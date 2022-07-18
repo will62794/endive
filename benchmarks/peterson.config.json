@@ -1,0 +1,31 @@
+{
+    "preds"  :  [
+        "(pc[self] = \"a1\")",
+        "(pc[self] = \"a2\")",
+        "(pc[self] = \"a3\")",
+        "(pc[self] = \"a4\")",
+        "(pc[self] = \"cs\")",
+        "(pc[self] = \"a5\")",
+        "(pc[other] = \"a1\")",
+        "(pc[other] = \"a2\")",
+        "(pc[other] = \"a3\")",
+        "(pc[other] = \"a4\")",
+        "(pc[other] = \"cs\")",
+        "(pc[other] = \"a5\")",
+        "(turn = other)",
+        "flag[self]",
+        "flag[other]",
+        "(turn = self)"
+    ],
+    "preds_alt" : [],
+    "safety"  :  "Mutex",
+    "constants"  :  "CONSTANTS\nProcSet={0,1}\n",
+    "constraint"  :  "",
+    "quant_inv"  :  "\\A self,other \\in ProcSet : ",
+    "quant_inv_alt"  :  null,
+    "quant_vars": [],
+    "model_consts"  :  "",
+    "symmetry" : false,
+    "typeok"  :  "TypeOK",
+    "simulate"  :  true      
+}

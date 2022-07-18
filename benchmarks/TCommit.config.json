@@ -1,0 +1,19 @@
+{
+    "preds"  :  [
+        "rmState = \"working\"",
+        "rmState = \"prepared\"",
+        "rmState = \"committed\"",
+        "rmState = \"aborted\""
+    ],
+    "preds_alt" : [],
+    "safety"  :  "TCConsistent",
+    "constants"  :  "CONSTANTS\nRM={rm1,rm2,rm3}\nrm1=rm1\nrm2=rm2\nrm3=rm3\n",
+    "constraint"  :  "",
+    "quant_inv"  :  "\\A rm \\in RM : ",
+    "quant_inv_alt"  :  null,
+    "quant_vars": [],
+    "model_consts"  :  "CONSTANT rm1,rm2,rm3",
+    "symmetry" : false,
+    "typeok"  :  "TCTypeOK",
+    "simulate"  :  false      
+}

@@ -1,0 +1,92 @@
+{
+    "preds"  :  [
+        "(configTerm[VARI] = configTerm[VARJ])",
+
+        "(configTerm[VARI] > configTerm[VARJ])",
+        "(configTerm[VARJ] > configTerm[VARI])",
+
+        "(configTerm[VARI] >= configTerm[VARJ])",
+        "(configTerm[VARJ] >= configTerm[VARI])",
+
+        "(configTerm[VARI] <= configTerm[VARJ])",
+        "(configTerm[VARJ] <= configTerm[VARI])",
+
+        "(configTerm[VARI] = currentTerm[VARI])",
+        "(configTerm[VARI] = currentTerm[VARJ])",
+        "(configTerm[VARJ] = currentTerm[VARI])",
+        "(configTerm[VARI] = configTerm[VARJ])",
+    
+        "(currentTerm[VARI] > currentTerm[VARJ])",
+        "(currentTerm[VARJ] > currentTerm[VARI])",
+
+        "(currentTerm[VARI] >= currentTerm[VARJ])",
+        "(currentTerm[VARJ] >= currentTerm[VARI])",
+
+        "(currentTerm[VARI] <= currentTerm[VARJ])",
+        "(currentTerm[VARJ] <= currentTerm[VARI])",
+
+        "(currentTerm[VARI] = currentTerm[VARJ])",
+    
+        "(state[VARI] = Primary)",
+        "(state[VARJ] = Primary)",
+    
+        "(configVersion[VARI] > configVersion[VARJ])",
+        "(configVersion[VARJ] > configVersion[VARI])",
+
+        "(configVersion[VARI] >= configVersion[VARJ])",
+        "(configVersion[VARJ] >= configVersion[VARI])",
+
+        "(configVersion[VARI] <= configVersion[VARJ])",
+        "(configVersion[VARJ] <= configVersion[VARI])",
+
+        "(configVersion[VARI] = configVersion[VARJ])",
+    
+        "(config[VARI] = config[VARJ])",
+    
+        "QuorumsOverlap(config[VARI], config[VARJ])",
+    
+        "(config[VARI] = {})",
+        "(config[VARJ] = {})",
+        "(VARI \\in config[VARI])",
+        "(VARJ \\in config[VARJ])",
+    
+        "IsNewerConfig(VARI, VARJ)",
+        "IsNewerConfig(VARJ, VARI)",
+        "IsNewerOrEqualConfig(VARI, VARJ)",
+        "IsNewerOrEqualConfig(VARJ, VARI)",
+        "ConfigDisabled(VARI)",
+        "ConfigDisabled(VARJ)"
+
+        
+
+
+    ],
+    "preds_alt" : [],
+    "safety"  :  "Safety",
+    "constants"  : [
+        "CONSTANTS" ,
+        "Nil = Nil",
+        "Server = {n1,n2,n3,n4}",
+        "Secondary = Secondary",
+        "Primary = Primary",
+        "MaxLogLen = 0",
+        "MaxTerm = 3",
+        "MaxConfigVersion = 3",
+        "InitTerm = 0",
+        "Nat <- NatFinite",
+        "n1 = n1",
+        "n2 = n2",
+        "n3 = n3",
+        "n4 = n4"
+    ],
+    "constraint"  :  "CONSTRAINT StateConstraint",
+    "quant_inv"  :  "\\A VARI \\in Server : \\A VARJ \\in Server : ",
+    "quant_inv_alt"  :  null,
+    "quant_vars": ["VARI", "VARJ"],
+    "model_consts"  :  "CONSTANT n1,n2,n3,n4",
+    "symmetry" : true,
+    "typeok"  :  "TypeOKRandom",
+    "try_final_minimize": true,
+    "load_inv_cache": "benchmarks/mldr-db.inv",
+    "simulate"  :  true
+}

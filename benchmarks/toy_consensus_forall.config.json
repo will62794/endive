@@ -1,0 +1,26 @@
+{
+    "preds"  :  [
+        "voted[s]",
+        "vote[s] = v",
+        "vote[s] = Nil",
+        "voted[n]",
+        "vote[n] = v",
+        "vote[n] = Nil",
+        "voted[t]",
+        "vote[t] = v",
+        "vote[t] = Nil",
+        "decided = {}",
+        "v \\in decided"
+    ],
+    "preds_alt" : [],
+    "safety"  :  "Inv",
+    "constants"  :  "CONSTANTS\nNode={n1,n2,n3}\nValue={v1,v2}\nNil=Nil\nn1=n1\nn2=n2\nn3=n3\nv1=v1\nv2=v2\n",
+    "constraint"  :  "",
+    "quant_inv"  :  "\\A s,t \\in Node : \\A Q \\in Quorums : \\A v \\in Value : \\E n \\in Q : ",
+    "quant_inv_alt"  :  null,
+    "quant_vars": [],
+    "model_consts"  :  "CONSTANT n1,n2,n3,v1,v2",
+    "symmetry" : false,
+    "typeok"  :  "TypeOK",
+    "simulate"  :  true      
+}

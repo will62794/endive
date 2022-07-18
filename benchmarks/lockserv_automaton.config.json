@@ -1,0 +1,25 @@
+{
+    "preds"  :  [
+        "lock_msg[VARI]",
+        "lock_msg[VARJ]",
+        "unlock_msg[VARI]",
+        "unlock_msg[VARJ]",
+        "grant_msg[VARI]",
+        "grant_msg[VARJ]",
+        "holds_lock[VARI]",
+        "holds_lock[VARJ]",
+        "held",
+        "VARI=VARJ"
+    ],
+    "preds_alt" : [],
+    "safety"  :  "Mutex",
+    "constants"  :  "CONSTANTS\nNode={n1,n2,n3}\nn1=n1\nn2=n2\nn3=n3\n",
+    "constraint"  :  "",
+    "quant_inv"  :  "\\A VARI \\in Node : \\A VARJ \\in Node : ",
+    "quant_inv_alt"  :  null,
+    "quant_vars": ["VARI", "VARJ"],
+    "model_consts"  :  "CONSTANT n1,n2,n3",
+    "symmetry" : false,
+    "typeok"  :  "TypeOK",
+    "simulate"  :  true      
+}

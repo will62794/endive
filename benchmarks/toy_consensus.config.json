@@ -1,0 +1,23 @@
+{
+    "preds"  :  [
+        "vote[VARI] = Nil",
+        "vote[VARI] = VARV",
+        "vote[VARJ] = Nil",
+        "vote[VARJ] = VARV",
+        "vote[VART] = Nil",
+        "vote[VART] = VARV",
+        "VARV \\in decision",
+        "ChosenAt(VARV, VARQ)"
+    ],
+    "preds_alt" : [],
+    "safety"  :  "Inv",
+    "constants"  :  "CONSTANTS\nNode={n1,n2,n3}\nValue={v1,v2}\nNil=Nil\nn1=n1\nn2=n2\nn3=n3\nv1=v1\nv2=v2\n",
+    "constraint"  :  "",
+    "quant_inv"  :  "\\A VARI \\in Node : \\A VARJ \\in Node : \\A VARV \\in Value : \\A VARQ \\in Quorums : \\E VART \\in VARQ :",
+    "quant_inv_alt"  :  null,
+    "quant_vars": [],
+    "model_consts"  :  "CONSTANT n1,n2,n3,v1,v2",
+    "symmetry" : false,
+    "typeok"  :  "TypeOK",
+    "simulate"  :  false      
+}

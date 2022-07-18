@@ -1,0 +1,30 @@
+{
+    "preds"  :  [
+        "<<VARR,VARP>> \\in match",
+        "<<VARI,VARP>> \\in response_sent",
+        "<<VARI,VARR>> \\in request_sent",
+        "<<VARJ,VARP>> \\in response_sent",
+        "<<VARJ,VARR>> \\in request_sent",
+        "<<VARI,VARP>> \\in response_received",
+        "<<VARJ,VARP>> \\in response_received",
+        "VARI=VARJ /\\ match = match",
+        "ResponseMatched(VARI,VARP)",
+        "ResponseMatched(VARJ,VARP)",
+        "NoneWithId(VARID)",
+        "<<VARID,VARI>> \\in t",
+        "<<VARID,VARJ>> \\in t",
+        "<<VARID,VARR>> \\in db_request_sent",
+        "<<VARID,VARP>> \\in db_response_sent"
+    ],
+    "preds_alt" : [],
+    "safety"  :  "Safety",
+    "constants"  :  "CONSTANT\nNode = {n1,n2,n3}\nRequest = {r1,r2,r3}\nResponse={p1,p2,p3}\nDbRequestId={i1,i2}\nn1 = n1\nn2 = n2\nn3 = n3\nr1 = r1\nr2 = r2\nr3=r3\np1 = p1\np2 = p2\np3=p3\ni1 = i1\ni2 = i2\ni3=i3\n",
+    "constraint"  :  "",
+    "quant_inv"  :  "\\A VARI \\in Node : \\A VARID \\in DbRequestId : \\A VARR \\in Request : \\A VARJ \\in Node : \\A VARP \\in Response : ",
+    "quant_inv_alt"  :  null,
+    "quant_vars": ["VARI", "VARJ"],
+    "model_consts"  :  "CONSTANT n1,n2,n3,r1,r2,r3,p1,p2,p3,i1,i2,i3",
+    "symmetry" : true,
+    "typeok"  :  "TypeOKRandom",
+    "simulate"  :  true      
+}

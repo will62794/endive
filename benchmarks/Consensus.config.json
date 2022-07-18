@@ -1,0 +1,17 @@
+{
+    "preds"  :  [
+        "chosen = {}",
+        "v \\in chosen"
+    ],
+    "preds_alt" : [],
+    "safety"  :  "Inv",
+    "constants"  :  "CONSTANTS\nValue={v1,v2,v3}\nv1=v1\nv2=v2\nv3=v3\n",
+    "constraint"  :  "",
+    "quant_inv"  :  "\\A v \\in Value : ",
+    "quant_inv_alt"  :  null,
+    "quant_vars": [],
+    "model_consts"  :  "",
+    "symmetry" : false,
+    "typeok"  :  "TypeOK",
+    "simulate"  :  true      
+}

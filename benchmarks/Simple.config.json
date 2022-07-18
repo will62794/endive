@@ -1,0 +1,25 @@
+{
+    "preds"  :  [
+        "pc[VARS] = \"a\"",
+        "pc[VARS] = \"b\"",
+        "pc[VARS] = \"Done\"",
+        "pc[VART] = \"a\"",
+        "pc[VART] = \"b\"",
+        "pc[VART] = \"Done\"",
+        "x[VARS] = 0",
+        "y[VARS] = 0",
+        "x[VARS] = y[VARS]",
+        "x[VARS] = y[VART]"
+    ],
+    "preds_alt" : [],
+    "safety"  :  "PCorrect",
+    "constants"  :  "CONSTANTS\nN=4\n",
+    "constraint"  :  "",
+    "quant_inv"  :  "\\A VARS \\in ProcSet : \\A VART \\in ProcSet : ",
+    "quant_inv_alt"  :  null,
+    "quant_vars": [],
+    "model_consts"  :  "",
+    "symmetry" : false,
+    "typeok"  :  "TypeOK",
+    "simulate"  :  false      
+}

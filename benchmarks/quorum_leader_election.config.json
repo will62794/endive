@@ -1,0 +1,23 @@
+{
+    "preds"  :  [
+        "isleader[VARS]",
+        "isleader[VARN]",
+        "voted[VARS] = Nil",
+        "voted[VARN] = Nil",
+        "voted[VARS] = VART",
+        "voted[VARN] = VART",
+        "voted[VARN] = VARS",
+        "VARS=VART"
+    ],
+    "preds_alt" : [],
+    "safety"  :  "Inv",
+    "constants"  :  "CONSTANTS\nNode={n1,n2,n3,n4}\nNil=Nil\nn1=n1\nn2=n2\nn3=n3\nn4=n4\n",
+    "constraint"  :  "",
+    "quant_inv"  :  "\\A VARS \\in Node : \\A VART \\in Node : \\A Q \\in Quorums : \\E VARN \\in Q : ",
+    "quant_inv_alt"  :  null,
+    "quant_vars": [],
+    "model_consts"  :  "CONSTANT n1,n2,n3,n4",
+    "symmetry" : false,
+    "typeok"  :  "TypeOK",
+    "simulate"  :  false      
+}

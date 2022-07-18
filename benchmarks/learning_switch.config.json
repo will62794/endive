@@ -1,0 +1,26 @@
+{
+    "preds"  :  [
+        "<<VARI,VARJ,VARK>> \\in table",
+        "<<VARI,VARJ,VARJ>> \\in table",
+        "<<VARI,VARK,VARI>> \\in table",
+        "<<VARI,VARJ,VARI>> \\in table",
+        "<<VARI,VARJ,VARZ>> \\in table",
+        "<<VARI,VARK,VARZ>> \\in table",
+        "<<VARI,VARK,VARJ>> \\in table",
+        "<<VARI,VARJ,VARK,VARZ>> \\in pending",
+        "VARI = VARJ /\\ table = table",
+        "VARI = VARK /\\ table = table",
+        "VARJ = VARK /\\ table = table"
+    ],
+    "preds_alt" : [],
+    "safety"  :  "Safety",
+    "constants"  :  "CONSTANTS\nNode={n1,n2,n3,n4}\nn1=n1\nn2=n2\nn3=n3\nn4=n4\n",
+    "constraint"  :  "CONSTRAINT StateConstraint",
+    "quant_inv"  :  "\\A VARI \\in Node : \\A VARJ \\in Node : \\A VARK \\in Node : \\A VARZ \\in Node :",
+    "quant_inv_alt"  :  null,
+    "quant_vars": ["VARI", "VARJ"],
+    "model_consts"  :  "CONSTANT n1,n2,n3,n4",
+    "symmetry" : true,
+    "typeok"  :  "TypeOKRandom",
+    "simulate"  :  true      
+}

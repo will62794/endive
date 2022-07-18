@@ -1,0 +1,29 @@
+{
+    "preds"  :  [
+        "VARPA \\in start",
+        "VARPB \\in start",
+        "<<VARS,VARPA>> \\in promise",
+        "<<VARS,VARPB>> \\in promise",
+        "<<VART,VARPA>> \\in promise",
+        "<<VART,VARPB>> \\in promise",
+        "VARS=VART /\\ promise = promise",
+        "(VARPA=VARPB) /\\ promise = promise",
+        "VARPA \\in leader",
+        "VARPB \\in leader",
+        "DidNotPromise(VARS)",
+        "DidNotPromise(VART)",
+        "ChosenAt(VARQ,VARPA)",
+        "ChosenAt(VARQ,VARPB)"
+    ],
+    "preds_alt" : [],
+    "safety"  :  "Safety",
+    "constants"  :  "CONSTANTS\nAcceptor = {a1,a2,a3}\nQuorum = {{a1,a2},{a1,a3},{a2,a3},{a1,a2,a3}}\nProposer = {p1,p2}\na1=a1\na2=a2\na3=a3\np1=p1\np2=p2\n",
+    "constraint"  :  "",
+    "quant_inv"  :  "\\A VARS \\in Acceptor : \\A VART \\in Acceptor : \\A VARPA \\in Proposer : \\A VARPB \\in Proposer : \\E VARQ \\in Quorum : ",
+    "quant_inv_alt"  :  null,
+    "quant_vars": ["VARPA", "VARPB"],
+    "model_consts"  :  "CONSTANT a1,a2,a3,p1,p2",
+    "symmetry" : false,
+    "typeok"  :  "TypeOK",
+    "simulate"  :  true      
+}

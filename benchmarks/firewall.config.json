@@ -1,0 +1,31 @@
+{
+    "preds"  :  [
+        "VARI \\in allowed_in",
+        "VARJ \\in allowed_in",
+        "VARK \\in allowed_in",
+        "allowed_in = {}",
+        "VARI \\in sent[VARI]",
+        "VARJ \\in sent[VARI]",
+        "VARI \\in sent[VARJ]",
+        "VARJ \\in sent[VARJ]",
+        "VARI \\in sent[VARK]",
+        "VARJ \\in sent[VARK]",
+        "VARK \\in sent[VARI]",
+        "sent[VARI] = {}",
+        "sent[VARJ] = {}",
+        "internal[VARI]",
+        "internal[VARJ]",
+        "internal[VARK]"
+    ],
+    "preds_alt" : [],
+    "safety"  :  "Inv",
+    "constants"  :  "CONSTANTS\nNode={n1,n2,n3}\nn1=n1\nn2=n2\nn3=n3\n",
+    "constraint"  :  "",
+    "quant_inv"  :  "\\A VARI \\in Node : \\A VARJ \\in Node : \\E VARK \\in Node : ",
+    "quant_inv_alt"  :  null,
+    "quant_vars": ["VARI", "VARJ"],
+    "model_consts"  :  "CONSTANT n1,n2,n3",
+    "symmetry" : true,
+    "typeok"  :  "TypeOK",
+    "simulate"  :  true      
+}

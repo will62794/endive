@@ -1,0 +1,28 @@
+{
+    "preds"  :  [
+        "table[NI][KI] = VALI",
+        "table[NI][KI] = Nil",
+        "KI \\in owner[NI]",
+        "<<NI,KI,VALI>> \\in transfer_msg",
+        "<<NI,KI,VALJ>> \\in transfer_msg",
+        "table[NJ][KI] = VALI",
+        "table[NJ][KI] = VALJ",
+        "table[NJ][KI] = Nil",
+        "KI \\in owner[NJ]",
+        "<<NJ,KI,VALI>> \\in transfer_msg",
+        "<<NJ,KI,VALJ>> \\in transfer_msg",
+        "NI = NJ /\\ owner = owner",
+        "VALI = VALJ /\\ owner = owner"
+    ],
+    "preds_alt" : [],
+    "safety"  :  "Safety",
+    "constants"  :  "CONSTANTS\nNode = {n1,n2,n3}\nKey = {k1,k2}\nValue={v1,v2}\nNil=Nil\nn1=n1\nn2=n2\nn3=n3\nk1=k1\nk2=k2\nk3=k3\nv1=v1\nv2=v2\nv3=v3\n",
+    "constraint"  :  "",
+    "quant_inv"  :  "\\A NI \\in Node : \\A NJ \\in Node : \\A KI \\in Key : \\A VALI \\in Value : \\A VALJ \\in Value : ",
+    "quant_inv_alt"  :  null,
+    "quant_vars": ["VALI", "VALJ"],
+    "model_consts"  :  "CONSTANT n1,n2,n3,v1,v2,v3,k1,k2,k3",
+    "symmetry" : true,
+    "typeok"  :  "TypeOKRandom",
+    "simulate"  :  true      
+}
