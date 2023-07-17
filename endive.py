@@ -11,6 +11,8 @@ import platform
 from datetime import datetime
 import tempfile
 
+import graphviz
+
 import pyeda
 import pyeda.inter
 
