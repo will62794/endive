@@ -1880,16 +1880,29 @@ class InductiveInvGen():
             self.do_invgen_proof_tree_mode()
             print("Proof graph edges")
             dot = graphviz.Digraph('round-table', comment='The Round Table')  
+            dot.graph_attr["rankdir"] = "LR"
+            dot.node_attr["fontname"] = "courier"
+            # dot.node_attr["shape"] = "box"
+            
+            # Store all nodes.
+            for e in self.proof_graph_edges:
+                print(e[0])
+                print(e[1])
+                dot.node(e[0][0], e[0][1].replace("\\", "\\\\"))
+                dot.node(e[1][0], e[1][1].replace("\\", "\\\\"))
+
             for e in self.proof_graph_edges:
                 print(e[0])
                 print(e[1])
                 dot.edge(e[0][0], e[1][0])
                 # print(e)
+
+            print("Final proof graph:")
             print(dot.source)
-            f = open("ind-proof-tree.dot", 'w')
+            f = open("graphs/" + self.specname + "_ind-proof-tree.dot", 'w')
             f.write(dot.source)
             f.close()
-            dot.render("ind-proof-tree")
+            dot.render("graphs/" + self.specname + "_ind-proof-tree")
             print("Finished invgen in proof tree mode.")
         else:
             self.do_invgen()
