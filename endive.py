@@ -254,7 +254,7 @@ class InductiveInvGen():
     def __init__(self, specdir, specname, safety, constants, state_constraint, quant_inv, model_consts, preds,
                     symmetry=False, simulate=False, simulate_depth=6, typeok="TypeOK", seed=0, num_invs=1000, num_rounds=3, num_iters=3, 
                     num_simulate_traces=10000, tlc_workers=6, quant_vars=[],java_exe="java",cached_invs=None, cached_invs_gen_time_secs=None, use_cpp_invgen=False,
-                    pregen_inv_cmd=None, opt_quant_minimize=False, try_final_minimize=False):
+                    pregen_inv_cmd=None, opt_quant_minimize=False, try_final_minimize=False, proof_tree_mode=False):
         self.java_exe = java_exe
         self.java_version_info = None
         
@@ -273,6 +273,7 @@ class InductiveInvGen():
         self.num_invs = num_invs
         self.tlc_workers = tlc_workers
         self.use_apalache_ctigen = False
+        self.proof_tree_mode = proof_tree_mode
 
         # Set an upper limit on CTIs per round to avoid TLC getting overwhelmend. Hope is that 
         # this will be enough to provide reasonably even sampling of the CTI space.
@@ -1022,8 +1023,11 @@ class InductiveInvGen():
         return all_tla_ctis    
 
 
-    def generate_ctis_tlc_run_async(self, num_traces_per_worker):
+    def generate_ctis_tlc_run_async(self, num_traces_per_worker, props=None):
         """ Starts a single instance of TLC to generate CTIs."""
+
+        if props == None:
+            props = [("Safety",self.safety)] + self.strengthening_conjuncts
 
         # Avoid TLC directory naming conflicts.
         tag = random.randint(0,10000)
@@ -1037,17 +1041,17 @@ class InductiveInvGen():
         # invcheck_tla_indcheck += self.model_consts + "\n"
 
         # Add definitions for for all strengthening conjuncts and for the current invariant.
-        for cinvname,cinvexp in self.strengthening_conjuncts:
+        for cinvname,cinvexp in props:
             invcheck_tla_indcheck += ("%s == %s\n" % (cinvname, cinvexp))
 
         # Create formula string which is conjunction of all strengthening conjuncts.
         strengthening_conjuncts_str = ""
-        for cinvname,cinvexp in self.strengthening_conjuncts:
+        for cinvname,cinvexp in props:
             strengthening_conjuncts_str += "    /\\ %s\n" % cinvname
 
         # Add definition of current inductive invariant candidate.
         invcheck_tla_indcheck += "InvStrengthened ==\n"
-        invcheck_tla_indcheck += "    /\\ %s\n" % self.safety
+        # invcheck_tla_indcheck += "    /\\ %s\n" % self.safety
         invcheck_tla_indcheck += strengthening_conjuncts_str
         invcheck_tla_indcheck += "\n"
 
@@ -1150,10 +1154,11 @@ class InductiveInvGen():
         return parsed_ctis       
 
 
-    def generate_ctis(self):
+    def generate_ctis(self, props=None):
         """ Generate CTIs for use in counterexample elimination. """
 
         all_ctis = set()
+        print("props:", props)
 
         # Run CTI generation multiple times to gain random seed diversity. Each
         # run should call TLC with a different random seed, to generate a different
@@ -1173,7 +1178,7 @@ class InductiveInvGen():
             # if self.use_apalache_ctigen:
                 # cti_subproc = self.generate_ctis_apalache_run_async(num_traces_per_tlc_instance)
             # else:
-            cti_subproc = self.generate_ctis_tlc_run_async(num_traces_per_tlc_instance)
+            cti_subproc = self.generate_ctis_tlc_run_async(num_traces_per_tlc_instance,props=props)
 
             cti_subprocs.append(cti_subproc)
 
@@ -1294,7 +1299,7 @@ class InductiveInvGen():
         logging.info(f"Pre-generated and cached {len(self.cached_invs)} total invariants")
         self.end_timing_invcheck()
 
-    def eliminate_ctis(self, orig_k_ctis, num_invs, roundi, preds_alt=[], quant_inv_alt=None, tlc_workers=6, specdir=None):
+    def eliminate_ctis(self, orig_k_ctis, num_invs, roundi, preds_alt=[], quant_inv_alt=None, tlc_workers=6, specdir=None, append_inv_round_id=True):
         """ Check which of the given satisfied invariants eliminate CTIs. """
         
         # Save CTIs, indexed by their hashed value.
@@ -1642,8 +1647,12 @@ class InductiveInvGen():
                     invi = int(inv.replace("Inv",""))
                     invexp = quant_inv_fn(sorted(invs)[invi])
                 
+                    inv_suffix = ""
+                    if append_inv_round_id:
+                        inv_suffix = "_" + str(iteration) + "_" + str(uniqid)
+                        
                     # Add the invariant as a conjunct.
-                    self.strengthening_conjuncts.append((inv+"_"+str(iteration)+"_"+str(uniqid), invexp))
+                    self.strengthening_conjuncts.append((inv + inv_suffix, invexp))
                     uniqid += 1
 
                     logging.info("%s %s", inv, invexp) #, "(eliminates %d CTIs)" % len(cti_states_eliminated_by_invs[inv])
@@ -1684,6 +1693,73 @@ class InductiveInvGen():
         if num_ctis_remaining > 0:
             return None
         return self.strengthening_conjuncts
+    
+    def do_invgen_proof_tree_mode(self):
+        self.lemma_obligations = [("Safety", self.safety)]
+        self.all_generated_lemmas = set()
+        self.proof_graph_edges = []
+
+        # For proof tree we look for single step inductive support lemmas.
+        self.simulate_depth = 1
+
+        count = 0
+
+        for roundi in range(self.num_rounds):
+            logging.info("### STARTING ROUND %d" % roundi)
+            logging.info("Num remaining lemma obligations %d" % len(self.lemma_obligations))
+            if len(self.lemma_obligations) == 0:
+                logging.info("No remaining lemma obligations. Stopping now!")
+                return
+
+            self.strengthening_conjuncts = []
+
+            logging.info("Generating CTIs.")
+            t0 = time.time()
+            curr_obligation = self.lemma_obligations.pop(0)
+            print("Current obligation:", curr_obligation)
+            # k_ctis = self.generate_ctis(props=[("LemmaObligation" + str(count), curr_obligation[1])])
+            k_ctis = self.generate_ctis(props=[curr_obligation])
+            count += 1
+
+            # for kcti in k_ctis:
+                # print(str(kcti))
+            logging.info("Number of total unique k-CTIs found: {}. (took {:.2f} secs)".format(len(k_ctis), (time.time()-t0)))
+            
+            # Limit number of CTIs if necessary.
+            if len(k_ctis) > self.MAX_NUM_CTIS_PER_ROUND:
+                logging.info(f"Limiting num k-CTIs to {self.MAX_NUM_CTIS_PER_ROUND} of {len(k_ctis)} total found.")
+                # Sort CTIS first to ensure we always select a consistent subset.
+                limited_ctis = sorted(list(k_ctis))[:self.MAX_NUM_CTIS_PER_ROUND]
+                k_ctis = set(limited_ctis)
+            
+            if len(k_ctis) == 0:
+                if roundi==0:
+                    logging.info("No initial CTIs found. Marking invariant as inductive and exiting.")
+                    self.is_inductive = True
+                    return
+                else:
+                    logging.info("Invariant appears likely to be inductive!")
+                logging.info("")
+                continue
+            else:
+                logging.info("Not done. Current invariant candidate is not inductive.")
+
+            self.total_num_cti_elimination_rounds = (roundi + 1)
+            ret = self.eliminate_ctis(k_ctis, self.num_invs, roundi, append_inv_round_id=True)
+            # If we did not eliminate all CTIs in this round, then exit with failure.
+            if ret == None:
+                logging.info("Could not eliminate all CTIs in this round. Exiting with failure.")
+                break
+            else:
+                # Successfully eliminated all CTIs.
+                print("Adding new proof obligations:" + str(len(self.strengthening_conjuncts)))
+                self.lemma_obligations += self.strengthening_conjuncts
+                for support_lemma in self.strengthening_conjuncts:
+                    # Check for existence of the predicate expression in existing lemma set.
+                    if support_lemma[1] not in [x[1] for x in self.all_generated_lemmas]:
+                        self.proof_graph_edges.append((support_lemma,curr_obligation))
+                        self.all_generated_lemmas.add(support_lemma)
+            logging.info("")
 
     def do_invgen(self):
         # Record Java version for stat recording.
@@ -1799,7 +1875,25 @@ class InductiveInvGen():
 
     def run(self):
         tstart = time.time()
-        self.do_invgen()
+
+        if self.proof_tree_mode:
+            self.do_invgen_proof_tree_mode()
+            print("Proof graph edges")
+            dot = graphviz.Digraph('round-table', comment='The Round Table')  
+            for e in self.proof_graph_edges:
+                print(e[0])
+                print(e[1])
+                dot.edge(e[0][0], e[1][0])
+                # print(e)
+            print(dot.source)
+            f = open("ind-proof-tree.dot", 'w')
+            f.write(dot.source)
+            f.close()
+            dot.render("ind-proof-tree")
+            print("Finished invgen in proof tree mode.")
+        else:
+            self.do_invgen()
+
         tend = time.time()
         self.total_duration_secs = (tend - tstart)
         if self.cached_invs_gen_time_secs != None:
@@ -1885,6 +1979,7 @@ if __name__ == "__main__":
     parser.add_argument('--opt_quant_minimize', help='Enable quantifier minimization optimization for faster invariant checking.', required=False, default=False, action='store_true')
     parser.add_argument('--try_final_minimize', help='Attempt to minimize the final discovered invariant.', required=False, default=False, action='store_true')
     parser.add_argument('--results_dir', help='Directory to save results.', required=False, type=str, default="results")
+    parser.add_argument('--proof_tree_mode', help='Run in inductive proof tree mode (EXPERIMENTAL).', default=False, action='store_true')
 
     
     args = vars(parser.parse_args())
@@ -1976,7 +2071,7 @@ if __name__ == "__main__":
                                 num_invs=num_invs, num_rounds=num_rounds, seed=seed, typeok=typeok, num_iters=numiters, 
                                 num_simulate_traces=NUM_SIMULATE_TRACES, simulate_depth=simulate_depth, tlc_workers=tlc_workers, quant_vars=quant_vars, symmetry=symmetry,
                                 simulate=simulate, java_exe=JAVA_EXE, cached_invs=cached_invs, cached_invs_gen_time_secs=cached_invs_gen_time_secs, use_cpp_invgen=use_cpp_invgen,
-                                pregen_inv_cmd=pregen_inv_cmd, opt_quant_minimize=args["opt_quant_minimize"],try_final_minimize=try_final_minimize)
+                                pregen_inv_cmd=pregen_inv_cmd, opt_quant_minimize=args["opt_quant_minimize"],try_final_minimize=try_final_minimize,proof_tree_mode=args["proof_tree_mode"])
 
     # Only do invariant generation, cache the invariants, and then exit.
     if cache_invs:
