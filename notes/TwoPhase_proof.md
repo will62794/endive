@@ -3,12 +3,15 @@
 ## Monolithic Inductive Safety Proof
 
 Given safety property `TCConsistent`, we want to prove that `TCConsistent` is an invariant of the `TwoPhase` protocol specification. To do this we need to find a sufficient inductive invariant. A standard approach, which we refer to as a "monolithic" inductive proof approach, is to start by checking whether `TCConsistent` is inductive on its own, by checking the following conditions
+
 $$
-\begin{aligned}
-& Init \Rightarrow TCConsistent \\
-& TCConsistent \wedge Next \Rightarrow TCConsistent'
-\end{aligned}
+Init \Rightarrow TCConsistent \\
 $$
+
+$$
+TCConsistent \wedge Next \Rightarrow TCConsistent'
+$$
+
 If this holds, then we're done. Otherwise, we expect to get a *counterexample to induction* (CTI), a pair of states $(s,s')$ that violates the consecution formula. From this CTI, we can then try to come up with a strengthening lemma invariant $L_1$ that is sufficient to rule out this CTI. Then, we conjoin this lemma to our original property and continue the process i.e. checking
 
 $$ (L_1 \wedge TCConsistent) \wedge Next \Rightarrow (L_1' \wedge TCConsistent')$$
@@ -36,7 +39,7 @@ That is, $S$ is fully inductive under the assumption of the predicates in $\math
 
 Now, after discovery of the lemmas in $\mathcal{L}$, we simply apply this decomposition procedure recursively on each non-inductive lemma in $\mathcal{L}$. So, for example, for each $L_i$, we search for supporting lemma invariants
 
-$$\mathcal{L}_i = L_{i.1} \wedge ... \wedge L_{i.k}$$
+$$\mathcal{L}_i = L_{i1} \wedge ... \wedge L_{ik}$$
 
 such that
 
