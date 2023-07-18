@@ -37,13 +37,15 @@ $$ \mathcal{L} \wedge S \wedge Next \Rightarrow S'$$
 
 That is, $S$ is fully inductive under the assumption of the predicates in $\mathcal{L}$. In theory we could view $\mathcal{L}$ as just a single invariant but would typically be a conjunction of smaller lemma invariants $L_1 \wedge ... \wedge L_k$. In essence, we are looking for a set of supporting lemma invariants that rule out *all* CTIs for $S$, whereas in the monolithic approach we may be content to rule out *some* CTIs for $S$ before continuing the process.
 
-Now, after discovery of the lemmas in $\mathcal{L}$, we simply apply this decomposition procedure recursively on each non-inductive lemma in $\mathcal{L}$. So, for example, for each $L_i$, we search for supporting lemma invariants
+Now, after discovery of the lemmas in $\mathcal{L}$, we simply apply this decomposition procedure recursively on each non-inductive lemma in $\mathcal{L}$. 
 
-$$\mathcal{L}_i = L_{i1} \wedge ... \wedge L_{ik}$$
+<!-- So, for example, for each $L_i$, we search for supporting lemma invariants
+
+$$ \mathcal{L}_i = L_{i1} \wedge ... \wedge L_{ik} $$
 
 such that
 
-$$ \mathcal{L}_i \wedge L_i \wedge Next \Rightarrow L_i'$$
+$$ \mathcal{L}_i \wedge L_i \wedge Next \Rightarrow L_i'$$ -->
 
 
 <!-- <img src="TwoPhase_ind-proof-tree.pdf"> -->
