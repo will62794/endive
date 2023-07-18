@@ -2,12 +2,13 @@
 
 ## Monolithic Inductive Safety Proof
 
-Given safety property `TCConsistent`, we want to prove that `TCConsistent` is an invariant of the `TwoPhase` protocol specification. To do this we need to find a sufficient inductive invariant. In the standard "monolithic" inductive proof approach, we can start by checking whether `TCConsistent` is inductive on its own, by checking
-
-$$ Init \Rightarrow TCConsistent $$
-
-$$ TCConsistent \wedge Next \Rightarrow TCConsistent'$$
-
+Given safety property `TCConsistent`, we want to prove that `TCConsistent` is an invariant of the `TwoPhase` protocol specification. To do this we need to find a sufficient inductive invariant. A standard approach, which we refer to as a "monolithic" inductive proof approach, is to start by checking whether `TCConsistent` is inductive on its own, by checking the following conditions
+$$
+\begin{aligned}
+& Init \Rightarrow TCConsistent \\
+& TCConsistent \wedge Next \Rightarrow TCConsistent'
+\end{aligned}
+$$
 If this holds, then we're done. Otherwise, we expect to get a *counterexample to induction* (CTI), a pair of states $(s,s')$ that violates the consecution formula. From this CTI, we can then try to come up with a strengthening lemma invariant $L_1$ that is sufficient to rule out this CTI. Then, we conjoin this lemma to our original property and continue the process i.e. checking
 
 $$ (L_1 \wedge TCConsistent) \wedge Next \Rightarrow (L_1' \wedge TCConsistent')$$
