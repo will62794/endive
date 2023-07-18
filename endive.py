@@ -1899,10 +1899,10 @@ class InductiveInvGen():
 
             print("Final proof graph:")
             print(dot.source)
-            f = open("graphs/" + self.specname + "_ind-proof-tree.dot", 'w')
+            f = open("notes/" + self.specname + "_ind-proof-tree.dot", 'w')
             f.write(dot.source)
             f.close()
-            dot.render("graphs/" + self.specname + "_ind-proof-tree")
+            dot.render("notes/" + self.specname + "_ind-proof-tree")
             print("Finished invgen in proof tree mode.")
         else:
             self.do_invgen()
