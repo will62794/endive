@@ -3,7 +3,7 @@
 \* Basic, static version of MongoDB Raft protocol. No reconfiguration is allowed.
 \*
 
-EXTENDS Naturals, Integers, FiniteSets, Sequences, TLC
+EXTENDS Naturals, Integers, FiniteSets, Sequences, TLC, Randomization
 
 CONSTANTS Server
 CONSTANTS Secondary, Primary, Nil
@@ -173,6 +173,15 @@ Next ==
 
 Spec == Init /\ [][Next]_vars
 
+\* Statement of type correctness.
+TypeOK ==
+    /\ currentTerm \in [Server -> Nat]
+    /\ state \in [Server -> {Secondary, Primary}]
+    /\ log \in [Server -> Seq(Nat)]
+    /\ committed \in SUBSET [ entry : Nat \X Nat, term : Nat ]
+
+NextUnchanged == UNCHANGED vars
+
 --------------------------------------------------------------------------------
 
 \*
@@ -208,11 +217,37 @@ StateMachineSafety ==
 
 CONSTANTS MaxTerm, MaxLogLen
 
+SeqOf(set, n) == UNION {[1..m -> set] : m \in 0..n}
+BoundedSeq(S, n) == SeqOf(S, n)
+NatFinite == 0..3
+PositiveNat == 1..3
+NumRandSubsets == 13
+
+kNumSubsets == 10
+nAvgSubsetSize == 3
+
 \* State Constraint. Used for model checking only.
 StateConstraint == \A s \in Server :
                     /\ currentTerm[s] <= MaxTerm
                     /\ Len(log[s]) <= MaxLogLen
 
 Symmetry == Permutations(Server)
+
+\* \* Statement of type correctness.
+\* TypeOKRandom ==
+\*     /\ currentTerm \in [Server -> Nat]
+\*     /\ state \in [Server -> {Secondary, Primary}]
+\*     /\ log \in [Server -> Seq(Nat)]
+\*     /\ committed \in SUBSET [ entry : Nat \X Nat, term : Nat ]
+
+TypeOKRandom == 
+    /\ currentTerm \in RandomSubset(5, [Server -> InitTerm..MaxTerm])
+    /\ state \in RandomSubset(NumRandSubsets, [Server -> {Secondary, Primary}])
+    /\ log \in [Server -> BoundedSeq(InitTerm..MaxTerm, MaxLogLen)]
+    /\ committed \in RandomSetOfSubsets(kNumSubsets, nAvgSubsetSize, [ entry : (1..MaxLogLen) \X (InitTerm..MaxTerm), term : InitTerm..MaxTerm ])
+
+    \* /\ config \in RandomSubset(NumRandSubsets, [Server -> SUBSET Server])
+    \* /\ configVersion \in RandomSubset(NumRandSubsets, [Server -> 0..MaxConfigVersion])
+    \* /\ configTerm \in RandomSubset(NumRandSubsets, [Server -> InitTerm..MaxTerm])
 
 =============================================================================

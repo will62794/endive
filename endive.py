@@ -1909,7 +1909,7 @@ class InductiveInvGen():
             f.write(dot.source)
             f.close()
             dot.render("notes/" + self.specname + "_ind-proof-tree")
-            print("Finished invgen in proof tree mode.")
+            print("Finished inductive invariant generation in proof tree mode.")
         else:
             self.do_invgen()
 
