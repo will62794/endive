@@ -39,6 +39,10 @@ That is, $S$ is fully inductive under the assumption of the predicates in $\math
 
 Now, after discovery of the lemmas in $\mathcal{L}$, we simply apply this decomposition procedure recursively on each non-inductive lemma in $\mathcal{L}$. 
 
+```
+$ python3 endive.py --spec benchmarks/TwoPhase --seed 20 --ninvs 15000 --niters 3 --nrounds 50 --num_simulate_traces 50000 --simulate_depth 1 --tlc_workers 6 --proof_tree_mode --opt_quant_minimize
+```
+
 <!-- So, for example, for each $L_i$, we search for supporting lemma invariants
 
 $$ \mathcal{L}_i = L_{i1} \wedge ... \wedge L_{ik} $$
