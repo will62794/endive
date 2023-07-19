@@ -173,4 +173,46 @@ Next ==
 
 Spec == Init /\ [][Next]_vars
 
+--------------------------------------------------------------------------------
+
+\*
+\* Correctness properties
+\*
+
+OnePrimaryPerTerm == 
+    \A s,t \in Server :
+        (/\ state[s] = Primary 
+         /\ state[t] = Primary
+         /\ currentTerm[s] = currentTerm[t]) => (s = t)
+
+LeaderAppendOnly == 
+    [][\A s \in Server : state[s] = Primary => Len(log'[s]) >= Len(log[s])]_vars
+
+\* <<index, term>> pairs uniquely identify log prefixes.
+LogMatching == 
+    \A s,t \in Server : 
+    \A i \in DOMAIN log[s] :
+        (\E j \in DOMAIN log[t] : i = j /\ log[s][i] = log[t][j]) => 
+        (SubSeq(log[s],1,i) = SubSeq(log[t],1,i)) \* prefixes must be the same.
+
+\* When a node gets elected as primary it contains all entries committed in previous terms.
+LeaderCompleteness == 
+    \A s \in Server : (state[s] = Primary) => 
+        \A c \in committed : (c.term < currentTerm[s] => InLog(c.entry, s))
+
+\* If two entries are committed at the same index, they must be the same entry.
+StateMachineSafety == 
+    \A c1, c2 \in committed : (c1.entry[1] = c2.entry[1]) => (c1 = c2)
+
+--------------------------------------------------------------------------------
+
+CONSTANTS MaxTerm, MaxLogLen
+
+\* State Constraint. Used for model checking only.
+StateConstraint == \A s \in Server :
+                    /\ currentTerm[s] <= MaxTerm
+                    /\ Len(log[s]) <= MaxLogLen
+
+Symmetry == Permutations(Server)
+
 =============================================================================
