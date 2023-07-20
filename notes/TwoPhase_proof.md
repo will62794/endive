@@ -20,6 +20,35 @@ until the overall property (with all conjoined lemmas) is inductive i.e. ending 
 
 $$L_k \wedge ... \wedge L_1 \wedge TCConsistent$$
 
+In this approach we may end up with something like the following, which is viewed only as a monolithic list of conjuncts, without any formal structure:
+
+
+```
+\* Inductive strengthening conjuncts
+Inv276_1_0_def == (tmPrepared = RM) \/ (~([type |-> "Commit"] \in msgs))
+Inv45_1_1_def == \A rmi \in RM : ([type |-> "Commit"] \in msgs) \/ (~(rmState[rmi] = "committed"))
+Inv79_1_2_def == \A rmi \in RM : ([type |-> "Prepared", rm |-> rmi] \in msgs) \/ (~(tmPrepared = tmPrepared \cup {rmi}))
+Inv349_1_3_def == \A rmi \in RM : ~([type |-> "Prepared", rm |-> rmi] \in msgs) \/ (~(rmState[rmi] = "working"))
+Inv318_1_4_def == ~([type |-> "Abort"] \in msgs) \/ (~([type |-> "Commit"] \in msgs))
+Inv331_1_5_def == ~([type |-> "Abort"] \in msgs) \/ (~(tmState = "init"))
+Inv334_1_6_def == \A rmi \in RM : ~([type |-> "Commit"] \in msgs) \/ (~(rmState[rmi] = "aborted"))
+Inv344_1_7_def == ~([type |-> "Commit"] \in msgs) \/ (~(tmState = "init"))
+Inv1863_2_8_def == \A rmi \in RM : (rmState[rmi] = "prepared") \/ (~([type |-> "Prepared", rm |-> rmi] \in msgs) \/ (~(tmState = "init")))
+
+\* The inductive invariant candidate.
+IndAuto ==
+  /\ TypeOK
+  /\ TCConsistent
+  /\ Inv276_1_0_def
+  /\ Inv45_1_1_def
+  /\ Inv79_1_2_def
+  /\ Inv349_1_3_def
+  /\ Inv318_1_4_def
+  /\ Inv331_1_5_def
+  /\ Inv334_1_6_def
+  /\ Inv344_1_7_def
+  /\ Inv1863_2_8_def
+```
 
 ```
 $ python3 endive.py --spec benchmarks/TwoPhase --seed 20 --ninvs 15000 --niters 3 --nrounds 50 --num_simulate_traces 50000 --simulate_depth 1 --tlc_workers 6 --proof_tree_mode --opt_quant_minimize
@@ -38,6 +67,8 @@ $$ \mathcal{L} \wedge S \wedge Next \Rightarrow S'$$
 That is, $S$ is fully inductive under the assumption of the predicates in $\mathcal{L}$. In theory we could view $\mathcal{L}$ as just a single invariant but would typically be a conjunction of smaller lemma invariants $L_1 \wedge ... \wedge L_k$. In essence, we are looking for a set of supporting lemma invariants that rule out *all* CTIs for $S$, whereas in the monolithic approach we may be content to rule out *some* CTIs for $S$ before continuing the process.
 
 Now, after discovery of the lemmas in $\mathcal{L}$, we simply apply this decomposition procedure recursively on each non-inductive lemma in $\mathcal{L}$. 
+
+[Inductive proof tree generated](notes/TwoPhase_ind-proof-tree.pdf) for same Two Phase Commit protocol as above.
 
 ```
 $ python3 endive.py --spec benchmarks/TwoPhase --seed 20 --ninvs 15000 --niters 3 --nrounds 50 --num_simulate_traces 50000 --simulate_depth 1 --tlc_workers 6 --proof_tree_mode --opt_quant_minimize
