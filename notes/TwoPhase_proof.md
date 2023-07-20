@@ -23,7 +23,7 @@ $$L_k \wedge ... \wedge L_1 \wedge TCConsistent$$
 In this approach we may end up with something like the following, which is viewed only as a monolithic list of conjuncts, without any formal structure:
 
 
-```
+```tla
 \* Inductive strengthening conjuncts
 Inv276_1_0_def == (tmPrepared = RM) \/ (~([type |-> "Commit"] \in msgs))
 Inv45_1_1_def == \A rmi \in RM : ([type |-> "Commit"] \in msgs) \/ (~(rmState[rmi] = "committed"))
@@ -68,7 +68,7 @@ That is, $S$ is fully inductive under the assumption of the predicates in $\math
 
 Now, after discovery of the lemmas in $\mathcal{L}$, we simply apply this decomposition procedure recursively on each non-inductive lemma in $\mathcal{L}$. 
 
-[Inductive proof tree generated](notes/TwoPhase_ind-proof-tree.pdf) for same Two Phase Commit protocol as above.
+[Inductive proof tree generated](TwoPhase_ind-proof-tree.pdf) for same Two Phase Commit protocol as above.
 
 ```
 $ python3 endive.py --spec benchmarks/TwoPhase --seed 20 --ninvs 15000 --niters 3 --nrounds 50 --num_simulate_traces 50000 --simulate_depth 1 --tlc_workers 6 --proof_tree_mode --opt_quant_minimize
