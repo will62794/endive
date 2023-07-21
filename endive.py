@@ -198,6 +198,25 @@ def runtlc_check_violated_invariants(spec,config=None, tlc_workers=6, cwd=None,j
         invs_violated.add(invname)
     return invs_violated
 
+
+class State():
+    """ A single TLA+ state. """
+    def __init__(self, state_str, state_lines):
+        self.state_str = state_str
+        self.state_lines = state_lines
+
+    def __str__(self):
+        return self.state_str
+
+class Trace():
+    """ Represents a trace of states. """
+    def __init__(self, states):
+        # List of states.
+        self.states = states
+
+    def getStates(self):
+        return self.states
+
 class CTI():
     """ Represents a single counterexample to induction (CTI) state. """
     def __init__(self, cti_str, cti_lines, action_name):
@@ -254,7 +273,7 @@ class InductiveInvGen():
     def __init__(self, specdir, specname, safety, constants, state_constraint, quant_inv, model_consts, preds,
                     symmetry=False, simulate=False, simulate_depth=6, typeok="TypeOK", seed=0, num_invs=1000, num_rounds=3, num_iters=3, 
                     num_simulate_traces=10000, tlc_workers=6, quant_vars=[],java_exe="java",cached_invs=None, cached_invs_gen_time_secs=None, use_cpp_invgen=False,
-                    pregen_inv_cmd=None, opt_quant_minimize=False, try_final_minimize=False, proof_tree_mode=False, max_num_conjuncts_per_round=10000,
+                    pregen_inv_cmd=None, opt_quant_minimize=False, try_final_minimize=False, proof_tree_mode=False, interactive_mode=False, max_num_conjuncts_per_round=10000,
                     max_num_ctis_per_round=10000):
         self.java_exe = java_exe
         self.java_version_info = None
@@ -275,6 +294,7 @@ class InductiveInvGen():
         self.tlc_workers = tlc_workers
         self.use_apalache_ctigen = False
         self.proof_tree_mode = proof_tree_mode
+        self.interactive_mode = interactive_mode
         self.max_num_conjuncts_per_round = max_num_conjuncts_per_round
 
         # Set an upper limit on CTIs per round to avoid TLC getting overwhelmend. Hope is that 
@@ -879,6 +899,7 @@ class InductiveInvGen():
         # print("Parsing CTI trace. Start line: " , lines[curr_line])
         # print(curr_line, len(lines))
 
+        trace_states = []
         trace_ctis = []
         trace_action_names = []
 
@@ -923,6 +944,11 @@ class InductiveInvGen():
                 # Assign the action names below.
                 cti = CTI(curr_cti.strip(), curr_cti_lines, None)
                 trace_ctis.append(cti)
+
+                # TODO: Can eventually merge 'State' and CTI' abstractions.
+                state = State(curr_cti.strip(), curr_cti_lines)
+                trace_states.append(state)
+
                 # trace_ctis.append(curr_cti.strip())
             curr_line += 1
 
@@ -939,7 +965,8 @@ class InductiveInvGen():
 
         # The last state is a bad state, not a CTI.
         trace_ctis = trace_ctis[:-1]
-        return (curr_line, set(trace_ctis))
+        trace = Trace(trace_states)
+        return (curr_line, set(trace_ctis), trace)
 
     def parse_ctis(self, lines):
         all_ctis = set()
@@ -952,16 +979,20 @@ class InductiveInvGen():
             if curr_line >= len(lines):
                 break
 
+        all_cti_traces = []
         curr_line += 1
         while curr_line < len(lines):
-            (curr_line, trace_ctis) = self.parse_cti_trace(lines, curr_line)
+            (curr_line, trace_ctis, trace) = self.parse_cti_trace(lines, curr_line)
             all_ctis = all_ctis.union(trace_ctis)
+            all_cti_traces.append(trace)
             curr_line += 1
         
         # for cti in all_ctis:
         #     print("cti")
         #     print(cti)
-        return all_ctis
+        # print("Trace")
+        # print(all_cti_traces[0].getStates())
+        return (all_ctis, all_cti_traces)
 
     def itf_json_val_to_tla_val(self, itfval):
         if type(itfval)==str:
@@ -1152,8 +1183,8 @@ class InductiveInvGen():
                 logging.info("[TLC output] " + line)      
             return set()
 
-        parsed_ctis = self.parse_ctis(lines)     
-        return parsed_ctis       
+        (parsed_ctis, parsed_cti_traces) = self.parse_ctis(lines)     
+        return (parsed_ctis,parsed_cti_traces)       
 
 
     def generate_ctis(self, props=None):
@@ -1185,19 +1216,21 @@ class InductiveInvGen():
             cti_subprocs.append(cti_subproc)
 
         # Await completion and parse results.
+        all_cti_traces = []
         for cti_subproc in cti_subprocs:
             if self.use_apalache_ctigen:
                 parsed_ctis = self.generate_ctis_apalache_run_await(cti_subproc)
             else:
-                parsed_ctis = self.generate_ctis_tlc_run_await(cti_subproc) 
+                (parsed_ctis, parsed_cti_traces) = self.generate_ctis_tlc_run_await(cti_subproc) 
             all_ctis = all_ctis.union(parsed_ctis)
+            all_cti_traces += parsed_cti_traces
 
         # FOR DIAGNOSTICS.
         # for x in sorted(list(all_ctis))[:10]:
             # print(x)
 
         self.end_timing_ctigen()
-        return all_ctis
+        return (all_ctis, all_cti_traces)
 
     def make_indquickcheck_tla_spec(self, spec_name, invs, sat_invs_group, orig_k_ctis, quant_inv_fn):
         invs_sorted = sorted(invs)
@@ -1700,7 +1733,7 @@ class InductiveInvGen():
             return None
         return self.strengthening_conjuncts
     
-    def do_invgen_proof_tree_mode(self):
+    def do_invgen_proof_tree_mode(self, interactive_mode=False):
         self.lemma_obligations = [("Safety", self.safety)]
         self.all_generated_lemmas = set()
         self.proof_graph_edges = []
@@ -1724,7 +1757,7 @@ class InductiveInvGen():
             curr_obligation = self.lemma_obligations.pop(0)
             print("Current obligation:", curr_obligation)
             # k_ctis = self.generate_ctis(props=[("LemmaObligation" + str(count), curr_obligation[1])])
-            k_ctis = self.generate_ctis(props=[curr_obligation])
+            k_ctis, k_cti_traces = self.generate_ctis(props=[curr_obligation])
             count += 1
 
             # for kcti in k_ctis:
@@ -1749,6 +1782,15 @@ class InductiveInvGen():
                 continue
             else:
                 logging.info("Not done. Current invariant candidate is not inductive.")
+
+
+            if interactive_mode:
+                print("--------- > One CTI example:")
+                one_cti_trace = k_cti_traces[0]
+                for i,s in enumerate(one_cti_trace.getStates()):
+                    print(f"State {i}")
+                    print(s)
+                return
 
             self.total_num_cti_elimination_rounds = (roundi + 1)
             ret = self.eliminate_ctis(k_ctis, self.num_invs, roundi, append_inv_round_id=True)
@@ -1811,7 +1853,7 @@ class InductiveInvGen():
 
             logging.info("Generating CTIs.")
             t0 = time.time()
-            k_ctis = self.generate_ctis()
+            (k_ctis,k_cti_traces) = self.generate_ctis()
             # for kcti in k_ctis:
                 # print(str(kcti))
             logging.info("Number of total unique k-CTIs found: {}. (took {:.2f} secs)".format(len(k_ctis), (time.time()-t0)))
@@ -1845,7 +1887,7 @@ class InductiveInvGen():
         # Do a final inductive check.
         # TODO: Possibly run this CTI generation with a different seed.
         logging.info("Running final CTI generation step.")
-        k_ctis = self.generate_ctis()
+        (k_ctis,k_cti_traces) = self.generate_ctis()
         logging.info("Number of new k-CTIs found: %d" % len(k_ctis)) 
         if len(k_ctis) == 0:
             # Optional: try to drop first conjunct to minimize size of invariant.
@@ -1853,7 +1895,7 @@ class InductiveInvGen():
                 logging.info("Trying to minimize final invariant slightly.")
                 first_conjunct = self.strengthening_conjuncts[0]
                 self.strengthening_conjuncts = self.strengthening_conjuncts[1:]
-                k_ctis = self.generate_ctis()
+                (k_ctis,k_cti_traces) = self.generate_ctis()
                 # If we can drop the first conjunct and remain inductive, then 
                 # we drop it. Otherwise, we put it back and continue.
                 if len(k_ctis) != 0:
@@ -1883,7 +1925,8 @@ class InductiveInvGen():
         tstart = time.time()
 
         if self.proof_tree_mode:
-            self.do_invgen_proof_tree_mode()
+            self.do_invgen_proof_tree_mode(interactive_mode=self.interactive_mode)
+            print("")
             print("Proof graph edges")
             dot = graphviz.Digraph('round-table', comment='The Round Table')  
             dot.graph_attr["rankdir"] = "LR"
@@ -1999,6 +2042,7 @@ if __name__ == "__main__":
     parser.add_argument('--try_final_minimize', help='Attempt to minimize the final discovered invariant.', required=False, default=False, action='store_true')
     parser.add_argument('--results_dir', help='Directory to save results.', required=False, type=str, default="results")
     parser.add_argument('--proof_tree_mode', help='Run in inductive proof tree mode (EXPERIMENTAL).', default=False, action='store_true')
+    parser.add_argument('--interactive_mode', help='Run in interactive proof tree mode (EXPERIMENTAL).', default=False, action='store_true')
     parser.add_argument('--max_num_conjuncts_per_round', help='Max number of conjuncts to learn per round.', type=int, default=10000)
     parser.add_argument('--max_num_ctis_per_round', help='Max number of CTIs per round.', type=int, default=10000)
 
@@ -2093,6 +2137,7 @@ if __name__ == "__main__":
                                 num_simulate_traces=NUM_SIMULATE_TRACES, simulate_depth=simulate_depth, tlc_workers=tlc_workers, quant_vars=quant_vars, symmetry=symmetry,
                                 simulate=simulate, java_exe=JAVA_EXE, cached_invs=cached_invs, cached_invs_gen_time_secs=cached_invs_gen_time_secs, use_cpp_invgen=use_cpp_invgen,
                                 pregen_inv_cmd=pregen_inv_cmd, opt_quant_minimize=args["opt_quant_minimize"],try_final_minimize=try_final_minimize,proof_tree_mode=args["proof_tree_mode"],
+                                interactive_mode=args["interactive_mode"],
                                 max_num_conjuncts_per_round=args["max_num_conjuncts_per_round"], max_num_ctis_per_round=args["max_num_ctis_per_round"])
 
     # Only do invariant generation, cache the invariants, and then exit.
