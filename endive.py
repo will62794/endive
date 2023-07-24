@@ -264,6 +264,53 @@ class CTI():
     def __lt__(self, other):
         return self.cti_str < other.cti_str
 
+class StructuredProofNode():
+    """ Single node (i.e. lemma) of a structured proof tree. """
+    def __init__(self, expr, children=[]):
+        # Top level goal expression to be proven.
+        self.expr = expr
+        self.children = children
+
+        # Each proof node/lemma can maintain a current set of CTIs, which are
+        # computed based on whether the lemma is inductive relative to its
+        # current set of direct children.
+        self.ctis = []
+
+    def serialize(self):
+        return {"expr": self.expr}
+
+    def to_html(self):
+        child_elems = "\n".join([f"<span>{c.to_html()}</span>" for c in self.children])
+        return f"""
+                <li>{self.expr} ({len(self.ctis)} CTIs) 
+                    <ul>{child_elems}</ul> 
+                </li>
+            """
+
+class StructuredProof():
+    """ Structured safety proof of an inductive invariant. 
+    
+    May also represent a "partial" proof i.e. one in an incomplete state that is yet to be completed.
+    """
+
+    def __init__(self, root):
+        # Top level goal expression to be proven.
+        self.safety_goal = safety
+        self.proof_tree = root 
+
+    def serialize(self):
+        return {"safety": self.safety, "proof_tree": self.proof_tree.serialize()}
+    
+    def to_html(self):
+        # child_elems = "\n".join([f"<li>{c.to_html()}</li>" for c in self.proof_tree.children])
+        return "<ul>"+self.proof_tree.to_html()+"</ul>"
+        # return f"<ul><li>{self.safety_goal}<ul>{child_elems}</ul></li></ul>"
+
+    def dump(self):
+        out_file = open("proof.proof", 'w')
+        json.dump(self.serialize(), out_file, indent=2)
+
+
 class InductiveInvGen():
     """ 
     Encapsulates the algorithm for inferring an inductive invariant given a
@@ -1733,10 +1780,62 @@ class InductiveInvGen():
             return None
         return self.strengthening_conjuncts
     
+    def run_interactive_mode(self, k_cti_traces):
+        print("--------- > One CTI example:")
+        one_cti_trace = k_cti_traces[0]
+        for i,s in enumerate(one_cti_trace.getStates()):
+            print(f"State {i}")
+            print(s)
+        
+        typeok = StructuredProofNode("TypeOK")
+        root = StructuredProofNode(safety, children = [typeok, typeok])
+        root.ctis = k_cti_traces[:1]
+        proof = StructuredProof(root)
+
+        # Ask for new lemma to eliminate CTIs in current batch.
+        # TODO: Deal with how to save given lemma and how to determine current level of
+        # proof that we are at.
+        # Do we just want some kind of tree structured UI interface?
+        # lemma = raw_input("Enter new lemma candidate for elimination")
+        # self.proof_graph["edges"].append((support_lemma,curr_obligation))
+
+        from flask import Flask
+        app = Flask(__name__)
+
+        @app.route("/")
+        def index():
+            html = "<h1>Proof Structure</h1>"
+            html += proof.to_html()
+            return html
+
+        @app.route("/hello")
+        def hello():
+            return "Hello World!"
+
+        @app.route("/members")
+        def members():
+            return "Members"
+
+        @app.route("/members/<string:name>/")
+        def getMember(name):
+            return "william"
+
+        if __name__ == "__main__":
+            app.run(debug=True)
+
+        # TODO: Persist and reload proof graph structure in between sessions?
+
+
+        # Save updated proof structure.
+        with open(f"{self.specname}.proof.json", 'w') as f:
+            json.dump(self.proof_graph, f, indent=2)
+
     def do_invgen_proof_tree_mode(self, interactive_mode=False):
         self.lemma_obligations = [("Safety", self.safety)]
         self.all_generated_lemmas = set()
-        self.proof_graph_edges = []
+
+        # TODO: Optionally reload from file for interactive mode.
+        # self.proof_graph = {"edges": [], "safety": self.safety}
 
         # For proof tree we look for single step inductive support lemmas.
         self.simulate_depth = 1
@@ -1783,13 +1882,8 @@ class InductiveInvGen():
             else:
                 logging.info("Not done. Current invariant candidate is not inductive.")
 
-
             if interactive_mode:
-                print("--------- > One CTI example:")
-                one_cti_trace = k_cti_traces[0]
-                for i,s in enumerate(one_cti_trace.getStates()):
-                    print(f"State {i}")
-                    print(s)
+                self.run_interactive_mode(k_cti_traces)
                 return
 
             self.total_num_cti_elimination_rounds = (roundi + 1)
@@ -1805,7 +1899,7 @@ class InductiveInvGen():
                 for support_lemma in self.strengthening_conjuncts:
                     # Check for existence of the predicate expression in existing lemma set.
                     if support_lemma[1] not in [x[1] for x in self.all_generated_lemmas]:
-                        self.proof_graph_edges.append((support_lemma,curr_obligation))
+                        self.proof_graph["edges"].append((support_lemma,curr_obligation))
                         self.all_generated_lemmas.add(support_lemma)
             logging.info("")
 
