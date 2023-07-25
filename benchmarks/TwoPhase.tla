@@ -180,7 +180,9 @@ THEOREM TPSpec => []TypeOK
 
 H_Inv276 == (tmPrepared = RM) \/ (~([type |-> "Commit"] \in msgs))
 H_Inv318 == ~([type |-> "Abort"] \in msgs) \/ (~([type |-> "Commit"] \in msgs))
-
+H_Inv334 == \A rmi \in RM : ~([type |-> "Commit"] \in msgs) \/ (~(rmState[rmi] = "aborted"))
+H_Inv79 == \A rmi \in RM : ([type |-> "Prepared", rm |-> rmi] \in msgs) \/ (~(tmPrepared = tmPrepared \cup {rmi}))
+H_Inv400 == \A rmi \in RM : ~(rmState[rmi] = "working") \/ (~(tmPrepared = RM))
 
   (*************************************************************************)
   (* This theorem asserts that the type-correctness predicate TPTypeOK is  *)

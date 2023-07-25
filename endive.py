@@ -284,7 +284,8 @@ class StructuredProofNode():
         }
 
     def list_elem_html(self):
-        return f"{self.expr} ({len(self.ctis)} CTIs) <a href=ctis>gen ctis</a>"
+        color = "darkred" if len(self.ctis) else "green"
+        return f"<span style='color:{color}'>{self.expr} ({len(self.ctis)} CTIs remaining)</span>"
 
     def to_html(self):
         child_elems = "\n".join([f"<span>{c.to_html()}</span>" for c in self.children])
@@ -1246,8 +1247,12 @@ class InductiveInvGen():
         return (parsed_ctis,parsed_cti_traces)       
 
 
-    def generate_ctis(self, props=None):
+    def generate_ctis(self, props=None, reseed=False):
         """ Generate CTIs for use in counterexample elimination. """
+
+        # Re-set random seed to ensure consistent RNG initial state.
+        if reseed:
+            random.seed(self.seed)
 
         all_ctis = set()
         print("props:", props)
@@ -1403,8 +1408,6 @@ class InductiveInvGen():
 
         # Initialize table mapping from invariants to a set of CTI states they violate.
         cti_states_eliminated_by_invs = {}
-        for inv in sat_invs:
-            cti_states_eliminated_by_invs[inv] = set()
 
         # Create metadir if necessary.
         os.system("mkdir -p states")
@@ -1417,6 +1420,16 @@ class InductiveInvGen():
         # Run CTI elimination checking in parallel.
         n_tlc_workers = 4
         cti_chunks = list(chunks(list(orig_ctis), n_tlc_workers))
+
+        invs = [x[1] for x in sat_invs]
+        sat_invs = ["Inv" + str(i) for i,x in enumerate(sat_invs)]
+        print("invs")
+        print(invs)
+        print("sat_invs")
+        print(sat_invs)
+
+        for inv in sat_invs:
+            cti_states_eliminated_by_invs[inv] = set()
 
         while curr_ind < len(sat_invs):
             sat_invs_group = sat_invs[curr_ind:(curr_ind+MAX_INVS_PER_GROUP)]
@@ -1626,6 +1639,8 @@ class InductiveInvGen():
 
                 # Sort the set of invariants to give them a consistent order.
                 invs = sorted(list(invs))
+                print("Raw invs")
+                print(invs[:5])
                 # print(hashlib.md5("".join(invs).encode()).hexdigest())
                 # for inv in invs:
                 #     print("invpred,",inv)
@@ -1643,6 +1658,8 @@ class InductiveInvGen():
                 sat_invs = self.check_invariants(invs, tlc_workers=tlc_workers)
                 
                 sat_invs = list(sorted(sat_invs))
+                print("sat invs")
+                print(sat_invs[:5])
 
                 print_invs = False # disable printing for now.
                 if print_invs:
@@ -1724,6 +1741,12 @@ class InductiveInvGen():
 
                     # Build and save the TLA+ spec.
                     spec_name = f"{self.specname}_chunk{ci}_IndQuickCheck"
+                    print("invs")
+                    print(invs[:5])
+                    print(len(invs))
+                    print("sat invs group")
+                    print(sat_invs_group[:5])
+                    print(len(sat_invs_group))
                     spec_str = self.make_indquickcheck_tla_spec(spec_name, invs, sat_invs_group, cti_chunk, quant_inv_fn)
 
                     ctiquicktlafile = f"{os.path.join(self.specdir, GEN_TLA_DIR)}/{spec_name}.tla"
@@ -1906,24 +1929,62 @@ class InductiveInvGen():
 
         root_obligation = ("Safety", safety)
         
-        # Start building the proof structure.
+        #
+        # Build the proof structure.
+        #
+        
         typeok = StructuredProofNode("TypeOK")
 
         h1 = StructuredProofNode("H_Inv276")
-        k_ctis, k_cti_traces = self.generate_ctis(props=[("H1", "H_Inv276")])
+        k_ctis, k_cti_traces = self.generate_ctis(props=[("H1", "H_Inv276")], reseed=True)
         h1.ctis = k_cti_traces[:MAX_CTIS_PER_NODE]
 
         h2 = StructuredProofNode("H_Inv318")
-        k_ctis, k_cti_traces = self.generate_ctis(props=[("H2", "H_Inv318")])
+        k_ctis, k_cti_traces = self.generate_ctis(props=[("H2", "H_Inv318")], reseed=True)
         h2.ctis = k_cti_traces[:MAX_CTIS_PER_NODE]
 
-        root = StructuredProofNode(safety, children = [h1, h2, typeok])
-        k_ctis, k_cti_traces = self.generate_ctis(props=[root_obligation])
-        root.ctis = k_cti_traces[:MAX_CTIS_PER_NODE]
+        h3 = StructuredProofNode("H_Inv334")
+        k_ctis, k_cti_traces = self.generate_ctis(props=[("H3", "H_Inv334")], reseed=True)
+        h3.ctis = k_cti_traces[:MAX_CTIS_PER_NODE]
+
+        h4 = StructuredProofNode("H_Inv79")
+        k_ctis, k_cti_traces = self.generate_ctis(props=[("H4", "H_Inv79")], reseed=True)
+        h4.ctis = k_cti_traces[:MAX_CTIS_PER_NODE]
+
+
+        h5 = StructuredProofNode("H_Inv400")
+        k_ctis, k_cti_traces = self.generate_ctis(props=[("H5", "H_Inv400")], reseed=True)
+        h5.ctis = k_cti_traces[:MAX_CTIS_PER_NODE]
+
+
+        root = StructuredProofNode(safety, children = [h1, h2, h3, h4, h5])
+        k_ctis, k_cti_traces = self.generate_ctis(props=[root_obligation], reseed=True)
+        print(f"{len(k_ctis)} top level CTIs")
+        k_ctis = list(k_ctis)
+        k_ctis.sort()
+        k_ctis = random.sample(k_ctis, MAX_CTIS_PER_NODE)
+        root.ctis = k_ctis
+        print([hash(c) for c in root.ctis])
 
         # TODO: Make sure this works correctly.
-        # self.check_cti_elimination(k_ctis, [("H2", "H_Inv318")])
-
+        # TODO: Check if CTI elimination checks are being computed correctly.
+        print(k_ctis[0])
+        ctis_eliminated_by_invs = self.check_cti_elimination(k_ctis, [
+            ("H1", "H_Inv276"), 
+            ("H2", "H_Inv318"), 
+            ("H3", "H_Inv334"), 
+            ("H4", "H_Inv79"),
+            ("H5", "H_Inv400")
+        ])
+        print("CTIs eliminated by invs")
+        all_eliminated_ctis = set()
+        for k in ctis_eliminated_by_invs:
+            print(k, ":", len(ctis_eliminated_by_invs[k]))
+            print(ctis_eliminated_by_invs[k])
+            all_eliminated_ctis.update(ctis_eliminated_by_invs[k])
+            root.ctis = [c for c in root.ctis if str(hash(c)) not in ctis_eliminated_by_invs[k]]
+        print(f"All eliminated CTIs: {len(all_eliminated_ctis)}")
+        print(all_eliminated_ctis)
         proof = StructuredProof(root)
 
         #
