@@ -277,12 +277,19 @@ class StructuredProofNode():
         self.ctis = []
 
     def serialize(self):
-        return {"expr": self.expr}
+        return {
+            "expr": self.expr, 
+            "children": [c.serialize() for c in self.children], 
+            "ctis": []
+        }
+
+    def list_elem_html(self):
+        return f"{self.expr} ({len(self.ctis)} CTIs) <a href=ctis>gen ctis</a>"
 
     def to_html(self):
         child_elems = "\n".join([f"<span>{c.to_html()}</span>" for c in self.children])
         return f"""
-                <li>{self.expr} ({len(self.ctis)} CTIs) 
+                <li>{self.list_elem_html()}
                     <ul>{child_elems}</ul> 
                 </li>
             """
@@ -296,14 +303,16 @@ class StructuredProof():
     def __init__(self, root):
         # Top level goal expression to be proven.
         self.safety_goal = safety
-        self.proof_tree = root 
+        self.root = root 
 
     def serialize(self):
-        return {"safety": self.safety, "proof_tree": self.proof_tree.serialize()}
+        return {"safety": self.safety, "proof_tree": self.root.serialize()}
     
     def to_html(self):
         # child_elems = "\n".join([f"<li>{c.to_html()}</li>" for c in self.proof_tree.children])
-        return "<ul>"+self.proof_tree.to_html()+"</ul>"
+        html = f"<h1>Proof Structure</h1>"
+        html += "<ul>"+self.root.to_html()+"</ul>"
+        return html
         # return f"<ul><li>{self.safety_goal}<ul>{child_elems}</ul></li></ul>"
 
     def dump(self):
@@ -1104,7 +1113,10 @@ class InductiveInvGen():
 
 
     def generate_ctis_tlc_run_async(self, num_traces_per_worker, props=None):
-        """ Starts a single instance of TLC to generate CTIs."""
+        """ Starts a single instance of TLC to generate CTIs.
+        
+        Will generate CTIs for the conjunction of all predicates given in 'props'.
+        """
 
         if props == None:
             props = [("Safety",self.safety)] + self.strengthening_conjuncts
@@ -1780,17 +1792,42 @@ class InductiveInvGen():
             return None
         return self.strengthening_conjuncts
     
-    def run_interactive_mode(self, k_cti_traces):
+    def run_interactive_mode(self):
+        # For proof tree we look for single step inductive support lemmas.
+        self.simulate_depth = 1
+
+        root_obligation = ("Safety", safety)
+
+
+
+        
+        MAX_CTIS_PER_NODE = 50
+
+        # Start building the proof structure.
+        typeok = StructuredProofNode("TypeOK")
+
+        h1 = StructuredProofNode("H_Inv276")
+        k_ctis, k_cti_traces = self.generate_ctis(props=[("H1", "H_Inv276")])
+        h1.ctis = k_cti_traces[:MAX_CTIS_PER_NODE]
+
+        h2 = StructuredProofNode("H_Inv318")
+        k_ctis, k_cti_traces = self.generate_ctis(props=[("H2", "H_Inv318")])
+        h2.ctis = k_cti_traces[:MAX_CTIS_PER_NODE]
+
+        root = StructuredProofNode(safety, children = [h1, h2, typeok])
+        k_ctis, k_cti_traces = self.generate_ctis(props=[root_obligation])
+        root.ctis = k_cti_traces[:MAX_CTIS_PER_NODE]
+
+        proof = StructuredProof(root)
+
+        #
+        # Display one CTI example.
+        #
         print("--------- > One CTI example:")
         one_cti_trace = k_cti_traces[0]
         for i,s in enumerate(one_cti_trace.getStates()):
             print(f"State {i}")
             print(s)
-        
-        typeok = StructuredProofNode("TypeOK")
-        root = StructuredProofNode(safety, children = [typeok, typeok])
-        root.ctis = k_cti_traces[:1]
-        proof = StructuredProof(root)
 
         # Ask for new lemma to eliminate CTIs in current batch.
         # TODO: Deal with how to save given lemma and how to determine current level of
@@ -1799,43 +1836,50 @@ class InductiveInvGen():
         # lemma = raw_input("Enter new lemma candidate for elimination")
         # self.proof_graph["edges"].append((support_lemma,curr_obligation))
 
-        from flask import Flask
-        app = Flask(__name__)
+        # Visualize proof structure in HTML format for inspection.
+        f = open(f"benchmarks/{self.specname}.proof.html", 'w')
+        f.write("<style>body{font-family:monospace;font-size:16px;}</style>")
+        f.write(proof.to_html())
+        f.close()
+        return
 
-        @app.route("/")
-        def index():
-            html = "<h1>Proof Structure</h1>"
-            html += proof.to_html()
-            return html
+        # from flask import Flask
+        # app = Flask(__name__)
 
-        @app.route("/hello")
-        def hello():
-            return "Hello World!"
+        # @app.route("/")
+        # def index():
+        #     html = "<h1>Proof Structure</h1>"
+        #     html += proof.to_html()
+        #     return html
 
-        @app.route("/members")
-        def members():
-            return "Members"
+        # @app.route("/hello")
+        # def hello():
+        #     return "Hello World!"
 
-        @app.route("/members/<string:name>/")
-        def getMember(name):
-            return "william"
+        # @app.route("/members")
+        # def members():
+        #     return "Members"
 
-        if __name__ == "__main__":
-            app.run(debug=True)
+        # @app.route("/members/<string:name>/")
+        # def getMember(name):
+        #     return "william"
 
-        # TODO: Persist and reload proof graph structure in between sessions?
+        # if __name__ == "__main__":
+        #     app.run(debug=True)
+
+        # # TODO: Persist and reload proof graph structure in between sessions?
 
 
-        # Save updated proof structure.
-        with open(f"{self.specname}.proof.json", 'w') as f:
-            json.dump(self.proof_graph, f, indent=2)
+        # # Save updated proof structure.
+        # with open(f"{self.specname}.proof.json", 'w') as f:
+        #     json.dump(self.proof_graph, f, indent=2)
 
     def do_invgen_proof_tree_mode(self, interactive_mode=False):
         self.lemma_obligations = [("Safety", self.safety)]
         self.all_generated_lemmas = set()
 
         # TODO: Optionally reload from file for interactive mode.
-        # self.proof_graph = {"edges": [], "safety": self.safety}
+        self.proof_graph = {"edges": [], "safety": self.safety}
 
         # For proof tree we look for single step inductive support lemmas.
         self.simulate_depth = 1
@@ -1881,10 +1925,6 @@ class InductiveInvGen():
                 continue
             else:
                 logging.info("Not done. Current invariant candidate is not inductive.")
-
-            if interactive_mode:
-                self.run_interactive_mode(k_cti_traces)
-                return
 
             self.total_num_cti_elimination_rounds = (roundi + 1)
             ret = self.eliminate_ctis(k_ctis, self.num_invs, roundi, append_inv_round_id=True)
@@ -2019,6 +2059,12 @@ class InductiveInvGen():
         tstart = time.time()
 
         if self.proof_tree_mode:
+
+            # Run interactive mode and then exit.
+            if self.interactive_mode:
+                self.run_interactive_mode()
+                return
+
             self.do_invgen_proof_tree_mode(interactive_mode=self.interactive_mode)
             print("")
             print("Proof graph edges")
@@ -2028,13 +2074,13 @@ class InductiveInvGen():
             # dot.node_attr["shape"] = "box"
             
             # Store all nodes.
-            for e in self.proof_graph_edges:
+            for e in self.proof_graph["edges"]:
                 print(e[0])
                 print(e[1])
                 dot.node(e[0][0], e[0][1].replace("\\", "\\\\"))
                 dot.node(e[1][0], e[1][1].replace("\\", "\\\\"))
 
-            for e in self.proof_graph_edges:
+            for e in self.proof_graph["edges"]:
                 print(e[0])
                 print(e[1])
                 dot.edge(e[0][0], e[1][0])

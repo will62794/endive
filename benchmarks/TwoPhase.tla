@@ -172,6 +172,16 @@ TCConsistent ==
   (*************************************************************************)
 
 THEOREM TPSpec => []TypeOK
+
+
+
+
+\* Helper lemmas
+
+H_Inv276 == (tmPrepared = RM) \/ (~([type |-> "Commit"] \in msgs))
+H_Inv318 == ~([type |-> "Abort"] \in msgs) \/ (~([type |-> "Commit"] \in msgs))
+
+
   (*************************************************************************)
   (* This theorem asserts that the type-correctness predicate TPTypeOK is  *)
   (* an invariant of the specification.                                    *)
