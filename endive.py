@@ -1829,13 +1829,6 @@ class InductiveInvGen():
             print(f"State {i}")
             print(s)
 
-        # Ask for new lemma to eliminate CTIs in current batch.
-        # TODO: Deal with how to save given lemma and how to determine current level of
-        # proof that we are at.
-        # Do we just want some kind of tree structured UI interface?
-        # lemma = raw_input("Enter new lemma candidate for elimination")
-        # self.proof_graph["edges"].append((support_lemma,curr_obligation))
-
         # Visualize proof structure in HTML format for inspection.
         f = open(f"benchmarks/{self.specname}.proof.html", 'w')
         f.write("<style>body{font-family:monospace;font-size:16px;}</style>")
