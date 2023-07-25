@@ -1393,6 +1393,112 @@ class InductiveInvGen():
         logging.info(f"Pre-generated and cached {len(self.cached_invs)} total invariants")
         self.end_timing_invcheck()
 
+    def check_cti_elimination(self, orig_ctis, sat_invs):
+
+        #
+        # TODO: Sort out how we handle 'invs' and 'sat_invs' and CTI tables here, etc.
+        #
+
+        logging.info("Checking which invariants eliminate CTIs.")
+
+        # Initialize table mapping from invariants to a set of CTI states they violate.
+        cti_states_eliminated_by_invs = {}
+        for inv in sat_invs:
+            cti_states_eliminated_by_invs[inv] = set()
+
+        # Create metadir if necessary.
+        os.system("mkdir -p states")
+
+        MAX_INVS_PER_GROUP = 1000
+        curr_ind = 0
+
+        quant_inv_fn = self.quant_inv 
+
+        # Run CTI elimination checking in parallel.
+        n_tlc_workers = 4
+        cti_chunks = list(chunks(list(orig_ctis), n_tlc_workers))
+
+        while curr_ind < len(sat_invs):
+            sat_invs_group = sat_invs[curr_ind:(curr_ind+MAX_INVS_PER_GROUP)]
+            logging.info("Checking invariant group of size %d (starting invariant=%d) for CTI elimination." % (len(sat_invs_group), curr_ind))
+            tlc_procs = []
+
+            # Create the TLA+ specs and configs for checking each chunk.
+            for ci,cti_chunk in enumerate(cti_chunks):
+
+                # Build and save the TLA+ spec.
+                spec_name = f"{self.specname}_chunk{ci}_IndQuickCheck"
+                spec_str = self.make_indquickcheck_tla_spec(spec_name, invs, sat_invs_group, cti_chunk, quant_inv_fn)
+
+                ctiquicktlafile = f"{os.path.join(self.specdir, GEN_TLA_DIR)}/{spec_name}.tla"
+                ctiquicktlafilename = f"{GEN_TLA_DIR}/{spec_name}.tla"
+
+                f = open(ctiquicktlafile,'w')
+                f.write(spec_str)
+                f.close()
+
+                # Generate config file.
+                ctiquickcfgfile=f"{os.path.join(self.specdir, GEN_TLA_DIR)}/{self.specname}_chunk{ci}_CTIQuickCheck.cfg"
+                ctiquickcfgfilename=f"{GEN_TLA_DIR}/{self.specname}_chunk{ci}_CTIQuickCheck.cfg"
+                cfg_str = self.make_ctiquickcheck_cfg(invs, sat_invs_group, cti_chunk, quant_inv_fn)
+                
+                f = open(ctiquickcfgfile,'w')
+                f.write(cfg_str)
+                f.close()
+
+                cti_states_file = os.path.join(self.specdir, f"states/cti_quick_check_chunk{ci}_{curr_ind}.json")
+                cti_states_relative_file = f"states/cti_quick_check_chunk{ci}_{curr_ind}.json"
+
+                # Run TLC.
+                # Create new tempdir to avoid name clashes with multiple TLC instances running concurrently.
+                dirpath = tempfile.mkdtemp()
+                cmdargs = (dirpath, TLC_MAX_SET_SIZE ,cti_states_relative_file, self.specname, ci, curr_ind, ctiquickcfgfilename, ctiquicktlafilename)
+                cmd = self.java_exe + ' -Xss16M -Djava.io.tmpdir="%s" -cp tla2tools-checkall.jar tlc2.TLC -maxSetSize %d -dump json %s -noGenerateSpecTE -metadir states/ctiquick_%s_chunk%d_%d -continue -checkAllInvariants -deadlock -workers 1 -config %s %s' % cmdargs
+
+                logging.info("TLC command: " + cmd)
+                workdir = None if self.specdir == "" else self.specdir
+                subproc = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, cwd=workdir)
+                tlc_procs.append(subproc)
+        
+            for ci,subproc in enumerate(tlc_procs):
+                logging.info("Waiting for TLC termination " + str(ci))
+
+                subproc.wait()
+                ret = subproc.stdout.read().decode(sys.stdout.encoding)
+
+                lines = ret.splitlines()
+                lines = greplines("State.*|/\\\\", lines)
+
+                cti_states_file = os.path.join(self.specdir, f"states/cti_quick_check_chunk{ci}_{curr_ind}.json")
+                cti_states_relative_file = f"states/cti_quick_check_chunk{ci}_{curr_ind}.json"
+
+                # logging.info(f"Opening CTI states JSON file: '{cti_states_file}'")
+                fcti = open(cti_states_file)
+                text = fcti.read()
+                cti_states = json.loads(text)["states"]
+                # cti_states = json.load(fcti)["states"]
+                fcti.close()
+                # print "cti states:",len(cti_states)
+
+                # Record the CTIs eliminated by each invariant.
+                for cti_state in cti_states:
+                    sval = cti_state["val"]
+                    ctiHash = sval["ctiId"]
+                    # for inv in sat_invs_group:
+                    # for inv in inv_chunks[ci]:
+                    for inv in sat_invs_group:
+                        if not sval[inv + "_val"]:
+                            cti_states_eliminated_by_invs[inv].add(ctiHash)
+
+                # TODO: Still needed? (7/25/2023, Will)
+                # for inv in cti_states_eliminated_by_invs:
+                #     if len(cti_states_eliminated_by_invs[inv]):
+                #         invi = int(inv.replace("Inv",""))
+                #         invexp = quant_inv_fn(sorted(invs)[invi])
+
+            curr_ind += MAX_INVS_PER_GROUP
+        return cti_states_eliminated_by_invs
+
     def eliminate_ctis(self, orig_k_ctis, num_invs, roundi, preds_alt=[], quant_inv_alt=None, tlc_workers=6, specdir=None, append_inv_round_id=True):
         """ Check which of the given satisfied invariants eliminate CTIs. """
         
@@ -1796,13 +1902,10 @@ class InductiveInvGen():
         # For proof tree we look for single step inductive support lemmas.
         self.simulate_depth = 1
 
-        root_obligation = ("Safety", safety)
-
-
-
-        
         MAX_CTIS_PER_NODE = 50
 
+        root_obligation = ("Safety", safety)
+        
         # Start building the proof structure.
         typeok = StructuredProofNode("TypeOK")
 
@@ -1817,6 +1920,9 @@ class InductiveInvGen():
         root = StructuredProofNode(safety, children = [h1, h2, typeok])
         k_ctis, k_cti_traces = self.generate_ctis(props=[root_obligation])
         root.ctis = k_cti_traces[:MAX_CTIS_PER_NODE]
+
+        # TODO: Make sure this works correctly.
+        # self.check_cti_elimination(k_ctis, [("H2", "H_Inv318")])
 
         proof = StructuredProof(root)
 
@@ -1835,30 +1941,6 @@ class InductiveInvGen():
         f.write(proof.to_html())
         f.close()
         return
-
-        # from flask import Flask
-        # app = Flask(__name__)
-
-        # @app.route("/")
-        # def index():
-        #     html = "<h1>Proof Structure</h1>"
-        #     html += proof.to_html()
-        #     return html
-
-        # @app.route("/hello")
-        # def hello():
-        #     return "Hello World!"
-
-        # @app.route("/members")
-        # def members():
-        #     return "Members"
-
-        # @app.route("/members/<string:name>/")
-        # def getMember(name):
-        #     return "william"
-
-        # if __name__ == "__main__":
-        #     app.run(debug=True)
 
         # # TODO: Persist and reload proof graph structure in between sessions?
 
