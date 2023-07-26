@@ -2035,9 +2035,16 @@ class InductiveInvGen():
             #     print(f"State {i}")
             #     print(s)
 
+        #
         # Visualize proof structure in HTML format for inspection.
+        #
         f = open(f"benchmarks/{self.specname}.proof.html", 'w')
-        f.write("<style>body{font-family:monospace;font-size:16px;}</style>")
+        
+        f.write("<head>")
+        f.write('<link rel="stylesheet" type="text/css" href="proof.css">')
+        f.write('<script type="text/javascript" src="proof.js"></script>')
+        f.write("</head>")
+
         f.write("<div>")
         f.write(proof.to_html())
         f.write("</div>")
@@ -2052,6 +2059,7 @@ class InductiveInvGen():
                 f.write("\n")
             f.write("</pre>")
         f.write("</div>")
+
         f.close()
 
         return
