@@ -208,6 +208,12 @@ class State():
     def __str__(self):
         return self.state_str
 
+    def pretty_str(self):
+        out = ""
+        for l in self.state_lines:
+            out += l + "\n"
+        return out
+
 class Trace():
     """ Represents a trace of states. """
     def __init__(self, states):
@@ -219,10 +225,13 @@ class Trace():
 
 class CTI():
     """ Represents a single counterexample to induction (CTI) state. """
-    def __init__(self, cti_str, cti_lines, action_name):
+    def __init__(self, cti_str, cti_lines, action_name, trace=None):
         self.cti_str = cti_str
         self.action_name = action_name
         self.cti_lines = cti_lines
+        # The full counterexample trace associated with this CTI. The CTI state may fall at 
+        # different points within this trace.
+        self.trace = trace
 
     def getCTIStateString(self):
         return self.cti_str
@@ -250,6 +259,19 @@ class CTI():
     
     def setActionName(self, action_name):
         self.action_name = action_name
+
+    def setTrace(self, trace):
+        self.trace = trace
+
+    def getTrace(self):
+        return self.trace
+
+    def pretty_str(self):
+        out = ""
+        for l in self.cti_lines:
+            out += l + "\n"
+        return out
+            
 
     def __hash__(self):
         return hash(self.cti_str)
@@ -1009,6 +1031,9 @@ class InductiveInvGen():
                 # trace_ctis.append(curr_cti.strip())
             curr_line += 1
 
+        # The trace associated with this CTI set.
+        trace = Trace(trace_states)
+
         # Assign action names to each CTI.
         # print(trace_action_names)
         for k,cti in enumerate(trace_ctis[:-1]):
@@ -1016,13 +1041,13 @@ class InductiveInvGen():
             # step ahead of it in the trace.
             action_name = trace_action_names[k+1]
             cti.setActionName(action_name)
+            cti.setTrace(trace)
         
         # for cti in trace_ctis:
             # print(cti.getActionName())
 
         # The last state is a bad state, not a CTI.
         trace_ctis = trace_ctis[:-1]
-        trace = Trace(trace_states)
         return (curr_line, set(trace_ctis), trace)
 
     def parse_ctis(self, lines):
@@ -1951,13 +1976,15 @@ class InductiveInvGen():
         k_ctis, k_cti_traces = self.generate_ctis(props=[("H4", "H_Inv79")], reseed=True)
         h4.ctis = k_cti_traces[:MAX_CTIS_PER_NODE]
 
-
         h5 = StructuredProofNode("H_Inv400")
         k_ctis, k_cti_traces = self.generate_ctis(props=[("H5", "H_Inv400")], reseed=True)
         h5.ctis = k_cti_traces[:MAX_CTIS_PER_NODE]
 
+        h6 = StructuredProofNode("H_Inv45")
+        k_ctis, k_cti_traces = self.generate_ctis(props=[("H6", "H_Inv45")], reseed=True)
+        h6.ctis = k_cti_traces[:MAX_CTIS_PER_NODE]
 
-        root = StructuredProofNode(safety, children = [h1, h2, h3, h4, h5])
+        root = StructuredProofNode(safety, children = [h1, h2, h3, h4, h5, h6])
         k_ctis, k_cti_traces = self.generate_ctis(props=[root_obligation], reseed=True)
         print(f"{len(k_ctis)} top level CTIs")
         k_ctis = list(k_ctis)
@@ -1974,7 +2001,8 @@ class InductiveInvGen():
             ("H2", "H_Inv318"), 
             ("H3", "H_Inv334"), 
             ("H4", "H_Inv79"),
-            ("H5", "H_Inv400")
+            ("H5", "H_Inv400"),
+            ("H6", "H_Inv45")
         ])
         print("CTIs eliminated by invs")
         all_eliminated_ctis = set()
@@ -1985,26 +2013,50 @@ class InductiveInvGen():
             root.ctis = [c for c in root.ctis if str(hash(c)) not in ctis_eliminated_by_invs[k]]
         print(f"All eliminated CTIs: {len(all_eliminated_ctis)}")
         print(all_eliminated_ctis)
+        print("====")
+
         proof = StructuredProof(root)
 
-        #
-        # Display one CTI example.
-        #
-        print("--------- > One CTI example:")
-        one_cti_trace = k_cti_traces[0]
-        for i,s in enumerate(one_cti_trace.getStates()):
-            print(f"State {i}")
-            print(s)
+        remaining_ctis = []
+        if len(root.ctis):
+            print("---> One remaining CTI")
+            remaining_ctis = random.sample(root.ctis, 3)
+            # print(one_cti.pretty_str())
+            # for i,s in enumerate(one_cti.getTrace().getStates()):
+            #     print(f"CTI State {i}")
+            #     print(s.pretty_str())
+
+            #
+            # Display one CTI example.
+            #
+            # print("--------- > One CTI example:")
+            # one_cti_trace = k_cti_traces[0]
+            # for i,s in enumerate(one_cti_trace.getStates()):
+            #     print(f"State {i}")
+            #     print(s)
 
         # Visualize proof structure in HTML format for inspection.
         f = open(f"benchmarks/{self.specname}.proof.html", 'w')
         f.write("<style>body{font-family:monospace;font-size:16px;}</style>")
+        f.write("<div>")
         f.write(proof.to_html())
+        f.write("</div>")
+        f.write("<div>") 
+        f.write(f"<h1>Sample of {len(root.ctis)} Remaining CTIs</h1>")      
+        for i,one_cti in enumerate(remaining_ctis):
+            f.write(f"<h3>CTI {i}</h3>\n")
+            f.write("<pre>")
+            for i,s in enumerate(one_cti.getTrace().getStates()):
+                f.write(f"<b>CTI State {i}</b> \n")
+                f.write(s.pretty_str())
+                f.write("\n")
+            f.write("</pre>")
+        f.write("</div>")
         f.close()
+
         return
 
         # # TODO: Persist and reload proof graph structure in between sessions?
-
 
         # # Save updated proof structure.
         # with open(f"{self.specname}.proof.json", 'w') as f:
