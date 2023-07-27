@@ -19,12 +19,30 @@ EXTENDS TLC, Naturals
 (* protocol--that is, what is allowed to happen.  What must happen would   *)
 (* be described by liveness properties, which we do not specify.           *)
 (***************************************************************************)
-CONSTANT RM \* The set of resource managers
+
+CONSTANT 
+    \* @type: Set(RM);
+    RM \* The set of resource managers
+
+Message ==
+  (*************************************************************************)
+  (* The set of all possible messages.  Messages of type $"Prepared"$ are  *)
+  (* sent from the RM indicated by the message's $rm$ field to the TM\@.   *)
+  (* Messages of type $"Commit"$ and $"Abort"$ are broadcast by the TM, to *)
+  (* be received by all RMs.  The set $msgs$ contains just a single copy   *)
+  (* of such a message.                                                    *)
+  (*************************************************************************)
+  [type : {"Prepared"}, rm : RM]  \cup  [type : {"Commit", "Abort"}]
+\*   [type : {"Prepared", "Commit", "Abort"}, rm : RM] 
 
 VARIABLES
+  \* @type: RM -> Str;
   rmState,       \* $rmState[rm]$ is the state of resource manager RM.
+  \* @type: Str;
   tmState,       \* The state of the transaction manager.
+  \* @type: Set(RM);
   tmPrepared,    \* The set of RMs from which the TM has received "Prepared" messages
+  \* @type: Set( { type: Str, rm: RM } );
   msgs
 
 vars == <<rmState, tmState, tmPrepared, msgs>>
@@ -45,16 +63,6 @@ vars == <<rmState, tmState, tmPrepared, msgs>>
     (* time has no effect.)                                                *)
     (***********************************************************************)
 
-Message ==
-  (*************************************************************************)
-  (* The set of all possible messages.  Messages of type $"Prepared"$ are  *)
-  (* sent from the RM indicated by the message's $rm$ field to the TM\@.   *)
-  (* Messages of type $"Commit"$ and $"Abort"$ are broadcast by the TM, to *)
-  (* be received by all RMs.  The set $msgs$ contains just a single copy   *)
-  (* of such a message.                                                    *)
-  (*************************************************************************)
-  [type : {"Prepared"}, rm : RM]  \cup  [type : {"Commit", "Abort"}]
-   
 TypeOK ==  
   (*************************************************************************)
   (* The type-correctness invariant                                        *)
@@ -128,7 +136,8 @@ RMRcvCommitMsg(rm) ==
   (*************************************************************************)
   (* Resource manager $rm$ is told by the TM to commit.                    *)
   (*************************************************************************)
-  /\ [type |-> "Commit"] \in msgs
+\*   /\ [type |-> "Commit"] \in msgs
+  /\ \E m \in msgs : m.type = "Commit"
   /\ rmState[rm] # "committed" \* no need to commit twice.
   /\ rmState' = [rmState EXCEPT ![rm] = "committed"]
   /\ UNCHANGED <<tmState, tmPrepared, msgs>>
@@ -137,7 +146,8 @@ RMRcvAbortMsg(rm) ==
   (*************************************************************************)
   (* Resource manager $rm$ is told by the TM to abort.                     *)
   (*************************************************************************)
-  /\ [type |-> "Abort"] \in msgs
+\*   /\ [type |-> "Abort"] \in msgs
+  /\ \E m \in msgs : m.type = "Abort"
   /\ rmState[rm] # "aborted" \* no need to abort twice.
   /\ rmState' = [rmState EXCEPT ![rm] = "aborted"]
   /\ UNCHANGED <<tmState, tmPrepared, msgs>>
@@ -145,6 +155,8 @@ RMRcvAbortMsg(rm) ==
 Next ==
   \/ TMCommit 
   \/ TMAbort
+\*   \/ \E rm \in RM : TMCommit(rm) 
+\*   \/ \E rm \in RM : TMAbort(rm)
   \/ \E rm \in RM : TMRcvPrepared(rm) 
   \/ \E rm \in RM : RMPrepare(rm) 
   \/ \E rm \in RM : RMChooseToAbort(rm)
@@ -156,9 +168,6 @@ TPSpec == Init /\ [][Next]_<<rmState, tmState, tmPrepared, msgs>>
 NextUnchanged == UNCHANGED vars
 
 Symmetry == Permutations(RM)
-
-Test == TLCGet("level")<20
-
 
 TCConsistent ==  
   (*************************************************************************)
@@ -173,8 +182,7 @@ TCConsistent ==
 
 THEOREM TPSpec => []TypeOK
 
-
-
+ApaInv == TypeOK /\ TCConsistent
 
 \* Helper lemmas
 
@@ -190,6 +198,28 @@ H_Inv45 == \A rmi \in RM : ([type |-> "Commit"] \in msgs) \/ (~(rmState[rmi] = "
 H_Inv331 == ~([type |-> "Abort"] \in msgs) \/ (~(tmState = "init"))
 H_Inv344 == ~([type |-> "Commit"] \in msgs) \/ (~(tmState = "init"))
 
+\* Level 2.
+H_Inv9990 == \A rmi \in RM : ([type |-> "Prepared", rm |-> rmi] \in msgs) \/ (~([type |-> "Commit"] \in msgs))
+H_Inv9991 == \A rmj \in RM : ([type |-> "Prepared", rm |-> rmj] \in msgs) \/ (~(tmPrepared = RM))
+
+
+\* Helper lemmas (Apalache compatible).
+
+\* \* Level 1.
+\* H_Inv276 == (tmPrepared = RM) \/ (~(\E m \in msgs : m.type = "Commit"))
+\* H_Inv318 == ~(\E m \in msgs : m.type = "Abort") \/ (~(\E m \in msgs : m.type = "Commit"))
+\* H_Inv334 == \A rmi \in RM : ~(\E m \in msgs : m.type = "Commit") \/ (~(rmState[rmi] = "aborted"))
+\* H_Inv79 == \A rmi \in RM : ([type |-> "Prepared", rm |-> rmi] \in msgs) \/ (~(tmPrepared = tmPrepared \cup {rmi}))
+\* H_Inv400 == \A rmi \in RM : ~(rmState[rmi] = "working") \/ (~(tmPrepared = RM))
+\* H_Inv45 == \A rmi \in RM : (\E m \in msgs : m.type = "Commit") \/ (~(rmState[rmi] = "committed"))
+
+\* \* Level 2.
+\* H_Inv331 == ~(\E m \in msgs : m.type = "Abort") \/ (~(tmState = "init"))
+\* H_Inv344 == ~(\E m \in msgs : m.type = "Commit") \/ (~(tmState = "init"))
+
+\* \* Level 2.
+\* H_Inv9990 == \A rmi \in RM : ([type |-> "Prepared", rm |-> rmi] \in msgs) \/ (~(\E m \in msgs : m.type = "Commit"))
+\* H_Inv9991 == \A rmj \in RM : ([type |-> "Prepared", rm |-> rmj] \in msgs) \/ (~(tmPrepared = RM))
 
   (*************************************************************************)
   (* This theorem asserts that the type-correctness predicate TPTypeOK is  *)

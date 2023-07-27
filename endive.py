@@ -336,7 +336,7 @@ class StructuredProofNode():
                 <td style='color:{color}'>{self.expr}</td>
                 <td style='color:{color}'>({len(self.ctis)-len(self.ctis_eliminated)} / {len(self.ctis)} CTIs remaining)</td>
                 <td>
-                    (eliminates {len(self.parent_ctis_eliminated)} ({round(pct_parent_ctis_eliminated * 100.0, 1)} %) of  parent CTIs, {len(self.parent_ctis_uniquely_eliminated)} uniquely)
+                    (eliminates {len(self.parent_ctis_eliminated)} ({round(pct_parent_ctis_eliminated * 100.0, 1)} % of) parent CTIs, {len(self.parent_ctis_uniquely_eliminated)} uniquely)
                 </td>
             </tr>
         </table>
@@ -387,7 +387,7 @@ class StructuredProof():
 
         html += ("<div>")
         html += (f"<h1>Proof Structure: {specname}</h1>")
-        html += (f"<div>Seed: {indgen.seed}</div>")
+        html += (f"<div>seed={indgen.seed}, num_simulate_traces={indgen.num_simulate_traces}</div>")
         html += (self.root_to_html())
         html += ("</div>")
         html += ("<div>") 
@@ -2027,7 +2027,10 @@ class InductiveInvGen():
                 StructuredProofNode("H2.1", "H_Inv331"),
                 StructuredProofNode("H2.2", "H_Inv344")
             ]),
-            StructuredProofNode("H3", "H_Inv334"),
+            StructuredProofNode("H3", "H_Inv334", children = [
+                StructuredProofNode("H3.1", "H_Inv9990"),
+                StructuredProofNode("H3.2", "H_Inv9991"),
+            ]),
             StructuredProofNode("H4", "H_Inv79"),        
             StructuredProofNode("H5", "H_Inv400"),
             StructuredProofNode("H6", "H_Inv45")
