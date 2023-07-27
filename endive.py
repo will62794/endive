@@ -306,6 +306,10 @@ class StructuredProofNode():
         # Set of CTIs of parent that this lemma eliminates.
         self.parent_ctis_eliminated = []
 
+        # Set of CTIs of parent that are eliminated by this predicate alone and
+        # none of its siblings.
+        self.parent_ctis_uniquely_eliminated = []
+
     def serialize(self):
         return {
             "expr": self.expr, 
@@ -323,7 +327,7 @@ class StructuredProofNode():
             <tr>
                 <td style='color:{color}'>{self.expr}</td>
                 <td style='color:{color}'>({len(self.ctis)-len(self.ctis_eliminated)} / {len(self.ctis)} CTIs remaining)</td>
-                <td>(eliminates {len(self.parent_ctis_eliminated)} parent CTIs)</td>
+                <td>(eliminates {len(self.parent_ctis_eliminated)} parent CTIs, {len(self.parent_ctis_uniquely_eliminated)} uniquely)</td>
             </tr>
         </table>
         """
@@ -2050,9 +2054,9 @@ class InductiveInvGen():
                 print(ctis_eliminated_unique)
                 child_node = node.children[i]
                 child_node.parent_ctis_eliminated = ctis_eliminated[inv]
+                child_node.parent_ctis_uniquely_eliminated = ctis_eliminated_unique[inv]
 
             node.ctis_eliminated = all_eliminated_ctis
-            # node.ctis = [c for c in node.ctis if str(hash(c)) not in all_eliminated_ctis]
 
             # Recursively generate CTIs for children as well.
             for child_node in node.children:
@@ -2064,8 +2068,8 @@ class InductiveInvGen():
 
         children = [
             StructuredProofNode("H1", "H_Inv276"),
-            StructuredProofNode("H2", "H_Inv318"),
-            StructuredProofNode("H3", "H_Inv334"),
+            # StructuredProofNode("H2", "H_Inv318"),
+            # StructuredProofNode("H3", "H_Inv334"),
             StructuredProofNode("H4", "H_Inv79"),        
             # StructuredProofNode("H5", "H_Inv400"),
             StructuredProofNode("H6", "H_Inv45")
