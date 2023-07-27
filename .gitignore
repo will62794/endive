@@ -39,3 +39,5 @@ states/
 __pycache__/
 benchmarks.log
 *.proofs.html
+*.proof.html
+.vscode/
