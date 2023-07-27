@@ -289,7 +289,7 @@ class CTI():
 
 class StructuredProofNode():
     """ Single node (i.e. lemma) of a structured proof tree. """
-    def __init__(self, name, expr, children=[]):
+    def __init__(self, name, expr, children=[], parent=None):
         # Name used to identify the expression.
         self.name = name
         # Top level goal expression to be proven.
@@ -303,6 +303,9 @@ class StructuredProofNode():
 
         # Set of CTIs eliminated by set of this node's direct children.
         self.ctis_eliminated = []
+
+        # Pointer to this node's parent, or None if it has no parent.
+        self.parent = parent
 
         # Set of CTIs of parent that this lemma eliminates.
         self.parent_ctis_eliminated = []
@@ -323,12 +326,18 @@ class StructuredProofNode():
     # </span>
     def list_elem_html(self):
         color = "darkred" if len(self.ctis) > len(self.ctis_eliminated) else "green"
+        if self.parent is not None and len(self.parent.ctis) > 0:
+            pct_parent_ctis_eliminated = float(len(self.parent_ctis_eliminated)) / len(self.parent.ctis)
+        else:
+            pct_parent_ctis_eliminated = 0.0
         return f"""
         <table class='proof-struct-table'>
             <tr>
                 <td style='color:{color}'>{self.expr}</td>
                 <td style='color:{color}'>({len(self.ctis)-len(self.ctis_eliminated)} / {len(self.ctis)} CTIs remaining)</td>
-                <td>(eliminates {len(self.parent_ctis_eliminated)} parent CTIs, {len(self.parent_ctis_uniquely_eliminated)} uniquely)</td>
+                <td>
+                    (eliminates {len(self.parent_ctis_eliminated)} ({round(pct_parent_ctis_eliminated * 100.0, 1)} %) of  parent CTIs, {len(self.parent_ctis_uniquely_eliminated)} uniquely)
+                </td>
             </tr>
         </table>
         """
@@ -366,17 +375,19 @@ class StructuredProof():
         out_file = open("proof.proof", 'w')
         json.dump(self.serialize(), out_file, indent=2)
 
-    def gen_html(self, specname, remaining_ctis):
+    def gen_html(self, indgen, specname, remaining_ctis):
         """ Generate HTML visualization of structured proof. """
         html = ""
 
         html += ("<head>")
         html += ('<link rel="stylesheet" type="text/css" href="proof.css">')
+        html += '<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>'
         html += ('<script type="text/javascript" src="proof.js"></script>')
         html += ("</head>")
 
         html += ("<div>")
         html += (f"<h1>Proof Structure: {specname}</h1>")
+        html += (f"<div>Seed: {indgen.seed}</div>")
         html += (self.root_to_html())
         html += ("</div>")
         html += ("<div>") 
@@ -2042,7 +2053,7 @@ class InductiveInvGen():
             Generates CTIs and computes the set eliminated by each node's support lemmas i.e. its direct children
             """
 
-            print(f"Generating CTIs for proof node ({node.name},{node.expr})")
+            print(f"Generating CTIs for structured proof node ({node.name},{node.expr})")
 
             # Generate CTIs for this proof node, and sort and then sample to ensure a consistent
             # ordering for a given random seed.
@@ -2051,7 +2062,7 @@ class InductiveInvGen():
             k_ctis.sort()
 
             # Set CTIs for this node based on those generated.
-            print("num k ctis:", len(k_ctis))
+            print("Num ctis:", len(k_ctis))
             num_to_sample = min(len(k_ctis), MAX_CTIS_PER_NODE) # don't try to sample more CTIs than there are.
             node.ctis = random.sample(k_ctis, num_to_sample)
 
@@ -2078,8 +2089,9 @@ class InductiveInvGen():
                     unique = unique.difference(ctis_eliminated[other])
                 ctis_eliminated_unique[inv] = unique
                 print("Unique:", len(unique))
-                print(ctis_eliminated_unique)
+                # print(ctis_eliminated_unique)
                 child_node = node.children[i]
+                child_node.parent = node
                 child_node.parent_ctis_eliminated = ctis_eliminated[inv]
                 child_node.parent_ctis_uniquely_eliminated = ctis_eliminated_unique[inv]
 
@@ -2117,7 +2129,7 @@ class InductiveInvGen():
         #
         # Visualize proof structure in HTML format for inspection.
         #
-        html = proof.gen_html(self.specname, remaining_ctis)
+        html = proof.gen_html(self, self.specname, remaining_ctis)
         f = open(f"benchmarks/{self.specname}.proof.html", 'w')
         f.write(html)
         f.close()

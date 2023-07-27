@@ -7,3 +7,7 @@ table td {
     min-width:60px;
     font-size:16px;
 }
+
+table td:hover {
+    cursor: pointer;
+}
