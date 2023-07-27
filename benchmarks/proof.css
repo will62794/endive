@@ -2,3 +2,8 @@ body{
     font-family: monospace;
     font-size:16px;
 }
+table td {
+    padding-right:10px;
+    min-width:60px;
+    font-size:16px;
+}

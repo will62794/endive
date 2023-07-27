@@ -166,7 +166,7 @@ def runtlc(spec,config=None,tlc_workers=6,cwd=None,java="java",tlc_flags=""):
     if config:
         cmd += " -config " + config
     cmd += " " + spec
-    logging.info("TLC command: " + cmd)
+    logging.debug("TLC command: " + cmd)
     subproc = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, cwd=cwd)
     tlc_raw_out = ""
     line_str = ""
@@ -288,7 +288,9 @@ class CTI():
 
 class StructuredProofNode():
     """ Single node (i.e. lemma) of a structured proof tree. """
-    def __init__(self, expr, children=[]):
+    def __init__(self, name, expr, children=[]):
+        # Name used to identify the expression.
+        self.name = name
         # Top level goal expression to be proven.
         self.expr = expr
         self.children = children
@@ -298,6 +300,12 @@ class StructuredProofNode():
         # current set of direct children.
         self.ctis = []
 
+        # Set of CTIs eliminated by set of this node's direct children.
+        self.ctis_eliminated = []
+
+        # Set of CTIs of parent that this lemma eliminates.
+        self.parent_ctis_eliminated = []
+
     def serialize(self):
         return {
             "expr": self.expr, 
@@ -305,9 +313,20 @@ class StructuredProofNode():
             "ctis": []
         }
 
+    # <span style='color:{color}'>
+    #     {self.expr} ({len(self.ctis)-len(self.ctis_eliminated)} CTIs remaining, eliminates {len(self.parent_ctis_eliminated)} parent CTIs)
+    # </span>
     def list_elem_html(self):
-        color = "darkred" if len(self.ctis) else "green"
-        return f"<span style='color:{color}'>{self.expr} ({len(self.ctis)} CTIs remaining)</span>"
+        color = "darkred" if len(self.ctis) > len(self.ctis_eliminated) else "green"
+        return f"""
+        <table class='proof-struct-table'>
+            <tr>
+                <td style='color:{color}'>{self.expr}</td>
+                <td style='color:{color}'>({len(self.ctis)-len(self.ctis_eliminated)} / {len(self.ctis)} CTIs remaining)</td>
+                <td>(eliminates {len(self.parent_ctis_eliminated)} parent CTIs)</td>
+            </tr>
+        </table>
+        """
 
     def to_html(self):
         child_elems = "\n".join([f"<span>{c.to_html()}</span>" for c in self.children])
@@ -316,6 +335,9 @@ class StructuredProofNode():
                     <ul>{child_elems}</ul> 
                 </li>
             """
+
+    def num_ctis_remaining(self):
+        return len(self.ctis) - len(self.ctis_eliminated)
 
 class StructuredProof():
     """ Structured safety proof of an inductive invariant. 
@@ -331,16 +353,40 @@ class StructuredProof():
     def serialize(self):
         return {"safety": self.safety, "proof_tree": self.root.serialize()}
     
-    def to_html(self):
-        # child_elems = "\n".join([f"<li>{c.to_html()}</li>" for c in self.proof_tree.children])
-        html = f"<h1>Proof Structure</h1>"
-        html += "<ul>"+self.root.to_html()+"</ul>"
+    def root_to_html(self):
+        html = "<ul>"+self.root.to_html()+"</ul>"
         return html
-        # return f"<ul><li>{self.safety_goal}<ul>{child_elems}</ul></li></ul>"
 
     def dump(self):
         out_file = open("proof.proof", 'w')
         json.dump(self.serialize(), out_file, indent=2)
+
+    def gen_html(self, specname, remaining_ctis):
+        """ Generate HTML visualization of structured proof. """
+        html = ""
+
+        html += ("<head>")
+        html += ('<link rel="stylesheet" type="text/css" href="proof.css">')
+        html += ('<script type="text/javascript" src="proof.js"></script>')
+        html += ("</head>")
+
+        html += ("<div>")
+        html += (f"<h1>Proof Structure: {specname}</h1>")
+        html += (self.root_to_html())
+        html += ("</div>")
+        html += ("<div>") 
+        html += (f"<h2>Sample of {self.root.num_ctis_remaining()} Remaining CTIs</h2>")      
+        for i,one_cti in enumerate(remaining_ctis):
+            html += (f"<h3>CTI {i}</h3>\n")
+            html += ("<pre>")
+            for i,s in enumerate(one_cti.getTrace().getStates()):
+                html += (f"<b>CTI State {i}</b> \n")
+                html += (s.pretty_str())
+                html += ("\n")
+            html += ("</pre>")
+        html += ("</div>")
+
+        return html
 
 
 class InductiveInvGen():
@@ -761,7 +807,7 @@ class InductiveInvGen():
         ]
         cmd = " ".join(args)
         # cmd = self.java_exe + ' -Djava.io.tmpdir="%s" -cp tla2tools-checkall.jar tlc2.TLC -maxSetSize %d %s -depth %d -seed %d -noGenerateSpecTE -metadir states/indcheckrandom_%d -continue -deadlock -workers %d -config %s %s' % args
-        logging.info("TLC command: " + cmd)
+        logging.debug("TLC command: " + cmd)
         workdir = None
         if self.specdir != "":
             workdir = self.specdir
@@ -1221,7 +1267,7 @@ class InductiveInvGen():
             traces_per_worker = num_traces_per_worker
             simulate_flag = "-simulate num=%d" % traces_per_worker
 
-        logging.info(f"Using fixed TLC worker count of {num_ctigen_tlc_workers} to ensure reproducible CTI generation.")
+        logging.debug(f"Using fixed TLC worker count of {num_ctigen_tlc_workers} to ensure reproducible CTI generation.")
         dirpath = tempfile.mkdtemp()
 
         # Apalache run.
@@ -1243,7 +1289,7 @@ class InductiveInvGen():
 
         args = (dirpath, TLC_MAX_SET_SIZE, simulate_flag, self.simulate_depth, ctiseed, tag, num_ctigen_tlc_workers, indcheckcfgfilename, indchecktlafilename)
         cmd = self.java_exe + ' -Xss16M -Djava.io.tmpdir="%s" -cp tla2tools-checkall.jar tlc2.TLC -maxSetSize %d %s -depth %d -seed %d -noGenerateSpecTE -metadir states/indcheckrandom_%d -continue -deadlock -workers %d -config %s %s' % args
-        logging.info("TLC command: " + cmd)
+        logging.debug("TLC command: " + cmd)
         workdir = None
         if self.specdir != "":
             workdir = self.specdir
@@ -1296,7 +1342,7 @@ class InductiveInvGen():
         # Start the TLC processes for CTI generation.
         logging.info(f"Running {num_cti_worker_procs} parallel CTI generation processes")
         for n in range(num_cti_worker_procs):
-            logging.info(f"Starting CTI generation process {n}")
+            logging.info(f"Starting CTI generation process {n} (of {num_cti_worker_procs} total workers)")
             # if self.use_apalache_ctigen:
                 # cti_subproc = self.generate_ctis_apalache_run_async(num_traces_per_tlc_instance)
             # else:
@@ -1424,6 +1470,11 @@ class InductiveInvGen():
         self.end_timing_invcheck()
 
     def check_cti_elimination(self, orig_ctis, sat_invs):
+        """ Computes CTI elimination mapping for the given set of CTIs and invariants.
+        
+        That is, this function computes and returns a mapping from each invariant to the set of CTIs 
+        that it eliminates.
+        """
 
         #
         # TODO: Sort out how we handle 'invs' and 'sat_invs' and CTI tables here, etc.
@@ -1448,10 +1499,10 @@ class InductiveInvGen():
 
         invs = [x[1] for x in sat_invs]
         sat_invs = ["Inv" + str(i) for i,x in enumerate(sat_invs)]
-        print("invs")
-        print(invs)
-        print("sat_invs")
-        print(sat_invs)
+        # print("invs")
+        # print(invs)
+        # print("sat_invs")
+        # print(sat_invs)
 
         for inv in sat_invs:
             cti_states_eliminated_by_invs[inv] = set()
@@ -1493,7 +1544,7 @@ class InductiveInvGen():
                 cmdargs = (dirpath, TLC_MAX_SET_SIZE ,cti_states_relative_file, self.specname, ci, curr_ind, ctiquickcfgfilename, ctiquicktlafilename)
                 cmd = self.java_exe + ' -Xss16M -Djava.io.tmpdir="%s" -cp tla2tools-checkall.jar tlc2.TLC -maxSetSize %d -dump json %s -noGenerateSpecTE -metadir states/ctiquick_%s_chunk%d_%d -continue -checkAllInvariants -deadlock -workers 1 -config %s %s' % cmdargs
 
-                logging.info("TLC command: " + cmd)
+                logging.debug("TLC command: " + cmd)
                 workdir = None if self.specdir == "" else self.specdir
                 subproc = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, cwd=workdir)
                 tlc_procs.append(subproc)
@@ -1799,7 +1850,7 @@ class InductiveInvGen():
                     cmd = self.java_exe + ' -Xss16M -Djava.io.tmpdir="%s" -cp tla2tools-checkall.jar tlc2.TLC -maxSetSize %d -dump json %s -noGenerateSpecTE -metadir states/ctiquick_%s_chunk%d_%d -continue -checkAllInvariants -deadlock -workers 1 -config %s %s' % (dirpath, TLC_MAX_SET_SIZE ,cti_states_relative_file, self.specname, ci, curr_ind, ctiquickcfgfilename, ctiquicktlafilename)
 
                     
-                    logging.info("TLC command: " + cmd)
+                    logging.debug("TLC command: " + cmd)
                     workdir = None if self.specdir == "" else self.specdir
                     subproc = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, cwd=workdir)
                     # time.sleep(0.25)
@@ -1950,77 +2001,89 @@ class InductiveInvGen():
         # For proof tree we look for single step inductive support lemmas.
         self.simulate_depth = 1
 
-        MAX_CTIS_PER_NODE = 50
+        MAX_CTIS_PER_NODE = 100
 
         root_obligation = ("Safety", safety)
-        
+
+        def gen_proof_node_ctis(node):
+            """ Routine that updates set of CTIs for each proof node. 
+            
+            Generates CTIs and computes the set eliminated by each node's support lemmas i.e. its direct children
+            """
+
+            print(f"Generating CTIs for proof node ({node.name},{node.expr})")
+
+            # Generate CTIs for this proof node, and sort and then sample to ensure a consistent
+            # ordering for a given random seed.
+            k_ctis, k_cti_traces = self.generate_ctis(props=[(node.name, node.expr)], reseed=True)
+            k_ctis = list(k_ctis)
+            k_ctis.sort()
+
+            # Set CTIs for this node based on those generated.
+            print("num k ctis:", len(k_ctis))
+            num_to_sample = min(len(k_ctis), MAX_CTIS_PER_NODE) # don't try to sample more CTIs than there are.
+            node.ctis = random.sample(k_ctis, num_to_sample)
+
+            # Compute CTIs that are eliminated by each of the "support lemmas" for this node i.e.
+            # its set of direct children.
+
+            print(f"Checking CTI elimination for support lemmas of node ({node.name},{node.expr})")
+            ctis_eliminated = self.check_cti_elimination(node.ctis, [
+                (child.name,child.expr) for child in node.children
+            ])
+
+            ctis_eliminated_unique = {}
+
+            print("CTIs eliminated by invs")
+            all_eliminated_ctis = set()
+            for i,inv in enumerate(sorted(ctis_eliminated.keys(), key=lambda k : int(k.replace("Inv", "")))):
+            # for child in node.children:
+                print(inv, ":", len(ctis_eliminated[inv]))
+                # print(ctis_eliminated_by_invs[k])
+                all_eliminated_ctis.update(ctis_eliminated[inv])
+
+                unique = ctis_eliminated[inv]
+                for other in (ctis_eliminated.keys() - {inv}):
+                    unique = unique.difference(ctis_eliminated[other])
+                ctis_eliminated_unique[inv] = unique
+                print("Unique:", len(unique))
+                print(ctis_eliminated_unique)
+                child_node = node.children[i]
+                child_node.parent_ctis_eliminated = ctis_eliminated[inv]
+
+            node.ctis_eliminated = all_eliminated_ctis
+            # node.ctis = [c for c in node.ctis if str(hash(c)) not in all_eliminated_ctis]
+
+            # Recursively generate CTIs for children as well.
+            for child_node in node.children:
+                gen_proof_node_ctis(child_node)
+
         #
         # Build the proof structure.
         #
-        
-        typeok = StructuredProofNode("TypeOK")
 
-        h1 = StructuredProofNode("H_Inv276")
-        k_ctis, k_cti_traces = self.generate_ctis(props=[("H1", "H_Inv276")], reseed=True)
-        h1.ctis = k_cti_traces[:MAX_CTIS_PER_NODE]
-
-        h2 = StructuredProofNode("H_Inv318")
-        k_ctis, k_cti_traces = self.generate_ctis(props=[("H2", "H_Inv318")], reseed=True)
-        h2.ctis = k_cti_traces[:MAX_CTIS_PER_NODE]
-
-        h3 = StructuredProofNode("H_Inv334")
-        k_ctis, k_cti_traces = self.generate_ctis(props=[("H3", "H_Inv334")], reseed=True)
-        h3.ctis = k_cti_traces[:MAX_CTIS_PER_NODE]
-
-        h4 = StructuredProofNode("H_Inv79")
-        k_ctis, k_cti_traces = self.generate_ctis(props=[("H4", "H_Inv79")], reseed=True)
-        h4.ctis = k_cti_traces[:MAX_CTIS_PER_NODE]
-
-        h5 = StructuredProofNode("H_Inv400")
-        k_ctis, k_cti_traces = self.generate_ctis(props=[("H5", "H_Inv400")], reseed=True)
-        h5.ctis = k_cti_traces[:MAX_CTIS_PER_NODE]
-
-        h6 = StructuredProofNode("H_Inv45")
-        k_ctis, k_cti_traces = self.generate_ctis(props=[("H6", "H_Inv45")], reseed=True)
-        h6.ctis = k_cti_traces[:MAX_CTIS_PER_NODE]
-
-        root = StructuredProofNode(safety, children = [h1, h2, h3, h4, h5, h6])
-        k_ctis, k_cti_traces = self.generate_ctis(props=[root_obligation], reseed=True)
-        print(f"{len(k_ctis)} top level CTIs")
-        k_ctis = list(k_ctis)
-        k_ctis.sort()
-        k_ctis = random.sample(k_ctis, MAX_CTIS_PER_NODE)
-        root.ctis = k_ctis
-        print([hash(c) for c in root.ctis])
-
-        # TODO: Make sure this works correctly.
-        # TODO: Check if CTI elimination checks are being computed correctly.
-        print(k_ctis[0])
-        ctis_eliminated_by_invs = self.check_cti_elimination(k_ctis, [
-            ("H1", "H_Inv276"), 
-            ("H2", "H_Inv318"), 
-            ("H3", "H_Inv334"), 
-            ("H4", "H_Inv79"),
-            ("H5", "H_Inv400"),
-            ("H6", "H_Inv45")
-        ])
-        print("CTIs eliminated by invs")
-        all_eliminated_ctis = set()
-        for k in ctis_eliminated_by_invs:
-            print(k, ":", len(ctis_eliminated_by_invs[k]))
-            print(ctis_eliminated_by_invs[k])
-            all_eliminated_ctis.update(ctis_eliminated_by_invs[k])
-            root.ctis = [c for c in root.ctis if str(hash(c)) not in ctis_eliminated_by_invs[k]]
-        print(f"All eliminated CTIs: {len(all_eliminated_ctis)}")
-        print(all_eliminated_ctis)
-        print("====")
-
+        children = [
+            StructuredProofNode("H1", "H_Inv276"),
+            StructuredProofNode("H2", "H_Inv318"),
+            StructuredProofNode("H3", "H_Inv334"),
+            StructuredProofNode("H4", "H_Inv79"),        
+            # StructuredProofNode("H5", "H_Inv400"),
+            StructuredProofNode("H6", "H_Inv45")
+        ]
+        root = StructuredProofNode("Safety", safety, children = children)
         proof = StructuredProof(root)
 
+        logging.info("Re-generating CTIs for all proof nodes.")
+        gen_proof_node_ctis(root)
+
+        print("CTIs eliminated by invs")
+
+        # Get some of the remaining CTIs for the root node.
         remaining_ctis = []
-        if len(root.ctis):
+        if len(root.ctis) > len(root.ctis_eliminated):
             print("---> One remaining CTI")
-            remaining_ctis = random.sample(root.ctis, 3)
+            remaining_ctis = random.sample(root.ctis, 1)
+
             # print(one_cti.pretty_str())
             # for i,s in enumerate(one_cti.getTrace().getStates()):
             #     print(f"CTI State {i}")
@@ -2038,28 +2101,9 @@ class InductiveInvGen():
         #
         # Visualize proof structure in HTML format for inspection.
         #
+        html = proof.gen_html(self.specname, remaining_ctis)
         f = open(f"benchmarks/{self.specname}.proof.html", 'w')
-        
-        f.write("<head>")
-        f.write('<link rel="stylesheet" type="text/css" href="proof.css">')
-        f.write('<script type="text/javascript" src="proof.js"></script>')
-        f.write("</head>")
-
-        f.write("<div>")
-        f.write(proof.to_html())
-        f.write("</div>")
-        f.write("<div>") 
-        f.write(f"<h1>Sample of {len(root.ctis)} Remaining CTIs</h1>")      
-        for i,one_cti in enumerate(remaining_ctis):
-            f.write(f"<h3>CTI {i}</h3>\n")
-            f.write("<pre>")
-            for i,s in enumerate(one_cti.getTrace().getStates()):
-                f.write(f"<b>CTI State {i}</b> \n")
-                f.write(s.pretty_str())
-                f.write("\n")
-            f.write("</pre>")
-        f.write("</div>")
-
+        f.write(html)
         f.close()
 
         return
@@ -2258,6 +2302,7 @@ class InductiveInvGen():
 
             # Run interactive mode and then exit.
             if self.interactive_mode:
+                logging.info("Running in interactive proof tree mode.")
                 self.run_interactive_mode()
                 return
 
@@ -2476,6 +2521,7 @@ if __name__ == "__main__":
                                 interactive_mode=args["interactive_mode"],
                                 max_num_conjuncts_per_round=args["max_num_conjuncts_per_round"], max_num_ctis_per_round=args["max_num_ctis_per_round"])
 
+
     # Only do invariant generation, cache the invariants, and then exit.
     if cache_invs:
         logging.info("Caching generated invariants only.")
@@ -2483,6 +2529,8 @@ if __name__ == "__main__":
         logging.info("Total duration: {:.2f} secs.".format(((time.time() - tstart))))
         exit(0)
     
+    logging.info("======= Starting inductive invariant generation run. =======")
+
     indgen.run()
     logging.info("Initial random seed: %d", indgen.seed)
     logging.info("opt_quant_minimize: %d", indgen.opt_quant_minimize)
