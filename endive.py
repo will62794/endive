@@ -10,6 +10,7 @@ import argparse
 import platform
 from datetime import datetime
 import tempfile
+import uuid
 
 import graphviz
 
@@ -161,7 +162,7 @@ def runtlc(spec,config=None,tlc_workers=6,cwd=None,java="java",tlc_flags=""):
     # Make a best effort to attempt to avoid collisions between different
     # instances of TLC running on the same machine.
     dirpath = tempfile.mkdtemp()
-    metadir_path = f"states/states_{random.randint(0,1000000000)}"
+    metadir_path = f"states/states_{uuid.uuid4().hex[:16]}"
     cmd = java + (f' -Djava.io.tmpdir="{dirpath}" -cp tla2tools-checkall.jar tlc2.TLC {tlc_flags} -maxSetSize {TLC_MAX_SET_SIZE} -metadir {metadir_path} -noGenerateSpecTE -checkAllInvariants -deadlock -continue -workers {tlc_workers}')
     if config:
         cmd += " -config " + config
@@ -176,7 +177,7 @@ def runtlc(spec,config=None,tlc_workers=6,cwd=None,java="java",tlc_flags=""):
         if new_stdout == "": # reached end of file.
             break
         if new_stdout == os.linesep:
-            logging.debug("[TLC Output] " + line_str)
+            # logging.debug("[TLC Output] " + line_str)
             tlc_lines.append(line_str)
             line_str = ""
         else:
@@ -1198,7 +1199,8 @@ class InductiveInvGen():
             props = [("Safety",self.safety)] + self.strengthening_conjuncts
 
         # Avoid TLC directory naming conflicts.
-        tag = random.randint(0,10000)
+        # Use small UUID.
+        tag = uuid.uuid4().hex[:16]
         ctiseed = random.randint(0,10000)
 
         # Generate spec for generating CTIs.
@@ -1292,7 +1294,7 @@ class InductiveInvGen():
             return subproc
 
         args = (dirpath, TLC_MAX_SET_SIZE, simulate_flag, self.simulate_depth, ctiseed, tag, num_ctigen_tlc_workers, indcheckcfgfilename, indchecktlafilename)
-        cmd = self.java_exe + ' -Xss16M -Djava.io.tmpdir="%s" -cp tla2tools-checkall.jar tlc2.TLC -maxSetSize %d %s -depth %d -seed %d -noGenerateSpecTE -metadir states/indcheckrandom_%d -continue -deadlock -workers %d -config %s %s' % args
+        cmd = self.java_exe + ' -Xss16M -Djava.io.tmpdir="%s" -cp tla2tools-checkall.jar tlc2.TLC -maxSetSize %d %s -depth %d -seed %d -noGenerateSpecTE -metadir states/indcheckrandom_%s -continue -deadlock -workers %d -config %s %s' % args
         logging.debug("TLC command: " + cmd)
         workdir = None
         if self.specdir != "":
@@ -1303,7 +1305,7 @@ class InductiveInvGen():
     def generate_ctis_tlc_run_await(self, subproc):
         """ Awaits completion of a CTI generation process, parses its results and returns the parsed CTIs."""
         tlc_out = subproc.stdout.read().decode(sys.stdout.encoding)
-        logging.debug(tlc_out)
+        # logging.debug(tlc_out)
         lines = tlc_out.splitlines()
         if "Error: parsing" in tlc_out:
             logging.error("Error in TLC execution, printing TLC output.")
@@ -2002,10 +2004,35 @@ class InductiveInvGen():
         return self.strengthening_conjuncts
     
     def run_interactive_mode(self):
+
+
+        ###########
+        # Build a demo proof structure.
+        ###########
+
+        children = [
+            StructuredProofNode("H1", "H_Inv276"),
+            StructuredProofNode("H2", "H_Inv318", children = [
+                StructuredProofNode("H2.1", "H_Inv331"),
+                StructuredProofNode("H2.2", "H_Inv344")
+            ]),
+            StructuredProofNode("H3", "H_Inv334"),
+            StructuredProofNode("H4", "H_Inv79"),        
+            StructuredProofNode("H5", "H_Inv400"),
+            StructuredProofNode("H6", "H_Inv45")
+        ]
+        root = StructuredProofNode("Safety", safety, children = children)
+        proof = StructuredProof(root)
+
+
+
+        ###########
+        ###########
+
         # For proof tree we look for single step inductive support lemmas.
         self.simulate_depth = 1
 
-        MAX_CTIS_PER_NODE = 100
+        MAX_CTIS_PER_NODE = 5000
 
         root_obligation = ("Safety", safety)
 
@@ -2061,21 +2088,6 @@ class InductiveInvGen():
             # Recursively generate CTIs for children as well.
             for child_node in node.children:
                 gen_proof_node_ctis(child_node)
-
-        #
-        # Build the proof structure.
-        #
-
-        children = [
-            StructuredProofNode("H1", "H_Inv276"),
-            # StructuredProofNode("H2", "H_Inv318"),
-            # StructuredProofNode("H3", "H_Inv334"),
-            StructuredProofNode("H4", "H_Inv79"),        
-            # StructuredProofNode("H5", "H_Inv400"),
-            StructuredProofNode("H6", "H_Inv45")
-        ]
-        root = StructuredProofNode("Safety", safety, children = children)
-        proof = StructuredProof(root)
 
         logging.info("Re-generating CTIs for all proof nodes.")
         gen_proof_node_ctis(root)
