@@ -202,6 +202,9 @@ H_Inv344 == ~([type |-> "Commit"] \in msgs) \/ (~(tmState = "init"))
 H_Inv9990 == \A rmi \in RM : ([type |-> "Prepared", rm |-> rmi] \in msgs) \/ (~([type |-> "Commit"] \in msgs))
 H_Inv9991 == \A rmj \in RM : ([type |-> "Prepared", rm |-> rmj] \in msgs) \/ (~(tmPrepared = RM))
 
+\* Level 3.
+H_Inv349 == \A rmi \in RM : ~([type |-> "Prepared", rm |-> rmi] \in msgs) \/ (~(rmState[rmi] = "working"))
+H_Inv1863 == \A rmi \in RM : (rmState[rmi] = "prepared") \/ (~([type |-> "Prepared", rm |-> rmi] \in msgs) \/ (~(tmState = "init")))
 
 \* Helper lemmas (Apalache compatible).
 
