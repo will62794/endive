@@ -333,7 +333,7 @@ class StructuredProofNode():
         return f"""
         <table class='proof-struct-table'>
             <tr>
-                <td style='color:{color}'>{self.expr}</td>
+                <td style='color:{color}' class='proof-node-expr'>{self.expr}</td>
                 <td style='color:{color}'>({len(self.ctis)-len(self.ctis_eliminated)} / {len(self.ctis)} CTIs remaining)</td>
                 <td>
                     (eliminates {len(self.parent_ctis_eliminated)} ({round(pct_parent_ctis_eliminated * 100.0, 1)} % of) parent CTIs, {len(self.parent_ctis_uniquely_eliminated)} uniquely)
@@ -349,6 +349,14 @@ class StructuredProofNode():
                     <ul>{child_elems}</ul> 
                 </li>
             """
+
+    def get_remaining_ctis(self):
+        return [c for c in self.ctis if str(hash(c)) not in self.ctis_eliminated]
+
+    def sample_remaining_ctis(self, max_num_ctis):
+        remaining_ctis = self.get_remaining_ctis()
+        num_ctis = min(len(remaining_ctis), max_num_ctis)
+        return random.sample(remaining_ctis, num_ctis)
 
     def num_ctis_remaining(self):
         return len(self.ctis) - len(self.ctis_eliminated)
@@ -371,6 +379,27 @@ class StructuredProof():
         html = "<ul>"+self.root.to_html()+"</ul>"
         return html
 
+    def node_cti_html(self, node):
+        html = ""
+        max_ctis_to_show = 3
+        remaining_ctis_sampled = node.sample_remaining_ctis(max_ctis_to_show)
+        for i,one_cti in enumerate(remaining_ctis_sampled):
+            html += f"<div class='cti-box cti_{node.expr}'>"
+            html += (f"<h3>CTI {i} for {node.expr}</h3>\n")
+            html += ("<pre>")
+            for k,s in enumerate(one_cti.getTrace().getStates()):
+                html += (f"<b>CTI State {k}</b> \n")
+                html += (s.pretty_str())
+                html += ("\n")
+            html += ("</pre>")
+            html += "</div>"  
+        for c in node.children:
+            html += self.node_cti_html(c)
+        return html      
+
+    def cti_viewer_html(self):
+        return self.node_cti_html(self.root)
+
     def dump(self):
         out_file = open("proof.proof", 'w')
         json.dump(self.serialize(), out_file, indent=2)
@@ -391,15 +420,21 @@ class StructuredProof():
         html += (self.root_to_html())
         html += ("</div>")
         html += ("<div>") 
-        html += (f"<h2>Sample of {self.root.num_ctis_remaining()} Remaining CTIs</h2>")      
-        for i,one_cti in enumerate(remaining_ctis):
-            html += (f"<h3>CTI {i}</h3>\n")
-            html += ("<pre>")
-            for i,s in enumerate(one_cti.getTrace().getStates()):
-                html += (f"<b>CTI State {i}</b> \n")
-                html += (s.pretty_str())
-                html += ("\n")
-            html += ("</pre>")
+        # html += (f"<h2>Sample of {self.root.num_ctis_remaining()} Remaining CTIs for {self.root.expr}</h2>")      
+        html += (f"<h2>Sample of remaining CTIs</h2>")      
+        
+        html += self.cti_viewer_html()
+        
+        # for i,one_cti in enumerate(remaining_ctis):
+        #     html += "<div class='cti-box'>"
+        #     html += (f"<h3>CTI {i}</h3>\n")
+        #     html += ("<pre>")
+        #     for i,s in enumerate(one_cti.getTrace().getStates()):
+        #         html += (f"<b>CTI State {i}</b> \n")
+        #         html += (s.pretty_str())
+        #         html += ("\n")
+        #     html += ("</pre>")
+        #     html += "</div>"
         html += ("</div>")
 
         return html
@@ -2113,7 +2148,8 @@ class InductiveInvGen():
         remaining_ctis = []
         if len(root.ctis) > len(root.ctis_eliminated):
             print("---> One remaining CTI")
-            remaining_ctis = random.sample(root.ctis, 1)
+            num_ctis = min(len(root.ctis), 3)
+            remaining_ctis = random.sample(root.ctis, num_ctis)
 
             # print(one_cti.pretty_str())
             # for i,s in enumerate(one_cti.getTrace().getStates()):
