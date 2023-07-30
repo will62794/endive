@@ -206,6 +206,33 @@ H_Inv9991 == \A rmj \in RM : ([type |-> "Prepared", rm |-> rmj] \in msgs) \/ (~(
 H_Inv349 == \A rmi \in RM : ~([type |-> "Prepared", rm |-> rmi] \in msgs) \/ (~(rmState[rmi] = "working"))
 H_Inv1863 == \A rmi \in RM : (rmState[rmi] = "prepared") \/ (~([type |-> "Prepared", rm |-> rmi] \in msgs) \/ (~(tmState = "init")))
 
+
+
+\* 
+\* Simple/minimal TLAPS proof structure example, just to test hierarchy/folding behavior.
+\* 
+
+L1 == 1
+L2 == 2
+L3 == 3
+L4 == 5
+L5 == 5
+
+THEOREM IndAuto
+  <1>1. L1
+    <2>1. L4
+        <3>1. L4
+        <3>2. L4
+        <3>3. L4
+    <2>1. L5
+  <1>2. L2
+  <1>3. L3
+  <1>4. L4
+
+
+
+
+
 \* Helper lemmas (Apalache compatible).
 
 \* \* Level 1.
