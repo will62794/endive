@@ -11,3 +11,14 @@ table td {
 table td:hover {
     cursor: pointer;
 }
+
+.proof-node-expr:hover {
+    opacity: 0.5;
+}
+
+.cti-box {
+    border:solid 1px gray;
+    padding:5px;
+    margin-top:10px;
+    margin-bottom:10px;
+}
