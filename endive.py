@@ -383,9 +383,19 @@ class StructuredProof():
         html = ""
         max_ctis_to_show = 3
         remaining_ctis_sampled = node.sample_remaining_ctis(max_ctis_to_show)
+
+        # Aggregate statistics.
+        all_remaining_ctis = node.get_remaining_ctis()
+        cti_action_names = [cti.getActionName() for cti in all_remaining_ctis]
+        action_names_set = set(cti_action_names)
+        action_counts = {a:cti_action_names.count(a) for a in action_names_set}
+
+        html += f"<div class='cti-container cti_{node.expr}'>"
+        action_name_info = ','.join([a + f"({action_counts[a]})" for a in list(action_names_set)])
+        html += f"<div>Actions present in CTIs: [{action_name_info}]</div>"
         for i,one_cti in enumerate(remaining_ctis_sampled):
-            html += f"<div class='cti-box cti_{node.expr}'>"
-            html += (f"<h3>CTI {i} for {node.expr}</h3>\n")
+            html += f"<div class='cti-box'>"
+            html += (f"<h3>CTI {i} for {node.expr} (Action: {one_cti.getActionName()})</h3>\n")
             html += ("<pre>")
             for k,s in enumerate(one_cti.getTrace().getStates()):
                 html += (f"<b>CTI State {k}</b> \n")
@@ -393,6 +403,7 @@ class StructuredProof():
                 html += ("\n")
             html += ("</pre>")
             html += "</div>"  
+        html += "</div>"  
         for c in node.children:
             html += self.node_cti_html(c)
         return html      
@@ -2069,12 +2080,12 @@ class InductiveInvGen():
                 StructuredProofNode("H3.4", "H_Inv349"),
                 StructuredProofNode("H3.5", "H_Inv1863"),
             ]),
-            StructuredProofNode("H4", "H_Inv79"),        
+            # StructuredProofNode("H4", "H_Inv79"),        
             StructuredProofNode("H5", "H_Inv400", children = [
                 StructuredProofNode("H5.1", "H_Inv349"),
                 StructuredProofNode("H5.2", "H_Inv79"),
             ]),
-            StructuredProofNode("H6", "H_Inv45")
+            # StructuredProofNode("H6", "H_Inv45")
         ]
         root = StructuredProofNode("Safety", safety, children = children)
         proof = StructuredProof(root)
