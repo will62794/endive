@@ -330,14 +330,15 @@ class StructuredProofNode():
             pct_parent_ctis_eliminated = float(len(self.parent_ctis_eliminated)) / len(self.parent.ctis)
         else:
             pct_parent_ctis_eliminated = 0.0
+        parent_info_text = ""
+        if self.parent is not None:
+            parent_info_text = f"(eliminates {len(self.parent_ctis_eliminated)} ({round(pct_parent_ctis_eliminated * 100.0, 1)} % of) parent CTIs, {len(self.parent_ctis_uniquely_eliminated)} uniquely)"
         return f"""
         <table class='proof-struct-table'>
             <tr>
                 <td style='color:{color}' class='proof-node-expr'>{self.expr}</td>
                 <td style='color:{color}'>({len(self.ctis)-len(self.ctis_eliminated)} / {len(self.ctis)} CTIs remaining)</td>
-                <td>
-                    (eliminates {len(self.parent_ctis_eliminated)} ({round(pct_parent_ctis_eliminated * 100.0, 1)} % of) parent CTIs, {len(self.parent_ctis_uniquely_eliminated)} uniquely)
-                </td>
+                <td> {parent_info_text} </td>
             </tr>
         </table>
         """

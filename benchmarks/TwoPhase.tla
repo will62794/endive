@@ -153,10 +153,10 @@ RMRcvAbortMsg(rm) ==
   /\ UNCHANGED <<tmState, tmPrepared, msgs>>
 
 Next ==
-  \/ TMCommit 
-  \/ TMAbort
 \*   \/ \E rm \in RM : TMCommit(rm) 
 \*   \/ \E rm \in RM : TMAbort(rm)
+  \/ TMCommit 
+  \/ TMAbort
   \/ \E rm \in RM : TMRcvPrepared(rm) 
   \/ \E rm \in RM : RMPrepare(rm) 
   \/ \E rm \in RM : RMChooseToAbort(rm)
