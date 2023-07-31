@@ -1458,6 +1458,8 @@ class InductiveInvGen():
         return (all_ctis, all_cti_traces)
 
     def make_indquickcheck_tla_spec(self, spec_name, invs, sat_invs_group, orig_k_ctis, quant_inv_fn):
+        print("invs:", invs)
+        print("sat_invs_group:", sat_invs_group)
         invs_sorted = sorted(invs)
         
         # Start building the spec.
@@ -1483,8 +1485,10 @@ class InductiveInvGen():
             invi = int(inv.replace("Inv",""))
             invname = "Inv%d" % invi
             invexp = quant_inv_fn(invs_sorted[invi])
+            # print(invname, invexp)
             invcheck_tla_indcheck += ("%s == %s\n" % (invname, invexp))
         invcheck_tla_indcheck += "\n"
+        # print("---")
 
         kCTIprop = "kCTIs"
         invcheck_tla_indcheck += "%s == \n" % kCTIprop
@@ -1587,7 +1591,8 @@ class InductiveInvGen():
         n_tlc_workers = 4
         cti_chunks = list(chunks(list(orig_ctis), n_tlc_workers))
 
-        invs = [x[1] for x in sat_invs]
+        # sat_invs = sorted(sat_invs)
+        invs = sorted([x[1] for x in sat_invs])
         sat_invs = ["Inv" + str(i) for i,x in enumerate(sat_invs)]
         # print("invs")
         # print(invs)
@@ -2108,7 +2113,7 @@ class InductiveInvGen():
                 StructuredProofNode("H3_2", "H_Inv9991", children=[
                     StructuredProofNode("H3_2", "H_Inv79")
                 ]),
-                StructuredProofNode("H3_3", "H_Inv331"),
+                # StructuredProofNode("H3_3", "H_Inv331"),
                 StructuredProofNode("H3_4", "H_Inv7777", children = [
                     StructuredProofNode("H3_4_1", "H_Inv362"),
                     StructuredProofNode("H3_4_2", "H_Inv446")
@@ -2119,7 +2124,7 @@ class InductiveInvGen():
                 ]),
                 StructuredProofNode("H3_6", "H_Inv349"),
             ]),
-            StructuredProofNode("H4", "H_Inv79"),        
+            # StructuredProofNode("H4", "H_Inv79"),        
             StructuredProofNode("H5", "H_Inv400", children = [
                 StructuredProofNode("H5_1", "H_Inv349"),
                 StructuredProofNode("H5_2", "H_Inv79"),
@@ -2188,6 +2193,7 @@ class InductiveInvGen():
             ctis_eliminated = self.check_cti_elimination(node.ctis, [
                 (child.name,child.expr) for child in node.children
             ])
+            print("CTI eliminate response:", ctis_eliminated.keys())
 
             ctis_eliminated_unique = {}
 
@@ -2205,7 +2211,7 @@ class InductiveInvGen():
                 ctis_eliminated_unique[inv] = unique
                 print("Unique:", len(unique))
                 # print(ctis_eliminated_unique)
-                child_node = node.children[i]
+                child_node = sorted(node.children, key=lambda x : x.expr)[i]
                 child_node.parent = node
                 child_node.parent_ctis_eliminated = ctis_eliminated[inv]
                 child_node.parent_ctis_uniquely_eliminated = ctis_eliminated_unique[inv]
