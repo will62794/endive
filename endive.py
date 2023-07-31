@@ -507,7 +507,7 @@ class InductiveInvGen():
                     symmetry=False, simulate=False, simulate_depth=6, typeok="TypeOK", seed=0, num_invs=1000, num_rounds=3, num_iters=3, 
                     num_simulate_traces=10000, tlc_workers=6, quant_vars=[],java_exe="java",cached_invs=None, cached_invs_gen_time_secs=None, use_cpp_invgen=False,
                     pregen_inv_cmd=None, opt_quant_minimize=False, try_final_minimize=False, proof_tree_mode=False, interactive_mode=False, max_num_conjuncts_per_round=10000,
-                    max_num_ctis_per_round=10000, override_num_cti_workers=None):
+                    max_num_ctis_per_round=10000, override_num_cti_workers=None, use_apalache_ctigen=False):
         self.java_exe = java_exe
         self.java_version_info = None
         
@@ -525,7 +525,7 @@ class InductiveInvGen():
         self.num_iters = num_iters
         self.num_invs = num_invs
         self.tlc_workers = tlc_workers
-        self.use_apalache_ctigen = False
+        self.use_apalache_ctigen = use_apalache_ctigen
         self.proof_tree_mode = proof_tree_mode
         self.interactive_mode = interactive_mode
         self.max_num_conjuncts_per_round = max_num_conjuncts_per_round
@@ -2581,6 +2581,7 @@ if __name__ == "__main__":
     parser.add_argument('--max_num_conjuncts_per_round', help='Max number of conjuncts to learn per round.', type=int, default=10000)
     parser.add_argument('--max_num_ctis_per_round', help='Max number of CTIs per round.', type=int, default=10000)
     parser.add_argument('--override_num_cti_workers', help='Max number of TLC workers for CTI generation.', type=int, default=None)
+    parser.add_argument('--use_apalache_ctigen', help='Use Apalache for CTI generation (experimental).', required=False, default=False, action='store_true')
 
     
     args = vars(parser.parse_args())
@@ -2675,7 +2676,7 @@ if __name__ == "__main__":
                                 pregen_inv_cmd=pregen_inv_cmd, opt_quant_minimize=args["opt_quant_minimize"],try_final_minimize=try_final_minimize,proof_tree_mode=args["proof_tree_mode"],
                                 interactive_mode=args["interactive_mode"],
                                 max_num_conjuncts_per_round=args["max_num_conjuncts_per_round"], max_num_ctis_per_round=args["max_num_ctis_per_round"],
-                                override_num_cti_workers=args["override_num_cti_workers"])
+                                override_num_cti_workers=args["override_num_cti_workers"],use_apalache_ctigen=args["use_apalache_ctigen"])
 
 
     # Only do invariant generation, cache the invariants, and then exit.
