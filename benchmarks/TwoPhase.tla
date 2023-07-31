@@ -182,8 +182,6 @@ TCConsistent ==
 
 THEOREM TPSpec => []TypeOK
 
-ApaInv == TypeOK /\ TCConsistent
-
 \* Helper lemmas
 
 \* Level 1.
@@ -234,25 +232,11 @@ THEOREM TCConsistent
 
 
 
+\* ApaInv == TypeOK /\ TCConsistent
+ApaInv == TypeOK /\ H_Inv344
 
+CInit == RM = {"1_OF_RM", "2_OF_RM", "3_OF_RM"}
 
-\* Helper lemmas (Apalache compatible).
-
-\* \* Level 1.
-\* H_Inv276 == (tmPrepared = RM) \/ (~(\E m \in msgs : m.type = "Commit"))
-\* H_Inv318 == ~(\E m \in msgs : m.type = "Abort") \/ (~(\E m \in msgs : m.type = "Commit"))
-\* H_Inv334 == \A rmi \in RM : ~(\E m \in msgs : m.type = "Commit") \/ (~(rmState[rmi] = "aborted"))
-\* H_Inv79 == \A rmi \in RM : ([type |-> "Prepared", rm |-> rmi] \in msgs) \/ (~(tmPrepared = tmPrepared \cup {rmi}))
-\* H_Inv400 == \A rmi \in RM : ~(rmState[rmi] = "working") \/ (~(tmPrepared = RM))
-\* H_Inv45 == \A rmi \in RM : (\E m \in msgs : m.type = "Commit") \/ (~(rmState[rmi] = "committed"))
-
-\* \* Level 2.
-\* H_Inv331 == ~(\E m \in msgs : m.type = "Abort") \/ (~(tmState = "init"))
-\* H_Inv344 == ~(\E m \in msgs : m.type = "Commit") \/ (~(tmState = "init"))
-
-\* \* Level 2.
-\* H_Inv9990 == \A rmi \in RM : ([type |-> "Prepared", rm |-> rmi] \in msgs) \/ (~(\E m \in msgs : m.type = "Commit"))
-\* H_Inv9991 == \A rmj \in RM : ([type |-> "Prepared", rm |-> rmj] \in msgs) \/ (~(tmPrepared = RM))
 
   (*************************************************************************)
   (* This theorem asserts that the type-correctness predicate TPTypeOK is  *)
