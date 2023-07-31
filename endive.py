@@ -2078,25 +2078,27 @@ class InductiveInvGen():
 
         # TwoPhase proof structure.
         twopc_children = [
-            # StructuredProofNode("H1", "H_Inv276"),
-            # StructuredProofNode("H2", "H_Inv318", children = [
-            #     StructuredProofNode("H2.1", "H_Inv331"),
-            #     StructuredProofNode("H2.2", "H_Inv344")
-            # ]),
-            StructuredProofNode("H3", "H_Inv334", children = [
-                StructuredProofNode("H3.1", "H_Inv9990"),
-                StructuredProofNode("H3.2", "H_Inv9991"),
-                StructuredProofNode("H3.3", "H_Inv318"),
-                StructuredProofNode("H3.4", "H_Inv349"),
-                StructuredProofNode("H3.5", "H_Inv1863"),
-                StructuredProofNode("H3.6", "TCConsistent"),
+            StructuredProofNode("H1", "H_Inv276"),
+            StructuredProofNode("H2", "H_Inv318", children = [
+                StructuredProofNode("H2_1", "H_Inv331"),
+                StructuredProofNode("H2_2", "H_Inv344")
             ]),
-            # StructuredProofNode("H4", "H_Inv79"),        
-            # StructuredProofNode("H5", "H_Inv400", children = [
-            #     StructuredProofNode("H5.1", "H_Inv349"),
-            #     StructuredProofNode("H5.2", "H_Inv79"),
-            # ]),
-            # StructuredProofNode("H6", "H_Inv45")
+            StructuredProofNode("H3", "H_Inv334", children = [
+                StructuredProofNode("H3_1", "H_Inv9990"),
+                StructuredProofNode("H3_2", "H_Inv9991"),
+                # StructuredProofNode("H3_3", "H_Inv318"),
+                # StructuredProofNode("H3_4", "H_Inv349"),
+                StructuredProofNode("H3_5", "H_Inv8880"),
+                StructuredProofNode("H3_6", "H_Inv8881"),
+                
+                # StructuredProofNode("H3_5", "H_Inv1863"),
+            ]),
+            StructuredProofNode("H4", "H_Inv79"),        
+            StructuredProofNode("H5", "H_Inv400", children = [
+                StructuredProofNode("H5_1", "H_Inv349"),
+                StructuredProofNode("H5_2", "H_Inv79"),
+            ]),
+            StructuredProofNode("H6", "H_Inv45")
         ]
         twopc_root = StructuredProofNode("Safety", safety, children = twopc_children)
 
@@ -2110,7 +2112,7 @@ class InductiveInvGen():
         ]
         msr_root = StructuredProofNode("Safety", safety, children = msr_children)
 
-        root = msr_root
+        root = twopc_root
         proof = StructuredProof(root)
 
 

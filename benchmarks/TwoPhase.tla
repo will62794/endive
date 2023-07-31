@@ -204,6 +204,8 @@ H_Inv9991 == \A rmj \in RM : ([type |-> "Prepared", rm |-> rmj] \in msgsPrepared
 H_Inv349 == \A rmi \in RM : ~([type |-> "Prepared", rm |-> rmi] \in msgsPrepared) \/ (~(rmState[rmi] = "working"))
 H_Inv1863 == \A rmi \in RM : (rmState[rmi] = "prepared") \/ (~([type |-> "Prepared", rm |-> rmi] \in msgsPrepared) \/ (~(tmState = "init")))
 
+H_Inv8880 == \A rmi \in RM : ~([type |-> "Abort"] \in msgsAbortCommit) \/ (~(rmState[rmi] = "committed"))
+H_Inv8881 == \A rmi \in RM : (~(rmState[rmi] = "committed")) \/ (~(tmState = "init"))
 
 
 \* 
@@ -233,7 +235,8 @@ THEOREM TCConsistent
 
 
 \* ApaInv == TypeOK /\ TCConsistent
-ApaInv == TypeOK /\ H_Inv344
+\* ApaInv == TypeOK /\ H_Inv344
+ApaInv == TypeOK /\ H_Inv45
 
 CInit == RM = {"1_OF_RM", "2_OF_RM", "3_OF_RM"}
 
