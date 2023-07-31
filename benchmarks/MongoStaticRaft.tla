@@ -250,4 +250,12 @@ TypeOKRandom ==
     \* /\ configVersion \in RandomSubset(NumRandSubsets, [Server -> 0..MaxConfigVersion])
     \* /\ configTerm \in RandomSubset(NumRandSubsets, [Server -> InitTerm..MaxTerm])
 
+\* 
+\* Helper lemmas.
+\* 
+
+
+
+
+
 =============================================================================

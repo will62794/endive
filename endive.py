@@ -2076,8 +2076,9 @@ class InductiveInvGen():
         # Build a demo proof structure.
         ###########
 
-        children = [
-            StructuredProofNode("H1", "H_Inv276"),
+        # TwoPhase proof structure.
+        twopc_children = [
+            # StructuredProofNode("H1", "H_Inv276"),
             # StructuredProofNode("H2", "H_Inv318", children = [
             #     StructuredProofNode("H2.1", "H_Inv331"),
             #     StructuredProofNode("H2.2", "H_Inv344")
@@ -2097,7 +2098,19 @@ class InductiveInvGen():
             # ]),
             # StructuredProofNode("H6", "H_Inv45")
         ]
-        root = StructuredProofNode("Safety", safety, children = children)
+        twopc_root = StructuredProofNode("Safety", safety, children = twopc_children)
+
+        # MongoStaticRaft proof structure.
+        msr_children = [
+            # StructuredProofNode("H1", "H_Inv276"),
+            # StructuredProofNode("H2", "H_Inv318", children = [
+            #     StructuredProofNode("H2.1", "H_Inv331"),
+            #     StructuredProofNode("H2.2", "H_Inv344")
+            # ])
+        ]
+        msr_root = StructuredProofNode("Safety", safety, children = msr_children)
+
+        root = msr_root
         proof = StructuredProof(root)
 
 
