@@ -344,7 +344,7 @@ class StructuredProofNode():
         <table class='proof-struct-table'>
             <tr>
                 <td style='color:{color}' class='proof-node-expr'>{self.expr}</td>
-                <td style='color:{color}'>({len(self.ctis)-len(self.ctis_eliminated)} / {len(self.ctis)} CTIs remaining)</td>
+                <td style='color:{color}' class='ctis-remaining-count'>({len(self.ctis)-len(self.ctis_eliminated)} / {len(self.ctis)} CTIs remaining)</td>
                 <td class='proof-parent-cti-info'> {parent_info_text} </td>
                 <td class='proof-cti-grid-row'>{cti_elim_viz}</td>
             </tr>
@@ -2077,7 +2077,7 @@ class InductiveInvGen():
         ###########
 
         children = [
-            # StructuredProofNode("H1", "H_Inv276"),
+            StructuredProofNode("H1", "H_Inv276"),
             # StructuredProofNode("H2", "H_Inv318", children = [
             #     StructuredProofNode("H2.1", "H_Inv331"),
             #     StructuredProofNode("H2.2", "H_Inv344")

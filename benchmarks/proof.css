@@ -5,7 +5,13 @@ body{
 table td {
     padding-right:10px;
     font-size:16px;
-    min-width: 130px;
+    min-width: 110px;
+}
+
+table td.ctis-remaining-count {
+    padding-right:10px;
+    font-size:16px;
+    min-width: 230px;
 }
 
 table td:hover {
