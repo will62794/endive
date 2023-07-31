@@ -41,3 +41,4 @@ benchmarks.log
 *.proofs.html
 *.proof.html
 .vscode/
+_apalache-out/
