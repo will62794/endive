@@ -491,8 +491,8 @@ class StructuredProof():
         # Store all nodes.
         self.add_node_to_dot_graph(dot, self.root)
 
-        print("Final proof graph:")
-        print(dot.source)
+        # print("Final proof graph:")
+        # print(dot.source)
         dot.render(out_file)
         return dot.source
 
