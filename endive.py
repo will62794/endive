@@ -2070,10 +2070,10 @@ class InductiveInvGen():
 
         children = [
             StructuredProofNode("H1", "H_Inv276"),
-            StructuredProofNode("H2", "H_Inv318", children = [
-                StructuredProofNode("H2.1", "H_Inv331"),
-                StructuredProofNode("H2.2", "H_Inv344")
-            ]),
+            # StructuredProofNode("H2", "H_Inv318", children = [
+            #     StructuredProofNode("H2.1", "H_Inv331"),
+            #     StructuredProofNode("H2.2", "H_Inv344")
+            # ]),
             StructuredProofNode("H3", "H_Inv334", children = [
                 StructuredProofNode("H3.1", "H_Inv9990"),
                 StructuredProofNode("H3.2", "H_Inv9991"),
@@ -2082,11 +2082,11 @@ class InductiveInvGen():
                 StructuredProofNode("H3.5", "H_Inv1863"),
             ]),
             # StructuredProofNode("H4", "H_Inv79"),        
-            StructuredProofNode("H5", "H_Inv400", children = [
-                StructuredProofNode("H5.1", "H_Inv349"),
-                StructuredProofNode("H5.2", "H_Inv79"),
-            ]),
-            # StructuredProofNode("H6", "H_Inv45")
+            # StructuredProofNode("H5", "H_Inv400", children = [
+            #     StructuredProofNode("H5.1", "H_Inv349"),
+            #     StructuredProofNode("H5.2", "H_Inv79"),
+            # ]),
+            StructuredProofNode("H6", "H_Inv45")
         ]
         root = StructuredProofNode("Safety", safety, children = children)
         proof = StructuredProof(root)
