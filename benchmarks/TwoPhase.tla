@@ -241,20 +241,23 @@ THEOREM TCConsistent
   <1>4. L4 OBVIOUS
   <1>5. QED OBVIOUS
 
-
+\* Constant initialization for model checking with Apalache.
+CInit == RM = {"1_OF_RM", "2_OF_RM", "3_OF_RM"}
 
 \* ApaInv == TypeOK /\ TCConsistent
 \* ApaInv == TypeOK /\ H_Inv344
-ApaInv == TypeOK /\ H_Inv362 /\ H_Inv446 /\ H_Inv7777
+
+ApaInv == TypeOK /\ H_Inv446
+
 ApaInv2 == 
     /\ TypeOK 
     /\ H_Inv9990
     /\ H_Inv9991
-    /\ H_Inv331
-    /\ H_Inv2000
+    /\ H_Inv7777
+    /\ H_Inv318
+    /\ H_Inv349
     /\ H_Inv334 \* to check in next state
 
-CInit == RM = {"1_OF_RM", "2_OF_RM", "3_OF_RM"}
 
 
   (*************************************************************************)
