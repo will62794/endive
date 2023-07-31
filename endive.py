@@ -301,6 +301,11 @@ class StructuredProofNode():
         # current set of direct children.
         self.ctis = []
 
+        # Flag telling whether CTIs were attempted to be generated yet
+        # for this proof node. Initially set to Flas,e it will go True
+        # once a call to set some CTIs on this node occur.
+        self.had_ctis_generated = False
+
         # Set of CTIs eliminated by set of this node's direct children.
         self.ctis_eliminated = []
 
@@ -326,6 +331,8 @@ class StructuredProofNode():
     # </span>
     def list_elem_html(self):
         color = "darkred" if len(self.ctis) > len(self.ctis_eliminated) else "green"
+        if not self.had_ctis_generated:
+            color = "goldenrod"
         if self.parent is not None and len(self.parent.ctis) > 0:
             pct_parent_ctis_eliminated = float(len(self.parent_ctis_eliminated)) / len(self.parent.ctis)
         else:
@@ -336,7 +343,7 @@ class StructuredProofNode():
         local_rand = random.Random()
         local_rand.seed(13)
         cti_elim_viz = ""
-        sample_size = 100
+        sample_size = 50
         if self.parent and len(self.parent.ctis) >= sample_size:
             elim_cti_sample = local_rand.sample(self.parent.ctis, sample_size)
             cti_elim_viz = "".join(["x" if str(hash(c)) in self.parent_ctis_eliminated else "-" for c in elim_cti_sample])
@@ -358,6 +365,11 @@ class StructuredProofNode():
                     <ul>{child_elems}</ul> 
                 </li>
             """
+
+    def set_ctis(self, ctis):
+        """ Set CTIs for this node and mark it as having CTIs generated. """
+        self.had_ctis_generated = True
+        self.ctis = ctis
 
     def get_remaining_ctis(self):
         return [c for c in self.ctis if str(hash(c)) not in self.ctis_eliminated]
@@ -424,7 +436,7 @@ class StructuredProof():
         out_file = open("proof.proof", 'w')
         json.dump(self.serialize(), out_file, indent=2)
 
-    def gen_html(self, indgen, specname, remaining_ctis):
+    def gen_html(self, indgen, specname):
         """ Generate HTML visualization of structured proof. """
         html = ""
 
@@ -2090,14 +2102,19 @@ class InductiveInvGen():
                 StructuredProofNode("H2_2", "H_Inv344")
             ]),
             StructuredProofNode("H3", "H_Inv334", children = [
-                StructuredProofNode("H3_1", "H_Inv9990"),
-                StructuredProofNode("H3_2", "H_Inv9991"),
-                # StructuredProofNode("H3_3", "H_Inv318"),
-                # StructuredProofNode("H3_4", "H_Inv349"),
-                StructuredProofNode("H3_5", "H_Inv8880"),
-                StructuredProofNode("H3_6", "H_Inv8881"),
-                
-                # StructuredProofNode("H3_5", "H_Inv1863"),
+                StructuredProofNode("H3_1", "H_Inv9990", children=[
+                    StructuredProofNode("H3_2", "H_Inv79")
+                ]),
+                StructuredProofNode("H3_2", "H_Inv9991", children=[
+                    StructuredProofNode("H3_2", "H_Inv79")
+                ]),
+                StructuredProofNode("H3_3", "H_Inv331"),
+                StructuredProofNode("H3_4", "H_Inv7777"),
+                StructuredProofNode("H3_5", "H_Inv318", children = [
+                    StructuredProofNode("H4_1", "H_Inv331"),
+                    StructuredProofNode("H4_2", "H_Inv344")
+                ]),
+                StructuredProofNode("H3_6", "H_Inv349"),
             ]),
             StructuredProofNode("H4", "H_Inv79"),        
             StructuredProofNode("H5", "H_Inv400", children = [
@@ -2133,7 +2150,16 @@ class InductiveInvGen():
 
         root_obligation = ("Safety", safety)
 
-        def gen_proof_node_ctis(node):
+        def save_proof_html(proof):
+            """ Visualize proof structure in HTML format for inspection. """
+            filename = f"benchmarks/{self.specname}.proof.html"
+            print(f"Saving latest proof HTML to '{filename}'")
+            html = proof.gen_html(self, self.specname)
+            f = open(filename, 'w')
+            f.write(html)
+            f.close()            
+
+        def gen_proof_node_ctis(proof, node):
             """ Routine that updates set of CTIs for each proof node. 
             
             Generates CTIs and computes the set eliminated by each node's support lemmas i.e. its direct children
@@ -2150,7 +2176,7 @@ class InductiveInvGen():
             # Set CTIs for this node based on those generated.
             print("Num ctis:", len(k_ctis))
             num_to_sample = min(len(k_ctis), MAX_CTIS_PER_NODE) # don't try to sample more CTIs than there are.
-            node.ctis = random.sample(k_ctis, num_to_sample)
+            node.set_ctis(random.sample(k_ctis, num_to_sample))
 
             # Compute CTIs that are eliminated by each of the "support lemmas" for this node i.e.
             # its set of direct children.
@@ -2183,43 +2209,21 @@ class InductiveInvGen():
 
             node.ctis_eliminated = all_eliminated_ctis
 
+            # Re-write proof html.
+            save_proof_html(proof)
+
             # Recursively generate CTIs for children as well.
             for child_node in node.children:
-                gen_proof_node_ctis(child_node)
+                gen_proof_node_ctis(proof, child_node)
 
         logging.info("Re-generating CTIs for all proof nodes.")
-        gen_proof_node_ctis(root)
+        save_proof_html(proof)
+        gen_proof_node_ctis(proof, root)
 
         print("CTIs eliminated by invs")
 
-        # Get some of the remaining CTIs for the root node.
-        remaining_ctis = []
-        if len(root.ctis) > len(root.ctis_eliminated):
-            print("---> One remaining CTI")
-            num_ctis = min(len(root.ctis), 3)
-            remaining_ctis = random.sample(root.ctis, num_ctis)
-
-            # print(one_cti.pretty_str())
-            # for i,s in enumerate(one_cti.getTrace().getStates()):
-            #     print(f"CTI State {i}")
-            #     print(s.pretty_str())
-
-            #
-            # Display one CTI example.
-            #
-            # print("--------- > One CTI example:")
-            # one_cti_trace = k_cti_traces[0]
-            # for i,s in enumerate(one_cti_trace.getStates()):
-            #     print(f"State {i}")
-            #     print(s)
-
-        #
-        # Visualize proof structure in HTML format for inspection.
-        #
-        html = proof.gen_html(self, self.specname, remaining_ctis)
-        f = open(f"benchmarks/{self.specname}.proof.html", 'w')
-        f.write(html)
-        f.close()
+        # Save final proof html.
+        save_proof_html(proof)
 
         return
 
