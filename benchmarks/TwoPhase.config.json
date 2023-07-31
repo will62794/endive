@@ -1,8 +1,8 @@
 {
     "preds"  :  [
         "tmState = \"init\"",
-        "[type |-> \"Prepared\", rm |-> rmi] \\in msgs",
-        "[type |-> \"Prepared\", rm |-> rmj] \\in msgs",
+        "[type |-> \"Prepared\", rm |-> rmi] \\in msgsPrepared",
+        "[type |-> \"Prepared\", rm |-> rmj] \\in msgsPrepared",
         "tmPrepared = RM",
         "rmState[rmi] = \"working\"",
         "rmState[rmi] = \"working\"",
