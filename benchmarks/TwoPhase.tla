@@ -218,16 +218,19 @@ L3 == 3
 L4 == 5
 L5 == 5
 
-THEOREM IndAuto
+THEOREM TCConsistent
   <1>1. L1
     <2>1. L4
-        <3>1. L4
-        <3>2. L4
-        <3>3. L4
-    <2>1. L5
-  <1>2. L2
-  <1>3. L3
-  <1>4. L4
+        <3>1. L4 OBVIOUS
+        <3>2. L4 OBVIOUS
+        <3>3. L4 OBVIOUS
+        <3>4. QED OBVIOUS
+    <2>2. L5 OBVIOUS
+    <2>3. QED OBVIOUS
+  <1>2. L2 OBVIOUS
+  <1>3. L3 OBVIOUS
+  <1>4. L4 OBVIOUS
+  <1>5. QED OBVIOUS
 
 
 
