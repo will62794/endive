@@ -2109,7 +2109,10 @@ class InductiveInvGen():
                     StructuredProofNode("H3_2", "H_Inv79")
                 ]),
                 StructuredProofNode("H3_3", "H_Inv331"),
-                StructuredProofNode("H3_4", "H_Inv7777"),
+                StructuredProofNode("H3_4", "H_Inv7777", children = [
+                    StructuredProofNode("H3_4_1", "H_Inv362"),
+                    StructuredProofNode("H3_4_2", "H_Inv446")
+                ]),
                 StructuredProofNode("H3_5", "H_Inv318", children = [
                     StructuredProofNode("H4_1", "H_Inv331"),
                     StructuredProofNode("H4_2", "H_Inv344")
