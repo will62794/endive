@@ -213,6 +213,10 @@ H_Inv8881 == \A rmi \in RM : (~(rmState[rmi] = "committed")) \/ (~(tmState = "in
 \* If a resource manager has aborted and also prepared, then transaction manager must have decided to abort.
 H_Inv7777 == \A rmi \in RM :  ((rmState[rmi] = "aborted") /\ ([type |-> "Prepared", rm |-> rmi] \in msgsPrepared)) => tmState = "aborted"
 
+H_Inv362 == (tmState = "aborted") \/ (~([type |-> "Abort"] \in msgsAbortCommit))
+H_Inv446 == \A rmi \in RM : ~([type |-> "Prepared", rm |-> rmi] \in msgsPrepared) \/ (~(rmState[rmi] = "working"))
+
+
 \* 
 \* Simple/minimal TLAPS proof structure example, just to test hierarchy/folding behavior.
 \* 
@@ -241,7 +245,7 @@ THEOREM TCConsistent
 
 \* ApaInv == TypeOK /\ TCConsistent
 \* ApaInv == TypeOK /\ H_Inv344
-ApaInv == TypeOK /\ H_Inv45
+ApaInv == TypeOK /\ H_Inv362 /\ H_Inv446 /\ H_Inv7777
 ApaInv2 == 
     /\ TypeOK 
     /\ H_Inv9990
