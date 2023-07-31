@@ -333,12 +333,20 @@ class StructuredProofNode():
         parent_info_text = ""
         if self.parent is not None:
             parent_info_text = f"(eliminates {len(self.parent_ctis_eliminated)} ({round(pct_parent_ctis_eliminated * 100.0, 1)} % of) parent CTIs, {len(self.parent_ctis_uniquely_eliminated)} uniquely)"
+        local_rand = random.Random()
+        local_rand.seed(13)
+        cti_elim_viz = ""
+        sample_size = 100
+        if self.parent and len(self.parent.ctis) >= sample_size:
+            elim_cti_sample = local_rand.sample(self.parent.ctis, sample_size)
+            cti_elim_viz = "".join(["x" if str(hash(c)) in self.parent_ctis_eliminated else "-" for c in elim_cti_sample])
         return f"""
         <table class='proof-struct-table'>
             <tr>
                 <td style='color:{color}' class='proof-node-expr'>{self.expr}</td>
                 <td style='color:{color}'>({len(self.ctis)-len(self.ctis_eliminated)} / {len(self.ctis)} CTIs remaining)</td>
-                <td> {parent_info_text} </td>
+                <td class='proof-parent-cti-info'> {parent_info_text} </td>
+                <td class='proof-cti-grid-row'>{cti_elim_viz}</td>
             </tr>
         </table>
         """
@@ -2069,7 +2077,7 @@ class InductiveInvGen():
         ###########
 
         children = [
-            StructuredProofNode("H1", "H_Inv276"),
+            # StructuredProofNode("H1", "H_Inv276"),
             # StructuredProofNode("H2", "H_Inv318", children = [
             #     StructuredProofNode("H2.1", "H_Inv331"),
             #     StructuredProofNode("H2.2", "H_Inv344")
@@ -2080,13 +2088,14 @@ class InductiveInvGen():
                 StructuredProofNode("H3.3", "H_Inv318"),
                 StructuredProofNode("H3.4", "H_Inv349"),
                 StructuredProofNode("H3.5", "H_Inv1863"),
+                StructuredProofNode("H3.6", "TCConsistent"),
             ]),
             # StructuredProofNode("H4", "H_Inv79"),        
             # StructuredProofNode("H5", "H_Inv400", children = [
             #     StructuredProofNode("H5.1", "H_Inv349"),
             #     StructuredProofNode("H5.2", "H_Inv79"),
             # ]),
-            StructuredProofNode("H6", "H_Inv45")
+            # StructuredProofNode("H6", "H_Inv45")
         ]
         root = StructuredProofNode("Safety", safety, children = children)
         proof = StructuredProof(root)

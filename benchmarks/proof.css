@@ -4,12 +4,20 @@ body{
 }
 table td {
     padding-right:10px;
-    min-width:60px;
     font-size:16px;
+    min-width: 130px;
 }
 
 table td:hover {
     cursor: pointer;
+}
+
+.proof-parent-cti-info {
+    min-width:500px;
+}
+
+.proof-cti-grid-row {
+    font-size:12px;
 }
 
 .proof-node-expr:hover {
