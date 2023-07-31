@@ -471,6 +471,31 @@ class StructuredProof():
 
         return html
 
+    def add_node_to_dot_graph(self, dot, node):
+        """ Add this node and its children, recursively, to DOT graph."""
+        dot.node(node.expr)
+        for c in node.children:
+            dot.edge(c.expr, node.expr)
+            self.add_node_to_dot_graph(dot, c)
+
+
+    def save_as_dot(self, out_file):
+        """ Generate DOT graph representation of this structured proof. """
+        print("")
+        print("Proof graph edges")
+        dot = graphviz.Digraph('proof-graph', strict=True, comment='Proof Structure')  
+        dot.graph_attr["rankdir"] = "LR"
+        dot.node_attr["fontname"] = "courier"
+        # dot.node_attr["shape"] = "box"
+        
+        # Store all nodes.
+        self.add_node_to_dot_graph(dot, self.root)
+
+        print("Final proof graph:")
+        print(dot.source)
+        dot.render(out_file)
+        return dot.source
+
 
 class InductiveInvGen():
     """ 
@@ -2222,6 +2247,9 @@ class InductiveInvGen():
             # Recursively generate CTIs for children as well.
             for child_node in node.children:
                 gen_proof_node_ctis(proof, child_node)
+
+        # Save proof structure as DOT graph.
+        proof.save_as_dot("benchmarks/" + self.specname + "_ind-proof-tree")
 
         logging.info("Re-generating CTIs for all proof nodes.")
         save_proof_html(proof)
