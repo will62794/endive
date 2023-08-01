@@ -306,6 +306,10 @@ class StructuredProofNode():
         # once a call to set some CTIs on this node occur.
         self.had_ctis_generated = False
 
+        # Set to true if we completed a full proof of this node's inductiveness
+        # relative to its supporting lemmas using Apalache model checker.
+        self.full_proof_check = False
+
         # Set of CTIs eliminated by set of this node's direct children.
         self.ctis_eliminated = []
 
@@ -347,16 +351,21 @@ class StructuredProofNode():
         if self.parent and len(self.parent.ctis) >= sample_size:
             elim_cti_sample = local_rand.sample(self.parent.ctis, sample_size)
             cti_elim_viz = "".join(["x" if str(hash(c)) in self.parent_ctis_eliminated else "-" for c in elim_cti_sample])
+        proof_check_badge = "&#10004;" if self.full_proof_check else "no"
         return f"""
         <table class='proof-struct-table'>
             <tr>
                 <td style='color:{color}' class='proof-node-expr'>{self.expr}</td>
                 <td style='color:{color}' class='ctis-remaining-count'>({len(self.ctis)-len(self.ctis_eliminated)} / {len(self.ctis)} CTIs remaining)</td>
+                <td style='color:{color}'> FP:{proof_check_badge} </td>
                 <td class='proof-parent-cti-info'> {parent_info_text} </td>
-                <td class='proof-cti-grid-row'>{cti_elim_viz}</td>
             </tr>
         </table>
         """
+        
+        # CTI elim viz row.
+        # <td class='proof-cti-grid-row'>{cti_elim_viz}</td>
+
 
     def to_html(self):
         child_elems = "\n".join([f"<span>{c.to_html()}</span>" for c in self.children])
@@ -1485,6 +1494,21 @@ class InductiveInvGen():
         self.end_timing_ctigen()
         return (all_ctis, all_cti_traces)
 
+    def make_rel_induction_check_spec(self, spec_name, support_lemmas, S, rel_ind_pred_name):
+        """ 
+        Create a spec that allows to check whether a given boolean expression S is inductive relative to to a conjunction of
+        given predicates L. Defines a predicate that is the conjunction of predicates in L as 'IndLemmas'.
+        """
+        
+        # Build the spec.
+        spec_lines = [
+            "---- MODULE %s ----\n" % spec_name,
+            "EXTENDS %s,Naturals,TLC\n\n" % self.specname,
+            f"{rel_ind_pred_name} == {self.typeok} /\ " + " /\\ ".join(support_lemmas + [S]),
+            "===="
+        ]
+        return "\n".join(spec_lines)
+
     def make_indquickcheck_tla_spec(self, spec_name, invs, sat_invs_group, orig_k_ctis, quant_inv_fn):
         print("invs:", invs)
         print("sat_invs_group:", sat_invs_group)
@@ -2243,6 +2267,44 @@ class InductiveInvGen():
                 child_node.parent_ctis_uniquely_eliminated = ctis_eliminated_unique[inv]
 
             node.ctis_eliminated = all_eliminated_ctis
+
+            # If all CTIs are eliminated for this node, optionally check
+            # for a complete proof using Apalache.
+            if len(node.get_remaining_ctis()) == 0:
+                logging.info("Checking for full proof with Apalache.")
+                # We want to check that this node lemma is inductive relative to the conjunction
+                # of all its children lemmas.
+                spec_name = f"{self.specname}_rel_ind_check"
+                support_lemmas = [c.expr for c in node.children]
+                rel_ind_pred_name = "IndLemmas"
+                spec_str = self.make_rel_induction_check_spec(spec_name, support_lemmas, node.expr, rel_ind_pred_name)
+
+                tla_file = f"{os.path.join(self.specdir, GEN_TLA_DIR)}/{spec_name}.tla"
+                tla_filename = f"{GEN_TLA_DIR}/{spec_name}.tla"
+
+                f = open(tla_file,'w')
+                f.write(spec_str)
+                f.close()
+
+                # TODO: Factor out Apalache process management.
+                apalache_bin = "apalache/bin/apalache-mc"
+                outdir = "gen_tla/apalache_ctigen"
+                rundir = "gen_tla/apalache_ctigen_rundir"
+                cmd = f"{apalache_bin} check --out-dir={outdir} --run-dir={rundir} --cinit=CInit --init={rel_ind_pred_name} --next=Next --inv={node.expr} --length=1 {tla_filename}"
+                logging.debug("Apalache command: " + cmd)
+                workdir = None
+                if self.specdir != "":
+                    workdir = self.specdir
+                subproc = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, cwd=workdir)
+                tlc_out = subproc.stdout.read().decode(sys.stdout.encoding)
+                # logging.debug(tlc_out)
+                lines = [x.strip() for x in tlc_out.splitlines()]
+                # Check for successful Apalache run.
+                for l in lines:
+                    if "Checker reports no error up to computation length 1" in l:
+                        logging.info("No error reported by Apalache. Full proof check passed!")
+                        node.full_proof_check = True
+
 
             # Re-write proof html.
             save_proof_html(proof)
