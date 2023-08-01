@@ -2188,7 +2188,7 @@ class InductiveInvGen():
 
         # MongoStaticRaft proof structure.
         msr_children = [
-            # StructuredProofNode("H1", "H_Inv276"),
+            StructuredProofNode("TermsOfEntriesGrowMonotonically", "H_TermsOfEntriesGrowMonotonically"),
             # StructuredProofNode("H2", "H_Inv318", children = [
             #     StructuredProofNode("H2.1", "H_Inv331"),
             #     StructuredProofNode("H2.2", "H_Inv344")

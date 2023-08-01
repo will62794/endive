@@ -254,6 +254,8 @@ TypeOKRandom ==
 \* Helper lemmas.
 \* 
 
+H_TermsOfEntriesGrowMonotonically ==
+    \A s \in Server : \A i,j \in DOMAIN log[s] : (i <= j) => (log[s][i] <= log[s][j])
 
 
 
