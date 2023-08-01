@@ -1268,16 +1268,16 @@ class InductiveInvGen():
     def generate_ctis_apalache_run_await(self, subproc):
         """ Awaits completion of a CTI generation process, parses its results and returns the parsed CTIs."""
         tlc_out = subproc.stdout.read().decode(sys.stdout.encoding)
-        # logging.debug(tlc_out)
+        logging.debug(tlc_out)
         # lines = tlc_out.splitlines()
 
         all_tla_ctis = set()
         all_cti_objs = []
-        outfiles = os.listdir("benchmarks/gen_tla/apalache-cti-out")
+        outfiles = os.listdir("benchmarks/gen_tla/apalache-ctigen")
         for outf in outfiles:
             if "itf.json" in outf:
                 # print(outf)
-                cti_obj = json.load(open(f"benchmarks/gen_tla/apalache-cti-out/{outf}"))
+                cti_obj = json.load(open(f"benchmarks/gen_tla/apalache-ctigen/{outf}"))
                 # print(cti_obj)
                 all_cti_objs.append(cti_obj)
 
@@ -1383,14 +1383,17 @@ class InductiveInvGen():
         # Apalache run.
         if self.use_apalache_ctigen:
             # Clean the output directory.
-            os.system("rm -f benchmarks/gen_tla/apalache-cti-out/*")
+            os.system("rm -rf benchmarks/gen_tla/apalache-cti-out")
 
-            apalache_bin = "apalache-v0.19.3/bin/apalache-mc"
+            apalache_bin = "apalache/bin/apalache-mc"
+            rundir = "gen_tla/apalache_ctigen"
+            outdir = "gen_tla/apalache_ctigen"
             jvm_args="JVM_ARGS='-Xss16M'"
             max_num_ctis = 250
-            cmd = f"{jvm_args} {apalache_bin} check --run-dir=gen_tla/apalache-cti-out --max-error={max_num_ctis} --init=IndCand --inv=IndCand --length=1 --config={indcheckcfgfilename} {indchecktlafilename}"
-            # cmd = self.java_exe + ' -Djava.io.tmpdir="%s" -cp tla2tools-checkall.jar tlc2.TLC -maxSetSize %d %s -depth %d -seed %d -noGenerateSpecTE -metadir states/indcheckrandom_%d -continue -deadlock -workers %d -config %s %s' % args
-            logging.info("Apalache command: " + cmd)
+            # cmd = f"{apalache_bin} check --run-dir=gen_tla/apalache-cti-out --max-error={max_num_ctis} --init=IndCand --inv=IndCand --length=1 --config={indcheckcfgfilename} {indchecktlafilename}"
+            # cmd = f"{apalache_bin} check --out-dir={outdir} --max-error={max_num_ctis} --view=vars --run-dir={rundir} --cinit=Cinit --init=IndCand --inv=IndCand --length=1 --config={indcheckcfgfilename} {indchecktlafilename}"
+            cmd = f"{apalache_bin} check --out-dir={outdir} --max-error={max_num_ctis} --view=vars --run-dir={rundir} --cinit=CInit --init=IndCand --next=Next --inv=InvStrengthened --length=1 {indchecktlafilename}"
+            logging.debug("Apalache command: " + cmd)
             workdir = None
             if self.specdir != "":
                 workdir = self.specdir
