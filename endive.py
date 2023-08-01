@@ -17,6 +17,8 @@ import graphviz
 import pyeda
 import pyeda.inter
 
+import mc
+
 DEBUG = False
 TLC_MAX_SET_SIZE = 10 ** 8
 JAVA_EXE="java"
@@ -516,7 +518,7 @@ class InductiveInvGen():
                     symmetry=False, simulate=False, simulate_depth=6, typeok="TypeOK", seed=0, num_invs=1000, num_rounds=3, num_iters=3, 
                     num_simulate_traces=10000, tlc_workers=6, quant_vars=[],java_exe="java",cached_invs=None, cached_invs_gen_time_secs=None, use_cpp_invgen=False,
                     pregen_inv_cmd=None, opt_quant_minimize=False, try_final_minimize=False, proof_tree_mode=False, interactive_mode=False, max_num_conjuncts_per_round=10000,
-                    max_num_ctis_per_round=10000, override_num_cti_workers=None, use_apalache_ctigen=False):
+                    max_num_ctis_per_round=10000, override_num_cti_workers=None, use_apalache_ctigen=False,all_args={}):
         self.java_exe = java_exe
         self.java_version_info = None
         
@@ -535,6 +537,7 @@ class InductiveInvGen():
         self.num_invs = num_invs
         self.tlc_workers = tlc_workers
         self.use_apalache_ctigen = use_apalache_ctigen
+        self.do_apalache_final_induction_check = all_args["do_apalache_final_induction_check"]
         self.proof_tree_mode = proof_tree_mode
         self.interactive_mode = interactive_mode
         self.max_num_conjuncts_per_round = max_num_conjuncts_per_round
@@ -1510,8 +1513,8 @@ class InductiveInvGen():
         return "\n".join(spec_lines)
 
     def make_indquickcheck_tla_spec(self, spec_name, invs, sat_invs_group, orig_k_ctis, quant_inv_fn):
-        print("invs:", invs)
-        print("sat_invs_group:", sat_invs_group)
+        # print("invs:", invs)
+        # print("sat_invs_group:", sat_invs_group)
         invs_sorted = sorted(invs)
         
         # Start building the spec.
@@ -1862,8 +1865,8 @@ class InductiveInvGen():
 
                 # Sort the set of invariants to give them a consistent order.
                 invs = sorted(list(invs))
-                print("Raw invs")
-                print(invs[:5])
+                # print("Raw invs")
+                # print(invs[:5])
                 # print(hashlib.md5("".join(invs).encode()).hexdigest())
                 # for inv in invs:
                 #     print("invpred,",inv)
@@ -1964,12 +1967,12 @@ class InductiveInvGen():
 
                     # Build and save the TLA+ spec.
                     spec_name = f"{self.specname}_chunk{ci}_IndQuickCheck"
-                    print("invs")
-                    print(invs[:5])
-                    print(len(invs))
-                    print("sat invs group")
-                    print(sat_invs_group[:5])
-                    print(len(sat_invs_group))
+                    # print("invs")
+                    # print(invs[:5])
+                    # print(len(invs))
+                    # print("sat invs group")
+                    # print(sat_invs_group[:5])
+                    # print(len(sat_invs_group))
                     spec_str = self.make_indquickcheck_tla_spec(spec_name, invs, sat_invs_group, cti_chunk, quant_inv_fn)
 
                     ctiquicktlafile = f"{os.path.join(self.specdir, GEN_TLA_DIR)}/{spec_name}.tla"
@@ -2193,7 +2196,8 @@ class InductiveInvGen():
         ]
         msr_root = StructuredProofNode("Safety", safety, children = msr_children)
 
-        root = twopc_root
+        # root = twopc_root
+        root = msr_root
         proof = StructuredProof(root)
 
 
@@ -2499,6 +2503,26 @@ class InductiveInvGen():
 
             self.is_inductive = True
             logging.info("REALLY DONE! Final invariant appears likely to be inductive!")
+
+
+            # Optionally do final induction check with Apalache (experimental).
+            if self.do_apalache_final_induction_check:
+                logging.info("Doing final inductive check with Apalache.")
+                lemmas = [("Safety",self.safety)] + self.strengthening_conjuncts
+                defs = {name:exp for name,exp in lemmas}
+                defs["IndCurr"] = "\n  /\\ " +  " \n  /\\ ".join([self.typeok] + [name for name,exp in lemmas])
+                # Check induction step.
+                apalache = mc.Apalache(self.specdir)
+                apa_subproc = apalache.check(self.specname, "IndCurr", "IndCurr", defs = defs, length=1)
+                res = apalache.await_output(apa_subproc)
+                logging.debug(res["stdout"])
+                if not res["error"]:
+                    logging.info("Apalache reported no error, final invariant should be truly inductive!")
+                else:
+                    logging.info("Apalache reported error, final invariant appears not truly inductive.")
+                logging.info("---")
+
+
             logging.info("Final inductive invariant:")
             logging.info("----" * 10)
             # Print the final inductive invariant in a paste-able TLA+ format.
@@ -2647,6 +2671,7 @@ if __name__ == "__main__":
     parser.add_argument('--max_num_ctis_per_round', help='Max number of CTIs per round.', type=int, default=10000)
     parser.add_argument('--override_num_cti_workers', help='Max number of TLC workers for CTI generation.', type=int, default=None)
     parser.add_argument('--use_apalache_ctigen', help='Use Apalache for CTI generation (experimental).', required=False, default=False, action='store_true')
+    parser.add_argument('--do_apalache_final_induction_check', help='Do final induction check with Apalache (experimental).', required=False, default=False, action='store_true')
 
     
     args = vars(parser.parse_args())
@@ -2741,7 +2766,7 @@ if __name__ == "__main__":
                                 pregen_inv_cmd=pregen_inv_cmd, opt_quant_minimize=args["opt_quant_minimize"],try_final_minimize=try_final_minimize,proof_tree_mode=args["proof_tree_mode"],
                                 interactive_mode=args["interactive_mode"],
                                 max_num_conjuncts_per_round=args["max_num_conjuncts_per_round"], max_num_ctis_per_round=args["max_num_ctis_per_round"],
-                                override_num_cti_workers=args["override_num_cti_workers"],use_apalache_ctigen=args["use_apalache_ctigen"])
+                                override_num_cti_workers=args["override_num_cti_workers"],use_apalache_ctigen=args["use_apalache_ctigen"],all_args=args)
 
 
     # Only do invariant generation, cache the invariants, and then exit.
