@@ -1,0 +1,6 @@
+// Proof Structure
+strict digraph "proof-graph" {
+	graph [rankdir=LR]
+	node [fontname=courier]
+	LeaderCompleteness
+}

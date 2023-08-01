@@ -1,0 +1,46 @@
+// Proof Structure
+strict digraph "proof-graph" {
+	graph [rankdir=LR]
+	node [fontname=courier]
+	TCConsistent
+	H_Inv276 -> TCConsistent
+	H_Inv276
+	H_Inv318 -> TCConsistent
+	H_Inv318
+	H_Inv331 -> H_Inv318
+	H_Inv331
+	H_Inv344 -> H_Inv318
+	H_Inv344
+	H_Inv334 -> TCConsistent
+	H_Inv334
+	H_Inv9990 -> H_Inv334
+	H_Inv9990
+	H_Inv79 -> H_Inv9990
+	H_Inv79
+	H_Inv9991 -> H_Inv334
+	H_Inv9991
+	H_Inv79 -> H_Inv9991
+	H_Inv79
+	H_Inv7777 -> H_Inv334
+	H_Inv7777
+	H_Inv362 -> H_Inv7777
+	H_Inv362
+	H_Inv446 -> H_Inv7777
+	H_Inv446
+	H_Inv318 -> H_Inv334
+	H_Inv318
+	H_Inv331 -> H_Inv318
+	H_Inv331
+	H_Inv344 -> H_Inv318
+	H_Inv344
+	H_Inv349 -> H_Inv334
+	H_Inv349
+	H_Inv400 -> TCConsistent
+	H_Inv400
+	H_Inv349 -> H_Inv400
+	H_Inv349
+	H_Inv79 -> H_Inv400
+	H_Inv79
+	H_Inv45 -> TCConsistent
+	H_Inv45
+}
