@@ -2517,10 +2517,14 @@ class InductiveInvGen():
                 res = apalache.await_output(apa_subproc)
                 logging.debug(res["stdout"])
                 if not res["error"]:
-                    logging.info("Apalache reported no error, final invariant should be truly inductive!")
+                    logging.info("Apalache final induction check: PASS!")
+
+                    # Try computing minimal support graph.
+                    # TODO: Consider optionally enabling this once faster.
+                    # inductive_inv = [self.typeok, "Safety"] + [c[0] for c in self.strengthening_conjuncts] 
+                    # apalache.compute_minimal_support_graph(self.specname, defs, self.typeok, inductive_inv)
                 else:
-                    logging.info("Apalache reported error, final invariant appears not truly inductive.")
-                logging.info("---")
+                    logging.info("Apalache final induction check: FAIL (not truly inductive)")
 
 
             logging.info("Final inductive invariant:")
