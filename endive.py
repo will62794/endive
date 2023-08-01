@@ -352,12 +352,12 @@ class StructuredProofNode():
             elim_cti_sample = local_rand.sample(self.parent.ctis, sample_size)
             cti_elim_viz = "".join(["x" if str(hash(c)) in self.parent_ctis_eliminated else "-" for c in elim_cti_sample])
         proof_check_badge = "&#10004;" if self.full_proof_check else "no"
+        # <td style='color:{color}'> FP:{proof_check_badge} </td>
         return f"""
         <table class='proof-struct-table'>
             <tr>
                 <td style='color:{color}' class='proof-node-expr'>{self.expr}</td>
-                <td style='color:{color}' class='ctis-remaining-count'>({len(self.ctis)-len(self.ctis_eliminated)} / {len(self.ctis)} CTIs remaining)</td>
-                <td style='color:{color}'> FP:{proof_check_badge} </td>
+                <td style='color:{color}' class='ctis-remaining-count'>({len(self.ctis)-len(self.ctis_eliminated)} / {len(self.ctis)} CTIs remaining) (FP:{proof_check_badge})</td>
                 <td class='proof-parent-cti-info'> {parent_info_text} </td>
             </tr>
         </table>
