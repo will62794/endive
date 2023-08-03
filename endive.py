@@ -359,7 +359,7 @@ class StructuredProofNode():
         <table class='proof-struct-table'>
             <tr>
                 <td style='color:{color}' class='proof-node-expr'>{self.expr}</td>
-                <td style='color:{color}' class='ctis-remaining-count'>({len(self.ctis)-len(self.ctis_eliminated)} / {len(self.ctis)} CTIs remaining) (FP:{proof_check_badge})</td>
+                <td style='color:{color}' class='ctis-remaining-count'>({len(self.ctis)-len(self.ctis_eliminated)} / {len(self.ctis)} CTIs remaining) (Apalache proof:{proof_check_badge})</td>
                 <td class='proof-parent-cti-info'> {parent_info_text} </td>
             </tr>
         </table>
@@ -1490,6 +1490,16 @@ class InductiveInvGen():
             all_ctis = all_ctis.union(parsed_ctis)
             all_cti_traces += parsed_cti_traces
 
+        # print("ALL CTIS")
+        # defs = ""
+        # init = "Init == \n"
+        # for i,c in enumerate(random.sample(all_ctis, 300)):
+        #     # print(c.cti_str)
+        #     defs += f"C{i} == " + "\n" + c.cti_str + "\n"
+        #     init += f"  \/ C{i}\n"
+
+        # print(init)
+
         # FOR DIAGNOSTICS.
         # for x in sorted(list(all_ctis))[:10]:
             # print(x)
@@ -1583,15 +1593,27 @@ class InductiveInvGen():
         for inv in sat_invs_group:
             invcheck_tla_indcheck += "    /\\ UNCHANGED %s_val\n" % inv
 
+        # Also add alternate transition relation expression for doing bounded reachablity
+        # from all CTI states.
+        depth_bound = 3
+        invcheck_tla_indcheck += "\n"
+        invcheck_tla_indcheck += "CTICheckNext_DepthBoundedReachability ==\n"
+        invcheck_tla_indcheck += f'    /\ TLCGet("level") < {depth_bound}\n'
+        invcheck_tla_indcheck += f"    /\ Next\n"
+        invcheck_tla_indcheck += "    /\\ UNCHANGED ctiId\n"
+        for inv in sat_invs_group:
+            invcheck_tla_indcheck += "    /\\ UNCHANGED %s_val\n" % inv
+
+
         invcheck_tla_indcheck += "===="
 
         return invcheck_tla_indcheck
 
-    def make_ctiquickcheck_cfg(self, invs, sat_invs_group, orig_k_ctis, quant_inv_fn):
+    def make_ctiquickcheck_cfg(self, invs, sat_invs_group, orig_k_ctis, quant_inv_fn, next_pred="CTICheckNext"):
 
         # Generate config file.
         invcheck_tla_indcheck_cfg = "INIT CTICheckInit\n"
-        invcheck_tla_indcheck_cfg += "NEXT CTICheckNext\n"
+        invcheck_tla_indcheck_cfg += f"NEXT {next_pred}\n"
         invcheck_tla_indcheck_cfg += self.state_constraint
         invcheck_tla_indcheck_cfg += "\n"
         invcheck_tla_indcheck_cfg += self.constants
@@ -1657,10 +1679,21 @@ class InductiveInvGen():
         for inv in sat_invs:
             cti_states_eliminated_by_invs[inv] = set()
 
+
+        def cti_states_relative_file(ci, curr_ind, tag="", ext=".json"):                
+            return f"states/cti_quick_check_chunk{ci}_{curr_ind}{tag}{ext}"
+
+        def cti_states_file(ci, curr_ind, tag=""):
+            return os.path.join(self.specdir, cti_states_relative_file(ci, curr_ind, tag=tag))
+
+        # Generate reachability graphs for CTI sets along with other checking.
+        generate_reachable_graphs = False
+
         while curr_ind < len(sat_invs):
             sat_invs_group = sat_invs[curr_ind:(curr_ind+MAX_INVS_PER_GROUP)]
             logging.info("Checking invariant group of size %d (starting invariant=%d) for CTI elimination." % (len(sat_invs_group), curr_ind))
             tlc_procs = []
+            tlc_procs_reach = []
 
             # Create the TLA+ specs and configs for checking each chunk.
             for ci,cti_chunk in enumerate(cti_chunks):
@@ -1681,42 +1714,52 @@ class InductiveInvGen():
                 ctiquickcfgfilename=f"{GEN_TLA_DIR}/{self.specname}_chunk{ci}_CTIQuickCheck.cfg"
                 cfg_str = self.make_ctiquickcheck_cfg(invs, sat_invs_group, cti_chunk, quant_inv_fn)
                 
-                f = open(ctiquickcfgfile,'w')
-                f.write(cfg_str)
-                f.close()
+                with open(ctiquickcfgfile,'w') as f:
+                    f.write(cfg_str)
 
-                cti_states_file = os.path.join(self.specdir, f"states/cti_quick_check_chunk{ci}_{curr_ind}.json")
-                cti_states_relative_file = f"states/cti_quick_check_chunk{ci}_{curr_ind}.json"
+
+                # Generate alternate config file for computing reachability graph from each CTI.
+                ctiquickcfgfile_reach=f"{os.path.join(self.specdir, GEN_TLA_DIR)}/{self.specname}_chunk{ci}_CTIQuickCheck_Reachable.cfg"
+                ctiquickcfgfilename_reach=f"{GEN_TLA_DIR}/{self.specname}_chunk{ci}_CTIQuickCheck_Reachable.cfg"
+                cfg_str = self.make_ctiquickcheck_cfg(invs, sat_invs_group, cti_chunk, quant_inv_fn, next_pred="CTICheckNext_DepthBoundedReachability")
+                
+                with open(ctiquickcfgfile_reach,'w') as f:
+                    f.write(cfg_str)
+
+                # cti_states_file = os.path.join(self.specdir, f"states/cti_quick_check_chunk{ci}_{curr_ind}.json")
+                # cti_states_relative_file = f"states/cti_quick_check_chunk{ci}_{curr_ind}.json"
+                
+                workdir = None if self.specdir == "" else self.specdir
 
                 # Run TLC.
                 # Create new tempdir to avoid name clashes with multiple TLC instances running concurrently.
-                dirpath = tempfile.mkdtemp()
-                cmdargs = (dirpath, TLC_MAX_SET_SIZE ,cti_states_relative_file, self.specname, ci, curr_ind, ctiquickcfgfilename, ctiquicktlafilename)
-                cmd = self.java_exe + ' -Xss16M -Djava.io.tmpdir="%s" -cp tla2tools-checkall.jar tlc2.TLC -maxSetSize %d -dump json %s -noGenerateSpecTE -metadir states/ctiquick_%s_chunk%d_%d -continue -checkAllInvariants -deadlock -workers 1 -config %s %s' % cmdargs
+                def run_with_config(cfg_filename, tag=""):
+                    dirpath = tempfile.mkdtemp()
+                    cmdargs = (dirpath, TLC_MAX_SET_SIZE, cti_states_relative_file(ci, curr_ind, tag=tag), self.specname, ci, curr_ind, tag, cfg_filename, ctiquicktlafilename)
+                    cmd = self.java_exe + ' -Xss16M -Djava.io.tmpdir="%s" -cp tla2tools-checkall.jar tlc2.TLC -maxSetSize %d -dump json %s -noGenerateSpecTE -metadir states/ctiquick_%s_chunk%d_%d_%s -continue -checkAllInvariants -deadlock -workers 1 -config %s %s' % cmdargs
+                    logging.debug("TLC command: " + cmd)
+                    subproc = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, cwd=workdir)
+                    return subproc
 
-                logging.debug("TLC command: " + cmd)
-                workdir = None if self.specdir == "" else self.specdir
-                subproc = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, cwd=workdir)
+                subproc = run_with_config(ctiquickcfgfilename)
                 tlc_procs.append(subproc)
+
+                if generate_reachable_graphs:
+                    subproc_reach = run_with_config(ctiquickcfgfilename_reach, tag="_reach")
+                    tlc_procs_reach.append(subproc_reach)
         
+            cti_states_reach = {"states": [], "edges": []}
+
             for ci,subproc in enumerate(tlc_procs):
                 logging.info("Waiting for TLC termination " + str(ci))
 
                 subproc.wait()
                 ret = subproc.stdout.read().decode(sys.stdout.encoding)
 
-                lines = ret.splitlines()
-                lines = greplines("State.*|/\\\\", lines)
-
-                cti_states_file = os.path.join(self.specdir, f"states/cti_quick_check_chunk{ci}_{curr_ind}.json")
-                cti_states_relative_file = f"states/cti_quick_check_chunk{ci}_{curr_ind}.json"
-
                 # logging.info(f"Opening CTI states JSON file: '{cti_states_file}'")
-                fcti = open(cti_states_file)
-                text = fcti.read()
-                cti_states = json.loads(text)["states"]
-                # cti_states = json.load(fcti)["states"]
-                fcti.close()
+                with open(cti_states_file(ci, curr_ind)) as fcti:
+                    text = fcti.read()
+                    cti_states = json.loads(text)["states"]
                 # print "cti states:",len(cti_states)
 
                 # Record the CTIs eliminated by each invariant.
@@ -1729,11 +1772,25 @@ class InductiveInvGen():
                         if not sval[inv + "_val"]:
                             cti_states_eliminated_by_invs[inv].add(ctiHash)
 
-                # TODO: Still needed? (7/25/2023, Will)
-                # for inv in cti_states_eliminated_by_invs:
-                #     if len(cti_states_eliminated_by_invs[inv]):
-                #         invi = int(inv.replace("Inv",""))
-                #         invexp = quant_inv_fn(sorted(invs)[invi])
+                #
+                # Optionally load the states reachable from CTIs as initial states.
+                #
+
+                if generate_reachable_graphs:
+                    tlc_procs_reach[ci].wait()
+                    ret = tlc_procs_reach[ci].stdout.read().decode(sys.stdout.encoding)
+
+                    json_file = cti_states_file(ci, curr_ind, tag="_reach")
+                    logging.info(f"Loading bounded depth reachable states from CTIs from JSON file: {json_file}")
+                    with open(json_file) as fcti:
+                        text = fcti.read()
+                        states = json.loads(text)["states"]
+                        edges = json.loads(text)["edges"]
+                        cti_states_reach["states"] += states
+                        cti_states_reach["edges"] += edges
+                    print(f"Total found states reachable from cti states in bounded depth:", len(cti_states_reach["states"]))
+                    print(f"Total found edges reachable from cti states in bounded depth:", len(cti_states_reach["edges"]))
+
 
             curr_ind += MAX_INVS_PER_GROUP
         return cti_states_eliminated_by_invs
@@ -2189,6 +2246,11 @@ class InductiveInvGen():
         # MongoStaticRaft proof structure.
         msr_children = [
             StructuredProofNode("TermsOfEntriesGrowMonotonically", "H_TermsOfEntriesGrowMonotonically"),
+            StructuredProofNode("OnePrimaryPerTerm_Lemma", "OnePrimaryPerTerm", children = [
+                StructuredProofNode("TermsOfEntriesGrowMonotonically", "H_TermsOfEntriesGrowMonotonically"),
+                StructuredProofNode("LeaderCompleteness_Lemma", "LeaderCompleteness"),
+                StructuredProofNode("QuorumsSafeAtTerms", "H_QuorumsSafeAtTerms")
+            ]),
             # StructuredProofNode("H2", "H_Inv318", children = [
             #     StructuredProofNode("H2.1", "H_Inv331"),
             #     StructuredProofNode("H2.2", "H_Inv344")
@@ -2208,6 +2270,8 @@ class InductiveInvGen():
         # For proof tree we look for single step inductive support lemmas.
         self.simulate_depth = 1
 
+        # May need to shrink when doing motif analysis/clustering. Will see.
+        # MAX_CTIS_PER_NODE = 200
         MAX_CTIS_PER_NODE = 5000
 
         root_obligation = ("Safety", safety)
@@ -2247,7 +2311,7 @@ class InductiveInvGen():
             ctis_eliminated = self.check_cti_elimination(node.ctis, [
                 (child.name,child.expr) for child in node.children
             ])
-            print("CTI eliminate response:", ctis_eliminated.keys())
+            # print("CTI eliminate response:", ctis_eliminated.keys())
 
             ctis_eliminated_unique = {}
 
