@@ -5,14 +5,38 @@
 
 EXTENDS Naturals, Integers, FiniteSets, Sequences, TLC, Randomization
 
-CONSTANTS Server
-CONSTANTS Secondary, Primary, Nil
-CONSTANT InitTerm
 
-VARIABLE currentTerm
-VARIABLE state
-VARIABLE log
-VARIABLE committed
+CONSTANTS 
+    \* @type: Set(SERVER);
+    Server
+
+CONSTANTS 
+    \* @type: Str;
+    Secondary, 
+    \* @type: Str;
+    Primary, 
+    \* @type: Str;
+    Nil
+
+CONSTANT
+    \* @type: Int; 
+    InitTerm
+
+VARIABLE 
+    \* @type: SERVER -> Int; 
+    currentTerm
+
+VARIABLE 
+    \* @type: SERVER -> Str;
+    state
+
+VARIABLE 
+    \* @type: SERVER -> Seq(Int);
+    log
+
+VARIABLE
+   \* @type: Set( { entry : <<Int, Int>>, term : Int } );
+    committed
 
 vars == <<currentTerm, state, log, committed>>
 
@@ -24,11 +48,16 @@ vars == <<currentTerm, state, log, committed>>
 Empty(s) == Len(s) = 0
 
 \* Is log entry e = <<index, term>> in the log of node 'i'.
+\* @type: (<<Int,Int>>,SERVER) => Bool;
 InLog(e, i) == \E x \in DOMAIN log[i] : x = e[1] /\ log[i][x] = e[2]
 
 \* The term of the last entry in a log, or 0 if the log is empty.
 LastTerm(xlog) == IF Len(xlog) = 0 THEN 0 ELSE xlog[Len(xlog)]
+
+\* @type: Seq(Int) => <<Int, Int>>;
 LastEntry(xlog) == <<Len(xlog),xlog[Len(xlog)]>>
+
+\* @type: (Seq(Int), Int) => Int;
 GetTerm(xlog, index) == IF index = 0 THEN 0 ELSE xlog[index]
 LogTerm(i, index) == GetTerm(log[i], index)
 
@@ -56,6 +85,7 @@ CanVoteForOplog(i, j, term) ==
     /\ logOk
 
 \* Is a log entry 'e'=<<i, t>> immediately committed in term 't' with a quorum 'Q'.
+\* @type: (<<Int, Int>>, Set(SERVER)) => Bool;
 ImmediatelyCommitted(e, Q) == 
     LET eind == e[1] 
         eterm == e[2] IN
@@ -215,7 +245,11 @@ StateMachineSafety ==
 
 --------------------------------------------------------------------------------
 
-CONSTANTS MaxTerm, MaxLogLen
+CONSTANTS 
+    \* @type: Int;
+    MaxTerm, 
+    \* @type: Int;
+    MaxLogLen
 
 SeqOf(set, n) == UNION {[1..m -> set] : m \in 0..n}
 BoundedSeq(S, n) == SeqOf(S, n)
@@ -253,6 +287,11 @@ TypeOKRandom ==
 \* 
 \* Helper lemmas.
 \* 
+
+\* If a primary has been elected at term T, then there must exist a quorum at term >= T.
+H_QuorumsSafeAtTerms == 
+    \A s \in Server : (state[s] = Primary) =>
+        (\A Q \in Quorums(Server) : \E n \in Q : currentTerm[n] >= currentTerm[s])
 
 H_TermsOfEntriesGrowMonotonically ==
     \A s \in Server : \A i,j \in DOMAIN log[s] : (i <= j) => (log[s][i] <= log[s][j])
