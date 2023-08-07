@@ -538,6 +538,7 @@ class InductiveInvGen():
         self.tlc_workers = tlc_workers
         self.use_apalache_ctigen = use_apalache_ctigen
         self.do_apalache_final_induction_check = all_args["do_apalache_final_induction_check"]
+        self.max_proof_node_ctis = all_args["max_proof_node_ctis"]
         self.proof_tree_mode = proof_tree_mode
         self.interactive_mode = interactive_mode
         self.max_num_conjuncts_per_round = max_num_conjuncts_per_round
@@ -2369,8 +2370,7 @@ class InductiveInvGen():
         self.simulate_depth = 1
 
         # May need to shrink when doing motif analysis/clustering. Will see.
-        MAX_CTIS_PER_NODE = 350
-        # MAX_CTIS_PER_NODE = 5000
+        MAX_CTIS_PER_NODE = self.max_proof_node_ctis
 
         root_obligation = ("Safety", safety)
 
@@ -2838,6 +2838,7 @@ if __name__ == "__main__":
     parser.add_argument('--override_num_cti_workers', help='Max number of TLC workers for CTI generation.', type=int, default=None)
     parser.add_argument('--use_apalache_ctigen', help='Use Apalache for CTI generation (experimental).', required=False, default=False, action='store_true')
     parser.add_argument('--do_apalache_final_induction_check', help='Do final induction check with Apalache (experimental).', required=False, default=False, action='store_true')
+    parser.add_argument('--max_proof_node_ctis', help='Maximum number of CTIs per proof node.', type=int, default=5000)
 
     
     args = vars(parser.parse_args())
