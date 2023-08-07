@@ -3,4 +3,18 @@ strict digraph "proof-graph" {
 	graph [rankdir=LR]
 	node [fontname=courier]
 	LeaderCompleteness
+	H_TermsOfEntriesGrowMonotonically -> LeaderCompleteness
+	H_TermsOfEntriesGrowMonotonically
+	H_PrimaryTermAtLeastAsLargeAsLogTerms -> H_TermsOfEntriesGrowMonotonically
+	H_PrimaryTermAtLeastAsLargeAsLogTerms
+	H_CommittedEntryExistsOnQuorum -> LeaderCompleteness
+	H_CommittedEntryExistsOnQuorum
+	H_EntriesCommittedInOwnTerm -> LeaderCompleteness
+	H_EntriesCommittedInOwnTerm
+	LogMatching -> LeaderCompleteness
+	LogMatching
+	H_LogEntryInTermImpliesSafeAtTerm -> LeaderCompleteness
+	H_LogEntryInTermImpliesSafeAtTerm
+	H_LogsLaterThanCommittedMustHaveCommitted -> LeaderCompleteness
+	H_LogsLaterThanCommittedMustHaveCommitted
 }

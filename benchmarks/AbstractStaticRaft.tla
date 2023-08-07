@@ -3,8 +3,7 @@
 \* High level specification of Raft protocol without dynamic reconfiguration.
 \*
 
-EXTENDS Naturals, Integers, FiniteSets, Sequences, TLC, Randomization
-\* Apalache
+EXTENDS Naturals, Integers, FiniteSets, Sequences, TLC, Apalache
 
 
 CONSTANTS 
@@ -36,7 +35,7 @@ VARIABLE
     log
 
 VARIABLE
-   \* @type: Set( { entry : <<Int, Int>>, term : Int } );
+   \* @type: Set( <<Int, Int, Int>> );
     committed
 
 vars == <<currentTerm, state, log, committed>>
@@ -168,10 +167,11 @@ CommitEntry(i, commitQuorum) ==
     \* all nodes have this log entry and are in the term of the leader.
     /\ ImmediatelyCommitted(<<ind,currentTerm[i]>>, commitQuorum)
     \* Don't mark an entry as committed more than once.
-    /\ ~\E c \in committed : c.entry = <<ind, currentTerm[i]>>
-    /\ committed' = committed \cup
-            {[ entry  |-> <<ind, currentTerm[i]>>,
-               term  |-> currentTerm[i]]}
+    /\ ~\E c \in committed : c[1] = ind /\ c[2] = currentTerm[i] 
+    /\ committed' = committed \cup {<<ind, currentTerm[i], currentTerm[i]>>}
+    \* committed \cup {}
+            \* {[ entry  |-> <<ind, currentTerm[i]>>,
+            \*    term  |-> currentTerm[i]]}
     /\ UNCHANGED <<currentTerm, state, log>>
 
 \* Action that exchanges terms between two nodes and step down the primary if
@@ -204,13 +204,6 @@ Next ==
 
 Spec == Init /\ [][Next]_vars
 
-\* Statement of type correctness.
-TypeOK ==
-    /\ currentTerm \in [Server -> Nat]
-    /\ state \in [Server -> {Secondary, Primary}]
-    /\ log \in [Server -> Seq(Nat)]
-    /\ committed \in SUBSET [ entry : Nat \X Nat, term : Nat ]
-
 NextUnchanged == UNCHANGED vars
 
 --------------------------------------------------------------------------------
@@ -238,11 +231,11 @@ LogMatching ==
 \* When a node gets elected as primary it contains all entries committed in previous terms.
 LeaderCompleteness == 
     \A s \in Server : (state[s] = Primary) => 
-        \A c \in committed : (c.term < currentTerm[s] => InLog(c.entry, s))
+        \A c \in committed : (c[3] < currentTerm[s] => InLog(<<c[1],c[2]>>, s))
 
-\* If two entries are committed at the same index, they must be the same entry.
-StateMachineSafety == 
-    \A c1, c2 \in committed : (c1.entry[1] = c2.entry[1]) => (c1 = c2)
+\* \* If two entries are committed at the same index, they must be the same entry.
+\* StateMachineSafety == 
+\*     \A c1, c2 \in committed : (c1.entry[1] = c2.entry[1]) => (c1 = c2)
 
 --------------------------------------------------------------------------------
 
@@ -252,15 +245,6 @@ CONSTANTS
     \* @type: Int;
     MaxLogLen
 
-SeqOf(set, n) == UNION {[1..m -> set] : m \in 0..n}
-BoundedSeq(S, n) == SeqOf(S, n)
-NatFinite == 0..3
-PositiveNat == 1..3
-NumRandSubsets == 13
-
-kNumSubsets == 10
-nAvgSubsetSize == 3
-
 \* State Constraint. Used for model checking only.
 StateConstraint == \A s \in Server :
                     /\ currentTerm[s] <= MaxTerm
@@ -268,22 +252,16 @@ StateConstraint == \A s \in Server :
 
 Symmetry == Permutations(Server)
 
-\* \* Statement of type correctness.
-\* TypeOK ==
-\*     /\ currentTerm \in [Server -> Nat]
-\*     /\ state \in [Server -> {Secondary, Primary}]
-\*     /\ log \in [Server -> Seq(Nat)]
-\*     /\ committed \in SUBSET [ entry : Nat \X Nat, term : Nat ]
+Terms == InitTerm..MaxTerm
+LogIndices == 1..MaxLogLen
 
-TypeOKRandom == 
-    /\ currentTerm \in RandomSubset(5, [Server -> InitTerm..MaxTerm])
-    /\ state \in RandomSubset(NumRandSubsets, [Server -> {Secondary, Primary}])
-    /\ log \in [Server -> BoundedSeq(InitTerm..MaxTerm, MaxLogLen)]
-    /\ committed \in RandomSetOfSubsets(kNumSubsets, nAvgSubsetSize, [ entry : (1..MaxLogLen) \X (InitTerm..MaxTerm), term : InitTerm..MaxTerm ])
-
-    \* /\ config \in RandomSubset(NumRandSubsets, [Server -> SUBSET Server])
-    \* /\ configVersion \in RandomSubset(NumRandSubsets, [Server -> 0..MaxConfigVersion])
-    \* /\ configTerm \in RandomSubset(NumRandSubsets, [Server -> InitTerm..MaxTerm])
+\* Statement of type correctness.
+TypeOK ==
+    /\ currentTerm \in [Server -> Nat]
+    /\ state \in [Server -> {Secondary, Primary}]
+    /\ log = Gen(3)
+    /\ \A s \in Server : \A i \in DOMAIN log[s] : log[s][i] \in Terms
+    /\ committed \in SUBSET (LogIndices \X Terms \X Terms)
 
 \* Used for Apalache, if we ever convert over to use that.
 CInit == 
@@ -313,10 +291,10 @@ H_PrimaryTermAtLeastAsLargeAsLogTerms ==
 
 H_CommittedEntryExistsOnQuorum == 
     \A c \in committed :
-        \E Q \in Quorums(Server) : \A n \in Q : InLog(c.entry, n)  
+        \E Q \in Quorums(Server) : \A n \in Q : InLog(<<c[1],c[2]>>, n)  
 
 H_EntriesCommittedInOwnTerm == 
-    \A c \in committed : c.term = c.entry[2] 
+    \A c \in committed : c[3] = c[2] 
 
 
 \* Existence of an entry in term T implies a past election in T, so 
@@ -326,14 +304,14 @@ H_LogEntryInTermImpliesSafeAtTerm ==
     \A i \in DOMAIN log[s] :
         \E Q \in Quorums(Server) : \A n \in Q : currentTerm[n] >= log[s][i]
 
-\* THEOREM LeaderCompleteness
-\*   <1>1. H_TermsOfEntriesGrowMonotonically
-\*     <1>1. H_PrimaryTermAtLeastAsLargeAsLogTerms
-\*   <1>2. OnePrimaryPerTerm
-\*     <1>1. H_TermsOfEntriesGrowMonotonically
-\*     <1>2. LeaderCompleteness
-\*     <1>3. H_QuorumsSafeAtTerms
-
-
+\* If a server's latest log term exceeds a committed entry c's term, all commits
+\* with terms <= c's must be in the server's log.
+H_LogsLaterThanCommittedMustHaveCommitted ==
+    \A s \in Server : 
+    \A c \in committed :
+        (\E i \in DOMAIN log[s] : log[s][i] > c[3]) =>
+            \A d \in committed :
+                d[3] <= c[3] => /\ Len(log[s]) >= d[1]
+                                /\ log[s][d[1]] = d[3]
 
 =============================================================================

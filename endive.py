@@ -515,7 +515,7 @@ class InductiveInvGen():
     """
 
     def __init__(self, specdir, specname, safety, constants, state_constraint, quant_inv, model_consts, preds,
-                    symmetry=False, simulate=False, simulate_depth=6, typeok="TypeOK", seed=0, num_invs=1000, num_rounds=3, num_iters=3, 
+                    symmetry=False, simulate=False, simulate_depth=6, typeok="TypeOK", typeok_random_spec=False, seed=0, num_invs=1000, num_rounds=3, num_iters=3, 
                     num_simulate_traces=10000, tlc_workers=6, quant_vars=[],java_exe="java",cached_invs=None, cached_invs_gen_time_secs=None, use_cpp_invgen=False,
                     pregen_inv_cmd=None, opt_quant_minimize=False, try_final_minimize=False, proof_tree_mode=False, interactive_mode=False, max_num_conjuncts_per_round=10000,
                     max_num_ctis_per_round=10000, override_num_cti_workers=None, use_apalache_ctigen=False,all_args={}):
@@ -580,6 +580,7 @@ class InductiveInvGen():
         self.simulate = simulate
         self.simulate_depth = simulate_depth
         self.typeok = typeok
+        self.typeok_random_spec = typeok_random_spec
 
         self.strengthening_conjuncts = []
 
@@ -1330,7 +1331,10 @@ class InductiveInvGen():
 
         # Generate spec for generating CTIs.
         invcheck_tla_indcheck=f"---- MODULE {self.specname}_CTIGen_{ctiseed} ----\n"
-        invcheck_tla_indcheck += "EXTENDS %s\n\n" % self.specname
+        suffix = ""
+        if self.typeok_random_spec:
+            suffix = "_TypeOKRandom"
+        invcheck_tla_indcheck += f"EXTENDS {self.specname}{suffix}\n\n"
 
         # We shouldn't need model constants for CTI generation.
         # invcheck_tla_indcheck += self.model_consts + "\n"
@@ -2367,8 +2371,9 @@ class InductiveInvGen():
             # ]),
             StructuredProofNode("CommittedEntryExistsOnQuorum", "H_CommittedEntryExistsOnQuorum"),
             StructuredProofNode("EntriesCommittedInOwnTerm", "H_EntriesCommittedInOwnTerm"),
-            # StructuredProofNode("LogMatching_Lemma", "LogMatching"),
+            StructuredProofNode("LogMatching_Lemma", "LogMatching"),
             StructuredProofNode("LogEntryInTermImpliesSafeAtTerm", "H_LogEntryInTermImpliesSafeAtTerm"),
+            StructuredProofNode("LogsLaterThanCommittedMustHaveCommitted", "H_LogsLaterThanCommittedMustHaveCommitted"),
             # StructuredProofNode("H2", "H_Inv318", children = [
             #     StructuredProofNode("H2.1", "H_Inv331"),
             #     StructuredProofNode("H2.2", "H_Inv344")
@@ -2691,7 +2696,8 @@ class InductiveInvGen():
                 logging.info("Doing final inductive check with Apalache.")
                 lemmas = [("Safety",self.safety)] + self.strengthening_conjuncts
                 defs = {name:exp for name,exp in lemmas}
-                defs["IndCurr"] = "\n  /\\ " +  " \n  /\\ ".join([self.typeok] + [name for name,exp in lemmas])
+                typeok = "TypeOK" # Apalache always uses normal TypeOK.
+                defs["IndCurr"] = "\n  /\\ " +  " \n  /\\ ".join([typeok] + [name for name,exp in lemmas])
                 # Check induction step.
                 apalache = mc.Apalache(self.specdir)
                 apa_subproc = apalache.check(self.specname, "IndCurr", "IndCurr", defs = defs, length=1)
@@ -2919,6 +2925,7 @@ if __name__ == "__main__":
     model_consts = spec_config["model_consts"]
     symmetry = spec_config["symmetry"]    
     typeok = spec_config["typeok"]
+    typeok_random_spec = spec_config.get("typeok_random_spec", False)
     simulate = spec_config["simulate"]
     results_dir = args["results_dir"]
     if "use_cpp_invgen" in spec_config:
@@ -2946,7 +2953,7 @@ if __name__ == "__main__":
 
     # Generate an inductive invariant.
     indgen = InductiveInvGen(specdir, specname, safety, constants, constraint, quant_inv, model_consts, preds, 
-                                num_invs=num_invs, num_rounds=num_rounds, seed=seed, typeok=typeok, num_iters=numiters, 
+                                num_invs=num_invs, num_rounds=num_rounds, seed=seed, typeok=typeok, typeok_random_spec=typeok_random_spec, num_iters=numiters, 
                                 num_simulate_traces=NUM_SIMULATE_TRACES, simulate_depth=simulate_depth, tlc_workers=tlc_workers, quant_vars=quant_vars, symmetry=symmetry,
                                 simulate=simulate, java_exe=JAVA_EXE, cached_invs=cached_invs, cached_invs_gen_time_secs=cached_invs_gen_time_secs, use_cpp_invgen=use_cpp_invgen,
                                 pregen_inv_cmd=pregen_inv_cmd, opt_quant_minimize=args["opt_quant_minimize"],try_final_minimize=try_final_minimize,proof_tree_mode=args["proof_tree_mode"],

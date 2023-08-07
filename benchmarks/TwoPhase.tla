@@ -229,7 +229,7 @@ L5 == 5
 
 THEOREM TCConsistent
   <1>1. L1
-    <2>1. L4
+    <2>1. L1
         <3>1. L4 OBVIOUS
         <3>2. L4 OBVIOUS
         <3>3. L4 OBVIOUS

@@ -37,6 +37,7 @@
     "model_consts"  :  "CONSTANT n1,n2,n3",
     "symmetry" : true,
     "typeok"  :  "TypeOKRandom",
+    "typeok_random_spec": true,
     "try_final_minimize": false,
     "simulate"  :  true
 }
