@@ -1,0 +1,14 @@
+strict digraph DiskGraph {
+node [shape=box,style=rounded]
+nodesep=0.35;
+subgraph cluster_graph {
+color="white";
+-7653612371147595999 [label="x = 0",style = filled]
+-7653612371147595999 -> 1237150017334310335 [label="",color="black",fontcolor="black"];
+1237150017334310335 [label="x = 1"];
+1237150017334310335 -> -5052852399776853322 [label="",color="black",fontcolor="black"];
+-5052852399776853322 [label="x = 2"];
+{rank = same; -7653612371147595999;}
+{rank = same; 1237150017334310335;}
+}
+}
