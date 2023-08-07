@@ -30,7 +30,7 @@
         "n3 = n3",
         "n4 = n4"
     ],
-    "constraint"  :  "CONSTRAINT StateConstraint",
+    "constraint"  :  "StateConstraint",
     "quant_inv"  :  "\\A VARI \\in Server : \\A VARJ \\in Server : ",
     "quant_inv_alt"  :  null,
     "quant_vars": ["VARI", "VARJ"],
