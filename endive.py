@@ -1651,7 +1651,7 @@ class InductiveInvGen():
         # TODO: Sort out how we handle 'invs' and 'sat_invs' and CTI tables here, etc.
         #
 
-        logging.info("Checking which invariants eliminate CTIs.")
+        logging.info(f"Checking invariant elimination for {len(orig_ctis)} CTIs.")
 
         # Initialize table mapping from invariants to a set of CTI states they violate.
         cti_states_eliminated_by_invs = {}
@@ -1786,10 +1786,106 @@ class InductiveInvGen():
                         text = fcti.read()
                         states = json.loads(text)["states"]
                         edges = json.loads(text)["edges"]
+                        # print(states)
+                        # print(edges)
                         cti_states_reach["states"] += states
                         cti_states_reach["edges"] += edges
                     print(f"Total found states reachable from cti states in bounded depth:", len(cti_states_reach["states"]))
                     print(f"Total found edges reachable from cti states in bounded depth:", len(cti_states_reach["edges"]))
+
+
+            if generate_reachable_graphs:
+                # TODO: Store CTI graph and look for motifs.
+                import networkx as nx
+                G = nx.DiGraph()
+                for e in cti_states_reach["states"]:
+                    G.add_node(e["fp"], initial=e["initial"], val=e["val"])
+                for e in cti_states_reach["edges"]:
+                    G.add_edge(e["from"], e["to"])
+                print("num nodes:", G.number_of_nodes())
+
+                num_init = 0
+                local_neighborhoods = {}
+                cti_root_nodes = []
+                out_degrees = []
+                for n in G.nodes():
+                    node = G.nodes[n]
+                    # print(node)
+                    # CTI states will be marked as initial states in the graph.
+                    if node["initial"]:
+                        cti_root_nodes.append(n)
+                        num_init += 1
+                        neighborhood = nx.bfs_tree(G, n, depth_limit=3)
+                        print(f"neighborhood of {n}")
+                        print("nodes:", neighborhood.number_of_nodes())
+                        print("edges:", neighborhood.number_of_edges())
+                        print(f"outdegree: {G.out_degree(n)}")
+                        out_degrees.append((n, G.out_degree(n)))
+                        local_neighborhoods[n] = neighborhood
+
+                print("Ascending out degrees")
+                for d in sorted(out_degrees, key = lambda x : x[1]):
+                    outdegree = d[1]
+                    if outdegree <= 2:
+                        cti = [c for c in orig_ctis if int(G.nodes[d[0]]["val"]["ctiId"]) == hash(c)][0]
+                        print(d)
+                        print(cti.action_name)
+                        for l in cti.cti_lines:
+                            print(l)
+
+                logging.info("Checking isomorphism between local neighborhoods")
+                unclustered_nodes = list(local_neighborhoods.keys())
+                clusters = []
+                while len(unclustered_nodes):
+                    # Get next unclustered node.
+                    next_node = unclustered_nodes.pop()
+                    # See if this node is isomorphic to any existing cluster.
+                    iso_to_cluster = None
+                    for i,c in enumerate(clusters):
+                        cluster_member = c[0]
+                        iso = nx.is_isomorphic(local_neighborhoods[next_node], local_neighborhoods[cluster_member])
+                        if iso:
+                            iso_to_cluster = i
+                            break
+
+                    # If it is not isomorphic to any existing cluster,
+                    # then create a new cluster with this node. Otherwise add
+                    # it to correct cluster.
+                    if iso_to_cluster is not None:
+                        clusters[iso_to_cluster].append(next_node)
+                    else:
+                        clusters.append([next_node])
+
+                    
+                # for n in local_neighborhoods:
+                #     isomorphic_cousins = []
+                #     for other in local_neighborhoods:
+                #         iso = nx.is_isomorphic(local_neighborhoods[n], local_neighborhoods[other])
+                #         if iso:
+                #             # print(f"isomorphic, {n} to {other}:", iso)
+                #             isomorphic_cousins.append(other)
+
+                    # print(f"Num isomorphic cousins found for node {n}:", len(isomorphic_cousins))
+                
+                # Mapping from CTI id to CTI object.
+                cti_table = {}
+                for c in orig_ctis:
+                    cti_table[hash(c)] = c
+
+                # Sort clusters by size.
+                print('num init:', num_init)
+                clusters = sorted(clusters, key=lambda c : len(c), reverse=True)
+
+                print(f"{len(clusters)} Isomorphic clusters")
+                # for i,c in enumerate(clusters):
+                #     print(f"cluster of size {len(c)}:", c)
+                #     nx.nx_pydot.write_dot(local_neighborhoods[c[0]], f"ctigraphs/cluster_{i}_{len(c)}.dot")
+
+                #     for n in c:
+                #         sval = G.nodes[n]["val"]
+                #         for k in sval:
+                #             print(k, sval[k])
+                            
 
 
             curr_ind += MAX_INVS_PER_GROUP
@@ -2245,10 +2341,12 @@ class InductiveInvGen():
 
         # MongoStaticRaft proof structure.
         msr_children = [
-            StructuredProofNode("TermsOfEntriesGrowMonotonically", "H_TermsOfEntriesGrowMonotonically"),
+            StructuredProofNode("TermsOfEntriesGrowMonotonically", "H_TermsOfEntriesGrowMonotonically", children =[
+                StructuredProofNode("PrimaryTermAtLeastAsLargeAsLogTerms", "H_PrimaryTermAtLeastAsLargeAsLogTerms")
+            ]),
             StructuredProofNode("OnePrimaryPerTerm_Lemma", "OnePrimaryPerTerm", children = [
-                StructuredProofNode("TermsOfEntriesGrowMonotonically", "H_TermsOfEntriesGrowMonotonically"),
-                StructuredProofNode("LeaderCompleteness_Lemma", "LeaderCompleteness"),
+                # StructuredProofNode("TermsOfEntriesGrowMonotonically", "H_TermsOfEntriesGrowMonotonically"),
+                # StructuredProofNode("LeaderCompleteness_Lemma", "LeaderCompleteness"),
                 StructuredProofNode("QuorumsSafeAtTerms", "H_QuorumsSafeAtTerms")
             ]),
             # StructuredProofNode("H2", "H_Inv318", children = [
@@ -2271,8 +2369,8 @@ class InductiveInvGen():
         self.simulate_depth = 1
 
         # May need to shrink when doing motif analysis/clustering. Will see.
-        # MAX_CTIS_PER_NODE = 200
-        MAX_CTIS_PER_NODE = 5000
+        MAX_CTIS_PER_NODE = 350
+        # MAX_CTIS_PER_NODE = 5000
 
         root_obligation = ("Safety", safety)
 
