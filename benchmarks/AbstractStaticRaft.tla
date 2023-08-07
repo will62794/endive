@@ -4,6 +4,7 @@
 \*
 
 EXTENDS Naturals, Integers, FiniteSets, Sequences, TLC, Randomization
+\* Apalache
 
 
 CONSTANTS 
@@ -268,7 +269,7 @@ StateConstraint == \A s \in Server :
 Symmetry == Permutations(Server)
 
 \* \* Statement of type correctness.
-\* TypeOKRandom ==
+\* TypeOK ==
 \*     /\ currentTerm \in [Server -> Nat]
 \*     /\ state \in [Server -> {Secondary, Primary}]
 \*     /\ log \in [Server -> Seq(Nat)]
@@ -284,6 +285,16 @@ TypeOKRandom ==
     \* /\ configVersion \in RandomSubset(NumRandSubsets, [Server -> 0..MaxConfigVersion])
     \* /\ configTerm \in RandomSubset(NumRandSubsets, [Server -> InitTerm..MaxTerm])
 
+\* Used for Apalache, if we ever convert over to use that.
+CInit == 
+    /\ Primary = "P"
+    /\ Secondary = "S"
+    /\ Nil = "Nil"
+    /\ Server = {"1_OF_SERVER", "2_OF_SERVER", "3_OF_SERVER"}
+    /\ MaxLogLen = 3
+    /\ MaxTerm = 3
+    /\ InitTerm = 0
+
 \* 
 \* Helper lemmas.
 \* 
@@ -296,6 +307,23 @@ H_QuorumsSafeAtTerms ==
 H_TermsOfEntriesGrowMonotonically ==
     \A s \in Server : \A i,j \in DOMAIN log[s] : (i <= j) => (log[s][i] <= log[s][j])
 
+H_PrimaryTermAtLeastAsLargeAsLogTerms == 
+    \A s \in Server : (state[s] = Primary) => 
+        \A i \in DOMAIN log[s] : currentTerm[s] >= log[s][i]
+
+H_CommittedEntryExistsOnQuorum == 
+    \A c \in committed :
+        \A Q \in Quorums(Server) : \E n \in Q : InLog(c.entry, n)  
+
+
+
+\* THEOREM LeaderCompleteness
+\*   <1>1. H_TermsOfEntriesGrowMonotonically
+\*     <1>1. H_PrimaryTermAtLeastAsLargeAsLogTerms
+\*   <1>2. OnePrimaryPerTerm
+\*     <1>1. H_TermsOfEntriesGrowMonotonically
+\*     <1>2. LeaderCompleteness
+\*     <1>3. H_QuorumsSafeAtTerms
 
 
 
