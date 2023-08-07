@@ -893,7 +893,7 @@ class InductiveInvGen():
         invcheck_cfg += "NEXT PredNext\n"
         invcheck_cfg += self.constants
         invcheck_cfg += "\n"
-        invcheck_cfg += self.state_constraint
+        invcheck_cfg += f"CONSTRAINT {self.state_constraint}"
         invcheck_cfg += "\n"
         if self.symmetry:
             invcheck_cfg += "SYMMETRY Symmetry\n"
@@ -1082,7 +1082,7 @@ class InductiveInvGen():
         invcheck_cfg += "NEXT Next\n"
         invcheck_cfg += self.constants
         invcheck_cfg += "\n"
-        invcheck_cfg += self.state_constraint
+        invcheck_cfg += f"CONSTRAINT {self.state_constraint}"
         invcheck_cfg += "\n"
         if self.symmetry:
             invcheck_cfg += "SYMMETRY Symmetry\n"
@@ -1342,9 +1342,15 @@ class InductiveInvGen():
         invcheck_tla_indcheck += strengthening_conjuncts_str
         invcheck_tla_indcheck += "\n"
 
+        # Add state constraint as an explicit precondition if needed in order to avoid 
+        # invariant violations that would violate the constraint, due to TLC default
+        # behavior: https://groups.google.com/g/tlaplus/c/nfd1H-tZbe8/m/eCV3DNKZOicJ.
+        precond = self.state_constraint if len(self.state_constraint) else "TRUE"
+        invcheck_tla_indcheck += f"InvStrengthened_Constraint == {precond} => InvStrengthened \n"
+
         invcheck_tla_indcheck += "IndCand ==\n"
         invcheck_tla_indcheck += "    /\\ %s\n" % self.typeok
-        invcheck_tla_indcheck += "    /\\ InvStrengthened\n"
+        invcheck_tla_indcheck += f"    /\ InvStrengthened\n"
 
         invcheck_tla_indcheck += "===="
 
@@ -1362,12 +1368,13 @@ class InductiveInvGen():
 
         invcheck_tla_indcheck_cfg = "INIT IndCand\n"
         invcheck_tla_indcheck_cfg += "NEXT Next\n"
-        invcheck_tla_indcheck_cfg += self.state_constraint
+        invcheck_tla_indcheck_cfg += f"CONSTRAINT {self.state_constraint}"
         invcheck_tla_indcheck_cfg += "\n"
         # Only check the invariant itself for now, and not TypeOK, since TypeOK
         # might be probabilistic, which doesn't seem to work correctly when checking 
         # invariance.
-        invcheck_tla_indcheck_cfg += "INVARIANT InvStrengthened\n"
+        # invcheck_tla_indcheck_cfg += "INVARIANT InvStrengthened\n"
+        invcheck_tla_indcheck_cfg += "INVARIANT InvStrengthened_Constraint\n"
         # invcheck_tla_indcheck_cfg += "INVARIANT OnePrimaryPerTerm\n"
         invcheck_tla_indcheck_cfg += self.constants
         invcheck_tla_indcheck_cfg += "\n"
@@ -1615,7 +1622,7 @@ class InductiveInvGen():
         # Generate config file.
         invcheck_tla_indcheck_cfg = "INIT CTICheckInit\n"
         invcheck_tla_indcheck_cfg += f"NEXT {next_pred}\n"
-        invcheck_tla_indcheck_cfg += self.state_constraint
+        invcheck_tla_indcheck_cfg += f"CONSTRAINT {self.state_constraint}"
         invcheck_tla_indcheck_cfg += "\n"
         invcheck_tla_indcheck_cfg += self.constants
         invcheck_tla_indcheck_cfg += "\n"
@@ -2345,11 +2352,15 @@ class InductiveInvGen():
             StructuredProofNode("TermsOfEntriesGrowMonotonically", "H_TermsOfEntriesGrowMonotonically", children =[
                 StructuredProofNode("PrimaryTermAtLeastAsLargeAsLogTerms", "H_PrimaryTermAtLeastAsLargeAsLogTerms")
             ]),
-            StructuredProofNode("OnePrimaryPerTerm_Lemma", "OnePrimaryPerTerm", children = [
-                # StructuredProofNode("TermsOfEntriesGrowMonotonically", "H_TermsOfEntriesGrowMonotonically"),
-                # StructuredProofNode("LeaderCompleteness_Lemma", "LeaderCompleteness"),
-                StructuredProofNode("QuorumsSafeAtTerms", "H_QuorumsSafeAtTerms")
-            ]),
+            # StructuredProofNode("OnePrimaryPerTerm_Lemma", "OnePrimaryPerTerm", children = [
+            #     # StructuredProofNode("TermsOfEntriesGrowMonotonically", "H_TermsOfEntriesGrowMonotonically"),
+            #     # StructuredProofNode("LeaderCompleteness_Lemma", "LeaderCompleteness"),
+            #     StructuredProofNode("QuorumsSafeAtTerms", "H_QuorumsSafeAtTerms")
+            # ]),
+            StructuredProofNode("CommittedEntryExistsOnQuorum", "H_CommittedEntryExistsOnQuorum"),
+            StructuredProofNode("EntriesCommittedInOwnTerm", "H_EntriesCommittedInOwnTerm"),
+            StructuredProofNode("LogMatching_Lemma", "LogMatching"),
+            StructuredProofNode("LogEntryInTermImpliesSafeAtTerm", "H_LogEntryInTermImpliesSafeAtTerm"),
             # StructuredProofNode("H2", "H_Inv318", children = [
             #     StructuredProofNode("H2.1", "H_Inv331"),
             #     StructuredProofNode("H2.2", "H_Inv344")
@@ -2436,7 +2447,7 @@ class InductiveInvGen():
 
             # If all CTIs are eliminated for this node, optionally check
             # for a complete proof using Apalache.
-            if len(node.get_remaining_ctis()) == 0:
+            if len(node.get_remaining_ctis()) == 0 and self.do_apalache_final_induction_check:
                 logging.info("Checking for full proof with Apalache.")
                 # We want to check that this node lemma is inductive relative to the conjunction
                 # of all its children lemmas.

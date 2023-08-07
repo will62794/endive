@@ -313,9 +313,18 @@ H_PrimaryTermAtLeastAsLargeAsLogTerms ==
 
 H_CommittedEntryExistsOnQuorum == 
     \A c \in committed :
-        \A Q \in Quorums(Server) : \E n \in Q : InLog(c.entry, n)  
+        \E Q \in Quorums(Server) : \A n \in Q : InLog(c.entry, n)  
+
+H_EntriesCommittedInOwnTerm == 
+    \A c \in committed : c.term = c.entry[2] 
 
 
+\* Existence of an entry in term T implies a past election in T, so 
+\* there must be some quorum at this term or greater.
+H_LogEntryInTermImpliesSafeAtTerm == 
+    \A s \in Server : 
+    \A i \in DOMAIN log[s] :
+        \E Q \in Quorums(Server) : \A n \in Q : currentTerm[n] >= log[s][i]
 
 \* THEOREM LeaderCompleteness
 \*   <1>1. H_TermsOfEntriesGrowMonotonically
