@@ -1245,16 +1245,22 @@ class InductiveInvGen():
         return (all_ctis, all_cti_traces)
 
     def itf_json_val_to_tla_val(self, itfval):
-        if type(itfval)==str:
+        if type(itfval) == int:
+            return str(itfval)
+        if type(itfval) == str:
             return itfval.replace("ModelValue_", "")
+        if "#map" in itfval:
+            return "<<" + ",".join(sorted([self.itf_json_val_to_tla_val(v) for v in itfval["#map"]])) + ">>"
         if "#set" in itfval:
             return "{" + ",".join(sorted([self.itf_json_val_to_tla_val(v) for v in itfval["#set"]])) + "}"
         if "#tup" in itfval:
             return "<<" + ",".join([self.itf_json_val_to_tla_val(v) for v in itfval["#tup"]]) + ">>"
+        return str(itfval)
 
     def itf_json_state_to_tla(self, svars, state):
         tla_state_form = ""
         for svar in svars:
+            # print(state[svar])
             svar_line = f"/\\ {svar} = {self.itf_json_val_to_tla_val(state[svar])} "
             tla_state_form += svar_line
             # print(svar_line)
@@ -1286,18 +1292,20 @@ class InductiveInvGen():
 
         all_tla_ctis = set()
         all_cti_objs = []
-        outfiles = os.listdir("benchmarks/gen_tla/apalache-ctigen")
+        outfiles = os.listdir("benchmarks/gen_tla/apalache_ctigen")
         for outf in outfiles:
             if "itf.json" in outf:
                 # print(outf)
-                cti_obj = json.load(open(f"benchmarks/gen_tla/apalache-ctigen/{outf}"))
-                # print(cti_obj)
+                cti_obj = json.load(open(f"benchmarks/gen_tla/apalache_ctigen/{outf}"))
+                print(cti_obj)
                 all_cti_objs.append(cti_obj)
 
         for cti_obj in all_cti_objs:
             state_vars = cti_obj["vars"]
+            print("state vars:", state_vars)
             tla_cti_str = self.itf_json_state_to_tla(state_vars, cti_obj["states"][0])
-            # print(tla_cti_str)
+            print(tla_cti_str)
+            print("---")
             tla_cti = CTI(tla_cti_str.strip(), [], None)
             all_tla_ctis.add(tla_cti)
 
@@ -1410,9 +1418,9 @@ class InductiveInvGen():
             outdir = "gen_tla/apalache_ctigen"
             jvm_args="JVM_ARGS='-Xss16M'"
             max_num_ctis = 250
-            # cmd = f"{apalache_bin} check --run-dir=gen_tla/apalache-cti-out --max-error={max_num_ctis} --init=IndCand --inv=IndCand --length=1 --config={indcheckcfgfilename} {indchecktlafilename}"
-            # cmd = f"{apalache_bin} check --out-dir={outdir} --max-error={max_num_ctis} --view=vars --run-dir={rundir} --cinit=Cinit --init=IndCand --inv=IndCand --length=1 --config={indcheckcfgfilename} {indchecktlafilename}"
-            cmd = f"{apalache_bin} check --out-dir={outdir} --max-error={max_num_ctis} --view=vars --run-dir={rundir} --cinit=CInit --init=IndCand --next=Next --inv=InvStrengthened --length=1 {indchecktlafilename}"
+            inv_to_check = "InvStrengthened_Constraint"
+            # cmd = f"{apalache_bin} check --out-dir={outdir} --max-error={max_num_ctis} --view=vars --run-dir={rundir} --cinit=CInit --init=IndCand --next=Next --inv={inv_to_check} --length=1 {indchecktlafilename}"
+            cmd = f"{apalache_bin} check --out-dir={outdir} --run-dir={rundir} --cinit=CInit --init=IndCand --next=Next --inv={inv_to_check} --length=1 {indchecktlafilename}"
             logging.debug("Apalache command: " + cmd)
             workdir = None
             if self.specdir != "":
@@ -2359,7 +2367,7 @@ class InductiveInvGen():
             # ]),
             StructuredProofNode("CommittedEntryExistsOnQuorum", "H_CommittedEntryExistsOnQuorum"),
             StructuredProofNode("EntriesCommittedInOwnTerm", "H_EntriesCommittedInOwnTerm"),
-            StructuredProofNode("LogMatching_Lemma", "LogMatching"),
+            # StructuredProofNode("LogMatching_Lemma", "LogMatching"),
             StructuredProofNode("LogEntryInTermImpliesSafeAtTerm", "H_LogEntryInTermImpliesSafeAtTerm"),
             # StructuredProofNode("H2", "H_Inv318", children = [
             #     StructuredProofNode("H2.1", "H_Inv331"),
