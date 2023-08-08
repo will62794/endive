@@ -269,8 +269,8 @@ CInit ==
     /\ Secondary = "S"
     /\ Nil = "Nil"
     /\ Server = {"1_OF_SERVER", "2_OF_SERVER", "3_OF_SERVER"}
-    /\ MaxLogLen = 3
-    /\ MaxTerm = 3
+    /\ MaxLogLen = 2
+    /\ MaxTerm = 2
     /\ InitTerm = 0
 
 \* 
