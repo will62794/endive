@@ -353,13 +353,13 @@ class StructuredProofNode():
         if self.parent and len(self.parent.ctis) >= sample_size:
             elim_cti_sample = local_rand.sample(self.parent.ctis, sample_size)
             cti_elim_viz = "".join(["x" if str(hash(c)) in self.parent_ctis_eliminated else "-" for c in elim_cti_sample])
-        proof_check_badge = "&#10004;" if self.full_proof_check else "no"
+        proof_check_badge = "&#10004;" if self.full_proof_check else "No"
         # <td style='color:{color}'> FP:{proof_check_badge} </td>
         return f"""
         <table class='proof-struct-table'>
             <tr>
                 <td style='color:{color}' class='proof-node-expr'>{self.expr}</td>
-                <td style='color:{color}' class='ctis-remaining-count'>({len(self.ctis)-len(self.ctis_eliminated)} / {len(self.ctis)} CTIs remaining) (Apalache proof:{proof_check_badge})</td>
+                <td style='color:{color}' class='ctis-remaining-count'>({len(self.ctis)-len(self.ctis_eliminated)} / {len(self.ctis)} CTIs remaining) (Apalache proof? {proof_check_badge})</td>
                 <td class='proof-parent-cti-info'> {parent_info_text} </td>
             </tr>
         </table>
@@ -1534,10 +1534,11 @@ class InductiveInvGen():
         """
         
         # Build the spec.
+        typeok = "TypeOK" # Apalache always uses normal TypeOK.
         spec_lines = [
             "---- MODULE %s ----\n" % spec_name,
             "EXTENDS %s,Naturals,TLC\n\n" % self.specname,
-            f"{rel_ind_pred_name} == {self.typeok} /\ " + " /\\ ".join(support_lemmas + [S]),
+            f"{rel_ind_pred_name} == {typeok} /\ " + " /\\ ".join(support_lemmas + [S]),
             "===="
         ]
         return "\n".join(spec_lines)
@@ -2437,11 +2438,11 @@ class InductiveInvGen():
 
             ctis_eliminated_unique = {}
 
-            print("CTIs eliminated by invs")
+            # print("CTIs eliminated by invs")
             all_eliminated_ctis = set()
             for i,inv in enumerate(sorted(ctis_eliminated.keys(), key=lambda k : int(k.replace("Inv", "")))):
             # for child in node.children:
-                print(inv, ":", len(ctis_eliminated[inv]))
+                # print(inv, ":", len(ctis_eliminated[inv]))
                 # print(ctis_eliminated_by_invs[k])
                 all_eliminated_ctis.update(ctis_eliminated[inv])
 
@@ -2457,6 +2458,9 @@ class InductiveInvGen():
                 child_node.parent_ctis_uniquely_eliminated = ctis_eliminated_unique[inv]
 
             node.ctis_eliminated = all_eliminated_ctis
+
+            # Re-write proof html.
+            save_proof_html(proof)
 
             # If all CTIs are eliminated for this node, optionally check
             # for a complete proof using Apalache.
@@ -2480,7 +2484,12 @@ class InductiveInvGen():
                 apalache_bin = "apalache/bin/apalache-mc"
                 outdir = "gen_tla/apalache_ctigen"
                 rundir = "gen_tla/apalache_ctigen_rundir"
-                cmd = f"{apalache_bin} check --out-dir={outdir} --run-dir={rundir} --cinit=CInit --init={rel_ind_pred_name} --next=Next --inv={node.expr} --length=1 {tla_filename}"
+
+                # Set a reasonable timeout on these checks for now.
+                # See https://apalache.informal.systems/docs/apalache/tuning.html#timeouts for more details.
+                smt_timeout_secs = 15
+
+                cmd = f"{apalache_bin} check --out-dir={outdir} --tuning-options=search.smt.timeout={smt_timeout_secs} --run-dir={rundir} --cinit=CInit --init={rel_ind_pred_name} --next=Next --inv={node.expr} --length=1 {tla_filename}"
                 logging.debug("Apalache command: " + cmd)
                 workdir = None
                 if self.specdir != "":
@@ -2494,6 +2503,11 @@ class InductiveInvGen():
                     if "Checker reports no error up to computation length 1" in l:
                         logging.info("No error reported by Apalache. Full proof check passed!")
                         node.full_proof_check = True
+
+                if not node.full_proof_check:
+                    logging.info("Apalache proof check failed, logging final lines of output.")
+                    for tail_line in lines[-10:]:
+                        logging.info(tail_line)
 
 
             # Re-write proof html.

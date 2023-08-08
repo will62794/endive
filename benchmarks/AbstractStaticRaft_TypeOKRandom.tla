@@ -13,8 +13,8 @@ kNumSubsets == 10
 nAvgSubsetSize == 3
 
 TypeOKRandom == 
-    /\ currentTerm \in RandomSubset(5, [Server -> InitTerm..MaxTerm])
-    /\ state \in RandomSubset(NumRandSubsets, [Server -> {Secondary, Primary}])
+    /\ currentTerm \in RandomSubset(5, [Server -> Terms])
+    /\ state \in [Server -> {Secondary, Primary}]
     /\ log \in [Server -> BoundedSeq(InitTerm..MaxTerm, MaxLogLen)]
     /\ committed \in RandomSetOfSubsets(kNumSubsets, nAvgSubsetSize, (LogIndices \X Terms \X Terms))
 
