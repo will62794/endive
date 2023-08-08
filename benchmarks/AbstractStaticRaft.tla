@@ -7,6 +7,7 @@ EXTENDS Naturals, Integers, FiniteSets, Sequences, TLC, Apalache
 
 
 CONSTANTS 
+    \* @typeAlias: SERVER = Str;
     \* @type: Set(SERVER);
     Server
 
@@ -169,9 +170,6 @@ CommitEntry(i, commitQuorum) ==
     \* Don't mark an entry as committed more than once.
     /\ ~\E c \in committed : c[1] = ind /\ c[2] = currentTerm[i] 
     /\ committed' = committed \cup {<<ind, currentTerm[i], currentTerm[i]>>}
-    \* committed \cup {}
-            \* {[ entry  |-> <<ind, currentTerm[i]>>,
-            \*    term  |-> currentTerm[i]]}
     /\ UNCHANGED <<currentTerm, state, log>>
 
 \* Action that exchanges terms between two nodes and step down the primary if
@@ -268,7 +266,7 @@ CInit ==
     /\ Primary = "P"
     /\ Secondary = "S"
     /\ Nil = "Nil"
-    /\ Server = {"1_OF_SERVER", "2_OF_SERVER", "3_OF_SERVER"}
+    /\ Server = {"s1", "s2", "s3"}
     /\ MaxLogLen = 2
     /\ MaxTerm = 2
     /\ InitTerm = 0
