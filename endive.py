@@ -11,6 +11,7 @@ import platform
 from datetime import datetime
 import tempfile
 import uuid
+import pickle
 
 import graphviz
 
@@ -342,7 +343,7 @@ class StructuredProofNode():
 
         # Set to true if we completed a full proof of this node's inductiveness
         # relative to its supporting lemmas using Apalache model checker.
-        self.full_proof_check = False
+        self.apalache_proof_check = False
 
         # Set of CTIs eliminated by set of this node's direct children.
         self.ctis_eliminated = []
@@ -364,27 +365,34 @@ class StructuredProofNode():
         return {
             "name": self.name, 
             "expr": self.expr, 
+            "apalache_proof_check": self.apalache_proof_check, 
             "children": [c.serialize() for c in self.children], 
             "ctis": [c.serialize() for c in self.ctis],
             # Eliminated CTIs are stored as CTI hashes, not full CTIs.
-            "ctis_eliminated": [c for c in self.ctis_eliminated]
+            "ctis_eliminated": [c for c in self.ctis_eliminated],
+            "parent_ctis_eliminated": [c for c in self.ctis_eliminated]
         }
 
     def load_from(self, obj):
         """ Load serialized proof object into the current one after deserializing. """
         self.name = obj["name"]
         self.expr = obj["expr"]
-        self.children = [StructuredProofNode(load_from_obj=c) for c in obj["children"]]
+        self.apalache_proof_check = obj.get("apalache_proof_check", False)
         self.ctis = [CTI(load_from_obj=c) for c in obj["ctis"]]
         self.ctis_eliminated = [c for c in obj["ctis_eliminated"]]
+        self.parent_ctis_eliminated = obj.get("parent_ctis_eliminated", [])
+        self.children = [StructuredProofNode(load_from_obj=c, parent=self) for c in obj["children"]]
 
     # <span style='color:{color}'>
     #     {self.expr} ({len(self.ctis)-len(self.ctis_eliminated)} CTIs remaining, eliminates {len(self.parent_ctis_eliminated)} parent CTIs)
     # </span>
     def list_elem_html(self):
+        all_ctis_eliminated = len(self.ctis) == len(self.ctis_eliminated)
         color = "darkred" if len(self.ctis) > len(self.ctis_eliminated) else "green"
         if not self.had_ctis_generated:
             color = "goldenrod"
+        # if all_ctis_eliminated and self.apalache_proof_check:
+        #     color = "blue"
         if self.parent is not None and len(self.parent.ctis) > 0:
             pct_parent_ctis_eliminated = float(len(self.parent_ctis_eliminated)) / len(self.parent.ctis)
         else:
@@ -399,7 +407,7 @@ class StructuredProofNode():
         if self.parent and len(self.parent.ctis) >= sample_size:
             elim_cti_sample = local_rand.sample(self.parent.ctis, sample_size)
             cti_elim_viz = "".join(["x" if str(hash(c)) in self.parent_ctis_eliminated else "-" for c in elim_cti_sample])
-        proof_check_badge = "&#10004;" if self.full_proof_check else "No"
+        proof_check_badge = "&#10004;" if self.apalache_proof_check else "<span style='color:darkred'>&cross;</span>"
         # <td style='color:{color}'> FP:{proof_check_badge} </td>
         return f"""
         <table class='proof-struct-table'>
@@ -2379,13 +2387,69 @@ class InductiveInvGen():
         """ Visualize proof structure in HTML format for inspection, and serialize to JSON. """
         filename = f"{self.proof_base_filename}.html"
         json_filename = f"{self.proof_base_filename}.json"
+        pickle_filename = f"{self.proof_base_filename}.pickle"
+
         print(f"Saving latest proof HTML to '{filename}'")
         with open(filename, 'w') as f:
             html = proof.gen_html(self, self.specname)
             f.write(html)
+
+        # Save structured proof object.
+        print(f"Saving latest proof JSON to '{json_filename}'")
         with open(json_filename, 'w') as f:
             proof_json = proof.serialize()
             json.dump(proof_json, f, indent=2)
+
+        print(f"Saving latest proof pickled to '{pickle_filename}'")
+        # Save pickled proof object.
+        with open(pickle_filename, 'wb') as f:
+            pickle.dump(proof, f)
+
+    def apalache_induction_check(self, node):
+        logging.info("Checking for full proof with Apalache.")
+        # We want to check that this node lemma is inductive relative to the conjunction
+        # of all its children lemmas.
+        spec_name = f"{self.specname}_rel_ind_check"
+        support_lemmas = [c.expr for c in node.children]
+        rel_ind_pred_name = "IndLemmas"
+        spec_str = self.make_rel_induction_check_spec(spec_name, support_lemmas, node.expr, rel_ind_pred_name)
+
+        tla_file = f"{os.path.join(self.specdir, GEN_TLA_DIR)}/{spec_name}.tla"
+        tla_filename = f"{GEN_TLA_DIR}/{spec_name}.tla"
+
+        f = open(tla_file,'w')
+        f.write(spec_str)
+        f.close()
+
+        # TODO: Factor out Apalache process management.
+        apalache_bin = "apalache/bin/apalache-mc"
+        outdir = "gen_tla/apalache_ctigen"
+        rundir = "gen_tla/apalache_ctigen_rundir"
+
+        # Set a reasonable timeout on these checks for now.
+        # See https://apalache.informal.systems/docs/apalache/tuning.html#timeouts for more details.
+        smt_timeout_secs = 15
+
+        cmd = f"{apalache_bin} check --out-dir={outdir} --tuning-options=search.smt.timeout={smt_timeout_secs} --run-dir={rundir} --cinit=CInit --init={rel_ind_pred_name} --next=Next --inv={node.expr} --length=1 {tla_filename}"
+        logging.debug("Apalache command: " + cmd)
+        workdir = None
+        if self.specdir != "":
+            workdir = self.specdir
+        subproc = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, cwd=workdir)
+        tlc_out = subproc.stdout.read().decode(sys.stdout.encoding)
+        # logging.debug(tlc_out)
+        lines = [x.strip() for x in tlc_out.splitlines()]
+        # Check for successful Apalache run.
+        for l in lines:
+            if "Checker reports no error up to computation length 1" in l:
+                logging.info("No error reported by Apalache. Full proof check passed!")
+                node.apalache_proof_check = True
+
+        if not node.apalache_proof_check:
+            logging.info("Apalache proof check failed, logging final lines of output.")
+            for tail_line in lines[-10:]:
+                logging.info(tail_line)
+
 
     def gen_proof_node_ctis(self, proof, node, target_node_name = None):
         """ Routine that updates set of CTIs for each proof node. 
@@ -2412,9 +2476,11 @@ class InductiveInvGen():
         k_ctis.sort()
 
         # Set CTIs for this node based on those generated.
-        print("Num ctis:", len(k_ctis))
+        logging.info(f"Number of proof node CTIs generated: {len(k_ctis)}. Limiting to {self.max_proof_node_ctis} CTIs.")
         num_to_sample = min(len(k_ctis), self.max_proof_node_ctis) # don't try to sample more CTIs than there are.
         node.set_ctis(random.sample(k_ctis, num_to_sample))
+
+        print("Node CTIS:", len(node.ctis))
 
         # Compute CTIs that are eliminated by each of the "support lemmas" for this node i.e.
         # its set of direct children.
@@ -2454,50 +2520,7 @@ class InductiveInvGen():
         # If all CTIs are eliminated for this node, optionally check
         # for a complete proof using Apalache.
         if len(node.get_remaining_ctis()) == 0 and self.do_apalache_final_induction_check:
-            logging.info("Checking for full proof with Apalache.")
-            # We want to check that this node lemma is inductive relative to the conjunction
-            # of all its children lemmas.
-            spec_name = f"{self.specname}_rel_ind_check"
-            support_lemmas = [c.expr for c in node.children]
-            rel_ind_pred_name = "IndLemmas"
-            spec_str = self.make_rel_induction_check_spec(spec_name, support_lemmas, node.expr, rel_ind_pred_name)
-
-            tla_file = f"{os.path.join(self.specdir, GEN_TLA_DIR)}/{spec_name}.tla"
-            tla_filename = f"{GEN_TLA_DIR}/{spec_name}.tla"
-
-            f = open(tla_file,'w')
-            f.write(spec_str)
-            f.close()
-
-            # TODO: Factor out Apalache process management.
-            apalache_bin = "apalache/bin/apalache-mc"
-            outdir = "gen_tla/apalache_ctigen"
-            rundir = "gen_tla/apalache_ctigen_rundir"
-
-            # Set a reasonable timeout on these checks for now.
-            # See https://apalache.informal.systems/docs/apalache/tuning.html#timeouts for more details.
-            smt_timeout_secs = 15
-
-            cmd = f"{apalache_bin} check --out-dir={outdir} --tuning-options=search.smt.timeout={smt_timeout_secs} --run-dir={rundir} --cinit=CInit --init={rel_ind_pred_name} --next=Next --inv={node.expr} --length=1 {tla_filename}"
-            logging.debug("Apalache command: " + cmd)
-            workdir = None
-            if self.specdir != "":
-                workdir = self.specdir
-            subproc = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, cwd=workdir)
-            tlc_out = subproc.stdout.read().decode(sys.stdout.encoding)
-            # logging.debug(tlc_out)
-            lines = [x.strip() for x in tlc_out.splitlines()]
-            # Check for successful Apalache run.
-            for l in lines:
-                if "Checker reports no error up to computation length 1" in l:
-                    logging.info("No error reported by Apalache. Full proof check passed!")
-                    node.full_proof_check = True
-
-            if not node.full_proof_check:
-                logging.info("Apalache proof check failed, logging final lines of output.")
-                for tail_line in lines[-10:]:
-                    logging.info(tail_line)
-
+            self.apalache_induction_check(node)
 
         # Re-write proof html.
         self.save_proof(proof)
@@ -2606,16 +2629,23 @@ class InductiveInvGen():
         if self.proof_tree_cmd and self.proof_tree_cmd[0] == "reload":
             logging.info(f"Reloading entire proof and re-generating CTIs.")
             proof = StructuredProof(root)
-            self.gen_proof_node_ctis(proof, root)
             self.save_proof(proof)
+            self.gen_proof_node_ctis(proof, root)
         else:
             # Otherwise load serialized proof object.
-            f = open(f"{self.proof_base_filename}.json")
-            proof_obj = json.load(f)
-            f.close()
+            # f = open(f"{self.proof_base_filename}.json")
+            # proof_obj = json.load(f)
+            # f.close()
 
-            logging.info(f"Loading proof from object file: {self.proof_base_filename}.json")
-            proof = StructuredProof(load_from_obj=proof_obj)
+            # Load from pickle file for now.
+            logging.info(f"Loading proof from pickle file: {self.proof_base_filename}.pickle")
+            f = open(f"{self.proof_base_filename}.pickle", 'rb')
+            proof = pickle.load(f)
+
+        root = proof.root
+
+            # logging.info(f"Loading proof from object file: {self.proof_base_filename}.json")
+            # proof = StructuredProof(load_from_obj=proof_obj)
 
         # Re-save proof at this point.
         self.save_proof(proof)
