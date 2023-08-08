@@ -204,9 +204,11 @@ def runtlc_check_violated_invariants(spec,config=None, tlc_workers=6, cwd=None,j
 
 class State():
     """ A single TLA+ state. """
-    def __init__(self, state_str, state_lines):
+    def __init__(self, state_str="", state_lines=[], load_from_obj=None):
         self.state_str = state_str
         self.state_lines = state_lines
+        if load_from_obj:
+            self.load_from(load_from_obj)
 
     def __str__(self):
         return self.state_str
@@ -216,6 +218,16 @@ class State():
         for l in self.state_lines:
             out += l + "\n"
         return out
+    
+    def serialize(self):
+        return {
+            "state_str": self.state_str,
+            "state_lines": self.state_lines
+        }
+    
+    def load_from(self, obj):
+        self.state_str = (obj["state_str"])
+        self.state_lines = (obj["state_lines"])
 
 class Trace():
     """ Represents a trace of states. """
@@ -225,16 +237,36 @@ class Trace():
 
     def getStates(self):
         return self.states
+    
+    def serialize(self):
+        return [s.serialize() for s in self.states]
 
 class CTI():
     """ Represents a single counterexample to induction (CTI) state. """
-    def __init__(self, cti_str, cti_lines, action_name, trace=None):
+    def __init__(self, cti_str="", cti_lines=[], action_name="", trace=None, load_from_obj=None):
         self.cti_str = cti_str
         self.action_name = action_name
         self.cti_lines = cti_lines
         # The full counterexample trace associated with this CTI. The CTI state may fall at 
         # different points within this trace.
         self.trace = trace
+
+        if load_from_obj:
+            self.load_from(load_from_obj)
+
+    def serialize(self):
+        return {
+            "cti_str": self.cti_str,
+            "action_name": self.action_name,
+            "cti_lines": self.cti_lines,
+            "trace": [s.serialize() for s in self.trace.getStates()]
+        }
+    
+    def load_from(self, obj):
+        self.cti_str = obj["cti_str"]
+        self.action_name = obj["action_name"]
+        self.cti_lines = obj["cti_lines"]
+        self.trace = Trace([State(load_from_obj=s) for s in obj["trace"]])
 
     def getCTIStateString(self):
         return self.cti_str
@@ -291,7 +323,7 @@ class CTI():
 
 class StructuredProofNode():
     """ Single node (i.e. lemma) of a structured proof tree. """
-    def __init__(self, name, expr, children=[], parent=None):
+    def __init__(self, name="", expr="", children=[], parent=None, load_from_obj = None):
         # Name used to identify the expression.
         self.name = name
         # Top level goal expression to be proven.
@@ -325,12 +357,26 @@ class StructuredProofNode():
         # none of its siblings.
         self.parent_ctis_uniquely_eliminated = []
 
+        if load_from_obj:
+            self.load_from(load_from_obj)
+
     def serialize(self):
         return {
+            "name": self.name, 
             "expr": self.expr, 
             "children": [c.serialize() for c in self.children], 
-            "ctis": []
+            "ctis": [c.serialize() for c in self.ctis],
+            # Eliminated CTIs are stored as CTI hashes, not full CTIs.
+            "ctis_eliminated": [c for c in self.ctis_eliminated]
         }
+
+    def load_from(self, obj):
+        """ Load serialized proof object into the current one after deserializing. """
+        self.name = obj["name"]
+        self.expr = obj["expr"]
+        self.children = [StructuredProofNode(load_from_obj=c) for c in obj["children"]]
+        self.ctis = [CTI(load_from_obj=c) for c in obj["ctis"]]
+        self.ctis_eliminated = [c for c in obj["ctis_eliminated"]]
 
     # <span style='color:{color}'>
     #     {self.expr} ({len(self.ctis)-len(self.ctis_eliminated)} CTIs remaining, eliminates {len(self.parent_ctis_eliminated)} parent CTIs)
@@ -399,14 +445,21 @@ class StructuredProof():
     May also represent a "partial" proof i.e. one in an incomplete state that is yet to be completed.
     """
 
-    def __init__(self, root):
+    def __init__(self, root=None, load_from_obj=None):
         # Top level goal expression to be proven.
         self.safety_goal = safety
         self.root = root 
 
+        if load_from_obj:
+            self.load_from(load_from_obj)
+
     def serialize(self):
-        return {"safety": self.safety, "proof_tree": self.root.serialize()}
+        return {"safety": self.safety_goal, "root": self.root.serialize()}
     
+    def load_from(self, obj):
+        self.safety_goal = obj["safety"]
+        self.root = StructuredProofNode(load_from_obj=obj["root"])
+
     def root_to_html(self):
         html = "<ul>"+self.root.to_html()+"</ul>"
         return html
@@ -540,6 +593,7 @@ class InductiveInvGen():
         self.do_apalache_final_induction_check = all_args["do_apalache_final_induction_check"]
         self.max_proof_node_ctis = all_args["max_proof_node_ctis"]
         self.proof_tree_mode = proof_tree_mode
+        self.proof_tree_cmd = all_args["proof_tree_cmd"]
         self.interactive_mode = interactive_mode
         self.max_num_conjuncts_per_round = max_num_conjuncts_per_round
         self.override_num_cti_workers = override_num_cti_workers
@@ -2321,12 +2375,147 @@ class InductiveInvGen():
             return None
         return self.strengthening_conjuncts
     
-    def run_interactive_mode(self):
+    def save_proof(self, proof):
+        """ Visualize proof structure in HTML format for inspection, and serialize to JSON. """
+        filename = f"{self.proof_base_filename}.html"
+        json_filename = f"{self.proof_base_filename}.json"
+        print(f"Saving latest proof HTML to '{filename}'")
+        with open(filename, 'w') as f:
+            html = proof.gen_html(self, self.specname)
+            f.write(html)
+        with open(json_filename, 'w') as f:
+            proof_json = proof.serialize()
+            json.dump(proof_json, f, indent=2)
 
+    def gen_proof_node_ctis(self, proof, node, target_node_name = None):
+        """ Routine that updates set of CTIs for each proof node. 
+        
+        Generates CTIs and computes the set eliminated by each node's support lemmas i.e. its direct children
+        """
+
+        # TODO: Eventually may want a different unique naming scheme for proof nodes.
+        if target_node_name is not None and target_node_name != node.name:
+            # Recurse right away if this is not the target node.
+            for child_node in node.children:
+                self.gen_proof_node_ctis(proof, child_node, target_node_name=target_node_name)   
+            return         
+
+        print(f"Generating CTIs for structured proof node ({node.name},{node.expr})")
+
+        # For proof tree we look for single step inductive support lemmas.
+        self.simulate_depth = 1
+
+        # Generate CTIs for this proof node, and sort and then sample to ensure a consistent
+        # ordering for a given random seed.
+        k_ctis, k_cti_traces = self.generate_ctis(props=[(node.name, node.expr)], reseed=True)
+        k_ctis = list(k_ctis)
+        k_ctis.sort()
+
+        # Set CTIs for this node based on those generated.
+        print("Num ctis:", len(k_ctis))
+        num_to_sample = min(len(k_ctis), self.max_proof_node_ctis) # don't try to sample more CTIs than there are.
+        node.set_ctis(random.sample(k_ctis, num_to_sample))
+
+        # Compute CTIs that are eliminated by each of the "support lemmas" for this node i.e.
+        # its set of direct children.
+
+        print(f"Checking CTI elimination for support lemmas of node ({node.name},{node.expr})")
+        ctis_eliminated = self.check_cti_elimination(node.ctis, [
+            (child.name,child.expr) for child in node.children
+        ])
+        # print("CTI eliminate response:", ctis_eliminated.keys())
+
+        ctis_eliminated_unique = {}
+
+        # print("CTIs eliminated by invs")
+        all_eliminated_ctis = set()
+        for i,inv in enumerate(sorted(ctis_eliminated.keys(), key=lambda k : int(k.replace("Inv", "")))):
+        # for child in node.children:
+            # print(inv, ":", len(ctis_eliminated[inv]))
+            # print(ctis_eliminated_by_invs[k])
+            all_eliminated_ctis.update(ctis_eliminated[inv])
+
+            unique = ctis_eliminated[inv]
+            for other in (ctis_eliminated.keys() - {inv}):
+                unique = unique.difference(ctis_eliminated[other])
+            ctis_eliminated_unique[inv] = unique
+            # print("Unique:", len(unique))
+            # print(ctis_eliminated_unique)
+            child_node = sorted(node.children, key=lambda x : x.expr)[i]
+            child_node.parent = node
+            child_node.parent_ctis_eliminated = ctis_eliminated[inv]
+            child_node.parent_ctis_uniquely_eliminated = ctis_eliminated_unique[inv]
+
+        node.ctis_eliminated = all_eliminated_ctis
+
+        # Re-write proof html.
+        self.save_proof(proof)
+
+        # If all CTIs are eliminated for this node, optionally check
+        # for a complete proof using Apalache.
+        if len(node.get_remaining_ctis()) == 0 and self.do_apalache_final_induction_check:
+            logging.info("Checking for full proof with Apalache.")
+            # We want to check that this node lemma is inductive relative to the conjunction
+            # of all its children lemmas.
+            spec_name = f"{self.specname}_rel_ind_check"
+            support_lemmas = [c.expr for c in node.children]
+            rel_ind_pred_name = "IndLemmas"
+            spec_str = self.make_rel_induction_check_spec(spec_name, support_lemmas, node.expr, rel_ind_pred_name)
+
+            tla_file = f"{os.path.join(self.specdir, GEN_TLA_DIR)}/{spec_name}.tla"
+            tla_filename = f"{GEN_TLA_DIR}/{spec_name}.tla"
+
+            f = open(tla_file,'w')
+            f.write(spec_str)
+            f.close()
+
+            # TODO: Factor out Apalache process management.
+            apalache_bin = "apalache/bin/apalache-mc"
+            outdir = "gen_tla/apalache_ctigen"
+            rundir = "gen_tla/apalache_ctigen_rundir"
+
+            # Set a reasonable timeout on these checks for now.
+            # See https://apalache.informal.systems/docs/apalache/tuning.html#timeouts for more details.
+            smt_timeout_secs = 15
+
+            cmd = f"{apalache_bin} check --out-dir={outdir} --tuning-options=search.smt.timeout={smt_timeout_secs} --run-dir={rundir} --cinit=CInit --init={rel_ind_pred_name} --next=Next --inv={node.expr} --length=1 {tla_filename}"
+            logging.debug("Apalache command: " + cmd)
+            workdir = None
+            if self.specdir != "":
+                workdir = self.specdir
+            subproc = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, cwd=workdir)
+            tlc_out = subproc.stdout.read().decode(sys.stdout.encoding)
+            # logging.debug(tlc_out)
+            lines = [x.strip() for x in tlc_out.splitlines()]
+            # Check for successful Apalache run.
+            for l in lines:
+                if "Checker reports no error up to computation length 1" in l:
+                    logging.info("No error reported by Apalache. Full proof check passed!")
+                    node.full_proof_check = True
+
+            if not node.full_proof_check:
+                logging.info("Apalache proof check failed, logging final lines of output.")
+                for tail_line in lines[-10:]:
+                    logging.info(tail_line)
+
+
+        # Re-write proof html.
+        self.save_proof(proof)
+
+        # If this was our target node, terminate.
+        if target_node_name is not None and target_node_name == node.name:
+            return
+
+        # Recursively generate CTIs for children as well.
+        for child_node in node.children:
+            self.gen_proof_node_ctis(proof, child_node)
+
+    def run_interactive_mode(self):
 
         ###########
         # Build a demo proof structure.
         ###########
+        self.proof_base_filename = f"benchmarks/{self.specname}.proof"
 
         # TwoPhase proof structure.
         twopc_children = [
@@ -2384,158 +2573,76 @@ class InductiveInvGen():
 
         # root = twopc_root
         root = msr_root
-        proof = StructuredProof(root)
+        # proof = StructuredProof(root)
 
 
+
+        # if load_from_file:
+        #     # Load serialized proof object.
+        #     f = open(f"{self.proof_base_filename}.json")
+        #     proof_obj = json.load(f)
+        #     f.close()
+
+        #     logging.info(f"Loading proof from object file: {self.proof_base_filename}.json")
+        #     proof = StructuredProof(load_from_obj=proof_obj)
+        # else:
+        #     # Otherwise load from local template.
+        #     proof = StructuredProof(root)
 
         ###########
         ###########
 
-        # For proof tree we look for single step inductive support lemmas.
-        self.simulate_depth = 1
+        # root_obligation = ("Safety", safety)
+        # Optionally save proof structure as DOT graph.
+        # proof.save_as_dot("benchmarks/" + self.specname + "_ind-proof-tree")
 
-        # May need to shrink when doing motif analysis/clustering. Will see.
-        MAX_CTIS_PER_NODE = self.max_proof_node_ctis
+        proof = None
 
-        root_obligation = ("Safety", safety)
+        #
+        # Handle interactive proof tree commands.
+        #
 
-        def save_proof_html(proof):
-            """ Visualize proof structure in HTML format for inspection. """
-            filename = f"benchmarks/{self.specname}.proof.html"
-            print(f"Saving latest proof HTML to '{filename}'")
-            html = proof.gen_html(self, self.specname)
-            f = open(filename, 'w')
-            f.write(html)
-            f.close()            
+        # Optionally reload proof structure from locally defined template.
+        if self.proof_tree_cmd and self.proof_tree_cmd[0] == "reload":
+            logging.info(f"Reloading entire proof and re-generating CTIs.")
+            proof = StructuredProof(root)
+            self.gen_proof_node_ctis(proof, root)
+            self.save_proof(proof)
+        else:
+            # Otherwise load serialized proof object.
+            f = open(f"{self.proof_base_filename}.json")
+            proof_obj = json.load(f)
+            f.close()
 
-        def gen_proof_node_ctis(proof, node):
-            """ Routine that updates set of CTIs for each proof node. 
-            
-            Generates CTIs and computes the set eliminated by each node's support lemmas i.e. its direct children
-            """
+            logging.info(f"Loading proof from object file: {self.proof_base_filename}.json")
+            proof = StructuredProof(load_from_obj=proof_obj)
 
-            print(f"Generating CTIs for structured proof node ({node.name},{node.expr})")
+        # Re-save proof at this point.
+        self.save_proof(proof)
+        if not self.proof_tree_cmd:
+            return
+        
+        logging.info(f"Handling proof tree command: {self.proof_tree_cmd[0]}")
 
-            # Generate CTIs for this proof node, and sort and then sample to ensure a consistent
-            # ordering for a given random seed.
-            k_ctis, k_cti_traces = self.generate_ctis(props=[(node.name, node.expr)], reseed=True)
-            k_ctis = list(k_ctis)
-            k_ctis.sort()
+        if self.proof_tree_cmd[0] == "ctigen_all":
+            logging.info("(proof_structure) [ctigen_all] Re-generating CTIs for all proof nodes.")
+            self.gen_proof_node_ctis(proof, root)
 
-            # Set CTIs for this node based on those generated.
-            print("Num ctis:", len(k_ctis))
-            num_to_sample = min(len(k_ctis), MAX_CTIS_PER_NODE) # don't try to sample more CTIs than there are.
-            node.set_ctis(random.sample(k_ctis, num_to_sample))
+            # Save final proof html.
+            self.save_proof(proof)
 
-            # Compute CTIs that are eliminated by each of the "support lemmas" for this node i.e.
-            # its set of direct children.
+        elif self.proof_tree_cmd[0] == "ctigen":
+            proof_node_name = self.proof_tree_cmd[1]
+            logging.info(f"(proof_structure) [ctigen] Re-generating CTIs for all proof node '{proof_node_name}'.")
+            self.gen_proof_node_ctis(proof, root, target_node_name=proof_node_name)
 
-            print(f"Checking CTI elimination for support lemmas of node ({node.name},{node.expr})")
-            ctis_eliminated = self.check_cti_elimination(node.ctis, [
-                (child.name,child.expr) for child in node.children
-            ])
-            # print("CTI eliminate response:", ctis_eliminated.keys())
+            # Save final proof html.
+            self.save_proof(proof)
 
-            ctis_eliminated_unique = {}
-
-            # print("CTIs eliminated by invs")
-            all_eliminated_ctis = set()
-            for i,inv in enumerate(sorted(ctis_eliminated.keys(), key=lambda k : int(k.replace("Inv", "")))):
-            # for child in node.children:
-                # print(inv, ":", len(ctis_eliminated[inv]))
-                # print(ctis_eliminated_by_invs[k])
-                all_eliminated_ctis.update(ctis_eliminated[inv])
-
-                unique = ctis_eliminated[inv]
-                for other in (ctis_eliminated.keys() - {inv}):
-                    unique = unique.difference(ctis_eliminated[other])
-                ctis_eliminated_unique[inv] = unique
-                print("Unique:", len(unique))
-                # print(ctis_eliminated_unique)
-                child_node = sorted(node.children, key=lambda x : x.expr)[i]
-                child_node.parent = node
-                child_node.parent_ctis_eliminated = ctis_eliminated[inv]
-                child_node.parent_ctis_uniquely_eliminated = ctis_eliminated_unique[inv]
-
-            node.ctis_eliminated = all_eliminated_ctis
-
-            # Re-write proof html.
-            save_proof_html(proof)
-
-            # If all CTIs are eliminated for this node, optionally check
-            # for a complete proof using Apalache.
-            if len(node.get_remaining_ctis()) == 0 and self.do_apalache_final_induction_check:
-                logging.info("Checking for full proof with Apalache.")
-                # We want to check that this node lemma is inductive relative to the conjunction
-                # of all its children lemmas.
-                spec_name = f"{self.specname}_rel_ind_check"
-                support_lemmas = [c.expr for c in node.children]
-                rel_ind_pred_name = "IndLemmas"
-                spec_str = self.make_rel_induction_check_spec(spec_name, support_lemmas, node.expr, rel_ind_pred_name)
-
-                tla_file = f"{os.path.join(self.specdir, GEN_TLA_DIR)}/{spec_name}.tla"
-                tla_filename = f"{GEN_TLA_DIR}/{spec_name}.tla"
-
-                f = open(tla_file,'w')
-                f.write(spec_str)
-                f.close()
-
-                # TODO: Factor out Apalache process management.
-                apalache_bin = "apalache/bin/apalache-mc"
-                outdir = "gen_tla/apalache_ctigen"
-                rundir = "gen_tla/apalache_ctigen_rundir"
-
-                # Set a reasonable timeout on these checks for now.
-                # See https://apalache.informal.systems/docs/apalache/tuning.html#timeouts for more details.
-                smt_timeout_secs = 15
-
-                cmd = f"{apalache_bin} check --out-dir={outdir} --tuning-options=search.smt.timeout={smt_timeout_secs} --run-dir={rundir} --cinit=CInit --init={rel_ind_pred_name} --next=Next --inv={node.expr} --length=1 {tla_filename}"
-                logging.debug("Apalache command: " + cmd)
-                workdir = None
-                if self.specdir != "":
-                    workdir = self.specdir
-                subproc = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, cwd=workdir)
-                tlc_out = subproc.stdout.read().decode(sys.stdout.encoding)
-                # logging.debug(tlc_out)
-                lines = [x.strip() for x in tlc_out.splitlines()]
-                # Check for successful Apalache run.
-                for l in lines:
-                    if "Checker reports no error up to computation length 1" in l:
-                        logging.info("No error reported by Apalache. Full proof check passed!")
-                        node.full_proof_check = True
-
-                if not node.full_proof_check:
-                    logging.info("Apalache proof check failed, logging final lines of output.")
-                    for tail_line in lines[-10:]:
-                        logging.info(tail_line)
-
-
-            # Re-write proof html.
-            save_proof_html(proof)
-
-            # Recursively generate CTIs for children as well.
-            for child_node in node.children:
-                gen_proof_node_ctis(proof, child_node)
-
-        # Save proof structure as DOT graph.
-        proof.save_as_dot("benchmarks/" + self.specname + "_ind-proof-tree")
-
-        logging.info("Re-generating CTIs for all proof nodes.")
-        save_proof_html(proof)
-        gen_proof_node_ctis(proof, root)
-
-        print("CTIs eliminated by invs")
-
-        # Save final proof html.
-        save_proof_html(proof)
+        if self.proof_tree_cmd == None:
+            logging.info("No proof tree command specified. Terminating.")
 
         return
-
-        # # TODO: Persist and reload proof graph structure in between sessions?
-
-        # # Save updated proof structure.
-        # with open(f"{self.specname}.proof.json", 'w') as f:
-        #     json.dump(self.proof_graph, f, indent=2)
 
     def do_invgen_proof_tree_mode(self, interactive_mode=False):
         self.lemma_obligations = [("Safety", self.safety)]
@@ -2870,16 +2977,21 @@ if __name__ == "__main__":
     parser.add_argument('--opt_quant_minimize', help='Enable quantifier minimization optimization for faster invariant checking.', required=False, default=False, action='store_true')
     parser.add_argument('--try_final_minimize', help='Attempt to minimize the final discovered invariant.', required=False, default=False, action='store_true')
     parser.add_argument('--results_dir', help='Directory to save results.', required=False, type=str, default="results")
-    parser.add_argument('--proof_tree_mode', help='Run in inductive proof tree mode (EXPERIMENTAL).', default=False, action='store_true')
-    parser.add_argument('--interactive_mode', help='Run in interactive proof tree mode (EXPERIMENTAL).', default=False, action='store_true')
     parser.add_argument('--max_num_conjuncts_per_round', help='Max number of conjuncts to learn per round.', type=int, default=10000)
     parser.add_argument('--max_num_ctis_per_round', help='Max number of CTIs per round.', type=int, default=10000)
     parser.add_argument('--override_num_cti_workers', help='Max number of TLC workers for CTI generation.', type=int, default=None)
+    
+    # Proof tree related commands.
+    parser.add_argument('--proof_tree_mode', help='Run in inductive proof tree mode (EXPERIMENTAL).', default=False, action='store_true')
+    parser.add_argument('--interactive', help='Run in interactive proof tree mode (EXPERIMENTAL).', default=False, action='store_true')
+    parser.add_argument('--max_proof_node_ctis', help='Maximum number of CTIs per proof node.', type=int, default=5000)
+    parser.add_argument('--proof_tree_cmd', help='Proof tree command (EXPERIMENTAL).', default=None, type=str, required=False, nargs="+")
+
+    # Apalache related commands.
     parser.add_argument('--use_apalache_ctigen', help='Use Apalache for CTI generation (experimental).', required=False, default=False, action='store_true')
     parser.add_argument('--do_apalache_final_induction_check', help='Do final induction check with Apalache (experimental).', required=False, default=False, action='store_true')
-    parser.add_argument('--max_proof_node_ctis', help='Maximum number of CTIs per proof node.', type=int, default=5000)
-
     
+
     args = vars(parser.parse_args())
 
     # Parse out spec name and directory, if needed.
@@ -2971,7 +3083,7 @@ if __name__ == "__main__":
                                 num_simulate_traces=NUM_SIMULATE_TRACES, simulate_depth=simulate_depth, tlc_workers=tlc_workers, quant_vars=quant_vars, symmetry=symmetry,
                                 simulate=simulate, java_exe=JAVA_EXE, cached_invs=cached_invs, cached_invs_gen_time_secs=cached_invs_gen_time_secs, use_cpp_invgen=use_cpp_invgen,
                                 pregen_inv_cmd=pregen_inv_cmd, opt_quant_minimize=args["opt_quant_minimize"],try_final_minimize=try_final_minimize,proof_tree_mode=args["proof_tree_mode"],
-                                interactive_mode=args["interactive_mode"],
+                                interactive_mode=args["interactive"],
                                 max_num_conjuncts_per_round=args["max_num_conjuncts_per_round"], max_num_ctis_per_round=args["max_num_ctis_per_round"],
                                 override_num_cti_workers=args["override_num_cti_workers"],use_apalache_ctigen=args["use_apalache_ctigen"],all_args=args)
 
