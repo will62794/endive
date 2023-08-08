@@ -257,7 +257,7 @@ LogIndices == 1..MaxLogLen
 
 \* Statement of type correctness.
 TypeOK ==
-    /\ currentTerm \in [Server -> Nat]
+    /\ currentTerm \in [Server -> Terms]
     /\ state \in [Server -> {Secondary, Primary}]
     /\ log = Gen(3)
     /\ \A s \in Server : \A i \in DOMAIN log[s] : log[s][i] \in Terms
