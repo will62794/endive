@@ -2515,11 +2515,11 @@ class InductiveInvGen():
 
         ctis_eliminated_unique = {}
 
-        # print("CTIs eliminated by invs")
+        print("CTIs eliminated by invs")
         all_eliminated_ctis = set()
         for i,inv in enumerate(sorted(ctis_eliminated.keys(), key=lambda k : int(k.replace("Inv", "")))):
         # for child in node.children:
-            # print(inv, ":", len(ctis_eliminated[inv]))
+            print(inv, ":", len(ctis_eliminated[inv]))
             # print(ctis_eliminated_by_invs[k])
             all_eliminated_ctis.update(ctis_eliminated[inv])
 
@@ -2609,7 +2609,7 @@ class InductiveInvGen():
             # ]),
             StructuredProofNode("CommittedEntryExistsOnQuorum", "H_CommittedEntryExistsOnQuorum"),
             StructuredProofNode("EntriesCommittedInOwnTerm", "H_EntriesCommittedInOwnTerm"),
-            StructuredProofNode("LogMatching_Lemma", "LogMatching"),
+            # StructuredProofNode("LogMatching_Lemma", "LogMatching"),
             StructuredProofNode("LogEntryInTermImpliesSafeAtTerm", "H_LogEntryInTermImpliesSafeAtTerm"),
             StructuredProofNode("LogsLaterThanCommittedMustHaveCommitted", "H_LogsLaterThanCommittedMustHaveCommitted"),
             # StructuredProofNode("H2", "H_Inv318", children = [
@@ -2619,8 +2619,14 @@ class InductiveInvGen():
         ]
         msr_root = StructuredProofNode("Safety", safety, children = msr_children)
 
-        # root = twopc_root
-        root = msr_root
+        root = None
+        if self.specname == "TwoPhase":
+            root = twopc_root
+        elif self.specname == "AbstractStaticRaft":
+            root = msr_root
+        else:
+            logging.info("Unknown spec for proof structure: " + self.specname)
+            return
         # proof = StructuredProof(root)
 
 
@@ -2678,6 +2684,15 @@ class InductiveInvGen():
             return
         
         logging.info(f"Handling proof tree command: {self.proof_tree_cmd[0]}")
+
+
+        # from flask import Flask
+        # app = Flask(__name__)
+        # @app.route('/')
+        # def index():
+        #     return json.dumps({'name': 'alice',
+        #                     'email': 'alice@outlook.com'})
+        # app.run()
 
         if self.proof_tree_cmd[0] == "ctigen_all":
             logging.info("(proof_structure) [ctigen_all] Re-generating CTIs for all proof nodes.")
