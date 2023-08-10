@@ -620,6 +620,11 @@ class InductiveInvGen():
         self.tlc_workers = tlc_workers
         self.use_apalache_ctigen = use_apalache_ctigen
         self.do_apalache_final_induction_check = all_args["do_apalache_final_induction_check"]
+
+        # Ensure a reasonable default timeout on these checks for now.
+        # See https://apalache.informal.systems/docs/apalache/tuning.html#timeouts for more details.
+        self.apalache_smt_timeout_secs = all_args["apalache_smt_timeout_secs"]
+
         self.max_proof_node_ctis = all_args["max_proof_node_ctis"]
         self.proof_tree_mode = proof_tree_mode
         self.proof_tree_cmd = all_args["proof_tree_cmd"]
@@ -2470,11 +2475,7 @@ class InductiveInvGen():
         # Use this tuning option to avoid unnecessary checking of inductive invariant at bound 0.
         tuning_opt_inv_filter = "search.invariantFilter=1->.*"
 
-        # Set a reasonable timeout on these checks for now.
-        # See https://apalache.informal.systems/docs/apalache/tuning.html#timeouts for more details.
-        smt_timeout_secs = 15
-
-        tuning_opts = f"search.smt.timeout={smt_timeout_secs}:{tuning_opt_inv_filter}"
+        tuning_opts = f"search.smt.timeout={self.apalache_smt_timeout_secs}:{tuning_opt_inv_filter}"
         cmd = f"{apalache_bin} check --out-dir={outdir} --tuning-options='{tuning_opts}' --run-dir={rundir} --cinit=CInit --init={rel_ind_pred_name} --next=Next --inv={goal_inv_name} --length=1 {tla_filename}"
         logging.debug("Apalache command: " + cmd)
         workdir = None
@@ -2628,20 +2629,17 @@ class InductiveInvGen():
                     StructuredProofNode("LogEntryInTermImpliesSafeAtTerm", "H_LogEntryInTermImpliesSafeAtTerm")
                 ])
             ]),
-            # StructuredProofNode("OnePrimaryPerTerm_Lemma", "OnePrimaryPerTerm", children = [
-            #     # StructuredProofNode("TermsOfEntriesGrowMonotonically", "H_TermsOfEntriesGrowMonotonically"),
-            #     # StructuredProofNode("LeaderCompleteness_Lemma", "LeaderCompleteness"),
-            #     StructuredProofNode("QuorumsSafeAtTerms", "H_QuorumsSafeAtTerms")
-            # ]),
+            StructuredProofNode("OnePrimaryPerTerm_Lemma", "H_OnePrimaryPerTerm", children = [
+                # StructuredProofNode("TermsOfEntriesGrowMonotonically", "H_TermsOfEntriesGrowMonotonically"),
+                # StructuredProofNode("LeaderCompleteness_Lemma", "LeaderCompleteness"),
+                StructuredProofNode("QuorumsSafeAtTerms", "H_QuorumsSafeAtTerms")
+            ]),
             StructuredProofNode("CommittedEntryExistsOnQuorum", "H_CommittedEntryExistsOnQuorum"),
             StructuredProofNode("EntriesCommittedInOwnTerm", "H_EntriesCommittedInOwnTerm"),
             StructuredProofNode("LogMatching_Lemma", "LogMatching"),
-            StructuredProofNode("LogEntryInTermImpliesSafeAtTerm", "H_LogEntryInTermImpliesSafeAtTerm"),
+            StructuredProofNode("PrimaryHasEntriesItCreated", "H_PrimaryHasEntriesItCreated"),
             StructuredProofNode("LogsLaterThanCommittedMustHaveCommitted", "H_LogsLaterThanCommittedMustHaveCommitted"),
-            # StructuredProofNode("H2", "H_Inv318", children = [
-            #     StructuredProofNode("H2.1", "H_Inv331"),
-            #     StructuredProofNode("H2.2", "H_Inv344")
-            # ])
+            StructuredProofNode("LogsWithEntryInTermMustHaveEarlierCommittedEntriesFromTerm", "H_LogsWithEntryInTermMustHaveEarlierCommittedEntriesFromTerm"),
         ]
         msr_root = StructuredProofNode("Safety", safety, children = msr_children)
 
@@ -3112,6 +3110,7 @@ if __name__ == "__main__":
     # Apalache related commands.
     parser.add_argument('--use_apalache_ctigen', help='Use Apalache for CTI generation (experimental).', required=False, default=False, action='store_true')
     parser.add_argument('--do_apalache_final_induction_check', help='Do final induction check with Apalache (experimental).', required=False, default=False, action='store_true')
+    parser.add_argument('--apalache_smt_timeout_secs', help='Apalache SMT timeout. (experimental).', required=False, type=int, default=15)
     
 
     args = vars(parser.parse_args())
