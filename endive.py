@@ -2455,11 +2455,15 @@ class InductiveInvGen():
         outdir = "gen_tla/apalache_ctigen"
         rundir = "gen_tla/apalache_ctigen"
 
+        # Use this tuning option to avoid unnecessary checking of inductive invariant at bound 0.
+        tuning_opt_inv_filter = "search.invariantFilter=1->.*"
+
         # Set a reasonable timeout on these checks for now.
         # See https://apalache.informal.systems/docs/apalache/tuning.html#timeouts for more details.
         smt_timeout_secs = 15
 
-        cmd = f"{apalache_bin} check --out-dir={outdir} --tuning-options=search.smt.timeout={smt_timeout_secs} --run-dir={rundir} --cinit=CInit --init={rel_ind_pred_name} --next=Next --inv={goal_inv_name} --length=1 {tla_filename}"
+        tuning_opts = f"search.smt.timeout={smt_timeout_secs}:{tuning_opt_inv_filter}"
+        cmd = f"{apalache_bin} check --out-dir={outdir} --tuning-options='{tuning_opts}' --run-dir={rundir} --cinit=CInit --init={rel_ind_pred_name} --next=Next --inv={goal_inv_name} --length=1 {tla_filename}"
         logging.debug("Apalache command: " + cmd)
         workdir = None
         if self.specdir != "":
