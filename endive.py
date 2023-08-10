@@ -24,6 +24,7 @@ DEBUG = False
 TLC_MAX_SET_SIZE = 10 ** 8
 JAVA_EXE="java"
 GEN_TLA_DIR="gen_tla"
+LATEST_TLC_JAR = "tla2tools_2.18.jar"
 
 def chunks(seq, n_chunks):
     """ Splits a given iterable into n evenly (as possible) sized chunks."""
@@ -1236,6 +1237,8 @@ class InductiveInvGen():
         trace_action_names = []
 
         while curr_line < len(lines):
+            # print(lines[curr_line])
+
             if re.search('Model checking completed', lines[curr_line]):
                 break
 
@@ -1246,7 +1249,10 @@ class InductiveInvGen():
             # Check for next "State N" line.
             if re.search("^State (.*)", lines[curr_line]):
 
-                res = re.match(".*State (.*)\: <([A-Za-z0-9_-]*) .*>",lines[curr_line])
+                # res = re.match(".*State ([0-9]*)\: <([A-Za-z0-9_-]*)[(]{0,1}([A-Za-z0-9_-]*)[)]{0,1} .*>",lines[curr_line])
+
+                # State 2: <BecomeLeader(n1,{n1, n3}) line 149, col 5 to line 157, col 35 of module AbstractStaticRaft>
+                res = re.match(".*State ([0-9]*)\: <(.*)>",lines[curr_line])
                 statek = int(res.group(1))
                 action_name = res.group(2)
                 trace_action_names.append(action_name)
@@ -1516,8 +1522,8 @@ class InductiveInvGen():
             subproc = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, cwd=workdir)
             return subproc
 
-        args = (dirpath, TLC_MAX_SET_SIZE, simulate_flag, self.simulate_depth, ctiseed, tag, num_ctigen_tlc_workers, indcheckcfgfilename, indchecktlafilename)
-        cmd = self.java_exe + ' -Xss16M -Djava.io.tmpdir="%s" -cp tla2tools-checkall.jar tlc2.TLC -maxSetSize %d %s -depth %d -seed %d -noGenerateSpecTE -metadir states/indcheckrandom_%s -continue -deadlock -workers %d -config %s %s' % args
+        args = (dirpath, "tla2tools-checkall.jar", TLC_MAX_SET_SIZE, simulate_flag, self.simulate_depth, ctiseed, tag, num_ctigen_tlc_workers, indcheckcfgfilename, indchecktlafilename)
+        cmd = self.java_exe + ' -Xss16M -Djava.io.tmpdir="%s" -cp %s tlc2.TLC -maxSetSize %d %s -depth %d -seed %d -noGenerateSpecTE -metadir states/indcheckrandom_%s -continue -deadlock -workers %d -config %s %s' % args
         logging.debug("TLC command: " + cmd)
         workdir = None
         if self.specdir != "":
@@ -2626,7 +2632,7 @@ class InductiveInvGen():
             # ]),
             StructuredProofNode("CommittedEntryExistsOnQuorum", "H_CommittedEntryExistsOnQuorum"),
             StructuredProofNode("EntriesCommittedInOwnTerm", "H_EntriesCommittedInOwnTerm"),
-            # StructuredProofNode("LogMatching_Lemma", "LogMatching"),
+            StructuredProofNode("LogMatching_Lemma", "LogMatching"),
             StructuredProofNode("LogEntryInTermImpliesSafeAtTerm", "H_LogEntryInTermImpliesSafeAtTerm"),
             StructuredProofNode("LogsLaterThanCommittedMustHaveCommitted", "H_LogsLaterThanCommittedMustHaveCommitted"),
             # StructuredProofNode("H2", "H_Inv318", children = [

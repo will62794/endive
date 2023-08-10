@@ -17,7 +17,8 @@ nAvgSubsetSize == 3
 kOrSmallerSubset(k, S) == UNION {(kSubset(n, S)) : n \in 0..k}
 
 TypeOKRandom == 
-    /\ currentTerm \in RandomSubset(5, [Server -> Terms])
+    \* /\ currentTerm \in RandomSubset(5, [Server -> Terms])
+    /\ currentTerm \in [Server -> Terms]
     /\ state \in [Server -> {Secondary, Primary}]
     /\ log \in [Server -> BoundedSeq(InitTerm..MaxTerm, MaxLogLen)]
     /\ committed \in kOrSmallerSubset(2, (LogIndices \X Terms \X Terms))

@@ -210,7 +210,7 @@ NextUnchanged == UNCHANGED vars
 \* Correctness properties
 \*
 
-OnePrimaryPerTerm == 
+H_OnePrimaryPerTerm == 
     \A s,t \in Server :
         (/\ state[s] = Primary 
          /\ state[t] = Primary
@@ -309,8 +309,26 @@ H_LogsLaterThanCommittedMustHaveCommitted ==
     \A s \in Server : 
     \A c \in committed :
         (\E i \in DOMAIN log[s] : log[s][i] > c[3]) =>
-            \A d \in committed :
-                d[3] <= c[3] => /\ Len(log[s]) >= d[1]
-                                /\ log[s][d[1]] = d[3]
+            (\A d \in committed :
+                (d[3] <= c[3]) => /\ Len(log[s]) >= d[1]
+                                  /\ log[s][d[1]] = d[3])
+
+H_LogsWithEntryInTermMustHaveEarlierCommittedEntriesFromTerm ==
+    \A s \in Server : 
+    \A c \in committed :
+        (\E i \in DOMAIN log[s] : log[s][i] = c[3] /\ i > c[1]) =>
+                    /\ Len(log[s]) >= c[1]
+                    /\ log[s][c[1]] = c[2]
+
+\* If a log entry exists in term T and there is a primary in term T, then this
+\* log entry should be present in that primary's log.
+H_PrimaryHasEntriesItCreated == 
+    \A i,j \in Server :
+    (state[i] = Primary) => 
+    \* Can't be that another node has an entry in this primary's term
+    \* but the primary doesn't have it.
+        ~(\E k \in DOMAIN log[j] :
+            /\ log[j][k] = currentTerm[i]
+            /\ ~InLog(<<k,log[j][k]>>, i))
 
 =============================================================================
