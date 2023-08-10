@@ -1454,6 +1454,9 @@ class InductiveInvGen():
         invcheck_tla_indcheck += "    /\\ %s\n" % self.typeok
         invcheck_tla_indcheck += f"    /\ InvStrengthened\n"
 
+        depth_bound = 2
+        invcheck_tla_indcheck += f'NextBounded ==  TLCGet("level") < {depth_bound} /\ Next\n'
+
         invcheck_tla_indcheck += "===="
 
         indchecktlafile = f"{os.path.join(self.specdir, GEN_TLA_DIR)}/{self.specname}_CTIGen_{ctiseed}.tla"
