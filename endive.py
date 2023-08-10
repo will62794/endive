@@ -689,7 +689,9 @@ class InductiveInvGen():
         self.total_num_ctis_eliminated = 0
         self.total_num_cti_elimination_rounds = 0
 
-        # Create directory for generated files if needed.
+        # Clear and create directory for generated files if needed.
+        os.system(f"rm -rf {os.path.join(self.specdir, GEN_TLA_DIR)}")
+        os.system(f"rm -rf {os.path.join(self.specdir, 'states')}")
         os.system(f"mkdir -p {os.path.join(self.specdir, GEN_TLA_DIR)}")
 
     def initialize_quant_inv(self):
@@ -1408,7 +1410,7 @@ class InductiveInvGen():
 
         # Avoid TLC directory naming conflicts.
         # Use small UUID.
-        tag = uuid.uuid4().hex[:16]
+        tag = uuid.uuid4().hex[:8]
         ctiseed = random.randint(0,10000)
 
         # Generate spec for generating CTIs.
@@ -1810,7 +1812,7 @@ class InductiveInvGen():
             for ci,cti_chunk in enumerate(cti_chunks):
 
                 # Build and save the TLA+ spec.
-                spec_name = f"{self.specname}_chunk{ci}_IndQuickCheck"
+                spec_name = f"{self.specname}_IndQuickCheck_chunk{ci}"
                 spec_str = self.make_indquickcheck_tla_spec(spec_name, invs, sat_invs_group, cti_chunk, quant_inv_fn)
 
                 ctiquicktlafile = f"{os.path.join(self.specdir, GEN_TLA_DIR)}/{spec_name}.tla"
@@ -1821,8 +1823,8 @@ class InductiveInvGen():
                 f.close()
 
                 # Generate config file.
-                ctiquickcfgfile=f"{os.path.join(self.specdir, GEN_TLA_DIR)}/{self.specname}_chunk{ci}_CTIQuickCheck.cfg"
-                ctiquickcfgfilename=f"{GEN_TLA_DIR}/{self.specname}_chunk{ci}_CTIQuickCheck.cfg"
+                ctiquickcfgfile=f"{os.path.join(self.specdir, GEN_TLA_DIR)}/{self.specname}_CTIQuickCheck_chunk{ci}.cfg"
+                ctiquickcfgfilename=f"{GEN_TLA_DIR}/{self.specname}_CTIQuickCheck_chunk{ci}.cfg"
                 cfg_str = self.make_ctiquickcheck_cfg(invs, sat_invs_group, cti_chunk, quant_inv_fn)
                 
                 with open(ctiquickcfgfile,'w') as f:
@@ -1830,8 +1832,8 @@ class InductiveInvGen():
 
 
                 # Generate alternate config file for computing reachability graph from each CTI.
-                ctiquickcfgfile_reach=f"{os.path.join(self.specdir, GEN_TLA_DIR)}/{self.specname}_chunk{ci}_CTIQuickCheck_Reachable.cfg"
-                ctiquickcfgfilename_reach=f"{GEN_TLA_DIR}/{self.specname}_chunk{ci}_CTIQuickCheck_Reachable.cfg"
+                ctiquickcfgfile_reach=f"{os.path.join(self.specdir, GEN_TLA_DIR)}/{self.specname}CTIQuickCheck_Reachable_chunk{ci}_.cfg"
+                ctiquickcfgfilename_reach=f"{GEN_TLA_DIR}/{self.specname}_CTIQuickCheck_Reachable_chunk{ci}.cfg"
                 cfg_str = self.make_ctiquickcheck_cfg(invs, sat_invs_group, cti_chunk, quant_inv_fn, next_pred="CTICheckNext_DepthBoundedReachability")
                 
                 with open(ctiquickcfgfile_reach,'w') as f:
@@ -2230,7 +2232,7 @@ class InductiveInvGen():
                 for ci,cti_chunk in enumerate(cti_chunks):
 
                     # Build and save the TLA+ spec.
-                    spec_name = f"{self.specname}_chunk{ci}_IndQuickCheck"
+                    spec_name = f"{self.specname}_IndQuickCheck_chunk{ci}"
                     # print("invs")
                     # print(invs[:5])
                     # print(len(invs))
@@ -2247,8 +2249,8 @@ class InductiveInvGen():
                     f.close()
 
                     # Generate config file.
-                    ctiquickcfgfile=f"{os.path.join(self.specdir, GEN_TLA_DIR)}/{self.specname}_chunk{ci}_CTIQuickCheck.cfg"
-                    ctiquickcfgfilename=f"{GEN_TLA_DIR}/{self.specname}_chunk{ci}_CTIQuickCheck.cfg"
+                    ctiquickcfgfile=f"{os.path.join(self.specdir, GEN_TLA_DIR)}/{self.specname}_CTIQuickCheck_chunk{ci}.cfg"
+                    ctiquickcfgfilename=f"{GEN_TLA_DIR}/{self.specname}_CTIQuickCheck_chunk{ci}.cfg"
                     cfg_str = self.make_ctiquickcheck_cfg(invs, sat_invs_group, cti_chunk, quant_inv_fn)
                     
                     f = open(ctiquickcfgfile,'w')
