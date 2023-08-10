@@ -1630,6 +1630,7 @@ class InductiveInvGen():
             "EXTENDS %s,Naturals,TLC\n" % self.specname,
             f"{rel_ind_pred_name} == ",
             "\n".join(["  /\ " + c for c in all_conjuncts]),
+            "",
             f"{goal_inv_name} == " + " => ".join(goal_inv_conjs),
             "===="
         ]
