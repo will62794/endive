@@ -2524,7 +2524,7 @@ class InductiveInvGen():
         k_ctis.sort()
 
         # Set CTIs for this node based on those generated.
-        logging.info(f"Number of proof node CTIs generated: {len(k_ctis)}. Limiting to {self.max_proof_node_ctis} CTIs.")
+        logging.info(f"Number of proof node CTIs generated: {len(k_ctis)}. Sampling a limit of {self.max_proof_node_ctis} CTIs.")
         num_to_sample = min(len(k_ctis), self.max_proof_node_ctis) # don't try to sample more CTIs than there are.
         node.set_ctis(random.sample(k_ctis, num_to_sample))
 

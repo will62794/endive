@@ -269,7 +269,7 @@ CInit ==
     /\ Nil = "Nil"
     /\ Server = {"s1", "s2", "s3"}
     /\ MaxLogLen = 3
-    /\ MaxTerm = 2
+    /\ MaxTerm = 3
     /\ InitTerm = 0
 
 \* 

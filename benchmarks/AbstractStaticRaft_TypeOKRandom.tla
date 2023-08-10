@@ -5,22 +5,25 @@
 \* 
 EXTENDS AbstractStaticRaft, Randomization, FiniteSetsExt
 
-SeqOf(set, n) == UNION {[1..m -> set] : m \in 0..n}
+SeqOf(S, n) == UNION {[1..m -> S] : m \in 0..n}
 BoundedSeq(S, n) == SeqOf(S, n)
 
 \* Parameters for random sampling if using it.
-NumRandSubsets == 13
 kNumSubsets == 10
 nAvgSubsetSize == 3
 
 \* Set of all subsets of a set of size <= k.
 kOrSmallerSubset(k, S) == UNION {(kSubset(n, S)) : n \in 0..k}
 
+\* Potentially use cardinality of log type to better estimate sampling parameters.
+logDomain == Server
+logRange == BoundedSeq(InitTerm..MaxTerm, MaxLogLen)
+logCardinality == Cardinality(logRange) ^ Cardinality(logDomain)
+
 TypeOKRandom == 
-    \* /\ currentTerm \in RandomSubset(5, [Server -> Terms])
-    /\ currentTerm \in [Server -> Terms]
+    /\ currentTerm \in RandomSubset(12, [Server -> Terms])
     /\ state \in [Server -> {Secondary, Primary}]
-    /\ log \in [Server -> BoundedSeq(InitTerm..MaxTerm, MaxLogLen)]
+    /\ log \in RandomSubset(100, [logDomain -> logRange])
     /\ committed \in kOrSmallerSubset(2, (LogIndices \X Terms \X Terms))
 
 \* Old, randomized version.
