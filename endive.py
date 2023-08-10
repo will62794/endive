@@ -436,6 +436,13 @@ class StructuredProofNode():
         self.had_ctis_generated = True
         self.ctis = ctis
 
+    def reset_ctis(self):
+        """ Set CTIs for this node and mark it as having CTIs generated. """
+        self.had_ctis_generated = False
+        self.ctis = []
+        self.ctis_eliminated = []
+        self.parent_ctis_eliminated = []
+
     def get_remaining_ctis(self):
         return [c for c in self.ctis if str(hash(c)) not in self.ctis_eliminated]
 
@@ -2490,6 +2497,9 @@ class InductiveInvGen():
 
         # For proof tree we look for single step inductive support lemmas.
         self.simulate_depth = 1
+
+        node.reset_ctis()
+        self.save_proof(proof)
 
         # Generate CTIs for this proof node, and sort and then sample to ensure a consistent
         # ordering for a given random seed.
