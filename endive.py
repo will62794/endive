@@ -472,6 +472,19 @@ class StructuredProof():
         html = "<ul>"+self.root.to_html()+"</ul>"
         return html
 
+    def get_node_by_name_rec(self, name, start_node):
+        if start_node.name == name:
+            return start_node
+        else:
+            for c in start_node.children:
+                ret = self.get_node_by_name_rec(name, c)
+                if ret is not None:
+                    return ret
+            return None
+
+    def get_node_by_name(self, name):
+        return self.get_node_by_name_rec(name, self.root)
+
     def node_cti_html(self, node):
         html = ""
         max_ctis_to_show = 3
@@ -1589,7 +1602,7 @@ class InductiveInvGen():
         self.end_timing_ctigen()
         return (all_ctis, all_cti_traces)
 
-    def make_rel_induction_check_spec(self, spec_name, support_lemmas, S, rel_ind_pred_name):
+    def make_rel_induction_check_spec(self, spec_name, support_lemmas, S, rel_ind_pred_name, goal_inv_name):
         """ 
         Create a spec that allows to check whether a given boolean expression S is inductive relative to to a conjunction of
         given predicates L. Defines a predicate that is the conjunction of predicates in L as 'IndLemmas'.
@@ -1597,10 +1610,18 @@ class InductiveInvGen():
         
         # Build the spec.
         typeok = "TypeOK" # Apalache always uses normal TypeOK.
+        all_conjuncts = [typeok] + support_lemmas + [S]
+        goal_inv_conjs = [S]
+        # Include state constraint as a precondition on the invariant,
+        # to ensure the constraint is respected in symbolic checking.
+        if len(self.state_constraint):
+            goal_inv_conjs = [self.state_constraint] + goal_inv_conjs
         spec_lines = [
             "---- MODULE %s ----\n" % spec_name,
-            "EXTENDS %s,Naturals,TLC\n\n" % self.specname,
-            f"{rel_ind_pred_name} == {typeok} /\ " + " /\\ ".join(support_lemmas + [S]),
+            "EXTENDS %s,Naturals,TLC\n" % self.specname,
+            f"{rel_ind_pred_name} == ",
+            "\n".join(["  /\ " + c for c in all_conjuncts]),
+            f"{goal_inv_name} == " + " => ".join(goal_inv_conjs),
             "===="
         ]
         return "\n".join(spec_lines)
@@ -2411,8 +2432,9 @@ class InductiveInvGen():
         # of all its children lemmas.
         spec_name = f"{self.specname}_rel_ind_check"
         support_lemmas = [c.expr for c in node.children]
-        rel_ind_pred_name = "IndLemmas"
-        spec_str = self.make_rel_induction_check_spec(spec_name, support_lemmas, node.expr, rel_ind_pred_name)
+        rel_ind_pred_name = "IndSupportLemmas"
+        goal_inv_name = "Inv"
+        spec_str = self.make_rel_induction_check_spec(spec_name, support_lemmas, node.expr, rel_ind_pred_name, goal_inv_name)
 
         tla_file = f"{os.path.join(self.specdir, GEN_TLA_DIR)}/{spec_name}.tla"
         tla_filename = f"{GEN_TLA_DIR}/{spec_name}.tla"
@@ -2424,13 +2446,13 @@ class InductiveInvGen():
         # TODO: Factor out Apalache process management.
         apalache_bin = "apalache/bin/apalache-mc"
         outdir = "gen_tla/apalache_ctigen"
-        rundir = "gen_tla/apalache_ctigen_rundir"
+        rundir = "gen_tla/apalache_ctigen"
 
         # Set a reasonable timeout on these checks for now.
         # See https://apalache.informal.systems/docs/apalache/tuning.html#timeouts for more details.
         smt_timeout_secs = 15
 
-        cmd = f"{apalache_bin} check --out-dir={outdir} --tuning-options=search.smt.timeout={smt_timeout_secs} --run-dir={rundir} --cinit=CInit --init={rel_ind_pred_name} --next=Next --inv={node.expr} --length=1 {tla_filename}"
+        cmd = f"{apalache_bin} check --out-dir={outdir} --tuning-options=search.smt.timeout={smt_timeout_secs} --run-dir={rundir} --cinit=CInit --init={rel_ind_pred_name} --next=Next --inv={goal_inv_name} --length=1 {tla_filename}"
         logging.debug("Apalache command: " + cmd)
         workdir = None
         if self.specdir != "":
@@ -2575,7 +2597,10 @@ class InductiveInvGen():
         # MongoStaticRaft proof structure.
         msr_children = [
             StructuredProofNode("TermsOfEntriesGrowMonotonically", "H_TermsOfEntriesGrowMonotonically", children =[
-                StructuredProofNode("PrimaryTermAtLeastAsLargeAsLogTerms", "H_PrimaryTermAtLeastAsLargeAsLogTerms")
+                StructuredProofNode("PrimaryTermAtLeastAsLargeAsLogTerms", "H_PrimaryTermAtLeastAsLargeAsLogTerms", children=[
+                    StructuredProofNode("QuorumsSafeAtTerms", "H_QuorumsSafeAtTerms"),
+                    StructuredProofNode("LogEntryInTermImpliesSafeAtTerm", "H_LogEntryInTermImpliesSafeAtTerm")
+                ])
             ]),
             # StructuredProofNode("OnePrimaryPerTerm_Lemma", "OnePrimaryPerTerm", children = [
             #     # StructuredProofNode("TermsOfEntriesGrowMonotonically", "H_TermsOfEntriesGrowMonotonically"),
@@ -2665,6 +2690,32 @@ class InductiveInvGen():
             proof_node_name = self.proof_tree_cmd[1]
             logging.info(f"(proof_structure) [ctigen] Re-generating CTIs for all proof node '{proof_node_name}'.")
             self.gen_proof_node_ctis(proof, root, target_node_name=proof_node_name)
+
+            # Save final proof html.
+            self.save_proof(proof)
+
+        elif self.proof_tree_cmd[0] in ["add_child", "remove_child"]:
+            cmd = self.proof_tree_cmd[0]
+            parent_proof_node_name = self.proof_tree_cmd[1]
+            child_expr = self.proof_tree_cmd[2]
+            child_name = child_expr[2:] # cut off the 'H_'.
+
+            parent_node = proof.get_node_by_name(parent_proof_node_name)
+            if parent_node is None:
+                logging.info(f"No parent node {parent_proof_node_name} exists")
+                return
+
+            if cmd == "add_child":
+
+                logging.info(f"(proof_structure) [add_child] Adding child to node '{parent_proof_node_name}'.")
+                new_child = StructuredProofNode(child_name, child_expr)
+                parent_node.children += [new_child]
+
+                logging.info(f"Added new child node: {child_name}")
+
+            if cmd == "remove_child":
+                parent_node.children = [c for c in parent_node.children if c.name != child_name]
+                logging.info(f"Removed child node: {child_name}")
 
             # Save final proof html.
             self.save_proof(proof)

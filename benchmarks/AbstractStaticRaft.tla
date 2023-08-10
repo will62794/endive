@@ -259,6 +259,7 @@ TypeOK ==
     /\ state \in [Server -> {Secondary, Primary}]
     /\ log = Gen(3)
     /\ \A s \in Server : \A i \in DOMAIN log[s] : log[s][i] \in Terms
+    /\ DOMAIN log = Server
     /\ committed \in SUBSET (LogIndices \X Terms \X Terms)
 
 \* Used for Apalache, if we ever convert over to use that.
@@ -267,7 +268,7 @@ CInit ==
     /\ Secondary = "S"
     /\ Nil = "Nil"
     /\ Server = {"s1", "s2", "s3"}
-    /\ MaxLogLen = 2
+    /\ MaxLogLen = 3
     /\ MaxTerm = 2
     /\ InitTerm = 0
 
