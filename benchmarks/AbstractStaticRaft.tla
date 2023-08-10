@@ -260,7 +260,12 @@ TypeOK ==
     /\ log = Gen(3)
     /\ \A s \in Server : \A i \in DOMAIN log[s] : log[s][i] \in Terms
     /\ DOMAIN log = Server
-    /\ committed \in SUBSET (LogIndices \X Terms \X Terms)
+    \* I believe this should constraint 'committed' to be a set of size 3,
+    \* with elements of the appropriate type.
+    /\ committed = Gen(3)
+    /\ \A c \in committed : c \in (LogIndices \X Terms \X Terms)
+
+\* /\ committed \in SUBSET (LogIndices \X Terms \X Terms)
 
 \* Used for Apalache, if we ever convert over to use that.
 CInit == 
