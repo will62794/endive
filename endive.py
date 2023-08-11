@@ -498,6 +498,8 @@ class StructuredProof():
         with open(pickle_filename, 'wb') as f:
             pickle.dump(self, f)
 
+        print(f"Finished saving proof objects.")
+
     def load_from(self, obj):
         self.safety_goal = obj["safety"]
         self.root = StructuredProofNode(load_from_obj=obj["root"])
