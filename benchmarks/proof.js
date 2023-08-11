@@ -1,4 +1,12 @@
 console.log("hello console");
+local_server = "http://127.0.0.1:5000"
+
+function genCtis(exprName){
+    console.log("Gen CTIs", exprName);
+    $.get(local_server + `/genCtis/${exprName}`, function(data){
+        console.log(data);
+    });
+}
 
 window.onload = function(){
     $('li').on('click', function(ev){

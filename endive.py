@@ -416,6 +416,7 @@ class StructuredProofNode():
                 <td style='color:{color}' class='proof-node-expr'>{self.expr}</td>
                 <td style='color:{color}' class='ctis-remaining-count'>({len(self.ctis)-len(self.ctis_eliminated)} / {len(self.ctis)} CTIs remaining) (Apalache proof? {proof_check_badge})</td>
                 <td class='proof-parent-cti-info'> {parent_info_text} </td>
+                <td onclick='genCtis("{self.expr}")'> Gen CTIs </td>
             </tr>
         </table>
         """
@@ -461,10 +462,13 @@ class StructuredProof():
     May also represent a "partial" proof i.e. one in an incomplete state that is yet to be completed.
     """
 
-    def __init__(self, root=None, load_from_obj=None):
+    def __init__(self, root=None, load_from_obj=None, specname=None):
         # Top level goal expression to be proven.
         self.safety_goal = safety
         self.root = root 
+
+        self.specname = specname
+        self.proof_base_filename = f"benchmarks/{self.specname}.proof"
 
         if load_from_obj:
             self.load_from(load_from_obj)
@@ -472,6 +476,28 @@ class StructuredProof():
     def serialize(self):
         return {"safety": self.safety_goal, "root": self.root.serialize()}
     
+    def save_proof(self):
+        """ Visualize proof structure in HTML format for inspection, and serialize to JSON. """
+        filename = f"{self.proof_base_filename}.html"
+        json_filename = f"{self.proof_base_filename}.json"
+        pickle_filename = f"{self.proof_base_filename}.pickle"
+
+        print(f"Saving latest proof HTML to '{filename}'")
+        with open(filename, 'w') as f:
+            html = self.gen_html(self, self.specname)
+            f.write(html)
+
+        # Save structured proof object.
+        print(f"Saving latest proof JSON to '{json_filename}'")
+        with open(json_filename, 'w') as f:
+            proof_json = self.serialize()
+            json.dump(proof_json, f, indent=2)
+
+        print(f"Saving latest proof pickled to '{pickle_filename}'")
+        # Save pickled proof object.
+        with open(pickle_filename, 'wb') as f:
+            pickle.dump(self, f)
+
     def load_from(self, obj):
         self.safety_goal = obj["safety"]
         self.root = StructuredProofNode(load_from_obj=obj["root"])
@@ -535,13 +561,15 @@ class StructuredProof():
 
         html += ("<head>")
         html += ('<link rel="stylesheet" type="text/css" href="proof.css">')
+        # html += """<script src="{{ url_for('static',filename='proof.js') }}"> </script>"""
+        # html += ("""<link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='proof.css') }}">""")
         html += '<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>'
         html += ('<script type="text/javascript" src="proof.js"></script>')
         html += ("</head>")
 
         html += ("<div>")
         html += (f"<h1>Proof Structure: {specname}</h1>")
-        html += (f"<div>seed={indgen.seed}, num_simulate_traces={indgen.num_simulate_traces}</div>")
+        # html += (f"<div>seed={self.indgen.seed}, num_simulate_traces={self.indgen.num_simulate_traces}</div>")
         html += (self.root_to_html())
         html += ("</div>")
         html += ("<div>") 
@@ -588,6 +616,91 @@ class StructuredProof():
         # print(dot.source)
         dot.render(out_file)
         return dot.source
+
+    def gen_ctis_for_node(self, indgen, node, target_node_name = None):
+        """ Routine that updates set of CTIs for each proof node. 
+        
+        Generates CTIs and computes the set eliminated by each node's support lemmas i.e. its direct children
+        """
+
+        # TODO: Eventually may want a different unique naming scheme for proof nodes.
+        if target_node_name is not None and target_node_name != node.name:
+            # Recurse right away if this is not the target node.
+            for child_node in node.children:
+                self.gen_ctis_for_node(self, child_node, target_node_name=target_node_name)   
+            return         
+
+        print(f"Generating CTIs for structured proof node ({node.name},{node.expr})")
+
+        # For proof tree we look for single step inductive support lemmas.
+        self.simulate_depth = 1
+
+        node.reset_ctis()
+        self.save_proof()
+
+        # Generate CTIs for this proof node, and sort and then sample to ensure a consistent
+        # ordering for a given random seed.
+        k_ctis, k_cti_traces = indgen.generate_ctis(props=[(node.name, node.expr)], reseed=True)
+        k_ctis = list(k_ctis)
+        k_ctis.sort()
+
+        # Set CTIs for this node based on those generated.
+        logging.info(f"Number of proof node CTIs generated: {len(k_ctis)}. Sampling a limit of {indgen.max_proof_node_ctis} CTIs.")
+        num_to_sample = min(len(k_ctis), indgen.max_proof_node_ctis) # don't try to sample more CTIs than there are.
+        node.set_ctis(random.sample(k_ctis, num_to_sample))
+
+        print("Node CTIS:", len(node.ctis))
+
+        # Compute CTIs that are eliminated by each of the "support lemmas" for this node i.e.
+        # its set of direct children.
+
+        print(f"Checking CTI elimination for support lemmas of node ({node.name},{node.expr})")
+        ctis_eliminated = indgen.check_cti_elimination(node.ctis, [
+            (child.name,child.expr) for child in node.children
+        ])
+        # print("CTI eliminate response:", ctis_eliminated.keys())
+
+        ctis_eliminated_unique = {}
+
+        print("CTIs eliminated by invs")
+        all_eliminated_ctis = set()
+        for i,inv in enumerate(sorted(ctis_eliminated.keys(), key=lambda k : int(k.replace("Inv", "")))):
+        # for child in node.children:
+            print(inv, ":", len(ctis_eliminated[inv]))
+            # print(ctis_eliminated_by_invs[k])
+            all_eliminated_ctis.update(ctis_eliminated[inv])
+
+            unique = ctis_eliminated[inv]
+            for other in (ctis_eliminated.keys() - {inv}):
+                unique = unique.difference(ctis_eliminated[other])
+            ctis_eliminated_unique[inv] = unique
+            # print("Unique:", len(unique))
+            # print(ctis_eliminated_unique)
+            child_node = sorted(node.children, key=lambda x : x.expr)[i]
+            child_node.parent = node
+            child_node.parent_ctis_eliminated = ctis_eliminated[inv]
+            child_node.parent_ctis_uniquely_eliminated = ctis_eliminated_unique[inv]
+
+        node.ctis_eliminated = all_eliminated_ctis
+
+        # Re-write proof html.
+        self.save_proof()
+
+        # If all CTIs are eliminated for this node, optionally check
+        # for a complete proof using Apalache.
+        if len(node.get_remaining_ctis()) == 0 and indgen.do_apalache_final_induction_check:
+            indgen.apalache_induction_check(node)
+
+        # Re-write proof html.
+        self.save_proof()
+
+        # If this was our target node, terminate.
+        if target_node_name is not None and target_node_name == node.name:
+            return
+
+        # Recursively generate CTIs for children as well.
+        for child_node in node.children:
+            self.gen_ctis_for_node(child_node)
 
 
 class InductiveInvGen():
@@ -2428,28 +2541,6 @@ class InductiveInvGen():
             return None
         return self.strengthening_conjuncts
     
-    def save_proof(self, proof):
-        """ Visualize proof structure in HTML format for inspection, and serialize to JSON. """
-        filename = f"{self.proof_base_filename}.html"
-        json_filename = f"{self.proof_base_filename}.json"
-        pickle_filename = f"{self.proof_base_filename}.pickle"
-
-        print(f"Saving latest proof HTML to '{filename}'")
-        with open(filename, 'w') as f:
-            html = proof.gen_html(self, self.specname)
-            f.write(html)
-
-        # Save structured proof object.
-        print(f"Saving latest proof JSON to '{json_filename}'")
-        with open(json_filename, 'w') as f:
-            proof_json = proof.serialize()
-            json.dump(proof_json, f, indent=2)
-
-        print(f"Saving latest proof pickled to '{pickle_filename}'")
-        # Save pickled proof object.
-        with open(pickle_filename, 'wb') as f:
-            pickle.dump(proof, f)
-
     def apalache_induction_check(self, node):
         logging.info("Checking for full proof with Apalache.")
         # We want to check that this node lemma is inductive relative to the conjunction
@@ -2496,91 +2587,6 @@ class InductiveInvGen():
             for tail_line in lines[-10:]:
                 logging.info(tail_line)
 
-
-    def gen_proof_node_ctis(self, proof, node, target_node_name = None):
-        """ Routine that updates set of CTIs for each proof node. 
-        
-        Generates CTIs and computes the set eliminated by each node's support lemmas i.e. its direct children
-        """
-
-        # TODO: Eventually may want a different unique naming scheme for proof nodes.
-        if target_node_name is not None and target_node_name != node.name:
-            # Recurse right away if this is not the target node.
-            for child_node in node.children:
-                self.gen_proof_node_ctis(proof, child_node, target_node_name=target_node_name)   
-            return         
-
-        print(f"Generating CTIs for structured proof node ({node.name},{node.expr})")
-
-        # For proof tree we look for single step inductive support lemmas.
-        self.simulate_depth = 1
-
-        node.reset_ctis()
-        self.save_proof(proof)
-
-        # Generate CTIs for this proof node, and sort and then sample to ensure a consistent
-        # ordering for a given random seed.
-        k_ctis, k_cti_traces = self.generate_ctis(props=[(node.name, node.expr)], reseed=True)
-        k_ctis = list(k_ctis)
-        k_ctis.sort()
-
-        # Set CTIs for this node based on those generated.
-        logging.info(f"Number of proof node CTIs generated: {len(k_ctis)}. Sampling a limit of {self.max_proof_node_ctis} CTIs.")
-        num_to_sample = min(len(k_ctis), self.max_proof_node_ctis) # don't try to sample more CTIs than there are.
-        node.set_ctis(random.sample(k_ctis, num_to_sample))
-
-        print("Node CTIS:", len(node.ctis))
-
-        # Compute CTIs that are eliminated by each of the "support lemmas" for this node i.e.
-        # its set of direct children.
-
-        print(f"Checking CTI elimination for support lemmas of node ({node.name},{node.expr})")
-        ctis_eliminated = self.check_cti_elimination(node.ctis, [
-            (child.name,child.expr) for child in node.children
-        ])
-        # print("CTI eliminate response:", ctis_eliminated.keys())
-
-        ctis_eliminated_unique = {}
-
-        print("CTIs eliminated by invs")
-        all_eliminated_ctis = set()
-        for i,inv in enumerate(sorted(ctis_eliminated.keys(), key=lambda k : int(k.replace("Inv", "")))):
-        # for child in node.children:
-            print(inv, ":", len(ctis_eliminated[inv]))
-            # print(ctis_eliminated_by_invs[k])
-            all_eliminated_ctis.update(ctis_eliminated[inv])
-
-            unique = ctis_eliminated[inv]
-            for other in (ctis_eliminated.keys() - {inv}):
-                unique = unique.difference(ctis_eliminated[other])
-            ctis_eliminated_unique[inv] = unique
-            # print("Unique:", len(unique))
-            # print(ctis_eliminated_unique)
-            child_node = sorted(node.children, key=lambda x : x.expr)[i]
-            child_node.parent = node
-            child_node.parent_ctis_eliminated = ctis_eliminated[inv]
-            child_node.parent_ctis_uniquely_eliminated = ctis_eliminated_unique[inv]
-
-        node.ctis_eliminated = all_eliminated_ctis
-
-        # Re-write proof html.
-        self.save_proof(proof)
-
-        # If all CTIs are eliminated for this node, optionally check
-        # for a complete proof using Apalache.
-        if len(node.get_remaining_ctis()) == 0 and self.do_apalache_final_induction_check:
-            self.apalache_induction_check(node)
-
-        # Re-write proof html.
-        self.save_proof(proof)
-
-        # If this was our target node, terminate.
-        if target_node_name is not None and target_node_name == node.name:
-            return
-
-        # Recursively generate CTIs for children as well.
-        for child_node in node.children:
-            self.gen_proof_node_ctis(proof, child_node)
 
     def run_interactive_mode(self):
 
@@ -2636,7 +2642,10 @@ class InductiveInvGen():
             ]),
             StructuredProofNode("CommittedEntryExistsOnQuorum", "H_CommittedEntryExistsOnQuorum"),
             StructuredProofNode("EntriesCommittedInOwnTerm", "H_EntriesCommittedInOwnTerm"),
-            StructuredProofNode("LogMatching_Lemma", "LogMatching"),
+            StructuredProofNode("LogMatching_Lemma", "LogMatching", children = [
+                StructuredProofNode("PrimaryHasEntriesItCreated", "H_PrimaryHasEntriesItCreated"),
+                StructuredProofNode("TermsOfEntriesGrowMonotonically", "H_TermsOfEntriesGrowMonotonically")
+            ]),
             StructuredProofNode("PrimaryHasEntriesItCreated", "H_PrimaryHasEntriesItCreated"),
             StructuredProofNode("LogsLaterThanCommittedMustHaveCommitted", "H_LogsLaterThanCommittedMustHaveCommitted"),
             StructuredProofNode("LogsWithEntryInTermMustHaveEarlierCommittedEntriesFromTerm", "H_LogsWithEntryInTermMustHaveEarlierCommittedEntriesFromTerm"),
@@ -2651,21 +2660,6 @@ class InductiveInvGen():
         else:
             logging.info("Unknown spec for proof structure: " + self.specname)
             return
-        # proof = StructuredProof(root)
-
-
-
-        # if load_from_file:
-        #     # Load serialized proof object.
-        #     f = open(f"{self.proof_base_filename}.json")
-        #     proof_obj = json.load(f)
-        #     f.close()
-
-        #     logging.info(f"Loading proof from object file: {self.proof_base_filename}.json")
-        #     proof = StructuredProof(load_from_obj=proof_obj)
-        # else:
-        #     # Otherwise load from local template.
-        #     proof = StructuredProof(root)
 
         ###########
         ###########
@@ -2684,8 +2678,8 @@ class InductiveInvGen():
         if self.proof_tree_cmd and self.proof_tree_cmd[0] == "reload":
             logging.info(f"Reloading entire proof and re-generating CTIs.")
             proof = StructuredProof(root)
-            self.save_proof(proof)
-            self.gen_proof_node_ctis(proof, root)
+            proof.save_proof()
+            proof.gen_ctis_for_node(root)
         else:
             # Otherwise load serialized proof object.
             # f = open(f"{self.proof_base_filename}.json")
@@ -2699,6 +2693,36 @@ class InductiveInvGen():
 
         root = proof.root
 
+
+        import flask
+        from flask import Flask
+        from flask_cors import CORS
+        app = Flask(__name__, static_folder="benchmarks")
+        CORS(app)
+        proof = StructuredProof(root, specname=self.specname)
+        proof.save_proof()
+        import multiprocessing
+        @app.route('/genCtis/<expr>')
+        def genCtis(expr):
+            logging.info("genCtis")
+            print(expr)
+
+            response = flask.jsonify({'ok': True})
+            response.headers.add('Access-Control-Allow-Origin', '*')
+
+            # Launch proof generation process in separate thread and return response right away.
+            def bar():
+                proof.gen_ctis_for_node(self, proof.root, target_node_name="Safety")
+            p = multiprocessing.Process(target=bar) # create a new Process
+            p.start()
+
+            return response
+        
+        # Start up server API.
+        app.run(debug=False)
+        return
+
+
             # logging.info(f"Loading proof from object file: {self.proof_base_filename}.json")
             # proof = StructuredProof(load_from_obj=proof_obj)
 
@@ -2710,28 +2734,20 @@ class InductiveInvGen():
         logging.info(f"Handling proof tree command: {self.proof_tree_cmd[0]}")
 
 
-        # from flask import Flask
-        # app = Flask(__name__)
-        # @app.route('/')
-        # def index():
-        #     return json.dumps({'name': 'alice',
-        #                     'email': 'alice@outlook.com'})
-        # app.run()
-
         if self.proof_tree_cmd[0] == "ctigen_all":
             logging.info("(proof_structure) [ctigen_all] Re-generating CTIs for all proof nodes.")
-            self.gen_proof_node_ctis(proof, root)
+            proof.gen_ctis_for_node(root)
 
             # Save final proof html.
-            self.save_proof(proof)
+            proof.save_proof()
 
         elif self.proof_tree_cmd[0] == "ctigen":
             proof_node_name = self.proof_tree_cmd[1]
             logging.info(f"(proof_structure) [ctigen] Re-generating CTIs for all proof node '{proof_node_name}'.")
-            self.gen_proof_node_ctis(proof, root, target_node_name=proof_node_name)
+            proof.gen_ctis_for_node(root, target_node_name=proof_node_name)
 
             # Save final proof html.
-            self.save_proof(proof)
+            proof.save_proof()
 
         elif self.proof_tree_cmd[0] in ["add_child", "remove_child"]:
             cmd = self.proof_tree_cmd[0]
@@ -2757,7 +2773,7 @@ class InductiveInvGen():
                 logging.info(f"Removed child node: {child_name}")
 
             # Save final proof html.
-            self.save_proof(proof)
+            prof.save_proof()
 
         if self.proof_tree_cmd == None:
             logging.info("No proof tree command specified. Terminating.")
