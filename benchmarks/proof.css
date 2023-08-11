@@ -1,6 +1,10 @@
 body{
     font-family: monospace;
-    font-size:16px;
+    font-size:14px;
+}
+table{
+    border-spacing: 3px;
+
 }
 table td {
     padding-right:10px;
@@ -19,7 +23,14 @@ table td:hover {
 }
 
 .proof-parent-cti-info {
-    min-width:400px;
+    min-width:10px;
+}
+
+.gen-ctis-button{
+    border:solid 1px gray;
+    background-color: lightgray;
+    text-align: center;
+    font-size:14px;
 }
 
 .proof-cti-grid-row {

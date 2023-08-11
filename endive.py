@@ -416,7 +416,7 @@ class StructuredProofNode():
                 <td style='color:{color}' class='proof-node-expr'>{self.expr}</td>
                 <td style='color:{color}' class='ctis-remaining-count'>({len(self.ctis)-len(self.ctis_eliminated)} / {len(self.ctis)} CTIs remaining) (Apalache proof? {proof_check_badge})</td>
                 <td class='proof-parent-cti-info'> {parent_info_text} </td>
-                <td onclick='genCtis("{self.expr}")'> Gen CTIs </td>
+                <td class='gen-ctis-button' onclick='genCtis("{self.name}")'> Gen CTIs </td>
             </tr>
         </table>
         """
@@ -629,20 +629,18 @@ class StructuredProof():
         if target_node_name is not None and target_node_name != node.name:
             # Recurse right away if this is not the target node.
             for child_node in node.children:
-                self.gen_ctis_for_node(self, child_node, target_node_name=target_node_name)   
+                self.gen_ctis_for_node(indgen, child_node, target_node_name=target_node_name)   
             return         
 
         print(f"Generating CTIs for structured proof node ({node.name},{node.expr})")
-
-        # For proof tree we look for single step inductive support lemmas.
-        self.simulate_depth = 1
 
         node.reset_ctis()
         self.save_proof()
 
         # Generate CTIs for this proof node, and sort and then sample to ensure a consistent
         # ordering for a given random seed.
-        k_ctis, k_cti_traces = indgen.generate_ctis(props=[(node.name, node.expr)], reseed=True)
+        # For proof tree we look for single step inductive support lemmas.
+        k_ctis, k_cti_traces = indgen.generate_ctis(props=[(node.name, node.expr)], reseed=True, depth=1)
         k_ctis = list(k_ctis)
         k_ctis.sort()
 
@@ -702,7 +700,7 @@ class StructuredProof():
 
         # Recursively generate CTIs for children as well.
         for child_node in node.children:
-            self.gen_ctis_for_node(child_node)
+            self.gen_ctis_for_node(indgen, child_node, target_node_name=target_node_name)
 
 
 class InductiveInvGen():
@@ -1525,7 +1523,7 @@ class InductiveInvGen():
         return all_tla_ctis    
 
 
-    def generate_ctis_tlc_run_async(self, num_traces_per_worker, props=None):
+    def generate_ctis_tlc_run_async(self, num_traces_per_worker, props=None, depth=None):
         """ Starts a single instance of TLC to generate CTIs.
         
         Will generate CTIs for the conjunction of all predicates given in 'props'.
@@ -1645,7 +1643,11 @@ class InductiveInvGen():
             subproc = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, cwd=workdir)
             return subproc
 
-        args = (dirpath, "tla2tools-checkall.jar", TLC_MAX_SET_SIZE, simulate_flag, self.simulate_depth, ctiseed, tag, num_ctigen_tlc_workers, indcheckcfgfilename, indchecktlafilename)
+        simulate_depth = self.simulate_depth
+        if depth is not None:
+            simulate_depth = depth
+        
+        args = (dirpath, "tla2tools-checkall.jar", TLC_MAX_SET_SIZE, simulate_flag, simulate_depth, ctiseed, tag, num_ctigen_tlc_workers, indcheckcfgfilename, indchecktlafilename)
         cmd = self.java_exe + ' -Xss16M -Djava.io.tmpdir="%s" -cp %s tlc2.TLC -maxSetSize %d %s -depth %d -seed %d -noGenerateSpecTE -metadir states/indcheckrandom_%s -continue -deadlock -workers %d -config %s %s' % args
         logging.debug("TLC command: " + cmd)
         workdir = None
@@ -1676,7 +1678,7 @@ class InductiveInvGen():
         return (parsed_ctis,parsed_cti_traces)       
 
 
-    def generate_ctis(self, props=None, reseed=False):
+    def generate_ctis(self, props=None, reseed=False, depth=None):
         """ Generate CTIs for use in counterexample elimination. """
 
         # Re-set random seed to ensure consistent RNG initial state.
@@ -1709,7 +1711,7 @@ class InductiveInvGen():
             # if self.use_apalache_ctigen:
                 # cti_subproc = self.generate_ctis_apalache_run_async(num_traces_per_tlc_instance)
             # else:
-            cti_subproc = self.generate_ctis_tlc_run_async(num_traces_per_tlc_instance,props=props)
+            cti_subproc = self.generate_ctis_tlc_run_async(num_traces_per_tlc_instance,props=props, depth=depth)
 
             cti_subprocs.append(cti_subproc)
 
@@ -2696,33 +2698,36 @@ class InductiveInvGen():
         root = proof.root
 
 
-        import flask
-        from flask import Flask
-        from flask_cors import CORS
-        app = Flask(__name__, static_folder="benchmarks")
-        CORS(app)
-        proof = StructuredProof(root, specname=self.specname)
-        proof.save_proof()
-        import multiprocessing
-        @app.route('/genCtis/<expr>')
-        def genCtis(expr):
-            logging.info("genCtis")
-            print(expr)
+        run_server = True
+        if run_server:
+            import flask
+            from flask import Flask
+            from flask_cors import CORS
+            app = Flask(__name__, static_folder="benchmarks")
+            CORS(app)
+            proof = StructuredProof(root, specname=self.specname)
+            proof.save_proof()
+            import multiprocessing
+            @app.route('/genCtis/<expr>')
+            def genCtis(expr):
+                logging.info(f"genCtis({expr})")
+                print(expr)
 
-            response = flask.jsonify({'ok': True})
-            response.headers.add('Access-Control-Allow-Origin', '*')
+                response = flask.jsonify({'ok': True, 'expr': expr})
+                response.headers.add('Access-Control-Allow-Origin', '*')
 
-            # Launch proof generation process in separate thread and return response right away.
-            def bar():
-                proof.gen_ctis_for_node(self, proof.root, target_node_name="Safety")
-            p = multiprocessing.Process(target=bar) # create a new Process
-            p.start()
+                # Launch proof generation process in separate thread and return response right away.
+                def bar():
+                    proof.gen_ctis_for_node(self, proof.root, target_node_name=expr)
+                    print("Finished generating CTIs for node:", expr)
+                p = multiprocessing.Process(target=bar) # create a new Process
+                p.start()
 
-            return response
-        
-        # Start up server API.
-        app.run(debug=False)
-        return
+                return response
+            
+            # Start up server API.
+            app.run(debug=False)
+            return
 
 
             # logging.info(f"Loading proof from object file: {self.proof_base_filename}.json")
