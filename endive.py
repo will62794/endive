@@ -440,6 +440,7 @@ class StructuredProofNode():
 
     def reset_ctis(self):
         """ Set CTIs for this node and mark it as having CTIs generated. """
+        logging.info(f"Resetting CTIs for node: {self.name}")
         self.had_ctis_generated = False
         self.ctis = []
         self.ctis_eliminated = []
@@ -2633,24 +2634,24 @@ class InductiveInvGen():
 
         # MongoStaticRaft proof structure.
         msr_children = [
-            StructuredProofNode("TermsOfEntriesGrowMonotonically", "H_TermsOfEntriesGrowMonotonically", children =[
+            StructuredProofNode("TermsOfEntriesGrowMonotonically_A", "H_TermsOfEntriesGrowMonotonically", children =[
                 StructuredProofNode("PrimaryTermAtLeastAsLargeAsLogTerms", "H_PrimaryTermAtLeastAsLargeAsLogTerms", children=[
-                    StructuredProofNode("QuorumsSafeAtTerms", "H_QuorumsSafeAtTerms"),
+                    StructuredProofNode("QuorumsSafeAtTerms_A", "H_QuorumsSafeAtTerms"),
                     StructuredProofNode("LogEntryInTermImpliesSafeAtTerm", "H_LogEntryInTermImpliesSafeAtTerm")
                 ])
             ]),
             StructuredProofNode("OnePrimaryPerTerm_Lemma", "H_OnePrimaryPerTerm", children = [
                 # StructuredProofNode("TermsOfEntriesGrowMonotonically", "H_TermsOfEntriesGrowMonotonically"),
                 # StructuredProofNode("LeaderCompleteness_Lemma", "LeaderCompleteness"),
-                StructuredProofNode("QuorumsSafeAtTerms", "H_QuorumsSafeAtTerms")
+                StructuredProofNode("QuorumsSafeAtTerms_B", "H_QuorumsSafeAtTerms")
             ]),
             StructuredProofNode("CommittedEntryExistsOnQuorum", "H_CommittedEntryExistsOnQuorum"),
             StructuredProofNode("EntriesCommittedInOwnTerm", "H_EntriesCommittedInOwnTerm"),
             StructuredProofNode("LogMatching_Lemma", "LogMatching", children = [
-                StructuredProofNode("PrimaryHasEntriesItCreated", "H_PrimaryHasEntriesItCreated"),
-                StructuredProofNode("TermsOfEntriesGrowMonotonically", "H_TermsOfEntriesGrowMonotonically")
+                StructuredProofNode("PrimaryHasEntriesItCreated_A", "H_PrimaryHasEntriesItCreated"),
+                StructuredProofNode("TermsOfEntriesGrowMonotonically_B", "H_TermsOfEntriesGrowMonotonically")
             ]),
-            StructuredProofNode("PrimaryHasEntriesItCreated", "H_PrimaryHasEntriesItCreated"),
+            StructuredProofNode("PrimaryHasEntriesItCreated_B", "H_PrimaryHasEntriesItCreated"),
             StructuredProofNode("LogsLaterThanCommittedMustHaveCommitted", "H_LogsLaterThanCommittedMustHaveCommitted"),
             StructuredProofNode("LogsWithEntryInTermMustHaveEarlierCommittedEntriesFromTerm", "H_LogsWithEntryInTermMustHaveEarlierCommittedEntriesFromTerm"),
         ]
@@ -2696,7 +2697,7 @@ class InductiveInvGen():
             proof = pickle.load(f)
 
         root = proof.root
-
+        proof.save_proof()
 
         run_server = True
         if run_server:
@@ -2705,9 +2706,8 @@ class InductiveInvGen():
             from flask_cors import CORS
             app = Flask(__name__, static_folder="benchmarks")
             CORS(app)
-            proof = StructuredProof(root, specname=self.specname)
-            proof.save_proof()
-            import multiprocessing
+
+            import threading
             @app.route('/genCtis/<expr>')
             def genCtis(expr):
                 logging.info(f"genCtis({expr})")
@@ -2720,7 +2720,7 @@ class InductiveInvGen():
                 def bar():
                     proof.gen_ctis_for_node(self, proof.root, target_node_name=expr)
                     print("Finished generating CTIs for node:", expr)
-                p = multiprocessing.Process(target=bar) # create a new Process
+                p = threading.Thread(target=bar) # create a new Process
                 p.start()
 
                 return response
