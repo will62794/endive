@@ -2681,9 +2681,9 @@ class InductiveInvGen():
         # Optionally reload proof structure from locally defined template.
         if self.proof_tree_cmd and self.proof_tree_cmd[0] == "reload":
             logging.info(f"Reloading entire proof and re-generating CTIs.")
-            proof = StructuredProof(root)
+            proof = StructuredProof(root, specname = self.specname)
             proof.save_proof()
-            proof.gen_ctis_for_node(root)
+            proof.gen_ctis_for_node(indgen, root)
         else:
             # Otherwise load serialized proof object.
             # f = open(f"{self.proof_base_filename}.json")
