@@ -21,9 +21,9 @@ logRange == BoundedSeq(InitTerm..MaxTerm, MaxLogLen)
 logCardinality == Cardinality(logRange) ^ Cardinality(logDomain)
 
 TypeOKRandom == 
-    /\ currentTerm \in RandomSubset(8, [Server -> Terms])
+    /\ currentTerm \in RandomSubset(10, [Server -> Terms])
     /\ state \in [Server -> {Secondary, Primary}]
-    /\ log \in RandomSubset(40, [logDomain -> logRange])
+    /\ log \in RandomSubset(60, [logDomain -> logRange])
     /\ committed \in kOrSmallerSubset(2, (LogIndices \X Terms \X Terms))
 
 \* Old, randomized version.
