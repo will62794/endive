@@ -3,7 +3,14 @@ local_server = "http://127.0.0.1:5000"
 
 function genCtis(exprName){
     console.log("Gen CTIs", exprName);
-    $.get(local_server + `/genCtis/${exprName}`, function(data){
+    $.get(local_server + `/genCtis/single/${exprName}`, function(data){
+        console.log(data);
+    });
+}
+
+function genCtisSubtree(exprName){
+    console.log("Gen CTIs subtree", exprName);
+    $.get(local_server + `/genCtis/subtree/${exprName}`, function(data){
         console.log(data);
     });
 }

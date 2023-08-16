@@ -191,6 +191,7 @@ ClientRequestAction == \E s \in Server : ClientRequest(s)
 GetEntriesAction == \E s, t \in Server : GetEntries(s, t)
 RollbackEntriesAction == \E s, t \in Server : RollbackEntries(s, t)
 BecomeLeaderAction == \E s \in Server : \E Q \in Quorums(Server) : BecomeLeader(s, Q)
+CommitEntryAction ==  \E s \in Server :  \E Q \in Quorums(Server) : CommitEntry(s, Q)
 UpdateTermsActions == \E s,t \in Server : UpdateTerms(s, t)
 
 Next == 
@@ -198,6 +199,7 @@ Next ==
     \/ GetEntriesAction
     \/ RollbackEntriesAction
     \/ BecomeLeaderAction
+    \/ CommitEntryAction
     \/ UpdateTermsActions
 
 Spec == Init /\ [][Next]_vars
@@ -308,15 +310,17 @@ H_LogEntryInTermImpliesSafeAtTerm ==
     \A i \in DOMAIN log[s] :
         \E Q \in Quorums(Server) : \A n \in Q : currentTerm[n] >= log[s][i]
 
-\* If a server's latest log term exceeds a committed entry c's term, all commits
+\* If a server's latest log term exceeds a committed entry c's term, then it must contain that 
+\* committed entry in its log.
+
 \* with terms <= c's must be in the server's log.
 H_LogsLaterThanCommittedMustHaveCommitted ==
     \A s \in Server : 
     \A c \in committed :
+        \* Exists an entry in log[s] with a term greater than the committed entry.
         (\E i \in DOMAIN log[s] : log[s][i] > c[3]) =>
-            (\A d \in committed :
-                (d[3] <= c[3]) => /\ Len(log[s]) >= d[1]
-                                  /\ log[s][d[1]] = d[3])
+            /\ Len(log[s]) >= c[1]
+            /\ log[s][c[1]] = c[3] \* entry exists in the server's log.
 
 H_LogsWithEntryInTermMustHaveEarlierCommittedEntriesFromTerm ==
     \A s \in Server : 

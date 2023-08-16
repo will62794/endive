@@ -417,6 +417,7 @@ class StructuredProofNode():
                 <td style='color:{color}' class='ctis-remaining-count'>({len(self.ctis)-len(self.ctis_eliminated)} / {len(self.ctis)} CTIs remaining) (Apalache proof? {proof_check_badge})</td>
                 <td class='proof-parent-cti-info'> {parent_info_text} </td>
                 <td class='gen-ctis-button' onclick='genCtis("{self.name}")'> Gen CTIs </td>
+                <td class='gen-ctis-button' onclick='genCtisSubtree("{self.name}")'> Gen CTIs (subtree) </td>
             </tr>
         </table>
         """
@@ -619,6 +620,17 @@ class StructuredProof():
         # print(dot.source)
         dot.render(out_file)
         return dot.source
+
+    def get_node_by_name(self, start_node, name):
+        # If this was our target node, terminate.
+        if name == start_node.name:
+            return start_node
+        else:
+            for c in start_node.children:
+                ret = self.get_node_by_name(c, name)
+                if ret is not None:
+                    return ret
+            return None
 
     def gen_ctis_for_node(self, indgen, node, target_node_name = None):
         """ Routine that updates set of CTIs for each proof node. 
@@ -2645,14 +2657,16 @@ class InductiveInvGen():
                 # StructuredProofNode("LeaderCompleteness_Lemma", "LeaderCompleteness"),
                 StructuredProofNode("QuorumsSafeAtTerms_B", "H_QuorumsSafeAtTerms")
             ]),
-            StructuredProofNode("CommittedEntryExistsOnQuorum", "H_CommittedEntryExistsOnQuorum"),
+            StructuredProofNode("CommittedEntryExistsOnQuorum", "H_CommittedEntryExistsOnQuorum", children = [
+                StructuredProofNode("LogsLaterThanCommittedMustHaveCommitted_B", "H_LogsLaterThanCommittedMustHaveCommitted"),
+            ]),
             StructuredProofNode("EntriesCommittedInOwnTerm", "H_EntriesCommittedInOwnTerm"),
             StructuredProofNode("LogMatching_Lemma", "LogMatching", children = [
                 StructuredProofNode("PrimaryHasEntriesItCreated_A", "H_PrimaryHasEntriesItCreated"),
                 StructuredProofNode("TermsOfEntriesGrowMonotonically_B", "H_TermsOfEntriesGrowMonotonically")
             ]),
             StructuredProofNode("PrimaryHasEntriesItCreated_B", "H_PrimaryHasEntriesItCreated"),
-            StructuredProofNode("LogsLaterThanCommittedMustHaveCommitted", "H_LogsLaterThanCommittedMustHaveCommitted"),
+            StructuredProofNode("LogsLaterThanCommittedMustHaveCommitted_A", "H_LogsLaterThanCommittedMustHaveCommitted"),
             StructuredProofNode("LogsWithEntryInTermMustHaveEarlierCommittedEntriesFromTerm", "H_LogsWithEntryInTermMustHaveEarlierCommittedEntriesFromTerm"),
         ]
         msr_root = StructuredProofNode("Safety", safety, children = msr_children)
@@ -2708,18 +2722,24 @@ class InductiveInvGen():
             CORS(app)
 
             import threading
-            @app.route('/genCtis/<expr>')
-            def genCtis(expr):
-                logging.info(f"genCtis({expr})")
-                print(expr)
+            @app.route('/genCtis/<flag>/<expr>')
+            def genCtis(flag, expr):
+                logging.info(f"genCtis({flag}, {expr})")
+                print(flag, expr)
 
                 response = flask.jsonify({'ok': True, 'expr': expr})
                 response.headers.add('Access-Control-Allow-Origin', '*')
 
                 # Launch proof generation process in separate thread and return response right away.
                 def bar():
-                    proof.gen_ctis_for_node(self, proof.root, target_node_name=expr)
+                    subtree = flag == "subtree"
+                    start_node = proof.get_node_by_name(proof.root, expr)
+                    if subtree:
+                        proof.gen_ctis_for_node(self, start_node)
+                    else:
+                        proof.gen_ctis_for_node(self, start_node, target_node_name=expr)
                     print("Finished generating CTIs for node:", expr)
+
                 p = threading.Thread(target=bar) # create a new Process
                 p.start()
 

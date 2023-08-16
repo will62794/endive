@@ -31,6 +31,10 @@ table td:hover {
     background-color: lightgray;
     text-align: center;
     font-size:14px;
+    border-radius:4px;
+    min-width:10px;
+    padding-left:10px;
+    padding-right:10px;
 }
 
 .proof-cti-grid-row {
