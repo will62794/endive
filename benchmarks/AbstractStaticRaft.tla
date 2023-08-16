@@ -286,7 +286,7 @@ CInit ==
 \* If a primary has been elected at term T, then there must exist a quorum at term >= T.
 H_QuorumsSafeAtTerms == 
     \A s \in Server : (state[s] = Primary) =>
-        (\A Q \in Quorums(Server) : \E n \in Q : currentTerm[n] >= currentTerm[s])
+        (\E Q \in Quorums(Server) : \A n \in Q : currentTerm[n] >= currentTerm[s])
 
 H_TermsOfEntriesGrowMonotonically ==
     \A s \in Server : \A i,j \in DOMAIN log[s] : (i <= j) => (log[s][i] <= log[s][j])
