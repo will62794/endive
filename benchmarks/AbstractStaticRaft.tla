@@ -299,8 +299,8 @@ H_CommittedEntryExistsOnQuorum ==
     \A c \in committed :
         \E Q \in Quorums(Server) : \A n \in Q : InLog(<<c[1],c[2]>>, n)  
 
-H_EntriesCommittedInOwnTerm == 
-    \A c \in committed : c[3] = c[2] 
+H_EntriesCommittedInOwnOrLaterTerm == 
+    \A c \in committed : c[3] >= c[2] 
 
 
 \* Existence of an entry in term T implies a past election in T, so 
