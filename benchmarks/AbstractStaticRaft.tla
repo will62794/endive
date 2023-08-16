@@ -317,10 +317,10 @@ H_LogEntryInTermImpliesSafeAtTerm ==
 H_LogsLaterThanCommittedMustHaveCommitted ==
     \A s \in Server : 
     \A c \in committed :
-        \* Exists an entry in log[s] with a term greater than the committed entry.
+        \* Exists an entry in log[s] with a term greater than the term in which the entry was committed.
         (\E i \in DOMAIN log[s] : log[s][i] > c[3]) =>
             /\ Len(log[s]) >= c[1]
-            /\ log[s][c[1]] = c[3] \* entry exists in the server's log.
+            /\ log[s][c[1]] = c[2] \* entry exists in the server's log.
 
 H_LogsWithEntryInTermMustHaveEarlierCommittedEntriesFromTerm ==
     \A s \in Server : 
