@@ -261,19 +261,30 @@ TypeOK ==
     /\ state \in [Server -> {Secondary, Primary}]
     /\ log = Gen(3)
     /\ \A s \in Server : \A i \in DOMAIN log[s] : log[s][i] \in Terms
+    /\ \A s \in Server : Len(log[s]) <= MaxLogLen
     /\ DOMAIN log = Server
     \* I believe this should constraint 'committed' to be a set of size 3,
     \* with elements of the appropriate type.
     /\ committed = Gen(3)
     /\ \A c \in committed : c \in (LogIndices \X Terms \X Terms)
-
+    
 \* /\ committed \in SUBSET (LogIndices \X Terms \X Terms)
 
 \* Used for Apalache, if we ever convert over to use that.
+CInit3 == 
+    /\ Primary = "P"
+    /\ Secondary = "S"
+    /\ Nil = "Nil"
+    /\ Server = {"s1", "s2", "s3"}
+    /\ MaxLogLen = 3
+    /\ MaxTerm = 3
+    /\ InitTerm = 0
+
 CInit == 
     /\ Primary = "P"
     /\ Secondary = "S"
     /\ Nil = "Nil"
+    \* /\ Server = {"s1", "s2"}
     /\ Server = {"s1", "s2", "s3"}
     /\ MaxLogLen = 3
     /\ MaxTerm = 3
@@ -314,8 +325,6 @@ H_LogEntryInTermImpliesSafeAtTerm ==
 
 \* If a server's latest log term exceeds a committed entry c's term, then it must contain that 
 \* committed entry in its log.
-
-\* with terms <= c's must be in the server's log.
 H_LogsLaterThanCommittedMustHaveCommitted ==
     \A s \in Server : 
     \A c \in committed :
@@ -342,5 +351,25 @@ H_PrimaryHasEntriesItCreated ==
         ~(\E k \in DOMAIN log[j] :
             /\ log[j][k] = currentTerm[i]
             /\ ~InLog(<<k,log[j][k]>>, i))
+
+\* A server's current term is always at least as large as the terms in its log.
+H_CurrentTermAtLeastAsLargeAsLogTermsForPrimary == 
+    \A s \in Server : 
+        (state[s] = Primary) => 
+            (\A i \in DOMAIN log[s] : currentTerm[s] >= log[s][i])
+
+\* If a log contains an entry in term T at index I such that
+\* the entries at J < I are in a different term, then there must be
+\* no other logs that contains entries in term T at indices J < I
+H_UniformLogEntriesInTerm ==
+    \A s,t \in Server :
+    \A i \in DOMAIN log[s] : 
+        (\A j \in DOMAIN log[s] : (j < i) => log[s][j] # log[s][i]) => 
+            (~\E k \in DOMAIN log[t] : log[t][k] = log[s][i] /\ k < i)
+
+H_CommittedEntryExistsOnQuorum_AND_LogsLaterThanCommittedMustHaveCommitted_AND_LeaderCompleteness == 
+    /\ LeaderCompleteness
+    /\ H_CommittedEntryExistsOnQuorum
+    /\ H_LogsLaterThanCommittedMustHaveCommitted
 
 =============================================================================
