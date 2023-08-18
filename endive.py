@@ -362,17 +362,23 @@ class StructuredProofNode():
         if load_from_obj:
             self.load_from(load_from_obj)
 
-    def serialize(self):
-        return {
+    def serialize(self, include_ctis=True):
+        ret = {
             "name": self.name, 
             "expr": self.expr, 
             "apalache_proof_check": self.apalache_proof_check, 
-            "children": [c.serialize() for c in self.children], 
+            "children": [c.serialize(include_ctis=include_ctis) for c in self.children], 
+        }
+        cti_info = {
             "ctis": [c.serialize() for c in self.ctis],
             # Eliminated CTIs are stored as CTI hashes, not full CTIs.
             "ctis_eliminated": [c for c in self.ctis_eliminated],
             "parent_ctis_eliminated": [c for c in self.ctis_eliminated]
         }
+        if include_ctis:
+            for k in cti_info:
+                ret[k] = cti_info[k]
+        return ret
 
     def load_from(self, obj):
         """ Load serialized proof object into the current one after deserializing. """
@@ -476,8 +482,8 @@ class StructuredProof():
         if load_from_obj:
             self.load_from(load_from_obj)
 
-    def serialize(self):
-        return {"safety": self.safety_goal, "root": self.root.serialize()}
+    def serialize(self, include_ctis=True):
+        return {"safety": self.safety_goal, "root": self.root.serialize(include_ctis=include_ctis)}
     
     def save_proof(self):
         """ Visualize proof structure in HTML format for inspection, and serialize to JSON. """
@@ -572,6 +578,13 @@ class StructuredProof():
         # html += """<script src="{{ url_for('static',filename='proof.js') }}"> </script>"""
         # html += ("""<link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='proof.css') }}">""")
         html += '<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>'
+        html += """
+        <!-- CytoscapeJS (for graph visualizations) -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.20.0/cytoscape.min.js" integrity="sha512-cjmYAonfXK+azDmWqvnqq8xmygHRHqVI7S0zuRxQnvcYVeoakwthRX6pPKoXfG1oIjDvMUtteRV9PhQjJwKWxQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+        <script src="https://unpkg.com/dagre@0.7.4/dist/dagre.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/cytoscape-dagre@2.5.0/cytoscape-dagre.min.js"></script>
+        """
+
         html += ('<script type="text/javascript" src="proof.js"></script>')
         html += ("</head>")
 
@@ -2777,8 +2790,16 @@ class InductiveInvGen():
             from flask_cors import CORS
             app = Flask(__name__, static_folder="benchmarks")
             CORS(app)
-
             import threading
+
+            @app.route('/getProofGraph')
+            def getProofGraph():
+                proof_json = proof.serialize(include_ctis=False)
+                response = flask.jsonify({'ok': True, 'proof_graph': proof_json})
+                response.headers.add('Access-Control-Allow-Origin', '*')
+                print(proof_json)
+                return response
+
             @app.route('/genCtis/<flag>/<expr>')
             def genCtis(flag, expr):
                 logging.info(f"genCtis({flag}, {expr})")
