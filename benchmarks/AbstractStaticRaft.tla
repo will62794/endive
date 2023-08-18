@@ -372,4 +372,23 @@ H_CommittedEntryExistsOnQuorum_AND_LogsLaterThanCommittedMustHaveCommitted_AND_L
     /\ H_CommittedEntryExistsOnQuorum
     /\ H_LogsLaterThanCommittedMustHaveCommitted
 
+\* Invariant developed during inductive proof decomposition experimenting.
+\* 08/18/2023
+HumanDecompInd == 
+    /\ TypeOK
+    /\ LeaderCompleteness
+    /\ H_CommittedEntryExistsOnQuorum_AND_LogsLaterThanCommittedMustHaveCommitted_AND_LeaderCompleteness
+    /\ H_CurrentTermAtLeastAsLargeAsLogTermsForPrimary
+    /\ H_EntriesCommittedInOwnOrLaterTerm
+    /\ H_EntriesCommittedInOwnTerm
+    /\ H_LogEntryInTermImpliesSafeAtTerm
+    /\ H_OnePrimaryPerTerm
+    /\ H_PrimaryHasEntriesItCreated
+    /\ H_QuorumsSafeAtTerms
+    /\ H_TermsOfEntriesGrowMonotonically
+    /\ LogMatching
+    /\ H_UniformLogEntriesInTerm
+
+HumanDecompInd_WithConstraint == StateConstraint => HumanDecompInd
+
 =============================================================================
