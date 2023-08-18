@@ -2690,7 +2690,7 @@ class InductiveInvGen():
             ]),
             StructuredProofNode("QuorumsSafeAtTerms", "H_QuorumsSafeAtTerms"),
             StructuredProofNode("EntriesCommittedInOwnTerm_C", "H_EntriesCommittedInOwnTerm"),
-            StructuredProofNode("TermsOfEntriesGrowMonotonically_A", "H_TermsOfEntriesGrowMonotonically"),
+            StructuredProofNode("TermsOfEntriesGrowMonotonically_B", "H_TermsOfEntriesGrowMonotonically"),
             StructuredProofNode("LogEntryInTermImpliesSafeAtTerm_T1", "H_LogEntryInTermImpliesSafeAtTerm", children = [
                 StructuredProofNode("QuorumsSafeAtTerms_T1", "H_QuorumsSafeAtTerms")
             ]),
