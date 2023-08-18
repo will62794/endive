@@ -284,10 +284,9 @@ CInit ==
     /\ Primary = "P"
     /\ Secondary = "S"
     /\ Nil = "Nil"
-    \* /\ Server = {"s1", "s2"}
     /\ Server = {"s1", "s2", "s3"}
     /\ MaxLogLen = 3
-    /\ MaxTerm = 3
+    /\ MaxTerm = 2
     /\ InitTerm = 0
 
 \* 
