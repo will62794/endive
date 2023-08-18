@@ -388,6 +388,10 @@ HumanDecompInd ==
     /\ LogMatching
     /\ H_UniformLogEntriesInTerm
 
+HumanDecompIndWithTypeOK ==
+    /\ TypeOK
+    /\ HumanDecompInd   
+
 HumanDecompInd_WithConstraint == StateConstraint => HumanDecompInd
 
 =============================================================================
