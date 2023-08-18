@@ -484,6 +484,7 @@ class StructuredProof():
         filename = f"{self.proof_base_filename}.html"
         json_filename = f"{self.proof_base_filename}.json"
         pickle_filename = f"{self.proof_base_filename}.pickle"
+        dot_filename = f"{self.proof_base_filename}.dot"
 
         print(f"Saving latest proof HTML to '{filename}'")
         with open(filename, 'w') as f:
@@ -500,6 +501,8 @@ class StructuredProof():
         # Save pickled proof object.
         with open(pickle_filename, 'wb') as f:
             pickle.dump(self, f)
+
+        self.save_as_dot(dot_filename)
 
         print(f"Finished saving proof objects.")
 
@@ -2681,7 +2684,7 @@ class InductiveInvGen():
                     StructuredProofNode("LogEntryInTermImpliesSafeAtTerm", "H_LogEntryInTermImpliesSafeAtTerm", children = [
                         StructuredProofNode("QuorumsSafeAtTerms_C", "H_QuorumsSafeAtTerms")
                     ]),
-                    StructuredProofNode("UniformLogEntriesInTerm", "H_UniformLogEntriesInTerm")
+                    StructuredProofNode("UniformLogEntriesInTerm_A", "H_UniformLogEntriesInTerm")
                 # ]),
                 # StructuredProofNode("LogsWithEntryInTermMustHaveEarlierCommittedEntriesFromTerm_A", "H_LogsWithEntryInTermMustHaveEarlierCommittedEntriesFromTerm"),
             ]),
@@ -2695,7 +2698,18 @@ class InductiveInvGen():
             #     # StructuredProofNode("PrimaryHasEntriesItCreated_A", "H_PrimaryHasEntriesItCreated"),
             #     # StructuredProofNode("TermsOfEntriesGrowMonotonically_B", "H_TermsOfEntriesGrowMonotonically")
             # ]),
-            StructuredProofNode("UniformLogEntriesInTerm", "H_UniformLogEntriesInTerm", children= [
+            StructuredProofNode("UniformLogEntriesInTerm_B", "H_UniformLogEntriesInTerm", children= [
+                StructuredProofNode("LogMatching_Lemma", "LogMatching", children = [
+                    StructuredProofNode("PrimaryHasEntriesItCreated_A1", "H_PrimaryHasEntriesItCreated", children = [
+                        StructuredProofNode("LogEntryInTermImpliesSafeAtTerm_T2a", "H_LogEntryInTermImpliesSafeAtTerm", children = [
+                            StructuredProofNode("QuorumsSafeAtTerms_T2a", "H_QuorumsSafeAtTerms")
+                        ]),
+                        StructuredProofNode("OnePrimaryPerTerm_LemmaAa", "H_OnePrimaryPerTerm", children = [
+                            StructuredProofNode("QuorumsSafeAtTerms_BAa", "H_QuorumsSafeAtTerms")
+                        ]),
+                    ]),
+                    StructuredProofNode("TermsOfEntriesGrowMonotonically_B1", "H_TermsOfEntriesGrowMonotonically")
+                ]),
                 StructuredProofNode("PrimaryHasEntriesItCreated_A", "H_PrimaryHasEntriesItCreated", children=[
                     StructuredProofNode("LogEntryInTermImpliesSafeAtTerm_T2", "H_LogEntryInTermImpliesSafeAtTerm", children = [
                         StructuredProofNode("QuorumsSafeAtTerms_T2", "H_QuorumsSafeAtTerms")
