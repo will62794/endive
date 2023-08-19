@@ -270,16 +270,6 @@ TypeOK ==
     
 \* /\ committed \in SUBSET (LogIndices \X Terms \X Terms)
 
-\* Used for Apalache, if we ever convert over to use that.
-CInit3 == 
-    /\ Primary = "Primary"
-    /\ Secondary = "Secondary"
-    /\ Nil = "Nil"
-    /\ Server = {"s1", "s2", "s3"}
-    /\ MaxLogLen = 3
-    /\ MaxTerm = 3
-    /\ InitTerm = 0
-
 CInit == 
     /\ Primary = "Primary"
     /\ Secondary = "Secondary"
