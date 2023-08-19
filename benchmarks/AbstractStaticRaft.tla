@@ -272,8 +272,8 @@ TypeOK ==
 
 \* Used for Apalache, if we ever convert over to use that.
 CInit3 == 
-    /\ Primary = "P"
-    /\ Secondary = "S"
+    /\ Primary = "Primary"
+    /\ Secondary = "Secondary"
     /\ Nil = "Nil"
     /\ Server = {"s1", "s2", "s3"}
     /\ MaxLogLen = 3
@@ -281,8 +281,8 @@ CInit3 ==
     /\ InitTerm = 0
 
 CInit == 
-    /\ Primary = "P"
-    /\ Secondary = "S"
+    /\ Primary = "Primary"
+    /\ Secondary = "Secondary"
     /\ Nil = "Nil"
     /\ Server = {"s1", "s2", "s3"}
     /\ MaxLogLen = 3
