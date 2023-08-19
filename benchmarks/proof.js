@@ -38,7 +38,7 @@ window.onload = function(){
     var body = document.getElementsByTagName("body");
     var div = document.createElement("div");
     div.id = "stategraph";
-    document.body.prepend(div);
+    document.body.appendChild(div);
 
     var cy = cytoscape({
         container: document.getElementById('stategraph'), // container to render in
@@ -141,7 +141,10 @@ window.onload = function(){
 
         cy.edges('edge').style({
             "curve-style": "straight",
-            "target-arrow-shape": "triangle"
+            "target-arrow-shape": "triangle",
+            "arrow-scale":1.5,
+            "line-color": "steelblue",
+            "target-arrow-color": "steelblue"
         })
     
 
