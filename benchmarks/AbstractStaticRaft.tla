@@ -332,6 +332,12 @@ H_LogsLaterThanCommittedMustHaveCommitted ==
             /\ Len(log[s]) >= c[1]
             /\ log[s][c[1]] = c[2] \* entry exists in the server's log.
 
+\* If a server's latest log term exceeds a committed entry c's term, then it must contain that 
+\* committed entry in its log. Also, primary logs must contain entries committed in earlier terms.
+H_PrimaryOrLogsLaterThanCommittedMustHaveEarlierCommitted ==
+    /\ H_LogsLaterThanCommittedMustHaveCommitted
+    /\ LeaderCompleteness
+
 H_LogsWithEntryInTermMustHaveEarlierCommittedEntriesFromTerm ==
     \A s \in Server : 
     \A c \in committed :
