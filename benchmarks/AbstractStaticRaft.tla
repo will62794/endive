@@ -234,8 +234,8 @@ LeaderCompleteness ==
         \A c \in committed : (c[3] < currentTerm[s] => InLog(<<c[1],c[2]>>, s))
 
 \* \* If two entries are committed at the same index, they must be the same entry.
-\* StateMachineSafety == 
-\*     \A c1, c2 \in committed : (c1.entry[1] = c2.entry[1]) => (c1 = c2)
+StateMachineSafety == 
+    \A c1, c2 \in committed : (c1[1] = c2[1]) => (c1 = c2)
 
 --------------------------------------------------------------------------------
 
