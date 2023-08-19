@@ -372,11 +372,12 @@ H_CommittedEntryExistsOnQuorum_AND_LogsLaterThanCommittedMustHaveCommitted_AND_L
     /\ H_LogsLaterThanCommittedMustHaveCommitted
 
 \* Invariant developed during inductive proof decomposition experimenting.
-\* 08/18/2023
+\* 08/19/2023
 HumanDecompInd == 
-    /\ TypeOK
+    /\ StateMachineSafety
     /\ LeaderCompleteness
-    /\ H_CommittedEntryExistsOnQuorum_AND_LogsLaterThanCommittedMustHaveCommitted_AND_LeaderCompleteness
+    /\ H_CommittedEntryExistsOnQuorum
+    /\ H_LogsLaterThanCommittedMustHaveCommitted
     /\ H_CurrentTermAtLeastAsLargeAsLogTermsForPrimary
     /\ H_EntriesCommittedInOwnOrLaterTerm
     /\ H_EntriesCommittedInOwnTerm
