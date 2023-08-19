@@ -1606,7 +1606,7 @@ class InductiveInvGen():
         invcheck_tla_indcheck += f"    /\ InvStrengthened\n"
 
         depth_bound = 2
-        level_bound_precond = 'TLCGet("level") < {depth_bound}'
+        level_bound_precond = f'TLCGet("level") < {depth_bound}'
         if self.use_apalache_ctigen:
             level_bound_precond = "TRUE"
         invcheck_tla_indcheck += f'NextBounded ==  {level_bound_precond} /\ Next\n'
