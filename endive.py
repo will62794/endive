@@ -2674,10 +2674,19 @@ class InductiveInvGen():
             #     # StructuredProofNode("LeaderCompleteness_Lemma", "LeaderCompleteness"),
             #     StructuredProofNode("QuorumsSafeAtTerms_B", "H_QuorumsSafeAtTerms")
             # ]),
-            StructuredProofNode("CommittedEntryExistsOnQuorum_AND_LogsLaterThanCommittedMustHaveCommitted_AND_LC", "H_CommittedEntryExistsOnQuorum_AND_LogsLaterThanCommittedMustHaveCommitted_AND_LeaderCompleteness", children = [
+            # Will probably need this but maybe alternate lemma version?
+            # StructuredProofNode("LogsLaterThanCommittedMustHaveCommitted", "H_LogsLaterThanCommittedMustHaveCommitted", children = [
+            #     StructuredProofNode("TermsOfEntriesGrowMonotonically_D", "H_TermsOfEntriesGrowMonotonically"),
+            #     StructuredProofNode("LeaderCompleteness_H", "LeaderCompleteness"),
+            #     StructuredProofNode("EntriesCommittedInOwnTerm_W", "H_EntriesCommittedInOwnTerm"),
+            #     StructuredProofNode("UniformLogEntriesInTerm_T3", "H_UniformLogEntriesInTerm"),
+            #     StructuredProofNode("OnePrimaryPerTerm_LemmaTa", "H_OnePrimaryPerTerm")
+            # ]),
+            StructuredProofNode("CommittedEntryExistsOnQuorum", "H_CommittedEntryExistsOnQuorum", children = [
                 # StructuredProofNode("LogsLaterThanCommittedMustHaveCommitted_B", "H_LogsLaterThanCommittedMustHaveCommitted", children=[
                     # StructuredProofNode("LeaderCompleteness_A", "LeaderCompleteness"),
                     # StructuredProofNode("PrimaryHasEntriesItCreated_A", "H_PrimaryHasEntriesItCreated"),
+                    StructuredProofNode("LogsLaterThanCommittedMustHaveCommitted_S1", "H_LogsLaterThanCommittedMustHaveCommitted"),
                     StructuredProofNode("TermsOfEntriesGrowMonotonically_A", "H_TermsOfEntriesGrowMonotonically", children=[
                         # StructuredProofNode("PrimaryHasEntriesItCreated_B", "H_PrimaryHasEntriesItCreated"),
                         StructuredProofNode("LogEntryInTermImpliesSafeAtTerm_B", "H_LogEntryInTermImpliesSafeAtTerm", children=[
@@ -2689,7 +2698,7 @@ class InductiveInvGen():
                             ])
                         ])
                     ]),
-                    StructuredProofNode("EntriesCommittedInOwnOrLaterTerm_B", "H_EntriesCommittedInOwnOrLaterTerm"),
+                    # StructuredProofNode("EntriesCommittedInOwnOrLaterTerm_B", "H_EntriesCommittedInOwnOrLaterTerm"),
                     StructuredProofNode("EntriesCommittedInOwnTerm_B", "H_EntriesCommittedInOwnTerm"),
                     # StructuredProofNode("CommittedEntryExistsOnQuorum_B", "H_CommittedEntryExistsOnQuorum", children = [
                     #     StructuredProofNode("LogsLaterThanCommittedMustHaveCommitted_C", "H_LogsLaterThanCommittedMustHaveCommitted")
@@ -2797,7 +2806,7 @@ class InductiveInvGen():
                 proof_json = proof.serialize(include_ctis=False)
                 response = flask.jsonify({'ok': True, 'proof_graph': proof_json})
                 response.headers.add('Access-Control-Allow-Origin', '*')
-                print(proof_json)
+                # print(proof_json)
                 return response
 
             @app.route('/genCtis/<flag>/<expr>')
