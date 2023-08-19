@@ -1570,7 +1570,7 @@ class InductiveInvGen():
         # Generate spec for generating CTIs.
         invcheck_tla_indcheck=f"---- MODULE {self.specname}_CTIGen_{ctiseed} ----\n"
         suffix = ""
-        if self.typeok_random_spec:
+        if self.typeok_random_spec and not self.use_apalache_ctigen:
             suffix = "_TypeOKRandom"
         invcheck_tla_indcheck += f"EXTENDS {self.specname}{suffix}\n\n"
 
@@ -1599,11 +1599,17 @@ class InductiveInvGen():
         invcheck_tla_indcheck += f"InvStrengthened_Constraint == {precond} => InvStrengthened \n"
 
         invcheck_tla_indcheck += "IndCand ==\n"
-        invcheck_tla_indcheck += "    /\\ %s\n" % self.typeok
+        typeok = self.typeok
+        if self.use_apalache_ctigen:
+            typeok = "TypeOK"
+        invcheck_tla_indcheck += "    /\\ %s\n" % typeok
         invcheck_tla_indcheck += f"    /\ InvStrengthened\n"
 
         depth_bound = 2
-        invcheck_tla_indcheck += f'NextBounded ==  TLCGet("level") < {depth_bound} /\ Next\n'
+        level_bound_precond = 'TLCGet("level") < {depth_bound}'
+        if self.use_apalache_ctigen:
+            level_bound_precond = "TRUE"
+        invcheck_tla_indcheck += f'NextBounded ==  {level_bound_precond} /\ Next\n'
 
         invcheck_tla_indcheck += "===="
 
@@ -1664,8 +1670,8 @@ class InductiveInvGen():
             jvm_args="JVM_ARGS='-Xss16M'"
             max_num_ctis = 250
             inv_to_check = "InvStrengthened_Constraint"
-            # cmd = f"{apalache_bin} check --out-dir={outdir} --max-error={max_num_ctis} --view=vars --run-dir={rundir} --cinit=CInit --init=IndCand --next=Next --inv={inv_to_check} --length=1 {indchecktlafilename}"
-            cmd = f"{apalache_bin} check --out-dir={outdir} --run-dir={rundir} --cinit=CInit --init=IndCand --next=Next --inv={inv_to_check} --length=1 {indchecktlafilename}"
+            cmd = f"{apalache_bin} check --out-dir={outdir} --max-error={max_num_ctis} --view=vars --run-dir={rundir} --cinit=CInit --init=IndCand --next=Next --inv={inv_to_check} --length=1 {indchecktlafilename}"
+            # cmd = f"{apalache_bin} check --out-dir={outdir} --run-dir={rundir} --cinit=CInit --init=IndCand --next=Next --inv={inv_to_check} --length=1 {indchecktlafilename}"
             logging.debug("Apalache command: " + cmd)
             workdir = None
             if self.specdir != "":
@@ -2674,6 +2680,7 @@ class InductiveInvGen():
             #     # StructuredProofNode("LeaderCompleteness_Lemma", "LeaderCompleteness"),
             #     StructuredProofNode("QuorumsSafeAtTerms_B", "H_QuorumsSafeAtTerms")
             # ]),
+
             # Will probably need this but maybe alternate lemma version?
             # StructuredProofNode("LogsLaterThanCommittedMustHaveCommitted", "H_LogsLaterThanCommittedMustHaveCommitted", children = [
             #     StructuredProofNode("TermsOfEntriesGrowMonotonically_D", "H_TermsOfEntriesGrowMonotonically"),
@@ -2682,6 +2689,7 @@ class InductiveInvGen():
             #     StructuredProofNode("UniformLogEntriesInTerm_T3", "H_UniformLogEntriesInTerm"),
             #     StructuredProofNode("OnePrimaryPerTerm_LemmaTa", "H_OnePrimaryPerTerm")
             # ]),
+
             StructuredProofNode("CommittedEntryExistsOnQuorum", "H_CommittedEntryExistsOnQuorum", children = [
                 # StructuredProofNode("LogsLaterThanCommittedMustHaveCommitted_B", "H_LogsLaterThanCommittedMustHaveCommitted", children=[
                     # StructuredProofNode("LeaderCompleteness_A", "LeaderCompleteness"),
