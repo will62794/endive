@@ -253,6 +253,9 @@ class CTI():
         # different points within this trace.
         self.trace = trace
 
+        # Optional cost metric for this CTI
+        self.cost = 0
+
         if load_from_obj:
             self.load_from(load_from_obj)
 
@@ -535,8 +538,14 @@ class StructuredProof():
 
     def node_cti_html(self, node):
         html = ""
-        max_ctis_to_show = 3
-        remaining_ctis_sampled = node.sample_remaining_ctis(max_ctis_to_show)
+        max_ctis_to_show = 30
+        cti_sort_key = lambda c : c.cost
+        # remaining_ctis_sampled = node.sample_remaining_ctis(max_ctis_to_show, sort_by = cti_sort_key)
+
+        # Sort remaining CTIs by cost.
+        remaining_ctis = sorted(node.get_remaining_ctis(), key = cti_sort_key)
+        remaining_ctis_sampled = remaining_ctis[:max_ctis_to_show]
+        # remaining_ctis_sampled = node.sample_remaining_ctis(max_ctis_to_show, sort_by = cti_sort_key)
 
         # Aggregate statistics.
         all_remaining_ctis = node.get_remaining_ctis()
@@ -549,7 +558,7 @@ class StructuredProof():
         html += f"<div>Actions present in CTIs: [{action_name_info}]</div>"
         for i,one_cti in enumerate(remaining_ctis_sampled):
             html += f"<div class='cti-box'>"
-            html += (f"<h3>CTI {i} for {node.expr} (Action: {one_cti.getActionName()})</h3>\n")
+            html += (f"<h3>CTI {i} for {node.expr} (Action: {one_cti.getActionName()}, cost={one_cti.cost})</h3>\n")
             html += ("<pre>")
             for k,s in enumerate(one_cti.getTrace().getStates()):
                 html += (f"<b>CTI State {k}</b> \n")
@@ -681,13 +690,34 @@ class StructuredProof():
 
         print("Node CTIS:", len(node.ctis))
 
+        # Mapping from CTI id to CTI object.
+        cti_table = {}
+        for c in node.ctis:
+            cti_table[str(hash(c))] = c
+
         # Compute CTIs that are eliminated by each of the "support lemmas" for this node i.e.
         # its set of direct children.
 
         print(f"Checking CTI elimination for support lemmas of node ({node.name},{node.expr})")
-        ctis_eliminated = indgen.check_cti_elimination(node.ctis, [
+        # ctis_eliminated = indgen.check_cti_elimination(node.ctis, [
+        #     (child.name,child.expr) for child in node.children
+        # ])
+
+        cti_info = indgen.check_cti_elimination(node.ctis, [
             (child.name,child.expr) for child in node.children
         ])
+
+        ctis_eliminated = cti_info["eliminated"]
+        cti_cost = cti_info["cost"]
+        # print(cti_cost)
+
+        # Assign costs for each node CTI.
+        print(len(node.ctis))
+        print("cost len:", len(cti_cost))
+        for c in cti_cost:
+            cost = cti_cost[c]
+            cti_table[c].cost = cost
+
         # print("CTI eliminate response:", ctis_eliminated.keys())
 
         ctis_eliminated_unique = {}
@@ -1841,7 +1871,12 @@ class InductiveInvGen():
             invi = int(inv.replace("Inv",""))
             invname = "Inv%d" % invi
             invcheck_tla_indcheck += "VARIABLE %s_val\n" % invname
-        invcheck_tla_indcheck += "VARIABLE ctiId\n"
+        aux_vars = [
+            "ctiId", 
+            "ctiCost"
+        ]
+        for v in aux_vars:
+            invcheck_tla_indcheck += f"VARIABLE {v}\n"
         invcheck_tla_indcheck += "\n"
 
         # Add definitions for all invariants and strengthening conjuncts.
@@ -1865,6 +1900,7 @@ class InductiveInvGen():
 
             # Identify the CTI state by the hash of its string representation.
             invcheck_tla_indcheck += "\t   " + "/\\ ctiId = \"%d\"\n" % (hash(cti))
+            invcheck_tla_indcheck += "\t   " + "/\\ ctiCost = CTICost\n"
             
             # invcheck_tla_indcheck += "\n"
         invcheck_tla_indcheck += "\n"
@@ -1891,7 +1927,8 @@ class InductiveInvGen():
         # Add next-state relation that leaves the auxiliary variables unchanged.
         invcheck_tla_indcheck += "CTICheckNext ==\n"
         invcheck_tla_indcheck += "    /\\ NextUnchanged\n"
-        invcheck_tla_indcheck += "    /\\ UNCHANGED ctiId\n"
+        for v in aux_vars:
+            invcheck_tla_indcheck += f"    /\\ UNCHANGED {v}\n"
         for inv in sat_invs_group:
             invcheck_tla_indcheck += "    /\\ UNCHANGED %s_val\n" % inv
 
@@ -1902,7 +1939,8 @@ class InductiveInvGen():
         invcheck_tla_indcheck += "CTICheckNext_DepthBoundedReachability ==\n"
         invcheck_tla_indcheck += f'    /\ TLCGet("level") < {depth_bound}\n'
         invcheck_tla_indcheck += f"    /\ Next\n"
-        invcheck_tla_indcheck += "    /\\ UNCHANGED ctiId\n"
+        for v in aux_vars:
+            invcheck_tla_indcheck += f"    /\\ UNCHANGED {v}\n"
         for inv in sat_invs_group:
             invcheck_tla_indcheck += "    /\\ UNCHANGED %s_val\n" % inv
 
@@ -1957,6 +1995,7 @@ class InductiveInvGen():
 
         # Initialize table mapping from invariants to a set of CTI states they violate.
         cti_states_eliminated_by_invs = {}
+        cti_costs = {}
 
         # Create metadir if necessary.
         os.system("mkdir -p states")
@@ -1990,6 +2029,7 @@ class InductiveInvGen():
 
         # Generate reachability graphs for CTI sets along with other checking.
         generate_reachable_graphs = False
+        self.cti_out_degrees = None
 
         while curr_ind < len(sat_invs):
             sat_invs_group = sat_invs[curr_ind:(curr_ind+MAX_INVS_PER_GROUP)]
@@ -2068,6 +2108,10 @@ class InductiveInvGen():
                 for cti_state in cti_states:
                     sval = cti_state["val"]
                     ctiHash = sval["ctiId"]
+                    ctiCost = sval["ctiCost"]
+
+                    cti_costs[ctiHash] = ctiCost
+
                     # for inv in sat_invs_group:
                     # for inv in inv_chunks[ci]:
                     for inv in sat_invs_group:
@@ -2096,7 +2140,6 @@ class InductiveInvGen():
                     print(f"Total found edges reachable from cti states in bounded depth:", len(cti_states_reach["edges"]))
 
 
-            self.cti_out_degrees = None
             if generate_reachable_graphs:
                 # TODO: Store CTI graph and look for motifs.
                 import networkx as nx
@@ -2135,7 +2178,7 @@ class InductiveInvGen():
                 self.cti_out_degrees = {str(G.nodes[d[0]]["val"]["ctiId"]):d[1] for d in out_degrees}
 
                 print("Printing some CTIs with smallest out-degree")
-                for d in list(sorted(out_degrees, key = lambda x : x[1]))[:4]:
+                for d in list(sorted(out_degrees, key = lambda x : x[1]))[:7]:
                     print("out degree:", d)
                     outdegree = d[1]
                     if outdegree <= 2:
@@ -2217,7 +2260,11 @@ class InductiveInvGen():
 
 
             curr_ind += MAX_INVS_PER_GROUP
-        return cti_states_eliminated_by_invs
+        # Return various CTI info.
+        return {
+            "eliminated": cti_states_eliminated_by_invs,
+            "cost": cti_costs
+        }
 
     def eliminate_ctis(self, orig_k_ctis, num_invs, roundi, preds_alt=[], quant_inv_alt=None, tlc_workers=6, specdir=None, append_inv_round_id=True):
         """ Check which of the given satisfied invariants eliminate CTIs. """
