@@ -694,6 +694,7 @@ class StructuredProof():
 
         print("CTIs eliminated by invs")
         all_eliminated_ctis = set()
+        out_degrees_of_unique_eliminated = set()
         for i,inv in enumerate(sorted(ctis_eliminated.keys(), key=lambda k : int(k.replace("Inv", "")))):
         # for child in node.children:
             print(inv, ":", len(ctis_eliminated[inv]))
@@ -710,7 +711,27 @@ class StructuredProof():
             child_node.parent = node
             child_node.parent_ctis_eliminated = set(ctis_eliminated[inv])
             child_node.parent_ctis_uniquely_eliminated = set(ctis_eliminated_unique[inv])
+            if len(child_node.parent_ctis_uniquely_eliminated) > 0:
+                one_unique_cti = random.sample(child_node.parent_ctis_uniquely_eliminated, 1)
+                for c in one_unique_cti:
+                    # Are the low outdegree CTIs among those CTIs that are uniquely eliminated?
+                    print("Sample of uniquely eliminated CTI:")
+                    print(child_node.name)
+                    print(c)
+                    # print([str(hash(x)) for x in node.ctis])
+                    uniq_cti_obj = [x for x in node.ctis if str(hash(x)) == c][0]
+                    print(uniq_cti_obj.pretty_str())
 
+                    if indgen.cti_out_degrees:
+                        # print(len(indgen.cti_out_degrees))
+                        out_degree = indgen.cti_out_degrees[c]
+                        # print(type(c), c)
+                        # print("out_degree:", out_degree)
+                        out_degrees_of_unique_eliminated.add(out_degree)
+
+        if indgen.cti_out_degrees:
+            print("uniquely eliminated out degrees:", out_degrees_of_unique_eliminated)
+            
         node.ctis_eliminated = all_eliminated_ctis
 
         # Re-write proof html.
@@ -2075,12 +2096,13 @@ class InductiveInvGen():
                     print(f"Total found edges reachable from cti states in bounded depth:", len(cti_states_reach["edges"]))
 
 
+            self.cti_out_degrees = None
             if generate_reachable_graphs:
                 # TODO: Store CTI graph and look for motifs.
                 import networkx as nx
                 G = nx.DiGraph()
                 for e in cti_states_reach["states"]:
-                    G.add_node(e["fp"], initial=e["initial"], val=e["val"])
+                    G.add_node(e["fp"], initial=e["initial"], val=e["val"], ctiId=e["val"]["ctiId"])
                 for e in cti_states_reach["edges"]:
                     G.add_edge(e["from"], e["to"])
                 print("num nodes:", G.number_of_nodes())
@@ -2097,45 +2119,70 @@ class InductiveInvGen():
                         cti_root_nodes.append(n)
                         num_init += 1
                         neighborhood = nx.bfs_tree(G, n, depth_limit=3)
-                        print(f"neighborhood of {n}")
-                        print("nodes:", neighborhood.number_of_nodes())
-                        print("edges:", neighborhood.number_of_edges())
-                        print(f"outdegree: {G.out_degree(n)}")
+                        # print(f"neighborhood of {n}")
+                        # print("nodes:", neighborhood.number_of_nodes())
+                        # print("edges:", neighborhood.number_of_edges())
+                        # print(f"outdegree: {G.out_degree(n)}")
                         out_degrees.append((n, G.out_degree(n)))
                         local_neighborhoods[n] = neighborhood
 
                 print("Ascending out degrees")
-                for d in sorted(out_degrees, key = lambda x : x[1]):
+                out_degree_nums = [d[1] for d in out_degrees]
+                unique_out_degrees = set(out_degree_nums)
+                deg_counts = {n:out_degree_nums.count(n) for n in unique_out_degrees}
+                print("Out-degree histogram table:", deg_counts)
+                
+                self.cti_out_degrees = {str(G.nodes[d[0]]["val"]["ctiId"]):d[1] for d in out_degrees}
+
+                print("Printing some CTIs with smallest out-degree")
+                for d in list(sorted(out_degrees, key = lambda x : x[1]))[:4]:
+                    print("out degree:", d)
                     outdegree = d[1]
                     if outdegree <= 2:
                         cti = [c for c in orig_ctis if int(G.nodes[d[0]]["val"]["ctiId"]) == hash(c)][0]
-                        print(d)
+                        # print(d)
                         print(cti.action_name)
                         for l in cti.cti_lines:
                             print(l)
+                        print("--")
 
-                logging.info("Checking isomorphism between local neighborhoods")
-                unclustered_nodes = list(local_neighborhoods.keys())
-                clusters = []
-                while len(unclustered_nodes):
-                    # Get next unclustered node.
-                    next_node = unclustered_nodes.pop()
-                    # See if this node is isomorphic to any existing cluster.
-                    iso_to_cluster = None
-                    for i,c in enumerate(clusters):
-                        cluster_member = c[0]
-                        iso = nx.is_isomorphic(local_neighborhoods[next_node], local_neighborhoods[cluster_member])
-                        if iso:
-                            iso_to_cluster = i
-                            break
+                print("Printing some CTIs with highest out-degree")
+                for d in list(sorted(out_degrees, key = lambda x : x[1]))[-4:]:
+                    print("out degree:", d)
+                    outdegree = d[1]
+                    cti = [c for c in orig_ctis if int(G.nodes[d[0]]["val"]["ctiId"]) == hash(c)][0]
+                    # print(d)
+                    print(cti.action_name)
+                    for l in cti.cti_lines:
+                        print(l)
+                    print("--")
 
-                    # If it is not isomorphic to any existing cluster,
-                    # then create a new cluster with this node. Otherwise add
-                    # it to correct cluster.
-                    if iso_to_cluster is not None:
-                        clusters[iso_to_cluster].append(next_node)
-                    else:
-                        clusters.append([next_node])
+                #
+                # TODO: Re-enable isomorphic clustering if desired.
+                #
+
+                # logging.info("Checking isomorphism between local neighborhoods")
+                # unclustered_nodes = list(local_neighborhoods.keys())
+                # clusters = []
+                # while len(unclustered_nodes):
+                #     # Get next unclustered node.
+                #     next_node = unclustered_nodes.pop()
+                #     # See if this node is isomorphic to any existing cluster.
+                #     iso_to_cluster = None
+                #     for i,c in enumerate(clusters):
+                #         cluster_member = c[0]
+                #         iso = nx.is_isomorphic(local_neighborhoods[next_node], local_neighborhoods[cluster_member])
+                #         if iso:
+                #             iso_to_cluster = i
+                #             break
+
+                #     # If it is not isomorphic to any existing cluster,
+                #     # then create a new cluster with this node. Otherwise add
+                #     # it to correct cluster.
+                #     if iso_to_cluster is not None:
+                #         clusters[iso_to_cluster].append(next_node)
+                #     else:
+                #         clusters.append([next_node])
 
                     
                 # for n in local_neighborhoods:
@@ -2154,10 +2201,10 @@ class InductiveInvGen():
                     cti_table[hash(c)] = c
 
                 # Sort clusters by size.
-                print('num init:', num_init)
-                clusters = sorted(clusters, key=lambda c : len(c), reverse=True)
+                # print('num init:', num_init)
+                # clusters = sorted(clusters, key=lambda c : len(c), reverse=True)
 
-                print(f"{len(clusters)} Isomorphic clusters")
+                # print(f"{len(clusters)} Isomorphic clusters")
                 # for i,c in enumerate(clusters):
                 #     print(f"cluster of size {len(c)}:", c)
                 #     nx.nx_pydot.write_dot(local_neighborhoods[c[0]], f"ctigraphs/cluster_{i}_{len(c)}.dot")
