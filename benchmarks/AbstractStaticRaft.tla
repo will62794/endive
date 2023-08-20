@@ -391,4 +391,31 @@ HumanDecompIndWithTypeOK ==
 
 HumanDecompInd_WithConstraint == StateConstraint => HumanDecompInd
 
+\* Sum the elements in the range of a function.
+RECURSIVE SumFnRange(_)
+SumFnRange(f) == IF DOMAIN f = {} THEN 0 ELSE
+  LET x == CHOOSE x \in DOMAIN f : TRUE
+    IN f[x] + SumFnRange([k \in (DOMAIN f) \ {x} |-> f[k]])
+
+RECURSIVE SumSeq(_)
+SumSeq(s) == IF s = <<>> THEN 0 ELSE
+  Head(s) + SumSeq(Tail(s))
+
+RECURSIVE SetSum(_)
+SetSum(set) == IF set = {} THEN 0 ELSE
+  LET x == CHOOSE x \in set: TRUE
+    IN x + SetSum(set \ {x})
+
+\* Predicate determining a "cost" function for CTI, typically to measure complexity/size of a 
+\* given CTI i.e. if we want to look for "minimal" CTIs.
+CTICost == 
+    \* Sum of all log lengths.
+    SumFnRange([s \in Server |-> Len(log[s])]) + 
+    Cardinality(committed) +
+    SumFnRange(currentTerm) +
+    \* Sum of term values in all log entries.
+    SumFnRange([s \in Server |-> SumFnRange(log[s])]) +
+    \* Treat states with more nodes in Secondary as lower "cost"/"energy" states.
+    SumFnRange([s \in Server |-> IF state[s] = Secondary THEN 0 ELSE 1])
+
 =============================================================================
