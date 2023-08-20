@@ -2000,7 +2000,7 @@ class InductiveInvGen():
 
 
                 # Generate alternate config file for computing reachability graph from each CTI.
-                ctiquickcfgfile_reach=f"{os.path.join(self.specdir, GEN_TLA_DIR)}/{self.specname}CTIQuickCheck_Reachable_chunk{ci}_.cfg"
+                ctiquickcfgfile_reach=f"{os.path.join(self.specdir, GEN_TLA_DIR)}/{self.specname}_CTIQuickCheck_Reachable_chunk{ci}.cfg"
                 ctiquickcfgfilename_reach=f"{GEN_TLA_DIR}/{self.specname}_CTIQuickCheck_Reachable_chunk{ci}.cfg"
                 cfg_str = self.make_ctiquickcheck_cfg(invs, sat_invs_group, cti_chunk, quant_inv_fn, next_pred="CTICheckNext_DepthBoundedReachability")
                 
