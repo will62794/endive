@@ -8,9 +8,9 @@ BoundedSeq(S, n) == SeqOf(S, n)
 \* Set of all subsets of a set of size <= k.
 kOrSmallerSubset(k, S) == UNION {(kSubset(n, S)) : n \in 0..k}
 
-\********
+\********************************
 \* Tree-based specification of Raft logs.
-\********
+\********************************
 
 \* Last term of a sequence, or -1 if the sequence is empty.
 SeqLastTerm(seq) == IF Len(seq) = 0 THEN -1 ELSE seq[Len(seq)][2]
