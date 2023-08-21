@@ -35,26 +35,35 @@ function focusOnNode(nodeId){
         var ctiCounter = document.createElement("h3");
         ctiCounter.innerHTML = `Total CTIs: ${data["ctis"].length}`;
         var ctiCounter2 = document.createElement("h3");
-        ctiCounter2.innerHTML = `Total CTIs eliminated: ${data["ctis_eliminated"].length}`;
+        ctiCounter2.innerHTML = `Total CTIs remaining: ${data["ctis_remaining"].length}`;
         ctipane.appendChild(ctiCounter);
         ctipane.appendChild(ctiCounter2);
 
         if(data["ctis"].length > 0){
-            let cti_obj = data["ctis"][0];
-            let cti_text = cti_obj["cti_str"];
-            var ctidiv = document.createElement("div");
-            var i = 0;
-            ctidiv.innerHTML += `<h3>CTI (${cti_obj["action_name"]}), cost=${cti_obj["cost"]}</h3>`;
-            for(const state of cti_obj["trace"]){
-                ctidiv.innerHTML += `<h4>CTI State ${i}</h4>`;
-                ctidiv.innerHTML += "<pre>";
-                for(const line of state["state_lines"]){
-                    ctidiv.innerHTML += line + "<br>";
+            let cti_ind = 0;
+            for(const cti_obj of data["ctis_remaining"].slice(0,2)){
+                // let cti_obj = data["ctis"][0];
+                let cti_text = cti_obj["cti_str"];
+                var ctidiv = document.createElement("div");
+                ctidiv.classList.add("cti-box");
+                var i = 0;
+                ctidiv.innerHTML += `<h3>CTI ${cti_ind} (${cti_obj["action_name"]}), cost=${cti_obj["cost"]}</h3>`;
+                for(const state of cti_obj["trace"]){
+                    ctidiv.innerHTML += `<h4>CTI State ${i}</h4>`;
+                    ctidiv.innerHTML += "<pre>";
+                    let lineI = 0;
+                    for(const line of state["state_lines"]){
+                        let isDiff = i==1 && (cti_obj["trace"][0]["state_lines"][lineI] !== line);
+                        let color = isDiff ? "blue" : "black";
+                        ctidiv.innerHTML += `<span style='color:${color}'>` + line + "</span><br>";
+                        lineI += 1;
+                    }
+                    ctidiv.innerHTML += "</pre>";
+                    i += 1;
                 }
-                ctidiv.innerHTML += "</pre>";
-                i += 1;
+                ctipane.appendChild(ctidiv);
+                cti_ind += 1;
             }
-            ctipane.appendChild(ctidiv);
         }
 
     });   
@@ -138,10 +147,10 @@ window.onload = function(){
         showCtisForNode(name);
         focusOnNode(name);
         if(currentNode !== null){
-            currentNode.style({"color":"black"});
+            currentNode.style({"color":"black", "font-weight": "normal"});
         }
         currentNode = this;
-        currentNode.style({"color":"blue"});
+        currentNode.style({"color":"black", "font-weight": "bold"});
     });
 
     cy.edges('edge').style({

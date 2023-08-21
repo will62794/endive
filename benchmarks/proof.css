@@ -47,20 +47,21 @@ table td:hover {
 
 .cti-box {
     border:solid 1px gray;
-    padding:5px;
+    padding:8px;
     margin-top:10px;
     margin-bottom:10px;
+    font-size:16px;
 }
 
 #stategraph{
-    width:58%;
+    width:55%;
     height: 90%;
     border-right:solid 1px black;
     float:left;
 }
 
 #ctiPane{
-    width:40%;
+    width:43%;
     float:left;
     height:90%;
     padding-left:1%;

@@ -2769,24 +2769,32 @@ class InductiveInvGen():
         # AbstractStaticRaft proof structure.
         #
 
+        lemmaTRUE = StructuredProofNode("LemmaTrue", "TRUE")
+
         quorumsSafeAtTerms = StructuredProofNode("QuorumsSafeAtTerms_C", "H_QuorumsSafeAtTerms")
+
+        onePrimaryPerTerm = StructuredProofNode("OnePrimaryPerTerm_Lemma", "H_OnePrimaryPerTerm", children = [
+            # lemmaTRUE,
+            quorumsSafeAtTerms
+        ])
 
         logEntryInTermImpliesSafeAtTerms = StructuredProofNode("LogEntryInTermImpliesSafeAtTerm", "H_LogEntryInTermImpliesSafeAtTerm", children = [        
             quorumsSafeAtTerms
         ])
 
-        lemmaTRUE = StructuredProofNode("LemmaTrue", "TRUE")
         primaryHasEntriesItCreated = StructuredProofNode("PrimaryHasEntriesItCreated_A", "H_PrimaryHasEntriesItCreated")
         primaryHasEntriesItCreated.children = [
             # lemmaTRUE,
-            quorumsSafeAtTerms
+            # quorumsSafeAtTerms,
+            onePrimaryPerTerm,
+            logEntryInTermImpliesSafeAtTerms
         ]
 
         currentTermsAtLeastLargeAsLogTermsForPrimary =  StructuredProofNode("CurrentTermAtLeastAsLargeAsLogTermsForPrimary", "H_CurrentTermAtLeastAsLargeAsLogTermsForPrimary", children = [
                 logEntryInTermImpliesSafeAtTerms
         ])
 
-        termsGrowMonotonically = StructuredProofNode("TermsOfEntriesGrowMonotonically_A", "H_TermsOfEntriesGrowMonotonically", children=[
+        termsGrowMonotonically = StructuredProofNode("TermsOfEntriesGrowMonotonically_A", "H_TermsOfEntriesGrowMonotonically", children = [
             currentTermsAtLeastLargeAsLogTermsForPrimary
         ])
 
@@ -2908,8 +2916,17 @@ class InductiveInvGen():
                 print(node)
                 ctis = [c.serialize() for c in node.ctis]
                 ctis_eliminated = [c for c in node.ctis_eliminated]
+
+                cti_sort_key = lambda c : c.cost
+                remaining_ctis_cost_sorted = sorted(node.get_remaining_ctis(), key = cti_sort_key)
+
                 # proof_json = proof.serialize(include_ctis=False)
-                response = flask.jsonify({'ok': True, 'ctis': ctis, 'ctis_eliminated': ctis_eliminated})
+                response = flask.jsonify({
+                    'ok': True, 
+                    'ctis': ctis, 
+                    'ctis_eliminated': ctis_eliminated,
+                    "ctis_remaining": [c.serialize() for c in remaining_ctis_cost_sorted]
+                })
                 response.headers.add('Access-Control-Allow-Origin', '*')
                 # print(proof_json)
                 return response
