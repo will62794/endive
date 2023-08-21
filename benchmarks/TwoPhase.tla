@@ -196,7 +196,9 @@ H_AllPreparedImpliesNoRMsWorking == \A rmi \in RM : (tmPrepared = RM) => ~(rmSta
 
 H_RMSentPrepareImpliesNotWorking == \A rmi \in RM : ([type |-> "Prepared", rm |-> rmi] \in msgsPrepared) => (~(rmState[rmi] = "working"))
 
+H_AllPreparedImpliesAllPrepareMsgsSent == (tmPrepared = RM) => \A rmj \in RM : ([type |-> "Prepared", rm |-> rmj] \in msgsPrepared)
 
+H_CommitMsgImpliesAllPreparedMsgsSent == \A rmi \in RM : ([type |-> "Commit"] \in msgsAbortCommit) => ([type |-> "Prepared", rm |-> rmi] \in msgsPrepared) 
 
 
 
@@ -207,8 +209,6 @@ H_Inv331 == ~([type |-> "Abort"] \in msgsAbortCommit) \/ (~(tmState = "init"))
 H_Inv344 == ~([type |-> "Commit"] \in msgsAbortCommit) \/ (~(tmState = "init"))
 
 \* Level 2.
-H_Inv9990 == \A rmi \in RM : ([type |-> "Prepared", rm |-> rmi] \in msgsPrepared) \/ (~([type |-> "Commit"] \in msgsAbortCommit))
-H_Inv9991 == \A rmj \in RM : ([type |-> "Prepared", rm |-> rmj] \in msgsPrepared) \/ (~(tmPrepared = RM))
 
 \* Level 3.
 H_Inv1863 == \A rmi \in RM : (rmState[rmi] = "prepared") \/ (~([type |-> "Prepared", rm |-> rmi] \in msgsPrepared) \/ (~(tmState = "init")))

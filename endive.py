@@ -2744,10 +2744,10 @@ class InductiveInvGen():
         rMSentPrepareImpliesNotWorking = StructuredProofNode("RMSentPrepareImpliesNotWorking", "H_RMSentPrepareImpliesNotWorking")
 
         commitMsgImpliesNoRMAborted = StructuredProofNode("CommitMsgImpliesNoRMAborted", "H_CommitMsgImpliesNoRMAborted", children = [
-            StructuredProofNode("H3_1", "H_Inv9990", children=[
+            StructuredProofNode("CommitMsgImpliesAllPreparedMsgsSent", "H_CommitMsgImpliesAllPreparedMsgsSent", children=[
                 StructuredProofNode("H3_2", "H_Inv79")
             ]),
-            StructuredProofNode("H3_2", "H_Inv9991", children=[
+            StructuredProofNode("AllPreparedImpliesAllPrepareMsgsSent", "H_AllPreparedImpliesAllPrepareMsgsSent", children=[
                 StructuredProofNode("H3_2", "H_Inv79")
             ]),
             StructuredProofNode("H3_4", "H_Inv7777", children = [
