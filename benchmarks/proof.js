@@ -152,8 +152,11 @@ window.onload = function(){
         ctis = node["ctis"];
         ctis_eliminated = node["ctis_eliminated"];
         let color = "orange"
-        if(ctis.length > 0 && ctis.length === ctis_eliminated.length){
+        if(node["had_ctis_generated"] && ctis.length === ctis_eliminated.length){
             color = "green";
+        }
+        if(!node["had_ctis_generated"]){
+            color = "lightgray";
         }
         // console.log(ctis.length)
         if(!addedNodes.includes(node["expr"])){

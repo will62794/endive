@@ -376,7 +376,8 @@ class StructuredProofNode():
             "ctis": [c.serialize() for c in self.ctis],
             # Eliminated CTIs are stored as CTI hashes, not full CTIs.
             "ctis_eliminated": [c for c in self.ctis_eliminated],
-            "parent_ctis_eliminated": [c for c in self.ctis_eliminated]
+            "parent_ctis_eliminated": [c for c in self.ctis_eliminated],
+            "had_ctis_generated": self.had_ctis_generated
         }
         if include_ctis:
             for k in cti_info:
