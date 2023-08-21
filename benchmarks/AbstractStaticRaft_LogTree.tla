@@ -58,7 +58,7 @@ TreeEdges == {
         \* Branch points in Raft have a particular property i.e. they can only
         \* occur when there are conflicting primaries in different terms. Thus, 
         \* it must be the case that all initial terms on any branch are different.
-        \* At most one branch can be the one that continue the parent branch.
+        \* At most one branch can be the one that continues the parent branch.
         /\ \A c1,c2 \in e.children : c1 # c2 => c1[1][2] # c2[1][2]
 
         \* Bound global depth of logs.
