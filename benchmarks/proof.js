@@ -42,6 +42,7 @@ window.onload = function(){
 
     var cy = cytoscape({
         container: document.getElementById('stategraph'), // container to render in
+        wheelSensitivity: 0.1,
         style: [
             {
                 selector: 'node',
