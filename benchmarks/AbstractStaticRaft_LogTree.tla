@@ -1,6 +1,6 @@
 ---- MODULE AbstractStaticRaft_LogTree ----
 
-EXTENDS AbstractStaticRaft, FiniteSetsExt
+EXTENDS AbstractStaticRaft, FiniteSetsExt, Json, IOUtils
 
 SeqOf(S, n) == UNION {[1..m -> S] : m \in 0..n}
 BoundedSeq(S, n) == SeqOf(S, n)
@@ -40,12 +40,12 @@ TreeEdgeType == [
     children: kOrSmallerSubset(MaxBranchingFactor, LogSections)
 ]
 
-TreeEdges == {
+\* The set of all valid tree "edges", where an edge is represented as a log
+\* section and a set of children log sections.
+ValidTreeEdges == {
     e \in TreeEdgeType : 
-        \* Assume we always start with some non-empty log section.
-        /\ e.log # <<>>
-        \* An empty child log is unnecessary to represent.
-        /\ <<>> \notin e.children
+        \* Assume log sections are always non-empty.
+        /\ e.log # <<>> /\ <<>> \notin e.children
 
         \* All children must maintain global monotonicity property i.e.
         \* all children logs are >= any terms in root log.
@@ -66,30 +66,42 @@ TreeEdges == {
         /\ \A c \in e.children : \A i \in DOMAIN c : c[i][1] <= MaxLogLen
 }
 
-TreePaths == {<<e1,e2>> \in TreeEdges \X TreeEdges : 
-                /\ e1.log[1][1] = 1
-                /\ \E c \in e1.children : e2.log = c}
-
+ValidTreesBounded == {
+    edges \in kOrSmallerSubset(2, ValidTreeEdges) :
+        \* Ignore the empty tree.
+        /\ edges # {}
+        \* Root log entry must exist.
+        /\ \E e \in edges : e.log[1] = <<1,0>>
+        \* Assume for now that the root log entry <<1,0>> is unique (i.e. present on all nodes at initialization.)
+        /\ \A e \in edges : (e.log[1][1] = 1) => (e.log[1] = <<1,0>>)
+        \* Each node must have a valid parent, unless the node is the root.
+        /\ \A e \in edges : 
+            \/ e.log[1] = <<1,0>> \* it is the root node.
+            \/ \E epar \in edges : \E c \in epar.children : c[Len(c)] = e.log[1]
+}
 
 \* TODO: Invariant that checks whether all logs currently in the system correspond to 
 \* some path in a valid log tree.
 LogsAreValidTrees == TRUE
 
-ASSUME PrintT(TreeEdges)
-ASSUME PrintT(Cardinality(TreeEdges))
-ASSUME PrintT(TreePaths)
-ASSUME PrintT(Cardinality(TreePaths))
+ASSUME PrintT(ValidTreeEdges)
+ASSUME PrintT(Cardinality(ValidTreeEdges))
 
 
-ValidTreesBounded == {
-    edges \in kOrSmallerSubset(2, TreeEdges) :
-        \* Root log entry must exist.
-        /\ \E e \in edges : e.log[1][1] = 1
-        \* Each node must have a valid parent, unless the node is the root.
-        /\ \A e \in edges : 
-            \/ e.log[1][1] = 1 \* the root node.
-            \/ \E epar \in edges : \E c \in epar.children : c[Len(c)][1] = e.log[1][1]
-}
+TreeAsEdgeSet(t) == 
+    { {<<ToString(e.log),ToString(c)>> : c \in e.children} : e \in t}
+
+ValidTreesAsEdgeSets == 
+    {UNION TreeAsEdgeSet(t) : t \in ValidTreesBounded}
+
+edgesJson == "{ \"edges\": " \o ToJson(ValidTreesAsEdgeSets) \o "}"
+ASSUME PrintT(ValidTreesAsEdgeSets)
+
+\* Serialize edge sets to JSON.
+file == "edges.json"
+opts == [format |-> "TXT", charset |-> "UTF-8", openOptions |-> <<"WRITE", "CREATE", "TRUNCATE_EXISTING">>]
+TXTSerializeResult == Serialize(edgesJson, file, opts)
+
 
 \* 
 \* Export sampling of valid trees in DOT graph format.
@@ -104,7 +116,8 @@ ASSUME PrintT("Num ValidTreesBounded")
 ASSUME(PrintT(Cardinality(ValidTreesBounded)))
 
 DOTEdges == {UNION {EdgeToDOTEdges(e) : e \in t} : t \in ValidTreesBounded}
-\* ASSUME(PrintT(DOTEdges))
+
+\* edgesJson == "{ \"edges\": " \o ToJson(DOTEdges) \o "}"
 
 
 =============================================================================
