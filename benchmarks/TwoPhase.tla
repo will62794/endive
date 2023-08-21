@@ -184,13 +184,23 @@ THEOREM TPSpec => []TypeOK
 
 \* Helper lemmas
 
-\* Level 1.
-H_Inv276 == (tmPrepared = RM) \/ (~([type |-> "Commit"] \in msgsAbortCommit))
-H_Inv318 == ~([type |-> "Abort"] \in msgsAbortCommit) \/ (~([type |-> "Commit"] \in msgsAbortCommit))
-H_Inv334 == \A rmi \in RM : ~([type |-> "Commit"] \in msgsAbortCommit) \/ (~(rmState[rmi] = "aborted"))
+H_CommitMsgImpliesNoAbortMsg ==  ([type |-> "Commit"] \in msgsAbortCommit) => ~([type |-> "Abort"] \in msgsAbortCommit)
+
+H_CommitMsgImpliesNoRMAborted == \A rmi \in RM : ~([type |-> "Commit"] \in msgsAbortCommit) \/ (~(rmState[rmi] = "aborted"))
+
+H_CommittedRMImpliesCommitMsg == \A rmi \in RM : ([type |-> "Commit"] \in msgsAbortCommit) \/ (~(rmState[rmi] = "committed"))
+
+H_CommitMsgImpliesAllPrepared == ([type |-> "Commit"] \in msgsAbortCommit) => (tmPrepared = RM)
+
+H_AllPreparedImpliesNoRMsWorking == \A rmi \in RM : (tmPrepared = RM) => ~(rmState[rmi] = "working") 
+
+H_RMSentPrepareImpliesNotWorking == \A rmi \in RM : ([type |-> "Prepared", rm |-> rmi] \in msgsPrepared) => (~(rmState[rmi] = "working"))
+
+
+
+
+
 H_Inv79 == \A rmi \in RM : ([type |-> "Prepared", rm |-> rmi] \in msgsPrepared) \/ (~(tmPrepared = tmPrepared \cup {rmi}))
-H_Inv400 == \A rmi \in RM : ~(rmState[rmi] = "working") \/ (~(tmPrepared = RM))
-H_Inv45 == \A rmi \in RM : ([type |-> "Commit"] \in msgsAbortCommit) \/ (~(rmState[rmi] = "committed"))
 
 \* Level 2.
 H_Inv331 == ~([type |-> "Abort"] \in msgsAbortCommit) \/ (~(tmState = "init"))
@@ -201,7 +211,6 @@ H_Inv9990 == \A rmi \in RM : ([type |-> "Prepared", rm |-> rmi] \in msgsPrepared
 H_Inv9991 == \A rmj \in RM : ([type |-> "Prepared", rm |-> rmj] \in msgsPrepared) \/ (~(tmPrepared = RM))
 
 \* Level 3.
-H_Inv349 == \A rmi \in RM : ~([type |-> "Prepared", rm |-> rmi] \in msgsPrepared) \/ (~(rmState[rmi] = "working"))
 H_Inv1863 == \A rmi \in RM : (rmState[rmi] = "prepared") \/ (~([type |-> "Prepared", rm |-> rmi] \in msgsPrepared) \/ (~(tmState = "init")))
 
 H_Inv2000 == \A rmi \in RM : (rmState[rmi] = "prepared") \/ (~(tmPrepared = RM)) \/ (~(tmState = "init"))
@@ -247,17 +256,20 @@ CInit == RM = {"1_OF_RM", "2_OF_RM", "3_OF_RM"}
 \* ApaInv == TypeOK /\ TCConsistent
 \* ApaInv == TypeOK /\ H_Inv344
 
-ApaInv == TypeOK /\ H_Inv446
+\* ApaInv == TypeOK /\ H_Inv446
 
-ApaInv2 == 
-    /\ TypeOK 
-    /\ H_Inv9990
-    /\ H_Inv9991
-    /\ H_Inv7777
-    /\ H_Inv318
-    /\ H_Inv349
-    /\ H_Inv334 \* to check in next state
+\* ApaInv2 == 
+\*     /\ TypeOK 
+\*     /\ H_Inv9990
+\*     /\ H_Inv9991
+\*     /\ H_Inv7777
+\*     /\ H_Inv318
+\*     /\ H_Inv349
+\*     /\ H_Inv334 \* to check in next state
 
+
+\* Dummy CTI cost for now.
+CTICost == 0
 
 
   (*************************************************************************)

@@ -22,8 +22,8 @@
         "Server = {n1,n2,n3}",
         "Secondary = Secondary",
         "Primary = Primary",
-        "MaxLogLen = 3",
-        "MaxTerm = 2",
+        "MaxLogLen = 2",
+        "MaxTerm = 1",
         "InitTerm = 0",
         "n1 = n1",
         "n2 = n2",
@@ -37,7 +37,7 @@
     "model_consts"  :  "CONSTANT n1,n2,n3",
     "symmetry" : true,
     "typeok"  :  "TypeOKRandom",
-    "typeok_random_spec": true,
+    "tlc_specific_spec": true,
     "try_final_minimize": false,
     "simulate"  :  true
 }
