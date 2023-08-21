@@ -1,6 +1,7 @@
 console.log("hello console");
 local_server = "http://127.0.0.1:5000"
-currentNode = null;
+currentNodeId = null;
+currentNode = null
 
 function genCtis(exprName){
     console.log("Gen CTIs", exprName);
@@ -19,12 +20,12 @@ function genCtisSubtree(exprName){
 function setCTIPaneHtml(){
     var ctipane = document.getElementById("ctiPane");
     ctipane.innerHTML = "<h1> CTI View </h1>";
-    ctipane.innerHTML += `<h3> Proof node: ${currentNode} </h3>`;
+    ctipane.innerHTML += `<h3> Proof node: ${currentNodeId} </h3>`;
     ctipane.innerHTML += "<button id='gen-ctis-btn'> Gen CTIs </button>";
 }
 
 function focusOnNode(nodeId){
-    currentNode = nodeId;
+    currentNodeId = nodeId;
     setCTIPaneHtml();
     $.get(local_server + `/getCtis/${nodeId}`, function(data){
         console.log("Retrieved CTIs for '" + nodeId + "'");
@@ -63,9 +64,9 @@ function focusOnNode(nodeId){
         // console.log(proof_node_expr);
         // $('.cti-container').hide();
         // $('.cti_' + proof_node_expr).show();
-        console.log("Generating CTIs for '" + currentNode + "'");
+        console.log("Generating CTIs for '" + currentNodeId + "'");
 
-        $.get(local_server + `/genCtis/single/${currentNode}`, function(data){
+        $.get(local_server + `/genCtis/single/${currentNodeId}`, function(data){
             console.log(data);
         });   
 
@@ -136,6 +137,11 @@ window.onload = function(){
         let name = this.data()["name"];
         showCtisForNode(name);
         focusOnNode(name);
+        if(currentNode !== null){
+            currentNode.style({"color":"black"});
+        }
+        currentNode = this;
+        currentNode.style({"color":"blue"});
     });
 
     cy.edges('edge').style({
