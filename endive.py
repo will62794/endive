@@ -2807,9 +2807,9 @@ class InductiveInvGen():
                     ]),
                     StructuredProofNode("TermsOfEntriesGrowMonotonically_A", "H_TermsOfEntriesGrowMonotonically", children=[
                         # StructuredProofNode("PrimaryHasEntriesItCreated_B", "H_PrimaryHasEntriesItCreated"),
-                        StructuredProofNode("LogEntryInTermImpliesSafeAtTerm_B", "H_LogEntryInTermImpliesSafeAtTerm", children=[
-                            StructuredProofNode("QuorumsSafeAtTerms_D", "H_QuorumsSafeAtTerms")
-                        ]),
+                        # StructuredProofNode("LogEntryInTermImpliesSafeAtTerm_B", "H_LogEntryInTermImpliesSafeAtTerm", children=[
+                        #     StructuredProofNode("QuorumsSafeAtTerms_D", "H_QuorumsSafeAtTerms")
+                        # ]),
                         StructuredProofNode("CurrentTermAtLeastAsLargeAsLogTermsForPrimary", "H_CurrentTermAtLeastAsLargeAsLogTermsForPrimary", children = [
                             StructuredProofNode("LogEntryInTermImpliesSafeAtTerm_L", "H_LogEntryInTermImpliesSafeAtTerm", children = [
                                 StructuredProofNode("QuorumsSafeAtTerms_C_L", "H_QuorumsSafeAtTerms")
@@ -2837,12 +2837,13 @@ class InductiveInvGen():
                             # StructuredProofNode("TermsOfEntriesGrowMonotonically_B1", "H_TermsOfEntriesGrowMonotonically")
                         ]),
                         StructuredProofNode("PrimaryHasEntriesItCreated_A", "H_PrimaryHasEntriesItCreated", children=[
-                            StructuredProofNode("LogEntryInTermImpliesSafeAtTerm_T2", "H_LogEntryInTermImpliesSafeAtTerm", children = [
-                                StructuredProofNode("QuorumsSafeAtTerms_T2", "H_QuorumsSafeAtTerms")
-                            ]),
-                            StructuredProofNode("OnePrimaryPerTerm_LemmaA", "H_OnePrimaryPerTerm", children = [
-                                StructuredProofNode("QuorumsSafeAtTerms_BA", "H_QuorumsSafeAtTerms")
-                            ]),
+                            StructuredProofNode("LemmaTrue", "TRUE")
+                            # StructuredProofNode("LogEntryInTermImpliesSafeAtTerm_T2", "H_LogEntryInTermImpliesSafeAtTerm", children = [
+                            #     StructuredProofNode("QuorumsSafeAtTerms_T2", "H_QuorumsSafeAtTerms")
+                            # ]),
+                            # StructuredProofNode("OnePrimaryPerTerm_LemmaA", "H_OnePrimaryPerTerm", children = [
+                            #     StructuredProofNode("QuorumsSafeAtTerms_BA", "H_QuorumsSafeAtTerms")
+                            # ]),
                         ]),
                     ])
                 # ]),
