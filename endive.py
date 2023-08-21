@@ -512,6 +512,7 @@ class StructuredProof():
         with open(pickle_filename, 'wb') as f:
             pickle.dump(self, f)
 
+        print(f"Saving latest proof as DOT to '{dot_filename}'")
         self.save_as_dot(dot_filename)
 
         print(f"Finished saving proof objects.")
