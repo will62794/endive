@@ -2736,29 +2736,29 @@ class InductiveInvGen():
         ###########
         self.proof_base_filename = f"benchmarks/{self.specname}.proof"
 
+        lemmaTRUE = StructuredProofNode("LemmaTrue", "TRUE")
+
+        tMKnowsPrepareImpliesRMSentPrepare = StructuredProofNode("TMKnowsPrepareImpliesRMSentPrepare", "H_TMKnowsPrepareImpliesRMSentPrepare")
+
         commitMsgImpliesNoAbortMsg = StructuredProofNode("CommitMsgImpliesNoAbortMsg", "H_CommitMsgImpliesNoAbortMsg", children = [
-            StructuredProofNode("H2_1", "H_Inv331"),
-            StructuredProofNode("H2_2", "H_Inv344")
+            StructuredProofNode("InitImpliesNoAbortMsg", "H_InitImpliesNoAbortMsg"),
+            StructuredProofNode("InitImpliesNoCommitMsg", "H_InitImpliesNoCommitMsg")
         ])
 
         rMSentPrepareImpliesNotWorking = StructuredProofNode("RMSentPrepareImpliesNotWorking", "H_RMSentPrepareImpliesNotWorking")
 
         commitMsgImpliesNoRMAborted = StructuredProofNode("CommitMsgImpliesNoRMAborted", "H_CommitMsgImpliesNoRMAborted", children = [
             StructuredProofNode("CommitMsgImpliesAllPreparedMsgsSent", "H_CommitMsgImpliesAllPreparedMsgsSent", children=[
-                StructuredProofNode("H3_2", "H_Inv79")
+                tMKnowsPrepareImpliesRMSentPrepare
             ]),
             StructuredProofNode("AllPreparedImpliesAllPrepareMsgsSent", "H_AllPreparedImpliesAllPrepareMsgsSent", children=[
-                StructuredProofNode("H3_2", "H_Inv79")
+                tMKnowsPrepareImpliesRMSentPrepare
             ]),
-            StructuredProofNode("H3_4", "H_Inv7777", children = [
-                StructuredProofNode("H3_4_1", "H_Inv362"),
-                StructuredProofNode("H3_4_2", "H_Inv446")
+            StructuredProofNode("RMAbortAfterPrepareImpliesTMAborted", "H_RMAbortAfterPrepareImpliesTMAborted", children = [
+                StructuredProofNode("AbortMsgSentImpliesTMAborted", "H_AbortMsgSentImpliesTMAborted"),
+                rMSentPrepareImpliesNotWorking
             ]),
             commitMsgImpliesNoAbortMsg,
-            # StructuredProofNode("H3_5", "H_Inv318", children = [
-            #     StructuredProofNode("H4_1", "H_Inv331"),
-            #     StructuredProofNode("H4_2", "H_Inv344")
-            # ]),
             rMSentPrepareImpliesNotWorking
         ])
 
@@ -2766,45 +2766,20 @@ class InductiveInvGen():
         twopc_children = [
             StructuredProofNode("CommitMsgImpliesAllPrepared", "H_CommitMsgImpliesAllPrepared"),
             commitMsgImpliesNoAbortMsg,
-            # StructuredProofNode("H2", "H_Inv318", children = [
-            #     StructuredProofNode("H2_1", "H_Inv331"),
-            #     StructuredProofNode("H2_2", "H_Inv344")
-            # ]),
             commitMsgImpliesNoRMAborted,
-            # StructuredProofNode("H3", "H_Inv334", children = [
-            #     StructuredProofNode("H3_1", "H_Inv9990", children=[
-            #         StructuredProofNode("H3_2", "H_Inv79")
-            #     ]),
-            #     StructuredProofNode("H3_2", "H_Inv9991", children=[
-            #         StructuredProofNode("H3_2", "H_Inv79")
-            #     ]),
-            #     StructuredProofNode("H3_4", "H_Inv7777", children = [
-            #         StructuredProofNode("H3_4_1", "H_Inv362"),
-            #         StructuredProofNode("H3_4_2", "H_Inv446")
-            #     ]),
-            #     commitMsgImpliesNoAbortMsg,
-            #     # StructuredProofNode("H3_5", "H_Inv318", children = [
-            #     #     StructuredProofNode("H4_1", "H_Inv331"),
-            #     #     StructuredProofNode("H4_2", "H_Inv344")
-            #     # ]),
-            #     StructuredProofNode("H3_6", "H_Inv349"),
-            # ]),
-            StructuredProofNode("AllPreparedImpliesNoRMsWorking", "H_AllPreparedImpliesNoRMsWorking", children = [
-                rMSentPrepareImpliesNotWorking,
-                StructuredProofNode("H5_2", "H_Inv79"),
-            ]),
             StructuredProofNode("CommittedRMImpliesCommitMsg", "H_CommittedRMImpliesCommitMsg"),
+            StructuredProofNode("TMKnowsPrepareImpliesRMPreparedCommittedOrAborted", "H_TMKnowsPrepareImpliesRMPreparedCommittedOrAborted", children = [
+                # lemmaTRUE,
+                rMSentPrepareImpliesNotWorking
+            ]),
         ]
         twopc_root = StructuredProofNode("Safety", safety, children = twopc_children)
-
 
 
 
         #
         # AbstractStaticRaft proof structure.
         #
-
-        lemmaTRUE = StructuredProofNode("LemmaTrue", "TRUE")
 
         quorumsSafeAtTerms = StructuredProofNode("QuorumsSafeAtTerms_C", "H_QuorumsSafeAtTerms")
 

@@ -1,6 +1,6 @@
 ------------------------------- MODULE TwoPhase ----------------------------- 
 \* benchmark: tla-twophase
-EXTENDS TLC, Naturals
+EXTENDS TLC, Naturals, FiniteSets
 
 (***************************************************************************)
 (* This specification describes the Two-Phase Commit protocol, in which a  *)
@@ -200,15 +200,16 @@ H_AllPreparedImpliesAllPrepareMsgsSent == (tmPrepared = RM) => \A rmj \in RM : (
 
 H_CommitMsgImpliesAllPreparedMsgsSent == \A rmi \in RM : ([type |-> "Commit"] \in msgsAbortCommit) => ([type |-> "Prepared", rm |-> rmi] \in msgsPrepared) 
 
+H_TMKnowsPrepareImpliesRMSentPrepare == \A rmi \in RM : (tmPrepared = tmPrepared \cup {rmi}) => ([type |-> "Prepared", rm |-> rmi] \in msgsPrepared) 
 
+H_TMKnowsPrepareImpliesRMPreparedCommittedOrAborted == \A rmi \in RM : (rmi \in tmPrepared) => rmState[rmi] \in {"prepared", "committed", "aborted"}
 
-H_Inv79 == \A rmi \in RM : ([type |-> "Prepared", rm |-> rmi] \in msgsPrepared) \/ (~(tmPrepared = tmPrepared \cup {rmi}))
+H_AbortMsgSentImpliesTMAborted == ([type |-> "Abort"] \in msgsAbortCommit) => tmState = "aborted"
 
-\* Level 2.
-H_Inv331 == ~([type |-> "Abort"] \in msgsAbortCommit) \/ (~(tmState = "init"))
-H_Inv344 == ~([type |-> "Commit"] \in msgsAbortCommit) \/ (~(tmState = "init"))
+H_RMAbortAfterPrepareImpliesTMAborted == \A rmi \in RM :  ((rmState[rmi] = "aborted") /\ ([type |-> "Prepared", rm |-> rmi] \in msgsPrepared)) => tmState = "aborted"
 
-\* Level 2.
+H_InitImpliesNoAbortMsg == (tmState = "init") => ~([type |-> "Abort"] \in msgsAbortCommit)
+H_InitImpliesNoCommitMsg == (tmState = "init") => ~([type |-> "Commit"] \in msgsAbortCommit) 
 
 \* Level 3.
 H_Inv1863 == \A rmi \in RM : (rmState[rmi] = "prepared") \/ (~([type |-> "Prepared", rm |-> rmi] \in msgsPrepared) \/ (~(tmState = "init")))
@@ -222,7 +223,6 @@ H_Inv8881 == \A rmi \in RM : (~(rmState[rmi] = "committed")) \/ (~(tmState = "in
 \* If a resource manager has aborted and also prepared, then transaction manager must have decided to abort.
 H_Inv7777 == \A rmi \in RM :  ((rmState[rmi] = "aborted") /\ ([type |-> "Prepared", rm |-> rmi] \in msgsPrepared)) => tmState = "aborted"
 
-H_Inv362 == (tmState = "aborted") \/ (~([type |-> "Abort"] \in msgsAbortCommit))
 H_Inv446 == \A rmi \in RM : ~([type |-> "Prepared", rm |-> rmi] \in msgsPrepared) \/ (~(rmState[rmi] = "working"))
 
 
@@ -269,7 +269,10 @@ CInit == RM = {"1_OF_RM", "2_OF_RM", "3_OF_RM"}
 
 
 \* Dummy CTI cost for now.
-CTICost == 0
+CTICost == 
+    Cardinality(msgsAbortCommit) + 
+    Cardinality(msgsPrepared) + 
+    Cardinality(tmPrepared)
 
 
   (*************************************************************************)
