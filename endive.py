@@ -633,8 +633,6 @@ class StructuredProof():
 
     def save_as_dot(self, out_file):
         """ Generate DOT graph representation of this structured proof. """
-        print("")
-        print("Proof graph edges")
         dot = graphviz.Digraph('proof-graph', strict=True, comment='Proof Structure')  
         # dot.graph_attr["rankdir"] = "LR"
         dot.node_attr["fontname"] = "courier"
@@ -3266,8 +3264,8 @@ class InductiveInvGen():
                 return
 
             self.do_invgen_proof_tree_mode(interactive_mode=self.interactive_mode)
-            print("")
-            print("Proof graph edges")
+            # print("")
+            # print("Proof graph edges")
             dot = graphviz.Digraph('round-table', comment='The Round Table')  
             dot.graph_attr["rankdir"] = "LR"
             dot.node_attr["fontname"] = "courier"
