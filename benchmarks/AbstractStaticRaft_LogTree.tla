@@ -77,8 +77,8 @@ ValidTreesBounded == {
         /\ \A e \in edges : (e.log[1][1] = 1) => (e.log[1] = <<1,0>>)
         \* Each node must have a valid parent, unless the node is the root.
         /\ \A e \in edges : 
-            \/ e.log[1] = <<1,0>> \* it is the root node.
-            \/ \E epar \in edges : \E c \in epar.children : c[Len(c)] = e.log[1]
+            (\/ e.log[1] = <<1,0>> \* it is the root node.
+             \/ \E epar \in edges : \E c \in epar.children : c[Len(c)] = e.log[1])
 }
 
 \* TODO: Invariant that checks whether all logs currently in the system correspond to 
