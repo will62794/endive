@@ -792,7 +792,7 @@ class InductiveInvGen():
     """
 
     def __init__(self, specdir, specname, safety, constants, state_constraint, quant_inv, model_consts, preds,
-                    symmetry=False, simulate=False, simulate_depth=6, typeok="TypeOK", typeok_random_spec=False, seed=0, num_invs=1000, num_rounds=3, num_iters=3, 
+                    symmetry=False, simulate=False, simulate_depth=6, typeok="TypeOK", tlc_specific_spec=False, seed=0, num_invs=1000, num_rounds=3, num_iters=3, 
                     num_simulate_traces=10000, tlc_workers=6, quant_vars=[],java_exe="java",cached_invs=None, cached_invs_gen_time_secs=None, use_cpp_invgen=False,
                     pregen_inv_cmd=None, opt_quant_minimize=False, try_final_minimize=False, proof_tree_mode=False, interactive_mode=False, max_num_conjuncts_per_round=10000,
                     max_num_ctis_per_round=10000, override_num_cti_workers=None, use_apalache_ctigen=False,all_args={}):
@@ -863,7 +863,7 @@ class InductiveInvGen():
         self.simulate = simulate
         self.simulate_depth = simulate_depth
         self.typeok = typeok
-        self.typeok_random_spec = typeok_random_spec
+        self.tlc_specific_spec = tlc_specific_spec
 
         self.strengthening_conjuncts = []
 
@@ -1622,8 +1622,8 @@ class InductiveInvGen():
         # Generate spec for generating CTIs.
         invcheck_tla_indcheck=f"---- MODULE {self.specname}_CTIGen_{ctiseed} ----\n"
         suffix = ""
-        if self.typeok_random_spec and not self.use_apalache_ctigen:
-            suffix = "_TypeOKRandom"
+        if self.tlc_specific_spec and not self.use_apalache_ctigen:
+            suffix = "_TLC"
         invcheck_tla_indcheck += f"EXTENDS {self.specname}{suffix}\n\n"
 
         # We shouldn't need model constants for CTI generation.
@@ -1863,7 +1863,13 @@ class InductiveInvGen():
         # Start building the spec.
         # invcheck_tla_indcheck="---- MODULE %s_IndQuickCheck ----\n" % self.specname
         invcheck_tla_indcheck="---- MODULE %s ----\n" % spec_name
-        invcheck_tla_indcheck += "EXTENDS %s,Naturals,TLC\n\n" % self.specname
+
+        # Extend TLC specific spec if needed for other definitions.
+        suffix = ""
+        if self.tlc_specific_spec and not self.use_apalache_ctigen:
+            suffix = "_TLC"
+
+        invcheck_tla_indcheck += f"EXTENDS {self.specname}{suffix},Naturals,TLC\n\n"
 
         invcheck_tla_indcheck += self.model_consts + "\n"
 
@@ -2803,7 +2809,8 @@ class InductiveInvGen():
         ])
 
         uniformLogEntriesInTerm = StructuredProofNode("UniformLogEntriesInTerm_T3", "H_UniformLogEntriesInTerm", children = [
-            logMatching
+            logMatching,
+            primaryHasEntriesItCreated
         ])
 
 
@@ -2925,7 +2932,8 @@ class InductiveInvGen():
                     'ok': True, 
                     'ctis': ctis, 
                     'ctis_eliminated': ctis_eliminated,
-                    "ctis_remaining": [c.serialize() for c in remaining_ctis_cost_sorted]
+                    "ctis_remaining": [c.serialize() for c in remaining_ctis_cost_sorted],
+                    "apalache_proof_check": node.apalache_proof_check
                 })
                 response.headers.add('Access-Control-Allow-Origin', '*')
                 # print(proof_json)
@@ -3424,7 +3432,7 @@ if __name__ == "__main__":
     model_consts = spec_config["model_consts"]
     symmetry = spec_config["symmetry"]    
     typeok = spec_config["typeok"]
-    typeok_random_spec = spec_config.get("typeok_random_spec", False)
+    tlc_specific_spec = spec_config.get("tlc_specific_spec", False)
     simulate = spec_config["simulate"]
     results_dir = args["results_dir"]
     if "use_cpp_invgen" in spec_config:
@@ -3452,7 +3460,7 @@ if __name__ == "__main__":
 
     # Generate an inductive invariant.
     indgen = InductiveInvGen(specdir, specname, safety, constants, constraint, quant_inv, model_consts, preds, 
-                                num_invs=num_invs, num_rounds=num_rounds, seed=seed, typeok=typeok, typeok_random_spec=typeok_random_spec, num_iters=numiters, 
+                                num_invs=num_invs, num_rounds=num_rounds, seed=seed, typeok=typeok, tlc_specific_spec=tlc_specific_spec, num_iters=numiters, 
                                 num_simulate_traces=NUM_SIMULATE_TRACES, simulate_depth=simulate_depth, tlc_workers=tlc_workers, quant_vars=quant_vars, symmetry=symmetry,
                                 simulate=simulate, java_exe=JAVA_EXE, cached_invs=cached_invs, cached_invs_gen_time_secs=cached_invs_gen_time_secs, use_cpp_invgen=use_cpp_invgen,
                                 pregen_inv_cmd=pregen_inv_cmd, opt_quant_minimize=args["opt_quant_minimize"],try_final_minimize=try_final_minimize,proof_tree_mode=args["proof_tree_mode"],
