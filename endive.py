@@ -264,7 +264,8 @@ class CTI():
             "cti_str": self.cti_str,
             "action_name": self.action_name,
             "cti_lines": self.cti_lines,
-            "trace": [s.serialize() for s in self.trace.getStates()]
+            "trace": [s.serialize() for s in self.trace.getStates()],
+            "cost": self.cost
         }
     
     def load_from(self, obj):
@@ -2761,29 +2762,44 @@ class InductiveInvGen():
         ]
         twopc_root = StructuredProofNode("Safety", safety, children = twopc_children)
 
-        # MongoStaticRaft proof structure.
-        msr_children = [
-            # StructuredProofNode("TermsOfEntriesGrowMonotonically_A", "H_TermsOfEntriesGrowMonotonically", children =[
-            #     StructuredProofNode("PrimaryTermAtLeastAsLargeAsLogTerms", "H_PrimaryTermAtLeastAsLargeAsLogTerms", children=[
-            #         StructuredProofNode("QuorumsSafeAtTerms_A", "H_QuorumsSafeAtTerms"),
-            #         StructuredProofNode("LogEntryInTermImpliesSafeAtTerm", "H_LogEntryInTermImpliesSafeAtTerm")
-            #     ])
-            # ]),
-            # StructuredProofNode("OnePrimaryPerTerm_Lemma", "H_OnePrimaryPerTerm", children = [
-            #     # StructuredProofNode("TermsOfEntriesGrowMonotonically", "H_TermsOfEntriesGrowMonotonically"),
-            #     # StructuredProofNode("LeaderCompleteness_Lemma", "LeaderCompleteness"),
-            #     StructuredProofNode("QuorumsSafeAtTerms_B", "H_QuorumsSafeAtTerms")
-            # ]),
 
-            # Will probably need this but maybe alternate lemma version?
-            # StructuredProofNode("LogsLaterThanCommittedMustHaveCommitted", "H_LogsLaterThanCommittedMustHaveCommitted", children = [
-            #     StructuredProofNode("TermsOfEntriesGrowMonotonically_D", "H_TermsOfEntriesGrowMonotonically"),
-            #     StructuredProofNode("LeaderCompleteness_H", "LeaderCompleteness"),
-            #     StructuredProofNode("EntriesCommittedInOwnTerm_W", "H_EntriesCommittedInOwnTerm"),
-            #     StructuredProofNode("UniformLogEntriesInTerm_T3", "H_UniformLogEntriesInTerm"),
-            #     StructuredProofNode("OnePrimaryPerTerm_LemmaTa", "H_OnePrimaryPerTerm")
-            # ]),
 
+
+        #
+        # AbstractStaticRaft proof structure.
+        #
+
+        quorumsSafeAtTerms = StructuredProofNode("QuorumsSafeAtTerms_C", "H_QuorumsSafeAtTerms")
+
+        logEntryInTermImpliesSafeAtTerms = StructuredProofNode("LogEntryInTermImpliesSafeAtTerm", "H_LogEntryInTermImpliesSafeAtTerm", children = [        
+            quorumsSafeAtTerms
+        ])
+
+        lemmaTRUE = StructuredProofNode("LemmaTrue", "TRUE")
+        primaryHasEntriesItCreated = StructuredProofNode("PrimaryHasEntriesItCreated_A", "H_PrimaryHasEntriesItCreated")
+        primaryHasEntriesItCreated.children = [
+            # lemmaTRUE,
+            quorumsSafeAtTerms
+        ]
+
+        currentTermsAtLeastLargeAsLogTermsForPrimary =  StructuredProofNode("CurrentTermAtLeastAsLargeAsLogTermsForPrimary", "H_CurrentTermAtLeastAsLargeAsLogTermsForPrimary", children = [
+                logEntryInTermImpliesSafeAtTerms
+        ])
+
+        termsGrowMonotonically = StructuredProofNode("TermsOfEntriesGrowMonotonically_A", "H_TermsOfEntriesGrowMonotonically", children=[
+            currentTermsAtLeastLargeAsLogTermsForPrimary
+        ])
+
+        logMatching = StructuredProofNode("LogMatching_Lemma", "LogMatching", children = [
+            primaryHasEntriesItCreated
+        ])
+
+        uniformLogEntriesInTerm = StructuredProofNode("UniformLogEntriesInTerm_T3", "H_UniformLogEntriesInTerm", children = [
+            logMatching
+        ])
+
+
+        asr_children = [
             StructuredProofNode("CommittedEntryExistsOnQuorum", "H_CommittedEntryExistsOnQuorum", children = [
                 # StructuredProofNode("LogsLaterThanCommittedMustHaveCommitted_B", "H_LogsLaterThanCommittedMustHaveCommitted", children=[
                     # StructuredProofNode("LeaderCompleteness_A", "LeaderCompleteness"),
@@ -2791,7 +2807,7 @@ class InductiveInvGen():
                     # StructuredProofNode("LogsLaterThanCommittedMustHaveCommitted_S1", "H_LogsLaterThanCommittedMustHaveCommitted", children = [
                     StructuredProofNode("PrimaryOrLogsLaterThanCommittedMustHaveEarlierCommitted", "H_PrimaryOrLogsLaterThanCommittedMustHaveEarlierCommitted", children = [
                         StructuredProofNode("CommittedEntryExistsOnQuorum_B", "H_CommittedEntryExistsOnQuorum"),
-                        StructuredProofNode("TermsOfEntriesGrowMonotonically_D", "H_TermsOfEntriesGrowMonotonically"),
+                        termsGrowMonotonically,
                         # StructuredProofNode("LeaderCompleteness_H", "LeaderCompleteness", children = [
                         #     StructuredProofNode("LogsLaterThanCommittedMustHaveCommitted_S4", "H_LogsLaterThanCommittedMustHaveCommitted"),
                         #     StructuredProofNode("EntriesCommittedInOwnTerm_BC", "H_EntriesCommittedInOwnTerm"),
@@ -2801,99 +2817,35 @@ class InductiveInvGen():
                         #     StructuredProofNode("TermsOfEntriesGrowMonotonically_DLC", "H_TermsOfEntriesGrowMonotonically")
                         # ]),
                         StructuredProofNode("EntriesCommittedInOwnTerm_W", "H_EntriesCommittedInOwnTerm"),
-                        StructuredProofNode("UniformLogEntriesInTerm_T3", "H_UniformLogEntriesInTerm"),
+                        # StructuredProofNode("UniformLogEntriesInTerm_T3", "H_UniformLogEntriesInTerm"),
+                        uniformLogEntriesInTerm,
                         # StructuredProofNode("OnePrimaryPerTerm_LemmaTa", "H_OnePrimaryPerTerm"),
-                        StructuredProofNode("LogEntryInTermImpliesSafeAtTerm_L2", "H_LogEntryInTermImpliesSafeAtTerm")
+                        logEntryInTermImpliesSafeAtTerms
+                        # StructuredProofNode("LogEntryInTermImpliesSafeAtTerm_L2", "H_LogEntryInTermImpliesSafeAtTerm")
                     ]),
-                    StructuredProofNode("TermsOfEntriesGrowMonotonically_A", "H_TermsOfEntriesGrowMonotonically", children=[
-                        # StructuredProofNode("PrimaryHasEntriesItCreated_B", "H_PrimaryHasEntriesItCreated"),
-                        # StructuredProofNode("LogEntryInTermImpliesSafeAtTerm_B", "H_LogEntryInTermImpliesSafeAtTerm", children=[
-                        #     StructuredProofNode("QuorumsSafeAtTerms_D", "H_QuorumsSafeAtTerms")
-                        # ]),
-                        StructuredProofNode("CurrentTermAtLeastAsLargeAsLogTermsForPrimary", "H_CurrentTermAtLeastAsLargeAsLogTermsForPrimary", children = [
-                            StructuredProofNode("LogEntryInTermImpliesSafeAtTerm_L", "H_LogEntryInTermImpliesSafeAtTerm", children = [
-                                StructuredProofNode("QuorumsSafeAtTerms_C_L", "H_QuorumsSafeAtTerms")
-                            ])
-                        ])
-                    ]),
+                    termsGrowMonotonically,
                     # StructuredProofNode("EntriesCommittedInOwnOrLaterTerm_B", "H_EntriesCommittedInOwnOrLaterTerm"),
                     StructuredProofNode("EntriesCommittedInOwnTerm_B", "H_EntriesCommittedInOwnTerm"),
                     # StructuredProofNode("CommittedEntryExistsOnQuorum_B", "H_CommittedEntryExistsOnQuorum", children = [
                     #     StructuredProofNode("LogsLaterThanCommittedMustHaveCommitted_C", "H_LogsLaterThanCommittedMustHaveCommitted")
                     # ]),
-                    StructuredProofNode("LogEntryInTermImpliesSafeAtTerm", "H_LogEntryInTermImpliesSafeAtTerm", children = [
-                        StructuredProofNode("QuorumsSafeAtTerms_C", "H_QuorumsSafeAtTerms")
-                    ]),
-                    StructuredProofNode("UniformLogEntriesInTerm_A", "H_UniformLogEntriesInTerm", children = [
-                        StructuredProofNode("LogMatching_Lemma", "LogMatching", children = [
-                            StructuredProofNode("PrimaryHasEntriesItCreated_A1", "H_PrimaryHasEntriesItCreated", children = [
-                                StructuredProofNode("LogEntryInTermImpliesSafeAtTerm_T2a", "H_LogEntryInTermImpliesSafeAtTerm", children = [
-                                    StructuredProofNode("QuorumsSafeAtTerms_T2a", "H_QuorumsSafeAtTerms")
-                                ]),
-                                StructuredProofNode("OnePrimaryPerTerm_LemmaAa", "H_OnePrimaryPerTerm", children = [
-                                    StructuredProofNode("QuorumsSafeAtTerms_BAa", "H_QuorumsSafeAtTerms")
-                                ]),
-                            ]),
-                            # StructuredProofNode("TermsOfEntriesGrowMonotonically_B1", "H_TermsOfEntriesGrowMonotonically")
-                        ]),
-                        StructuredProofNode("PrimaryHasEntriesItCreated_A", "H_PrimaryHasEntriesItCreated", children=[
-                            StructuredProofNode("LemmaTrue", "TRUE")
-                            # StructuredProofNode("LogEntryInTermImpliesSafeAtTerm_T2", "H_LogEntryInTermImpliesSafeAtTerm", children = [
-                            #     StructuredProofNode("QuorumsSafeAtTerms_T2", "H_QuorumsSafeAtTerms")
-                            # ]),
-                            # StructuredProofNode("OnePrimaryPerTerm_LemmaA", "H_OnePrimaryPerTerm", children = [
-                            #     StructuredProofNode("QuorumsSafeAtTerms_BA", "H_QuorumsSafeAtTerms")
-                            # ]),
-                        ]),
-                    ])
+                    logEntryInTermImpliesSafeAtTerms,
+                    # StructuredProofNode("LogEntryInTermImpliesSafeAtTerm", "H_LogEntryInTermImpliesSafeAtTerm", children = [
+                    #     # StructuredProofNode("QuorumsSafeAtTerms_C", "H_QuorumsSafeAtTerms"),
+                    #     quorumsSafeAtTerms
+                    # ]),
+                    uniformLogEntriesInTerm
                 # ]),
                 # StructuredProofNode("LogsWithEntryInTermMustHaveEarlierCommittedEntriesFromTerm_A", "H_LogsWithEntryInTermMustHaveEarlierCommittedEntriesFromTerm"),
             ]),
-            # StructuredProofNode("QuorumsSafeAtTerms", "H_QuorumsSafeAtTerms"),
-            # StructuredProofNode("EntriesCommittedInOwnTerm_C", "H_EntriesCommittedInOwnTerm"),
-            # StructuredProofNode("TermsOfEntriesGrowMonotonically_B", "H_TermsOfEntriesGrowMonotonically"),
-            # StructuredProofNode("LogEntryInTermImpliesSafeAtTerm_T1", "H_LogEntryInTermImpliesSafeAtTerm", children = [
-            #     StructuredProofNode("QuorumsSafeAtTerms_T1", "H_QuorumsSafeAtTerms")
-            # ]),
-            # # StructuredProofNode("LogMatching_Lemma", "LogMatching", children = [
-            # #     # StructuredProofNode("PrimaryHasEntriesItCreated_A", "H_PrimaryHasEntriesItCreated"),
-            # #     # StructuredProofNode("TermsOfEntriesGrowMonotonically_B", "H_TermsOfEntriesGrowMonotonically")
-            # # ]),
-            # StructuredProofNode("UniformLogEntriesInTerm_B", "H_UniformLogEntriesInTerm", children= [
-            #     StructuredProofNode("LogMatching_Lemma", "LogMatching", children = [
-            #         StructuredProofNode("PrimaryHasEntriesItCreated_A1", "H_PrimaryHasEntriesItCreated", children = [
-            #             StructuredProofNode("LogEntryInTermImpliesSafeAtTerm_T2a", "H_LogEntryInTermImpliesSafeAtTerm", children = [
-            #                 StructuredProofNode("QuorumsSafeAtTerms_T2a", "H_QuorumsSafeAtTerms")
-            #             ]),
-            #             StructuredProofNode("OnePrimaryPerTerm_LemmaAa", "H_OnePrimaryPerTerm", children = [
-            #                 StructuredProofNode("QuorumsSafeAtTerms_BAa", "H_QuorumsSafeAtTerms")
-            #             ]),
-            #         ]),
-            #         StructuredProofNode("TermsOfEntriesGrowMonotonically_B1", "H_TermsOfEntriesGrowMonotonically")
-            #     ]),
-            #     StructuredProofNode("PrimaryHasEntriesItCreated_A", "H_PrimaryHasEntriesItCreated", children=[
-            #         StructuredProofNode("LogEntryInTermImpliesSafeAtTerm_T2", "H_LogEntryInTermImpliesSafeAtTerm", children = [
-            #             StructuredProofNode("QuorumsSafeAtTerms_T2", "H_QuorumsSafeAtTerms")
-            #         ]),
-            #         StructuredProofNode("OnePrimaryPerTerm_LemmaA", "H_OnePrimaryPerTerm", children = [
-            #             StructuredProofNode("QuorumsSafeAtTerms_BA", "H_QuorumsSafeAtTerms")
-            #         ]),
-            #     ]),
-            # ])
-
-            # StructuredProofNode("PrimaryHasEntriesItCreated_B", "H_PrimaryHasEntriesItCreated"),
-            # StructuredProofNode("LogsLaterThanCommittedMustHaveCommitted_A", "H_LogsLaterThanCommittedMustHaveCommitted", children=[
-            #     StructuredProofNode("CommittedEntryExistsOnQuorum_B", "H_CommittedEntryExistsOnQuorum")
-            # ]),
-            # StructuredProofNode("LogsWithEntryInTermMustHaveEarlierCommittedEntriesFromTerm", "H_LogsWithEntryInTermMustHaveEarlierCommittedEntriesFromTerm"),
         ]
-        msr_root = StructuredProofNode("Safety", safety, children = msr_children)
+        asr_root = StructuredProofNode("Safety", safety, children = asr_children)
 
         root = None
         if self.specname == "TwoPhase":
             root = twopc_root
         elif self.specname == "AbstractStaticRaft":
-            root = msr_root
+            root = asr_root
         else:
             logging.info("Unknown spec for proof structure: " + self.specname)
             return

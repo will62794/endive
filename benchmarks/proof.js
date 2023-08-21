@@ -43,7 +43,7 @@ function focusOnNode(nodeId){
             let cti_text = cti_obj["cti_str"];
             var ctidiv = document.createElement("div");
             var i = 0;
-            ctidiv.innerHTML += `<h3>CTI (${cti_obj["action_name"]})</h3>`;
+            ctidiv.innerHTML += `<h3>CTI (${cti_obj["action_name"]}), cost=${cti_obj["cost"]}</h3>`;
             for(const state of cti_obj["trace"]){
                 ctidiv.innerHTML += `<h4>CTI State ${i}</h4>`;
                 ctidiv.innerHTML += "<pre>";
@@ -119,12 +119,13 @@ window.onload = function(){
                 selector: 'node',
                 style: {
                     'label': function (el) {
-                        return JSON.stringify(el.data()["id"]);
+                        return el.data()["id"];
                     },
                     "background-color": "lightgray",
                     "border-style": "solid",
                     "border-width": "1",
-                    "border-color": "black"
+                    "border-color": "black",
+                    "font-size":"14px"
                 }
             },
         ]
@@ -144,19 +145,22 @@ window.onload = function(){
 
 
     let addedNodes = [];
-    function addNodesToGraph(node){
+    function addNodesToGraph(proof_graph, node){
         dataVal = { id: node["expr"], name: node["name"] };
         console.log("node:", node);
         // console.log(dataVal);
         // console.log("Nodes:", cy.nodes());
         ctis = node["ctis"];
         ctis_eliminated = node["ctis_eliminated"];
-        let color = "orange"
+        let style = {"background-color": "orange"}
         if(node["had_ctis_generated"] && ctis.length === ctis_eliminated.length){
-            color = "green";
+            style = {"background-color": "green"}
         }
         if(!node["had_ctis_generated"]){
-            color = "lightgray";
+            style = {"background-color": "lightgray"}
+        }
+        if(node["expr"] === proof_graph["safety"]){
+            style["border-width"] = "5px";
         }
         // console.log(ctis.length)
         if(!addedNodes.includes(node["expr"])){
@@ -166,19 +170,19 @@ window.onload = function(){
                 data: dataVal,
                 position: { x: 200, y: 200 },
                 color: "red",
-                style: {"background-color": color}
+                style: style
             });
         }
 
         for(const child of node["children"]){
-            addNodesToGraph(child);
+            addNodesToGraph(proof_graph, child);
         }
     }
 
     let addedEdges = [];
-    function addEdgesToGraph(node){
+    function addEdgesToGraph(proof_graph, node){
         for(const child of node["children"]){
-            addEdgesToGraph(child);
+            addEdgesToGraph(proof_graph, child);
             let edgeName = 'e_' + child["expr"] + node["expr"];
             if(!addedEdges.includes(edgeName)){
                 addedEdges.push(edgeName);
@@ -199,9 +203,10 @@ window.onload = function(){
         console.log("return");
         console.log(data);
 
+        let proof_graph = data["proof_graph"];
         let root = data["proof_graph"]["root"];
-        addNodesToGraph(root);
-        addEdgesToGraph(root);
+        addNodesToGraph(proof_graph, root);
+        addEdgesToGraph(proof_graph, root);
 
         cy.edges('edge').style({
             "curve-style": "straight",
