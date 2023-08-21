@@ -53,7 +53,6 @@ ValidTreeEdges == {
         /\ (\A c \in e.children : \A i \in DOMAIN c : c[i][2] >= SeqLastTerm(e.log))
 
         \* All children must start at the immediate next index from the end of this log section.
-        \* If the current log is empty, then they start at the first index.
         /\ \A c \in e.children : c[1][1] = e.log[Len(e.log)][1] + 1
 
         \* Branch points in Raft have a particular property i.e. they can only
