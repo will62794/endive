@@ -71,6 +71,8 @@ ValidTreesBounded == {
     edges \in kOrSmallerSubset(2, ValidTreeEdges) :
         \* Ignore the empty tree.
         /\ edges # {}
+        \* Assume log sections are uniquely represented in the tree.
+        /\ \A e1,e2 \in edges : e1.log = e2.log => e1 = e2
         \* Root log entry must exist.
         /\ \E e \in edges : e.log[1] = <<1,0>>
         \* Assume for now that the root log entry <<1,0>> is unique (i.e. present on all nodes at initialization.)
