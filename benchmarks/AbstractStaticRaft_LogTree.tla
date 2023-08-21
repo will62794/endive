@@ -21,6 +21,7 @@ IsMonotonic(seq) == \A i,j \in DOMAIN seq : i > j => seq[i] >= seq[j]
 \* Max branching factor of global log "tree".
 MaxBranchingFactor == 2
 
+\* Max length of any log section.
 MaxLogSectionLen == 1
 
 \* All bounded size chunks of a log, which must be monotonic in terms and have indices
