@@ -2944,8 +2944,19 @@ class InductiveInvGen():
 
             @app.route('/getProofGraph')
             def getProofGraph():
-                proof_json = proof.serialize(include_ctis=False)
+                proof_json = proof.serialize(include_ctis=True)
                 response = flask.jsonify({'ok': True, 'proof_graph': proof_json})
+                response.headers.add('Access-Control-Allow-Origin', '*')
+                # print(proof_json)
+                return response
+
+            @app.route('/getCtis/<expr>')
+            def getCtis(expr):
+                node = proof.get_node_by_name(proof.root, expr)
+                print(node)
+                ctis = [c.serialize() for c in node.ctis]
+                # proof_json = proof.serialize(include_ctis=False)
+                response = flask.jsonify({'ok': True, 'ctis': ctis})
                 response.headers.add('Access-Control-Allow-Origin', '*')
                 # print(proof_json)
                 return response
@@ -2966,7 +2977,7 @@ class InductiveInvGen():
                         proof.gen_ctis_for_node(self, start_node)
                     else:
                         proof.gen_ctis_for_node(self, start_node, target_node_name=expr)
-                    print("Finished generating CTIs for node:", expr)
+                    print("-- Finished generating CTIs for node:", expr, "--")
 
                 p = threading.Thread(target=bar) # create a new Process
                 p.start()
