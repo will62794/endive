@@ -31,6 +31,13 @@ function focusOnNode(nodeId){
         console.log(data);
 
         var ctipane = document.getElementById("ctiPane");
+        var ctiCounter = document.createElement("h3");
+        ctiCounter.innerHTML = `Total CTIs: ${data["ctis"].length}`;
+        var ctiCounter2 = document.createElement("h3");
+        ctiCounter2.innerHTML = `Total CTIs eliminated: ${data["ctis_eliminated"].length}`;
+        ctipane.appendChild(ctiCounter);
+        ctipane.appendChild(ctiCounter2);
+
         if(data["ctis"].length > 0){
             let cti_obj = data["ctis"][0];
             let cti_text = cti_obj["cti_str"];

@@ -2955,8 +2955,9 @@ class InductiveInvGen():
                 node = proof.get_node_by_name(proof.root, expr)
                 print(node)
                 ctis = [c.serialize() for c in node.ctis]
+                ctis_eliminated = [c for c in node.ctis_eliminated]
                 # proof_json = proof.serialize(include_ctis=False)
-                response = flask.jsonify({'ok': True, 'ctis': ctis})
+                response = flask.jsonify({'ok': True, 'ctis': ctis, 'ctis_eliminated': ctis_eliminated})
                 response.headers.add('Access-Control-Allow-Origin', '*')
                 # print(proof_json)
                 return response
