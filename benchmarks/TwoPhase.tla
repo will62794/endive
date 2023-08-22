@@ -198,9 +198,9 @@ H_AllPreparedImpliesNoRMsWorking == \A rmi \in RM : (tmPrepared = RM) => ~(rmSta
 
 H_RMSentPrepareImpliesNotWorking == \A rmi \in RM : ([type |-> "Prepared", rm |-> rmi] \in msgsPrepared) => (~(rmState[rmi] = "working"))
 
-H_AllPreparedImpliesAllPrepareMsgsSent == (tmPrepared = RM) => \A rmj \in RM : ([type |-> "Prepared", rm |-> rmj] \in msgsPrepared)
+H_AllPreparedImpliesAllPreparesSent == (tmPrepared = RM) => \A rmj \in RM : ([type |-> "Prepared", rm |-> rmj] \in msgsPrepared)
 
-H_CommitMsgImpliesAllPreparedMsgsSent == \A rmi \in RM : ([type |-> "Commit"] \in msgsAbortCommit) => ([type |-> "Prepared", rm |-> rmi] \in msgsPrepared) 
+H_CommitMsgImpliesAllPreparesSent == \A rmi \in RM : ([type |-> "Commit"] \in msgsAbortCommit) => ([type |-> "Prepared", rm |-> rmi] \in msgsPrepared) 
 
 H_TMKnowsPrepareImpliesRMSentPrepare == \A rmi \in RM : (tmPrepared = tmPrepared \cup {rmi}) => ([type |-> "Prepared", rm |-> rmi] \in msgsPrepared) 
 
