@@ -34,12 +34,9 @@ function focusOnNode(nodeId){
         var ctipane = document.getElementById("ctiPane");
         var ctiCounter = document.createElement("h3");
         ctiCounter.innerHTML = `Total CTIs: ${data["ctis"].length}`;
-        var ctiCounter2 = document.createElement("h3");
-        console.log("data", data);
-        ctiCounter2.innerHTML = `Total CTIs remaining: ${data["ctis_remaining"].length}`;
-        ctiCounter2.innerHTML += `<br>Apalache proof? ${data["apalache_proof_check"]}`;
+        ctiCounter.innerHTML += `<br>Total CTIs remaining: ${data["ctis_remaining"].length}`;
+        ctiCounter.innerHTML += `<br>Apalache proof? ${data["apalache_proof_check"]}`;
         ctipane.appendChild(ctiCounter);
-        ctipane.appendChild(ctiCounter2);
 
         if(data["ctis"].length > 0){
             let cti_ind = 0;
