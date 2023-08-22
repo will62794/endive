@@ -140,6 +140,24 @@ window.onload = function(){
                     "font-size":"14px"
                 }
             },
+            {
+                selector: 'edge',
+                style: {
+                    'label': function (el) {
+                        // Disable for now.
+                        return "";
+                        let eliminated = el.data()["data"]["num_parent_ctis_eliminated"];
+                        if(eliminated > 0){
+                            return eliminated;
+                        }
+                    },
+                    // "background-color": "lightgray",
+                    // "border-style": "solid",
+                    // "border-width": "1",
+                    // "border-color": "black",
+                    "font-size":"10px"
+                }
+            },
         ]
     });
 
@@ -207,7 +225,8 @@ window.onload = function(){
                     group: 'edges', data: {
                         id: edgeName,
                         source: child["expr"],
-                        target: node["expr"]
+                        target: node["expr"],
+                        data: child
                     }
                 });
             }
@@ -235,7 +254,7 @@ window.onload = function(){
     
 
         // let layout = cy.layout({name:"cose"});
-        let layout = cy.layout({ name: "dagre", nodeSep: 90.0, spacingFactor: 1.6 });
+        let layout = cy.layout({ name: "dagre", nodeSep: 90.0, spacingFactor: 1.7 });
         layout.run();
 
     });

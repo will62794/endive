@@ -377,7 +377,8 @@ class StructuredProofNode():
             "ctis": [c.serialize() for c in self.ctis],
             # Eliminated CTIs are stored as CTI hashes, not full CTIs.
             "ctis_eliminated": [c for c in self.ctis_eliminated],
-            "parent_ctis_eliminated": [c for c in self.ctis_eliminated],
+            "num_parent_ctis_eliminated": len(self.parent_ctis_eliminated),
+            # "parent_ctis_eliminated": [c for c in self.parent_ctis_eliminated],
             "had_ctis_generated": self.had_ctis_generated
         }
         if include_ctis:
@@ -2741,8 +2742,9 @@ class InductiveInvGen():
         tMKnowsPrepareImpliesRMSentPrepare = StructuredProofNode("TMKnowsPrepareImpliesRMSentPrepare", "H_TMKnowsPrepareImpliesRMSentPrepare")
 
         commitMsgImpliesNoAbortMsg = StructuredProofNode("CommitMsgImpliesNoAbortMsg", "H_CommitMsgImpliesNoAbortMsg", children = [
-            StructuredProofNode("InitImpliesNoAbortMsg", "H_InitImpliesNoAbortMsg"),
-            StructuredProofNode("InitImpliesNoCommitMsg", "H_InitImpliesNoCommitMsg")
+            lemmaTRUE,
+            # StructuredProofNode("InitImpliesNoAbortMsg", "H_InitImpliesNoAbortMsg"),
+            # StructuredProofNode("InitImpliesNoCommitMsg", "H_InitImpliesNoCommitMsg")
         ])
 
         rMSentPrepareImpliesNotWorking = StructuredProofNode("RMSentPrepareImpliesNotWorking", "H_RMSentPrepareImpliesNotWorking")
@@ -2764,6 +2766,34 @@ class InductiveInvGen():
 
         # TwoPhase proof structure.
         twopc_children = [
+
+
+            # StructuredProofNode("H_Inv362_1_4_def", "Inv362_1_4_def"),
+            # StructuredProofNode("H_Inv380_1_5_def", "Inv380_1_5_def"),
+            # StructuredProofNode("H_Inv51_1_2_def", "Inv51_1_2_def"),
+            # StructuredProofNode("H_Inv339_1_0_def", "Inv339_1_0_def"),
+
+            # StructuredProofNode("H_Inv330_1_1", "Inv330_1_1", children = [
+            #     StructuredProofNode("CommitMsgImpliesAllPrepared", "H_CommitMsgImpliesAllPrepared")
+            # ]),
+            # StructuredProofNode("H_Inv429_1_2", "Inv429_1_2", children = [
+            #     StructuredProofNode("TMKnowsPrepareImpliesRMSentPrepare", "H_TMKnowsPrepareImpliesRMSentPrepare")
+            # ]),
+            # StructuredProofNode("H_Inv507_1_4", "Inv507_1_4"),
+
+
+
+            # StructuredProofNode("H_Inv89_1_0", "Inv89_1_0"),
+            # StructuredProofNode("H_Inv330_1_1", "Inv330_1_1", children = [
+            #     StructuredProofNode("CommitMsgImpliesAllPrepared", "H_CommitMsgImpliesAllPrepared")
+            # ]),
+            # StructuredProofNode("H_Inv429_1_2", "Inv429_1_2", children = [
+            #     StructuredProofNode("TMKnowsPrepareImpliesRMSentPrepare", "H_TMKnowsPrepareImpliesRMSentPrepare")
+            # ]),
+            # StructuredProofNode("H_Inv415_1_3", "Inv415_1_3"),
+            # StructuredProofNode("H_Inv507_1_4", "Inv507_1_4"),
+
+
             StructuredProofNode("CommitMsgImpliesAllPrepared", "H_CommitMsgImpliesAllPrepared"),
             commitMsgImpliesNoAbortMsg,
             commitMsgImpliesNoRMAborted,
@@ -2937,6 +2967,7 @@ class InductiveInvGen():
                     'ctis': ctis, 
                     'ctis_eliminated': ctis_eliminated,
                     "ctis_remaining": [c.serialize() for c in remaining_ctis_cost_sorted],
+                    "num_parent_ctis_eliminated": len(node.parent_ctis_eliminated),
                     "apalache_proof_check": node.apalache_proof_check
                 })
                 response.headers.add('Access-Control-Allow-Origin', '*')
