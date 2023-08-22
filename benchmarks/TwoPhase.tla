@@ -182,7 +182,9 @@ TCConsistent ==
 
 THEOREM TPSpec => []TypeOK
 
+\* 
 \* Helper lemmas
+\* 
 
 H_CommitMsgImpliesNoAbortMsg ==  ([type |-> "Commit"] \in msgsAbortCommit) => ~([type |-> "Abort"] \in msgsAbortCommit)
 
@@ -208,8 +210,18 @@ H_AbortMsgSentImpliesTMAborted == ([type |-> "Abort"] \in msgsAbortCommit) => tm
 
 H_RMAbortAfterPrepareImpliesTMAborted == \A rmi \in RM :  ((rmState[rmi] = "aborted") /\ ([type |-> "Prepared", rm |-> rmi] \in msgsPrepared)) => tmState = "aborted"
 
+
+
+
+
+
+
+
 H_InitImpliesNoAbortMsg == (tmState = "init") => ~([type |-> "Abort"] \in msgsAbortCommit)
 H_InitImpliesNoCommitMsg == (tmState = "init") => ~([type |-> "Commit"] \in msgsAbortCommit) 
+
+H_TMAbortedImpliesAbortMsg == \A rmi \in RM : \A rmj \in RM : (tmState = "aborted") \/ (~([type |-> "Abort"] \in msgsAbortCommit))
+H_TMCommittedImpliesAbortMsg == \A rmi \in RM : \A rmj \in RM : (tmState = "committed") \/ (~([type |-> "Commit"] \in msgsAbortCommit))
 
 \* Level 3.
 H_Inv1863 == \A rmi \in RM : (rmState[rmi] = "prepared") \/ (~([type |-> "Prepared", rm |-> rmi] \in msgsPrepared) \/ (~(tmState = "init")))
@@ -224,6 +236,37 @@ H_Inv8881 == \A rmi \in RM : (~(rmState[rmi] = "committed")) \/ (~(tmState = "in
 H_Inv7777 == \A rmi \in RM :  ((rmState[rmi] = "aborted") /\ ([type |-> "Prepared", rm |-> rmi] \in msgsPrepared)) => tmState = "aborted"
 
 H_Inv446 == \A rmi \in RM : ~([type |-> "Prepared", rm |-> rmi] \in msgsPrepared) \/ (~(rmState[rmi] = "working"))
+
+
+
+
+
+
+
+
+
+
+
+
+\* alternate.
+
+Inv1433_2_7_def2 == \A rmi \in RM : \A rmj \in RM : (rmState[rmi] = "prepared") \/ (~([type |-> "Prepared", rm |-> rmi] \in msgsPrepared))
+
+Inv89_1_0 == \A rmi \in RM : ([type |-> "Prepared", rm |-> rmi] \in msgsPrepared) \/ (~(tmPrepared = tmPrepared \cup {rmi}))
+Inv326_1_1_def == \A rmi \in RM : \A rmj \in RM : (tmPrepared = RM) \/ (~([type |-> "Commit"] \in msgsAbortCommit))
+Inv51_1_2_def == \A rmi \in RM : \A rmj \in RM : ([type |-> "Commit"] \in msgsAbortCommit) \/ (~(rmState[rmi] = "committed"))
+Inv446_1_3_def == \A rmi \in RM : \A rmj \in RM : ~([type |-> "Prepared", rm |-> rmi] \in msgsPrepared) \/ (~(rmState[rmi] = "working"))
+Inv362_1_4_def == \A rmi \in RM : \A rmj \in RM : (tmState = "aborted") \/ (~([type |-> "Abort"] \in msgsAbortCommit))
+Inv380_1_5_def == \A rmi \in RM : \A rmj \in RM : (tmState = "committed") \/ (~([type |-> "Commit"] \in msgsAbortCommit))
+Inv479_1_6_def == \A rmi \in RM : \A rmj \in RM : ~(rmState[rmi] = "aborted") \/ (~(tmState = "committed"))
+Inv1433_2_7_def == \A rmi \in RM : \A rmj \in RM : (rmState[rmi] = "prepared") \/ (~([type |-> "Prepared", rm |-> rmi] \in msgsPrepared) \/ (~(tmState = "init")))
+Inv339_1_0_def == \A rmi \in RM : \A rmj \in RM : (tmPrepared = RM) \/ (~(tmState = "committed"))
+
+Inv89_1_0b == \A rmi \in RM : ([type |-> "Prepared", rm |-> rmi] \in msgsPrepared) \/ (~(tmPrepared = tmPrepared \cup {rmi}))
+Inv330_1_1 == \A rmi \in RM : (tmPrepared = RM) \/ (~(rmState[rmi] = "committed"))
+Inv429_1_2 == \A rmi \in RM : ~([type |-> "Commit"] \in msgsAbortCommit) \/ (~(rmState[rmi] = "aborted"))
+Inv415_1_3 == \A rmi \in RM : ~([type |-> "Abort"] \in msgsAbortCommit) \/ (~(rmState[rmi] = "committed"))
+Inv507_1_4 == \A rmi \in RM : ~(rmState[rmi] = "working") \/ (~(tmPrepared = RM))
 
 
 \* 
