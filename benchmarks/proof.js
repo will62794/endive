@@ -251,7 +251,7 @@ window.onload = function(){
     
 
         // let layout = cy.layout({name:"cose"});
-        let layout = cy.layout({ name: "dagre", nodeSep: 90.0, spacingFactor: 1.7 });
+        let layout = cy.layout({ name: "dagre", nodeSep: 90.0, spacingFactor: 2.1 });
         layout.run();
 
     });
