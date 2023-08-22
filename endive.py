@@ -2741,19 +2741,22 @@ class InductiveInvGen():
 
         tMKnowsPrepareImpliesRMSentPrepare = StructuredProofNode("TMKnowsPrepareImpliesRMSentPrepare", "H_TMKnowsPrepareImpliesRMSentPrepare")
 
+        ######
+        ######
+        ## lemmaelim
         commitMsgImpliesNoAbortMsg = StructuredProofNode("CommitMsgImpliesNoAbortMsg", "H_CommitMsgImpliesNoAbortMsg", children = [
             lemmaTRUE,
-            # StructuredProofNode("InitImpliesNoAbortMsg", "H_InitImpliesNoAbortMsg"),
-            # StructuredProofNode("InitImpliesNoCommitMsg", "H_InitImpliesNoCommitMsg")
+            StructuredProofNode("InitImpliesNoAbortMsg", "H_InitImpliesNoAbortMsg"),
+            StructuredProofNode("InitImpliesNoCommitMsg", "H_InitImpliesNoCommitMsg")
         ])
 
         rMSentPrepareImpliesNotWorking = StructuredProofNode("RMSentPrepareImpliesNotWorking", "H_RMSentPrepareImpliesNotWorking")
 
         commitMsgImpliesNoRMAborted = StructuredProofNode("CommitMsgImpliesNoRMAborted", "H_CommitMsgImpliesNoRMAborted", children = [
-            StructuredProofNode("CommitMsgImpliesAllPreparedMsgsSent", "H_CommitMsgImpliesAllPreparedMsgsSent", children=[
+            StructuredProofNode("CommitMsgImpliesAllPreparesSent", "H_CommitMsgImpliesAllPreparesSent", children=[
                 tMKnowsPrepareImpliesRMSentPrepare
             ]),
-            StructuredProofNode("AllPreparedImpliesAllPrepareMsgsSent", "H_AllPreparedImpliesAllPrepareMsgsSent", children=[
+            StructuredProofNode("AllPreparedImpliesAllPreparesSent", "H_AllPreparedImpliesAllPreparesSent", children=[
                 tMKnowsPrepareImpliesRMSentPrepare
             ]),
             StructuredProofNode("RMAbortAfterPrepareImpliesTMAborted", "H_RMAbortAfterPrepareImpliesTMAborted", children = [
