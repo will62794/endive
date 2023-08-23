@@ -41,6 +41,21 @@ function computeNodeColor(data){
     return "orange";
 }
 
+
+function refreshNode(nodeId){
+    console.log("Refreshing proof node '" + nodeId + "'");
+    focusOnNode(nodeId);
+    $.get(local_server + `/getCtis/${nodeId}`, function(data){
+        console.log(data);
+
+        let color = computeNodeColor(data);
+        console.log(color);
+        // let color = "orange";
+        cy.nodes(`node[name = "${nodeId}"]`).style('background-color', color);
+
+    });   
+}
+
 function focusOnNode(nodeId){
     currentNodeId = nodeId;
     setCTIPaneHtml();
@@ -101,21 +116,22 @@ function focusOnNode(nodeId){
         // console.log(proof_node_expr);
         // $('.cti-container').hide();
         // $('.cti_' + proof_node_expr).show();
-        console.log("Refreshing proof node '" + currentNodeId + "'");
-        focusOnNode(currentNodeId);
-        $.get(local_server + `/getCtis/${currentNodeId}`, function(data){
-            console.log(data);
+        refreshNode(currentNodeId);
+        // console.log("Refreshing proof node '" + currentNodeId + "'");
+        // focusOnNode(currentNodeId);
+        // $.get(local_server + `/getCtis/${currentNodeId}`, function(data){
+        //     console.log(data);
 
-            // if(data["ctis"].length > 0){
-            //     color = "orange";
-            // }
+        //     // if(data["ctis"].length > 0){
+        //     //     color = "orange";
+        //     // }
 
-            let color = computeNodeColor(data);
-            console.log(color);
-            // let color = "orange";
-            cy.nodes(`node[name = "${currentNodeId}"]`).style('background-color', color);
+        //     let color = computeNodeColor(data);
+        //     console.log(color);
+        //     // let color = "orange";
+        //     cy.nodes(`node[name = "${currentNodeId}"]`).style('background-color', color);
 
-        });   
+        // });   
 
         // let obj = cy.getElementById(currentNodeId);
         // obj.style({"background-color": "red"});
