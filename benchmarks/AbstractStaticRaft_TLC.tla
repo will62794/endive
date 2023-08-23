@@ -60,4 +60,40 @@ CTICost ==
     \* Treat states with more nodes in Secondary as lower "cost"/"energy" states.
     SumFnRange([s \in Server |-> IF state[s] = Secondary THEN 0 ELSE 1])
 
+
+
+\* 
+\* Liveness. (TODO.)
+\* 
+
+\* Simple high level liveness property of a system with bounded logs
+\* that says that all indices eventually become committed.
+\* EventuallyAllIndicesCommit == <> (\A s \in Server : Len(log[s]) = MaxLogLen)
+EventuallyAllIndicesCommit == []((\E s,t \in Server : log[s] # log[t]) => <>(\A s,t \in Server : log[s] = log[t]))
+\* EventuallyAllIndicesCommit == <> ({c[1] : c \in committed} = LogIndices)
+\* EventuallyAllIndicesCommit == <> (Cardinality(committed) > 4)
+\* EventuallyAllIndicesCommit == <> (\E s \in Server : currentTerm[s] = -2)
+
+Inv1 == 
+    \E s,t \in Server : 
+        /\ s # t
+        /\ log[s] = <<1>> 
+        /\ state[t] = Primary
+        /\ currentTerm[t] = 2
+        /\ log[t] = <<2>>
+        /\ \A q \in Server : q \notin {s,t} => log[q] = <<>>
+
+Inv1Check == ~Inv1
+
+\* TODO: What are proper fairness assumptions here?
+Fairness ==
+    \* /\ \A s \in Server : WF_vars(ClientRequest(s))
+    /\ \A s, t \in Server : WF_vars(GetEntries(s, t))
+    /\ \A s, t \in Server : WF_vars(RollbackEntries(s, t))
+    \* /\ \A s \in Server : \A Q \in Quorums(Server) : WF_vars(BecomeLeader(s, Q))
+    /\ \A s \in Server :  \A Q \in Quorums(Server) : WF_vars(CommitEntry(s, Q))
+    \* /\ \A s,t \in Server : WF_vars(UpdateTerms(s, t))
+
+Spec == Init /\ [][Next]_vars /\ Fairness
+
 =============================================================================

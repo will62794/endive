@@ -202,8 +202,6 @@ Next ==
     \/ CommitEntryAction
     \/ UpdateTermsActions
 
-Spec == Init /\ [][Next]_vars
-
 NextUnchanged == UNCHANGED vars
 
 --------------------------------------------------------------------------------
@@ -391,26 +389,4 @@ HumanDecompIndWithTypeOK ==
 
 HumanDecompInd_WithConstraint == StateConstraint => HumanDecompInd
 
-(**
-
-\* Liveness. (TODO.)
-
-\* Simple high level liveness property of a system with bounded logs
-\* that says that all indices eventually become committed.
-\* EventuallyAllIndicesCommit == <> ({c[1] : c \in committed} = LogIndices)
-\* EventuallyAllIndicesCommit == <> (Cardinality(committed) > 4)
-EventuallyAllIndicesCommit == <> (\E s \in Server : currentTerm[s] = -1)
-
-Fairness ==
-    /\ \A s \in Server : WF_vars(ClientRequest(s))
-    /\ \A s, t \in Server : WF_vars(GetEntries(s, t))
-    /\ \A s, t \in Server : WF_vars(RollbackEntries(s, t))
-    /\ \A s \in Server : \A Q \in Quorums(Server) : WF_vars(BecomeLeader(s, Q))
-    /\ \A s \in Server :  \A Q \in Quorums(Server) : WF_vars(CommitEntry(s, Q))
-    /\ \A s,t \in Server : WF_vars(UpdateTerms(s, t))
-
-Spec == Init /\ [][Next]_vars /\ Fairness
-
-
-**)
 =============================================================================
