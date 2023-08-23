@@ -306,7 +306,13 @@ window.onload = function(){
     
 
         // let layout = cy.layout({name:"cose"});
-        let layout = cy.layout({ name: "dagre", nodeSep: 90.0, spacingFactor: 2.1 });
+        let layout = cy.layout({ 
+            name: "dagre", 
+            nodeSep: 10.0, 
+            edgeSep: 20.0,
+            spacingFactor: 1.4,
+            nodeDimensionsIncludeLabels: true
+         });
         layout.run();
 
     });
