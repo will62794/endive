@@ -2971,7 +2971,8 @@ class InductiveInvGen():
                     'ctis_eliminated': ctis_eliminated,
                     "ctis_remaining": [c.serialize() for c in remaining_ctis_cost_sorted],
                     "num_parent_ctis_eliminated": len(node.parent_ctis_eliminated),
-                    "apalache_proof_check": node.apalache_proof_check
+                    "apalache_proof_check": node.apalache_proof_check,
+                    "had_ctis_generated": node.had_ctis_generated
                 })
                 response.headers.add('Access-Control-Allow-Origin', '*')
                 # print(proof_json)

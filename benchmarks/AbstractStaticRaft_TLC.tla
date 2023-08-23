@@ -74,7 +74,7 @@ EventuallyAllIndicesCommit == []((\E s,t \in Server : log[s] # log[t]) => <>(\A 
 \* EventuallyAllIndicesCommit == <> (Cardinality(committed) > 4)
 \* EventuallyAllIndicesCommit == <> (\E s \in Server : currentTerm[s] = -2)
 
-Inv1 == 
+HInv1 == 
     \E s,t \in Server : 
         /\ s # t
         /\ log[s] = <<1>> 
@@ -83,7 +83,7 @@ Inv1 ==
         /\ log[t] = <<2>>
         /\ \A q \in Server : q \notin {s,t} => log[q] = <<>>
 
-Inv1Check == ~Inv1
+HInv1Check == ~HInv1
 
 \* TODO: What are proper fairness assumptions here?
 Fairness ==

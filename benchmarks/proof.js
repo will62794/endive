@@ -2,6 +2,7 @@ console.log("hello console");
 local_server = "http://127.0.0.1:5000"
 currentNodeId = null;
 currentNode = null
+cy = null;
 
 function genCtis(exprName){
     console.log("Gen CTIs", exprName);
@@ -21,7 +22,23 @@ function setCTIPaneHtml(){
     var ctipane = document.getElementById("ctiPane");
     ctipane.innerHTML = "<h1> CTI View </h1>";
     ctipane.innerHTML += `<h3> Proof node: ${currentNodeId} </h3>`;
-    ctipane.innerHTML += "<button id='gen-ctis-btn'> Gen CTIs </button>";
+    ctipane.innerHTML += "<div><button id='gen-ctis-btn'> Gen CTIs </button></div> <br>";
+    ctipane.innerHTML += "<div><button id='refresh-node-btn'> Refresh Proof Node </button></div>";
+}
+
+function computeNodeColor(data){
+    ctis = data["ctis"];
+    ctis_eliminated = data["ctis_eliminated"];
+    let style = {"background-color": "orange"}
+    if(data["had_ctis_generated"] && ctis.length === ctis_eliminated.length){
+        // style = {"background-color": "green"}
+        return "green";
+    }
+    if(!data["had_ctis_generated"]){
+        // style = {"background-color": "lightgray"}
+        return "lightgray";
+    }
+    return "orange";
 }
 
 function focusOnNode(nodeId){
@@ -77,7 +94,33 @@ function focusOnNode(nodeId){
         $.get(local_server + `/genCtis/single/${currentNodeId}`, function(data){
             console.log(data);
         });   
+    })
 
+    $('#refresh-node-btn').on('click', function(ev){
+        // let proof_node_expr = $(this).html();
+        // console.log(proof_node_expr);
+        // $('.cti-container').hide();
+        // $('.cti_' + proof_node_expr).show();
+        console.log("Refreshing proof node '" + currentNodeId + "'");
+        focusOnNode(currentNodeId);
+        $.get(local_server + `/getCtis/${currentNodeId}`, function(data){
+            console.log(data);
+
+            // if(data["ctis"].length > 0){
+            //     color = "orange";
+            // }
+
+            let color = computeNodeColor(data);
+            console.log(color);
+            // let color = "orange";
+            cy.nodes(`node[name = "${currentNodeId}"]`).style('background-color', color);
+
+        });   
+
+        // let obj = cy.getElementById(currentNodeId);
+        // obj.style({"background-color": "red"});
+        // console.log("node obj:", obj);
+        // cy.nodes(`node`).style('background-color', 'red');
     })
 }
 
@@ -120,7 +163,7 @@ window.onload = function(){
 
     setCTIPaneHtml();
 
-    var cy = cytoscape({
+    cy = cytoscape({
         container: document.getElementById('stategraph'), // container to render in
         wheelSensitivity: 0.1,
         style: [
@@ -182,18 +225,11 @@ window.onload = function(){
         console.log("node:", node);
         // console.log(dataVal);
         // console.log("Nodes:", cy.nodes());
-        ctis = node["ctis"];
-        ctis_eliminated = node["ctis_eliminated"];
-        let style = {"background-color": "orange"}
-        if(node["had_ctis_generated"] && ctis.length === ctis_eliminated.length){
-            style = {"background-color": "green"}
-        }
-        if(!node["had_ctis_generated"]){
-            style = {"background-color": "lightgray"}
-        }
+        style = {"background-color": computeNodeColor(node)}
         if(node["expr"] === proof_graph["safety"]){
             style["border-width"] = "5px";
         }
+        
         // console.log(ctis.length)
         if(!addedNodes.includes(node["expr"])){
             addedNodes.push(node["expr"]);
@@ -248,6 +284,9 @@ window.onload = function(){
             "line-color": "steelblue",
             "target-arrow-color": "steelblue"
         })
+
+        // cy.nodes('node').style({'background-color': 'red'});
+
     
 
         // let layout = cy.layout({name:"cose"});
