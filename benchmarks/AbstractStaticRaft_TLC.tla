@@ -92,7 +92,7 @@ Fairness ==
     /\ \A s, t \in Server : WF_vars(RollbackEntries(s, t))
     \* /\ \A s \in Server : \A Q \in Quorums(Server) : WF_vars(BecomeLeader(s, Q))
     /\ \A s \in Server :  \A Q \in Quorums(Server) : WF_vars(CommitEntry(s, Q))
-    \* /\ \A s,t \in Server : WF_vars(UpdateTerms(s, t))
+    /\ \A s,t \in Server : WF_vars(UpdateTerms(s, t))
 
 Spec == Init /\ [][Next]_vars /\ Fairness
 
