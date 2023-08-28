@@ -45,7 +45,7 @@ function computeNodeColor(data){
 function refreshNode(nodeId){
     console.log("Refreshing proof node '" + nodeId + "'");
     focusOnNode(nodeId);
-    $.get(local_server + `/getCtis/${nodeId}`, function(data){
+    $.get(local_server + `/getNode/${nodeId}`, function(data){
         console.log(data);
 
         let color = computeNodeColor(data);
@@ -59,7 +59,7 @@ function refreshNode(nodeId){
 function focusOnNode(nodeId){
     currentNodeId = nodeId;
     setCTIPaneHtml();
-    $.get(local_server + `/getCtis/${nodeId}`, function(data){
+    $.get(local_server + `/getNode/${nodeId}`, function(data){
         console.log("Retrieved CTIs for '" + nodeId + "'");
         console.log(data);
 
@@ -68,6 +68,9 @@ function focusOnNode(nodeId){
         ctiCounter.innerHTML = `Total CTIs: ${data["ctis"].length}`;
         ctiCounter.innerHTML += `<br>Total CTIs remaining: ${data["ctis_remaining"].length}`;
         ctiCounter.innerHTML += `<br>Apalache proof? ${data["apalache_proof_check"]}`;
+        if(data["project_vars"] !== null){
+            ctiCounter.innerHTML += `<br>Projected vars: << ${data["project_vars"]} >>`;
+        }
         ctipane.appendChild(ctiCounter);
 
         if(data["ctis"].length > 0){
@@ -83,7 +86,11 @@ function focusOnNode(nodeId){
                     ctidiv.innerHTML += `<h4>CTI State ${i}</h4>`;
                     ctidiv.innerHTML += "<pre>";
                     let lineI = 0;
+                    console.log(cti_obj);
                     for(const line of state["state_lines"]){
+                        if(data["project_vars"] !== null && data["project_vars"].every(x => !line.includes(x))){
+                            continue;
+                        }
                         let isDiff = i==1 && (cti_obj["trace"][0]["state_lines"][lineI] !== line);
                         let color = isDiff ? "blue" : "black";
                         ctidiv.innerHTML += `<span style='color:${color}'>` + line + "</span><br>";
@@ -220,7 +227,7 @@ window.onload = function(){
     cy.on('click', 'node', function(evt){
         console.log( 'clicked ' + this.id() );
         let name = this.data()["name"];
-        showCtisForNode(name);
+        // showCtisForNode(name);
         focusOnNode(name);
         if(currentNode !== null){
             currentNode.style({"color":"black", "font-weight": "normal"});

@@ -336,6 +336,11 @@ class StructuredProofNode():
         self.expr = expr
         self.children = children
 
+        self.cti_view = None
+
+        # Set of variables to project to (i.e keep only these) for CTI generation and analysis.
+        self.cti_project_vars = None
+
         # Each proof node/lemma can maintain a current set of CTIs, which are
         # computed based on whether the lemma is inductive relative to its
         # current set of direct children.
@@ -372,11 +377,17 @@ class StructuredProofNode():
             "expr": self.expr, 
             "apalache_proof_check": self.apalache_proof_check, 
             "children": [c.serialize(include_ctis=include_ctis) for c in self.children], 
+            "project_vars": self.cti_project_vars
         }
+
+        cti_sort_key = lambda c : c.cost
+        remaining_ctis_cost_sorted = sorted(self.get_remaining_ctis(), key = cti_sort_key)
+
         cti_info = {
             "ctis": [c.serialize() for c in self.ctis],
             # Eliminated CTIs are stored as CTI hashes, not full CTIs.
             "ctis_eliminated": [c for c in self.ctis_eliminated],
+            "ctis_remaining": [c.serialize() for c in remaining_ctis_cost_sorted],
             "num_parent_ctis_eliminated": len(self.parent_ctis_eliminated),
             # "parent_ctis_eliminated": [c for c in self.parent_ctis_eliminated],
             "had_ctis_generated": self.had_ctis_generated
@@ -681,7 +692,7 @@ class StructuredProof():
         # Generate CTIs for this proof node, and sort and then sample to ensure a consistent
         # ordering for a given random seed.
         # For proof tree we look for single step inductive support lemmas.
-        k_ctis, k_cti_traces = indgen.generate_ctis(props=[(node.name, node.expr)], reseed=True, depth=1)
+        k_ctis, k_cti_traces = indgen.generate_ctis(props=[(node.name, node.expr)], reseed=True, depth=1, view=node.cti_view)
         k_ctis = list(k_ctis)
         k_ctis.sort()
 
@@ -1606,7 +1617,7 @@ class InductiveInvGen():
         return all_tla_ctis    
 
 
-    def generate_ctis_tlc_run_async(self, num_traces_per_worker, props=None, depth=None):
+    def generate_ctis_tlc_run_async(self, num_traces_per_worker, props=None, depth=None, view=None):
         """ Starts a single instance of TLC to generate CTIs.
         
         Will generate CTIs for the conjunction of all predicates given in 'props'.
@@ -1664,6 +1675,12 @@ class InductiveInvGen():
             level_bound_precond = "TRUE"
         invcheck_tla_indcheck += f'NextBounded ==  {level_bound_precond} /\ Next\n'
 
+        # Add VIEW expression if needed.
+        view_expr_name = "CTIView"
+        if view is not None:
+            invcheck_tla_indcheck += "\n"
+            invcheck_tla_indcheck += f"{view_expr_name} == {view}\n"
+
         invcheck_tla_indcheck += "===="
 
         indchecktlafile = f"{os.path.join(self.specdir, GEN_TLA_DIR)}/{self.specname}_CTIGen_{ctiseed}.tla"
@@ -1680,7 +1697,9 @@ class InductiveInvGen():
 
         invcheck_tla_indcheck_cfg = "INIT IndCand\n"
         invcheck_tla_indcheck_cfg += "NEXT Next\n"
-        invcheck_tla_indcheck_cfg += f"CONSTRAINT {self.state_constraint}"
+        invcheck_tla_indcheck_cfg += f"CONSTRAINT {self.state_constraint}\n"
+        if view is not None:
+            invcheck_tla_indcheck_cfg += f"VIEW {view_expr_name}\n"
         invcheck_tla_indcheck_cfg += "\n"
         # Only check the invariant itself for now, and not TypeOK, since TypeOK
         # might be probabilistic, which doesn't seem to work correctly when checking 
@@ -1767,7 +1786,7 @@ class InductiveInvGen():
         return (parsed_ctis,parsed_cti_traces)       
 
 
-    def generate_ctis(self, props=None, reseed=False, depth=None):
+    def generate_ctis(self, props=None, reseed=False, depth=None, view=None):
         """ Generate CTIs for use in counterexample elimination. """
 
         # Re-set random seed to ensure consistent RNG initial state.
@@ -1800,7 +1819,7 @@ class InductiveInvGen():
             # if self.use_apalache_ctigen:
                 # cti_subproc = self.generate_ctis_apalache_run_async(num_traces_per_tlc_instance)
             # else:
-            cti_subproc = self.generate_ctis_tlc_run_async(num_traces_per_tlc_instance,props=props, depth=depth)
+            cti_subproc = self.generate_ctis_tlc_run_async(num_traces_per_tlc_instance,props=props, depth=depth, view=view)
 
             cti_subprocs.append(cti_subproc)
 
@@ -2827,11 +2846,13 @@ class InductiveInvGen():
 
         primaryHasEntriesItCreated = StructuredProofNode("PrimaryHasEntriesItCreated_A", "H_PrimaryHasEntriesItCreated")
         primaryHasEntriesItCreated.children = [
-            # lemmaTRUE,
+            lemmaTRUE,
             # quorumsSafeAtTerms,
-            onePrimaryPerTerm,
-            logEntryInTermImpliesSafeAtTerms
+            # onePrimaryPerTerm,
+            # logEntryInTermImpliesSafeAtTerms
         ]
+        primaryHasEntriesItCreated.cti_view = "<<state, currentTerm, log>>"
+        primaryHasEntriesItCreated.cti_project_vars = ["state", "currentTerm", "log"]
 
         currentTermsAtLeastLargeAsLogTermsForPrimary =  StructuredProofNode("CurrentTermAtLeastAsLargeAsLogTermsForPrimary", "H_CurrentTermAtLeastAsLargeAsLogTermsForPrimary", children = [
                 logEntryInTermImpliesSafeAtTerms
@@ -2954,7 +2975,7 @@ class InductiveInvGen():
                 # print(proof_json)
                 return response
 
-            @app.route('/getCtis/<expr>')
+            @app.route('/getNode/<expr>')
             def getCtis(expr):
                 node = proof.get_node_by_name(proof.root, expr)
                 print(node)
@@ -2963,17 +2984,19 @@ class InductiveInvGen():
 
                 cti_sort_key = lambda c : c.cost
                 remaining_ctis_cost_sorted = sorted(node.get_remaining_ctis(), key = cti_sort_key)
+                [c.serialize() for c in remaining_ctis_cost_sorted]
 
                 # proof_json = proof.serialize(include_ctis=False)
-                response = flask.jsonify({
-                    'ok': True, 
-                    'ctis': ctis, 
-                    'ctis_eliminated': ctis_eliminated,
-                    "ctis_remaining": [c.serialize() for c in remaining_ctis_cost_sorted],
-                    "num_parent_ctis_eliminated": len(node.parent_ctis_eliminated),
-                    "apalache_proof_check": node.apalache_proof_check,
-                    "had_ctis_generated": node.had_ctis_generated
-                })
+                response = flask.jsonify(node.serialize())
+                # response = flask.jsonify({
+                #     'ok': True, 
+                #     'ctis': ctis, 
+                #     'ctis_eliminated': ctis_eliminated,
+                #     "ctis_remaining": [c.serialize() for c in remaining_ctis_cost_sorted],
+                #     "num_parent_ctis_eliminated": len(node.parent_ctis_eliminated),
+                #     "apalache_proof_check": node.apalache_proof_check,
+                #     "had_ctis_generated": node.had_ctis_generated
+                # })
                 response.headers.add('Access-Control-Allow-Origin', '*')
                 # print(proof_json)
                 return response
