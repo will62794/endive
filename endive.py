@@ -478,7 +478,6 @@ class StructuredProofNode():
     def get_children(self):
         if type(self.children) == dict:
             out = sum(list(self.children.values()), [])
-            print(out)
             return out
         return self.children
 
@@ -551,10 +550,9 @@ class StructuredProof():
     def serialize(self, include_ctis=True):
         return {"safety": self.safety_goal, "root": self.root.serialize(include_ctis=include_ctis)}
     
-    def save_proof(self):
+    def save_proof(self, include_json=False):
         """ Visualize proof structure in HTML format for inspection, and serialize to JSON. """
         filename = f"{self.proof_base_filename}.html"
-        json_filename = f"{self.proof_base_filename}.json"
         pickle_filename = f"{self.proof_base_filename}.pickle"
         dot_filename = f"{self.proof_base_filename}.dot"
 
@@ -564,10 +562,12 @@ class StructuredProof():
             f.write(html)
 
         # Save structured proof object.
-        print(f"Saving latest proof JSON to '{json_filename}'")
-        with open(json_filename, 'w') as f:
-            proof_json = self.serialize()
-            json.dump(proof_json, f, indent=2)
+        if include_json:
+            json_filename = f"{self.proof_base_filename}.json"
+            print(f"Saving latest proof JSON to '{json_filename}'")
+            with open(json_filename, 'w') as f:
+                proof_json = self.serialize()
+                json.dump(proof_json, f, indent=2)
 
         print(f"Saving latest proof pickled to '{pickle_filename}'")
         # Save pickled proof object.
@@ -794,9 +794,11 @@ class StructuredProof():
                 one_unique_cti = random.sample(child_node.parent_ctis_uniquely_eliminated, 1)
                 for c in one_unique_cti:
                     # Are the low outdegree CTIs among those CTIs that are uniquely eliminated?
-                    print("Sample of uniquely eliminated CTI:")
-                    print(child_node.name)
-                    print(c)
+                    
+                    # print("Sample of uniquely eliminated CTI:")
+                    # print(child_node.name)
+                    # print(c)
+
                     # print([str(hash(x)) for x in node.ctis])
                     uniq_cti_obj = [x for x in ctis if str(hash(x)) == c][0]
                     print(uniq_cti_obj.pretty_str())
@@ -841,10 +843,10 @@ class StructuredProof():
 
         k_ctis, _ = indgen.generate_ctis(props=[(node.name, node.expr)], reseed=True, depth=1, view=node.cti_view, actions=actions)
 
-        if self.actions is not None:
-            print(k_ctis.keys())
-            for k in k_ctis:
-                print(k, len(k_ctis[k]))
+        # if self.actions is not None:
+        #     print(k_ctis.keys())
+        #     for k in k_ctis:
+        #         print(k, len(k_ctis[k]))
 
 
         # Compute CTI elimination broken down by action.
@@ -2883,11 +2885,15 @@ class InductiveInvGen():
         #     "TMAbort" : ""
         #     "TMAbort" : StructuredProofNode("InitImpliesNoAbortMsg", "H_InitImpliesNoAbortMsg")
         # }
-        commitMsgImpliesNoAbortMsg = StructuredProofNode("CommitMsgImpliesNoAbortMsg", "H_CommitMsgImpliesNoAbortMsg", children = [
+        commitMsgImpliesNoAbortMsg = StructuredProofNode("CommitMsgImpliesNoAbortMsg", "H_CommitMsgImpliesNoAbortMsg", children = {
             # lemmaTRUE,
-            StructuredProofNode("InitImpliesNoAbortMsg", "H_InitImpliesNoAbortMsg", parent_action="TMCommit"),
-            StructuredProofNode("InitImpliesNoCommitMsg", "H_InitImpliesNoCommitMsg", parent_action="TMAbort")
-        ])
+            "TMAbort": [
+                StructuredProofNode("InitImpliesNoCommitMsg", "H_InitImpliesNoCommitMsg", parent_action="TMAbort")
+            ],
+            "TMCommit": [
+                StructuredProofNode("InitImpliesNoAbortMsg", "H_InitImpliesNoAbortMsg", parent_action="TMCommit")
+            ]
+        })
         commitMsgImpliesNoAbortMsg.parent_action ="RMChooseToAbortAction"
 
         rMSentPrepareImpliesNotWorking = StructuredProofNode("RMSentPrepareImpliesNotWorking", "H_RMSentPrepareImpliesNotWorking")
@@ -2919,9 +2925,9 @@ class InductiveInvGen():
         # TwoPhase proof structure.
         twopc_children = [
             # StructuredProofNode("CommitMsgImpliesAllPrepared", "H_CommitMsgImpliesAllPrepared", parent_action="RMChooseToAbortAction"),
-            # commitMsgImpliesNoAbortMsg,
+            commitMsgImpliesNoAbortMsg,
             # commitMsgImpliesNoRMAborted,
-            # StructuredProofNode("CommittedRMImpliesCommitMsg", "H_CommittedRMImpliesCommitMsg"),
+            StructuredProofNode("CommittedRMImpliesCommitMsg", "H_CommittedRMImpliesCommitMsg"),
             tMKnowsPrepareImpliesRMPreparedCommittedOrAborted
         ]
         twopc_root = StructuredProofNode("Safety", safety, children = {
@@ -3036,6 +3042,7 @@ class InductiveInvGen():
             logging.info(f"Reloading entire proof and re-generating CTIs.")
             proof = StructuredProof(root, specname = self.specname, actions=actions)
             proof.save_proof()
+
             # Re-generate CTIs.
             if self.proof_tree_cmd[0] == "reload":
                 proof.gen_ctis_for_node(indgen, root)
@@ -3157,7 +3164,7 @@ class InductiveInvGen():
                 logging.info(f"Removed child node: {child_name}")
 
             # Save final proof html.
-            prof.save_proof()
+            proof.save_proof()
 
         if self.proof_tree_cmd == None:
             logging.info("No proof tree command specified. Terminating.")

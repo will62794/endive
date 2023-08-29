@@ -70,8 +70,6 @@ function refreshNode(nodeId){
         console.log(data);
 
         let color = computeNodeColor(data);
-        console.log(color);
-        // let color = "orange";
         cy.nodes(`node[name = "${nodeId}"]`).style('background-color', color);
 
     });   
@@ -430,11 +428,13 @@ window.onload = function(){
                 if(!addedEdges.includes(edgeName)){
                     addedEdges.push(edgeName);
                     cy.add({
-                        group: 'edges', data: {
+                        group: 'edges', 
+                        data: {
                             id: edgeName,
                             source: child["expr"],
                             target: targetId,
-                            data: child,
+                            child: child,
+                            actionSubEdge: true
                         }, 
                         style: {
                             "target-arrow-shape": "triangle",
@@ -476,7 +476,15 @@ window.onload = function(){
             nodeSep: 10.0, 
             edgeSep: 20.0,
             spacingFactor: 1.4,
-            nodeDimensionsIncludeLabels: true
+            nodeDimensionsIncludeLabels: true,
+            // edgeWeight: function(edge){
+            //     console.log("edge data:", edge.data());
+            //     if(edge.data()["actionSubEdge"]){
+            //         return 1.0;
+            //     } else{
+            //         return 0.1;
+            //     }
+            // }
          });
         layout.run();
 
