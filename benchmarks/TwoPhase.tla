@@ -154,6 +154,13 @@ RMRcvAbortMsg(rm) ==
   /\ rmState' = [rmState EXCEPT ![rm] = "aborted"]
   /\ UNCHANGED <<tmState, tmPrepared, msgsPrepared, msgsAbortCommit>>
 
+
+TMRcvPreparedAction == \E rm \in RM : TMRcvPrepared(rm) 
+RMPrepareAction == \E rm \in RM : RMPrepare(rm) 
+RMChooseToAbortAction == \E rm \in RM : RMChooseToAbort(rm)
+RMRcvCommitMsgAction == \E rm \in RM : RMRcvCommitMsg(rm) 
+RMRcvAbortMsgAction == \E rm \in RM : RMRcvAbortMsg(rm)
+
 Next ==
   \/ TMCommit 
   \/ TMAbort

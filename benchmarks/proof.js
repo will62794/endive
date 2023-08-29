@@ -75,12 +75,29 @@ function focusOnNode(nodeId){
 
         if(data["ctis"].length > 0){
             let cti_ind = 0;
-            for(const cti_obj of data["ctis_remaining"].slice(0,2)){
+            let cti_table = {};
+            for(const c of data["ctis"]){
+                cti_table[c["hashId"]] = c;
+            }
+            console.log("CTI table:", cti_table);
+
+            for(const cluster_name in data["cti_clusters"]){
+                cluster_cti_ids = data["cti_clusters"][cluster_name];
+                cti_id = data["cti_clusters"][cluster_name][0]
+                cti_obj = cti_table[cti_id];
+
+                // If all CTIs from this cluster are eliminated, then continue.
+                if(cluster_cti_ids.every(cid => data["ctis_eliminated"].includes(cid))){
+                    continue;
+                }
+            
+                // for(const cti_obj of data["ctis_remaining"].slice(0,2)){
                 // let cti_obj = data["ctis"][0];
                 let cti_text = cti_obj["cti_str"];
                 var ctidiv = document.createElement("div");
                 ctidiv.classList.add("cti-box");
                 var i = 0;
+                ctidiv.innerHTML += `<h2>Cluster: ${cluster_name.split(" ")[0]}</h2>`;
                 ctidiv.innerHTML += `<h3>CTI ${cti_ind} (${cti_obj["action_name"]}), cost=${cti_obj["cost"]}</h3>`;
                 for(const state of cti_obj["trace"]){
                     ctidiv.innerHTML += `<h4>CTI State ${i}</h4>`;
@@ -194,7 +211,7 @@ window.onload = function(){
                 selector: 'node',
                 style: {
                     'label': function (el) {
-                        return el.data()["id"];
+                        return el.data()["name"];
                     },
                     "background-color": "lightgray",
                     "border-style": "solid",
@@ -245,7 +262,7 @@ window.onload = function(){
     let addedNodes = [];
     function addNodesToGraph(proof_graph, node){
         dataVal = { id: node["expr"], name: node["name"] };
-        console.log("node:", node);
+        // console.log("node:", node);
         // console.log(dataVal);
         // console.log("Nodes:", cy.nodes());
         style = {"background-color": computeNodeColor(node)}
@@ -263,6 +280,38 @@ window.onload = function(){
                 color: "red",
                 style: style
             });
+
+            var ix = 0;
+            for(const action in node["ctis"]){
+                if(node["ctis"][action].length === 0){
+                    continue;
+                }
+                
+                // node["cti_clusters"][act]
+                let actname = action.split(" ")[0];
+                let nid = node["expr"] + "_" + actname;
+                let dataVal = { id: nid, name: actname };
+
+                cy.add({
+                    group: 'nodes',
+                    data: dataVal,
+                    position: { x: 200, y: 200 },
+                    color: "red",
+                    size: 3,
+                    style: {"background-color": "gray", "shape": "rectangle", "width":20, "height":20}
+                });
+
+                let edgeName = actname + node['expr'];
+                cy.add({
+                    group: 'edges', data: {
+                        id: edgeName,
+                        source: nid,
+                        target: node["expr"],
+                        // data: child
+                    }
+                });
+                ix += 1;
+            }
         }
 
         for(const child of node["children"]){
@@ -272,28 +321,44 @@ window.onload = function(){
 
     let addedEdges = [];
     function addEdgesToGraph(proof_graph, node){
-        for(const child of node["children"]){
-            addEdgesToGraph(proof_graph, child);
-            let edgeName = 'e_' + child["expr"] + node["expr"];
-            if(!addedEdges.includes(edgeName)){
-                addedEdges.push(edgeName);
-                cy.add({
-                    group: 'edges', data: {
-                        id: edgeName,
-                        source: child["expr"],
-                        target: node["expr"],
-                        data: child
-                    }
-                });
-            }
+        console.log("Adding edges to graph.");
+        console.log(node["cti_clusters"]);
 
-        }
+        // actions = node["cti_clusters"].keys;
+        // if(Object.keys(node["cti_clusters"]).length === 0){
+        //     actions = ["ALL_ACTIONS"];
+        // }
+
+        // for(const act in actions){
+            // node["cti_clusters"][act]
+            // actname = act.split(" ")[0];
+            // console.log("child action node:", node["expr"]+"_"+actname);
+
+            for(const child of node["children"]){
+                addEdgesToGraph(proof_graph, child);
+                let edgeName = 'e_' + child["expr"] + node["expr"];
+                if(!addedEdges.includes(edgeName)){
+                    addedEdges.push(edgeName);
+                    cy.add({
+                        group: 'edges', data: {
+                            id: edgeName,
+                            source: child["expr"],
+                            // target: node["expr"],
+                            target: node["expr"],
+                            //  + "_" + actname,
+                            data: child
+                        }
+                    });
+                }
+
+            }
+        // }
     }
 
     console.log("Get proof");
     $.get(local_server + `/getProofGraph`, function(data){
-        console.log("return");
-        console.log(data);
+        console.log("proof graph obj:", data);
+        // console.log(data);
 
         let proof_graph = data["proof_graph"];
         let root = data["proof_graph"]["root"];
