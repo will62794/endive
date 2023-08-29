@@ -2865,7 +2865,7 @@ class InductiveInvGen():
         commitMsgImpliesNoAbortMsg = StructuredProofNode("CommitMsgImpliesNoAbortMsg", "H_CommitMsgImpliesNoAbortMsg", children = [
             # lemmaTRUE,
             StructuredProofNode("InitImpliesNoAbortMsg", "H_InitImpliesNoAbortMsg", parent_action="TMCommit"),
-            # StructuredProofNode("InitImpliesNoCommitMsg", "H_InitImpliesNoCommitMsg", parent_action="TMAbort")
+            StructuredProofNode("InitImpliesNoCommitMsg", "H_InitImpliesNoCommitMsg", parent_action="TMAbort")
         ])
         commitMsgImpliesNoAbortMsg.parent_action ="RMChooseToAbortAction"
 

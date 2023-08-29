@@ -38,11 +38,12 @@ function computeNodeColor(data, action){
         // this node.
         ctis = [];
         ctis_eliminated = [];
-        for(const action in ctis){
+        for(const action in data["ctis"]){
             ctis = ctis.concat(data["ctis"][action]);
             ctis_eliminated = ctis_eliminated.concat(data["ctis_eliminated"][action]);
         }
         console.log(data["name"]);
+        console.log(data["ctis"]);
         console.log("color ctis:", ctis);
         console.log("color ctis elim:", ctis_eliminated);
     } else{
@@ -101,6 +102,8 @@ function focusOnNode(nodeId, nodeData){
         ctis_for_action = data["ctis"][actionName];
         console.log("ctis for action:", ctis_for_action);
 
+        num_ctis_remaining = ctis_remaining.length
+
         if(nodeData["actionNode"] === undefined){
             console.log(`Node ${nodeId} not an action node.`);
             // If node is not an action node then compute based on all CTIs for this node.
@@ -112,13 +115,13 @@ function focusOnNode(nodeId, nodeData){
             }
 
             ctis_for_action = ctis;
-            ctis_remaining = [] // TODO.
+            num_ctis_remaining = ctis.length - ctis_eliminated.length;
         }
 
         var ctipane = document.getElementById("ctiPane");
         var ctiCounter = document.createElement("h3");
         ctiCounter.innerHTML = `Total CTIs: ${ctis_for_action.length}`;
-        ctiCounter.innerHTML += `<br>Total CTIs remaining: ${ctis_remaining.length}`;
+        ctiCounter.innerHTML += `<br>Total CTIs remaining: ${num_ctis_remaining}`;
         ctiCounter.innerHTML += `<br>Apalache proof? ${data["apalache_proof_check"]}`;
         if(data["project_vars"] !== null){
             ctiCounter.innerHTML += `<br>Projected vars: << ${data["project_vars"]} >>`;
