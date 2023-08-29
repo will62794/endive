@@ -345,8 +345,13 @@ window.onload = function(){
             });
 
             var ix = 0;
-            for(const action in node["ctis"]){
-                if(node["ctis"][action].length === 0){
+            let child_actions = Object.keys(node["children"])
+            console.log("child actions:", child_actions);
+            let cti_actions = Object.keys(node["ctis"]);
+            console.log("cti actions:", cti_actions);
+            for(const action of new Set(cti_actions.concat(child_actions))){
+                console.log(action);
+                if(node["ctis"][action] && node["ctis"][action].length === 0 && !child_actions.includes(action)){
                     continue;
                 }
                 
@@ -393,8 +398,10 @@ window.onload = function(){
             }
         }
 
-        for(const child of node["children"]){
-            addNodesToGraph(proof_graph, child);
+        for(const action in node["children"]){
+            for(const child of node["children"][action]){
+                addNodesToGraph(proof_graph, child);
+            }
         }
     }
 
@@ -406,34 +413,41 @@ window.onload = function(){
         //     actions = ["ALL_ACTIONS"];
         // }
 
-        for(const child of node["children"]){
-            addEdgesToGraph(proof_graph, child);
-            let edgeName = 'e_' + child["expr"] + node["expr"];
-            let targetId = node["expr"];
-            if(child["parent_action"] !== null && node["ctis"][child["parent_action"]]){
-                console.log(node["parent_action"]);
-                targetId = node["expr"] + "_" + child["parent_action"];
+        for(const action in node["children"]){
+            // continue;
+            console.log("Node:", node["name"]);
+            console.log("Child action:", action);
+            for(const child of node["children"][action]){
+                addEdgesToGraph(proof_graph, child);
+                let edgeName = 'e_' + child["expr"] + node["expr"];
+                let targetId = node["expr"];
+                // if(child["parent_action"] !== null && node["ctis"][child["parent_action"]]){
+                    // console.log(node["parent_action"]);
+                    // targetId = node["expr"] + "_" + child["parent_action"];
+                targetId = node["expr"] + "_" + action;
+                    // child["parent_action"];
+                // }
+                if(!addedEdges.includes(edgeName)){
+                    addedEdges.push(edgeName);
+                    cy.add({
+                        group: 'edges', data: {
+                            id: edgeName,
+                            source: child["expr"],
+                            target: targetId,
+                            data: child,
+                        }, 
+                        style: {
+                            "target-arrow-shape": "triangle",
+                            "arrow-scale":2.1,
+                            "line-color": "steelblue",
+                            "target-arrow-color": "steelblue"
+                        }
+                    });
+                }
             }
-            if(!addedEdges.includes(edgeName)){
-                addedEdges.push(edgeName);
-                cy.add({
-                    group: 'edges', data: {
-                        id: edgeName,
-                        source: child["expr"],
-                        target: targetId,
-                        data: child,
-                    }, 
-                    style: {
-                        "target-arrow-shape": "triangle",
-                        "arrow-scale":2.1,
-                        "line-color": "steelblue",
-                        "target-arrow-color": "steelblue"
-                    }
-                });
-            }
-
-        }
         // }
+        }
+
     }
 
     console.log("Get proof");

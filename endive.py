@@ -330,7 +330,7 @@ class CTI():
 
 class StructuredProofNode():
     """ Single node (i.e. lemma) of a structured proof tree. """
-    def __init__(self, name="", expr="", children=[], parent=None, load_from_obj = None, parent_action=None):
+    def __init__(self, name="", expr="", children={}, parent=None, load_from_obj = None, parent_action=None):
         # Name used to identify the expression.
         self.name = name
         # Top level goal expression to be proven.
@@ -380,7 +380,7 @@ class StructuredProofNode():
             "name": self.name, 
             "expr": self.expr, 
             "apalache_proof_check": self.apalache_proof_check, 
-            "children": [c.serialize(include_ctis=include_ctis) for c in self.children], 
+            "children":  {a:[c.serialize(include_ctis=include_ctis) for c in self.children[a]] for a in self.children}, 
             "project_vars": self.cti_project_vars,
             "parent_action": self.parent_action
         }
@@ -461,12 +461,26 @@ class StructuredProofNode():
 
 
     def to_html(self):
-        child_elems = "\n".join([f"<span>{c.to_html()}</span>" for c in self.children])
+        child_elems = "\n".join([f"<span>{c.to_html()}</span>" for c in self.get_children()])
         return f"""
                 <li>{self.list_elem_html()}
                     <ul>{child_elems}</ul> 
                 </li>
             """
+
+    def children_list(self):
+        if type(self.children) == dict:
+            out = sum(list(self.children.values()), [])
+            print(out)
+            return out
+        return self.children
+
+    def get_children(self):
+        if type(self.children) == dict:
+            out = sum(list(self.children.values()), [])
+            print(out)
+            return out
+        return self.children
 
     def set_ctis(self, ctis, action):
         """ Set CTIs for this node and mark it as having CTIs generated. """
@@ -617,7 +631,7 @@ class StructuredProof():
             html += ("</pre>")
             html += "</div>"  
         html += "</div>"  
-        for c in node.children:
+        for c in node.get_children():
             html += self.node_cti_html(c)
         return html      
 
@@ -677,7 +691,7 @@ class StructuredProof():
     def add_node_to_dot_graph(self, dot, node):
         """ Add this node and its children, recursively, to DOT graph."""
         dot.node(node.expr)
-        for c in node.children:
+        for c in node.get_children():
             dot.edge(c.expr, node.expr)
             self.add_node_to_dot_graph(dot, c)
 
@@ -702,7 +716,7 @@ class StructuredProof():
         if name == start_node.name:
             return start_node
         else:
-            for c in start_node.children:
+            for c in start_node.children_list():
                 ret = self.get_node_by_name(c, name)
                 if ret is not None:
                     return ret
@@ -731,8 +745,15 @@ class StructuredProof():
         # cti_info = indgen.check_cti_elimination(node.ctis, [
 
         # Compute CTI elimination for children that serve as support lemmas specifically for this action.
+        # cti_info = indgen.check_cti_elimination(ctis, [
+        #     (child.name,child.expr) for child in node.children if child.parent_action == action
+        # ])
+
+        if action not in node.children:
+            return {}
+
         cti_info = indgen.check_cti_elimination(ctis, [
-            (child.name,child.expr) for child in node.children if child.parent_action == action
+            (child.name,child.expr) for child in node.children[action]
         ])
 
         ctis_eliminated = cti_info["eliminated"]
@@ -765,7 +786,7 @@ class StructuredProof():
             ctis_eliminated_unique[inv] = unique
             # print("Unique:", len(unique))
             # print(ctis_eliminated_unique)
-            child_node = sorted(node.children, key=lambda x : x.expr)[i]
+            child_node = sorted(node.children[action], key=lambda x : x.expr)[i]
             child_node.parent = node
             child_node.parent_ctis_eliminated = set(ctis_eliminated[inv])
             child_node.parent_ctis_uniquely_eliminated = set(ctis_eliminated_unique[inv])
@@ -2870,6 +2891,7 @@ class InductiveInvGen():
         commitMsgImpliesNoAbortMsg.parent_action ="RMChooseToAbortAction"
 
         rMSentPrepareImpliesNotWorking = StructuredProofNode("RMSentPrepareImpliesNotWorking", "H_RMSentPrepareImpliesNotWorking")
+        rMSentPrepareImpliesNotWorking.parent_action = "TMRcvPreparedAction"
 
         commitMsgImpliesNoRMAborted = StructuredProofNode("CommitMsgImpliesNoRMAborted", "H_CommitMsgImpliesNoRMAborted", children = [
             StructuredProofNode("CommitMsgImpliesAllPreparesSent", "H_CommitMsgImpliesAllPreparesSent", children=[
@@ -2887,46 +2909,25 @@ class InductiveInvGen():
         ])
         # commitMsgImpliesNoRMAborted.parent_action = "RMChooseToAbortAction"
 
+        tMKnowsPrepareImpliesRMPreparedCommittedOrAborted = StructuredProofNode(
+            "TMKnowsPrepareImpliesRMPreparedCommittedOrAborted", 
+            "H_TMKnowsPrepareImpliesRMPreparedCommittedOrAborted", children = {
+                # lemmaTRUE,
+                "TMAbort": [rMSentPrepareImpliesNotWorking]
+        })
+
         # TwoPhase proof structure.
         twopc_children = [
-
-
-            # StructuredProofNode("H_Inv362_1_4_def", "Inv362_1_4_def"),
-            # StructuredProofNode("H_Inv380_1_5_def", "Inv380_1_5_def"),
-            # StructuredProofNode("H_Inv51_1_2_def", "Inv51_1_2_def"),
-            # StructuredProofNode("H_Inv339_1_0_def", "Inv339_1_0_def"),
-
-            # StructuredProofNode("H_Inv330_1_1", "Inv330_1_1", children = [
-            #     StructuredProofNode("CommitMsgImpliesAllPrepared", "H_CommitMsgImpliesAllPrepared")
-            # ]),
-            # StructuredProofNode("H_Inv429_1_2", "Inv429_1_2", children = [
-            #     StructuredProofNode("TMKnowsPrepareImpliesRMSentPrepare", "H_TMKnowsPrepareImpliesRMSentPrepare")
-            # ]),
-            # StructuredProofNode("H_Inv507_1_4", "Inv507_1_4"),
-
-
-
-            # StructuredProofNode("H_Inv89_1_0", "Inv89_1_0"),
-            # StructuredProofNode("H_Inv330_1_1", "Inv330_1_1", children = [
-            #     StructuredProofNode("CommitMsgImpliesAllPrepared", "H_CommitMsgImpliesAllPrepared")
-            # ]),
-            # StructuredProofNode("H_Inv429_1_2", "Inv429_1_2", children = [
-            #     StructuredProofNode("TMKnowsPrepareImpliesRMSentPrepare", "H_TMKnowsPrepareImpliesRMSentPrepare")
-            # ]),
-            # StructuredProofNode("H_Inv415_1_3", "Inv415_1_3"),
-            # StructuredProofNode("H_Inv507_1_4", "Inv507_1_4"),
-
-
-            StructuredProofNode("CommitMsgImpliesAllPrepared", "H_CommitMsgImpliesAllPrepared", parent_action="RMChooseToAbortAction"),
-            commitMsgImpliesNoAbortMsg,
-            commitMsgImpliesNoRMAborted,
-            StructuredProofNode("CommittedRMImpliesCommitMsg", "H_CommittedRMImpliesCommitMsg"),
-            StructuredProofNode("TMKnowsPrepareImpliesRMPreparedCommittedOrAborted", "H_TMKnowsPrepareImpliesRMPreparedCommittedOrAborted", children = [
-                # lemmaTRUE,
-                rMSentPrepareImpliesNotWorking
-            ]),
+            # StructuredProofNode("CommitMsgImpliesAllPrepared", "H_CommitMsgImpliesAllPrepared", parent_action="RMChooseToAbortAction"),
+            # commitMsgImpliesNoAbortMsg,
+            # commitMsgImpliesNoRMAborted,
+            # StructuredProofNode("CommittedRMImpliesCommitMsg", "H_CommittedRMImpliesCommitMsg"),
+            tMKnowsPrepareImpliesRMPreparedCommittedOrAborted
         ]
-        twopc_root = StructuredProofNode("Safety", safety, children = twopc_children)
+        twopc_root = StructuredProofNode("Safety", safety, children = {
+            "TMAbort": twopc_children,
+            "RMRcvCommitMsgAction": [rMSentPrepareImpliesNotWorking]
+        })
 
 
 
