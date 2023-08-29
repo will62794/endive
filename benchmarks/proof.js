@@ -3,13 +3,34 @@ local_server = "http://127.0.0.1:5000"
 currentNodeId = null;
 currentNode = null
 cy = null;
+let addedNodes = [];
+let addedEdges = [];
+
+let awaitPollIntervalMS = 1000;
 
 cytoscape.warnings(false);
 
+function awaitGenCtiCompletion(expr){
+    $.get(local_server + `/getActiveCtiGenThreads`, function(data){
+        console.log("checking active cti threads:", data)
+
+        let active_threads = data["active_threads"];
+        $('#gen-ctis-btn').prop("disabled",true);
+        if(active_threads.length > 0){
+            setTimeout(() => awaitGenCtiCompletion(expr), awaitPollIntervalMS);
+        } else{
+            // Once active CTI gen thread completes, refresh the proof graph.
+            reloadProofGraph();
+            $('#gen-ctis-btn').prop("disabled",false);
+        }
+    });
+}
+
 function genCtis(exprName){
-    console.log("Gen CTIs", exprName);
+    console.log("Generating CTIs for '" + exprName + "'");
     $.get(local_server + `/genCtis/single/${exprName}`, function(data){
         console.log(data);
+        awaitGenCtiCompletion(exprName);
     });
 }
 
@@ -178,15 +199,7 @@ function focusOnNode(nodeId, nodeData){
     });   
 
     $('#gen-ctis-btn').on('click', function(ev){
-        // let proof_node_expr = $(this).html();
-        // console.log(proof_node_expr);
-        // $('.cti-container').hide();
-        // $('.cti_' + proof_node_expr).show();
-        console.log("Generating CTIs for '" + currentNodeId + "'");
-
-        $.get(local_server + `/genCtis/single/${currentNodeId}`, function(data){
-            console.log(data);
-        });   
+        genCtis(currentNodeId);
     })
 
     $('#refresh-node-btn').on('click', function(ev){
@@ -224,13 +237,202 @@ function showCtisForNode(nodeId){
     });   
 }
 
-window.onload = function(){
-    $('li').on('click', function(ev){
-        // TODO.
-        // $(this).children('ul').eq(1).toggle();
-        // console.log($(this).children('ul').eq(0));
+
+function addNodesToGraph(proof_graph, node){
+    dataVal = { id: node["expr"], name: node["name"] };
+    // console.log("node:", node);
+    // console.log(dataVal);
+    // console.log("Nodes:", cy.nodes());
+    style = {"background-color": computeNodeColor(node)}
+    if(node["expr"] === proof_graph["safety"]){
+        style["border-width"] = "5px";
+    }
+    
+    // console.log(ctis.length)
+    if(!addedNodes.includes(node["expr"])){
+        addedNodes.push(node["expr"]);
+        cy.add({
+            group: 'nodes',
+            data: dataVal,
+            position: { x: 200, y: 200 },
+            color: "red",
+            style: style
+        });
+
+        var ix = 0;
+        let child_actions = Object.keys(node["children"])
+        console.log("child actions:", child_actions);
+        let cti_actions = Object.keys(node["ctis"]);
+        console.log("cti actions:", cti_actions);
+        for(const action of new Set(cti_actions.concat(child_actions))){
+            console.log(action);
+            if(node["ctis"][action] && node["ctis"][action].length === 0 && !child_actions.includes(action)){
+                continue;
+            }
+            
+            // node["cti_clusters"][act]
+            let actname = action.split(" ")[0];
+            let nid = node["expr"] + "_" + actname;
+            let dataVal = { 
+                id: nid, 
+                name: actname, 
+                actionNode: true,
+                parentId: node["name"]
+            };
+
+            cy.add({
+                group: 'nodes',
+                data: dataVal,
+                position: { x: 200, y: 200 },
+                color: "red",
+                size: 3,
+                style: {
+                    "background-color": computeNodeColor(node, actname),
+                    "shape": "rectangle", 
+                    "width":20, 
+                    "height":20
+                },
+            });
+
+            let edgeName = actname + node['expr'];
+            cy.add({
+                group: 'edges', 
+                data: {
+                    id: edgeName,
+                    source: nid,
+                    target: node["expr"],
+                    // data: child,
+                },
+                style: {
+                    // "line-color": "gray",
+                    "target-arrow-shape": "triangle",
+                    "width": 2
+                }
+            });
+            ix += 1;
+        }
+    }
+
+    for(const action in node["children"]){
+        for(const child of node["children"][action]){
+            addNodesToGraph(proof_graph, child);
+        }
+    }
+}
+
+function addEdgesToGraph(proof_graph, node){
+
+    // actions = node["cti_clusters"].keys;
+    // if(Object.keys(node["cti_clusters"]).length === 0){
+    //     actions = ["ALL_ACTIONS"];
+    // }
+
+    for(const action in node["children"]){
+        // continue;
+        console.log("Node:", node["name"]);
+        console.log("Child action:", action);
+        for(const child of node["children"][action]){
+            addEdgesToGraph(proof_graph, child);
+            let edgeName = 'e_' + child["expr"] + node["expr"];
+            let targetId = node["expr"];
+            // if(child["parent_action"] !== null && node["ctis"][child["parent_action"]]){
+                // console.log(node["parent_action"]);
+                // targetId = node["expr"] + "_" + child["parent_action"];
+            targetId = node["expr"] + "_" + action;
+                // child["parent_action"];
+            // }
+            if(!addedEdges.includes(edgeName)){
+                addedEdges.push(edgeName);
+                cy.add({
+                    group: 'edges', 
+                    data: {
+                        id: edgeName,
+                        source: child["expr"],
+                        target: targetId,
+                        child: child,
+                        actionSubEdge: true
+                    }, 
+                    style: {
+                        "target-arrow-shape": "triangle",
+                        "arrow-scale":2.1,
+                        "line-color": "steelblue",
+                        "target-arrow-color": "steelblue"
+                    }
+                });
+            }
+        }
+    }
+}
+
+function reloadProofGraph(){
+    if(cy !== null){
+        cy.elements().remove();
+        addedNodes = [];
+        addedEdges = [];
+    }
+
+    cy.on('click', 'node', function(evt){
+        console.log( 'clicked ' + this.id() );
+        let name = this.data()["name"];
+        let nid = this.data()["id"];
+        console.log("node name:", name, "node id:", nid);
+        console.log("parent id", this.data()["parentId"]);
+        let actionNode = this.data()["actionNode"];
+        // if(actionNode){
+        //     name = this.data()["parentId"]
+        // }
+        // showCtisForNode(name);
+        focusOnNode(name, this.data());
+        if(currentNode !== null){
+            currentNode.style({"color":"black", "font-weight": "normal"});
+        }
+        currentNode = this;
+        currentNode.style({"color":"black", "font-weight": "bold"});
+    });
+
+    cy.edges('edge').style({
+        "curve-style": "straight",
+        "target-arrow-shape": "triangle"
     })
 
+    console.log("Fetching proof graph.");
+
+    $.get(local_server + `/getProofGraph`, function(data){
+        console.log("proof graph obj:", data);
+
+        let proof_graph = data["proof_graph"];
+        let root = data["proof_graph"]["root"];
+        addNodesToGraph(proof_graph, root);
+        addEdgesToGraph(proof_graph, root);
+
+        cy.edges('edge').style({
+            "curve-style": "straight",
+            // "line-color": "steelblue",
+            // "target-arrow-color": "steelblue"
+        })
+
+        // let layout = cy.layout({name:"cose"});
+        let layout = cy.layout({ 
+            name: "dagre", 
+            nodeSep: 10.0, 
+            edgeSep: 20.0,
+            spacingFactor: 1.4,
+            nodeDimensionsIncludeLabels: true,
+            // edgeWeight: function(edge){
+            //     console.log("edge data:", edge.data());
+            //     if(edge.data()["actionSubEdge"]){
+            //         return 1.0;
+            //     } else{
+            //         return 0.1;
+            //     }
+            // }
+            });
+        layout.run();
+
+    });
+}
+
+function reloadLayout(){
     // Hide all CTIs initially.
     $('.cti-container').hide();
 
@@ -295,199 +497,9 @@ window.onload = function(){
         ]
     });
 
-    cy.on('click', 'node', function(evt){
-        console.log( 'clicked ' + this.id() );
-        let name = this.data()["name"];
-        let nid = this.data()["id"];
-        console.log("node name:", name, "node id:", nid);
-        console.log("parent id", this.data()["parentId"]);
-        let actionNode = this.data()["actionNode"];
-        // if(actionNode){
-        //     name = this.data()["parentId"]
-        // }
-        // showCtisForNode(name);
-        focusOnNode(name, this.data());
-        if(currentNode !== null){
-            currentNode.style({"color":"black", "font-weight": "normal"});
-        }
-        currentNode = this;
-        currentNode.style({"color":"black", "font-weight": "bold"});
-    });
+    reloadProofGraph();
+}
 
-    cy.edges('edge').style({
-        "curve-style": "straight",
-        "target-arrow-shape": "triangle"
-    })
-
-
-    let addedNodes = [];
-    function addNodesToGraph(proof_graph, node){
-        dataVal = { id: node["expr"], name: node["name"] };
-        // console.log("node:", node);
-        // console.log(dataVal);
-        // console.log("Nodes:", cy.nodes());
-        style = {"background-color": computeNodeColor(node)}
-        if(node["expr"] === proof_graph["safety"]){
-            style["border-width"] = "5px";
-        }
-        
-        // console.log(ctis.length)
-        if(!addedNodes.includes(node["expr"])){
-            addedNodes.push(node["expr"]);
-            cy.add({
-                group: 'nodes',
-                data: dataVal,
-                position: { x: 200, y: 200 },
-                color: "red",
-                style: style
-            });
-
-            var ix = 0;
-            let child_actions = Object.keys(node["children"])
-            console.log("child actions:", child_actions);
-            let cti_actions = Object.keys(node["ctis"]);
-            console.log("cti actions:", cti_actions);
-            for(const action of new Set(cti_actions.concat(child_actions))){
-                console.log(action);
-                if(node["ctis"][action] && node["ctis"][action].length === 0 && !child_actions.includes(action)){
-                    continue;
-                }
-                
-                // node["cti_clusters"][act]
-                let actname = action.split(" ")[0];
-                let nid = node["expr"] + "_" + actname;
-                let dataVal = { 
-                    id: nid, 
-                    name: actname, 
-                    actionNode: true,
-                    parentId: node["name"]
-                };
-
-                cy.add({
-                    group: 'nodes',
-                    data: dataVal,
-                    position: { x: 200, y: 200 },
-                    color: "red",
-                    size: 3,
-                    style: {
-                        "background-color": computeNodeColor(node, actname),
-                        "shape": "rectangle", 
-                        "width":20, 
-                        "height":20
-                    },
-                });
-
-                let edgeName = actname + node['expr'];
-                cy.add({
-                    group: 'edges', 
-                    data: {
-                        id: edgeName,
-                        source: nid,
-                        target: node["expr"],
-                        // data: child,
-                    },
-                    style: {
-                        // "line-color": "gray",
-                        "target-arrow-shape": "triangle",
-                        "width": 2
-                    }
-                });
-                ix += 1;
-            }
-        }
-
-        for(const action in node["children"]){
-            for(const child of node["children"][action]){
-                addNodesToGraph(proof_graph, child);
-            }
-        }
-    }
-
-    let addedEdges = [];
-    function addEdgesToGraph(proof_graph, node){
-
-        // actions = node["cti_clusters"].keys;
-        // if(Object.keys(node["cti_clusters"]).length === 0){
-        //     actions = ["ALL_ACTIONS"];
-        // }
-
-        for(const action in node["children"]){
-            // continue;
-            console.log("Node:", node["name"]);
-            console.log("Child action:", action);
-            for(const child of node["children"][action]){
-                addEdgesToGraph(proof_graph, child);
-                let edgeName = 'e_' + child["expr"] + node["expr"];
-                let targetId = node["expr"];
-                // if(child["parent_action"] !== null && node["ctis"][child["parent_action"]]){
-                    // console.log(node["parent_action"]);
-                    // targetId = node["expr"] + "_" + child["parent_action"];
-                targetId = node["expr"] + "_" + action;
-                    // child["parent_action"];
-                // }
-                if(!addedEdges.includes(edgeName)){
-                    addedEdges.push(edgeName);
-                    cy.add({
-                        group: 'edges', 
-                        data: {
-                            id: edgeName,
-                            source: child["expr"],
-                            target: targetId,
-                            child: child,
-                            actionSubEdge: true
-                        }, 
-                        style: {
-                            "target-arrow-shape": "triangle",
-                            "arrow-scale":2.1,
-                            "line-color": "steelblue",
-                            "target-arrow-color": "steelblue"
-                        }
-                    });
-                }
-            }
-        // }
-        }
-
-    }
-
-    console.log("Get proof");
-    $.get(local_server + `/getProofGraph`, function(data){
-        console.log("proof graph obj:", data);
-        // console.log(data);
-
-        let proof_graph = data["proof_graph"];
-        let root = data["proof_graph"]["root"];
-        addNodesToGraph(proof_graph, root);
-        addEdgesToGraph(proof_graph, root);
-
-        cy.edges('edge').style({
-            "curve-style": "straight",
-            // "line-color": "steelblue",
-            // "target-arrow-color": "steelblue"
-        })
-
-        // cy.nodes('node').style({'background-color': 'red'});
-
-    
-
-        // let layout = cy.layout({name:"cose"});
-        let layout = cy.layout({ 
-            name: "dagre", 
-            nodeSep: 10.0, 
-            edgeSep: 20.0,
-            spacingFactor: 1.4,
-            nodeDimensionsIncludeLabels: true,
-            // edgeWeight: function(edge){
-            //     console.log("edge data:", edge.data());
-            //     if(edge.data()["actionSubEdge"]){
-            //         return 1.0;
-            //     } else{
-            //         return 0.1;
-            //     }
-            // }
-         });
-        layout.run();
-
-    });
-
+window.onload = function(){
+    reloadLayout();
 }

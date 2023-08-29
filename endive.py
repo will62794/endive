@@ -2919,7 +2919,7 @@ class InductiveInvGen():
             "TMKnowsPrepareImpliesRMPreparedCommittedOrAborted", 
             "H_TMKnowsPrepareImpliesRMPreparedCommittedOrAborted", children = {
                 # lemmaTRUE,
-                "TMAbort": [rMSentPrepareImpliesNotWorking]
+                "TMRcvPreparedAction": [rMSentPrepareImpliesNotWorking]
         })
 
         # TwoPhase proof structure.
@@ -3069,6 +3069,8 @@ class InductiveInvGen():
             CORS(app)
             import threading
 
+            self.active_ctigen_threads = set()
+
             @app.route('/getProofGraph')
             def getProofGraph():
                 proof_json = proof.serialize(include_ctis=True)
@@ -3086,6 +3088,12 @@ class InductiveInvGen():
                 response.headers.add('Access-Control-Allow-Origin', '*')
                 return response
 
+            @app.route('/getActiveCtiGenThreads')
+            def getActiveCtiGenThreads():
+                response = flask.jsonify({'ok': True, 'active_threads': list(self.active_ctigen_threads)})
+                response.headers.add('Access-Control-Allow-Origin', '*')
+                return response
+
             @app.route('/genCtis/<flag>/<expr>')
             def genCtis(flag, expr):
                 logging.info(f"genCtis({flag}, {expr})")
@@ -3094,17 +3102,21 @@ class InductiveInvGen():
                 response = flask.jsonify({'ok': True, 'expr': expr})
                 response.headers.add('Access-Control-Allow-Origin', '*')
 
+                self.active_ctigen_threads.add(expr)
+
                 # Launch proof generation process in separate thread and return response right away.
-                def bar():
+                def ctigen_fn():
                     subtree = flag == "subtree"
+
                     start_node = proof.get_node_by_name(proof.root, expr)
                     if subtree:
                         proof.gen_ctis_for_node(self, start_node)
                     else:
                         proof.gen_ctis_for_node(self, start_node, target_node_name=expr)
                     print("-- Finished generating CTIs for node:", expr, "--")
+                    self.active_ctigen_threads.remove(expr)
 
-                p = threading.Thread(target=bar) # create a new Process
+                p = threading.Thread(target=ctigen_fn) # create a new Process
                 p.start()
 
                 return response
