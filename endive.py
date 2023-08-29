@@ -330,7 +330,7 @@ class CTI():
 
 class StructuredProofNode():
     """ Single node (i.e. lemma) of a structured proof tree. """
-    def __init__(self, name="", expr="", children=[], parent=None, load_from_obj = None):
+    def __init__(self, name="", expr="", children=[], parent=None, load_from_obj = None, parent_action=None):
         # Name used to identify the expression.
         self.name = name
         # Top level goal expression to be proven.
@@ -363,6 +363,8 @@ class StructuredProofNode():
         # Pointer to this node's parent, or None if it has no parent.
         self.parent = parent
 
+        self.parent_action = parent_action
+
         # Set of CTIs of parent that this lemma eliminates.
         self.parent_ctis_eliminated = []
 
@@ -379,7 +381,8 @@ class StructuredProofNode():
             "expr": self.expr, 
             "apalache_proof_check": self.apalache_proof_check, 
             "children": [c.serialize(include_ctis=include_ctis) for c in self.children], 
-            "project_vars": self.cti_project_vars
+            "project_vars": self.cti_project_vars,
+            "parent_action": self.parent_action
         }
 
         cti_sort_key = lambda c : c.cost
@@ -391,7 +394,8 @@ class StructuredProofNode():
             # Eliminated CTIs are stored as CTI hashes, not full CTIs.
             # "ctis_eliminated": [c for c in self.ctis_eliminated],
             "ctis_eliminated": self.ctis_eliminated,
-            "ctis_remaining": [c.serialize() for c in remaining_ctis_cost_sorted],
+            "ctis_remaining": {a:[c.serialize() for c in self.get_remaining_ctis(a)] for a in self.ctis},
+            # [c.serialize() for c in remaining_ctis_cost_sorted],
             # "cti_clusters": self.get_cti_clusters(serialize=True),
             "num_parent_ctis_eliminated": len(self.parent_ctis_eliminated),
             # "parent_ctis_eliminated": [c for c in self.parent_ctis_eliminated],
@@ -481,9 +485,10 @@ class StructuredProofNode():
         self.apalache_proof_check = False
         # self.parent_ctis_eliminated = []
 
-    def get_remaining_ctis(self):
-        # return [c for c in self.ctis if str(hash(c)) not in self.ctis_eliminated]
-        return []
+    def get_remaining_ctis(self, action=None):
+        if action is None:
+            return []
+        return [c for c in self.ctis[action] if str(hash(c)) not in self.ctis_eliminated[action]]
 
     def sample_remaining_ctis(self, max_num_ctis):
         remaining_ctis = self.get_remaining_ctis()
@@ -724,8 +729,10 @@ class StructuredProof():
         # ])
 
         # cti_info = indgen.check_cti_elimination(node.ctis, [
+
+        # Compute CTI elimination for children that serve as support lemmas specifically for this action.
         cti_info = indgen.check_cti_elimination(ctis, [
-            (child.name,child.expr) for child in node.children
+            (child.name,child.expr) for child in node.children if child.parent_action == action
         ])
 
         ctis_eliminated = cti_info["eliminated"]
@@ -2851,11 +2858,16 @@ class InductiveInvGen():
         ######
         ######
         ## lemmaelim
+        # children = {
+        #     "TMAbort" : ""
+        #     "TMAbort" : StructuredProofNode("InitImpliesNoAbortMsg", "H_InitImpliesNoAbortMsg")
+        # }
         commitMsgImpliesNoAbortMsg = StructuredProofNode("CommitMsgImpliesNoAbortMsg", "H_CommitMsgImpliesNoAbortMsg", children = [
-            lemmaTRUE,
-            # StructuredProofNode("InitImpliesNoAbortMsg", "H_InitImpliesNoAbortMsg"),
-            # StructuredProofNode("InitImpliesNoCommitMsg", "H_InitImpliesNoCommitMsg")
+            # lemmaTRUE,
+            StructuredProofNode("InitImpliesNoAbortMsg", "H_InitImpliesNoAbortMsg", parent_action="TMCommit"),
+            StructuredProofNode("InitImpliesNoCommitMsg", "H_InitImpliesNoCommitMsg", parent_action="TMAbort")
         ])
+        commitMsgImpliesNoAbortMsg.parent_action ="RMChooseToAbortAction"
 
         rMSentPrepareImpliesNotWorking = StructuredProofNode("RMSentPrepareImpliesNotWorking", "H_RMSentPrepareImpliesNotWorking")
 
@@ -2865,14 +2877,15 @@ class InductiveInvGen():
             ]),
             StructuredProofNode("AllPreparedImpliesAllPreparesSent", "H_AllPreparedImpliesAllPreparesSent", children=[
                 tMKnowsPrepareImpliesRMSentPrepare
-            ]),
+            ], parent_action="TMCommit"),
             StructuredProofNode("RMAbortAfterPrepareImpliesTMAborted", "H_RMAbortAfterPrepareImpliesTMAborted", children = [
                 StructuredProofNode("AbortMsgSentImpliesTMAborted", "H_AbortMsgSentImpliesTMAborted"),
                 rMSentPrepareImpliesNotWorking
-            ]),
+            ], parent_action="TMCommit"),
             commitMsgImpliesNoAbortMsg,
             rMSentPrepareImpliesNotWorking
         ])
+        # commitMsgImpliesNoRMAborted.parent_action = "RMChooseToAbortAction"
 
         # TwoPhase proof structure.
         twopc_children = [
@@ -2904,7 +2917,7 @@ class InductiveInvGen():
             # StructuredProofNode("H_Inv507_1_4", "Inv507_1_4"),
 
 
-            StructuredProofNode("CommitMsgImpliesAllPrepared", "H_CommitMsgImpliesAllPrepared"),
+            StructuredProofNode("CommitMsgImpliesAllPrepared", "H_CommitMsgImpliesAllPrepared", parent_action="RMChooseToAbortAction"),
             commitMsgImpliesNoAbortMsg,
             commitMsgImpliesNoRMAborted,
             StructuredProofNode("CommittedRMImpliesCommitMsg", "H_CommittedRMImpliesCommitMsg"),

@@ -4,6 +4,8 @@ currentNodeId = null;
 currentNode = null
 cy = null;
 
+cytoscape.warnings(false);
+
 function genCtis(exprName){
     console.log("Gen CTIs", exprName);
     $.get(local_server + `/genCtis/single/${exprName}`, function(data){
@@ -18,17 +20,24 @@ function genCtisSubtree(exprName){
     });
 }
 
-function setCTIPaneHtml(){
+function setCTIPaneHtml(nodeData){
     var ctipane = document.getElementById("ctiPane");
     ctipane.innerHTML = "<h1> CTI View </h1>";
-    ctipane.innerHTML += `<h3> Proof node: ${currentNodeId} </h3>`;
+    let nodeIdText = currentNodeId;
+    if(nodeData && nodeData["actionNode"]){
+        nodeIdText = nodeData["parentId"] + " -> " + currentNodeId + "";
+    }
+    ctipane.innerHTML += `<h3> Proof node: ${nodeIdText} </h3>`;
     ctipane.innerHTML += "<div><button id='gen-ctis-btn'> Gen CTIs </button></div> <br>";
     ctipane.innerHTML += "<div><button id='refresh-node-btn'> Refresh Proof Node </button></div>";
 }
 
-function computeNodeColor(data){
-    ctis = data["ctis"];
-    ctis_eliminated = data["ctis_eliminated"];
+function computeNodeColor(data, action){
+    if(action === undefined){
+        return "gray";
+    }
+    ctis = data["ctis"][action];
+    ctis_eliminated = data["ctis_eliminated"][action];
     let style = {"background-color": "orange"}
     if(data["had_ctis_generated"] && ctis.length === ctis_eliminated.length){
         // style = {"background-color": "green"}
@@ -56,40 +65,57 @@ function refreshNode(nodeId){
     });   
 }
 
-function focusOnNode(nodeId){
+function focusOnNode(nodeId, nodeData){
     currentNodeId = nodeId;
-    setCTIPaneHtml();
-    $.get(local_server + `/getNode/${nodeId}`, function(data){
+    console.log(nodeData);
+    setCTIPaneHtml(nodeData);
+
+    let nodeIdArg = nodeId;
+    // For action nodes, we want to get the data for the associated parent node.
+    if(nodeData["actionNode"]){
+        nodeIdArg = nodeData["parentId"];
+    }
+
+    $.get(local_server + `/getNode/${nodeIdArg}`, function(data){
         console.log("Retrieved CTIs for '" + nodeId + "'");
-        console.log(data);
+        console.log("node data:", data);
+
+        let actionName;
+        if(nodeData["actionNode"]){
+            actionName = nodeData["name"];
+        }
+        console.log("actionName", actionName);
+        ctis_for_action = data["ctis"][actionName];
+        console.log("ctis for action:", ctis_for_action);
 
         var ctipane = document.getElementById("ctiPane");
         var ctiCounter = document.createElement("h3");
-        ctiCounter.innerHTML = `Total CTIs: ${data["ctis"].length}`;
-        ctiCounter.innerHTML += `<br>Total CTIs remaining: ${data["ctis_remaining"].length}`;
+        ctiCounter.innerHTML = `Total CTIs: ${ctis_for_action.length}`;
+        ctiCounter.innerHTML += `<br>Total CTIs remaining: ${data["ctis_remaining"][actionName].length}`;
         ctiCounter.innerHTML += `<br>Apalache proof? ${data["apalache_proof_check"]}`;
         if(data["project_vars"] !== null){
             ctiCounter.innerHTML += `<br>Projected vars: << ${data["project_vars"]} >>`;
         }
         ctipane.appendChild(ctiCounter);
 
-        if(data["ctis"].length > 0){
+        if(ctis_for_action.length > 0){
             let cti_ind = 0;
             let cti_table = {};
-            for(const c of data["ctis"]){
-                cti_table[c["hashId"]] = c;
+            for(const c of ctis_for_action){
+                    cti_table[c["hashId"]] = c;
             }
             console.log("CTI table:", cti_table);
 
-            for(const cluster_name in data["cti_clusters"]){
-                cluster_cti_ids = data["cti_clusters"][cluster_name];
-                cti_id = data["cti_clusters"][cluster_name][0]
-                cti_obj = cti_table[cti_id];
+            // for(const cluster_name in data["cti_clusters"]){
+                // cluster_cti_ids = data["cti_clusters"][cluster_name];
+                // cti_id = data["cti_clusters"][cluster_name][0]
+                // cti_obj = cti_table[cti_id];
+                cti_obj = ctis_for_action[0];
 
                 // If all CTIs from this cluster are eliminated, then continue.
-                if(cluster_cti_ids.every(cid => data["ctis_eliminated"].includes(cid))){
-                    continue;
-                }
+                // if(cluster_cti_ids.every(cid => data["ctis_eliminated"].includes(cid))){
+                //     continue;
+                // }
             
                 // for(const cti_obj of data["ctis_remaining"].slice(0,2)){
                 // let cti_obj = data["ctis"][0];
@@ -97,7 +123,7 @@ function focusOnNode(nodeId){
                 var ctidiv = document.createElement("div");
                 ctidiv.classList.add("cti-box");
                 var i = 0;
-                ctidiv.innerHTML += `<h2>Cluster: ${cluster_name.split(" ")[0]}</h2>`;
+                // ctidiv.innerHTML += `<h2>Cluster: ${cluster_name.split(" ")[0]}</h2>`;
                 ctidiv.innerHTML += `<h3>CTI ${cti_ind} (${cti_obj["action_name"]}), cost=${cti_obj["cost"]}</h3>`;
                 for(const state of cti_obj["trace"]){
                     ctidiv.innerHTML += `<h4>CTI State ${i}</h4>`;
@@ -118,7 +144,7 @@ function focusOnNode(nodeId){
                 }
                 ctipane.appendChild(ctidiv);
                 cti_ind += 1;
-            }
+            // }
         }
 
     });   
@@ -244,8 +270,16 @@ window.onload = function(){
     cy.on('click', 'node', function(evt){
         console.log( 'clicked ' + this.id() );
         let name = this.data()["name"];
+        let nid = this.data()["id"];
+        console.log("node name", name);
+        console.log("node id", nid);
+        console.log("parent id", this.data()["parentId"]);
+        let actionNode = this.data()["actionNode"];
+        // if(actionNode){
+        //     name = this.data()["parentId"]
+        // }
         // showCtisForNode(name);
-        focusOnNode(name);
+        focusOnNode(name, this.data());
         if(currentNode !== null){
             currentNode.style({"color":"black", "font-weight": "normal"});
         }
@@ -290,7 +324,12 @@ window.onload = function(){
                 // node["cti_clusters"][act]
                 let actname = action.split(" ")[0];
                 let nid = node["expr"] + "_" + actname;
-                let dataVal = { id: nid, name: actname };
+                let dataVal = { 
+                    id: nid, 
+                    name: actname, 
+                    actionNode: true,
+                    parentId: node["name"]
+                };
 
                 cy.add({
                     group: 'nodes',
@@ -298,16 +337,27 @@ window.onload = function(){
                     position: { x: 200, y: 200 },
                     color: "red",
                     size: 3,
-                    style: {"background-color": "gray", "shape": "rectangle", "width":20, "height":20}
+                    style: {
+                        "background-color": computeNodeColor(node, actname),
+                        "shape": "rectangle", 
+                        "width":20, 
+                        "height":20
+                    },
                 });
 
                 let edgeName = actname + node['expr'];
                 cy.add({
-                    group: 'edges', data: {
+                    group: 'edges', 
+                    data: {
                         id: edgeName,
                         source: nid,
                         target: node["expr"],
-                        // data: child
+                        // data: child,
+                    },
+                    style: {
+                        // "line-color": "gray",
+                        "target-arrow-shape": "triangle",
+                        "width": 2
                     }
                 });
                 ix += 1;
@@ -321,37 +371,39 @@ window.onload = function(){
 
     let addedEdges = [];
     function addEdgesToGraph(proof_graph, node){
-        console.log("Adding edges to graph.");
-        console.log(node["cti_clusters"]);
 
         // actions = node["cti_clusters"].keys;
         // if(Object.keys(node["cti_clusters"]).length === 0){
         //     actions = ["ALL_ACTIONS"];
         // }
 
-        // for(const act in actions){
-            // node["cti_clusters"][act]
-            // actname = act.split(" ")[0];
-            // console.log("child action node:", node["expr"]+"_"+actname);
-
-            for(const child of node["children"]){
-                addEdgesToGraph(proof_graph, child);
-                let edgeName = 'e_' + child["expr"] + node["expr"];
-                if(!addedEdges.includes(edgeName)){
-                    addedEdges.push(edgeName);
-                    cy.add({
-                        group: 'edges', data: {
-                            id: edgeName,
-                            source: child["expr"],
-                            // target: node["expr"],
-                            target: node["expr"],
-                            //  + "_" + actname,
-                            data: child
-                        }
-                    });
-                }
-
+        for(const child of node["children"]){
+            addEdgesToGraph(proof_graph, child);
+            let edgeName = 'e_' + child["expr"] + node["expr"];
+            let targetId = node["expr"];
+            if(child["parent_action"] !== null && node["ctis"][child["parent_action"]]){
+                console.log(node["parent_action"]);
+                targetId = node["expr"] + "_" + child["parent_action"];
             }
+            if(!addedEdges.includes(edgeName)){
+                addedEdges.push(edgeName);
+                cy.add({
+                    group: 'edges', data: {
+                        id: edgeName,
+                        source: child["expr"],
+                        target: targetId,
+                        data: child,
+                    }, 
+                    style: {
+                        "target-arrow-shape": "triangle",
+                        "arrow-scale":2.1,
+                        "line-color": "steelblue",
+                        "target-arrow-color": "steelblue"
+                    }
+                });
+            }
+
+        }
         // }
     }
 
@@ -367,10 +419,8 @@ window.onload = function(){
 
         cy.edges('edge').style({
             "curve-style": "straight",
-            "target-arrow-shape": "triangle",
-            "arrow-scale":1.5,
-            "line-color": "steelblue",
-            "target-arrow-color": "steelblue"
+            // "line-color": "steelblue",
+            // "target-arrow-color": "steelblue"
         })
 
         // cy.nodes('node').style({'background-color': 'red'});
