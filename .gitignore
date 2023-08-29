@@ -43,3 +43,9 @@ benchmarks.log
 .vscode/
 _apalache-out/
 apalache/
+*.proof.dot
+*.proof.dot.pdf
+*.proof.json
+*.proof.pickle
+*.svg
+trace.json
