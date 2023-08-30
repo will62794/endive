@@ -26,6 +26,12 @@ TypeOKRandom ==
     /\ log \in RandomSubset(80, [logDomain -> logRange])
     /\ immediatelyCommitted \in kOrSmallerSubset(2, (LogIndices \X Terms))
 
+TypeOKRandomEmptyCommitted == 
+    /\ currentTerm \in RandomSubset(5, [Server -> Terms])
+    /\ state \in [Server -> {Secondary, Primary}]
+    /\ log \in RandomSubset(80, [logDomain -> logRange])
+    /\ immediatelyCommitted = {}
+
 \* Old, randomized version.
 \* /\ committed \in RandomSetOfSubsets(kNumSubsets, nAvgSubsetSize, (LogIndices \X Terms \X Terms))
 

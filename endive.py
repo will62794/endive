@@ -3023,8 +3023,12 @@ class InductiveInvGen():
 
         onePrimaryPerTerm = StructuredProofNode("OnePrimaryPerTerm_Lemma", "H_OnePrimaryPerTerm", children = {
             # lemmaTRUE,
-            "BecomeLeaderAction":[quorumsSafeAtTerms]
+            "BecomeLeaderAction":[
+                quorumsSafeAtTerms
+            ]
         })
+        onePrimaryPerTerm.ctigen_typeok = "TypeOKRandomEmptyCommitted"
+
 
         logEntryInTermImpliesSafeAtTerms = StructuredProofNode("LogEntryInTermImpliesSafeAtTerm", "H_LogEntryInTermImpliesSafeAtTerm")
         logEntryInTermImpliesSafeAtTerms.children = {    
@@ -3059,6 +3063,8 @@ class InductiveInvGen():
                 currentTermsAtLeastLargeAsLogTermsForPrimary
             ]
         }
+        termsGrowMonotonically.ctigen_typeok = "TypeOKRandomEmptyCommitted"
+
 
         logMatching = StructuredProofNode("LogMatching_Lemma", "LogMatching", children = {
             "ClientRequestAction":[primaryHasEntriesItCreated]
@@ -3078,6 +3084,7 @@ class InductiveInvGen():
                 primaryHasEntriesItCreated
             ]
         }
+        uniformLogEntriesInTerm.ctigen_typeok = "TypeOKRandomEmptyCommitted"
 
         entriesCommittedInOwnTerm = StructuredProofNode("EntriesCommittedInOwnTerm", "H_EntriesCommittedInOwnTerm")
 
