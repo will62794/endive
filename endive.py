@@ -330,7 +330,7 @@ class CTI():
 
 class StructuredProofNode():
     """ Single node (i.e. lemma) of a structured proof tree. """
-    def __init__(self, name="", expr="", children={}, parent=None, load_from_obj = None, parent_action=None):
+    def __init__(self, name="", expr="", children={}, parent=None, load_from_obj = None):
         # Name used to identify the expression.
         self.name = name
         # Top level goal expression to be proven.
@@ -363,8 +363,6 @@ class StructuredProofNode():
         # Pointer to this node's parent, or None if it has no parent.
         self.parent = parent
 
-        self.parent_action = parent_action
-
         # Set of CTIs of parent that this lemma eliminates.
         self.parent_ctis_eliminated = []
 
@@ -381,8 +379,7 @@ class StructuredProofNode():
             "expr": self.expr, 
             "apalache_proof_check": self.apalache_proof_check, 
             "children":  {a:[c.serialize(include_ctis=include_ctis) for c in self.children[a]] for a in self.children}, 
-            "project_vars": self.cti_project_vars,
-            "parent_action": self.parent_action
+            "project_vars": self.cti_project_vars
         }
 
         cti_sort_key = lambda c : c.cost
@@ -461,7 +458,7 @@ class StructuredProofNode():
 
 
     def to_html(self):
-        child_elems = "\n".join([f"<span>{c.to_html()}</span>" for c in self.get_children()])
+        child_elems = "\n".join([f"<span>{c.to_html()}</span>" for c in self.children_list()])
         return f"""
                 <li>{self.list_elem_html()}
                     <ul>{child_elems}</ul> 
@@ -469,13 +466,6 @@ class StructuredProofNode():
             """
 
     def children_list(self):
-        if type(self.children) == dict:
-            out = sum(list(self.children.values()), [])
-            print(out)
-            return out
-        return self.children
-
-    def get_children(self):
         if type(self.children) == dict:
             out = sum(list(self.children.values()), [])
             return out
@@ -631,7 +621,7 @@ class StructuredProof():
             html += ("</pre>")
             html += "</div>"  
         html += "</div>"  
-        for c in node.get_children():
+        for c in node.children_list():
             html += self.node_cti_html(c)
         return html      
 
@@ -691,7 +681,7 @@ class StructuredProof():
     def add_node_to_dot_graph(self, dot, node):
         """ Add this node and its children, recursively, to DOT graph."""
         dot.node(node.expr)
-        for c in node.get_children():
+        for c in node.children_list():
             dot.edge(c.expr, node.expr)
             self.add_node_to_dot_graph(dot, c)
 
@@ -740,13 +730,6 @@ class StructuredProof():
         print(f"Checking CTI elimination for support lemmas of node ({node.name},{node.expr})")
         # ctis_eliminated = indgen.check_cti_elimination(node.ctis, [
         #     (child.name,child.expr) for child in node.children
-        # ])
-
-        # cti_info = indgen.check_cti_elimination(node.ctis, [
-
-        # Compute CTI elimination for children that serve as support lemmas specifically for this action.
-        # cti_info = indgen.check_cti_elimination(ctis, [
-        #     (child.name,child.expr) for child in node.children if child.parent_action == action
         # ])
 
         if action not in node.children:
@@ -880,7 +863,7 @@ class StructuredProof():
             return
 
         # Recursively generate CTIs for children as well.
-        for child_node in node.children:
+        for child_node in node.children_list():
             self.gen_ctis_for_node(indgen, child_node, target_node_name=target_node_name)
 
 
@@ -2888,32 +2871,37 @@ class InductiveInvGen():
         commitMsgImpliesNoAbortMsg = StructuredProofNode("CommitMsgImpliesNoAbortMsg", "H_CommitMsgImpliesNoAbortMsg", children = {
             # lemmaTRUE,
             "TMAbort": [
-                StructuredProofNode("InitImpliesNoCommitMsg", "H_InitImpliesNoCommitMsg", parent_action="TMAbort")
+                StructuredProofNode("InitImpliesNoCommitMsg", "H_InitImpliesNoCommitMsg")
             ],
             "TMCommit": [
-                StructuredProofNode("InitImpliesNoAbortMsg", "H_InitImpliesNoAbortMsg", parent_action="TMCommit")
+                StructuredProofNode("InitImpliesNoAbortMsg", "H_InitImpliesNoAbortMsg")
             ]
         })
-        commitMsgImpliesNoAbortMsg.parent_action ="RMChooseToAbortAction"
 
         rMSentPrepareImpliesNotWorking = StructuredProofNode("RMSentPrepareImpliesNotWorking", "H_RMSentPrepareImpliesNotWorking")
-        rMSentPrepareImpliesNotWorking.parent_action = "TMRcvPreparedAction"
 
-        commitMsgImpliesNoRMAborted = StructuredProofNode("CommitMsgImpliesNoRMAborted", "H_CommitMsgImpliesNoRMAborted", children = [
-            StructuredProofNode("CommitMsgImpliesAllPreparesSent", "H_CommitMsgImpliesAllPreparesSent", children=[
-                tMKnowsPrepareImpliesRMSentPrepare
-            ]),
-            StructuredProofNode("AllPreparedImpliesAllPreparesSent", "H_AllPreparedImpliesAllPreparesSent", children=[
-                tMKnowsPrepareImpliesRMSentPrepare
-            ], parent_action="TMCommit"),
-            StructuredProofNode("RMAbortAfterPrepareImpliesTMAborted", "H_RMAbortAfterPrepareImpliesTMAborted", children = [
-                StructuredProofNode("AbortMsgSentImpliesTMAborted", "H_AbortMsgSentImpliesTMAborted"),
-                rMSentPrepareImpliesNotWorking
-            ], parent_action="TMCommit"),
-            commitMsgImpliesNoAbortMsg,
-            rMSentPrepareImpliesNotWorking
-        ])
-        # commitMsgImpliesNoRMAborted.parent_action = "RMChooseToAbortAction"
+        commitMsgImpliesNoRMAborted = StructuredProofNode("CommitMsgImpliesNoRMAborted", "H_CommitMsgImpliesNoRMAborted", children = {
+            "RMRcvAbortMsgAction": [
+                StructuredProofNode("CommitMsgImpliesAllPreparesSent", "H_CommitMsgImpliesAllPreparesSent", children={
+                    "TMCommit": [tMKnowsPrepareImpliesRMSentPrepare]
+                }),
+                # StructuredProofNode("AllPreparedImpliesAllPreparesSent", "H_AllPreparedImpliesAllPreparesSent", children=[
+                #     tMKnowsPrepareImpliesRMSentPrepare
+                # ]),
+               
+                commitMsgImpliesNoAbortMsg,
+            ],
+            "RMChooseToAbortAction": [
+                rMSentPrepareImpliesNotWorking,
+                StructuredProofNode("RMAbortAfterPrepareImpliesTMAborted", "H_RMAbortAfterPrepareImpliesTMAborted", children = {
+                    "TMAbort": [
+                        StructuredProofNode("AbortMsgSentImpliesTMAborted", "H_AbortMsgSentImpliesTMAborted"),
+                        rMSentPrepareImpliesNotWorking
+                    ]
+                }),
+            ] 
+            
+        })
 
         tMKnowsPrepareImpliesRMPreparedCommittedOrAborted = StructuredProofNode(
             "TMKnowsPrepareImpliesRMPreparedCommittedOrAborted", 
@@ -2922,17 +2910,33 @@ class InductiveInvGen():
                 "TMRcvPreparedAction": [rMSentPrepareImpliesNotWorking]
         })
 
+        commitMsgImpliesAllPrepared = StructuredProofNode("CommitMsgImpliesAllPrepared", "H_CommitMsgImpliesAllPrepared")
+
+        committedRMImpliesCommitMsg = StructuredProofNode("CommittedRMImpliesCommitMsg", "H_CommittedRMImpliesCommitMsg")
+
         # TwoPhase proof structure.
-        twopc_children = [
-            # StructuredProofNode("CommitMsgImpliesAllPrepared", "H_CommitMsgImpliesAllPrepared", parent_action="RMChooseToAbortAction"),
-            commitMsgImpliesNoAbortMsg,
-            # commitMsgImpliesNoRMAborted,
-            StructuredProofNode("CommittedRMImpliesCommitMsg", "H_CommittedRMImpliesCommitMsg"),
-            tMKnowsPrepareImpliesRMPreparedCommittedOrAborted
-        ]
+        # twopc_children = [
+        #     StructuredProofNode("CommitMsgImpliesAllPrepared", "H_CommitMsgImpliesAllPrepared", parent_action="RMChooseToAbortAction"),
+        #     commitMsgImpliesNoAbortMsg,
+        #     commitMsgImpliesNoRMAborted,
+        #     committedRMImpliesCommitMsg,
+        #     tMKnowsPrepareImpliesRMPreparedCommittedOrAborted
+        # ]
+
         twopc_root = StructuredProofNode("Safety", safety, children = {
-            "TMAbort": twopc_children,
-            "RMRcvCommitMsgAction": [rMSentPrepareImpliesNotWorking]
+            "RMChooseToAbortAction": [
+                tMKnowsPrepareImpliesRMPreparedCommittedOrAborted,
+                commitMsgImpliesAllPrepared,
+                rMSentPrepareImpliesNotWorking,
+                committedRMImpliesCommitMsg,
+            ],
+            "RMRcvAbortMsgAction": [
+                committedRMImpliesCommitMsg,
+                commitMsgImpliesNoAbortMsg
+            ],
+            "RMRcvCommitMsgAction": [
+                commitMsgImpliesNoRMAborted
+            ]
         })
 
 

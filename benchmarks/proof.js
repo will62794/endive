@@ -16,12 +16,14 @@ function awaitGenCtiCompletion(expr){
 
         let active_threads = data["active_threads"];
         $('#gen-ctis-btn').prop("disabled",true);
+        $('#gen-ctis-btn-subtree').prop("disabled",true);
         if(active_threads.length > 0){
             setTimeout(() => awaitGenCtiCompletion(expr), awaitPollIntervalMS);
         } else{
             // Once active CTI gen thread completes, refresh the proof graph.
             reloadProofGraph();
             $('#gen-ctis-btn').prop("disabled",false);
+            $('#gen-ctis-btn-subtree').prop("disabled",false);
         }
     });
 }
@@ -35,9 +37,10 @@ function genCtis(exprName){
 }
 
 function genCtisSubtree(exprName){
-    console.log("Gen CTIs subtree", exprName);
+    console.log("Gen CTIs recursive", exprName);
     $.get(local_server + `/genCtis/subtree/${exprName}`, function(data){
         console.log(data);
+        awaitGenCtiCompletion(exprName);
     });
 }
 
@@ -50,6 +53,7 @@ function setCTIPaneHtml(nodeData){
     }
     ctipane.innerHTML += `<h3> Proof node: ${nodeIdText} </h3>`;
     ctipane.innerHTML += "<div><button id='gen-ctis-btn'> Gen CTIs </button></div> <br>";
+    ctipane.innerHTML += "<div><button id='gen-ctis-btn-subtree'> Gen CTIs (recursive) </button></div> <br>";
     ctipane.innerHTML += "<div><button id='refresh-node-btn'> Refresh Proof Node </button></div>";
 }
 
@@ -78,7 +82,7 @@ function computeNodeColor(data, action){
     }
     if(!data["had_ctis_generated"]){
         // style = {"background-color": "lightgray"}
-        return "lightgray";
+        return "gray";
     }
     return "orange";
 }
@@ -202,6 +206,10 @@ function focusOnNode(nodeId, nodeData){
         genCtis(currentNodeId);
     })
 
+    $('#gen-ctis-btn-subtree').on('click', function(ev){
+        genCtisSubtree(currentNodeId);
+    })
+
     $('#refresh-node-btn').on('click', function(ev){
         // let proof_node_expr = $(this).html();
         // console.log(proof_node_expr);
@@ -251,13 +259,40 @@ function addNodesToGraph(proof_graph, node){
     // console.log(ctis.length)
     if(!addedNodes.includes(node["expr"])){
         addedNodes.push(node["expr"]);
+
+        let parentNodeBoxId = node["expr"] + "_parent_box";
+
+        // Add parent container box first if needed.
         cy.add({
             group: 'nodes',
-            data: dataVal,
+            data: {
+                id: parentNodeBoxId, 
+                name: node["name"]
+            },
+            style: {
+                "background-color": "#eee",
+                "shape": "rectangle", 
+                // "width": "100px", 
+                // "height": 200
+            },
+        });
+
+        cy.add({
+            group: 'nodes',
+            data: { 
+                id: node["expr"], 
+                name: node["name"],
+                parent: parentNodeBoxId
+            },
             position: { x: 200, y: 200 },
             color: "red",
             style: style
         });
+
+
+        //
+        // Add action-specific sub-nodes.
+        //
 
         var ix = 0;
         let child_actions = Object.keys(node["children"])
@@ -270,14 +305,14 @@ function addNodesToGraph(proof_graph, node){
                 continue;
             }
             
-            // node["cti_clusters"][act]
             let actname = action.split(" ")[0];
             let nid = node["expr"] + "_" + actname;
             let dataVal = { 
                 id: nid, 
                 name: actname, 
                 actionNode: true,
-                parentId: node["name"]
+                parentId: node["name"],
+                parent: parentNodeBoxId
             };
 
             cy.add({
@@ -290,7 +325,8 @@ function addNodesToGraph(proof_graph, node){
                     "background-color": computeNodeColor(node, actname),
                     "shape": "rectangle", 
                     "width":20, 
-                    "height":20
+                    "height":20,
+                    "font-size":"12px"
                 },
             });
 
@@ -414,18 +450,29 @@ function reloadProofGraph(){
         // let layout = cy.layout({name:"cose"});
         let layout = cy.layout({ 
             name: "dagre", 
-            nodeSep: 10.0, 
-            edgeSep: 20.0,
-            spacingFactor: 1.4,
+            // padding:50,
+            // nodeSep: 300.0, 
+            // edgeSep: 20.0,
+            spacingFactor: 1.0,
             nodeDimensionsIncludeLabels: true,
-            // edgeWeight: function(edge){
-            //     console.log("edge data:", edge.data());
-            //     if(edge.data()["actionSubEdge"]){
-            //         return 1.0;
-            //     } else{
-            //         return 0.1;
-            //     }
-            // }
+            transform: function( node, pos ){ 
+                return pos;
+                // console.log("pos", pos);
+                // let parent = node.parent();
+                // console.log(parent);
+                // if(node.data()["actionNode"]){
+                //     pos.x *= 0.1;
+                // }
+                // return pos; 
+            },
+            edgeWeight: function(edge){
+                console.log("edge data:", edge.data());
+                if(edge.data()["actionSubEdge"]){
+                    return 10.0;
+                } else{
+                    return 0.1;
+                }
+            }
             });
         layout.run();
 
@@ -462,6 +509,7 @@ function reloadLayout(){
     cy = cytoscape({
         container: document.getElementById('stategraph'), // container to render in
         wheelSensitivity: 0.1,
+        boxSelectionEnabled: false,
         style: [
             {
                 selector: 'node',
@@ -474,6 +522,13 @@ function reloadLayout(){
                     "border-width": "1",
                     "border-color": "black",
                     "font-size":"14px"
+                }
+            },
+            {
+                selector: ':parent',
+                css: {
+                  'text-valign': 'top',
+                  'text-halign': 'center',
                 }
             },
             {
