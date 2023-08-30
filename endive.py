@@ -3029,8 +3029,7 @@ class InductiveInvGen():
             ]
         }
 
-        entriesCommittedInOwnTerm = StructuredProofNode("EntriesCommittedInOwnTerm_W", "H_EntriesCommittedInOwnTerm")
-
+        entriesCommittedInOwnTerm = StructuredProofNode("EntriesCommittedInOwnTerm", "H_EntriesCommittedInOwnTerm")
 
         primaryOrLogsLaterThanCommittedMustHaveEarlierCommitted = StructuredProofNode("PrimaryOrLogsLaterThanCommittedMustHaveEarlierCommitted", "H_PrimaryOrLogsLaterThanCommittedMustHaveEarlierCommitted")
 

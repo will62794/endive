@@ -378,7 +378,7 @@ function addEdgesToGraph(proof_graph, node){
         console.log("Child action:", action);
         for(const child of node["children"][action]){
             addEdgesToGraph(proof_graph, child);
-            let edgeName = 'e_' + child["expr"] + node["expr"];
+            let edgeName = 'e_' + child["expr"] + "_" + action + "_" + node["expr"];
             let targetId = node["expr"];
             // if(child["parent_action"] !== null && node["ctis"][child["parent_action"]]){
                 // console.log(node["parent_action"]);
