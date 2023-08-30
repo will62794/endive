@@ -339,6 +339,9 @@ class StructuredProofNode():
 
         self.cti_view = None
 
+        # Allow nodes to optionally override TypeOK for potentially faster local CTI generation.
+        self.ctigen_typeok = None
+
         # Set of variables to project to (i.e keep only these) for CTI generation and analysis.
         self.cti_project_vars = None
 
@@ -834,7 +837,17 @@ class StructuredProof():
         if self.actions is None:
             actions = ["Next"]
 
-        k_ctis, _ = indgen.generate_ctis(props=[(node.name, node.expr)], reseed=True, depth=1, view=node.cti_view, actions=actions)
+        typeok_override = None
+        # Optionally use special TypeOK for this node.
+        if node.ctigen_typeok is not None:
+            typeok_override = node.ctigen_typeok
+
+        k_ctis, _ = indgen.generate_ctis(
+                            props=[(node.name, node.expr)], 
+                            reseed=True, depth=1, 
+                            view=node.cti_view, 
+                            actions=actions, 
+                            typeok_override=typeok_override)
 
         # if self.actions is not None:
         #     print(k_ctis.keys())
@@ -1697,7 +1710,7 @@ class InductiveInvGen():
         return all_tla_ctis    
 
 
-    def generate_ctis_tlc_run_async(self, num_traces_per_worker, props=None, depth=None, view=None, action=None):
+    def generate_ctis_tlc_run_async(self, num_traces_per_worker, props=None, depth=None, view=None, action=None, typeok=None):
         """ Starts a single instance of TLC to generate CTIs.
         
         Will generate CTIs for the conjunction of all predicates given in 'props'.
@@ -1743,10 +1756,14 @@ class InductiveInvGen():
         invcheck_tla_indcheck += f"InvStrengthened_Constraint == {precond} => InvStrengthened \n"
 
         invcheck_tla_indcheck += "IndCand ==\n"
-        typeok = self.typeok
+        typeok_expr = self.typeok
+        # Optionally overrride default TypeOK setting.
+        if typeok is not None:
+            typeok_expr = typeok
+
         if self.use_apalache_ctigen:
-            typeok = "TypeOK"
-        invcheck_tla_indcheck += "    /\\ %s\n" % typeok
+            typeok_expr = "TypeOK"
+        invcheck_tla_indcheck += "    /\\ %s\n" % typeok_expr
         invcheck_tla_indcheck += f"    /\ InvStrengthened\n"
 
         depth_bound = 2
@@ -1895,7 +1912,7 @@ class InductiveInvGen():
                     all_ctis = all_ctis.union(parsed_ctis)
                     # all_cti_traces += parsed_cti_traces
 
-    def generate_ctis(self, props=None, reseed=False, depth=None, view=None, actions=None):
+    def generate_ctis(self, props=None, reseed=False, depth=None, view=None, actions=None, typeok_override=None):
         """ Generate CTIs for use in counterexample elimination. """
 
         # Re-set random seed to ensure consistent RNG initial state.
@@ -1938,7 +1955,7 @@ class InductiveInvGen():
                 curr_proc_batch = []
                 for action in actions:
                     logging.info(f"Starting CTI generation process {n} (of {num_cti_worker_procs} total workers), Action='{action}'")
-                    cti_subproc = self.generate_ctis_tlc_run_async(num_traces_per_tlc_instance,props=props, depth=depth, view=view, action=action)
+                    cti_subproc = self.generate_ctis_tlc_run_async(num_traces_per_tlc_instance,props=props, depth=depth, view=view, action=action, typeok=typeok_override)
                     proc_obj = {"action": action, "proc": cti_subproc}
                     cti_subprocs.append(proc_obj)
                     actions_started += 1
@@ -3158,9 +3175,110 @@ class InductiveInvGen():
 
 
 
+
+        ############################
+        # AbstractDynamicRaft proof structure.
+        #############################
+
+        quorumsSafeAtTerms_adr = StructuredProofNode("QuorumsSafeAtTerms", "H_QuorumsSafeAtTerms")
+        quorumsSafeAtTerms_adr.ctigen_typeok = "TypeOKRandomEmptyCommitted"
+
+        primaryConfigTermEqualToCurrentTerm_adr = StructuredProofNode("PrimaryConfigTermEqualToCurrentTerm", "H_PrimaryConfigTermEqualToCurrentTerm")
+        primaryConfigTermEqualToCurrentTerm_adr.ctigen_typeok = "TypeOKRandomEmptyCommitted"
+
+        configVersionAndTermUnique_adr = StructuredProofNode("ConfigVersionAndTermUnique", "H_ConfigVersionAndTermUnique")
+        configVersionAndTermUnique_adr.ctigen_typeok = "TypeOKRandomEmptyCommitted"
+
+
+        onePrimaryPerTerm_adr = StructuredProofNode("OnePrimaryPerTerm_Lemma", "H_OnePrimaryPerTerm", children = {
+            # lemmaTRUE,
+            "BecomeLeaderAction": [
+                    quorumsSafeAtTerms_adr,
+                    primaryConfigTermEqualToCurrentTerm_adr,
+                    configVersionAndTermUnique_adr
+            ]
+        })
+        onePrimaryPerTerm_adr.ctigen_typeok = "TypeOKRandomEmptyCommitted"
+
+
+        primaryHasEntriesItCreated_adr = StructuredProofNode("PrimaryHasEntriesItCreated_A", "H_PrimaryHasEntriesItCreated")
+        primaryHasEntriesItCreated_adr.children = {
+            "ClientRequestAction": [
+                onePrimaryPerTerm_adr,
+            ],
+            "BecomeLeaderAction": [
+                # quorumsSafeAtTerms,
+                # logEntryInTermImpliesSafeAtTerms
+            ]
+        }
+        primaryHasEntriesItCreated_adr.ctigen_typeok = "TypeOKRandomEmptyCommitted"
+
+
+
+        logMatching_adr = StructuredProofNode("LogMatching_Lemma", "LogMatching", children = {
+            "ClientRequestAction":[primaryHasEntriesItCreated_adr]
+        })
+        logMatching_adr.ctigen_typeok = "TypeOKRandomEmptyCommitted"
+
+
+        uniformLogEntriesInTerm_adr = StructuredProofNode("UniformLogEntriesInTerm", "H_UniformLogEntriesInTerm")
+        uniformLogEntriesInTerm_adr.children = {
+            "GetEntriesAction": [
+                # lemmaTRUEShim,
+                logMatching_adr
+            ],
+            "ClientRequestAction": [
+                primaryHasEntriesItCreated_adr
+            ]
+        }
+        uniformLogEntriesInTerm_adr.ctigen_typeok = "TypeOKRandomEmptyCommitted"
+
+
+        primaryOrLogsLaterThanCommittedMustHaveEarlierCommitted_adr = StructuredProofNode("PrimaryOrLogsLaterThanCommittedMustHaveEarlierCommitted", "H_PrimaryOrLogsLaterThanCommittedMustHaveEarlierCommitted")
+        primaryOrLogsLaterThanCommittedMustHaveEarlierCommitted_adr.children = {
+            "BecomeLeaderAction": [
+                # termsGrowMonotonically,
+                # uniformLogEntriesInTerm,
+                # logEntryInTermImpliesSafeAtTerms,
+                # committedEntryExistsOnQuorum_cycleBreak
+            ],
+            "ClientRequestAction": [
+                # termsGrowMonotonically,
+                # uniformLogEntriesInTerm,
+            ],
+            "CommitEntryAction": [
+                # termsGrowMonotonically,
+                primaryHasEntriesItCreated_adr,
+                # logEntryInTermImpliesSafeAtTerms
+            ],
+            "GetEntriesAction": [
+                # termsGrowMonotonically,
+                uniformLogEntriesInTerm_adr
+            ]
+        }
+
+
+        committedEntryExistsOnQuorum_adr = StructuredProofNode("CommittedEntryExistsOnQuorum", "H_CommittedEntryExistsOnQuorum")
+        committedEntryExistsOnQuorum_adr.children = {
+            "RollbackEntriesAction":[
+                # lemmaTRUE,
+                # StructuredProofNode("LogsLaterThanCommittedMustHaveCommitted", "H_LogsLaterThanCommittedMustHaveCommitted", children = [lemmaTRUE]),
+                # StructuredProofNode("LeaderCompletenessLemma", "LeaderCompleteness", children = [lemmaTRUE])
+                # primaryOrLogsLaterThanCommittedMustHaveEarlierCommitted,
+
+                # logsLaterThanCommittedMustHaveCommitted,
+
+                primaryOrLogsLaterThanCommittedMustHaveEarlierCommitted_adr
+
+                # leaderCompleteness
+            ]
+        }
+
+
         adr_children = {
             "CommitEntryAction": [
-                committedEntryExistsOnQuorum
+                committedEntryExistsOnQuorum_adr,
+                onePrimaryPerTerm_adr
             ]
         }
 
@@ -3293,13 +3411,15 @@ class InductiveInvGen():
                 # Launch proof generation process in separate thread and return response right away.
                 def ctigen_fn():
                     subtree = flag == "subtree"
+                    start = time.time()
 
                     start_node = proof.get_node_by_name(proof.root, expr)
                     if subtree:
                         proof.gen_ctis_for_node(self, start_node)
                     else:
                         proof.gen_ctis_for_node(self, start_node, target_node_name=expr)
-                    print("-- Finished generating CTIs for node:", expr, "--")
+                    duration = time.time() - start
+                    print("-- Finished generating CTIs for node:", expr, f" in {round(duration,1)}s --")
                     self.active_ctigen_threads.remove(expr)
 
                 p = threading.Thread(target=ctigen_fn) # create a new Process

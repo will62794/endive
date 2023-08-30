@@ -489,6 +489,16 @@ H_CommittedEntryExistsOnQuorum_AND_LogsLaterThanCommittedMustHaveCommitted_AND_L
     /\ H_CommittedEntryExistsOnQuorum
     /\ H_LogsLaterThanCommittedMustHaveCommitted
 
+\* Reconfig related.
+
+H_PrimaryConfigTermEqualToCurrentTerm == 
+    \A s \in Server : (state[s] = Primary) => (configTerm[s] = currentTerm[s])
+
+H_ConfigVersionAndTermUnique ==
+    \A i,j \in Server :
+        (<<configVersion[i],configTerm[i]>> = <<configVersion[j],configTerm[j]>> )=>
+        config[i] = config[j]
+
 \* Invariant developed during inductive proof decomposition experimenting.
 \* 08/19/2023
 HumanDecompInd == 

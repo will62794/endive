@@ -102,6 +102,9 @@ function refreshNode(nodeId){
 }
 
 function focusOnNode(nodeId, nodeData){
+    if(currentNodeId === nodeId){
+        return;
+    }
     console.log("Focus on node: ", nodeId);
     currentNodeId = nodeId;
     console.log(nodeData);
