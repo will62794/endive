@@ -120,11 +120,12 @@ function focusOnNode(nodeId, nodeData){
         ctis_remaining = [];
         if(nodeData["actionNode"]){
             actionName = nodeData["name"];
-            ctis_remaining = data["ctis_remaining"][actionName]
+            ctis_remaining = data["ctis"][actionName].filter(c => !data["ctis_eliminated"][actionName].includes(c["hashId"]));
         }
         console.log("actionName", actionName);
         ctis_for_action = data["ctis"][actionName];
         console.log("ctis for action:", ctis_for_action);
+        console.log("ctis for action remaining:", ctis_remaining.length);
 
         num_ctis_remaining = ctis_remaining.length
 
@@ -462,7 +463,7 @@ function reloadProofGraph(){
         addEdgesToGraph(proof_graph, root);
 
         cy.edges('edge').style({
-            "curve-style": "straight",
+            // "curve-style": "unbundled-bezier",
             // "line-color": "steelblue",
             // "target-arrow-color": "steelblue"
         })
