@@ -2997,7 +2997,7 @@ class InductiveInvGen():
 
         currentTermsAtLeastLargeAsLogTermsForPrimary =  StructuredProofNode("CurrentTermAtLeastAsLargeAsLogTermsForPrimary", "H_CurrentTermAtLeastAsLargeAsLogTermsForPrimary")
         currentTermsAtLeastLargeAsLogTermsForPrimary.children = {
-            "GetEntriesAction": [
+            "BecomeLeaderAction": [
                 logEntryInTermImpliesSafeAtTerms
             ]
         }
@@ -3044,31 +3044,32 @@ class InductiveInvGen():
                 # StructuredProofNode("LeaderCompletenessLemma", "LeaderCompleteness", children = [lemmaTRUE])
                 # primaryOrLogsLaterThanCommittedMustHaveEarlierCommitted,
 
-                logsLaterThanCommittedMustHaveCommitted,
+                # logsLaterThanCommittedMustHaveCommitted,
+
+                primaryOrLogsLaterThanCommittedMustHaveEarlierCommitted
 
                 # leaderCompleteness
-
-                # termsGrowMonotonically,
-                # StructuredProofNode("EntriesCommittedInOwnTerm_B", "H_EntriesCommittedInOwnTerm"),
-                # logEntryInTermImpliesSafeAtTerms,
-                # uniformLogEntriesInTerm
             ]
         }
+
+        committedEntryExistsOnQuorum_cycleBreak = StructuredProofNode("CommittedEntryExistsOnQuorum_cycleBreak", "H_CommittedEntryExistsOnQuorum_cyclebreak")
     
         # TODO: May need to figure out how to deal with cyclic dependency here.
         primaryOrLogsLaterThanCommittedMustHaveEarlierCommitted.children = {
-            # "BecomeLeaderAction": [committedEntryExistsOnQuorum],
-            "BecomeLeaderAction": [],
-            "ClientRequestAction": [
-                # lemmaTRUE,
-                # StructuredProofNode("CommittedEntryExistsOnQuorum_B", "H_CommittedEntryExistsOnQuorum"),
-                entriesCommittedInOwnTerm,
+            "BecomeLeaderAction": [
                 termsGrowMonotonically,
                 uniformLogEntriesInTerm,
-                # logEntryInTermImpliesSafeAtTerms
+                logEntryInTermImpliesSafeAtTerms,
+                committedEntryExistsOnQuorum_cycleBreak
+            ],
+            "ClientRequestAction": [
+                termsGrowMonotonically,
+                uniformLogEntriesInTerm,
             ],
             "CommitEntryAction": [
-                entriesCommittedInOwnTerm
+                termsGrowMonotonically,
+                primaryHasEntriesItCreated,
+                logEntryInTermImpliesSafeAtTerms
             ],
             "GetEntriesAction": [
                 termsGrowMonotonically,
@@ -3078,20 +3079,11 @@ class InductiveInvGen():
 
 
         logsLaterThanCommittedMustHaveCommitted.children = {
-            # "BecomeLeaderAction": [committedEntryExistsOnQuorum],
-            # "BecomeLeaderAction": [],
             "ClientRequestAction": [
-                # lemmaTRUE,
-                # StructuredProofNode("CommittedEntryExistsOnQuorum_B", "H_CommittedEntryExistsOnQuorum"),
-                # entriesCommittedInOwnTerm,
-                # termsGrowMonotonically,
-                # uniformLogEntriesInTerm,
-                # logEntryInTermImpliesSafeAtTerms
                 leaderCompleteness,
 
             ],
             "CommitEntryAction": [
-                # entriesCommittedInOwnTerm,
                 leaderCompleteness,
                 termsGrowMonotonically,
                 primaryHasEntriesItCreated,
@@ -3101,16 +3093,11 @@ class InductiveInvGen():
                 termsGrowMonotonically,
                 uniformLogEntriesInTerm,
                 logEntryInTermImpliesSafeAtTerms,
-                # entriesCommittedInOwnTerm
             ]
         }
 
-        committedEntryExistsOnQuorum_cycleBreak = StructuredProofNode("CommittedEntryExistsOnQuorum_cycleBreak", "H_CommittedEntryExistsOnQuorum_cyclebreak")
-
         leaderCompleteness.children = {
-            # "BecomeLeaderAction": [committedEntryExistsOnQuorum],
             "BecomeLeaderAction": [
-                # entriesCommittedInOwnTerm,
                 termsGrowMonotonically,
                 uniformLogEntriesInTerm,
                 logEntryInTermImpliesSafeAtTerms,
@@ -3118,22 +3105,13 @@ class InductiveInvGen():
                 committedEntryExistsOnQuorum_cycleBreak
             ],
             "ClientRequestAction": [
-                # lemmaTRUE,
-                # StructuredProofNode("CommittedEntryExistsOnQuorum_B", "H_CommittedEntryExistsOnQuorum"),
-                # entriesCommittedInOwnTerm,
                 termsGrowMonotonically,
                 uniformLogEntriesInTerm,
-                # logEntryInTermImpliesSafeAtTerms
             ],
             "CommitEntryAction": [
-                # entriesCommittedInOwnTerm,
                 termsGrowMonotonically,
                 quorumsSafeAtTerms
             ],
-            # "GetEntriesAction": [
-            #     termsGrowMonotonically,
-            #     uniformLogEntriesInTerm
-            # ]
         }
 
 

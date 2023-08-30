@@ -102,6 +102,7 @@ function refreshNode(nodeId){
 }
 
 function focusOnNode(nodeId, nodeData){
+    console.log("Focus on node: ", nodeId);
     currentNodeId = nodeId;
     console.log(nodeData);
     setCTIPaneHtml(nodeData);
@@ -171,6 +172,8 @@ function focusOnNode(nodeId, nodeData){
 
                 if(ctis_remaining && ctis_remaining.length > 0){
                     cti_obj = ctis_remaining[0];
+                } else{
+                    return;
                 }
 
                 // If all CTIs from this cluster are eliminated, then continue.
