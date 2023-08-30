@@ -2891,20 +2891,26 @@ class InductiveInvGen():
             ]
         })
 
+        allPreparedImpliesAllPreparesSent = StructuredProofNode("AllPreparedImpliesAllPreparesSent", "H_AllPreparedImpliesAllPreparesSent", children = {
+            "TMRcvPreparedAction": [tMKnowsPrepareImpliesRMSentPrepare]
+        })
+
+        commitMsgImpliesAllPreparesSent = StructuredProofNode("CommitMsgImpliesAllPreparesSent", "H_CommitMsgImpliesAllPreparesSent", children={
+            "TMCommit": [tMKnowsPrepareImpliesRMSentPrepare]
+        })
+
+
         commitMsgImpliesNoRMAborted = StructuredProofNode("CommitMsgImpliesNoRMAborted", "H_CommitMsgImpliesNoRMAborted", children = {
             "RMRcvAbortMsgAction": [
-                StructuredProofNode("CommitMsgImpliesAllPreparesSent", "H_CommitMsgImpliesAllPreparesSent", children={
-                    "TMCommit": [tMKnowsPrepareImpliesRMSentPrepare]
-                }),
-                commitMsgImpliesNoAbortMsg,
+                commitMsgImpliesAllPreparesSent,
+                commitMsgImpliesNoAbortMsg
             ],
             "RMChooseToAbortAction": [
                 rMSentPrepareImpliesNotWorking,
-                rMAbortAfterPrepareImpliesTMAborted,
-                commitMsgImpliesNoAbortMsg
+                commitMsgImpliesAllPreparesSent
             ],
             "TMCommit": [
-                StructuredProofNode("AllPreparedImpliesAllPreparesSent", "H_AllPreparedImpliesAllPreparesSent"),
+                allPreparedImpliesAllPreparesSent,
                 rMAbortAfterPrepareImpliesTMAborted
             ]
             
