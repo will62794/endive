@@ -2818,7 +2818,7 @@ class InductiveInvGen():
         # We want to check that this node lemma is inductive relative to the conjunction
         # of all its children lemmas.
         spec_name = f"{self.specname}_rel_ind_check"
-        support_lemmas = [c.expr for c in node.children]
+        support_lemmas = [c.expr for c in node.children_list()]
         rel_ind_pred_name = "IndSupportLemmas"
         goal_inv_name = "Inv"
         spec_str = self.make_rel_induction_check_spec(spec_name, support_lemmas, node.expr, rel_ind_pred_name, goal_inv_name)

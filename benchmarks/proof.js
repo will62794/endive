@@ -258,9 +258,25 @@ function addNodesToGraph(proof_graph, node){
     // console.log("node:", node);
     // console.log(dataVal);
     // console.log("Nodes:", cy.nodes());
-    style = {"background-color": computeNodeColor(node), "radius": 100}
+    style = {
+        "background-color": computeNodeColor(node)
+    }
+
+    let styleParentBox = {
+        "background-color": "#eee",
+        "shape": "round-rectangle",
+    }
+
     if(node["expr"] === proof_graph["safety"]){
-        style["border-width"] = "5px";
+        style["border-width"] = "6px";
+        styleParentBox["border-width"] = "5px";
+        style["font-size"] = "20px";
+        style["width"] = 45;
+        style["height"] = style["width"];
+    }
+
+    if(node["apalache_proof_check"]){
+        styleParentBox["border-color"] = "green";
     }
     
     // console.log(ctis.length)
@@ -277,12 +293,7 @@ function addNodesToGraph(proof_graph, node){
                 // name: node["name"]
                 name: ""
             },
-            style: {
-                "background-color": "#eee",
-                "shape": "round-rectangle", 
-                // "width": "100px", 
-                // "height": 200
-            },
+            style: styleParentBox
         });
 
         // Add main lemma node.
