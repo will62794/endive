@@ -24,7 +24,7 @@ TypeOKRandom ==
     /\ currentTerm \in RandomSubset(5, [Server -> Terms])
     /\ state \in [Server -> {Secondary, Primary}]
     /\ log \in RandomSubset(80, [logDomain -> logRange])
-    /\ committed \in kOrSmallerSubset(2, (LogIndices \X Terms \X Terms))
+    /\ immediatelyCommitted \in kOrSmallerSubset(2, (LogIndices \X Terms \X Terms))
 
 \* Old, randomized version.
 \* /\ committed \in RandomSetOfSubsets(kNumSubsets, nAvgSubsetSize, (LogIndices \X Terms \X Terms))
@@ -53,7 +53,7 @@ SetSum(set) == IF set = {} THEN 0 ELSE
 CTICost == 
     \* Sum of all log lengths.
     SumFnRange([s \in Server |-> Len(log[s])]) + 
-    Cardinality(committed) +
+    Cardinality(immediatelyCommitted) +
     SumFnRange(currentTerm) +
     \* Sum of term values in all log entries.
     SumFnRange([s \in Server |-> SumFnRange(log[s])]) +
