@@ -3084,7 +3084,7 @@ class InductiveInvGen():
             "ClientRequestAction": [
                 # lemmaTRUE,
                 # StructuredProofNode("CommittedEntryExistsOnQuorum_B", "H_CommittedEntryExistsOnQuorum"),
-                entriesCommittedInOwnTerm,
+                # entriesCommittedInOwnTerm,
                 # termsGrowMonotonically,
                 # uniformLogEntriesInTerm,
                 # logEntryInTermImpliesSafeAtTerms
@@ -3092,14 +3092,17 @@ class InductiveInvGen():
 
             ],
             "CommitEntryAction": [
-                entriesCommittedInOwnTerm,
+                # entriesCommittedInOwnTerm,
                 leaderCompleteness,
-                termsGrowMonotonically
+                termsGrowMonotonically,
+                primaryHasEntriesItCreated,
+                logEntryInTermImpliesSafeAtTerms
             ],
             "GetEntriesAction": [
                 termsGrowMonotonically,
                 uniformLogEntriesInTerm,
-                logEntryInTermImpliesSafeAtTerms
+                logEntryInTermImpliesSafeAtTerms,
+                # entriesCommittedInOwnTerm
             ]
         }
 
@@ -3108,7 +3111,7 @@ class InductiveInvGen():
         leaderCompleteness.children = {
             # "BecomeLeaderAction": [committedEntryExistsOnQuorum],
             "BecomeLeaderAction": [
-                entriesCommittedInOwnTerm,
+                # entriesCommittedInOwnTerm,
                 termsGrowMonotonically,
                 uniformLogEntriesInTerm,
                 logEntryInTermImpliesSafeAtTerms,
@@ -3124,7 +3127,9 @@ class InductiveInvGen():
                 # logEntryInTermImpliesSafeAtTerms
             ],
             "CommitEntryAction": [
-                entriesCommittedInOwnTerm
+                # entriesCommittedInOwnTerm,
+                termsGrowMonotonically,
+                quorumsSafeAtTerms
             ],
             # "GetEntriesAction": [
             #     termsGrowMonotonically,
