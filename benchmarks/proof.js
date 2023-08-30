@@ -251,7 +251,7 @@ function addNodesToGraph(proof_graph, node){
     // console.log("node:", node);
     // console.log(dataVal);
     // console.log("Nodes:", cy.nodes());
-    style = {"background-color": computeNodeColor(node)}
+    style = {"background-color": computeNodeColor(node), "radius": 100}
     if(node["expr"] === proof_graph["safety"]){
         style["border-width"] = "5px";
     }
@@ -267,7 +267,8 @@ function addNodesToGraph(proof_graph, node){
             group: 'nodes',
             data: {
                 id: parentNodeBoxId, 
-                name: node["name"]
+                // name: node["name"]
+                name: ""
             },
             style: {
                 "background-color": "#eee",
@@ -277,6 +278,7 @@ function addNodesToGraph(proof_graph, node){
             },
         });
 
+        // Add main lemma node.
         cy.add({
             group: 'nodes',
             data: { 
@@ -330,7 +332,7 @@ function addNodesToGraph(proof_graph, node){
                 },
             });
 
-            let edgeName = actname + node['expr'];
+            let edgeName = nid + "_" + actname + node['expr'];
             cy.add({
                 group: 'edges', 
                 data: {
@@ -453,7 +455,7 @@ function reloadProofGraph(){
             // padding:50,
             // nodeSep: 300.0, 
             // edgeSep: 20.0,
-            spacingFactor: 1.0,
+            spacingFactor: 0.8,
             nodeDimensionsIncludeLabels: true,
             transform: function( node, pos ){ 
                 return pos;
@@ -465,14 +467,14 @@ function reloadProofGraph(){
                 // }
                 // return pos; 
             },
-            edgeWeight: function(edge){
-                console.log("edge data:", edge.data());
-                if(edge.data()["actionSubEdge"]){
-                    return 10.0;
-                } else{
-                    return 0.1;
-                }
-            }
+            // edgeWeight: function(edge){
+            //     // console.log("edge data:", edge.data());
+            //     if(edge.data()["actionSubEdge"]){
+            //         return 10.0;
+            //     } else{
+            //         return 0.1;
+            //     }
+            // }
             });
         layout.run();
 

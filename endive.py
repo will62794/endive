@@ -2880,26 +2880,33 @@ class InductiveInvGen():
 
         rMSentPrepareImpliesNotWorking = StructuredProofNode("RMSentPrepareImpliesNotWorking", "H_RMSentPrepareImpliesNotWorking")
 
+        abortMsgSentImpliesTMAborted = StructuredProofNode("AbortMsgSentImpliesTMAborted", "H_AbortMsgSentImpliesTMAborted")
+
+        rMAbortAfterPrepareImpliesTMAborted = StructuredProofNode("RMAbortAfterPrepareImpliesTMAborted", "H_RMAbortAfterPrepareImpliesTMAborted", children = {
+            "RMRcvAbortMsgAction": [
+                abortMsgSentImpliesTMAborted
+            ],
+            "RMChooseToAbortAction": [
+                rMSentPrepareImpliesNotWorking,
+            ]
+        })
+
         commitMsgImpliesNoRMAborted = StructuredProofNode("CommitMsgImpliesNoRMAborted", "H_CommitMsgImpliesNoRMAborted", children = {
             "RMRcvAbortMsgAction": [
                 StructuredProofNode("CommitMsgImpliesAllPreparesSent", "H_CommitMsgImpliesAllPreparesSent", children={
                     "TMCommit": [tMKnowsPrepareImpliesRMSentPrepare]
                 }),
-                # StructuredProofNode("AllPreparedImpliesAllPreparesSent", "H_AllPreparedImpliesAllPreparesSent", children=[
-                #     tMKnowsPrepareImpliesRMSentPrepare
-                # ]),
-               
                 commitMsgImpliesNoAbortMsg,
             ],
             "RMChooseToAbortAction": [
                 rMSentPrepareImpliesNotWorking,
-                StructuredProofNode("RMAbortAfterPrepareImpliesTMAborted", "H_RMAbortAfterPrepareImpliesTMAborted", children = {
-                    "TMAbort": [
-                        StructuredProofNode("AbortMsgSentImpliesTMAborted", "H_AbortMsgSentImpliesTMAborted"),
-                        rMSentPrepareImpliesNotWorking
-                    ]
-                }),
-            ] 
+                rMAbortAfterPrepareImpliesTMAborted,
+                commitMsgImpliesNoAbortMsg
+            ],
+            "TMCommit": [
+                StructuredProofNode("AllPreparedImpliesAllPreparesSent", "H_AllPreparedImpliesAllPreparesSent"),
+                rMAbortAfterPrepareImpliesTMAborted
+            ]
             
         })
 

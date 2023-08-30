@@ -50,18 +50,18 @@ table td:hover {
     padding:8px;
     margin-top:10px;
     margin-bottom:10px;
-    font-size:16px;
+    font-size:14px;
 }
 
 #stategraph{
-    width:55%;
+    width:58%;
     height: 90%;
     border-right:solid 1px black;
     float:left;
 }
 
 #ctiPane{
-    width:43%;
+    width:40%;
     float:left;
     height:90%;
     padding-left:1%;
