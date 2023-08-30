@@ -75,6 +75,7 @@ function computeNodeColor(data, action){
         ctis = data["ctis"][action];
         ctis_eliminated = data["ctis_eliminated"][action];
     }
+    console.log(data);
 
     if(data["had_ctis_generated"] && ctis.length === ctis_eliminated.length){
         // style = {"background-color": "green"}
@@ -326,8 +327,8 @@ function addNodesToGraph(proof_graph, node){
                 style: {
                     "background-color": computeNodeColor(node, actname),
                     "shape": "rectangle", 
-                    "width":20, 
-                    "height":20,
+                    "width": 15, 
+                    "height": 15,
                     "font-size":"12px"
                 },
             });

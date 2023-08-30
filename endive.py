@@ -373,12 +373,16 @@ class StructuredProofNode():
         if load_from_obj:
             self.load_from(load_from_obj)
 
-    def serialize(self, include_ctis=True):
+    def serialize_rec(self, include_ctis=True, seen=set()):
+        # if self.expr in seen:
+        #     None
+        # print(seen)
+        # seen.add(self.expr)
         ret = {
             "name": self.name, 
             "expr": self.expr, 
             "apalache_proof_check": self.apalache_proof_check, 
-            "children":  {a:[c.serialize(include_ctis=include_ctis) for c in self.children[a]] for a in self.children}, 
+            "children":  {a:[c.serialize_rec(include_ctis=include_ctis, seen=set(seen)) for c in self.children[a]] for a in self.children}, 
             "project_vars": self.cti_project_vars
         }
 
@@ -391,7 +395,7 @@ class StructuredProofNode():
             # Eliminated CTIs are stored as CTI hashes, not full CTIs.
             # "ctis_eliminated": [c for c in self.ctis_eliminated],
             "ctis_eliminated": self.ctis_eliminated,
-            "ctis_remaining": {a:[c.serialize() for c in self.get_remaining_ctis(a)] for a in self.ctis},
+            "ctis_remaining": {a:[cti.serialize() for cti in self.get_remaining_ctis(a)] for a in self.ctis},
             # [c.serialize() for c in remaining_ctis_cost_sorted],
             # "cti_clusters": self.get_cti_clusters(serialize=True),
             "num_parent_ctis_eliminated": len(self.parent_ctis_eliminated),
@@ -403,6 +407,11 @@ class StructuredProofNode():
             for k in cti_info:
                 ret[k] = cti_info[k]
         return ret
+
+    def serialize(self, include_ctis=True):
+        seen_nodes = set()
+        return self.serialize_rec(include_ctis=include_ctis, seen=seen_nodes)
+
 
     def load_from(self, obj):
         """ Load serialized proof object into the current one after deserializing. """
@@ -564,8 +573,8 @@ class StructuredProof():
         with open(pickle_filename, 'wb') as f:
             pickle.dump(self, f)
 
-        print(f"Saving latest proof as DOT to '{dot_filename}'")
-        self.save_as_dot(dot_filename)
+        # print(f"Saving latest proof as DOT to '{dot_filename}'")
+        # self.save_as_dot(dot_filename)
 
         print(f"Finished saving proof objects.")
 
@@ -621,8 +630,8 @@ class StructuredProof():
             html += ("</pre>")
             html += "</div>"  
         html += "</div>"  
-        for c in node.children_list():
-            html += self.node_cti_html(c)
+        # for c in node.children_list():
+            # html += self.node_cti_html(c)
         return html      
 
     def cti_viewer_html(self):
@@ -655,7 +664,9 @@ class StructuredProof():
         html += ("<div hidden>")
         html += (f"<h1>Proof Structure: {specname}</h1>")
         # html += (f"<div>seed={self.indgen.seed}, num_simulate_traces={self.indgen.num_simulate_traces}</div>")
-        html += (self.root_to_html())
+        
+        # html += (self.root_to_html())
+        
         html += ("</div>")
         html += ("<div>") 
         # html += (f"<h2>Sample of {self.root.num_ctis_remaining()} Remaining CTIs for {self.root.expr}</h2>")      
@@ -2965,63 +2976,110 @@ class InductiveInvGen():
             quorumsSafeAtTerms
         ])
 
-        logEntryInTermImpliesSafeAtTerms = StructuredProofNode("LogEntryInTermImpliesSafeAtTerm", "H_LogEntryInTermImpliesSafeAtTerm", children = [        
-            quorumsSafeAtTerms
-        ])
+        logEntryInTermImpliesSafeAtTerms = StructuredProofNode("LogEntryInTermImpliesSafeAtTerm", "H_LogEntryInTermImpliesSafeAtTerm")
+        logEntryInTermImpliesSafeAtTerms.children = {    
+            "ClientRequest": [
+                quorumsSafeAtTerms
+            ]
+        }
 
         primaryHasEntriesItCreated = StructuredProofNode("PrimaryHasEntriesItCreated_A", "H_PrimaryHasEntriesItCreated")
-        primaryHasEntriesItCreated.children = [
-            lemmaTRUE,
-            # quorumsSafeAtTerms,
-            # onePrimaryPerTerm,
-            # logEntryInTermImpliesSafeAtTerms
-        ]
+        primaryHasEntriesItCreated.children = {
+            "GetEntriesAction":[
+                lemmaTRUE,
+                # quorumsSafeAtTerms,
+                # onePrimaryPerTerm,
+                # logEntryInTermImpliesSafeAtTerms
+            ]
+        }
         primaryHasEntriesItCreated.cti_view = "<<state, currentTerm, log>>"
         primaryHasEntriesItCreated.cti_project_vars = ["state", "currentTerm", "log"]
 
-        currentTermsAtLeastLargeAsLogTermsForPrimary =  StructuredProofNode("CurrentTermAtLeastAsLargeAsLogTermsForPrimary", "H_CurrentTermAtLeastAsLargeAsLogTermsForPrimary", children = [
+        currentTermsAtLeastLargeAsLogTermsForPrimary =  StructuredProofNode("CurrentTermAtLeastAsLargeAsLogTermsForPrimary", "H_CurrentTermAtLeastAsLargeAsLogTermsForPrimary")
+        currentTermsAtLeastLargeAsLogTermsForPrimary.children = {
+            "GetEntriesAction": [
                 logEntryInTermImpliesSafeAtTerms
-        ])
+            ]
+        }
 
-        termsGrowMonotonically = StructuredProofNode("TermsOfEntriesGrowMonotonically_A", "H_TermsOfEntriesGrowMonotonically", children = [
-            currentTermsAtLeastLargeAsLogTermsForPrimary
-        ])
+        termsGrowMonotonically = StructuredProofNode("TermsOfEntriesGrowMonotonically_A", "H_TermsOfEntriesGrowMonotonically")
+        termsGrowMonotonically.children = {
+            "ClientRequestAction": [
+                currentTermsAtLeastLargeAsLogTermsForPrimary
+            ]
+        }
 
-        logMatching = StructuredProofNode("LogMatching_Lemma", "LogMatching", children = [
-            primaryHasEntriesItCreated
-        ])
+        logMatching = StructuredProofNode("LogMatching_Lemma", "LogMatching", children = {
+            "ClientRequestAction":[primaryHasEntriesItCreated]
+        })
 
-        lemmaTRUEShim.children = [primaryHasEntriesItCreated]
+        lemmaTRUEShim.children = {
+            "UpdateTermsAction":[primaryHasEntriesItCreated]
+        }
 
-        uniformLogEntriesInTerm = StructuredProofNode("UniformLogEntriesInTerm_T3", "H_UniformLogEntriesInTerm", children = [
-            lemmaTRUEShim,
-            # logMatching,
-            # primaryHasEntriesItCreated
-        ])
+        uniformLogEntriesInTerm = StructuredProofNode("UniformLogEntriesInTerm", "H_UniformLogEntriesInTerm")
+        uniformLogEntriesInTerm.children = {
+            "GetEntriesAction": [
+                # lemmaTRUEShim,
+                logMatching
+            ],
+            "ClientRequestAction": [
+                primaryHasEntriesItCreated
+            ]
+        }
+
+        entriesCommittedInOwnTerm = StructuredProofNode("EntriesCommittedInOwnTerm_W", "H_EntriesCommittedInOwnTerm")
 
 
-        asr_children = [
-            StructuredProofNode("CommittedEntryExistsOnQuorum", "H_CommittedEntryExistsOnQuorum", children = [
-                lemmaTRUE,
+        primaryOrLogsLaterThanCommittedMustHaveEarlierCommitted = StructuredProofNode("PrimaryOrLogsLaterThanCommittedMustHaveEarlierCommitted", "H_PrimaryOrLogsLaterThanCommittedMustHaveEarlierCommitted")
+
+        committedEntryExistsOnQuorum = StructuredProofNode("CommittedEntryExistsOnQuorum", "H_CommittedEntryExistsOnQuorum")
+        committedEntryExistsOnQuorum.children = {
+            "RollbackEntriesAction":[
+                # lemmaTRUE,
                 # StructuredProofNode("LogsLaterThanCommittedMustHaveCommitted", "H_LogsLaterThanCommittedMustHaveCommitted", children = [lemmaTRUE]),
                 # StructuredProofNode("LeaderCompletenessLemma", "LeaderCompleteness", children = [lemmaTRUE])
-                StructuredProofNode("PrimaryOrLogsLaterThanCommittedMustHaveEarlierCommitted", "H_PrimaryOrLogsLaterThanCommittedMustHaveEarlierCommitted", children = [
-                    lemmaTRUE,
-                    # StructuredProofNode("CommittedEntryExistsOnQuorum_B", "H_CommittedEntryExistsOnQuorum"),
-                    termsGrowMonotonically,
-                    StructuredProofNode("EntriesCommittedInOwnTerm_W", "H_EntriesCommittedInOwnTerm"),
-                    uniformLogEntriesInTerm,
-                    # logEntryInTermImpliesSafeAtTerms
-                ]),
+                primaryOrLogsLaterThanCommittedMustHaveEarlierCommitted
 
                 # termsGrowMonotonically,
                 # StructuredProofNode("EntriesCommittedInOwnTerm_B", "H_EntriesCommittedInOwnTerm"),
                 # logEntryInTermImpliesSafeAtTerms,
                 # uniformLogEntriesInTerm
-            ]),
-        ]
+            ]
+        }
+    
+        # TODO: May need to figure out how to deal with cyclic dependency here.
+        primaryOrLogsLaterThanCommittedMustHaveEarlierCommitted.children = {
+            # "BecomeLeaderAction": [committedEntryExistsOnQuorum],
+            "BecomeLeaderAction": [],
+            "ClientRequestAction": [
+                # lemmaTRUE,
+                # StructuredProofNode("CommittedEntryExistsOnQuorum_B", "H_CommittedEntryExistsOnQuorum"),
+                entriesCommittedInOwnTerm,
+                termsGrowMonotonically,
+                uniformLogEntriesInTerm,
+                # logEntryInTermImpliesSafeAtTerms
+            ],
+            "CommitEntryAction": [
+                entriesCommittedInOwnTerm
+            ],
+            "GetEntriesAction": [
+                termsGrowMonotonically,
+                uniformLogEntriesInTerm
+            ]
+        }
+
+
+        asr_children = {
+            "CommitEntryAction": [
+                committedEntryExistsOnQuorum
+            ]
+        }
         asr_root = StructuredProofNode("Safety", safety, children = asr_children)
 
+        #
+        # Set the specified spec appropriately.
+        #
         root = None
         actions = None
         if self.specname == "TwoPhase":
@@ -3037,6 +3095,14 @@ class InductiveInvGen():
             ]
         elif self.specname == "AbstractStaticRaft":
             root = asr_root
+            actions = [
+                "ClientRequestAction",
+                "GetEntriesAction",
+                "RollbackEntriesAction",
+                "BecomeLeaderAction",
+                "CommitEntryAction",
+                "UpdateTermsActions",
+            ]
         else:
             logging.info("Unknown spec for proof structure: " + self.specname)
             return
