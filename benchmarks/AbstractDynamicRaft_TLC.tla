@@ -1,9 +1,9 @@
----- MODULE AbstractStaticRaft_TLC ----
+---- MODULE AbstractDynamicRaft_TLC ----
 \* 
 \* Separate spec for 'TypeOKRandom' and other TLC specific definitions
 \* to avoid clashes with  Apalache type checking.
 \* 
-EXTENDS AbstractStaticRaft, Randomization, FiniteSetsExt
+EXTENDS AbstractDynamicRaft, Randomization, FiniteSetsExt
 
 SeqOf(S, n) == UNION {[1..m -> S] : m \in 0..n}
 BoundedSeq(S, n) == SeqOf(S, n)
@@ -23,8 +23,21 @@ logCardinality == Cardinality(logRange) ^ Cardinality(logDomain)
 TypeOKRandom == 
     /\ currentTerm \in RandomSubset(5, [Server -> Terms])
     /\ state \in [Server -> {Secondary, Primary}]
-    /\ log \in RandomSubset(80, [logDomain -> logRange])
+    /\ log \in RandomSubset(10, [logDomain -> logRange])
     /\ immediatelyCommitted \in kOrSmallerSubset(2, (LogIndices \X Terms))
+    /\ config \in RandomSubset(10, [Server -> SUBSET Server])
+    /\ configVersion \in RandomSubset(5, [Server -> ConfigVersions])
+    /\ configTerm \in RandomSubset(5, [Server -> Terms])
+
+
+TypeOKRandomEmptyCommitted == 
+    /\ currentTerm \in RandomSubset(5, [Server -> Terms])
+    /\ state \in [Server -> {Secondary, Primary}]
+    /\ log \in RandomSubset(10, [logDomain -> logRange])
+    /\ immediatelyCommitted = {}
+    /\ config \in RandomSubset(10, [Server -> SUBSET Server])
+    /\ configVersion \in RandomSubset(5, [Server -> ConfigVersions])
+    /\ configTerm \in RandomSubset(5, [Server -> Terms])
 
 \* Old, randomized version.
 \* /\ committed \in RandomSetOfSubsets(kNumSubsets, nAvgSubsetSize, (LogIndices \X Terms \X Terms))

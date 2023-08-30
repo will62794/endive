@@ -37,7 +37,7 @@ VARIABLE
 
 VARIABLE
    \* @type: Set( <<Int, Int, Int>> );
-    committed
+    immediatelyCommitted
 
 \* Configuration related variables.
 VARIABLE configVersion
@@ -45,7 +45,7 @@ VARIABLE configTerm
 VARIABLE config
 
 
-vars == <<currentTerm, state, log, committed>>
+vars == <<currentTerm, state, log, immediatelyCommitted>>
 
 \*
 \* Helper operators.
@@ -75,8 +75,8 @@ Quorums(S) == {i \in SUBSET(S) : Cardinality(i) * 2 > Cardinality(S)}
 QuorumsOverlap(x, y) == \A qx \in Quorums(x), qy \in Quorums(y) : qx \cap qy # {}
 
 \* The min/max of a set of numbers.
-Min(s) == CHOOSE x \in s : \A y \in s : x <= y
-Max(s) == CHOOSE x \in s : \A y \in s : x >= y
+\* Min(s) == CHOOSE x \in s : \A y \in s : x <= y
+\* Max(s) == CHOOSE x \in s : \A y \in s : x >= y
 
 \* Is it possible for log 'i' to roll back against log 'j'. 
 \* If this is true, it implies that log 'i' should remove entries from the end of its log.
@@ -98,7 +98,7 @@ CanVoteForOplog(i, j, term) ==
     /\ currentTerm[i] < term
     /\ logOk
 
-\* Is a log entry 'e'=<<i, t>> immediately committed in term 't' with a quorum 'Q'.
+\* Is a log entry 'e'=<<i, t>> immediately immediatelyCommitted in term 't' with a quorum 'Q'.
 \* @type: (<<Int, Int>>, Set(SERVER)) => Bool;
 ImmediatelyCommitted(e, Q) == 
     LET eind == e[1] 
@@ -153,7 +153,7 @@ ConfigQuorumCheck(i) ==
 TermQuorumCheck(i) ==
     \E Q \in Quorums(config[i]) : \A t \in Q : currentTerm[t] = currentTerm[i]    
 
-\* Check whether the entry at "index" on "primary" is committed in the primary's current config.
+\* Check whether the entry at "index" on "primary" is immediatelyCommitted in the primary's current config.
 IsCommitted(index, primary) ==
     \* The primary must contain such an entry.
     /\ Len(log[primary]) >= index
@@ -167,22 +167,22 @@ IsCommitted(index, primary) ==
             /\ currentTerm[s] = currentTerm[primary]  \* they are in the same term.
 
 \*
-\* This is the precondition about committed oplog entries that must be satisfied
+\* This is the precondition about immediatelyCommitted oplog entries that must be satisfied
 \* on a primary server s in order for it to execute a reconfiguration.
 \*
 \* When a primary is first elected in term T, we can be sure that it contains
-\* all committed entries from terms < T. During its reign as primary in term T
+\* all immediatelyCommitted entries from terms < T. During its reign as primary in term T
 \* though, it needs to make sure that any entries it commits in its own term are
 \* correctly transferred to new configurations. That is, before leaving a
-\* configuration C, it must make sure that any entry it committed in T is now
-\* committed by the rules of configuration C i.e. it is "immediately committed"
+\* configuration C, it must make sure that any entry it immediatelyCommitted in T is now
+\* immediatelyCommitted by the rules of configuration C i.e. it is "immediately immediatelyCommitted"
 \* in C. That is, present on some quorum of servers in C that are in term T. 
 OplogCommitment(s) == 
-    \* The primary has committed at least one entry in its term, or, no entries
-    \* have been committed yet.
-    /\ (committed = {}) \/ (\E c \in committed : (c[2] = currentTerm[s]))
-    \* All entries committed in the primary's term are committed in its current config.
-    /\ \A c \in committed : (c[2] = currentTerm[s]) => IsCommitted(c[1], s)
+    \* The primary has immediatelyCommitted at least one entry in its term, or, no entries
+    \* have been immediatelyCommitted yet.
+    /\ (immediatelyCommitted = {}) \/ (\E c \in immediatelyCommitted : (c[2] = currentTerm[s]))
+    \* All entries immediatelyCommitted in the primary's term are immediatelyCommitted in its current config.
+    /\ \A c \in immediatelyCommitted : (c[2] = currentTerm[s]) => IsCommitted(c[1], s)
 
 --------------------------------------------------------------------------------
 
@@ -195,7 +195,7 @@ OplogCommitment(s) ==
 ClientRequest(i) ==
     /\ state[i] = Primary
     /\ log' = [log EXCEPT ![i] = Append(log[i], currentTerm[i])]
-    /\ UNCHANGED <<currentTerm, state, committed, config, configVersion, configTerm>>
+    /\ UNCHANGED <<currentTerm, state, immediatelyCommitted, config, configVersion, configTerm>>
 
 \* Node 'i' gets a new log entry from node 'j'.
 GetEntries(i, j) ==
@@ -215,7 +215,7 @@ GetEntries(i, j) ==
               newEntry      == log[j][newEntryIndex]
               newLog        == Append(log[i], newEntry) IN
               /\ log' = [log EXCEPT ![i] = newLog]
-    /\ UNCHANGED <<committed, currentTerm, state, config, configVersion, configTerm>>
+    /\ UNCHANGED <<immediatelyCommitted, currentTerm, state, config, configVersion, configTerm>>
 
 \*  Node 'i' rolls back against the log of node 'j'.  
 RollbackEntries(i, j) ==
@@ -223,7 +223,7 @@ RollbackEntries(i, j) ==
     /\ CanRollback(i, j)
     \* Roll back one log entry.
     /\ log' = [log EXCEPT ![i] = SubSeq(log[i], 1, Len(log[i])-1)]
-    /\ UNCHANGED <<committed, currentTerm, state, config, configVersion, configTerm>>
+    /\ UNCHANGED <<immediatelyCommitted, currentTerm, state, config, configVersion, configTerm>>
 
 \* Node 'i' gets elected as a primary.
 BecomeLeader(i, voteQuorum) == 
@@ -241,7 +241,7 @@ BecomeLeader(i, voteQuorum) ==
                     ELSE state[s]]
     \* Update config's term upon becoming primary.
     /\ configTerm' = [configTerm EXCEPT ![i] = newTerm]
-    /\ UNCHANGED <<log, committed, config, configVersion>>   
+    /\ UNCHANGED <<log, immediatelyCommitted, config, configVersion>>   
             
 \* Primary 'i' commits its latest log entry.
 CommitEntry(i, commitQuorum) ==
@@ -254,9 +254,9 @@ CommitEntry(i, commitQuorum) ==
     /\ log[i][ind] = currentTerm[i]
     \* all nodes have this log entry and are in the term of the leader.
     /\ ImmediatelyCommitted(<<ind,currentTerm[i]>>, commitQuorum)
-    \* Don't mark an entry as committed more than once.
-    /\ ~\E c \in committed : c[1] = ind /\ c[2] = currentTerm[i] 
-    /\ committed' = committed \cup {<<ind, currentTerm[i], currentTerm[i]>>}
+    \* Don't mark an entry as immediatelyCommitted more than once.
+    /\ ~\E c \in immediatelyCommitted : c[1] = ind /\ c[2] = currentTerm[i] 
+    /\ immediatelyCommitted' = immediatelyCommitted \cup {<<ind, currentTerm[i]>>}
     /\ UNCHANGED <<currentTerm, state, log, config, configVersion, configTerm>>
 
 \* Action that exchanges terms between two nodes and step down the primary if
@@ -266,7 +266,7 @@ CommitEntry(i, commitQuorum) ==
 \* strictly necessary for guaranteeing safety.
 UpdateTerms(i, j) == 
     /\ UpdateTermsExpr(i, j)
-    /\ UNCHANGED <<log, committed, config, configVersion, configTerm>>
+    /\ UNCHANGED <<log, immediatelyCommitted, config, configVersion, configTerm>>
 
 
 \* A reconfig occurs on node i. The node must currently be a leader.
@@ -280,7 +280,7 @@ Reconfig(i, newConfig) ==
     /\ configTerm' = [configTerm EXCEPT ![i] = currentTerm[i]]
     /\ configVersion' = [configVersion EXCEPT ![i] = configVersion[i] + 1]
     /\ config' = [config EXCEPT ![i] = newConfig]
-    /\ UNCHANGED <<currentTerm, state, log, committed>>
+    /\ UNCHANGED <<currentTerm, state, log, immediatelyCommitted>>
 
 \* Node i sends its current config to node j.
 SendConfig(i, j) ==
@@ -289,16 +289,16 @@ SendConfig(i, j) ==
     /\ configVersion' = [configVersion EXCEPT ![j] = configVersion[i]]
     /\ configTerm' = [configTerm EXCEPT ![j] = configTerm[i]]
     /\ config' = [config EXCEPT ![j] = config[i]]
-    /\ UNCHANGED <<currentTerm, state, log, committed>>
+    /\ UNCHANGED <<currentTerm, state, log, immediatelyCommitted>>
 
 
 Init == 
     /\ currentTerm = [i \in Server |-> InitTerm]
     /\ state       = [i \in Server |-> Secondary]
     /\ log = [i \in Server |-> <<>>]
-    /\ committed = {}
+    /\ immediatelyCommitted = {}
     /\ configVersion =  [i \in Server |-> 1]
-    /\ configTerm    =  [i \in Server |-> 0]
+    /\ configTerm    =  [i \in Server |-> InitTerm]
     /\ \E initConfig \in SUBSET Server :
         /\ initConfig # {}
         /\ config = [i \in Server |-> initConfig]
@@ -346,14 +346,14 @@ LogMatching ==
         (\E j \in DOMAIN log[t] : i = j /\ log[s][i] = log[t][j]) => 
         (SubSeq(log[s],1,i) = SubSeq(log[t],1,i)) \* prefixes must be the same.
 
-\* When a node gets elected as primary it contains all entries committed in previous terms.
+\* When a node gets elected as primary it contains all entries immediatelyCommitted in previous terms.
 LeaderCompleteness == 
     \A s \in Server : (state[s] = Primary) => 
-        \A c \in committed : (c[3] < currentTerm[s] => InLog(<<c[1],c[2]>>, s))
+        \A c \in immediatelyCommitted : (c[3] < currentTerm[s] => InLog(<<c[1],c[2]>>, s))
 
-\* \* If two entries are committed at the same index, they must be the same entry.
+\* \* If two entries are immediatelyCommitted at the same index, they must be the same entry.
 StateMachineSafety == 
-    \A c1, c2 \in committed : (c1[1] = c2[1]) => (c1 = c2)
+    \A c1, c2 \in immediatelyCommitted : (c1[1] = c2[1]) => (c1 = c2)
 
 --------------------------------------------------------------------------------
 
@@ -375,6 +375,7 @@ Symmetry == Permutations(Server)
 
 Terms == InitTerm..MaxTerm
 LogIndices == 1..MaxLogLen
+ConfigVersions == 1..MaxConfigVersion
 
 \* Statement of type correctness.
 TypeOK ==
@@ -386,10 +387,10 @@ TypeOK ==
     /\ DOMAIN log = Server
     \* I believe this should constraint 'committed' to be a set of size 3,
     \* with elements of the appropriate type.
-    /\ committed = Gen(3)
-    /\ \A c \in committed : c \in (LogIndices \X Terms \X Terms)
+    /\ immediatelyCommitted = Gen(3)
+    /\ \A c \in immediatelyCommitted : c \in (LogIndices \X Terms \X Terms)
     
-\* /\ committed \in SUBSET (LogIndices \X Terms \X Terms)
+\* /\ immediatelyCommitted \in SUBSET (LogIndices \X Terms \X Terms)
 
 CInit == 
     /\ Primary = "Primary"
@@ -417,14 +418,14 @@ H_PrimaryTermAtLeastAsLargeAsLogTerms ==
         \A i \in DOMAIN log[s] : currentTerm[s] >= log[s][i]
 
 H_CommittedEntryExistsOnQuorum == 
-    \A c \in committed :
+    \A c \in immediatelyCommitted :
         \E Q \in Quorums(Server) : \A n \in Q : InLog(<<c[1],c[2]>>, n)  
 
 H_EntriesCommittedInOwnOrLaterTerm == 
-    \A c \in committed : c[3] >= c[2] 
+    \A c \in immediatelyCommitted : c[3] >= c[2] 
 
 H_EntriesCommittedInOwnTerm == 
-    \A c \in committed : c[3] = c[2] 
+    \A c \in immediatelyCommitted : c[3] = c[2] 
 
 \* Existence of an entry in term T implies a past election in T, so 
 \* there must be some quorum at this term or greater.
@@ -433,26 +434,26 @@ H_LogEntryInTermImpliesSafeAtTerm ==
     \A i \in DOMAIN log[s] :
         \E Q \in Quorums(Server) : \A n \in Q : currentTerm[n] >= log[s][i]
 
-\* If a server's latest log term exceeds a committed entry c's term, then it must contain that 
-\* committed entry in its log.
+\* If a server's latest log term exceeds a immediatelyCommitted entry c's term, then it must contain that 
+\* immediatelyCommitted entry in its log.
 H_LogsLaterThanCommittedMustHaveCommitted ==
     \A s \in Server : 
-    \A c \in committed :
-        \* Exists an entry in log[s] with a term greater than the term in which the entry was committed.
+    \A c \in immediatelyCommitted :
+        \* Exists an entry in log[s] with a term greater than the term in which the entry was immediatelyCommitted.
         (\E i \in DOMAIN log[s] : (log[s][i] > c[3]) \/ (log[s][i] > c[2])) =>
             /\ Len(log[s]) >= c[1]
             /\ log[s][c[1]] = c[2] \* entry exists in the server's log.
 
-\* If a server's latest log term exceeds a committed entry c's term, then it must contain that 
-\* committed entry in its log. Also, primary logs must contain entries committed in earlier terms.
+\* If a server's latest log term exceeds a immediatelyCommitted entry c's term, then it must contain that 
+\* immediatelyCommitted entry in its log. Also, primary logs must contain entries immediatelyCommitted in earlier terms.
 H_PrimaryOrLogsLaterThanCommittedMustHaveEarlierCommitted ==
     /\ H_LogsLaterThanCommittedMustHaveCommitted
     /\ LeaderCompleteness
 
 H_LogsWithEntryInTermMustHaveEarlierCommittedEntriesFromTerm ==
     \A s \in Server : 
-    \A c \in committed :
-        \* Exists an entry with same term as the committed entry. 
+    \A c \in immediatelyCommitted :
+        \* Exists an entry with same term as the immediatelyCommitted entry. 
         (\E i \in DOMAIN log[s] : log[s][i] = c[3] /\ i >= c[1]) =>
                     /\ Len(log[s]) >= c[1]
                     /\ log[s][c[1]] = c[2]

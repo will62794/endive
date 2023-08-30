@@ -1879,6 +1879,22 @@ class InductiveInvGen():
         return (parsed_ctis,parsed_cti_traces)       
 
 
+    def generate_ctis_tlc_run_await_subprocs(self, subprocs, actions=None, all_ctis=set()):
+        for cti_subproc in subprocs:
+            if self.use_apalache_ctigen:
+                parsed_ctis = self.generate_ctis_apalache_run_await(cti_subproc)
+            else:
+                if actions is not None:
+                    action = cti_subproc["action"]
+                    logging.info(f"Waiting for CTI generation process termination (action={action})")
+                    (parsed_ctis, parsed_cti_traces) = self.generate_ctis_tlc_run_await(cti_subproc["proc"]) 
+                    all_ctis[action] = parsed_ctis
+                    # all_cti_traces[action] = parsed_cti_traces
+                else:
+                    (parsed_ctis, parsed_cti_traces) = self.generate_ctis_tlc_run_await(cti_subproc["proc"]) 
+                    all_ctis = all_ctis.union(parsed_ctis)
+                    # all_cti_traces += parsed_cti_traces
+
     def generate_ctis(self, props=None, reseed=False, depth=None, view=None, actions=None):
         """ Generate CTIs for use in counterexample elimination. """
 
@@ -1905,17 +1921,34 @@ class InductiveInvGen():
         cti_subprocs = []
         num_traces_per_tlc_instance = self.num_simulate_traces // num_cti_worker_procs
 
+        # Break down CTIs by action in this case.
+        if actions is not None:
+            all_ctis = {}
+            all_cti_traces = {}
+
         # Start the TLC processes for CTI generation.
         logging.info(f"Running {num_cti_worker_procs} parallel CTI generation processes")
         for n in range(num_cti_worker_procs):
             # if self.use_apalache_ctigen:
                 # cti_subproc = self.generate_ctis_apalache_run_async(num_traces_per_tlc_instance)
             # else:
+            MAX_CONCURRENT_PROCS = 3
             if actions is not None:
+                actions_started = 0
+                curr_proc_batch = []
                 for action in actions:
                     logging.info(f"Starting CTI generation process {n} (of {num_cti_worker_procs} total workers), Action='{action}'")
                     cti_subproc = self.generate_ctis_tlc_run_async(num_traces_per_tlc_instance,props=props, depth=depth, view=view, action=action)
-                    cti_subprocs.append({"action": action, "proc": cti_subproc})
+                    proc_obj = {"action": action, "proc": cti_subproc}
+                    cti_subprocs.append(proc_obj)
+                    actions_started += 1
+                    curr_proc_batch.append(proc_obj)
+                    # Limit the number of concurrent procs running.
+                    if actions_started % MAX_CONCURRENT_PROCS == 0 or (actions_started == len(actions) and len(curr_proc_batch)):
+                        logging.info(f"Launched {actions_started} total CTI procs, awaiting previous to complete.")
+                        self.generate_ctis_tlc_run_await_subprocs(curr_proc_batch, actions=actions, all_ctis=all_ctis)
+                        curr_proc_batch = []
+
             else:
                 logging.info(f"Starting CTI generation process {n} (of {num_cti_worker_procs} total workers)")
                 cti_subproc = self.generate_ctis_tlc_run_async(num_traces_per_tlc_instance,props=props, depth=depth, view=view)
@@ -1924,24 +1957,25 @@ class InductiveInvGen():
         # Await completion and parse results.
         all_cti_traces = []
 
-        # Break down CTIs by action in this case.
-        if actions is not None:
-            all_ctis = {}
-            all_cti_traces = {}
+        # self.generate_ctis_tlc_run_await_subprocs(cti_subprocs, actions=actions, all_ctis=all_ctis)
 
+
+        """
         for cti_subproc in cti_subprocs:
             if self.use_apalache_ctigen:
                 parsed_ctis = self.generate_ctis_apalache_run_await(cti_subproc)
             else:
                 if actions is not None:
                     action = cti_subproc["action"]
+                    logging.info(f"Waiting for CTI generation process termination (action={action})")
                     (parsed_ctis, parsed_cti_traces) = self.generate_ctis_tlc_run_await(cti_subproc["proc"]) 
                     all_ctis[action] = parsed_ctis
-                    all_cti_traces[action] = parsed_cti_traces
+                    # all_cti_traces[action] = parsed_cti_traces
                 else:
                     (parsed_ctis, parsed_cti_traces) = self.generate_ctis_tlc_run_await(cti_subproc["proc"]) 
                     all_ctis = all_ctis.union(parsed_ctis)
-                    all_cti_traces += parsed_cti_traces
+                    # all_cti_traces += parsed_cti_traces
+        """
 
         # print("ALL CTIS")
         # defs = ""
@@ -3122,6 +3156,18 @@ class InductiveInvGen():
         }
         asr_root = StructuredProofNode("Safety", safety, children = asr_children)
 
+
+
+        adr_children = {
+            "CommitEntryAction": [
+                committedEntryExistsOnQuorum
+            ]
+        }
+
+        # AbstractDynamicRaft proof structure.
+        adr_root = StructuredProofNode("Safety", safety, children = adr_children)
+
+
         #
         # Set the specified spec appropriately.
         #
@@ -3147,6 +3193,18 @@ class InductiveInvGen():
                 "BecomeLeaderAction",
                 "CommitEntryAction",
                 "UpdateTermsActions",
+            ]
+        elif self.specname == "AbstractDynamicRaft":
+            root = adr_root
+            actions = [
+                "ClientRequestAction",
+                "GetEntriesAction",
+                "RollbackEntriesAction",
+                "BecomeLeaderAction",
+                "CommitEntryAction",
+                "UpdateTermsActions",
+                "ReconfigAction",
+                "SendConfigAction"
             ]
         else:
             logging.info("Unknown spec for proof structure: " + self.specname)
