@@ -23,8 +23,8 @@ logCardinality == Cardinality(logRange) ^ Cardinality(logDomain)
 TypeOKRandom == 
     /\ currentTerm \in RandomSubset(5, [Server -> Terms])
     /\ state \in [Server -> {Secondary, Primary}]
-    /\ log \in RandomSubset(160, [logDomain -> logRange])
-    /\ committed \in kOrSmallerSubset(1, (LogIndices \X Terms \X Terms))
+    /\ log \in RandomSubset(80, [logDomain -> logRange])
+    /\ committed \in kOrSmallerSubset(2, (LogIndices \X Terms \X Terms))
 
 \* Old, randomized version.
 \* /\ committed \in RandomSetOfSubsets(kNumSubsets, nAvgSubsetSize, (LogIndices \X Terms \X Terms))

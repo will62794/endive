@@ -165,6 +165,12 @@ function focusOnNode(nodeId, nodeData){
                 // cti_id = data["cti_clusters"][cluster_name][0]
                 // cti_obj = cti_table[cti_id];
                 cti_obj = ctis_for_action[0];
+                // console.log(cti_obj);
+                // console.log(ctis_remaining);
+
+                if(ctis_remaining && ctis_remaining.length > 0){
+                    cti_obj = ctis_remaining[0];
+                }
 
                 // If all CTIs from this cluster are eliminated, then continue.
                 // if(cluster_cti_ids.every(cid => data["ctis_eliminated"].includes(cid))){
@@ -183,7 +189,7 @@ function focusOnNode(nodeId, nodeData){
                     ctidiv.innerHTML += `<h4>CTI State ${i}</h4>`;
                     ctidiv.innerHTML += "<pre>";
                     let lineI = 0;
-                    console.log(cti_obj);
+                    // console.log(cti_obj);
                     for(const line of state["state_lines"]){
                         if(data["project_vars"] !== null && data["project_vars"].every(x => !line.includes(x))){
                             continue;
@@ -273,7 +279,7 @@ function addNodesToGraph(proof_graph, node){
             },
             style: {
                 "background-color": "#eee",
-                "shape": "rectangle", 
+                "shape": "round-rectangle", 
                 // "width": "100px", 
                 // "height": 200
             },

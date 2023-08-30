@@ -297,6 +297,10 @@ H_CommittedEntryExistsOnQuorum ==
     \A c \in committed :
         \E Q \in Quorums(Server) : \A n \in Q : InLog(<<c[1],c[2]>>, n)  
 
+H_CommittedEntryExistsOnQuorum_cyclebreak == 
+    \A c \in committed :
+        \E Q \in Quorums(Server) : \A n \in Q : InLog(<<c[1],c[2]>>, n)
+
 H_EntriesCommittedInOwnOrLaterTerm == 
     \A c \in committed : c[3] >= c[2] 
 
