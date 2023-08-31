@@ -3117,7 +3117,7 @@ class InductiveInvGen():
             "BecomeLeaderAction": [
                 termsGrowMonotonically,
                 uniformLogEntriesInTerm,
-                logEntryInTermImpliesSafeAtTerms,
+                # logEntryInTermImpliesSafeAtTerms,
                 committedEntryExistsOnQuorum_cycleBreak
             ],
             "ClientRequestAction": [
