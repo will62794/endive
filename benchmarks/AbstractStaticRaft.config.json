@@ -22,7 +22,7 @@
         "Server = {n1,n2,n3}",
         "Secondary = Secondary",
         "Primary = Primary",
-        "MaxLogLen = 2",
+        "MaxLogLen = 3",
         "MaxTerm = 2",
         "InitTerm = 0",
         "n1 = n1",

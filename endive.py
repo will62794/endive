@@ -2450,6 +2450,7 @@ class InductiveInvGen():
 
             curr_ind += MAX_INVS_PER_GROUP
         # Return various CTI info.
+        # print("CTI costs:", cti_costs)
         return {
             "eliminated": cti_states_eliminated_by_invs,
             "cost": cti_costs
@@ -3061,14 +3062,18 @@ class InductiveInvGen():
         termsGrowMonotonically = StructuredProofNode("TermsOfEntriesGrowMonotonically", "H_TermsOfEntriesGrowMonotonically")
         termsGrowMonotonically.children = {
             "ClientRequestAction": [
-                currentTermsAtLeastLargeAsLogTermsForPrimary
+                lemmaTRUE,
+                # currentTermsAtLeastLargeAsLogTermsForPrimary
             ]
         }
         termsGrowMonotonically.ctigen_typeok = "TypeOKRandomEmptyCommitted"
 
 
         logMatching = StructuredProofNode("LogMatching_Lemma", "LogMatching", children = {
-            "ClientRequestAction":[primaryHasEntriesItCreated]
+            "ClientRequestAction":[
+                lemmaTRUE,
+                # primaryHasEntriesItCreated
+            ]
         })
 
         lemmaTRUEShim.children = {
@@ -3099,14 +3104,13 @@ class InductiveInvGen():
         committedEntryExistsOnQuorum.children = {
             "RollbackEntriesAction":[
                 # lemmaTRUE,
+                logsLaterThanCommittedMustHaveCommitted
+                # primaryOrLogsLaterThanCommittedMustHaveEarlierCommitted
+
                 # StructuredProofNode("LogsLaterThanCommittedMustHaveCommitted", "H_LogsLaterThanCommittedMustHaveCommitted", children = [lemmaTRUE]),
                 # StructuredProofNode("LeaderCompletenessLemma", "LeaderCompleteness", children = [lemmaTRUE])
                 # primaryOrLogsLaterThanCommittedMustHaveEarlierCommitted,
-
                 # logsLaterThanCommittedMustHaveCommitted,
-
-                primaryOrLogsLaterThanCommittedMustHaveEarlierCommitted
-
                 # leaderCompleteness
             ]
         }
@@ -3125,24 +3129,25 @@ class InductiveInvGen():
         # TODO: May need to figure out how to deal with cyclic dependency here.
         primaryOrLogsLaterThanCommittedMustHaveEarlierCommitted.children = {
             "BecomeLeaderAction": [
-                termsGrowMonotonically,
-                uniformLogEntriesInTerm,
-                committedEntryExistsOnQuorum_cycleBreak
+                # termsGrowMonotonically,
+                # uniformLogEntriesInTerm,
+                # committedEntryExistsOnQuorum_cycleBreak
                 # logEntryInTermImpliesSafeAtTerms,
             ],
             "ClientRequestAction": [
-                termsGrowMonotonically,
-                uniformLogEntriesInTerm,
+                # termsGrowMonotonically,
+                # uniformLogEntriesInTerm,
             ],
             "CommitEntryAction": [
-                logEntryInTermImpliesSafeAtTerms,
-                quorumsSafeAtTerms
+                # logEntryInTermImpliesSafeAtTerms,
+                # quorumsSafeAtTerms
                 # termsGrowMonotonically,
                 # primaryHasEntriesItCreated,
             ],
             "GetEntriesAction": [
-                termsGrowMonotonically,
-                uniformLogEntriesInTerm
+                lemmaTRUE
+                # termsGrowMonotonically,
+                # uniformLogEntriesInTerm
             ]
         }
 
@@ -3172,47 +3177,49 @@ class InductiveInvGen():
 
         logsLaterThanCommittedMustHaveCommitted.children = {
             "ClientRequestAction": [
+                # lemmaTRUE,
                 leaderCompleteness,
 
             ],
             "CommitEntryAction": [
-                leaderCompleteness,
-                termsGrowMonotonically,
-                primaryHasEntriesItCreated,
+                # lemmaTRUE,
+                # leaderCompleteness,
+                # termsGrowMonotonically,
+                # primaryHasEntriesItCreated,
                 logEntryInTermImpliesSafeAtTerms
             ],
             "GetEntriesAction": [
+                # lemmaTRUE,
+                logMatching,
                 termsGrowMonotonically,
-                uniformLogEntriesInTerm,
-                logEntryInTermImpliesSafeAtTerms,
+                # uniformLogEntriesInTerm,
+                # logEntryInTermImpliesSafeAtTerms,
             ]
         }
 
         leaderCompleteness.children = {
             "BecomeLeaderAction": [
-                termsGrowMonotonically,
-                uniformLogEntriesInTerm,
-                logEntryInTermImpliesSafeAtTerms,
-                # TODO: Will need to deal with cycle recursion issue here properly.
-                committedEntryExistsOnQuorum_cycleBreak
-            ],
-            "ClientRequestAction": [
-                termsGrowMonotonically,
-                uniformLogEntriesInTerm,
+                lemmaTRUE,
+                # termsGrowMonotonically,
+                # uniformLogEntriesInTerm,
+                # logEntryInTermImpliesSafeAtTerms,
+                # # TODO: Will need to deal with cycle recursion issue here properly.
+                committedEntryExistsOnQuorum_cycleBreak,
             ],
             "CommitEntryAction": [
-                termsGrowMonotonically,
-                quorumsSafeAtTerms
+                # termsGrowMonotonically,
+                # quorumsSafeAtTerms
             ],
         }
 
 
         asr_children = {
             "CommitEntryAction": [
+                # lemmaTRUE
                 committedEntryExistsOnQuorum
             ]
         }
-        asr_root = StructuredProofNode("Safety", safety, children = asr_children)
+        asr_root = StructuredProofNode("StateMachineSafety_Lemma", safety, children = asr_children)
 
 
 

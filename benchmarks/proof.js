@@ -189,15 +189,15 @@ function focusOnNode(nodeId, nodeData){
                 // cti_id = data["cti_clusters"][cluster_name][0]
                 // cti_obj = cti_table[cti_id];
                 cti_obj = ctis_for_action[0];
-                console.log(ctis_for_action);
+                console.log("CTIs for action:", ctis_for_action);
 
-                cti_obj = _.sortBy(ctis_for_action, 'cost')[0];
+                cti_obj = _.sortBy(ctis_for_action, "cost")[0];
 
                 // console.log(cti_obj);
                 // console.log(ctis_remaining);
 
                 if(ctis_remaining && ctis_remaining.length > 0){
-                    cti_obj = ctis_remaining[0];
+                    cti_obj = _.sortBy(ctis_remaining, "cost")[0];
                 } else{
                     return;
                 }
@@ -224,7 +224,8 @@ function focusOnNode(nodeId, nodeData){
                         if(data["project_vars"] !== null && data["project_vars"].every(x => !line.includes(x))){
                             continue;
                         }
-                        let isDiff = i==1 && (cti_obj["trace"][0]["state_lines"][lineI] !== line);
+                        let prevLine = cti_obj["trace"][0]["state_lines"][lineI];
+                        let isDiff = i==1 && (prevLine !== line);
                         let color = isDiff ? "blue" : "black";
                         ctidiv.innerHTML += `<span style='color:${color}'>` + line + "</span><br>";
                         lineI += 1;
