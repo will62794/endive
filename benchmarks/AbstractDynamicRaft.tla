@@ -47,6 +47,9 @@ VARIABLE config
 
 vars == <<currentTerm, state, log, immediatelyCommitted>>
 
+\* The set of all allowed config sets.
+AllConfigs == SUBSET Server
+
 \*
 \* Helper operators.
 \*
@@ -299,7 +302,7 @@ Init ==
     /\ immediatelyCommitted = {}
     /\ configVersion =  [i \in Server |-> 1]
     /\ configTerm    =  [i \in Server |-> InitTerm]
-    /\ \E initConfig \in SUBSET Server :
+    /\ \E initConfig \in AllConfigs :
         /\ initConfig # {}
         /\ config = [i \in Server |-> initConfig]
 
@@ -309,7 +312,7 @@ RollbackEntriesAction == \E s, t \in Server : RollbackEntries(s, t)
 BecomeLeaderAction == \E s \in Server : \E Q \in Quorums(config[s]) :  BecomeLeader(s, Q)
 CommitEntryAction ==  \E s \in Server :  \E Q \in Quorums(config[s]) : CommitEntry(s, Q)
 UpdateTermsActions == \E s,t \in Server : UpdateTerms(s, t)
-ReconfigAction == \E s \in Server, newConfig \in SUBSET Server : Reconfig(s, newConfig)
+ReconfigAction == \E s \in Server, newConfig \in AllConfigs : Reconfig(s, newConfig)
 SendConfigAction == \E s,t \in Server : SendConfig(s, t)
 
 Next == 
