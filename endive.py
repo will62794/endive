@@ -3127,18 +3127,18 @@ class InductiveInvGen():
             "BecomeLeaderAction": [
                 termsGrowMonotonically,
                 uniformLogEntriesInTerm,
-                # logEntryInTermImpliesSafeAtTerms,
                 committedEntryExistsOnQuorum_cycleBreak
+                # logEntryInTermImpliesSafeAtTerms,
             ],
             "ClientRequestAction": [
                 termsGrowMonotonically,
                 uniformLogEntriesInTerm,
             ],
             "CommitEntryAction": [
-                # termsGrowMonotonically,
-                # primaryHasEntriesItCreated,
                 logEntryInTermImpliesSafeAtTerms,
                 quorumsSafeAtTerms
+                # termsGrowMonotonically,
+                # primaryHasEntriesItCreated,
             ],
             "GetEntriesAction": [
                 termsGrowMonotonically,
