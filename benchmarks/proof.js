@@ -6,7 +6,7 @@ cy = null;
 let addedNodes = [];
 let addedEdges = [];
 
-let awaitPollIntervalMS = 1000;
+let awaitPollIntervalMS = 2000;
 
 cytoscape.warnings(false);
 
@@ -141,6 +141,25 @@ function focusOnNode(nodeId, nodeData){
             for(const action in data["ctis"]){
                 ctis = ctis.concat(data["ctis"][action]);
                 ctis_eliminated = ctis_eliminated.concat(data["ctis_eliminated"][action]);
+
+
+            }
+
+            // Computing CTIs uniquely eliminated by each action.
+            // TODO: Sort this out.
+            for(const action in data["ctis"]){
+                ctis_for_other_actions = [];
+                for(const otherAction in data["ctis"]){
+                    if(otherAction !== action){
+                        ctis_for_other_actions = ctis_for_other_actions.concat(data["ctis"][otherAction].map(c => c["hashId"]));
+                    }
+                }
+
+                // console.log("CTIs for other actions:", ctis_for_other_actions);
+
+                // CTIs unique to this action.
+                action_unique_ctis = data["ctis"][action].map(c => c["hashId"]).filter(c => !ctis_for_other_actions.includes(c));
+                console.log(`Found ${action_unique_ctis.length} unique CTIs for action ${action}.`);
             }
 
             ctis_for_action = ctis;
@@ -170,6 +189,10 @@ function focusOnNode(nodeId, nodeData){
                 // cti_id = data["cti_clusters"][cluster_name][0]
                 // cti_obj = cti_table[cti_id];
                 cti_obj = ctis_for_action[0];
+                console.log(ctis_for_action);
+
+                cti_obj = _.sortBy(ctis_for_action, 'cost')[0];
+
                 // console.log(cti_obj);
                 // console.log(ctis_remaining);
 
@@ -417,7 +440,7 @@ function addEdgesToGraph(proof_graph, node){
                     }, 
                     style: {
                         "target-arrow-shape": "triangle",
-                        "arrow-scale":2.1,
+                        "arrow-scale": 2.0,
                         "line-color": "steelblue",
                         "target-arrow-color": "steelblue"
                     }
@@ -469,9 +492,9 @@ function reloadProofGraph(){
         addEdgesToGraph(proof_graph, root);
 
         cy.edges('edge').style({
-            // "curve-style": "unbundled-bezier",
+            "curve-style": "straight",
             // "line-color": "steelblue",
-            // "target-arrow-color": "steelblue"
+            "target-arrow-shape": "triangle"
         })
 
         // let layout = cy.layout({name:"cose"});

@@ -266,7 +266,7 @@ TypeOK ==
     \* I believe this should constraint 'committed' to be a set of size 3,
     \* with elements of the appropriate type.
     /\ immediatelyCommitted = Gen(3)
-    /\ \A c \in immediatelyCommitted : c \in (LogIndices \X Terms \X Terms)
+    /\ \A c \in immediatelyCommitted : c \in (LogIndices \X Terms)
     
 \* /\ committed \in SUBSET (LogIndices \X Terms \X Terms)
 
@@ -372,6 +372,10 @@ H_CommittedEntryExistsOnQuorum_AND_LogsLaterThanCommittedMustHaveCommitted_AND_L
     /\ LeaderCompleteness
     /\ H_CommittedEntryExistsOnQuorum
     /\ H_LogsLaterThanCommittedMustHaveCommitted
+
+H_UniformLogEntriesInTerm_AND_TermsOfEntriesGrowMonotonically == 
+    /\ H_UniformLogEntriesInTerm
+    /\ H_TermsOfEntriesGrowMonotonically
 
 \* Invariant developed during inductive proof decomposition experimenting.
 \* 08/19/2023

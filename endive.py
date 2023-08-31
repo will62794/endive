@@ -657,6 +657,7 @@ class StructuredProof():
         <script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.20.0/cytoscape.min.js" integrity="sha512-cjmYAonfXK+azDmWqvnqq8xmygHRHqVI7S0zuRxQnvcYVeoakwthRX6pPKoXfG1oIjDvMUtteRV9PhQjJwKWxQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
         <script src="https://unpkg.com/dagre@0.7.4/dist/dagre.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/cytoscape-dagre@2.5.0/cytoscape-dagre.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/underscore@1.13.6/underscore-umd-min.js"></script>
         """
 
         html += ('<script type="text/javascript" src="proof.js"></script>')
@@ -3110,6 +3111,15 @@ class InductiveInvGen():
             ]
         }
 
+        coreLogInv = StructuredProofNode("CoreLogInv", "H_UniformLogEntriesInTerm_AND_TermsOfEntriesGrowMonotonically")
+        coreLogInv.children = {
+            "ClientRequestAction": [
+                logMatching,
+                primaryHasEntriesItCreated,
+                currentTermsAtLeastLargeAsLogTermsForPrimary
+            ]
+        }
+
         committedEntryExistsOnQuorum_cycleBreak = StructuredProofNode("CommittedEntryExistsOnQuorum_cycleBreak", "H_CommittedEntryExistsOnQuorum_cyclebreak")
     
         # TODO: May need to figure out how to deal with cyclic dependency here.
@@ -3125,15 +3135,39 @@ class InductiveInvGen():
                 uniformLogEntriesInTerm,
             ],
             "CommitEntryAction": [
-                termsGrowMonotonically,
-                primaryHasEntriesItCreated,
-                logEntryInTermImpliesSafeAtTerms
+                # termsGrowMonotonically,
+                # primaryHasEntriesItCreated,
+                logEntryInTermImpliesSafeAtTerms,
+                quorumsSafeAtTerms
             ],
             "GetEntriesAction": [
                 termsGrowMonotonically,
                 uniformLogEntriesInTerm
             ]
         }
+
+        # Alternate proof structure that condense 'UniformLogEntries' and 'TermsGrowMonotonically' into a single,
+        # central proof node.
+        alt_children = {
+            "BecomeLeaderAction": [
+                coreLogInv,
+                committedEntryExistsOnQuorum_cycleBreak,
+            ],
+            "ClientRequestAction": [
+                coreLogInv
+            ],
+            "CommitEntryAction": [
+                # termsGrowMonotonically,
+                # primaryHasEntriesItCreated,
+                logEntryInTermImpliesSafeAtTerms,
+                quorumsSafeAtTerms
+            ],
+            "GetEntriesAction": [
+                coreLogInv
+            ]
+        }
+        # primaryOrLogsLaterThanCommittedMustHaveEarlierCommitted.children = alt_children
+
 
 
         logsLaterThanCommittedMustHaveCommitted.children = {
