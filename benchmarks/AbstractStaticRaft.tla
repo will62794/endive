@@ -255,8 +255,9 @@ Symmetry == Permutations(Server)
 Terms == InitTerm..MaxTerm
 LogIndices == 1..MaxLogLen
 
-\* Statement of type correctness.
-TypeOK ==
+
+\* Statement of type correctness tailored to Apalache. 
+ApaTypeOK ==
     /\ currentTerm \in [Server -> Terms]
     /\ state \in [Server -> {Secondary, Primary}]
     /\ log = Gen(3)
@@ -395,8 +396,8 @@ HumanDecompInd ==
     /\ LogMatching
     /\ H_UniformLogEntriesInTerm
 
-HumanDecompIndWithTypeOK ==
-    /\ TypeOK
+HumanDecompIndWithApaTypeOK ==
+    /\ ApaTypeOK
     /\ HumanDecompInd   
 
 HumanDecompInd_WithConstraint == StateConstraint => HumanDecompInd

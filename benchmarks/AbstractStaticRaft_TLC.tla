@@ -15,29 +15,23 @@ nAvgSubsetSize == 3
 \* Set of all subsets of a set of size <= k.
 kOrSmallerSubset(k, S) == UNION {(kSubset(n, S)) : n \in 0..k}
 
-\* Potentially use cardinality of log type to better estimate sampling parameters.
-logDomain == Server
-logRange == BoundedSeq(InitTerm..MaxTerm, MaxLogLen)
-logCardinality == Cardinality(logRange) ^ Cardinality(logDomain)
+TypeOK == 
+    /\ currentTerm \in [Server -> Terms]
+    /\ state \in [Server -> {Secondary, Primary}]
+    /\ log \in [Server -> BoundedSeq(Terms, MaxLogLen)]
+    /\ immediatelyCommitted \in SUBSET (LogIndices \X Terms)
 
 TypeOKRandom == 
     /\ currentTerm \in RandomSubset(5, [Server -> Terms])
     /\ state \in [Server -> {Secondary, Primary}]
-    /\ log \in RandomSubset(80, [logDomain -> logRange])
+    /\ log \in RandomSubset(80, [Server -> BoundedSeq(Terms, MaxLogLen)])
     /\ immediatelyCommitted \in kOrSmallerSubset(2, (LogIndices \X Terms))
 
 TypeOKRandomEmptyCommitted == 
     /\ currentTerm \in RandomSubset(5, [Server -> Terms])
     /\ state \in [Server -> {Secondary, Primary}]
-    /\ log \in RandomSubset(80, [logDomain -> logRange])
+    /\ log \in RandomSubset(80, [Server -> BoundedSeq(Terms, MaxLogLen)])
     /\ immediatelyCommitted = {}
-
-
-TypeOK_full == 
-    /\ currentTerm \in [Server -> Terms]
-    /\ state \in [Server -> {Secondary, Primary}]
-    /\ log \in [logDomain -> logRange]
-    /\ immediatelyCommitted \in SUBSET (LogIndices \X Terms)
 
 \* Old, randomized version.
 \* /\ committed \in RandomSetOfSubsets(kNumSubsets, nAvgSubsetSize, (LogIndices \X Terms \X Terms))

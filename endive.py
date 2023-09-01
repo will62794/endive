@@ -1780,7 +1780,7 @@ class InductiveInvGen():
             typeok_expr = typeok
 
         if self.use_apalache_ctigen:
-            typeok_expr = "TypeOK"
+            typeok_expr = "ApaTypeOK" # use dedicated Apalache TypeOK.
         invcheck_tla_indcheck += "    /\\ %s\n" % typeok_expr
         invcheck_tla_indcheck += f"    /\ InvStrengthened\n"
 
@@ -1883,8 +1883,10 @@ class InductiveInvGen():
         if depth is not None:
             simulate_depth = depth
         
-        args = (dirpath, "tla2tools-checkall.jar", TLC_MAX_SET_SIZE, simulate_flag, simulate_depth, ctiseed, tag, num_ctigen_tlc_workers, indcheckcfgfilename(action), indchecktlafilename)
-        cmd = self.java_exe + ' -Xss16M -Djava.io.tmpdir="%s" -cp %s tlc2.TLC -maxSetSize %d %s -depth %d -seed %d -noGenerateSpecTE -metadir states/indcheckrandom_%s -continue -deadlock -workers %d -config %s %s' % args
+        max_domain_sample_vals = 80 # TODO: possibly make this configurable per spec.
+        sampling_args = f"-Dtlc2.tool.impl.Tool.autoInitSamplingMaxSampleVals={max_domain_sample_vals} -Dtlc2.tool.impl.Tool.autoInitStatesSampling=true"
+        args = (dirpath, sampling_args, "tla2tools-checkall.jar", TLC_MAX_SET_SIZE, simulate_flag, simulate_depth, ctiseed, tag, num_ctigen_tlc_workers, indcheckcfgfilename(action), indchecktlafilename)
+        cmd = self.java_exe + ' -Xss16M -Djava.io.tmpdir="%s" %s -cp %s tlc2.TLC -maxSetSize %d %s -depth %d -seed %d -noGenerateSpecTE -metadir states/indcheckrandom_%s -continue -deadlock -workers %d -config %s %s' % args
         logging.debug("TLC command: " + cmd)
         workdir = None
         if self.specdir != "":
@@ -2036,7 +2038,7 @@ class InductiveInvGen():
         """
         
         # Build the spec.
-        typeok = "TypeOK" # Apalache always uses normal TypeOK.
+        typeok = "ApaTypeOK" # Use TypeOK for Apalache.
         all_conjuncts = [typeok] + support_lemmas + [S]
         goal_inv_conjs = [S]
         # Include state constraint as a precondition on the invariant,
