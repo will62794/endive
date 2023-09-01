@@ -118,6 +118,9 @@ UpdateTermsExpr(i, j) ==
     /\ state' = [state EXCEPT ![j] = Secondary] 
 
 
+\* (configVersion, term) pair of node i.
+CV(i) == <<configVersion[i], configTerm[i]>>
+
 \* Is the config of node i considered 'newer' than the config of node j. This is the condition for
 \* node j to accept the config of node i.
 IsNewerConfig(i, j) ==
@@ -502,28 +505,55 @@ H_ConfigVersionAndTermUnique ==
         (<<configVersion[i],configTerm[i]>> = <<configVersion[j],configTerm[j]>> )=>
         config[i] = config[j]
 
-\* Invariant developed during inductive proof decomposition experimenting.
-\* 08/19/2023
-HumanDecompInd == 
-    /\ StateMachineSafety
-    /\ LeaderCompleteness
-    /\ H_CommittedEntryExistsOnQuorum
-    /\ H_LogsLaterThanCommittedMustHaveCommitted
-    /\ H_CurrentTermAtLeastAsLargeAsLogTermsForPrimary
-    /\ H_EntriesCommittedInOwnOrLaterTerm
-    /\ H_EntriesCommittedInOwnTerm
-    /\ H_LogEntryInTermImpliesSafeAtTerm
-    /\ H_OnePrimaryPerTerm
-    /\ H_PrimaryHasEntriesItCreated
-    /\ H_QuorumsSafeAtTerms
-    /\ H_TermsOfEntriesGrowMonotonically
-    /\ LogMatching
-    /\ H_UniformLogEntriesInTerm
+H_PrimaryInTermContainsNewestConfigOfTerm == 
+    \A p,s \in Server : 
+        (state[p] = Primary /\ configTerm[s] = configTerm[p]) =>
+            (configVersion[p] >= configVersion[s]) 
 
-HumanDecompIndWithTypeOK ==
-    /\ TypeOK
-    /\ HumanDecompInd   
 
-HumanDecompInd_WithConstraint == StateConstraint => HumanDecompInd
+
+\* Is node i disabled due to a quorum of its config having moved to a newer config.
+ConfigDisabled(i) == 
+    \A Q \in Quorums(config[i]) : \E n \in Q : NewerConfig(CV(n), CV(i))
+
+ActiveConfigSet == {s \in Server : ~ConfigDisabled(s)}
+
+\* The quorums of all active configs overlap with each other. 
+H_ActiveConfigsOverlap == 
+    \A s,t \in ActiveConfigSet : QuorumsOverlap(config[s], config[t])
+
+\* Every active config overlaps with some node in a term >=T for all elections
+\* that occurred in term T (and exist in some config that is still around).
+H_ActiveConfigsSafeAtTerms == 
+    \A s \in Server : 
+    \A t \in ActiveConfigSet :
+        \A Q \in Quorums(config[t]) : \E n \in Q : currentTerm[n] >= configTerm[s]
+
+
+
+
+\* \* Invariant developed during inductive proof decomposition experimenting.
+\* \* 08/19/2023
+\* HumanDecompInd == 
+\*     /\ StateMachineSafety
+\*     /\ LeaderCompleteness
+\*     /\ H_CommittedEntryExistsOnQuorum
+\*     /\ H_LogsLaterThanCommittedMustHaveCommitted
+\*     /\ H_CurrentTermAtLeastAsLargeAsLogTermsForPrimary
+\*     /\ H_EntriesCommittedInOwnOrLaterTerm
+\*     /\ H_EntriesCommittedInOwnTerm
+\*     /\ H_LogEntryInTermImpliesSafeAtTerm
+\*     /\ H_OnePrimaryPerTerm
+\*     /\ H_PrimaryHasEntriesItCreated
+\*     /\ H_QuorumsSafeAtTerms
+\*     /\ H_TermsOfEntriesGrowMonotonically
+\*     /\ LogMatching
+\*     /\ H_UniformLogEntriesInTerm
+
+\* HumanDecompIndWithTypeOK ==
+\*     /\ TypeOK
+\*     /\ HumanDecompInd   
+
+\* HumanDecompInd_WithConstraint == StateConstraint => HumanDecompInd
 
 =============================================================================
