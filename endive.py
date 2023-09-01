@@ -3237,13 +3237,24 @@ class InductiveInvGen():
         configVersionAndTermUnique_adr = StructuredProofNode("ConfigVersionAndTermUnique", "H_ConfigVersionAndTermUnique")
         configVersionAndTermUnique_adr.ctigen_typeok = "TypeOKRandomEmptyCommitted"
 
+        primaryInTermContainsNewestConfigOfTerm_adr = StructuredProofNode("PrimaryInTermContainsNewestConfigOfTerm", "H_PrimaryInTermContainsNewestConfigOfTerm")
+        # primaryInTermContainsNewestConfigOfTerm.ch
+
+
+        activeConfigsOverlap_adr = StructuredProofNode("ActiveConfigsOverlap", "H_ActiveConfigsOverlap")
+        activeConfigsSafeAtTerms_adr = StructuredProofNode("ActiveConfigsSafeAtTerms", "H_ActiveConfigsSafeAtTerms")
+
+
 
         onePrimaryPerTerm_adr = StructuredProofNode("OnePrimaryPerTerm_Lemma", "H_OnePrimaryPerTerm", children = {
             # lemmaTRUE,
             "BecomeLeaderAction": [
-                    quorumsSafeAtTerms_adr,
-                    primaryConfigTermEqualToCurrentTerm_adr,
-                    configVersionAndTermUnique_adr
+                # quorumsSafeAtTerms_adr,
+                primaryConfigTermEqualToCurrentTerm_adr,
+                configVersionAndTermUnique_adr,
+                # primaryInTermContainsNewestConfigOfTerm_adr,
+                activeConfigsOverlap_adr,
+                activeConfigsSafeAtTerms_adr
             ]
         })
         onePrimaryPerTerm_adr.ctigen_typeok = "TypeOKRandomEmptyCommitted"
