@@ -19,6 +19,7 @@ import pyeda
 import pyeda.inter
 
 import mc
+import tlaparse
 
 DEBUG = False
 TLC_MAX_SET_SIZE = 10 ** 8
@@ -535,21 +536,30 @@ class StructuredProof():
     May also represent a "partial" proof i.e. one in an incomplete state that is yet to be completed.
     """
 
-    def __init__(self, root=None, load_from_obj=None, specname=None, actions=None):
+    def __init__(self, root=None, load_from_obj=None, specname=None, actions=None, spec_defs=None, nodes=None):
         # Top level goal expression to be proven.
         self.safety_goal = safety
         self.root = root 
+
+        self.nodes = nodes
 
         self.specname = specname
         self.proof_base_filename = f"benchmarks/{self.specname}.proof"
 
         self.actions = actions
 
+        self.spec_defs = spec_defs
+
         if load_from_obj:
             self.load_from(load_from_obj)
 
     def serialize(self, include_ctis=True):
-        return {"safety": self.safety_goal, "root": self.root.serialize(include_ctis=include_ctis)}
+        return {
+            "safety": self.safety_goal, 
+            "root": self.root.serialize(include_ctis=include_ctis),
+            "nodes": [n.serialize() for n in self.nodes],
+            "spec_defs": self.spec_defs
+        }
     
     def save_proof(self, include_json=False):
         """ Visualize proof structure in HTML format for inspection, and serialize to JSON. """
@@ -649,6 +659,7 @@ class StructuredProof():
 
         html += ("<head>")
         html += ('<link rel="stylesheet" type="text/css" href="proof.css">')
+        html += '<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">'
         # html += """<script src="{{ url_for('static',filename='proof.js') }}"> </script>"""
         # html += ("""<link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='proof.css') }}">""")
         html += '<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>'
@@ -724,6 +735,12 @@ class StructuredProof():
                 ret = self.get_node_by_name(c, name)
                 if ret is not None:
                     return ret
+
+            # If you didn't find the node via traversing from the
+            # start node, also check the set of all nodes.
+            for n in self.nodes:
+                if name == n.name:
+                    return n
             return None
 
     def compute_cti_elimination_for_node(self, indgen, node, ctis, action):
@@ -3035,19 +3052,19 @@ class InductiveInvGen():
         logEntryInTermImpliesSafeAtTerms = StructuredProofNode("LogEntryInTermImpliesSafeAtTerm", "H_LogEntryInTermImpliesSafeAtTerm")
         logEntryInTermImpliesSafeAtTerms.children = {    
             "ClientRequestAction": [
-                quorumsSafeAtTerms
+                # quorumsSafeAtTerms
             ]
         }
 
         primaryHasEntriesItCreated = StructuredProofNode("PrimaryHasEntriesItCreated_A", "H_PrimaryHasEntriesItCreated")
         primaryHasEntriesItCreated.children = {
-            "ClientRequestAction": [
-                onePrimaryPerTerm,
-            ],
-            "BecomeLeaderAction": [
-                # quorumsSafeAtTerms,
-                logEntryInTermImpliesSafeAtTerms
-            ]
+            # "ClientRequestAction": [
+            #     onePrimaryPerTerm,
+            # ],
+            # "BecomeLeaderAction": [
+            #     # quorumsSafeAtTerms,
+            #     logEntryInTermImpliesSafeAtTerms
+            # ]
         }
         primaryHasEntriesItCreated.cti_view = "<<state, currentTerm, log>>"
         primaryHasEntriesItCreated.cti_project_vars = ["state", "currentTerm", "log"]
@@ -3070,10 +3087,10 @@ class InductiveInvGen():
 
 
         logMatching = StructuredProofNode("LogMatching_Lemma", "LogMatching", children = {
-            "ClientRequestAction":[
-                lemmaTRUE,
-                # primaryHasEntriesItCreated
-            ]
+            # "ClientRequestAction":[
+            #     lemmaTRUE,
+            #     # primaryHasEntriesItCreated
+            # ]
         })
 
         lemmaTRUEShim.children = {
@@ -3105,8 +3122,8 @@ class InductiveInvGen():
             "RollbackEntriesAction":[
                 # lemmaTRUE,
                 logsLaterThanCommittedMustHaveCommitted
-                # primaryOrLogsLaterThanCommittedMustHaveEarlierCommitted
 
+                # primaryOrLogsLaterThanCommittedMustHaveEarlierCommitted
                 # StructuredProofNode("LogsLaterThanCommittedMustHaveCommitted", "H_LogsLaterThanCommittedMustHaveCommitted", children = [lemmaTRUE]),
                 # StructuredProofNode("LeaderCompletenessLemma", "LeaderCompleteness", children = [lemmaTRUE])
                 # primaryOrLogsLaterThanCommittedMustHaveEarlierCommitted,
@@ -3174,48 +3191,50 @@ class InductiveInvGen():
         # primaryOrLogsLaterThanCommittedMustHaveEarlierCommitted.children = alt_children
 
 
-
         logsLaterThanCommittedMustHaveCommitted.children = {
             "ClientRequestAction": [
                 # lemmaTRUE,
                 leaderCompleteness,
-
             ],
             "CommitEntryAction": [
                 # lemmaTRUE,
                 logEntryInTermImpliesSafeAtTerms
             ],
             "GetEntriesAction": [
-                # lemmaTRUE,
-                logMatching,
+                lemmaTRUE,
+                # logMatching,
                 termsGrowMonotonically,
             ]
         }
 
         leaderCompleteness.children = {
             "BecomeLeaderAction": [
-                lemmaTRUE,
+                # lemmaTRUE,
                 # termsGrowMonotonically,
                 # uniformLogEntriesInTerm,
                 # logEntryInTermImpliesSafeAtTerms,
                 # # TODO: Will need to deal with cycle recursion issue here properly.
-                committedEntryExistsOnQuorum_cycleBreak,
+                # committedEntryExistsOnQuorum_cycleBreak,
             ],
             "CommitEntryAction": [
-                # termsGrowMonotonically,
-                # quorumsSafeAtTerms
+                termsGrowMonotonically,
+                quorumsSafeAtTerms
             ],
         }
 
 
         asr_children = {
-            "CommitEntryAction": [
+            "ClientRequestAction": [
                 # lemmaTRUE
                 committedEntryExistsOnQuorum
             ]
         }
         asr_root = StructuredProofNode("StateMachineSafety_Lemma", safety, children = asr_children)
-
+        asr_nodes = [
+            committedEntryExistsOnQuorum,
+            logMatching
+            # primaryHasEntriesItCreated
+        ]
 
 
 
@@ -3343,6 +3362,7 @@ class InductiveInvGen():
         #
         root = None
         actions = None
+        nodes = None
         if self.specname == "TwoPhase":
             root = twopc_root
             actions = [
@@ -3354,6 +3374,7 @@ class InductiveInvGen():
                 "RMRcvCommitMsgAction",
                 "RMRcvAbortMsgAction"    
             ]
+            nodes = []
         elif self.specname == "AbstractStaticRaft":
             root = asr_root
             actions = [
@@ -3364,6 +3385,7 @@ class InductiveInvGen():
                 "CommitEntryAction",
                 "UpdateTermsActions",
             ]
+            nodes = asr_nodes
         elif self.specname == "AbstractDynamicRaft":
             root = adr_root
             actions = [
@@ -3396,7 +3418,7 @@ class InductiveInvGen():
         # Optionally reload proof structure from locally defined template.
         if self.proof_tree_cmd and self.proof_tree_cmd[0] in ["reload", "reload_proof_struct"]:
             logging.info(f"Reloading entire proof and re-generating CTIs.")
-            proof = StructuredProof(root, specname = self.specname, actions=actions)
+            proof = StructuredProof(root, specname = self.specname, actions=actions, nodes=nodes)
             proof.save_proof()
 
             # Re-generate CTIs.
@@ -3414,6 +3436,11 @@ class InductiveInvGen():
             proof = pickle.load(f)
 
         root = proof.root
+
+        # Add spec definitions.
+        if self.load_parse_tree:
+            proof.spec_defs = self.spec_defs
+
         proof.save_proof()
 
         run_server = True
@@ -3441,6 +3468,21 @@ class InductiveInvGen():
                 print(node)
 
                 response = flask.jsonify(node.serialize())
+                response.headers.add('Access-Control-Allow-Origin', '*')
+                return response
+            
+            @app.route('/addSupportEdge/<target>/<action>/<src>')
+            def addSupportEdge(target, action, src):
+                target_node = proof.get_node_by_name(proof.root, target)
+                src_node = proof.get_node_by_name(proof.root, src)
+                print("Target:", target_node)
+                print("Source:", src_node)
+
+                target_node.children[action].append(src_node)
+
+                proof.save_proof()
+
+                response = flask.jsonify({'ok': True})
                 response.headers.add('Access-Control-Allow-Origin', '*')
                 return response
 
@@ -3749,6 +3791,14 @@ class InductiveInvGen():
 
     def run(self):
         tstart = time.time()
+
+        self.load_parse_tree = True
+
+        # Parse and save AST of spec if needed.
+        if self.load_parse_tree:
+            logging.info(f"Parsing spec '{self.specname}' into parse tree.")
+            tla_tree = tlaparse.parse_tla_file(self.specdir, f"{self.specname}")
+            self.spec_defs = tlaparse.get_all_user_defs(tla_tree)
 
         if self.proof_tree_mode:
 

@@ -5,10 +5,15 @@ currentNode = null
 cy = null;
 let addedNodes = [];
 let addedEdges = [];
+let specDefs = [];
+
+// Stores source node from which to create support lemma edge.
+let supportLemmaTarget = null;
 
 let awaitPollIntervalMS = 2000;
 
 cytoscape.warnings(false);
+
 
 function awaitGenCtiCompletion(expr){
     $.get(local_server + `/getActiveCtiGenThreads`, function(data){
@@ -24,12 +29,17 @@ function awaitGenCtiCompletion(expr){
             reloadProofGraph();
             $('#gen-ctis-btn').prop("disabled",false);
             $('#gen-ctis-btn-subtree').prop("disabled",false);
+            $('#cti-loading-icon').hide();
         }
     });
 }
 
 function genCtis(exprName){
     console.log("Generating CTIs for '" + exprName + "'");
+    $('#cti-loading-icon').css('visibility', 'visible');
+    
+
+
     $.get(local_server + `/genCtis/single/${exprName}`, function(data){
         console.log(data);
         awaitGenCtiCompletion(exprName);
@@ -44,6 +54,19 @@ function genCtisSubtree(exprName){
     });
 }
 
+function addSupportLemmaEdge(target, action, src){
+    console.log("Adding support edge, target:", target, ", source:", src, ", action: ", action);
+    $.get(local_server + `/addSupportEdge/${target}/${action}/${src}`, function(data){
+        console.log(data);
+        console.log("add edge complete.");
+
+        // Once we added the new support edge, we should reload the proof graph and re-generate CTIs
+        // for the target node.
+        reloadProofGraph();
+        genCtis(target);
+    });
+}
+
 function setCTIPaneHtml(nodeData){
     var ctipane = document.getElementById("ctiPane");
     ctipane.innerHTML = "<h1> CTI View </h1>";
@@ -51,10 +74,23 @@ function setCTIPaneHtml(nodeData){
     if(nodeData && nodeData["actionNode"]){
         nodeIdText = nodeData["parentId"] + " -> " + currentNodeId + "";
     }
+
+    ctipane.innerHTML += '<div id="cti-loading-icon"><i>Generating CTIs</i> <i class="fa fa-refresh fa-spin"></i></div>';
     ctipane.innerHTML += `<h3> Proof node: ${nodeIdText} </h3>`;
-    ctipane.innerHTML += "<div><button id='gen-ctis-btn'> Gen CTIs </button></div> <br>";
-    ctipane.innerHTML += "<div><button id='gen-ctis-btn-subtree'> Gen CTIs (recursive) </button></div> <br>";
-    ctipane.innerHTML += "<div><button id='refresh-node-btn'> Refresh Proof Node </button></div>";
+
+    // For now don't allow CTI generation for specific sub-actions, only for top-level node all at once.
+    if(nodeData && !nodeData["actionNode"]){
+
+        ctipane.innerHTML += "<div><button id='gen-ctis-btn'> Gen CTIs </button></div> <br>";
+        ctipane.innerHTML += "<div><button id='gen-ctis-btn-subtree'> Gen CTIs (recursive) </button></div> <br>";
+    }
+
+    ctipane.innerHTML += "<div><button id='refresh-node-btn'> Refresh Proof Node </button></div> <br>";
+    ctipane.innerHTML += "<div><button id='add-support-lemma-btn'> Add support lemma </button></div>";
+
+
+
+    $('#cti-loading-icon').css('visibility', 'hidden');
 }
 
 function computeNodeColor(data, action){
@@ -69,8 +105,6 @@ function computeNodeColor(data, action){
         }
         console.log(data["name"]);
         console.log(data["ctis"]);
-        console.log("color ctis:", ctis);
-        console.log("color ctis elim:", ctis_eliminated);
     } else{
         ctis = data["ctis"][action];
         ctis_eliminated = data["ctis_eliminated"][action];
@@ -122,12 +156,13 @@ function focusOnNode(nodeId, nodeData){
 
         let actionName;
         ctis_remaining = [];
-        if(nodeData["actionNode"]){
+        ctis_for_action = []
+        if(nodeData["actionNode"] && data["ctis"][actionName]){
             actionName = nodeData["name"];
             ctis_remaining = data["ctis"][actionName].filter(c => !data["ctis_eliminated"][actionName].includes(c["hashId"]));
+            ctis_for_action = data["ctis"][actionName];
         }
         console.log("actionName", actionName);
-        ctis_for_action = data["ctis"][actionName];
         console.log("ctis for action:", ctis_for_action);
         console.log("ctis for action remaining:", ctis_remaining.length);
 
@@ -275,6 +310,15 @@ function focusOnNode(nodeId, nodeData){
         // console.log("node obj:", obj);
         // cy.nodes(`node`).style('background-color', 'red');
     })
+
+    $('#add-support-lemma-btn').on('click', function(ev){
+        // if(currentNodeId !== null){
+            console.log("Prime edge creation.");
+            supportLemmaTarget = currentNode;
+            // {"nodeId": currentProofNodeId, "action": currentNodeId};
+        // }
+    }); 
+
 }
 
 function showCtisForNode(nodeId){
@@ -405,6 +449,42 @@ function addNodesToGraph(proof_graph, node){
             addNodesToGraph(proof_graph, child);
         }
     }
+
+
+    // Also add any nodes that were not added via recursive graph traversal.
+    for(const node of proof_graph["nodes"]){
+        if(!addedNodes.includes(node["expr"])){
+            addedNodes.push(node["expr"]);
+
+            console.log("Adding standalone node to graph:", node["expr"]);
+    
+            let parentNodeBoxId = node["expr"] + "_parent_box";
+    
+            // Add parent container box first if needed.
+            cy.add({
+                group: 'nodes',
+                data: {
+                    id: parentNodeBoxId, 
+                    // name: node["name"]
+                    name: ""
+                },
+                style: styleParentBox
+            });
+    
+            // Add main lemma node.
+            cy.add({
+                group: 'nodes',
+                data: { 
+                    id: node["expr"], 
+                    name: node["name"],
+                    parent: parentNodeBoxId
+                },
+                position: { x: 200, y: 200 },
+                color: "red",
+                style: style
+            });        
+        }
+    }
 }
 
 function addEdgesToGraph(proof_graph, node){
@@ -416,8 +496,8 @@ function addEdgesToGraph(proof_graph, node){
 
     for(const action in node["children"]){
         // continue;
-        console.log("Node:", node["name"]);
-        console.log("Child action:", action);
+        // console.log("Node:", node["name"]);
+        // console.log("Child action:", action);
         for(const child of node["children"][action]){
             addEdgesToGraph(proof_graph, child);
             let edgeName = 'e_' + child["expr"] + "_" + action + "_" + node["expr"];
@@ -463,12 +543,23 @@ function reloadProofGraph(){
         let name = this.data()["name"];
         let nid = this.data()["id"];
         console.log("node name:", name, "node id:", nid);
+        // let parentId = this.data()["parentId"];
         console.log("parent id", this.data()["parentId"]);
         let actionNode = this.data()["actionNode"];
-        // if(actionNode){
-        //     name = this.data()["parentId"]
-        // }
-        // showCtisForNode(name);
+        
+        // Check if we are primed for new support lemma edge creation.
+        if(supportLemmaTarget !== null && supportLemmaTarget.data()["actionNode"]){
+            console.log("Create support lemma edge:", supportLemmaTarget, name);
+
+            // Add support lemma edge.
+            let parentId = supportLemmaTarget.data()["parentId"];
+            let action = supportLemmaTarget.data()["name"];
+            addSupportLemmaEdge(parentId, action, name);
+            supportLemmaTarget = null;
+            return;
+            
+        }
+
         focusOnNode(name, this.data());
         if(currentNode !== null){
             currentNode.style({"color":"black", "font-weight": "normal"});
@@ -489,6 +580,10 @@ function reloadProofGraph(){
 
         let proof_graph = data["proof_graph"];
         let root = data["proof_graph"]["root"];
+
+        // Save any global spec definitions.
+        specDefs = proof_graph["spec_defs"];
+
         addNodesToGraph(proof_graph, root);
         addEdgesToGraph(proof_graph, root);
 

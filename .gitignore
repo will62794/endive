@@ -49,3 +49,4 @@ apalache/
 *.proof.pickle
 *.svg
 trace.json
+benchmarks/*.xml
