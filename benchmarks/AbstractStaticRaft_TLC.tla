@@ -32,6 +32,13 @@ TypeOKRandomEmptyCommitted ==
     /\ log \in RandomSubset(80, [logDomain -> logRange])
     /\ immediatelyCommitted = {}
 
+
+TypeOK_full == 
+    /\ currentTerm \in [Server -> Terms]
+    /\ state \in [Server -> {Secondary, Primary}]
+    /\ log \in [logDomain -> logRange]
+    /\ immediatelyCommitted \in SUBSET (LogIndices \X Terms)
+
 \* Old, randomized version.
 \* /\ committed \in RandomSetOfSubsets(kNumSubsets, nAvgSubsetSize, (LogIndices \X Terms \X Terms))
 
