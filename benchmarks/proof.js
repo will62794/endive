@@ -157,7 +157,7 @@ function focusOnNode(nodeId, nodeData){
         let actionName;
         ctis_remaining = [];
         ctis_for_action = []
-        if(nodeData["actionNode"] && data["ctis"][actionName]){
+        if(nodeData["actionNode"]){
             actionName = nodeData["name"];
             ctis_remaining = data["ctis"][actionName].filter(c => !data["ctis_eliminated"][actionName].includes(c["hashId"]));
             ctis_for_action = data["ctis"][actionName];
@@ -366,7 +366,8 @@ function addNodesToGraph(proof_graph, node){
             data: {
                 id: parentNodeBoxId, 
                 // name: node["name"]
-                name: ""
+                name: "",
+                parentBox: true
             },
             style: styleParentBox
         });
@@ -542,8 +543,13 @@ function reloadProofGraph(){
         console.log( 'clicked ' + this.id() );
         let name = this.data()["name"];
         let nid = this.data()["id"];
+
+        // Don't do anything for enclosing parent boxes.
+        if(this.data()["parentBox"]){
+            return;
+        }
+
         console.log("node name:", name, "node id:", nid);
-        // let parentId = this.data()["parentId"];
         console.log("parent id", this.data()["parentId"]);
         let actionNode = this.data()["actionNode"];
         
