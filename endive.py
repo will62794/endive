@@ -3183,17 +3183,12 @@ class InductiveInvGen():
             ],
             "CommitEntryAction": [
                 # lemmaTRUE,
-                # leaderCompleteness,
-                # termsGrowMonotonically,
-                # primaryHasEntriesItCreated,
                 logEntryInTermImpliesSafeAtTerms
             ],
             "GetEntriesAction": [
                 # lemmaTRUE,
                 logMatching,
                 termsGrowMonotonically,
-                # uniformLogEntriesInTerm,
-                # logEntryInTermImpliesSafeAtTerms,
             ]
         }
 
@@ -3240,10 +3235,8 @@ class InductiveInvGen():
         primaryInTermContainsNewestConfigOfTerm_adr = StructuredProofNode("PrimaryInTermContainsNewestConfigOfTerm", "H_PrimaryInTermContainsNewestConfigOfTerm")
         # primaryInTermContainsNewestConfigOfTerm.ch
 
-
         activeConfigsOverlap_adr = StructuredProofNode("ActiveConfigsOverlap", "H_ActiveConfigsOverlap")
         activeConfigsSafeAtTerms_adr = StructuredProofNode("ActiveConfigsSafeAtTerms", "H_ActiveConfigsSafeAtTerms")
-
 
 
         onePrimaryPerTerm_adr = StructuredProofNode("OnePrimaryPerTerm_Lemma", "H_OnePrimaryPerTerm", children = {
