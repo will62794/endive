@@ -1,1 +1,4 @@
 pyeda
+graphviz
+flask
+flask_cors
