@@ -2313,7 +2313,7 @@ class InductiveInvGen():
             @app.route('/genCtis/<flag>/<expr>')
             def genCtis(flag, expr):
                 logging.info(f"genCtis({flag}, {expr})")
-                # print(flag, expr)
+                print(flag, expr)
 
                 response = flask.jsonify({'ok': True, 'expr': expr})
                 response.headers.add('Access-Control-Allow-Origin', '*')

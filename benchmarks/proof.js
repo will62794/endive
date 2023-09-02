@@ -1,8 +1,11 @@
-console.log("hello console");
 local_server = "http://127.0.0.1:5000"
+cy = null;
+
 currentNodeId = null;
 currentNode = null
-cy = null;
+
+selectedEdge = null;
+
 let addedNodes = [];
 let addedEdges = [];
 let specDefs = [];
@@ -52,16 +55,23 @@ function genCtisSubtree(exprName){
     });
 }
 
-function deleteSupportLemmaEdge(target, action, src){
-    console.log("Deleting support edge, target:", target, ", source:", src, ", action: ", action);
-    $.get(local_server + `/deleteSupportEdge/${target}/${action}/${src}`, function(data){
+function deleteSupportLemmaEdge(edge){
+
+    let source = edge.data()["source"];
+    let sourceNode = edge.data()["child"];
+    let target = edge.data()["targetNode"];
+    let action = edge.data()["action"];
+    let parentId = edge.data()["targetParentId"];
+
+    console.log("Deleting support edge, target:", target, ", source:", source, ", action: ", action);
+    $.get(local_server + `/deleteSupportEdge/${target["name"]}/${action}/${sourceNode["name"]}`, function(data){
         console.log(data);
         console.log("add edge complete.");
 
         // Once we added the new support edge, we should reload the proof graph and re-generate CTIs
         // for the target node.
         reloadProofGraph();
-        genCtis(target);
+        genCtis(target["name"]);
     });
 }
 
@@ -91,16 +101,35 @@ function setCTIPaneHtml(nodeData){
 
     // For now don't allow CTI generation for specific sub-actions, only for top-level node all at once.
     if(nodeData && !nodeData["actionNode"]){
-
         ctipane.innerHTML += "<div><button id='gen-ctis-btn'> Gen CTIs </button></div> <br>";
         ctipane.innerHTML += "<div><button id='gen-ctis-btn-subtree'> Gen CTIs (recursive) </button></div> <br>";
     }
 
     ctipane.innerHTML += "<div><button id='refresh-node-btn'> Refresh Proof Node </button></div> <br>";
-    ctipane.innerHTML += "<div><button id='add-support-lemma-btn'> Add support lemma </button></div>";
+    ctipane.innerHTML += "<div><button id='add-support-lemma-btn'> Add support lemma </button></div><br>";
+    ctipane.innerHTML += "<div><button id='delete-support-edge-btn'> Delete selected support lemma </button></div>";
 
+    // ctipane.innerHTML += '<label for="lemmas">Choose a lemma node to add:</label>';
+    // let selectHTML = '<select name="lemmas" id="lemmas">';
+    // for(const def of specDefs){
+    //     if(def.startsWith("H_")){
+    //         selectHTML += `<option value="volvo">${def}</option>`;
+    //     }
+    // }
+    // selectHTML += '</select>';
+    // ctipane.innerHTML += selectHTML;
 
     $('#cti-loading-icon').css('visibility', 'hidden');
+    $('#delete-support-edge-btn').css('visibility', 'hidden');
+
+    $('#delete-support-edge-btn').on('click', function(ev){
+        console.log("CLICKED delete button.");
+        if(selectedEdge === null){
+            return;
+        }
+        console.log("deleting edge");
+        deleteSupportLemmaEdge(selectedEdge);
+    })
 }
 
 function computeNodeColor(data, action){
@@ -171,6 +200,9 @@ function focusOnNode(nodeId, nodeData){
         ctis_for_action = []
         if(nodeData["actionNode"]){
             actionName = nodeData["name"];
+            if(data["ctis"][actionName] === undefined){
+                return;
+            }
             ctis_remaining = data["ctis"][actionName].filter(c => !data["ctis_eliminated"][actionName].includes(c["hashId"]));
             ctis_for_action = data["ctis"][actionName];
         }
@@ -188,8 +220,6 @@ function focusOnNode(nodeId, nodeData){
             for(const action in data["ctis"]){
                 ctis = ctis.concat(data["ctis"][action]);
                 ctis_eliminated = ctis_eliminated.concat(data["ctis_eliminated"][action]);
-
-
             }
 
             // Computing CTIs uniquely eliminated by each action.
@@ -529,7 +559,18 @@ function reloadProofGraph(){
     }
 
     // Can double click support edges to delete them from proof graph.
-    cy.on('dblclick', 'edge', function(evt){
+    cy.on('click', 'edge', function(evt){
+
+        if(selectedEdge === null){
+            selectedEdge = this;
+        } else{
+            selectedEdge.style({"line-color":"steelblue", "font-weight": "normal"});
+            selectedEdge = this;
+        }
+        selectedEdge.style({"line-color":"orange", "font-weight": "bold"});
+        $('#delete-support-edge-btn').css('visibility', 'visible');
+        return
+
         console.log("double clicked edge");
         let source = this.data()["source"];
         console.log(this.data()["child"]);
@@ -544,6 +585,12 @@ function reloadProofGraph(){
         console.log( 'clicked ' + this.id() );
         let name = this.data()["name"];
         let nid = this.data()["id"];
+
+        if(selectedEdge !== null){
+            selectedEdge.style({"line-color":"steelblue", "font-weight": "normal"});
+            selectedEdge = null;
+        }
+
 
         // Don't do anything for enclosing parent boxes.
         if(this.data()["parentBox"]){
