@@ -2261,6 +2261,15 @@ class InductiveInvGen():
                 response.headers.add('Access-Control-Allow-Origin', '*')
                 return response
             
+            @app.route('/addNode/<expr>')
+            def addNode(expr):
+                # Create new node without any children or edges to other nodes.
+                proof.nodes.append(StructuredProofNode(expr, expr))
+                proof.save_proof()
+                response = flask.jsonify({'ok': True})
+                response.headers.add('Access-Control-Allow-Origin', '*')
+                return response
+
             @app.route('/addSupportEdge/<target>/<action>/<src>')
             def addSupportEdge(target, action, src):
                 target_node = proof.get_node_by_name(proof.root, target)

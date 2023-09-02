@@ -55,6 +55,13 @@ function genCtisSubtree(exprName){
     });
 }
 
+function addLemmaNode(lemmaName){
+    console.log("Adding lemma:", lemmaName);
+    $.get(local_server + `/addNode/${lemmaName}`, function(data){
+        reloadProofGraph();
+    });
+}
+
 function deleteSupportLemmaEdge(edge){
 
     let source = edge.data()["source"];
@@ -83,8 +90,9 @@ function addSupportLemmaEdge(target, action, src){
 
         // Once we added the new support edge, we should reload the proof graph and re-generate CTIs
         // for the target node.
-        reloadProofGraph();
-        genCtis(target);
+        reloadProofGraph(function(){
+            genCtis(target);
+        });
     });
 }
 
@@ -109,15 +117,17 @@ function setCTIPaneHtml(nodeData){
     ctipane.innerHTML += "<div><button id='add-support-lemma-btn'> Add support lemma </button></div><br>";
     ctipane.innerHTML += "<div><button id='delete-support-edge-btn'> Delete selected support lemma </button></div>";
 
-    // ctipane.innerHTML += '<label for="lemmas">Choose a lemma node to add:</label>';
-    // let selectHTML = '<select name="lemmas" id="lemmas">';
-    // for(const def of specDefs){
-    //     if(def.startsWith("H_")){
-    //         selectHTML += `<option value="volvo">${def}</option>`;
-    //     }
-    // }
-    // selectHTML += '</select>';
-    // ctipane.innerHTML += selectHTML;
+    ctipane.innerHTML += '<label for="lemmas">Choose a lemma node to add:</label>';
+    let selectHTML = '<select name="lemmas" id="lemma-selection">';
+    for(const def of specDefs){
+        if(def.startsWith("H_")){
+            selectHTML += `<option value="${def}">${def}</option>`;
+        }
+    }
+    selectHTML += '</select>';
+    ctipane.innerHTML += selectHTML;
+    ctipane.innerHTML += "<div><button id='add-lemma-node-btn'> Add lemma </button></div>";
+
 
     $('#cti-loading-icon').css('visibility', 'hidden');
     $('#delete-support-edge-btn').css('visibility', 'hidden');
@@ -129,6 +139,11 @@ function setCTIPaneHtml(nodeData){
         }
         console.log("deleting edge");
         deleteSupportLemmaEdge(selectedEdge);
+    })
+
+    $('#add-lemma-node-btn').on('click', function(ev){
+        let selectedLemma = $("#lemma-selection").find(":selected").val();
+        addLemmaNode(selectedLemma);
     })
 }
 
@@ -551,7 +566,7 @@ function addEdgesToGraph(proof_graph, node){
     }
 }
 
-function reloadProofGraph(){
+function reloadProofGraph(onCompleteFn){
     if(cy !== null){
         cy.elements().remove();
         addedNodes = [];
@@ -676,6 +691,9 @@ function reloadProofGraph(){
             // }
             });
         layout.run();
+
+        // Callback to run once graph is reloaded.
+        onCompleteFn();
 
     });
 }
