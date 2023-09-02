@@ -37,8 +37,6 @@ function awaitGenCtiCompletion(expr){
 function genCtis(exprName){
     console.log("Generating CTIs for '" + exprName + "'");
     $('#cti-loading-icon').css('visibility', 'visible');
-    
-
 
     $.get(local_server + `/genCtis/single/${exprName}`, function(data){
         console.log(data);
@@ -51,6 +49,19 @@ function genCtisSubtree(exprName){
     $.get(local_server + `/genCtis/subtree/${exprName}`, function(data){
         console.log(data);
         awaitGenCtiCompletion(exprName);
+    });
+}
+
+function deleteSupportLemmaEdge(target, action, src){
+    console.log("Deleting support edge, target:", target, ", source:", src, ", action: ", action);
+    $.get(local_server + `/deleteSupportEdge/${target}/${action}/${src}`, function(data){
+        console.log(data);
+        console.log("add edge complete.");
+
+        // Once we added the new support edge, we should reload the proof graph and re-generate CTIs
+        // for the target node.
+        reloadProofGraph();
+        genCtis(target);
     });
 }
 
@@ -89,7 +100,6 @@ function setCTIPaneHtml(nodeData){
     ctipane.innerHTML += "<div><button id='add-support-lemma-btn'> Add support lemma </button></div>";
 
 
-
     $('#cti-loading-icon').css('visibility', 'hidden');
 }
 
@@ -117,7 +127,7 @@ function computeNodeColor(data, action){
     }
     if(!data["had_ctis_generated"]){
         if(action !== undefined){
-            return "#eee";
+            return "lightgray";
         }
         return "gray";
     }
@@ -314,11 +324,9 @@ function focusOnNode(nodeId, nodeData){
     })
 
     $('#add-support-lemma-btn').on('click', function(ev){
-        // if(currentNodeId !== null){
             console.log("Prime edge creation.");
             supportLemmaTarget = currentNode;
-            // {"nodeId": currentProofNodeId, "action": currentNodeId};
-        // }
+            $('#add-support-lemma-btn').prop("disabled",true);
     }); 
 
 }
@@ -412,6 +420,7 @@ function addNodeToGraph(proof_graph, node){
                 parent: parentNodeBoxId
             };
 
+            node_size = 18
             cy.add({
                 group: 'nodes',
                 data: dataVal,
@@ -421,8 +430,8 @@ function addNodeToGraph(proof_graph, node){
                 style: {
                     "background-color": computeNodeColor(node, actname),
                     "shape": "rectangle", 
-                    "width": 15, 
-                    "height": 15,
+                    "width": node_size, 
+                    "height": node_size,
                     "font-size":"12px"
                 },
             });
@@ -494,8 +503,11 @@ function addEdgesToGraph(proof_graph, node){
                         id: edgeName,
                         source: child["expr"],
                         target: targetId,
+                        targetParentId: node["expr"],
+                        targetNode: node,
                         child: child,
-                        actionSubEdge: true
+                        actionSubEdge: true,
+                        action: action 
                     }, 
                     style: {
                         "target-arrow-shape": "triangle",
@@ -515,6 +527,18 @@ function reloadProofGraph(){
         addedNodes = [];
         addedEdges = [];
     }
+
+    // Can double click support edges to delete them from proof graph.
+    cy.on('dblclick', 'edge', function(evt){
+        console.log("double clicked edge");
+        let source = this.data()["source"];
+        console.log(this.data()["child"]);
+        let target = this.data()["targetNode"];
+        let action = this.data()["action"];
+        let parentId = this.data()["targetParentId"];
+        deleteSupportLemmaEdge(target["name"], action, this.data()["child"]["name"])
+    });
+
 
     cy.on('click', 'node', function(evt){
         console.log( 'clicked ' + this.id() );
@@ -539,6 +563,7 @@ function reloadProofGraph(){
             let action = supportLemmaTarget.data()["name"];
             addSupportLemmaEdge(parentId, action, name);
             supportLemmaTarget = null;
+            $('#add-support-lemma-btn').prop("disabled",false);
             return;
             
         }

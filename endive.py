@@ -2405,6 +2405,32 @@ class InductiveInvGen():
                 response.headers.add('Access-Control-Allow-Origin', '*')
                 return response
 
+            @app.route('/deleteSupportEdge/<target>/<action>/<src>')
+            def deleteSupportEdge(target, action, src):
+                target_node = proof.get_node_by_name(proof.root, target)
+                src_node = proof.get_node_by_name(proof.root, src)
+                print("Target:", target_node)
+                print("Source:", src_node)
+                
+                response = flask.jsonify({'ok': False})
+                response.headers.add('Access-Control-Allow-Origin', '*')
+
+                if target_node is None or src_node is None:
+                    print("Target or source node not found.")
+                    return response
+
+                if action not in target_node.children:
+                    print("Action does not exist.")
+                    return response
+
+                # Delete the appropriate child node.
+                target_node.children[action] = [c for c in target_node.children[action] if c.name != src]
+                proof.save_proof()
+
+                response = flask.jsonify({'ok': True})
+                response.headers.add('Access-Control-Allow-Origin', '*')
+                return response
+
             @app.route('/getActiveCtiGenThreads')
             def getActiveCtiGenThreads():
                 response = flask.jsonify({'ok': True, 'active_threads': list(self.active_ctigen_threads)})
