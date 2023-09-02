@@ -3481,6 +3481,8 @@ class InductiveInvGen():
                 print("Target:", target_node)
                 print("Source:", src_node)
 
+                if action not in target_node.children:
+                    target_node.children[action] = []
                 target_node.children[action].append(src_node)
 
                 proof.save_proof()
