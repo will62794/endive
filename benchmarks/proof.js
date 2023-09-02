@@ -116,7 +116,9 @@ function computeNodeColor(data, action){
         return "green";
     }
     if(!data["had_ctis_generated"]){
-        // style = {"background-color": "lightgray"}
+        if(action !== undefined){
+            return "#eee";
+        }
         return "gray";
     }
     return "orange";
@@ -327,8 +329,7 @@ function showCtisForNode(nodeId){
     });   
 }
 
-
-function addNodesToGraph(proof_graph, node){
+function addNodeToGraph(proof_graph, node){
     dataVal = { id: node["expr"], name: node["name"] };
     // console.log("node:", node);
     // console.log(dataVal);
@@ -444,47 +445,23 @@ function addNodesToGraph(proof_graph, node){
             ix += 1;
         }
     }
+}
 
+function addNodesToGraph(proof_graph, node){
+ 
+    // Add this node.
+    addNodeToGraph(proof_graph, node);
+
+    // Add children as nodes, recursively.
     for(const action in node["children"]){
         for(const child of node["children"][action]){
             addNodesToGraph(proof_graph, child);
         }
     }
 
-
-    // Also add any nodes that were not added via recursive graph traversal.
+    // Also add any global nodes that were not added via recursive graph traversal.
     for(const node of proof_graph["nodes"]){
-        if(!addedNodes.includes(node["expr"])){
-            addedNodes.push(node["expr"]);
-
-            console.log("Adding standalone node to graph:", node["expr"]);
-    
-            let parentNodeBoxId = node["expr"] + "_parent_box";
-    
-            // Add parent container box first if needed.
-            cy.add({
-                group: 'nodes',
-                data: {
-                    id: parentNodeBoxId, 
-                    // name: node["name"]
-                    name: ""
-                },
-                style: styleParentBox
-            });
-    
-            // Add main lemma node.
-            cy.add({
-                group: 'nodes',
-                data: { 
-                    id: node["expr"], 
-                    name: node["name"],
-                    parent: parentNodeBoxId
-                },
-                position: { x: 200, y: 200 },
-                color: "red",
-                style: style
-            });        
-        }
+        addNodeToGraph(proof_graph, node);
     }
 }
 
