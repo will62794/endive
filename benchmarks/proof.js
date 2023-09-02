@@ -75,7 +75,7 @@ function setCTIPaneHtml(nodeData){
         nodeIdText = nodeData["parentId"] + " -> " + currentNodeId + "";
     }
 
-    ctipane.innerHTML += '<div id="cti-loading-icon"><i>Generating CTIs</i> <i class="fa fa-refresh fa-spin"></i></div>';
+    ctipane.innerHTML += '<div id="cti-loading-icon">Generating CTIs <i class="fa fa-refresh fa-spin"></i></div>';
     ctipane.innerHTML += `<h3> Proof node: ${nodeIdText} </h3>`;
 
     // For now don't allow CTI generation for specific sub-actions, only for top-level node all at once.
