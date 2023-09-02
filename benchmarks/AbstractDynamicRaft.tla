@@ -411,6 +411,8 @@ CInit ==
 \* Helper lemmas.
 \* 
 
+H_LEMMA_TRUE == TRUE
+
 \* If a primary has been elected at term T, then there must exist a quorum at term >= T.
 H_QuorumsSafeAtTerms == 
     \A s \in Server : (state[s] = Primary) =>

@@ -117,7 +117,9 @@ function setCTIPaneHtml(nodeData){
     ctipane.innerHTML += "<div><button id='add-support-lemma-btn'> Add support lemma </button></div><br>";
     ctipane.innerHTML += "<div><button id='delete-support-edge-btn'> Delete selected support lemma </button></div>";
 
-    ctipane.innerHTML += '<label for="lemmas">Choose a lemma node to add:</label>';
+    ctipane.innerHTML += "<div><button id='add-lemma-node-btn'> Add lemma </button></div><br>";
+
+    ctipane.innerHTML += '<label for="lemmas">Choose a lemma node to add:</label><br>';
     let selectHTML = '<select name="lemmas" id="lemma-selection">';
     for(const def of specDefs){
         if(def.startsWith("H_")){
@@ -126,7 +128,6 @@ function setCTIPaneHtml(nodeData){
     }
     selectHTML += '</select>';
     ctipane.innerHTML += selectHTML;
-    ctipane.innerHTML += "<div><button id='add-lemma-node-btn'> Add lemma </button></div>";
 
 
     $('#cti-loading-icon').css('visibility', 'hidden');

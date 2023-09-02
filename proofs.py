@@ -241,7 +241,7 @@ class StructuredProof():
             "spec_defs": self.spec_defs
         }
     
-    def save_proof(self, include_json=False):
+    def save_proof(self, include_json=False, include_dot=False):
         """ Visualize proof structure in HTML format for inspection, and serialize to JSON. """
         filename = f"{self.proof_base_filename}.html"
         pickle_filename = f"{self.proof_base_filename}.pickle"
@@ -265,8 +265,9 @@ class StructuredProof():
         with open(pickle_filename, 'wb') as f:
             pickle.dump(self, f)
 
-        print(f"Saving latest proof as DOT to '{dot_filename}'")
-        self.save_as_dot(dot_filename)
+        if include_dot:
+            print(f"Saving latest proof as DOT to '{dot_filename}'")
+            self.save_as_dot(dot_filename)
 
         print(f"Finished saving proof objects.")
 
