@@ -14,21 +14,37 @@ primaryConfigTermEqualToCurrentTerm_adr.ctigen_typeok = "TypeOKRandomEmptyCommit
 activeConfigsOverlap_adr = StructuredProofNode("ActiveConfigsOverlap", "H_ActiveConfigsOverlap")
 activeConfigsSafeAtTerms_adr = StructuredProofNode("ActiveConfigsSafeAtTerms", "H_ActiveConfigsSafeAtTerms")
 
+onePrimaryPerTerm_adr = StructuredProofNode("OnePrimaryPerTerm_Lemma", "H_OnePrimaryPerTerm")
+
+primaryInTermContainsNewestConfigOfTerm_adr = StructuredProofNode("PrimaryInTermContainsNewestConfigOfTerm", "H_PrimaryInTermContainsNewestConfigOfTerm")
+primaryInTermContainsNewestConfigOfTerm_adr.children = {
+    "BecomeLeaderAction": [
+        activeConfigsSafeAtTerms_adr,
+        # TODO: will need to deal with cycle issue here before re-including this lemma.
+        # onePrimaryPerTerm_adr
+    ]
+}
+
 configVersionAndTermUnique_adr = StructuredProofNode("ConfigVersionAndTermUnique", "H_ConfigVersionAndTermUnique")
 # configVersionAndTermUnique_adr.ctigen_typeok = "TypeOKRandomEmptyCommitted"
 configVersionAndTermUnique_adr.ctigen_typeok = "TypeOK"
 configVersionAndTermUnique_adr.children = {
     "BecomeLeaderAction":[
         primaryConfigTermEqualToCurrentTerm_adr,
-        activeConfigsSafeAtTerms_adr
+        activeConfigsSafeAtTerms_adr,
+    ],
+    "ReconfigAction": [
+        primaryInTermContainsNewestConfigOfTerm_adr
     ]
 }
 
+activeConfigsSafeAtTerms_adr.children = {
+    "BecomeLeaderAction": [activeConfigsOverlap_adr]
+}
 
-primaryInTermContainsNewestConfigOfTerm_adr = StructuredProofNode("PrimaryInTermContainsNewestConfigOfTerm", "H_PrimaryInTermContainsNewestConfigOfTerm")
-# primaryInTermContainsNewestConfigOfTerm.ch
 
-onePrimaryPerTerm_adr = StructuredProofNode("OnePrimaryPerTerm_Lemma", "H_OnePrimaryPerTerm", children = {
+
+onePrimaryPerTerm_adr.children = {
     # lemmaTRUE,
     "BecomeLeaderAction": [
         # quorumsSafeAtTerms_adr,
@@ -38,7 +54,7 @@ onePrimaryPerTerm_adr = StructuredProofNode("OnePrimaryPerTerm_Lemma", "H_OnePri
         activeConfigsOverlap_adr,
         activeConfigsSafeAtTerms_adr
     ]
-})
+}
 onePrimaryPerTerm_adr.ctigen_typeok = "TypeOKRandomEmptyCommitted"
 
 
