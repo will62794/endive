@@ -5,13 +5,316 @@ import subprocess
 import logging
 import os
 import sys
+import random
+import re
+import tempfile
+import pyeda
 
 from itertools import chain, combinations
+
+TLC_MAX_SET_SIZE = 10 ** 8
 
 def powerset(iterable):
     "powerset([1,2,3]) --> () (1,) (2,) (3,) (1,2) (1,3) (2,3) (1,2,3)"
     s = list(iterable)
     return chain.from_iterable(combinations(s, r) for r in range(len(s)+1))
+
+
+def pred_symmetry_reduction(invs, quant_vars):
+    """ Takes a set of predicates and removes those which are equivalent under symmetry to other invariants. """
+    # For now, only do symmetry reduction for exactly two quantified vars.
+    if not len(quant_vars)==2:
+        return invs
+    qv1 = quant_vars[0]
+    qv2 = quant_vars[1]
+    inv_uniq_set = set()
+    for inv in invs:
+        swap_inv = inv
+        swap_inv = swap_inv.replace(qv1, "__QV1_TEMP").replace(qv2, "__QV2_TEMP")
+        swap_inv = swap_inv.replace("__QV1_TEMP", qv2).replace("__QV2_TEMP", qv1)
+        # print("orig",inv)
+        # print("swap",swap_inv)
+        if (inv in inv_uniq_set) or (swap_inv in inv_uniq_set):
+            continue
+        else:
+            inv_uniq_set.add(inv)
+    return inv_uniq_set
+
+def symb_equivalence_reduction(invs, invs_symb):
+    """ 
+    Reduce set of invariant candidates to those that are logically equivalent,
+    using CNF based equivalence checking, where 'invs_symb' are symbolic version
+    of the string predicates given in 'invs'. Returns the reduced set of
+    invariant predicates.
+    """
+    # Ensure we return invariants in a consistent order i.e. avoid nondeterminism
+    # of using a set here.
+    invs_unique = []
+    cnf_invs_set = set()
+    for invi,inv in enumerate(invs):
+        symb_inv = invs_symb[invi]
+        cnf_str = str(symb_inv.to_cnf())
+
+        # Only add predicate if there is not an equivalent one that already exists.
+        if cnf_str not in cnf_invs_set:
+            invs_unique.append(inv)
+            cnf_invs_set.add(cnf_str)
+    return invs_unique
+
+
+def generate_invs(preds, num_invs, min_num_conjuncts=2, max_num_conjuncts=2, 
+                    process_local=False, boolean_style="tla", quant_vars=[]):
+    """ Generate 'num_invs' random invariants with the specified number of conjuncts. """
+    # Pick some random conjunct.
+    # OR and negations should be functionally complete
+    symb_neg_op = "~"
+    if boolean_style == "cpp":
+        # ops = ["&&", "||"]
+        ops = ["||"]
+        andop = "&&"
+        neg_op = "!"
+    elif boolean_style == "tla":
+        # ops = ["/\\", "\\/"]
+        ops = ["\\/"]
+        andop = "/\\"
+        neg_op = "~"
+
+    # Assign a numeric id to each predicate.
+    pred_id = {p:k for (k,p) in enumerate(preds)}
+
+    invs = []
+    invs_symb = []
+    invs_symb_strs = []
+    for invi in range(num_invs):
+        conjuncts = list(preds)
+        # conjuncts = list(map(str, range(len(preds))))
+        num_conjuncts = random.randint(min_num_conjuncts, max_num_conjuncts)
+        
+        # Select first atomic term of overall predicate.
+        c = random.choice(conjuncts)
+        conjuncts.remove(c)
+
+        # Optionally negate it.
+        negate = random.choice([True, False])
+        (n,fn) = (neg_op,symb_neg_op) if negate else ("","")
+
+        inv = n + "(" + c + ")"
+        pred_id_var = f"x_{str(pred_id[c]).zfill(3)}"
+        symb_inv_str = fn + "(" + pred_id_var + ")"
+
+        for i in range(1,num_conjuncts):
+            c = random.choice(conjuncts)
+            conjuncts.remove(c)
+            op = ""
+            fop = "|"
+            if i < num_conjuncts:
+                op = random.choice(ops)
+            negate = random.choice([True, False])
+            (n,fn) = (neg_op,symb_neg_op) if negate else ("","")
+            new_term = n + "(" + c + ")"
+
+            # Sort invariant terms to produce more consistent output regardless of random seed.
+            new_inv_args = [new_term,inv]
+            new_inv_args = sorted(new_inv_args)
+            inv  =  new_inv_args[0] + " " + op + " (" + new_inv_args[1] +")"
+
+            # inv  =  n + "(" + c + ")" + " " + op + " (" + inv +")"
+            
+            # Symbolic version of the predicate. Used for quickly 
+            # detecting logically equivalent predicate forms.
+            pred_id_var = f"x_{str(pred_id[c]).zfill(3)}"
+            symb_inv_str = fn + "(" + pred_id_var + ")" + " " + fop + " (" + symb_inv_str +")"
+
+        if inv not in invs:
+            invs.append(inv)
+            invs_symb.append(pyeda.inter.expr(symb_inv_str))
+            # print(type(invs_symb[-1]))
+            invs_symb_strs.append(symb_inv_str)
+
+    logging.info(f"number of invs: {len(invs)}")
+
+    # Do CNF based equivalence reduction.
+    invs = symb_equivalence_reduction(invs, invs_symb)
+    logging.info(f"number of invs post CNF based equivalence reduction: {len(invs)}")
+
+    # if len(quant_vars):
+        # invs = pred_symmetry_reduction(invs, quant_vars)
+    logging.info(f"number of post symmetry invs: {len(invs)}")
+
+    # return invs_symb
+    # return invs_symb_strs
+    # return set(map(str, invs_symb))
+    return {"raw_invs": set(invs), "pred_invs": invs_symb_strs}
+
+def greplines(pattern, lines):
+    return [ln for ln in lines if re.search(pattern, ln)]
+
+def runtlc(spec,config=None,tlc_workers=6,cwd=None,java="java",tlc_flags=""):
+    # Make a best effort to attempt to avoid collisions between different
+    # instances of TLC running on the same machine.
+    dirpath = tempfile.mkdtemp()
+    metadir_path = f"states/states_{uuid.uuid4().hex[:16]}"
+    cmd = java + (f' -Djava.io.tmpdir="{dirpath}" -cp tla2tools-checkall.jar tlc2.TLC {tlc_flags} -maxSetSize {TLC_MAX_SET_SIZE} -metadir {metadir_path} -noGenerateSpecTE -checkAllInvariants -deadlock -continue -workers {tlc_workers}')
+    if config:
+        cmd += " -config " + config
+    cmd += " " + spec
+    logging.debug("TLC command: " + cmd)
+    subproc = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, cwd=cwd)
+    tlc_raw_out = ""
+    line_str = ""
+    tlc_lines = []
+    while True:
+        new_stdout = subproc.stdout.read(1).decode(sys.stdout.encoding)
+        if new_stdout == "": # reached end of file.
+            break
+        if new_stdout == os.linesep:
+            # logging.debug("[TLC Output] " + line_str)
+            tlc_lines.append(line_str)
+            line_str = ""
+        else:
+            line_str += new_stdout
+    return tlc_lines
+
+# Run TLC on spec to check all invariants and return the set 
+# of invariants that were violated.
+def runtlc_check_violated_invariants(spec,config=None, tlc_workers=6, cwd=None,java="java"):
+    #
+    # TODO: Check for this type of error:
+    # 'Error: The invariant of Inv91 is equal to FALSE'
+    #
+    lines = runtlc(spec,config=config,tlc_workers=tlc_workers,cwd=cwd,java=java)
+    invs_violated = set()
+    for l in greplines("is violated", lines):
+        res = re.match(".*Invariant (Inv.*) is violated",l)
+        invname = res.group(1)
+        invs_violated.add(invname)
+    return invs_violated
+
+
+class State():
+    """ A single TLA+ state. """
+    def __init__(self, state_str="", state_lines=[], load_from_obj=None):
+        self.state_str = state_str
+        self.state_lines = state_lines
+        if load_from_obj:
+            self.load_from(load_from_obj)
+
+    def __str__(self):
+        return self.state_str
+
+    def pretty_str(self):
+        out = ""
+        for l in self.state_lines:
+            out += l + "\n"
+        return out
+    
+    def serialize(self):
+        return {
+            "state_str": self.state_str,
+            "state_lines": self.state_lines
+        }
+    
+    def load_from(self, obj):
+        self.state_str = (obj["state_str"])
+        self.state_lines = (obj["state_lines"])
+
+class Trace():
+    """ Represents a trace of states. """
+    def __init__(self, states):
+        # List of states.
+        self.states = states
+
+    def getStates(self):
+        return self.states
+    
+    def serialize(self):
+        return [s.serialize() for s in self.states]
+
+class CTI():
+    """ Represents a single counterexample to induction (CTI) state. """
+    def __init__(self, cti_str="", cti_lines=[], action_name="", trace=None, load_from_obj=None):
+        self.cti_str = cti_str
+        self.action_name = action_name
+        self.cti_lines = cti_lines
+        # The full counterexample trace associated with this CTI. The CTI state may fall at 
+        # different points within this trace.
+        self.trace = trace
+
+        # Optional cost metric for this CTI
+        self.cost = 0
+
+        if load_from_obj:
+            self.load_from(load_from_obj)
+
+    def serialize(self):
+        return {
+            "cti_str": self.cti_str,
+            "action_name": self.action_name,
+            "cti_lines": self.cti_lines,
+            "trace": [s.serialize() for s in self.trace.getStates()],
+            "cost": self.cost,
+            "hashId": str(hash(self))
+        }
+    
+    def load_from(self, obj):
+        self.cti_str = obj["cti_str"]
+        self.action_name = obj["action_name"]
+        self.cti_lines = obj["cti_lines"]
+        self.trace = Trace([State(load_from_obj=s) for s in obj["trace"]])
+
+    def getCTIStateString(self):
+        return self.cti_str
+
+    def getPrimedCTIStateString(self):
+        """ Return CTI as TLA+ state string where variables are primed."""
+        primed_state_vars = []
+        for cti_line in self.cti_lines:
+            # Remove the conjunction (/\) at the beginning of the line.
+            cti_line = cti_line[2:].strip()
+            # print(cti_line)
+            # Look for the first equals sign.
+            first_equals = cti_line.index("=")
+            varname = cti_line[:first_equals].strip()
+            varval = cti_line[first_equals+1:]
+            # print("varname:", varname)
+            # print("varval:", varval)
+            primed_state_vars.append(f"/\\ {varname}' ={varval}")
+        primed_state = " ".join(primed_state_vars)
+        # print(primed_state)
+        return primed_state
+    
+    def getActionName(self):
+        return self.action_name
+    
+    def setActionName(self, action_name):
+        self.action_name = action_name
+
+    def setTrace(self, trace):
+        self.trace = trace
+
+    def getTrace(self):
+        return self.trace
+
+    def pretty_str(self):
+        out = ""
+        for l in self.cti_lines:
+            out += l + "\n"
+        return out
+            
+
+    def __hash__(self):
+        return hash(self.cti_str)
+    
+    def __eq__(self, other):
+        return hash(self.cti_str) == hash(other.cti_str)
+    
+    def __str__(self):
+        return self.cti_str
+    
+    # Order CTIs as strings.
+    def __lt__(self, other):
+        return self.cti_str < other.cti_str
+
 
 class Apalache:
     """ Utilities for model checking TLA+ with Apalache. """
