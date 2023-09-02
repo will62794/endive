@@ -693,7 +693,9 @@ function reloadProofGraph(onCompleteFn){
         layout.run();
 
         // Callback to run once graph is reloaded.
-        onCompleteFn();
+        if(onCompleteFn !== undefined){
+            onCompleteFn();
+        }
 
     });
 }
