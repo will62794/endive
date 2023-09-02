@@ -384,7 +384,7 @@ LogIndices == 1..MaxLogLen
 ConfigVersions == 1..MaxConfigVersion
 
 \* Statement of type correctness.
-TypeOK ==
+ApaTypeOK ==
     /\ currentTerm \in [Server -> Terms]
     /\ state \in [Server -> {Secondary, Primary}]
     /\ log = Gen(3)
