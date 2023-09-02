@@ -11,15 +11,22 @@ quorumsSafeAtTerms_adr.ctigen_typeok = "TypeOKRandomEmptyCommitted"
 primaryConfigTermEqualToCurrentTerm_adr = StructuredProofNode("PrimaryConfigTermEqualToCurrentTerm", "H_PrimaryConfigTermEqualToCurrentTerm")
 primaryConfigTermEqualToCurrentTerm_adr.ctigen_typeok = "TypeOKRandomEmptyCommitted"
 
-configVersionAndTermUnique_adr = StructuredProofNode("ConfigVersionAndTermUnique", "H_ConfigVersionAndTermUnique")
-configVersionAndTermUnique_adr.ctigen_typeok = "TypeOKRandomEmptyCommitted"
-
-primaryInTermContainsNewestConfigOfTerm_adr = StructuredProofNode("PrimaryInTermContainsNewestConfigOfTerm", "H_PrimaryInTermContainsNewestConfigOfTerm")
-# primaryInTermContainsNewestConfigOfTerm.ch
-
 activeConfigsOverlap_adr = StructuredProofNode("ActiveConfigsOverlap", "H_ActiveConfigsOverlap")
 activeConfigsSafeAtTerms_adr = StructuredProofNode("ActiveConfigsSafeAtTerms", "H_ActiveConfigsSafeAtTerms")
 
+configVersionAndTermUnique_adr = StructuredProofNode("ConfigVersionAndTermUnique", "H_ConfigVersionAndTermUnique")
+# configVersionAndTermUnique_adr.ctigen_typeok = "TypeOKRandomEmptyCommitted"
+configVersionAndTermUnique_adr.ctigen_typeok = "TypeOK"
+configVersionAndTermUnique_adr.children = {
+    "BecomeLeaderAction":[
+        primaryConfigTermEqualToCurrentTerm_adr,
+        activeConfigsSafeAtTerms_adr
+    ]
+}
+
+
+primaryInTermContainsNewestConfigOfTerm_adr = StructuredProofNode("PrimaryInTermContainsNewestConfigOfTerm", "H_PrimaryInTermContainsNewestConfigOfTerm")
+# primaryInTermContainsNewestConfigOfTerm.ch
 
 onePrimaryPerTerm_adr = StructuredProofNode("OnePrimaryPerTerm_Lemma", "H_OnePrimaryPerTerm", children = {
     # lemmaTRUE,

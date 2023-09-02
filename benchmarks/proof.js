@@ -115,7 +115,7 @@ function setCTIPaneHtml(nodeData){
 
     ctipane.innerHTML += "<div><button id='refresh-node-btn'> Refresh Proof Node </button></div> <br>";
     ctipane.innerHTML += "<div><button id='add-support-lemma-btn'> Add support lemma </button></div><br>";
-    ctipane.innerHTML += "<div><button id='delete-support-edge-btn'> Delete selected support lemma </button></div>";
+    ctipane.innerHTML += "<div><button id='delete-support-edge-btn'> Delete selected support lemma edge </button></div>";
 
     ctipane.innerHTML += "<div><button id='add-lemma-node-btn'> Add lemma </button></div><br>";
 
