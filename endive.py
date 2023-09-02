@@ -815,7 +815,7 @@ class StructuredProof():
 
                     # print([str(hash(x)) for x in node.ctis])
                     uniq_cti_obj = [x for x in ctis if str(hash(x)) == c][0]
-                    print(uniq_cti_obj.pretty_str())
+                    # print(uniq_cti_obj.pretty_str())
 
                     if indgen.cti_out_degrees:
                         # print(len(indgen.cti_out_degrees))
@@ -1883,8 +1883,8 @@ class InductiveInvGen():
         if depth is not None:
             simulate_depth = depth
         
-        max_domain_sample_vals = 80 # TODO: possibly make this configurable per spec.
-        sampling_args = f"-Dtlc2.tool.impl.Tool.autoInitSamplingMaxSampleVals={max_domain_sample_vals} -Dtlc2.tool.impl.Tool.autoInitStatesSampling=true"
+        sampling_target_num_init_states = 30000
+        sampling_args = f"-Dtlc2.tool.impl.Tool.autoInitStatesSampling=true -Dtlc2.tool.impl.Tool.autoInitSamplingTargetNumInitStates={sampling_target_num_init_states}"
         args = (dirpath, sampling_args, "tla2tools-checkall.jar", TLC_MAX_SET_SIZE, simulate_flag, simulate_depth, ctiseed, tag, num_ctigen_tlc_workers, indcheckcfgfilename(action), indchecktlafilename)
         cmd = self.java_exe + ' -Xss16M -Djava.io.tmpdir="%s" %s -cp %s tlc2.TLC -maxSetSize %d %s -depth %d -seed %d -noGenerateSpecTE -metadir states/indcheckrandom_%s -continue -deadlock -workers %d -config %s %s' % args
         logging.debug("TLC command: " + cmd)
@@ -3116,6 +3116,8 @@ class InductiveInvGen():
         primaryOrLogsLaterThanCommittedMustHaveEarlierCommitted = StructuredProofNode("PrimaryOrLogsLaterThanCommittedMustHaveEarlierCommitted", "H_PrimaryOrLogsLaterThanCommittedMustHaveEarlierCommitted")
 
         logsLaterThanCommittedMustHaveCommitted = StructuredProofNode("LogsLaterThanCommittedMustHaveCommitted", "H_LogsLaterThanCommittedMustHaveCommitted")
+        # logsLaterThanCommittedMustHaveCommitted.ctigen_typeok = "TypeOKSmallCommitted"
+        logsLaterThanCommittedMustHaveCommitted.ctigen_typeok = "TypeOK"
 
         leaderCompleteness = StructuredProofNode("LeaderCompletenessLemma", "LeaderCompleteness")
 
@@ -3204,7 +3206,7 @@ class InductiveInvGen():
             ],
             "GetEntriesAction": [
                 lemmaTRUE,
-                # logMatching,
+                logMatching,
                 termsGrowMonotonically,
             ]
         }
@@ -3467,7 +3469,6 @@ class InductiveInvGen():
             @app.route('/getNode/<expr>')
             def getCtis(expr):
                 node = proof.get_node_by_name(proof.root, expr)
-                print(node)
 
                 response = flask.jsonify(node.serialize())
                 response.headers.add('Access-Control-Allow-Origin', '*')
@@ -3497,7 +3498,7 @@ class InductiveInvGen():
             @app.route('/genCtis/<flag>/<expr>')
             def genCtis(flag, expr):
                 logging.info(f"genCtis({flag}, {expr})")
-                print(flag, expr)
+                # print(flag, expr)
 
                 response = flask.jsonify({'ok': True, 'expr': expr})
                 response.headers.add('Access-Control-Allow-Origin', '*')

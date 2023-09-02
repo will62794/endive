@@ -21,6 +21,12 @@ TypeOK ==
     /\ log \in [Server -> BoundedSeq(Terms, MaxLogLen)]
     /\ immediatelyCommitted \in SUBSET (LogIndices \X Terms)
 
+TypeOKSmallCommitted == 
+    /\ currentTerm \in [Server -> Terms]
+    /\ state \in [Server -> {Secondary, Primary}]
+    /\ log \in [Server -> BoundedSeq(Terms, MaxLogLen)]
+    /\ immediatelyCommitted \in kOrSmallerSubset(1, (LogIndices \X Terms))
+
 TypeOKRandom == 
     /\ currentTerm \in RandomSubset(5, [Server -> Terms])
     /\ state \in [Server -> {Secondary, Primary}]

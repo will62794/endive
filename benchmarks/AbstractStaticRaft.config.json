@@ -36,7 +36,7 @@
     "quant_vars": ["VARI", "VARJ"],
     "model_consts"  :  "CONSTANT n1,n2,n3",
     "symmetry" : true,
-    "typeok"  :  "TypeOKRandom",
+    "typeok"  :  "TypeOK",
     "tlc_specific_spec": true,
     "try_final_minimize": false,
     "simulate"  :  true
