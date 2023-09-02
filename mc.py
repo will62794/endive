@@ -9,6 +9,7 @@ import random
 import re
 import tempfile
 import pyeda
+import uuid
 
 from itertools import chain, combinations
 

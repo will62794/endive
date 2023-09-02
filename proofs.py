@@ -7,6 +7,7 @@ import pickle
 import graphviz
 from mc import CTI
 import logging
+import json
 
 class StructuredProofNode():
     """ Single node (i.e. lemma) of a structured proof tree. """
