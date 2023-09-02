@@ -490,11 +490,6 @@ H_UniformLogEntriesInTerm ==
         (\A j \in DOMAIN log[s] : (j < i) => log[s][j] # log[s][i]) => 
             (~\E k \in DOMAIN log[t] : log[t][k] = log[s][i] /\ k < i)
 
-H_CommittedEntryExistsOnQuorum_AND_LogsLaterThanCommittedMustHaveCommitted_AND_LeaderCompleteness == 
-    /\ LeaderCompleteness
-    /\ H_CommittedEntryExistsOnQuorum
-    /\ H_LogsLaterThanCommittedMustHaveCommitted
-
 \* Reconfig related.
 
 H_PrimaryConfigTermEqualToCurrentTerm == 
