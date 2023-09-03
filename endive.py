@@ -12,6 +12,7 @@ from datetime import datetime
 import tempfile
 import uuid
 import pickle
+import itertools
 
 import graphviz
 
@@ -34,6 +35,10 @@ def chunks(seq, n_chunks):
     chunk_size = max(N // n_chunks, 1)
     # print("chunk size:", chunk_size)
     return (seq[i:i+chunk_size] for i in range(0, N, chunk_size))
+
+def dict_product(inp):
+    """ Produce Cartesian product of dicts with list valued fields. """
+    return [dict(zip(inp, x)) for x in itertools.product(*inp.values())]
 
 class InductiveInvGen():
     """ 
@@ -145,21 +150,43 @@ class InductiveInvGen():
         os.system(f"rm -rf {os.path.join(self.specdir, 'states')}")
         os.system(f"mkdir -p {os.path.join(self.specdir, GEN_TLA_DIR)}")
 
-    def get_tlc_config_constants_str(self):
-        """ Return string for CONSTANT definitions in TLC config. """
-        if type(self.constants) == list:
-            return "CONSTANTS\n" + "\n".join(self.constants)
-        if type(self.constants) == dict:
+    def constants_obj_to_constants_str(self, constants_obj):
+        if type(constants_obj) == list:
+            return "CONSTANTS\n" + "\n".join(constants_obj)
+        if type(constants_obj) == dict:
             out = ""
-            for c in self.constants:
-                val = self.constants[c]
+            for c in constants_obj:
+                val = constants_obj[c]
                 # TODO: Consider how to handle multi-valued parameters.
                 # for minimal CTI generation.
-                if type(self.constants[c]) == list:
-                    val = self.constants[c][-1] 
+                if type(constants_obj[c]) == list:
+                    val = constants_obj[c][-1] 
                 out += f"{c} = {val}\n"
             return "CONSTANTS\n" + out
-        return self.constants
+        return constants_obj
+
+    def get_tlc_config_constants_str(self):
+        """ Return string for CONSTANT definitions in TLC config. """
+        return self.constants_obj_to_constants_str(self.constants)
+    
+    def get_config_constant_instances(self):
+        """ 
+        If the CONSTANT parameter settings are multi-valued, enumerate the possible
+        parameterized instantiations based on each multi-valued parameters e.g. the Cartesian product
+        of all possible parameter values for each field.
+
+        TODO: Eventually would need to think more about enumeration order here (e.g. smallest first).
+        """
+
+        if not type(self.constants) == dict:
+            return [self.constants]
+
+        # First convert fields of dict to 1 element lists if they are not lists.
+        listified_constants = dict(self.constants)
+        for k in listified_constants:
+            if not type(listified_constants[k]) == list:
+                listified_constants[k] = [listified_constants[k]]
+        return dict_product(listified_constants)
 
     def initialize_quant_inv(self):
         """ Set up quantifier template function."""
@@ -871,7 +898,7 @@ class InductiveInvGen():
         return all_tla_ctis    
 
 
-    def generate_ctis_tlc_run_async(self, num_traces_per_worker, props=None, depth=None, view=None, action=None, typeok=None):
+    def generate_ctis_tlc_run_async(self, num_traces_per_worker, props=None, depth=None, view=None, action=None, typeok=None, constants_obj=None):
         """ Starts a single instance of TLC to generate CTIs.
         
         Will generate CTIs for the conjunction of all predicates given in 'props'.
@@ -967,6 +994,8 @@ class InductiveInvGen():
         else:
             invcheck_tla_indcheck_cfg += f"NEXT {action}\n"
 
+        if constants_obj is None:
+            constants_obj = self.constants
 
         invcheck_tla_indcheck_cfg += f"CONSTRAINT {self.state_constraint}\n"
         if view is not None:
@@ -978,7 +1007,7 @@ class InductiveInvGen():
         # invcheck_tla_indcheck_cfg += "INVARIANT InvStrengthened\n"
         invcheck_tla_indcheck_cfg += "INVARIANT InvStrengthened_Constraint\n"
         # invcheck_tla_indcheck_cfg += "INVARIANT OnePrimaryPerTerm\n"
-        invcheck_tla_indcheck_cfg += self.get_tlc_config_constants_str()
+        invcheck_tla_indcheck_cfg += self.constants_obj_to_constants_str(constants_obj)
         invcheck_tla_indcheck_cfg += "\n"
         # TODO: See if we really want to allow symmetry here or not.
         # if symmetry:
@@ -1118,7 +1147,18 @@ class InductiveInvGen():
                 curr_proc_batch = []
                 for action in actions:
                     logging.info(f"Starting CTI generation process {n} (of {num_cti_worker_procs} total workers), Action='{action}'")
-                    cti_subproc = self.generate_ctis_tlc_run_async(num_traces_per_tlc_instance,props=props, depth=depth, view=view, action=action, typeok=typeok_override)
+                    
+                    # TODO: Consider iterating over multiple config instances, ideally in order of "smallest" to "largest".
+                    constants_obj = self.get_config_constant_instances()[-1]
+                    cti_subproc = self.generate_ctis_tlc_run_async(
+                                        num_traces_per_tlc_instance,
+                                        props=props, 
+                                        depth=depth, 
+                                        view=view, 
+                                        action=action, 
+                                        typeok=typeok_override,
+                                        constants_obj=constants_obj)
+                    
                     proc_obj = {"action": action, "proc": cti_subproc}
                     cti_subprocs.append(proc_obj)
                     actions_started += 1
@@ -2636,6 +2676,10 @@ class InductiveInvGen():
         tstart = time.time()
 
         self.load_parse_tree = True
+
+        print("CONFIG CONSTANT INSTANCES.")
+        for c in self.get_config_constant_instances():
+            print(c)
 
         # Parse and save AST of spec if needed.
         if self.load_parse_tree:
