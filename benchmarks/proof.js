@@ -32,7 +32,7 @@ function awaitGenCtiCompletion(expr){
             reloadProofGraph();
             $('#gen-ctis-btn').prop("disabled",false);
             $('#gen-ctis-btn-subtree').prop("disabled",false);
-            $('#cti-loading-icon').hide();
+            $('#cti-loading-icon').css('visibility', 'hidden');
         }
     });
 }
@@ -77,8 +77,9 @@ function deleteSupportLemmaEdge(edge){
 
         // Once we added the new support edge, we should reload the proof graph and re-generate CTIs
         // for the target node.
-        reloadProofGraph();
-        genCtis(target["name"]);
+        reloadProofGraph(function(){
+            genCtis(target["name"]);
+        });
     });
 }
 
