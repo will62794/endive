@@ -1057,8 +1057,9 @@ class InductiveInvGen():
         if depth is not None:
             simulate_depth = depth
         
-        sampling_target_num_init_states = 30000
-        sampling_args = f"-Dtlc2.tool.impl.Tool.autoInitStatesSampling=true -Dtlc2.tool.impl.Tool.autoInitSamplingTargetNumInitStates={sampling_target_num_init_states}"
+        sampling_target_num_init_states = 10000
+        sampling_target_time_limit_ms = 5000
+        sampling_args = f"-Dtlc2.tool.impl.Tool.autoInitStatesSampling=true -Dtlc2.tool.impl.Tool.autoInitSamplingTimeLimitMS={sampling_target_time_limit_ms} -Dtlc2.tool.impl.Tool.autoInitSamplingTargetNumInitStates={sampling_target_num_init_states}"
         args = (dirpath, sampling_args, "tla2tools-checkall.jar", mc.TLC_MAX_SET_SIZE, simulate_flag, simulate_depth, ctiseed, tag, num_ctigen_tlc_workers, indcheckcfgfilename(action), indchecktlafilename)
         cmd = self.java_exe + ' -Xss16M -Djava.io.tmpdir="%s" %s -cp %s tlc2.TLC -maxSetSize %d %s -depth %d -seed %d -noGenerateSpecTE -metadir states/indcheckrandom_%s -continue -deadlock -workers %d -config %s %s' % args
         logging.debug("TLC command: " + cmd)
@@ -1146,7 +1147,7 @@ class InductiveInvGen():
             # if self.use_apalache_ctigen:
                 # cti_subproc = self.generate_ctis_apalache_run_async(num_traces_per_tlc_instance)
             # else:
-            MAX_CONCURRENT_PROCS = 4
+            MAX_CONCURRENT_PROCS = 3
             if actions is not None:
                 actions_started = 0
                 curr_proc_batch = []
