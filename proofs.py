@@ -415,7 +415,6 @@ class StructuredProof():
             return start_node
         else:
             seen.add(start_node.name)
-            print(seen)
             for c in start_node.children_list():
                 if c.name not in seen:
                     ret = self.get_node_by_name_rec(c, name, seen=seen)
