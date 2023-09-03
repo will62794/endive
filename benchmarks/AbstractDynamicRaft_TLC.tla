@@ -95,7 +95,11 @@ CTICost ==
     \* Sum of term values in all log entries.
     SumFnRange([s \in Server |-> SumFnRange(log[s])]) +
     \* Treat states with more nodes in Secondary as lower "cost"/"energy" states.
-    SumFnRange([s \in Server |-> IF state[s] = Secondary THEN 0 ELSE 1])
+    SumFnRange([s \in Server |-> IF state[s] = Secondary THEN 0 ELSE 1]) +
+    \* Config variables.
+    SumFnRange([s \in Server |-> Cardinality(config[s])]) + 
+    SumFnRange(configVersion) +
+    SumFnRange(configTerm)
 
 
 
