@@ -527,6 +527,23 @@ H_ActiveConfigsSafeAtTerms ==
         \A Q \in Quorums(config[t]) : \E n \in Q : currentTerm[n] >= configTerm[s]
 
 
+\* If a log entry in term T exists, there must have been an election in 
+\* term T to create it, implying the existence of a config in term T or newer.
+H_LogEntryInTermImpliesConfigInTerm == 
+    \A s \in Server : 
+        \A i \in DOMAIN log[s] :
+        \E t \in Server : 
+            configTerm[t] >= log[s][i]
+
+H_ActiveConfigsOverlapWithCommittedEntry == 
+    \A c \in immediatelyCommitted :
+    \A s \in ActiveConfigSet :
+        \A Q \in Quorums(config[s]) : \E n \in Q : InLog(c, n)  
+
+H_NewerConfigsDisablePrimaryCommitsInOlderTerms ==
+    \A s,t \in Server : 
+    (state[t] = Primary /\ currentTerm[t] < configTerm[s]) =>
+        \A Q \in Quorums(config[t]) : \E n \in Q : currentTerm[n] > currentTerm[t]
 
 
 \* \* Invariant developed during inductive proof decomposition experimenting.

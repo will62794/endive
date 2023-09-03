@@ -26,6 +26,24 @@ TypeOK ==
     /\ configVersion \in [Server -> ConfigVersions]
     /\ configTerm \in [Server -> Terms]
 
+TypeOKEmptyCommitted == 
+    /\ currentTerm \in [Server -> Terms]
+    /\ state \in [Server -> {Secondary, Primary}]
+    /\ log \in [Server -> BoundedSeq(Terms, MaxLogLen)]
+    /\ immediatelyCommitted = {}
+    /\ config \in [Server -> SUBSET Server]
+    /\ configVersion \in [Server -> ConfigVersions]
+    /\ configTerm \in [Server -> Terms]
+
+TypeOKEmptyCommittedEmptyLogs == 
+    /\ currentTerm \in [Server -> Terms]
+    /\ state \in [Server -> {Secondary, Primary}]
+    /\ log \in [Server -> {<<>>}]
+    /\ immediatelyCommitted = {}
+    /\ config \in [Server -> SUBSET Server]
+    /\ configVersion \in [Server -> ConfigVersions]
+    /\ configTerm \in [Server -> Terms]
+
 TypeOKRandom == 
     /\ currentTerm \in RandomSubset(5, [Server -> Terms])
     /\ state \in [Server -> {Secondary, Primary}]

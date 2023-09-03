@@ -28,6 +28,8 @@ primaryInTermContainsNewestConfigOfTerm_adr.children = {
         primaryConfigTermEqualToCurrentTerm_adr
     ]
 }
+primaryInTermContainsNewestConfigOfTerm_adr.ctigen_typeok = "TypeOKEmptyCommittedEmptyLogs"
+
 
 configVersionAndTermUnique_adr = StructuredProofNode("ConfigVersionAndTermUnique", "H_ConfigVersionAndTermUnique")
 # configVersionAndTermUnique_adr.ctigen_typeok = "TypeOKRandomEmptyCommitted"
@@ -75,6 +77,7 @@ onePrimaryPerTerm_adr.children = {
 }
 onePrimaryPerTerm_adr.ctigen_typeok = "TypeOKRandomEmptyCommitted"
 
+logEntryInTermImpliesConfigInTerm = StructuredProofNode("LogEntryInTermImpliesConfigInTerm", "H_LogEntryInTermImpliesConfigInTerm")
 
 primaryHasEntriesItCreated_adr = StructuredProofNode("PrimaryHasEntriesItCreated_A", "H_PrimaryHasEntriesItCreated")
 primaryHasEntriesItCreated_adr.children = {
@@ -82,8 +85,8 @@ primaryHasEntriesItCreated_adr.children = {
         onePrimaryPerTerm_adr,
     ],
     "BecomeLeaderAction": [
-        # quorumsSafeAtTerms,
-        # logEntryInTermImpliesSafeAtTerms
+        logEntryInTermImpliesConfigInTerm,
+        activeConfigsSafeAtTerms_adr
     ]
 }
 primaryHasEntriesItCreated_adr.ctigen_typeok = "TypeOKRandomEmptyCommitted"
@@ -93,8 +96,22 @@ primaryHasEntriesItCreated_adr.ctigen_typeok = "TypeOKRandomEmptyCommitted"
 logMatching_adr = StructuredProofNode("LogMatching_Lemma", "LogMatching", children = {
     "ClientRequestAction":[primaryHasEntriesItCreated_adr]
 })
-logMatching_adr.ctigen_typeok = "TypeOKRandomEmptyCommitted"
+logMatching_adr.ctigen_typeok = "TypeOKEmptyCommitted"
 
+currentTermsAtLeastLargeAsLogTermsForPrimary_adr =  StructuredProofNode("CurrentTermAtLeastAsLargeAsLogTermsForPrimary", "H_CurrentTermAtLeastAsLargeAsLogTermsForPrimary")
+currentTermsAtLeastLargeAsLogTermsForPrimary_adr.children = {
+    "BecomeLeaderAction": [
+        activeConfigsSafeAtTerms_adr
+    ]
+}
+
+
+termsGrowMonotonically_adr = StructuredProofNode("TermsOfEntriesGrowMonotonically", "H_TermsOfEntriesGrowMonotonically")
+termsGrowMonotonically_adr.children = {
+    "ClientRequestAction": [
+        currentTermsAtLeastLargeAsLogTermsForPrimary_adr
+    ]
+}
 
 uniformLogEntriesInTerm_adr = StructuredProofNode("UniformLogEntriesInTerm", "H_UniformLogEntriesInTerm")
 uniformLogEntriesInTerm_adr.children = {
@@ -106,20 +123,22 @@ uniformLogEntriesInTerm_adr.children = {
         primaryHasEntriesItCreated_adr
     ]
 }
-uniformLogEntriesInTerm_adr.ctigen_typeok = "TypeOKRandomEmptyCommitted"
+uniformLogEntriesInTerm_adr.ctigen_typeok = "TypeOKEmptyCommitted"
 
+activeConfigsOverlapWithCommittedEntry_adr = StructuredProofNode("ActiveConfigsOverlapWithCommittedEntry", "H_ActiveConfigsOverlapWithCommittedEntry")
+newerConfigsDisablePrimaryCommitsInOlderTerms_adr = StructuredProofNode("NewerConfigsDisablePrimaryCommitsInOlderTerms", "H_NewerConfigsDisablePrimaryCommitsInOlderTerms")
 
 primaryOrLogsLaterThanCommittedMustHaveEarlierCommitted_adr = StructuredProofNode("PrimaryOrLogsLaterThanCommittedMustHaveEarlierCommitted", "H_PrimaryOrLogsLaterThanCommittedMustHaveEarlierCommitted")
 primaryOrLogsLaterThanCommittedMustHaveEarlierCommitted_adr.children = {
     "BecomeLeaderAction": [
-        # termsGrowMonotonically,
+        termsGrowMonotonically_adr,
         # uniformLogEntriesInTerm,
         # logEntryInTermImpliesSafeAtTerms,
         # committedEntryExistsOnQuorum_cycleBreak
     ],
     "ClientRequestAction": [
-        # termsGrowMonotonically,
-        # uniformLogEntriesInTerm,
+        termsGrowMonotonically_adr,
+        uniformLogEntriesInTerm_adr,
     ],
     "CommitEntryAction": [
         # termsGrowMonotonically,
@@ -149,11 +168,18 @@ committedEntryExistsOnQuorum_adr.children = {
     ]
 }
 
+activeConfigsOverlapWithCommittedEntry_adr.children = {
+    "RollbackEntriesAction": [
+        primaryOrLogsLaterThanCommittedMustHaveEarlierCommitted_adr
+    ]
+}
+
 
 adr_children = {
     "CommitEntryAction": [
-        committedEntryExistsOnQuorum_adr,
-        # onePrimaryPerTerm_adr
+        activeConfigsOverlapWithCommittedEntry_adr,
+        newerConfigsDisablePrimaryCommitsInOlderTerms_adr,
+        # primaryConfigTermEqualToCurrentTerm_adr
     ]
 }
 
