@@ -103,8 +103,8 @@ class InductiveInvGen():
         #
 
         # Accept constants as either list of lines or string.
-        if type(constants)==list:
-            constants = "\n".join(constants)
+        # if type(constants)==list:
+            # constants = "\n".join(constants)
         self.constants = constants
 
         self.state_constraint = state_constraint
@@ -144,6 +144,17 @@ class InductiveInvGen():
         os.system(f"rm -rf {os.path.join(self.specdir, GEN_TLA_DIR)}")
         os.system(f"rm -rf {os.path.join(self.specdir, 'states')}")
         os.system(f"mkdir -p {os.path.join(self.specdir, GEN_TLA_DIR)}")
+
+    def get_tlc_config_constants_str(self):
+        """ Return string for CONSTANT definitions in TLC config. """
+        if type(self.constants) == list:
+            return "CONSTANTS\n" + "\n".join(self.constants)
+        if type(self.constants) == dict:
+            out = ""
+            for c in self.constants:
+                out += f"{c} = {self.constants[c]}\n"
+            return "CONSTANTS\n" + out
+        return self.constants
 
     def initialize_quant_inv(self):
         """ Set up quantifier template function."""
@@ -427,7 +438,7 @@ class InductiveInvGen():
 
         invcheck_cfg = "INIT PredInit\n"
         invcheck_cfg += "NEXT PredNext\n"
-        invcheck_cfg += self.constants
+        invcheck_cfg += self.get_tlc_config_constants_str()
         invcheck_cfg += "\n"
         invcheck_cfg += f"CONSTRAINT {self.state_constraint}"
         invcheck_cfg += "\n"
@@ -616,7 +627,7 @@ class InductiveInvGen():
 
         invcheck_cfg = "INIT Init\n"
         invcheck_cfg += "NEXT Next\n"
-        invcheck_cfg += self.constants
+        invcheck_cfg += self.get_tlc_config_constants_str()
         invcheck_cfg += "\n"
         invcheck_cfg += f"CONSTRAINT {self.state_constraint}"
         invcheck_cfg += "\n"
@@ -962,7 +973,7 @@ class InductiveInvGen():
         # invcheck_tla_indcheck_cfg += "INVARIANT InvStrengthened\n"
         invcheck_tla_indcheck_cfg += "INVARIANT InvStrengthened_Constraint\n"
         # invcheck_tla_indcheck_cfg += "INVARIANT OnePrimaryPerTerm\n"
-        invcheck_tla_indcheck_cfg += self.constants
+        invcheck_tla_indcheck_cfg += self.get_tlc_config_constants_str()
         invcheck_tla_indcheck_cfg += "\n"
         # TODO: See if we really want to allow symmetry here or not.
         # if symmetry:
@@ -1291,7 +1302,7 @@ class InductiveInvGen():
         invcheck_tla_indcheck_cfg += f"NEXT {next_pred}\n"
         invcheck_tla_indcheck_cfg += f"CONSTRAINT {self.state_constraint}"
         invcheck_tla_indcheck_cfg += "\n"
-        invcheck_tla_indcheck_cfg += self.constants
+        invcheck_tla_indcheck_cfg += self.get_tlc_config_constants_str()
         invcheck_tla_indcheck_cfg += "\n"
         
         # for inv in sat_invs_group:
