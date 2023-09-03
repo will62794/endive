@@ -152,7 +152,12 @@ class InductiveInvGen():
         if type(self.constants) == dict:
             out = ""
             for c in self.constants:
-                out += f"{c} = {self.constants[c]}\n"
+                val = self.constants[c]
+                # TODO: Consider how to handle multi-valued parameters.
+                # for minimal CTI generation.
+                if type(self.constants[c]) == list:
+                    val = self.constants[c][-1] 
+                out += f"{c} = {val}\n"
             return "CONSTANTS\n" + out
         return self.constants
 
