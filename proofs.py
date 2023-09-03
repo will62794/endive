@@ -57,16 +57,34 @@ class StructuredProofNode():
         if load_from_obj:
             self.load_from(load_from_obj)
 
-    def serialize_rec(self, include_ctis=True, seen=set()):
+    def serialize_rec(self, include_ctis=True, seen=set(), serialize_children=True):
         # if self.expr in seen:
         #     None
         # print(seen)
-        # seen.add(self.expr)
+
+        # Deal with cycles in the proof graph by tracking visited nodes.
+        seen.add(self.expr)
+
+        # If we have already visited this node in the proof graph, then retain it as a child,
+        # but don't recursively serialize its children.
+        def serialize_child(c):
+            if c.expr in seen:
+                return c.serialize_rec(include_ctis=include_ctis, seen=set(seen), serialize_children=False)
+            else:
+                return c.serialize_rec(include_ctis=include_ctis, seen=set(seen))
+
+        children_serialized = {}
+        if serialize_children:
+            children_serialized = { 
+                a:[serialize_child(c) for c in self.children[a]] 
+                    for a in self.children
+            }
+
         ret = {
             "name": self.name, 
             "expr": self.expr, 
             "apalache_proof_check": self.apalache_proof_check, 
-            "children":  {a:[c.serialize_rec(include_ctis=include_ctis, seen=set(seen)) for c in self.children[a]] for a in self.children}, 
+            "children": children_serialized, 
             "project_vars": self.cti_project_vars
         }
 
@@ -74,17 +92,14 @@ class StructuredProofNode():
         remaining_ctis_cost_sorted = sorted(self.get_remaining_ctis(), key = cti_sort_key)
 
         cti_info = {
-            # "ctis": [c.serialize() for c in self.ctis],
             "ctis": {a:[c.serialize() for c in self.ctis[a]] for a in self.ctis},
-            # Eliminated CTIs are stored as CTI hashes, not full CTIs.
-            # "ctis_eliminated": [c for c in self.ctis_eliminated],
-            "ctis_eliminated": self.ctis_eliminated,
-            # "ctis_remaining": {a:[cti.serialize() for cti in self.get_remaining_ctis(a)] for a in self.ctis},
+            "ctis_eliminated": self.ctis_eliminated, # eliminated CTIs are stored as CTI hashes, not full CTIs.
             "ctis_remaining": {a:[str(hash(cti)) for cti in self.get_remaining_ctis(a)] for a in self.ctis},
             "num_parent_ctis_eliminated": len(self.parent_ctis_eliminated),
             # "parent_ctis_eliminated": [c for c in self.parent_ctis_eliminated],
             "had_ctis_generated": self.had_ctis_generated
         }
+
         # print(type(cti_info["ctis"]))
         if include_ctis:
             for k in cti_info:
@@ -279,19 +294,6 @@ class StructuredProof():
         html = "<ul>"+self.root.to_html()+"</ul>"
         return html
 
-    def get_node_by_name_rec(self, name, start_node):
-        if start_node.name == name:
-            return start_node
-        else:
-            for c in start_node.children:
-                ret = self.get_node_by_name_rec(name, c)
-                if ret is not None:
-                    return ret
-            return None
-
-    def get_node_by_name(self, name):
-        return self.get_node_by_name_rec(name, self.root)
-
     def node_cti_html(self, node):
         html = ""
         max_ctis_to_show = 30
@@ -407,22 +409,32 @@ class StructuredProof():
         dot.render(out_file)
         return dot.source
 
-    def get_node_by_name(self, start_node, name):
+    def get_node_by_name_rec(self, start_node, name, seen=set()):
         # If this was our target node, terminate.
         if name == start_node.name:
             return start_node
         else:
+            seen.add(start_node.name)
+            print(seen)
             for c in start_node.children_list():
-                ret = self.get_node_by_name(c, name)
-                if ret is not None:
-                    return ret
-
-            # If you didn't find the node via traversing from the
-            # start node, also check the set of all nodes.
-            for n in self.nodes:
-                if name == n.name:
-                    return n
+                if c.name not in seen:
+                    ret = self.get_node_by_name_rec(c, name, seen=seen)
+                    if ret is not None:
+                        return ret
             return None
+
+    def get_node_by_name(self, start_node, name):
+        seen = set()
+        ret = self.get_node_by_name_rec(start_node, name, seen=seen)
+        if ret is not None:
+            return ret
+
+        # If you didn't find the node via traversing from the
+        # start node, also check the set of all nodes.
+        for n in self.nodes:
+            if name == n.name:
+                return n
+        return None
 
     def compute_cti_elimination_for_node(self, indgen, node, ctis, action):
         """ Compute CTIs that are eliminated by the children of this node, for given set of CTIs. """

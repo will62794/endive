@@ -22,6 +22,10 @@ primaryInTermContainsNewestConfigOfTerm_adr.children = {
         activeConfigsSafeAtTerms_adr,
         # TODO: will need to deal with cycle issue here before re-including this lemma.
         # onePrimaryPerTerm_adr
+    ],
+    "ReconfigAction": [
+        onePrimaryPerTerm_adr,
+        primaryConfigTermEqualToCurrentTerm_adr
     ]
 }
 
@@ -39,8 +43,21 @@ configVersionAndTermUnique_adr.children = {
     ]
 }
 
+activeConfigsOverlap_adr.children = {
+    "ReconfigAction": [
+        onePrimaryPerTerm_adr,
+        activeConfigsSafeAtTerms_adr
+    ],
+    "BecomeLeaderAction": [
+        activeConfigsSafeAtTerms_adr
+    ]
+}
+
 activeConfigsSafeAtTerms_adr.children = {
-    "BecomeLeaderAction": [activeConfigsOverlap_adr]
+    "BecomeLeaderAction": [activeConfigsOverlap_adr],
+    "ReconfigAction": [
+        activeConfigsOverlap_adr,
+    ]
 }
 
 
@@ -136,7 +153,7 @@ committedEntryExistsOnQuorum_adr.children = {
 adr_children = {
     "CommitEntryAction": [
         committedEntryExistsOnQuorum_adr,
-        onePrimaryPerTerm_adr
+        # onePrimaryPerTerm_adr
     ]
 }
 
