@@ -1,6 +1,10 @@
 body{
-    font-family: monospace;
+    /* font-family: monospace; */
     font-size:14px;
+}
+
+h1{
+    font-family: sans-serif;
 }
 table{
     border-spacing: 3px;
@@ -65,8 +69,43 @@ table td:hover {
     float:left;
     height:90%;
     padding-left:1%;
+    font-family: monospace;
 }
 
 #cti-loading-icon{
     color:blue;
+}
+
+#proof-node-name{
+    font-size: 18px;
+    font-weight: bold;
+    font-family: monospace;
+}
+
+
+button {
+    background-color: steelblue;
+    border: none;
+    color: white;
+    padding: 8px 20px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 14px;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+button:disabled{
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* button:hover{
+    cursor: pointer;
+} */
+
+#delete-support-edge-btn{
+    background-color: #f44336;
+    color:white;
 }

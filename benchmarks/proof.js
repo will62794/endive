@@ -104,18 +104,18 @@ function setCTIPaneHtml(nodeData){
         nodeIdText = nodeData["parentId"] + " -> " + currentNodeId + "";
     }
 
-    ctipane.innerHTML += '<div id="cti-loading-icon">Generating CTIs <i class="fa fa-refresh fa-spin"></i></div>';
-    ctipane.innerHTML += `<h3> Proof node: ${nodeIdText} </h3>`;
+    // let generatingCTIsDiv = '<div id="cti-loading-icon">Generating CTIs <i class="fa fa-refresh fa-spin"></i></div>';
+    let generatingCTIsDiv = '<div id="cti-loading-icon">Generating CTIs <i class="fa fa-refresh fa-spin"></i></div>';
+    // ctipane.innerHTML += generatingCTIsDiv;
+    ctipane.innerHTML += `<div id='proof-node-name'> Proof node: ${nodeIdText} </div><br>`;
 
     // For now don't allow CTI generation for specific sub-actions, only for top-level node all at once.
-    if(nodeData && !nodeData["actionNode"]){
-        ctipane.innerHTML += "<div><button id='gen-ctis-btn'> Gen CTIs </button></div> <br>";
-        ctipane.innerHTML += "<div><button id='gen-ctis-btn-subtree'> Gen CTIs (recursive) </button></div> <br>";
-    }
+    ctipane.innerHTML += `<div><button id='gen-ctis-btn'> Generate CTIs </button> ${generatingCTIsDiv}</div> <br>`;
+    // ctipane.innerHTML += "<div><button id='gen-ctis-btn-subtree'> Gen CTIs (recursive) </button></div> <br>";
 
-    ctipane.innerHTML += "<div><button id='refresh-node-btn'> Refresh Proof Node </button></div> <br>";
+    // ctipane.innerHTML += "<div><button id='refresh-node-btn'> Refresh Proof Node </button></div> <br>";
     ctipane.innerHTML += "<div><button id='add-support-lemma-btn'> Add support lemma </button></div><br>";
-    ctipane.innerHTML += "<div><button id='delete-support-edge-btn'> Delete selected support lemma edge </button></div>";
+    ctipane.innerHTML += "<div><button id='delete-support-edge-btn'> Delete selected support lemma edge </button></div><br>";
 
     ctipane.innerHTML += "<div><button id='add-lemma-node-btn'> Add lemma </button></div><br>";
 
@@ -128,6 +128,14 @@ function setCTIPaneHtml(nodeData){
     }
     selectHTML += '</select>';
     ctipane.innerHTML += selectHTML;
+
+    $("#gen-ctis-btn").prop('disabled', true);
+    $("#gen-ctis-btn-subtree").prop('disabled', true);
+
+    if(nodeData && !nodeData["actionNode"]){
+        $("#gen-ctis-btn").prop('disabled', false);
+        $("#gen-ctis-btn-subtree").prop('disabled', false);
+    }
 
 
     $('#cti-loading-icon').css('visibility', 'hidden');
