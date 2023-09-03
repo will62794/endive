@@ -34,7 +34,8 @@ configVersionAndTermUnique_adr.children = {
         activeConfigsSafeAtTerms_adr,
     ],
     "ReconfigAction": [
-        primaryInTermContainsNewestConfigOfTerm_adr
+        primaryInTermContainsNewestConfigOfTerm_adr,
+        primaryConfigTermEqualToCurrentTerm_adr
     ]
 }
 
