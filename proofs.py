@@ -435,7 +435,7 @@ class StructuredProof():
                 return n
         return None
 
-    def compute_cti_elimination_for_node(self, indgen, node, ctis, action):
+    def compute_cti_elimination_for_node(self, indgen, node, ctis, action, constants_obj=None):
         """ Compute CTIs that are eliminated by the children of this node, for given set of CTIs. """
 
         ####
@@ -460,7 +460,7 @@ class StructuredProof():
 
         cti_info = indgen.check_cti_elimination(ctis, [
             (child.name,child.expr) for child in node.children[action]
-        ])
+        ], constants_obj=constants_obj)
 
         ctis_eliminated = cti_info["eliminated"]
         cti_cost = cti_info["cost"]
@@ -552,32 +552,57 @@ class StructuredProof():
         if node.ctigen_typeok is not None:
             typeok_override = node.ctigen_typeok
 
-        k_ctis, _ = indgen.generate_ctis(
-                            props=[(node.name, node.expr)], 
-                            reseed=True, depth=1, 
-                            view=node.cti_view, 
-                            actions=actions, 
-                            typeok_override=typeok_override)
-
-        # if self.actions is not None:
-        #     print(k_ctis.keys())
-        #     for k in k_ctis:
-        #         print(k, len(k_ctis[k]))
-
-
-        # Compute CTI elimination broken down by action.
+        # for constants_obj in indgen.get_config_constant_instances():
+        
+        all_ctis_by_action = {a:set() for a in actions}
+        node.ctis_eliminated = {a:set() for a in actions}
         for action in actions:
-            ctis_for_action = list(k_ctis[action])
-            ctis_for_action.sort()
+            for constants_obj in indgen.get_config_constant_instances():
+                # If we have already found some CTIs for this action, don't try generate any more.
+                # This amounts to a policy where we look for CTIs in smaller parameter instances first,
+                # before considering larger ones.
+                if action in all_ctis_by_action[action] and len(all_ctis_by_action[action]) > 0 and len(node.ctis_eliminated[action]) < len(all_ctis_by_action[action]):
+                    print(f"Already have un-eliminated CTIs for action {action}, continuing.")
+                    continue
 
-            # Set CTIs for this node based on those generated and sample if needed.
-            logging.info(f"Number of proof node CTIs generated for action '{action}': {len(ctis_for_action)}. Sampling a limit of {indgen.max_proof_node_ctis} CTIs.")
-            num_to_sample = min(len(ctis_for_action), indgen.max_proof_node_ctis) # don't try to sample more CTIs than there are.
-            ctis_for_action_sampled = random.sample(ctis_for_action, num_to_sample)
-            node.set_ctis(ctis_for_action_sampled, action)
+                print(f"Generating CTIs for action {action} of node ({node.name},{node.expr})")
+                ctis, _ = indgen.generate_ctis(
+                                    props=[(node.name, node.expr)], 
+                                    reseed=True, depth=1, 
+                                    view=node.cti_view, 
+                                    # actions=actions, 
+                                    actions=[action], 
+                                    typeok_override=typeok_override,
+                                    constants_obj=constants_obj)
+                
+                # Sample CTIs if we generated more than desired.
+                if len(ctis[action]) > indgen.max_proof_node_ctis:
+                    ctis[action] = random.sample(ctis[action], indgen.max_proof_node_ctis)
+                all_ctis_by_action[action].update(ctis[action])
 
-            ctis_eliminated = self.compute_cti_elimination_for_node(indgen, node, node.get_ctis(action), action)
-            node.ctis_eliminated[action] = list(ctis_eliminated)
+                #
+                # Compute CTI elimination broken down per action.
+                #
+                
+                ctis_for_action = list(all_ctis_by_action[action])
+                ctis_for_action.sort()
+
+                # Set CTIs for this node based on those generated and sample if needed.
+                logging.info(f"Number of proof node CTIs generated for action '{action}': {len(ctis_for_action)}. Sampling a limit of {indgen.max_proof_node_ctis} CTIs.")
+                
+                # num_to_sample = min(len(ctis_for_action), indgen.max_proof_node_ctis) # don't try to sample more CTIs than there are.
+                # ctis_for_action_sampled = random.sample(ctis_for_action, num_to_sample)
+                # node.set_ctis(ctis_for_action_sampled, action)
+
+                # node.set_ctis(ctis_for_action, action)
+
+                # ctis_eliminated = self.compute_cti_elimination_for_node(indgen, node, node.get_ctis(action), action, constants_obj = constants_obj)
+                ctis_eliminated = self.compute_cti_elimination_for_node(indgen, node, ctis[action], action, constants_obj = constants_obj)
+                
+                node.set_ctis(all_ctis_by_action[action], action)
+                node.ctis_eliminated[action].update(ctis_eliminated)
+        
+            node.ctis_eliminated[action] = list(node.ctis_eliminated[action])
 
 
         # Re-write proof html.

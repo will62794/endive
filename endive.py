@@ -158,7 +158,8 @@ class InductiveInvGen():
             for c in constants_obj:
                 val = constants_obj[c]
                 # TODO: Consider how to handle multi-valued parameters.
-                # for minimal CTI generation.
+                # for minimal CTI generation. For now take the last parameter
+                # in the list.
                 if type(constants_obj[c]) == list:
                     val = constants_obj[c][-1] 
                 out += f"{c} = {val}\n"
@@ -167,7 +168,8 @@ class InductiveInvGen():
 
     def get_tlc_config_constants_str(self):
         """ Return string for CONSTANT definitions in TLC config. """
-        return self.constants_obj_to_constants_str(self.constants)
+        # return self.get_config_constant_instances()[-1]
+        return self.constants_obj_to_constants_str(self.get_config_constant_instances()[-1])
     
     def get_config_constant_instances(self):
         """ 
@@ -1097,14 +1099,17 @@ class InductiveInvGen():
                     action = cti_subproc["action"]
                     logging.info(f"Waiting for CTI generation process termination (action={action})")
                     (parsed_ctis, parsed_cti_traces) = self.generate_ctis_tlc_run_await(cti_subproc["proc"]) 
-                    all_ctis[action] = parsed_ctis
+                    if action in all_ctis:
+                        all_ctis[action].update(parsed_ctis)
+                    else:
+                        all_ctis[action] = parsed_ctis
                     # all_cti_traces[action] = parsed_cti_traces
                 else:
                     (parsed_ctis, parsed_cti_traces) = self.generate_ctis_tlc_run_await(cti_subproc["proc"]) 
                     all_ctis = all_ctis.union(parsed_ctis)
                     # all_cti_traces += parsed_cti_traces
 
-    def generate_ctis(self, props=None, reseed=False, depth=None, view=None, actions=None, typeok_override=None):
+    def generate_ctis(self, props=None, reseed=False, depth=None, view=None, actions=None, typeok_override=None, constants_obj=None):
         """ Generate CTIs for use in counterexample elimination. """
 
         # Re-set random seed to ensure consistent RNG initial state.
@@ -1141,7 +1146,7 @@ class InductiveInvGen():
             # if self.use_apalache_ctigen:
                 # cti_subproc = self.generate_ctis_apalache_run_async(num_traces_per_tlc_instance)
             # else:
-            MAX_CONCURRENT_PROCS = 3
+            MAX_CONCURRENT_PROCS = 4
             if actions is not None:
                 actions_started = 0
                 curr_proc_batch = []
@@ -1149,7 +1154,10 @@ class InductiveInvGen():
                     logging.info(f"Starting CTI generation process {n} (of {num_cti_worker_procs} total workers), Action='{action}'")
                     
                     # TODO: Consider iterating over multiple config instances, ideally in order of "smallest" to "largest".
-                    constants_obj = self.get_config_constant_instances()[-1]
+                    # constants_obj = self.get_config_constant_instances()[-1]
+                    # for constants_obj in self.get_config_constant_instances()[-1:]:
+                    print("CTI generation for config:", constants_obj)
+                
                     cti_subproc = self.generate_ctis_tlc_run_async(
                                         num_traces_per_tlc_instance,
                                         props=props, 
@@ -1340,14 +1348,17 @@ class InductiveInvGen():
 
         return invcheck_tla_indcheck
 
-    def make_ctiquickcheck_cfg(self, invs, sat_invs_group, orig_k_ctis, quant_inv_fn, next_pred="CTICheckNext"):
+    def make_ctiquickcheck_cfg(self, invs, sat_invs_group, orig_k_ctis, quant_inv_fn, next_pred="CTICheckNext", constants_obj=None):
 
         # Generate config file.
         invcheck_tla_indcheck_cfg = "INIT CTICheckInit\n"
         invcheck_tla_indcheck_cfg += f"NEXT {next_pred}\n"
         invcheck_tla_indcheck_cfg += f"CONSTRAINT {self.state_constraint}"
         invcheck_tla_indcheck_cfg += "\n"
-        invcheck_tla_indcheck_cfg += self.get_tlc_config_constants_str()
+        if constants_obj is not None:
+            invcheck_tla_indcheck_cfg += self.constants_obj_to_constants_str(constants_obj)
+        else:
+            invcheck_tla_indcheck_cfg += self.get_tlc_config_constants_str()
         invcheck_tla_indcheck_cfg += "\n"
         
         # for inv in sat_invs_group:
@@ -1371,7 +1382,7 @@ class InductiveInvGen():
         logging.info(f"Pre-generated and cached {len(self.cached_invs)} total invariants")
         self.end_timing_invcheck()
 
-    def check_cti_elimination(self, orig_ctis, sat_invs):
+    def check_cti_elimination(self, orig_ctis, sat_invs, constants_obj=None):
         """ Computes CTI elimination mapping for the given set of CTIs and invariants.
         
         That is, this function computes and returns a mapping from each invariant to the set of CTIs 
@@ -1445,7 +1456,7 @@ class InductiveInvGen():
                 # Generate config file.
                 ctiquickcfgfile=f"{os.path.join(self.specdir, GEN_TLA_DIR)}/{self.specname}_CTIQuickCheck_chunk{ci}.cfg"
                 ctiquickcfgfilename=f"{GEN_TLA_DIR}/{self.specname}_CTIQuickCheck_chunk{ci}.cfg"
-                cfg_str = self.make_ctiquickcheck_cfg(invs, sat_invs_group, cti_chunk, quant_inv_fn)
+                cfg_str = self.make_ctiquickcheck_cfg(invs, sat_invs_group, cti_chunk, quant_inv_fn, constants_obj=constants_obj)
                 
                 with open(ctiquickcfgfile,'w') as f:
                     f.write(cfg_str)
@@ -1454,7 +1465,7 @@ class InductiveInvGen():
                 # Generate alternate config file for computing reachability graph from each CTI.
                 ctiquickcfgfile_reach=f"{os.path.join(self.specdir, GEN_TLA_DIR)}/{self.specname}_CTIQuickCheck_Reachable_chunk{ci}.cfg"
                 ctiquickcfgfilename_reach=f"{GEN_TLA_DIR}/{self.specname}_CTIQuickCheck_Reachable_chunk{ci}.cfg"
-                cfg_str = self.make_ctiquickcheck_cfg(invs, sat_invs_group, cti_chunk, quant_inv_fn, next_pred="CTICheckNext_DepthBoundedReachability")
+                cfg_str = self.make_ctiquickcheck_cfg(invs, sat_invs_group, cti_chunk, quant_inv_fn, next_pred="CTICheckNext_DepthBoundedReachability", constants_obj=constants_obj)
                 
                 with open(ctiquickcfgfile_reach,'w') as f:
                     f.write(cfg_str)
@@ -2677,7 +2688,7 @@ class InductiveInvGen():
 
         self.load_parse_tree = True
 
-        print("CONFIG CONSTANT INSTANCES.")
+        print("Config CONSTANT instances.")
         for c in self.get_config_constant_instances():
             print(c)
 

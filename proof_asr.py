@@ -56,10 +56,10 @@ termsGrowMonotonically.children = {
 
 
 logMatching = StructuredProofNode("LogMatching_Lemma", "LogMatching", children = {
-    # "ClientRequestAction":[
-    #     lemmaTRUE,
+    "ClientRequestAction":[
+        lemmaTRUE,
     #     # primaryHasEntriesItCreated
-    # ]
+    ]
 })
 
 lemmaTRUEShim.children = {
@@ -203,7 +203,8 @@ asr_children = {
 asr_root = StructuredProofNode("StateMachineSafety_Lemma", "StateMachineSafety", children = asr_children)
 asr_nodes = [
     committedEntryExistsOnQuorum,
-    logMatching
+    logMatching,
+    currentTermsAtLeastLargeAsLogTermsForPrimary
     # primaryHasEntriesItCreated
 ]
 asr_actions = [
