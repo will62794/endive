@@ -10,7 +10,6 @@ lemmaTRUEShim = StructuredProofNode("LemmaTrueShim", "1=1")
 quorumsSafeAtTerms = StructuredProofNode("QuorumsSafeAtTerms", "H_QuorumsSafeAtTerms")
 
 onePrimaryPerTerm = StructuredProofNode("OnePrimaryPerTerm_Lemma", "H_OnePrimaryPerTerm", children = {
-    # lemmaTRUE,
     "BecomeLeaderAction":[
         quorumsSafeAtTerms
     ]
@@ -21,21 +20,21 @@ onePrimaryPerTerm.ctigen_typeok = "TypeOKRandomEmptyCommitted"
 logEntryInTermImpliesSafeAtTerms = StructuredProofNode("LogEntryInTermImpliesSafeAtTerm", "H_LogEntryInTermImpliesSafeAtTerm")
 logEntryInTermImpliesSafeAtTerms.children = {    
     "ClientRequestAction": [
-        # quorumsSafeAtTerms
+        quorumsSafeAtTerms
     ]
 }
 
-primaryHasEntriesItCreated = StructuredProofNode("PrimaryHasEntriesItCreated_A", "H_PrimaryHasEntriesItCreated")
+primaryHasEntriesItCreated = StructuredProofNode("PrimaryHasEntriesItCreated", "H_PrimaryHasEntriesItCreated")
 primaryHasEntriesItCreated.children = {
-    # "ClientRequestAction": [
-    #     onePrimaryPerTerm,
-    # ],
-    # "BecomeLeaderAction": [
-    #     # quorumsSafeAtTerms,
-    #     logEntryInTermImpliesSafeAtTerms
-    # ]
+    "ClientRequestAction": [
+        onePrimaryPerTerm,
+    ],
+    "BecomeLeaderAction": [
+        # quorumsSafeAtTerms,
+        logEntryInTermImpliesSafeAtTerms
+    ]
 }
-primaryHasEntriesItCreated.cti_view = "<<state, currentTerm, log>>"
+# primaryHasEntriesItCreated.cti_view = "<<state, currentTerm, log>>"
 primaryHasEntriesItCreated.cti_project_vars = ["state", "currentTerm", "log"]
 
 currentTermsAtLeastLargeAsLogTermsForPrimary =  StructuredProofNode("CurrentTermAtLeastAsLargeAsLogTermsForPrimary", "H_CurrentTermAtLeastAsLargeAsLogTermsForPrimary")
@@ -48,8 +47,7 @@ currentTermsAtLeastLargeAsLogTermsForPrimary.children = {
 termsGrowMonotonically = StructuredProofNode("TermsOfEntriesGrowMonotonically", "H_TermsOfEntriesGrowMonotonically")
 termsGrowMonotonically.children = {
     "ClientRequestAction": [
-        lemmaTRUE,
-        # currentTermsAtLeastLargeAsLogTermsForPrimary
+        currentTermsAtLeastLargeAsLogTermsForPrimary
     ]
 }
 # termsGrowMonotonically.ctigen_typeok = "TypeOKRandomEmptyCommitted"
@@ -57,8 +55,7 @@ termsGrowMonotonically.children = {
 
 logMatching = StructuredProofNode("LogMatching_Lemma", "LogMatching", children = {
     "ClientRequestAction":[
-        lemmaTRUE,
-    #     # primaryHasEntriesItCreated
+        primaryHasEntriesItCreated
     ]
 })
 
@@ -69,7 +66,6 @@ lemmaTRUEShim.children = {
 uniformLogEntriesInTerm = StructuredProofNode("UniformLogEntriesInTerm", "H_UniformLogEntriesInTerm")
 uniformLogEntriesInTerm.children = {
     "GetEntriesAction": [
-        # lemmaTRUEShim,
         logMatching
     ],
     "ClientRequestAction": [
@@ -172,7 +168,7 @@ logsLaterThanCommittedMustHaveCommitted.children = {
         logEntryInTermImpliesSafeAtTerms
     ],
     "GetEntriesAction": [
-        lemmaTRUE,
+        # lemmaTRUE,
         logMatching,
         termsGrowMonotonically,
     ]
@@ -180,9 +176,10 @@ logsLaterThanCommittedMustHaveCommitted.children = {
 
 leaderCompleteness.children = {
     "BecomeLeaderAction": [
-        # lemmaTRUE,
-        # termsGrowMonotonically,
-        # uniformLogEntriesInTerm,
+        termsGrowMonotonically,
+        uniformLogEntriesInTerm,
+        committedEntryExistsOnQuorum,
+        logsLaterThanCommittedMustHaveCommitted
         # logEntryInTermImpliesSafeAtTerms,
         # # TODO: Will need to deal with cycle recursion issue here properly.
         # committedEntryExistsOnQuorum_cycleBreak,
@@ -195,7 +192,7 @@ leaderCompleteness.children = {
 
 
 asr_children = {
-    "ClientRequestAction": [
+    "CommitEntryAction": [
         # lemmaTRUE
         committedEntryExistsOnQuorum
     ]
