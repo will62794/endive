@@ -545,6 +545,8 @@ H_NewerConfigsDisablePrimaryCommitsInOlderTerms ==
     (state[t] = Primary /\ currentTerm[t] < configTerm[s]) =>
         \A Q \in Quorums(config[t]) : \E n \in Q : currentTerm[n] > currentTerm[t]
 
+H_ConfigsNonempty ==
+    \A s \in Server : config[s] # {}
 
 \* \* Invariant developed during inductive proof decomposition experimenting.
 \* \* 08/19/2023

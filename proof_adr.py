@@ -5,6 +5,8 @@ from proofs import *
 # AbstractDynamicRaft proof structure.
 #
 
+configsNonEmpty_adr = StructuredProofNode("ConfigsNonEmpty", "H_ConfigsNonEmpty")
+
 quorumsSafeAtTerms_adr = StructuredProofNode("QuorumsSafeAtTerms", "H_QuorumsSafeAtTerms")
 quorumsSafeAtTerms_adr.ctigen_typeok = "TypeOKRandomEmptyCommitted"
 
@@ -21,7 +23,7 @@ primaryInTermContainsNewestConfigOfTerm_adr.children = {
     "BecomeLeaderAction": [
         activeConfigsSafeAtTerms_adr,
         # TODO: will need to deal with cycle issue here before re-including this lemma.
-        # onePrimaryPerTerm_adr
+        onePrimaryPerTerm_adr
     ],
     "ReconfigAction": [
         onePrimaryPerTerm_adr,
