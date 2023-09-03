@@ -101,7 +101,8 @@ logMatching_adr.ctigen_typeok = "TypeOKEmptyCommitted"
 currentTermsAtLeastLargeAsLogTermsForPrimary_adr =  StructuredProofNode("CurrentTermAtLeastAsLargeAsLogTermsForPrimary", "H_CurrentTermAtLeastAsLargeAsLogTermsForPrimary")
 currentTermsAtLeastLargeAsLogTermsForPrimary_adr.children = {
     "BecomeLeaderAction": [
-        activeConfigsSafeAtTerms_adr
+        activeConfigsSafeAtTerms_adr,
+        logEntryInTermImpliesConfigInTerm
     ]
 }
 
