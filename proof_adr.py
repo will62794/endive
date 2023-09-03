@@ -5,7 +5,7 @@ from proofs import *
 # AbstractDynamicRaft proof structure.
 #
 
-configsNonEmpty_adr = StructuredProofNode("ConfigsNonEmpty", "H_ConfigsNonEmpty")
+configsNonEmpty_adr = StructuredProofNode("ConfigsNonempty", "H_ConfigsNonempty")
 
 quorumsSafeAtTerms_adr = StructuredProofNode("QuorumsSafeAtTerms", "H_QuorumsSafeAtTerms")
 quorumsSafeAtTerms_adr.ctigen_typeok = "TypeOKRandomEmptyCommitted"
@@ -182,6 +182,7 @@ adr_children = {
     "CommitEntryAction": [
         activeConfigsOverlapWithCommittedEntry_adr,
         newerConfigsDisablePrimaryCommitsInOlderTerms_adr,
+        configsNonEmpty_adr
         # primaryConfigTermEqualToCurrentTerm_adr
     ]
 }
