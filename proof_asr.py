@@ -98,6 +98,7 @@ committedEntryExistsOnQuorum.children = {
         # leaderCompleteness
     ]
 }
+committedEntryExistsOnQuorum.ctigen_typeok = "TypeOKSmallCommitted"
 
 coreLogInv = StructuredProofNode("CoreLogInv", "H_UniformLogEntriesInTerm_AND_TermsOfEntriesGrowMonotonically")
 coreLogInv.children = {
