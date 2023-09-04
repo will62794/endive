@@ -38,7 +38,22 @@ def chunks(seq, n_chunks):
 
 def dict_product(inp):
     """ Produce Cartesian product of dicts with list valued fields. """
-    return [dict(zip(inp, x)) for x in itertools.product(*inp.values())]
+    for k in inp:
+        inp[k] = [(i,v) for i,v in enumerate(inp[k])]
+    # print(inp[k])
+    prod = list(itertools.product(*inp.values()))
+    # print(list(prod))
+
+    # Prefer instances with all smaller params before looking at instances
+    # with larger params.
+    elems = [dict(zip(inp, x)) for x in prod]
+    sorted_elems = sorted(elems, key = lambda d : max([v[0] for v in d.values()]))
+    
+    # Remove sort indices.
+    for d in sorted_elems:
+        for k in d:
+            d[k] = d[k][1]
+    return sorted_elems
 
 class InductiveInvGen():
     """ 
