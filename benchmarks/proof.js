@@ -683,6 +683,10 @@ function reloadProofGraph(onCompleteFn){
     // Allow double-click on node to also start CTI generation.
     cy.on('dblclick', 'node', function(evt){
         onNodeSelect(this);
+        // Don't generate CTIs for action nodes.
+        if(this.data()["actionNode"]){
+            return;
+        }
         genCtis(currentNodeId);
         return;
     })
@@ -834,10 +838,13 @@ function reloadLayout(){
     let stategraph = document.getElementById('stategraph');
     var legendDiv = document.createElement("div");
     legendDiv.id = "graph-legend";
-    legendDiv.innerHTML = `<i class="fa fa-circle proven-color"></i> Proved<br>`;
-    legendDiv.innerHTML += `<i class="fa fa-circle ctis-left-color"></i> Unproven (CTIs remaining)<br>`;
+    legendDiv.innerHTML = "";
+    legendDiv.innerHTML += `&#9711; Lemma node<br>`;
+    legendDiv.innerHTML += `<span style='font-size:18px'>&#9633;</span> Action subnode<br>`;
+    legendDiv.innerHTML += `<i class="fa fa-circle proven-color"></i> Proved<br>`;
+    legendDiv.innerHTML += `<i class="fa fa-circle ctis-left-color"></i> Unproven (CTIs remaining)<br><br>`;
     legendDiv.innerHTML += `(Click on edge to delete support lemma)<br>`;
-    legendDiv.innerHTML += `(Double click node to re-generate CTIs)`;
+    legendDiv.innerHTML += `(Double click lemma node to re-generate CTIs)`;
     stategraph.appendChild(legendDiv);
 
 }
