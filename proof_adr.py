@@ -211,7 +211,12 @@ activeConfigsOverlapWithCommittedEntry_adr.children = {
         onePrimaryPerTerm_adr
     ],
     "BecomeLeaderAction": [
-        logsLaterThanCommittedMustHaveCommitted
+        logsLaterThanCommittedMustHaveCommitted,
+        activeConfigsSafeAtTerms_adr,
+    ],
+    "ReconfigAction": [
+        # activeConfigsOverlap_adr,
+        primaryConfigTermEqualToCurrentTerm_adr
     ]
 }
 
