@@ -208,6 +208,9 @@ activeConfigsOverlapWithCommittedEntry_adr.children = {
     ],
     "CommitEntryAction":[
         newerConfigsDisablePrimaryCommitsInOlderTerms_adr,
+        activeConfigsOverlap_adr,
+        primaryConfigTermEqualToCurrentTerm_adr,
+        onePrimaryPerTerm_adr
     ],
     "BecomeLeaderAction": [
         logsLaterThanCommittedMustHaveCommitted
