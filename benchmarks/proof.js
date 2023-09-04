@@ -21,7 +21,7 @@ cytoscape.warnings(false);
 
 const loadingIcon = '<i class="fa fa-refresh fa-spin"></i>';
 
-function awaitGenCtiCompletion(expr, recurse){
+function awaitGenCtiCompletion(expr, onCompleteFn){
     $.get(local_server + `/getActiveCtiGenThreads`, function(data){
         console.log("checking active cti threads:", data)
 
@@ -31,7 +31,7 @@ function awaitGenCtiCompletion(expr, recurse){
 
 
         if(active_threads.length > 0){
-            setTimeout(() => awaitGenCtiCompletion(expr, recurse), awaitPollIntervalMS);
+            setTimeout(() => awaitGenCtiCompletion(expr, onCompleteFn), awaitPollIntervalMS);
         } else{
             // Once active CTI gen thread completes, refresh the proof graph.
             reloadProofGraph(function(){
@@ -41,42 +41,8 @@ function awaitGenCtiCompletion(expr, recurse){
                 $("#gen-ctis-btn").html("Generate CTIs");
                 generatingCTIs = false;
     
-                console.log("Recursing:", recurse);
-
-                if(recurse !== undefined){
-                    console.log("Recursing on node:", currentNode.data());
-                    // currentNode["children"]
-
-                    let nodeId = currentNode.data()["name"];
-
-                    // Get node and then recurse on children.
-                    $.get(local_server + `/getNode/${nodeId}`, function(data){
-                        console.log(data);
-                        console.log(data["children"]);
-
-                        let all_children = [];
-                        for(const action in data["children"]){
-                            for(const child of data["children"][action]){
-                                all_children.push(child);
-                            }
-                        }
-
-                        function genForChildren(children){
-                            if(children.length === 0){
-                                return;
-                            }
-                            let child = children[0];
-                            $.get(local_server + `/genCtis/single/${child["name"]}`, function(data){
-                                // console.log(data);
-                                console.log("Recursive CTI generation of child:", child);
-                                let recurse = true;
-                                awaitGenCtiCompletion(child["name"], recurse);
-                                genForChildren(children.splice(1))
-                            });
-                        }
-
-                        genForChildren(all_children);
-                    }); 
+                if(onCompleteFn !== undefined){
+                    onCompleteFn();
                 }
             });
 
@@ -84,8 +50,29 @@ function awaitGenCtiCompletion(expr, recurse){
     });
 }
 
-function genCtis(exprName){
+// Generate CTIs for a list of multiple nodes.
+function genCtisForExprs(exprNameList, onCompleteFn){
     if(generatingCTIs){
+        return;
+    }
+
+    genCtis(exprNameList[0], function(){
+        return genCtisForExprs(exprNameList.splice(1));
+    });
+}
+
+function genCtisRecursive(exprName){
+    traverseProofGraph(exprName, function(visited){
+        genCtisForExprs(visited);
+    });
+}
+
+function genCtis(exprName, onCompleteFn){
+    if(generatingCTIs){
+        return;
+    }
+
+    if(exprName === undefined){
         return;
     }
 
@@ -96,16 +83,38 @@ function genCtis(exprName){
 
     $.get(local_server + `/genCtis/single/${exprName}`, function(data){
         // console.log(data);
-        awaitGenCtiCompletion(exprName);
+        awaitGenCtiCompletion(exprName, onCompleteFn);
     });
 }
 
-function genCtisSubtree(exprName){
-    console.log("Gen CTIs recursive", exprName);
-    $.get(local_server + `/genCtis/single/${exprName}`, function(data){
-        // console.log(data);
-        let recurse = true;
-        awaitGenCtiCompletion(exprName, recurse);
+function traverseProofGraphRec(startNode, visited){
+
+    console.log("Visiting node:", startNode, startNode["name"]);
+    console.log(visited);
+    // For each of its children, re-generate CTIs.
+    if(visited.includes[startNode["name"]]){
+        return [];
+    }
+    visited.push(startNode["name"]);
+    for(const action in startNode["children"]){
+        let visitedSubtree = [];
+        for(const child of startNode["children"][action]){
+            console.log(child["name"]);
+            if(!visited.includes(child["name"])){
+                visitedSubtree = traverseProofGraphRec(child, visited);
+            }
+        }
+    }
+}
+
+function traverseProofGraph(startNodeExprName, onCompleteFn){
+    console.log("Traverse proof graph from start node:", startNodeExprName);
+    $.get(local_server + `/getNode/${startNodeExprName}`, function(data){
+        console.log(data);
+        let visited = [];
+        traverseProofGraphRec(data, visited);
+        console.log("visited nodes:", visited);
+        onCompleteFn(visited);
     });
 }
 
@@ -402,7 +411,7 @@ function focusOnNode(nodeId, nodeData){
     })
 
     $('#gen-ctis-btn-subtree').on('click', function(ev){
-        genCtisSubtree(currentNodeId);
+        genCtisRecursive(currentNodeId);
     })
 
     $('#refresh-node-btn').on('click', function(ev){

@@ -2327,11 +2327,15 @@ class InductiveInvGen():
                 return response
 
             @app.route('/getNode/<expr>')
-            def getCtis(expr):
+            def getNode(expr):
                 node = proof.get_node_by_name(proof.root, expr)
-
-                response = flask.jsonify(node.serialize())
-                response.headers.add('Access-Control-Allow-Origin', '*')
+                if node is None:
+                    print(f"Node '{expr}' not found.")
+                    response = flask.jsonify({'ok': False})
+                    response.headers.add('Access-Control-Allow-Origin', '*')
+                else:
+                    response = flask.jsonify(node.serialize())
+                    response.headers.add('Access-Control-Allow-Origin', '*')
                 return response
             
             @app.route('/addNode/<expr>')
@@ -2408,6 +2412,9 @@ class InductiveInvGen():
                     start = time.time()
 
                     start_node = proof.get_node_by_name(proof.root, expr)
+                    if start_node is None:
+                        print(f"no node found: {expr}")
+                        return
                     if subtree:
                         proof.gen_ctis_for_node(self, start_node)
                     else:

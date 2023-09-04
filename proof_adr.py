@@ -141,7 +141,8 @@ newerConfigsDisablePrimaryCommitsInOlderTerms_adr = StructuredProofNode("NewerCo
 newerConfigsDisablePrimaryCommitsInOlderTerms_adr.children = {
     "BecomeLeaderAction": [
         activeConfigsOverlap_adr,
-        activeConfigsSafeAtTerms_adr
+        activeConfigsSafeAtTerms_adr,
+        primaryConfigTermEqualToCurrentTerm_adr
     ],
     "ReconfigAction": [
         primaryConfigTermEqualToCurrentTerm_adr
