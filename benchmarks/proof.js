@@ -674,12 +674,11 @@ function reloadProofGraph(onCompleteFn){
 
 
     // Allow double-click on node to also start CTI generation.
-    cy.on('dblclick', 'node', function(evt){
-        onNodeSelect(this);
-        genCtis(currentNodeId);
-        return;
-
-    })
+    // cy.on('dblclick', 'node', function(evt){
+    //     onNodeSelect(this);
+    //     genCtis(currentNodeId);
+    //     return;
+    // })
 
     cy.on('click', 'node', function(evt){
         onNodeSelect(this);
