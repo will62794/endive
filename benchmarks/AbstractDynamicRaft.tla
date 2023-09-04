@@ -413,7 +413,8 @@ CInit ==
 \* Helper lemmas.
 \* 
 
-H_LEMMA_TRUE == TRUE
+\* Dummy lemma that is trivially true.
+H_TRUE == Cardinality(DOMAIN state) >= 0
 
 \* If a primary has been elected at term T, then there must exist a quorum at term >= T.
 H_QuorumsSafeAtTerms == 
