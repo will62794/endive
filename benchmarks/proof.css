@@ -12,13 +12,13 @@ table{
 }
 table td {
     padding-right:10px;
-    font-size:16px;
+    font-size:14px;
     min-width: 110px;
 }
 
 table td.ctis-remaining-count {
     padding-right:10px;
-    font-size:16px;
+    font-size:14px;
     min-width: 230px;
 }
 
@@ -54,7 +54,7 @@ table td:hover {
     padding:8px;
     margin-top:10px;
     margin-bottom:10px;
-    font-size:18px;
+    font-size:16px;
 }
 
 #stategraph{
@@ -77,7 +77,7 @@ table td:hover {
 }
 
 #proof-node-name{
-    font-size: 18px;
+    font-size: 16px;
     font-weight: bold;
     font-family: monospace;
 }
@@ -87,11 +87,11 @@ button {
     background-color: steelblue;
     border: none;
     color: white;
-    padding: 8px 20px;
+    padding: 6px 14px;
     text-align: center;
     text-decoration: none;
     display: inline-block;
-    font-size: 14px;
+    font-size: 12px;
     cursor: pointer;
     border-radius: 5px;
 }
