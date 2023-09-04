@@ -219,7 +219,8 @@ activeConfigsOverlapWithCommittedEntry_adr.children = {
     "ReconfigAction": [
         activeConfigsOverlap_adr,
         primaryConfigTermEqualToCurrentTerm_adr,
-        configVersionAndTermUnique_adr
+        # configVersionAndTermUnique_adr,
+        uniformLogEntriesInTerm_adr
     ]
 }
 
