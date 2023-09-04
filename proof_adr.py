@@ -181,7 +181,7 @@ activeConfigsOverlapWithCommittedEntry_adr.children = {
 adr_children = {
     "CommitEntryAction": [
         activeConfigsOverlapWithCommittedEntry_adr,
-        newerConfigsDisablePrimaryCommitsInOlderTerms_adr,
+        # newerConfigsDisablePrimaryCommitsInOlderTerms_adr,
         configsNonEmpty_adr,
         primaryConfigTermEqualToCurrentTerm_adr
     ]
