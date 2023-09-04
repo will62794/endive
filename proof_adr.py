@@ -197,7 +197,8 @@ leaderCompleteness.children = {
     ],
     "CommitEntryAction": [
         primaryConfigTermEqualToCurrentTerm_adr,
-        activeConfigsOverlapWithCommittedEntry_adr
+        activeConfigsOverlapWithCommittedEntry_adr,
+        uniformLogEntriesInTerm_adr
     ]
 }
 
