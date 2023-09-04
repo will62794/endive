@@ -309,14 +309,16 @@ Init ==
         /\ initConfig # {}
         /\ config = [i \in Server |-> initConfig]
 
-ClientRequestAction == \E s \in Server : ClientRequest(s)
-GetEntriesAction == \E s, t \in Server : GetEntries(s, t)
-RollbackEntriesAction == \E s, t \in Server : RollbackEntries(s, t)
-BecomeLeaderAction == \E s \in Server : \E Q \in Quorums(config[s]) :  BecomeLeader(s, Q)
-CommitEntryAction ==  \E s \in Server :  \E Q \in Quorums(config[s]) : CommitEntry(s, Q)
-UpdateTermsActions == \E s,t \in Server : UpdateTerms(s, t)
-ReconfigAction == \E s \in Server, newConfig \in AllConfigs : Reconfig(s, newConfig)
-SendConfigAction == \E s,t \in Server : SendConfig(s, t)
+
+\* Add dummy precondition for now so TLC tags actions by name explicitly.
+ClientRequestAction == TRUE /\ \E s \in Server : ClientRequest(s)
+GetEntriesAction == TRUE /\ \E s, t \in Server : GetEntries(s, t)
+RollbackEntriesAction == TRUE /\ \E s, t \in Server : RollbackEntries(s, t)
+BecomeLeaderAction == TRUE /\ \E s \in Server : \E Q \in Quorums(config[s]) :  BecomeLeader(s, Q)
+CommitEntryAction ==  TRUE /\ \E s \in Server :  \E Q \in Quorums(config[s]) : CommitEntry(s, Q)
+UpdateTermsActions == TRUE /\ \E s,t \in Server : UpdateTerms(s, t)
+ReconfigAction == TRUE /\ \E s \in Server, newConfig \in AllConfigs : Reconfig(s, newConfig)
+SendConfigAction == TRUE /\ \E s,t \in Server : SendConfig(s, t)
 
 Next == 
     \/ ClientRequestAction
