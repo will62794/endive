@@ -279,7 +279,7 @@ function focusOnNode(nodeId, nodeData){
         }
 
         var ctipane = document.getElementById("ctiPane");
-        var ctiCounter = document.createElement("h3");
+        var ctiCounter = document.createElement("h4");
         ctiCounter.innerHTML = `Total CTIs: ${ctis_for_action.length}`;
         ctiCounter.innerHTML += `<br>Total CTIs remaining: ${num_ctis_remaining}`;
         ctiCounter.innerHTML += `<br>Apalache proof? ${data["apalache_proof_check"]}`;
