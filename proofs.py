@@ -560,7 +560,7 @@ class StructuredProof():
 
             # Actions that we should keep searching for CTIs for.
             actions_to_skip = [a for a in actions if
-                a in all_ctis_by_action[a] and 
+                a in all_ctis_by_action and 
                 len(all_ctis_by_action[a]) > 0 and 
                 len(node.ctis_eliminated[a]) < len(all_ctis_by_action[a])          
             ]
