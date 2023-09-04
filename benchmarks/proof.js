@@ -6,6 +6,8 @@ currentNode = null
 
 selectedEdge = null;
 
+generatingCTIs = false;
+
 let addedNodes = [];
 let addedEdges = [];
 let specDefs = [];
@@ -37,15 +39,20 @@ function awaitGenCtiCompletion(expr){
             $('#gen-ctis-btn-subtree').prop("disabled",false);
             $('#cti-loading-icon').css('visibility', 'hidden');
             $("#gen-ctis-btn").html("Generate CTIs");
-
+            generatingCTIs = false;
         }
     });
 }
 
 function genCtis(exprName){
+    if(generatingCTIs){
+        return;
+    }
+
     console.log("Generating CTIs for '" + exprName + "'");
     $('#cti-loading-icon').css('visibility', 'visible');
     $("#gen-ctis-btn").html("Generating CTIs " + loadingIcon);
+    generatingCTIs = true;
 
     $.get(local_server + `/genCtis/single/${exprName}`, function(data){
         console.log(data);
@@ -674,11 +681,11 @@ function reloadProofGraph(onCompleteFn){
 
 
     // Allow double-click on node to also start CTI generation.
-    // cy.on('dblclick', 'node', function(evt){
-    //     onNodeSelect(this);
-    //     genCtis(currentNodeId);
-    //     return;
-    // })
+    cy.on('dblclick', 'node', function(evt){
+        onNodeSelect(this);
+        genCtis(currentNodeId);
+        return;
+    })
 
     cy.on('click', 'node', function(evt){
         onNodeSelect(this);
