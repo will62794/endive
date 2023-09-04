@@ -5,6 +5,8 @@ from proofs import *
 # AbstractDynamicRaft proof structure.
 #
 
+lemmaTRUE = StructuredProofNode("LemmaTrue", "TRUE")
+
 configsNonEmpty_adr = StructuredProofNode("ConfigsNonempty", "H_ConfigsNonempty")
 
 quorumsSafeAtTerms_adr = StructuredProofNode("QuorumsSafeAtTerms", "H_QuorumsSafeAtTerms")
@@ -80,6 +82,11 @@ onePrimaryPerTerm_adr.children = {
 onePrimaryPerTerm_adr.ctigen_typeok = "TypeOKRandomEmptyCommitted"
 
 logEntryInTermImpliesConfigInTerm = StructuredProofNode("LogEntryInTermImpliesConfigInTerm", "H_LogEntryInTermImpliesConfigInTerm")
+logEntryInTermImpliesConfigInTerm.children = {
+    "BecomeLeaderAction": [activeConfigsSafeAtTerms_adr],
+    "ClientRequestAction": [primaryConfigTermEqualToCurrentTerm_adr],
+    "ReconfigAction": [primaryConfigTermEqualToCurrentTerm_adr]
+}
 
 primaryHasEntriesItCreated_adr = StructuredProofNode("PrimaryHasEntriesItCreated_A", "H_PrimaryHasEntriesItCreated")
 primaryHasEntriesItCreated_adr.children = {
@@ -154,26 +161,56 @@ primaryOrLogsLaterThanCommittedMustHaveEarlierCommitted_adr.children = {
     ]
 }
 
+leaderCompleteness = StructuredProofNode("LeaderCompletenessLemma", "LeaderCompleteness")
 
-committedEntryExistsOnQuorum_adr = StructuredProofNode("CommittedEntryExistsOnQuorum", "H_CommittedEntryExistsOnQuorum")
-committedEntryExistsOnQuorum_adr.children = {
-    "RollbackEntriesAction":[
+logsLaterThanCommittedMustHaveCommitted = StructuredProofNode("LogsLaterThanCommittedMustHaveCommitted", "H_LogsLaterThanCommittedMustHaveCommitted")
+logsLaterThanCommittedMustHaveCommitted.children = {
+    "ClientRequestAction": [
         # lemmaTRUE,
-        # StructuredProofNode("LogsLaterThanCommittedMustHaveCommitted", "H_LogsLaterThanCommittedMustHaveCommitted", children = [lemmaTRUE]),
-        # StructuredProofNode("LeaderCompletenessLemma", "LeaderCompleteness", children = [lemmaTRUE])
-        # primaryOrLogsLaterThanCommittedMustHaveEarlierCommitted,
-
-        # logsLaterThanCommittedMustHaveCommitted,
-
-        primaryOrLogsLaterThanCommittedMustHaveEarlierCommitted_adr
-
-        # leaderCompleteness
+        leaderCompleteness,
+    ],
+    "CommitEntryAction": [
+        # lemmaTRUE,
+        logEntryInTermImpliesConfigInTerm,
+        activeConfigsSafeAtTerms_adr
+    ],
+    "GetEntriesAction": [
+        # lemmaTRUE,
+        logMatching_adr,
+        uniformLogEntriesInTerm_adr,
+        termsGrowMonotonically_adr,
     ]
 }
 
+leaderCompleteness.children = {
+    "BecomeLeaderAction":[activeConfigsOverlapWithCommittedEntry_adr]
+}
+
+# committedEntryExistsOnQuorum_adr = StructuredProofNode("CommittedEntryExistsOnQuorum", "H_CommittedEntryExistsOnQuorum")
+# committedEntryExistsOnQuorum_adr.children = {
+#     "RollbackEntriesAction":[
+#         # lemmaTRUE,
+#         # StructuredProofNode("LogsLaterThanCommittedMustHaveCommitted", "H_LogsLaterThanCommittedMustHaveCommitted", children = [lemmaTRUE]),
+#         # StructuredProofNode("LeaderCompletenessLemma", "LeaderCompleteness", children = [lemmaTRUE])
+#         # primaryOrLogsLaterThanCommittedMustHaveEarlierCommitted,
+
+#         logsLaterThanCommittedMustHaveCommitted,
+
+#         # primaryOrLogsLaterThanCommittedMustHaveEarlierCommitted_adr
+
+#         # leaderCompleteness
+#     ]
+# }
+
 activeConfigsOverlapWithCommittedEntry_adr.children = {
     "RollbackEntriesAction": [
-        primaryOrLogsLaterThanCommittedMustHaveEarlierCommitted_adr
+        logsLaterThanCommittedMustHaveCommitted
+    ],
+    "CommitEntryAction":[
+        newerConfigsDisablePrimaryCommitsInOlderTerms_adr,
+    ],
+    "BecomeLeaderAction": [
+        logsLaterThanCommittedMustHaveCommitted
     ]
 }
 
@@ -181,7 +218,6 @@ activeConfigsOverlapWithCommittedEntry_adr.children = {
 adr_children = {
     "CommitEntryAction": [
         activeConfigsOverlapWithCommittedEntry_adr,
-        # newerConfigsDisablePrimaryCommitsInOlderTerms_adr,
         configsNonEmpty_adr,
         primaryConfigTermEqualToCurrentTerm_adr
     ]
@@ -189,7 +225,7 @@ adr_children = {
 
 # AbstractDynamicRaft proof structure.
 adr_root = StructuredProofNode("Safety", "StateMachineSafety", children = adr_children)
-adr_nodes = []
+adr_nodes = [lemmaTRUE]
 adr_actions = [
     "ClientRequestAction",
     "GetEntriesAction",
