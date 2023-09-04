@@ -21,7 +21,7 @@ cytoscape.warnings(false);
 
 const loadingIcon = '<i class="fa fa-refresh fa-spin"></i>';
 
-function awaitGenCtiCompletion(expr){
+function awaitGenCtiCompletion(expr, recurse){
     $.get(local_server + `/getActiveCtiGenThreads`, function(data){
         console.log("checking active cti threads:", data)
 
@@ -31,15 +31,55 @@ function awaitGenCtiCompletion(expr){
 
 
         if(active_threads.length > 0){
-            setTimeout(() => awaitGenCtiCompletion(expr), awaitPollIntervalMS);
+            setTimeout(() => awaitGenCtiCompletion(expr, recurse), awaitPollIntervalMS);
         } else{
             // Once active CTI gen thread completes, refresh the proof graph.
-            reloadProofGraph();
-            $('#gen-ctis-btn').prop("disabled",false);
-            $('#gen-ctis-btn-subtree').prop("disabled",false);
-            $('#cti-loading-icon').css('visibility', 'hidden');
-            $("#gen-ctis-btn").html("Generate CTIs");
-            generatingCTIs = false;
+            reloadProofGraph(function(){
+                $('#gen-ctis-btn').prop("disabled",false);
+                $('#gen-ctis-btn-subtree').prop("disabled",false);
+                $('#cti-loading-icon').css('visibility', 'hidden');
+                $("#gen-ctis-btn").html("Generate CTIs");
+                generatingCTIs = false;
+    
+                console.log("Recursing:", recurse);
+
+                if(recurse !== undefined){
+                    console.log("Recursing on node:", currentNode.data());
+                    // currentNode["children"]
+
+                    let nodeId = currentNode.data()["name"];
+
+                    // Get node and then recurse on children.
+                    $.get(local_server + `/getNode/${nodeId}`, function(data){
+                        console.log(data);
+                        console.log(data["children"]);
+
+                        let all_children = [];
+                        for(const action in data["children"]){
+                            for(const child of data["children"][action]){
+                                all_children.push(child);
+                            }
+                        }
+
+                        function genForChildren(children){
+                            if(children.length === 0){
+                                return;
+                            }
+                            let child = children[0];
+                            $.get(local_server + `/genCtis/single/${child["name"]}`, function(data){
+                                // console.log(data);
+                                console.log("Recursive CTI generation of child:", child);
+                                let recurse = true;
+                                awaitGenCtiCompletion(child["name"], recurse);
+                                genForChildren(children.splice(1))
+                            });
+                        }
+
+                        genForChildren(all_children);
+                    }); 
+                }
+            });
+
         }
     });
 }
@@ -55,16 +95,17 @@ function genCtis(exprName){
     generatingCTIs = true;
 
     $.get(local_server + `/genCtis/single/${exprName}`, function(data){
-        console.log(data);
+        // console.log(data);
         awaitGenCtiCompletion(exprName);
     });
 }
 
 function genCtisSubtree(exprName){
     console.log("Gen CTIs recursive", exprName);
-    $.get(local_server + `/genCtis/subtree/${exprName}`, function(data){
-        console.log(data);
-        awaitGenCtiCompletion(exprName);
+    $.get(local_server + `/genCtis/single/${exprName}`, function(data){
+        // console.log(data);
+        let recurse = true;
+        awaitGenCtiCompletion(exprName, recurse);
     });
 }
 
@@ -85,8 +126,8 @@ function deleteSupportLemmaEdge(edge){
 
     console.log("Deleting support edge, target:", target, ", source:", source, ", action: ", action);
     $.get(local_server + `/deleteSupportEdge/${target["name"]}/${action}/${sourceNode["name"]}`, function(data){
-        console.log(data);
-        console.log("add edge complete.");
+        // console.log(data);
+        // console.log("add edge complete.");
 
         $('#delete-support-edge-btn').css('visibility', 'hidden');
 
@@ -101,8 +142,8 @@ function deleteSupportLemmaEdge(edge){
 function addSupportLemmaEdge(target, action, src){
     console.log("Adding support edge, target:", target, ", source:", src, ", action: ", action);
     $.get(local_server + `/addSupportEdge/${target}/${action}/${src}`, function(data){
-        console.log(data);
-        console.log("add edge complete.");
+        // console.log(data);
+        // console.log("add edge complete.");
 
         // Once we added the new support edge, we should reload the proof graph and re-generate CTIs
         // for the target node.
@@ -128,7 +169,7 @@ function setCTIPaneHtml(nodeData){
     // For now don't allow CTI generation for specific sub-actions, only for top-level node all at once.
     // ctipane.innerHTML += `<div><button id='gen-ctis-btn'> Generate CTIs </button> ${generatingCTIsDiv}</div> <br>`;
     ctipane.innerHTML += `<div><button id='gen-ctis-btn'> Generate CTIs </button></div> <br>`;
-    // ctipane.innerHTML += "<div><button id='gen-ctis-btn-subtree'> Gen CTIs (recursive) </button></div> <br>";
+    ctipane.innerHTML += "<div><button id='gen-ctis-btn-subtree'> Generate CTIs (recursive) </button></div> <br>";
 
     // ctipane.innerHTML += "<div><button id='refresh-node-btn'> Refresh Proof Node </button></div> <br>";
     ctipane.innerHTML += "<div><button id='add-support-lemma-btn'> Add support lemma </button></div><br>";
@@ -184,13 +225,10 @@ function computeNodeColor(data, action){
             ctis = ctis.concat(data["ctis"][action]);
             ctis_eliminated = ctis_eliminated.concat(data["ctis_eliminated"][action]);
         }
-        console.log(data["name"]);
-        console.log(data["ctis"]);
     } else{
         ctis = data["ctis"][action];
         ctis_eliminated = data["ctis_eliminated"][action];
     }
-    console.log(data);
 
     if(data["had_ctis_generated"] && ctis.length === ctis_eliminated.length){
         // style = {"background-color": "green"}
@@ -473,11 +511,11 @@ function addNodeToGraph(proof_graph, node){
 
         var ix = 0;
         let child_actions = Object.keys(node["children"])
-        console.log("child actions:", child_actions);
+        // console.log("child actions:", child_actions);
         let cti_actions = Object.keys(node["ctis"]);
-        console.log("cti actions:", cti_actions);
+        // console.log("cti actions:", cti_actions);
         for(const action of new Set(cti_actions.concat(child_actions))){
-            console.log(action);
+            // console.log(action);
             if(node["ctis"][action] && node["ctis"][action].length === 0 && !child_actions.includes(action)){
                 continue;
             }
