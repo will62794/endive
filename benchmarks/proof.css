@@ -82,6 +82,9 @@ table td:hover {
     font-family: monospace;
 }
 
+.monofont{
+    font-family: monospace;
+}
 
 button {
     background-color: steelblue;

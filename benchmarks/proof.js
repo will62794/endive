@@ -75,6 +75,8 @@ function deleteSupportLemmaEdge(edge){
         console.log(data);
         console.log("add edge complete.");
 
+        $('#delete-support-edge-btn').css('visibility', 'hidden');
+
         // Once we added the new support edge, we should reload the proof graph and re-generate CTIs
         // for the target node.
         reloadProofGraph(function(){
@@ -116,7 +118,7 @@ function setCTIPaneHtml(nodeData){
 
     // ctipane.innerHTML += "<div><button id='refresh-node-btn'> Refresh Proof Node </button></div> <br>";
     ctipane.innerHTML += "<div><button id='add-support-lemma-btn'> Add support lemma </button></div><br>";
-    ctipane.innerHTML += "<div><button id='delete-support-edge-btn'> Delete selected support lemma edge </button></div><br>";
+    ctipane.innerHTML += "<div><button id='delete-support-edge-btn'> Delete support lemma edge </button></div><br>";
 
     ctipane.innerHTML += "<div><button id='add-lemma-node-btn'> Add lemma </button></div><br>";
 
@@ -608,6 +610,7 @@ function reloadProofGraph(onCompleteFn){
         });
 
         $('#delete-support-edge-btn').css('visibility', 'visible');
+        $('#delete-support-edge-btn').html(`Delete support lemma edge: <span class='monofont'>${this.data()["source"]}</span>`);
         return
 
         console.log("double clicked edge");

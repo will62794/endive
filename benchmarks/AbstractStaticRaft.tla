@@ -285,6 +285,9 @@ CInit ==
 \* Helper lemmas.
 \* 
 
+\* Dummy lemma that is trivially true.
+H_TRUE == Cardinality(DOMAIN state) >= 0
+
 \* If a primary has been elected at term T, then there must exist a quorum at term >= T.
 H_QuorumsSafeAtTerms == 
     \A s \in Server : (state[s] = Primary) =>
@@ -370,10 +373,10 @@ H_UniformLogEntriesInTerm ==
         (\A j \in DOMAIN log[s] : (j < i) => log[s][j] # log[s][i]) => 
             (~\E k \in DOMAIN log[t] : log[t][k] = log[s][i] /\ k < i)
 
-H_CommittedEntryExistsOnQuorum_AND_LogsLaterThanCommittedMustHaveCommitted_AND_LeaderCompleteness == 
-    /\ LeaderCompleteness
-    /\ H_CommittedEntryExistsOnQuorum
-    /\ H_LogsLaterThanCommittedMustHaveCommitted
+\* H_CommittedEntryExistsOnQuorum_AND_LogsLaterThanCommittedMustHaveCommitted_AND_LeaderCompleteness == 
+\*     /\ LeaderCompleteness
+\*     /\ H_CommittedEntryExistsOnQuorum
+\*     /\ H_LogsLaterThanCommittedMustHaveCommitted
 
 H_UniformLogEntriesInTerm_AND_TermsOfEntriesGrowMonotonically == 
     /\ H_UniformLogEntriesInTerm
