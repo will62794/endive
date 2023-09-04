@@ -138,6 +138,16 @@ uniformLogEntriesInTerm_adr.ctigen_typeok = "TypeOKEmptyCommitted"
 activeConfigsOverlapWithCommittedEntry_adr = StructuredProofNode("ActiveConfigsOverlapWithCommittedEntry", "H_ActiveConfigsOverlapWithCommittedEntry")
 newerConfigsDisablePrimaryCommitsInOlderTerms_adr = StructuredProofNode("NewerConfigsDisablePrimaryCommitsInOlderTerms", "H_NewerConfigsDisablePrimaryCommitsInOlderTerms")
 
+newerConfigsDisablePrimaryCommitsInOlderTerms_adr.children = {
+    "BecomeLeaderAction": [
+        activeConfigsOverlap_adr,
+        activeConfigsSafeAtTerms_adr
+    ],
+    "ReconfigAction": [
+        primaryConfigTermEqualToCurrentTerm_adr
+    ]
+}
+
 primaryOrLogsLaterThanCommittedMustHaveEarlierCommitted_adr = StructuredProofNode("PrimaryOrLogsLaterThanCommittedMustHaveEarlierCommitted", "H_PrimaryOrLogsLaterThanCommittedMustHaveEarlierCommitted")
 primaryOrLogsLaterThanCommittedMustHaveEarlierCommitted_adr.children = {
     "BecomeLeaderAction": [
@@ -183,24 +193,14 @@ logsLaterThanCommittedMustHaveCommitted.children = {
 }
 
 leaderCompleteness.children = {
-    "BecomeLeaderAction":[activeConfigsOverlapWithCommittedEntry_adr]
+    "BecomeLeaderAction":[
+        activeConfigsOverlapWithCommittedEntry_adr
+    ],
+    "CommitEntryAction": [
+        primaryConfigTermEqualToCurrentTerm_adr,
+        activeConfigsOverlapWithCommittedEntry_adr
+    ]
 }
-
-# committedEntryExistsOnQuorum_adr = StructuredProofNode("CommittedEntryExistsOnQuorum", "H_CommittedEntryExistsOnQuorum")
-# committedEntryExistsOnQuorum_adr.children = {
-#     "RollbackEntriesAction":[
-#         # lemmaTRUE,
-#         # StructuredProofNode("LogsLaterThanCommittedMustHaveCommitted", "H_LogsLaterThanCommittedMustHaveCommitted", children = [lemmaTRUE]),
-#         # StructuredProofNode("LeaderCompletenessLemma", "LeaderCompleteness", children = [lemmaTRUE])
-#         # primaryOrLogsLaterThanCommittedMustHaveEarlierCommitted,
-
-#         logsLaterThanCommittedMustHaveCommitted,
-
-#         # primaryOrLogsLaterThanCommittedMustHaveEarlierCommitted_adr
-
-#         # leaderCompleteness
-#     ]
-# }
 
 activeConfigsOverlapWithCommittedEntry_adr.children = {
     "RollbackEntriesAction": [
