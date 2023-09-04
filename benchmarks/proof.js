@@ -499,6 +499,7 @@ function addNodeToGraph(proof_graph, node){
                     source: nid,
                     target: node["expr"],
                     // data: child,
+                    actionSubnodeEdge: true,
                 },
                 style: {
                     // "line-color": "gray",
@@ -561,7 +562,6 @@ function addEdgesToGraph(proof_graph, node){
                         targetParentId: node["expr"],
                         targetNode: node,
                         child: child,
-                        actionSubEdge: true,
                         action: action 
                     }, 
                     style: {
@@ -585,14 +585,28 @@ function reloadProofGraph(onCompleteFn){
 
     // Can double click support edges to delete them from proof graph.
     cy.on('click', 'edge', function(evt){
+        if(this.data()["actionSubnodeEdge"]){
+            // Action node edges are not selectable.
+            return;
+        }
+
 
         if(selectedEdge === null){
             selectedEdge = this;
         } else{
-            selectedEdge.style({"line-color":"steelblue", "font-weight": "normal"});
+            selectedEdge.style({
+                "line-color":"steelblue", 
+                "target-arrow-color": "steelblue",
+                "font-weight": "normal",
+            });
             selectedEdge = this;
         }
-        selectedEdge.style({"line-color":"orange", "font-weight": "bold"});
+        selectedEdge.style({
+            "line-color":"orange", 
+            "font-weight": "bold",
+            "target-arrow-color": "orange"
+        });
+
         $('#delete-support-edge-btn').css('visibility', 'visible');
         return
 
