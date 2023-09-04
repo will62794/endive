@@ -141,7 +141,6 @@ RMRcvCommitMsg(rm) ==
   (* Resource manager $rm$ is told by the TM to commit.                    *)
   (*************************************************************************)
   /\ [type |-> "Commit"] \in msgsAbortCommit
-  /\ rmState[rm] # "committed" \* no need to commit twice.
   /\ rmState' = [rmState EXCEPT ![rm] = "committed"]
   /\ UNCHANGED <<tmState, tmPrepared, msgsPrepared, msgsAbortCommit>>
 
@@ -150,7 +149,6 @@ RMRcvAbortMsg(rm) ==
   (* Resource manager $rm$ is told by the TM to abort.                     *)
   (*************************************************************************)
   /\ [type |-> "Abort"] \in msgsAbortCommit
-  /\ rmState[rm] # "aborted" \* no need to abort twice.
   /\ rmState' = [rmState EXCEPT ![rm] = "aborted"]
   /\ UNCHANGED <<tmState, tmPrepared, msgsPrepared, msgsAbortCommit>>
 
@@ -169,7 +167,7 @@ Next ==
   \/ RMChooseToAbortAction
   \/ RMRcvCommitMsgAction
   \/ RMRcvAbortMsgAction
-  
+
 -----------------------------------------------------------------------------
 TPSpec == Init /\ [][Next]_<<rmState, tmState, tmPrepared, msgsPrepared, msgsAbortCommit>>
 
