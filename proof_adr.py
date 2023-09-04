@@ -176,16 +176,14 @@ leaderCompleteness = StructuredProofNode("LeaderCompletenessLemma", "LeaderCompl
 logsLaterThanCommittedMustHaveCommitted = StructuredProofNode("LogsLaterThanCommittedMustHaveCommitted", "H_LogsLaterThanCommittedMustHaveCommitted")
 logsLaterThanCommittedMustHaveCommitted.children = {
     "ClientRequestAction": [
-        # lemmaTRUE,
         leaderCompleteness,
     ],
     "CommitEntryAction": [
-        # lemmaTRUE,
         logEntryInTermImpliesConfigInTerm,
-        activeConfigsSafeAtTerms_adr
+        activeConfigsSafeAtTerms_adr,
+        newerConfigsDisablePrimaryCommitsInOlderTerms_adr
     ],
     "GetEntriesAction": [
-        # lemmaTRUE,
         logMatching_adr,
         uniformLogEntriesInTerm_adr,
         termsGrowMonotonically_adr,

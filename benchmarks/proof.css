@@ -129,3 +129,7 @@ button:disabled{
     padding:15px;
     font-size:11px;
 }
+
+#legend-list{
+    list-style-type:none;
+}

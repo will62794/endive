@@ -877,12 +877,14 @@ function reloadLayout(){
     var legendDiv = document.createElement("div");
     legendDiv.id = "graph-legend";
     legendDiv.innerHTML = "";
-    legendDiv.innerHTML += `&#9711; Lemma node<br>`;
-    legendDiv.innerHTML += `<span style='font-size:18px'>&#9633;</span> Action subnode<br>`;
-    legendDiv.innerHTML += `<i class="fa fa-circle proven-color"></i> Proved<br>`;
-    legendDiv.innerHTML += `<i class="fa fa-circle ctis-left-color"></i> Unproven (CTIs remaining)<br><br>`;
-    legendDiv.innerHTML += `(Click on edge to delete support lemma)<br>`;
-    legendDiv.innerHTML += `(Double click lemma node to re-generate CTIs)`;
+    legendDiv.innerHTML += `<ul id="legend-list">`;
+    legendDiv.innerHTML += `<li>&#9711; Lemma node<br></li>`;
+    legendDiv.innerHTML += `<li><span style='font-size:18px'>&#9633;</span> Action subnode<br></li>`;
+    legendDiv.innerHTML += `<li><i class="fa fa-circle proven-color"></i> Proved<br></li>`;
+    legendDiv.innerHTML += `<li><i class="fa fa-circle ctis-left-color"></i> Unproven (CTIs remaining)<br><br></li>`;
+    legendDiv.innerHTML += `<li>(Click on edge to delete support lemma)<br></li>`;
+    legendDiv.innerHTML += `<li>(Double click lemma node to re-generate CTIs)</li>`;
+    legendDiv.innerHTML += `</ul>`;
     stategraph.appendChild(legendDiv);
 
 }
