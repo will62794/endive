@@ -155,20 +155,21 @@ RMRcvAbortMsg(rm) ==
   /\ UNCHANGED <<tmState, tmPrepared, msgsPrepared, msgsAbortCommit>>
 
 
-TMRcvPreparedAction == \E rm \in RM : TMRcvPrepared(rm) 
-RMPrepareAction == \E rm \in RM : RMPrepare(rm) 
-RMChooseToAbortAction == \E rm \in RM : RMChooseToAbort(rm)
-RMRcvCommitMsgAction == \E rm \in RM : RMRcvCommitMsg(rm) 
-RMRcvAbortMsgAction == \E rm \in RM : RMRcvAbortMsg(rm)
+TMRcvPreparedAction == TRUE /\ \E rm \in RM : TMRcvPrepared(rm) 
+RMPrepareAction == TRUE /\ \E rm \in RM : RMPrepare(rm) 
+RMChooseToAbortAction == TRUE /\ \E rm \in RM : RMChooseToAbort(rm)
+RMRcvCommitMsgAction == TRUE /\ \E rm \in RM : RMRcvCommitMsg(rm) 
+RMRcvAbortMsgAction == TRUE /\ \E rm \in RM : RMRcvAbortMsg(rm)
 
 Next ==
   \/ TMCommit 
   \/ TMAbort
-  \/ \E rm \in RM : TMRcvPrepared(rm) 
-  \/ \E rm \in RM : RMPrepare(rm) 
-  \/ \E rm \in RM : RMChooseToAbort(rm)
-  \/ \E rm \in RM : RMRcvCommitMsg(rm) 
-  \/ \E rm \in RM : RMRcvAbortMsg(rm)
+  \/ TMRcvPreparedAction
+  \/ RMPrepareAction
+  \/ RMChooseToAbortAction
+  \/ RMRcvCommitMsgAction
+  \/ RMRcvAbortMsgAction
+  
 -----------------------------------------------------------------------------
 TPSpec == Init /\ [][Next]_<<rmState, tmState, tmPrepared, msgsPrepared, msgsAbortCommit>>
 

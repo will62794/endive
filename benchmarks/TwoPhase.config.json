@@ -22,13 +22,12 @@
     ],
     "preds_alt" : [],
     "safety"  :  "TCConsistent",
-    "constants"  :  [
-        "CONSTANTS",
-        "RM={rm1,rm2,rm3}",
-        "rm1 = rm1",
-        "rm2 = rm2",
-        "rm3 = rm3"
-    ],
+    "constants"  :  {
+        "RM" : ["{rm1}","{rm1,rm2}","{rm1,rm2,rm3}"],
+        "rm1" : "rm1",
+        "rm2" : "rm2",
+        "rm3" : "rm3"
+    },
     "constraint"  :  "",
     "quant_inv"  :  "\\A rmi \\in RM : \\A rmj \\in RM : ",
     "quant_inv_alt"  :  null,
