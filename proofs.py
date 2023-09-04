@@ -570,7 +570,10 @@ class StructuredProof():
             # Generate CTIs for all actions at once, and then break down into each action when we get the returned set of CTIs
             # labeled by action.
             # print(f"Generating CTIs for action {actions_to_check} of node ({node.name},{node.expr})")
-            print(f"Generating CTIs for node ({node.name},{node.expr})")
+            print(f"Generating CTIs for node ({node.name},{node.expr}), constants instance:", constants_obj)
+            print("Actions to skip:", actions_to_skip)
+            print("Actions to check:", actions_to_check)
+
             new_ctis, _ = indgen.generate_ctis(
                                 props=[(node.name, node.expr)], 
                                 reseed=True, depth=1, 
