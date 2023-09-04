@@ -181,9 +181,6 @@ leaderCompleteness.children = {
         uniformLogEntriesInTerm,
         committedEntryExistsOnQuorum,
         logsLaterThanCommittedMustHaveCommitted
-        # logEntryInTermImpliesSafeAtTerms,
-        # # TODO: Will need to deal with cycle recursion issue here properly.
-        # committedEntryExistsOnQuorum_cycleBreak,
     ],
     "CommitEntryAction": [
         termsGrowMonotonically,

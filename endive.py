@@ -749,7 +749,7 @@ class InductiveInvGen():
                 # State 2: <BecomeLeader(n1,{n1, n3}) line 149, col 5 to line 157, col 35 of module AbstractStaticRaft>
                 res = re.match(".*State ([0-9]*)\: <(.*)>",lines[curr_line])
                 statek = int(res.group(1))
-                action_name = res.group(2)
+                action_name = res.group(2).split(" ")[0]
                 trace_action_names.append(action_name)
                 # TODO: Consider utilizing the action for help in inferring strengthening conjuncts.
                 # print(res)
@@ -899,8 +899,11 @@ class InductiveInvGen():
         # return parsed_ctis 
         return all_tla_ctis    
 
-
-    def generate_ctis_tlc_run_async(self, num_traces_per_worker, props=None, depth=None, view=None, action=None, typeok=None, constants_obj=None):
+    def generate_ctis_tlc_run_async(self, num_traces_per_worker, 
+                                        props=None, depth=None, view=None, 
+                                        action=None, typeok=None, constants_obj=None, 
+                                        sampling_target_num_init_states=15000,
+                                        sampling_target_time_limit_ms=8000):
         """ Starts a single instance of TLC to generate CTIs.
         
         Will generate CTIs for the conjunction of all predicates given in 'props'.
@@ -1030,7 +1033,7 @@ class InductiveInvGen():
             traces_per_worker = num_traces_per_worker
             simulate_flag = "-simulate num=%d" % traces_per_worker
 
-        logging.debug(f"Using fixed TLC worker count of {num_ctigen_tlc_workers} to ensure reproducible CTI generation.")
+        logging.debug(f"Using fixed TLC process '-workers={num_ctigen_tlc_workers}' count to ensure reproducible CTI generation.")
         dirpath = tempfile.mkdtemp()
 
         # Apalache run.
@@ -1057,8 +1060,6 @@ class InductiveInvGen():
         if depth is not None:
             simulate_depth = depth
         
-        sampling_target_num_init_states = 10000
-        sampling_target_time_limit_ms = 5000
         sampling_args = f"-Dtlc2.tool.impl.Tool.autoInitStatesSampling=true -Dtlc2.tool.impl.Tool.autoInitSamplingTimeLimitMS={sampling_target_time_limit_ms} -Dtlc2.tool.impl.Tool.autoInitSamplingTargetNumInitStates={sampling_target_num_init_states}"
         args = (dirpath, sampling_args, "tla2tools-checkall.jar", mc.TLC_MAX_SET_SIZE, simulate_flag, simulate_depth, ctiseed, tag, num_ctigen_tlc_workers, indcheckcfgfilename(action), indchecktlafilename)
         cmd = self.java_exe + ' -Xss16M -Djava.io.tmpdir="%s" %s -cp %s tlc2.TLC -maxSetSize %d %s -depth %d -seed %d -noGenerateSpecTE -metadir states/indcheckrandom_%s -continue -deadlock -workers %d -config %s %s' % args
@@ -1104,11 +1105,10 @@ class InductiveInvGen():
                         all_ctis[action].update(parsed_ctis)
                     else:
                         all_ctis[action] = parsed_ctis
-                    # all_cti_traces[action] = parsed_cti_traces
                 else:
+                    logging.info(f"Waiting for CTI generation process termination.")
                     (parsed_ctis, parsed_cti_traces) = self.generate_ctis_tlc_run_await(cti_subproc["proc"]) 
-                    all_ctis = all_ctis.union(parsed_ctis)
-                    # all_cti_traces += parsed_cti_traces
+                    all_ctis.update(parsed_ctis)
 
     def generate_ctis(self, props=None, reseed=False, depth=None, view=None, actions=None, typeok_override=None, constants_obj=None):
         """ Generate CTIs for use in counterexample elimination. """
@@ -1139,7 +1139,6 @@ class InductiveInvGen():
         # Break down CTIs by action in this case.
         if actions is not None:
             all_ctis = {}
-            all_cti_traces = {}
 
         # Start the TLC processes for CTI generation.
         logging.info(f"Running {num_cti_worker_procs} parallel CTI generation processes")
@@ -1180,31 +1179,22 @@ class InductiveInvGen():
 
             else:
                 logging.info(f"Starting CTI generation process {n} (of {num_cti_worker_procs} total workers)")
-                cti_subproc = self.generate_ctis_tlc_run_async(num_traces_per_tlc_instance,props=props, depth=depth, view=view)
+                target_sample_states = 20000
+                target_sample_time_limit_ms = 10000
+                cti_subproc = self.generate_ctis_tlc_run_async(
+                                    num_traces_per_tlc_instance,
+                                    props=props, 
+                                    depth=depth, 
+                                    view=view, 
+                                    typeok=typeok_override,
+                                    constants_obj=constants_obj,
+                                    sampling_target_num_init_states=target_sample_states // num_cti_worker_procs,
+                                    sampling_target_time_limit_ms=target_sample_time_limit_ms)
+                
                 cti_subprocs.append({"proc": cti_subproc})
 
         # Await completion and parse results.
-        all_cti_traces = []
-
-        # self.generate_ctis_tlc_run_await_subprocs(cti_subprocs, actions=actions, all_ctis=all_ctis)
-
-
-        """
-        for cti_subproc in cti_subprocs:
-            if self.use_apalache_ctigen:
-                parsed_ctis = self.generate_ctis_apalache_run_await(cti_subproc)
-            else:
-                if actions is not None:
-                    action = cti_subproc["action"]
-                    logging.info(f"Waiting for CTI generation process termination (action={action})")
-                    (parsed_ctis, parsed_cti_traces) = self.generate_ctis_tlc_run_await(cti_subproc["proc"]) 
-                    all_ctis[action] = parsed_ctis
-                    # all_cti_traces[action] = parsed_cti_traces
-                else:
-                    (parsed_ctis, parsed_cti_traces) = self.generate_ctis_tlc_run_await(cti_subproc["proc"]) 
-                    all_ctis = all_ctis.union(parsed_ctis)
-                    # all_cti_traces += parsed_cti_traces
-        """
+        self.generate_ctis_tlc_run_await_subprocs(cti_subprocs, actions=None, all_ctis=all_ctis)
 
         # print("ALL CTIS")
         # defs = ""
@@ -1221,7 +1211,7 @@ class InductiveInvGen():
             # print(x)
 
         self.end_timing_ctigen()
-        return (all_ctis, all_cti_traces)
+        return (all_ctis, [])
 
     def make_rel_induction_check_spec(self, spec_name, support_lemmas, S, rel_ind_pred_name, goal_inv_name):
         """ 

@@ -188,12 +188,13 @@ Init ==
     /\ log = [i \in Server |-> <<>>]
     /\ immediatelyCommitted = {}
 
-ClientRequestAction == \E s \in Server : ClientRequest(s)
-GetEntriesAction == \E s, t \in Server : GetEntries(s, t)
-RollbackEntriesAction == \E s, t \in Server : RollbackEntries(s, t)
-BecomeLeaderAction == \E s \in Server : \E Q \in Quorums(Server) : BecomeLeader(s, Q)
-CommitEntryAction ==  \E s \in Server :  \E Q \in Quorums(Server) : CommitEntry(s, Q)
-UpdateTermsActions == \E s,t \in Server : UpdateTerms(s, t)
+\* Add dummy precondition for now so TLC tags actions by name explicitly.
+ClientRequestAction == TRUE /\ \E s \in Server : ClientRequest(s)
+GetEntriesAction == TRUE /\ \E s, t \in Server : GetEntries(s, t)
+RollbackEntriesAction == TRUE /\ \E s, t \in Server : RollbackEntries(s, t)
+BecomeLeaderAction == TRUE /\ \E s \in Server : \E Q \in Quorums(Server) : BecomeLeader(s, Q)
+CommitEntryAction ==  TRUE /\ \E s \in Server :  \E Q \in Quorums(Server) : CommitEntry(s, Q)
+UpdateTermsActions == TRUE /\ \E s,t \in Server : UpdateTerms(s, t)
 
 Next == 
     \/ ClientRequestAction
