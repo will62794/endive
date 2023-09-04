@@ -828,6 +828,18 @@ function reloadLayout(){
     });
 
     reloadProofGraph();
+
+
+    // Build legend for proof graph.
+    let stategraph = document.getElementById('stategraph');
+    var legendDiv = document.createElement("div");
+    legendDiv.id = "graph-legend";
+    legendDiv.innerHTML = `<i class="fa fa-circle proven-color"></i> Proved<br>`;
+    legendDiv.innerHTML += `<i class="fa fa-circle ctis-left-color"></i> Unproven (CTIs remaining)<br>`;
+    legendDiv.innerHTML += `(Click on edge to delete support lemma)<br>`;
+    legendDiv.innerHTML += `(Double click node to re-generate CTIs)`;
+    stategraph.appendChild(legendDiv);
+
 }
 
 window.onload = function(){

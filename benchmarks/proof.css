@@ -112,3 +112,20 @@ button:disabled{
     background-color: #f44336;
     color:white;
 }
+.proven-color{
+    color:green;
+}
+.ctis-left-color{
+    color:orange;
+}
+#graph-legend{
+    font-family: sans-serif;
+    position: absolute;
+    left: 10px;
+    top: 10px;
+    /* width:250px; */
+    /* height:200px; */
+    background-color: #eee;
+    padding:15px;
+    font-size:11px;
+}
