@@ -637,7 +637,7 @@ function reloadProofGraph(onCompleteFn){
         let nid = this.data()["id"];
 
         if(selectedEdge !== null){
-            selectedEdge.style({"line-color":"steelblue", "font-weight": "normal"});
+            selectedEdge.style({"line-color":"steelblue", "font-weight": "normal", "target-arrow-color": "steelblue"});
             selectedEdge = null;
         }
 

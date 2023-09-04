@@ -45,7 +45,7 @@ VARIABLE configTerm
 VARIABLE config
 
 
-vars == <<currentTerm, state, log, immediatelyCommitted>>
+vars == <<currentTerm, state, log, immediatelyCommitted, configVersion, configTerm, config>>
 
 \* The set of all allowed config sets.
 AllConfigs == SUBSET Server
@@ -357,7 +357,7 @@ LogMatching ==
 \* When a node gets elected as primary it contains all entries immediatelyCommitted in previous terms.
 LeaderCompleteness == 
     \A s \in Server : (state[s] = Primary) => 
-        \A c \in immediatelyCommitted : (c[3] < currentTerm[s] => InLog(<<c[1],c[2]>>, s))
+        \A c \in immediatelyCommitted : (c[2] < currentTerm[s] => InLog(<<c[1],c[2]>>, s))
 
 \* \* If two entries are immediatelyCommitted at the same index, they must be the same entry.
 StateMachineSafety == 
@@ -433,10 +433,10 @@ H_CommittedEntryExistsOnQuorum ==
         \E Q \in Quorums(Server) : \A n \in Q : InLog(<<c[1],c[2]>>, n)  
 
 H_EntriesCommittedInOwnOrLaterTerm == 
-    \A c \in immediatelyCommitted : c[3] >= c[2] 
+    \A c \in immediatelyCommitted : c[2] >= c[2] 
 
 H_EntriesCommittedInOwnTerm == 
-    \A c \in immediatelyCommitted : c[3] = c[2] 
+    \A c \in immediatelyCommitted : c[2] = c[2] 
 
 \* Existence of an entry in term T implies a past election in T, so 
 \* there must be some quorum at this term or greater.
@@ -465,7 +465,7 @@ H_LogsWithEntryInTermMustHaveEarlierCommittedEntriesFromTerm ==
     \A s \in Server : 
     \A c \in immediatelyCommitted :
         \* Exists an entry with same term as the immediatelyCommitted entry. 
-        (\E i \in DOMAIN log[s] : log[s][i] = c[3] /\ i >= c[1]) =>
+        (\E i \in DOMAIN log[s] : log[s][i] = c[2] /\ i >= c[1]) =>
                     /\ Len(log[s]) >= c[1]
                     /\ log[s][c[1]] = c[2]
 
