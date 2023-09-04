@@ -586,6 +586,48 @@ function addEdgesToGraph(proof_graph, node){
     }
 }
 
+function onNodeSelect(node){
+    console.log( 'clicked ' + node.id() );
+    let name = node.data()["name"];
+    let nid = node.data()["id"];
+
+    if(selectedEdge !== null){
+        selectedEdge.style({"line-color":"steelblue", "font-weight": "normal", "target-arrow-color": "steelblue"});
+        selectedEdge = null;
+    }
+
+
+    // Don't do anything for enclosing parent boxes.
+    if(node.data()["parentBox"]){
+        return;
+    }
+
+    console.log("node name:", name, "node id:", nid);
+    console.log("parent id", node.data()["parentId"]);
+    let actionNode = node.data()["actionNode"];
+    
+    // Check if we are primed for new support lemma edge creation.
+    if(supportLemmaTarget !== null && supportLemmaTarget.data()["actionNode"]){
+        console.log("Create support lemma edge:", supportLemmaTarget, name);
+
+        // Add support lemma edge.
+        let parentId = supportLemmaTarget.data()["parentId"];
+        let action = supportLemmaTarget.data()["name"];
+        addSupportLemmaEdge(parentId, action, name);
+        supportLemmaTarget = null;
+        $('#add-support-lemma-btn').prop("disabled",false);
+        return;
+        
+    }
+
+    focusOnNode(name, node.data());
+    if(currentNode !== null){
+        currentNode.style({"color":"black", "font-weight": "normal"});
+    }
+    currentNode = node;
+    currentNode.style({"color":"black", "font-weight": "bold"});
+}
+
 function reloadProofGraph(onCompleteFn){
     if(cy !== null){
         cy.elements().remove();
@@ -631,46 +673,17 @@ function reloadProofGraph(onCompleteFn){
     });
 
 
+    // Allow double-click on node to also start CTI generation.
+    cy.on('dblclick', 'node', function(evt){
+        onNodeSelect(this);
+        genCtis(currentNodeId);
+        return;
+
+    })
+
     cy.on('click', 'node', function(evt){
-        console.log( 'clicked ' + this.id() );
-        let name = this.data()["name"];
-        let nid = this.data()["id"];
-
-        if(selectedEdge !== null){
-            selectedEdge.style({"line-color":"steelblue", "font-weight": "normal", "target-arrow-color": "steelblue"});
-            selectedEdge = null;
-        }
-
-
-        // Don't do anything for enclosing parent boxes.
-        if(this.data()["parentBox"]){
-            return;
-        }
-
-        console.log("node name:", name, "node id:", nid);
-        console.log("parent id", this.data()["parentId"]);
-        let actionNode = this.data()["actionNode"];
-        
-        // Check if we are primed for new support lemma edge creation.
-        if(supportLemmaTarget !== null && supportLemmaTarget.data()["actionNode"]){
-            console.log("Create support lemma edge:", supportLemmaTarget, name);
-
-            // Add support lemma edge.
-            let parentId = supportLemmaTarget.data()["parentId"];
-            let action = supportLemmaTarget.data()["name"];
-            addSupportLemmaEdge(parentId, action, name);
-            supportLemmaTarget = null;
-            $('#add-support-lemma-btn').prop("disabled",false);
-            return;
-            
-        }
-
-        focusOnNode(name, this.data());
-        if(currentNode !== null){
-            currentNode.style({"color":"black", "font-weight": "normal"});
-        }
-        currentNode = this;
-        currentNode.style({"color":"black", "font-weight": "bold"});
+        onNodeSelect(this);
+        return;
     });
 
     cy.edges('edge').style({
