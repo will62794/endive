@@ -17,6 +17,7 @@ let awaitPollIntervalMS = 2000;
 
 cytoscape.warnings(false);
 
+const loadingIcon = '<i class="fa fa-refresh fa-spin"></i>';
 
 function awaitGenCtiCompletion(expr){
     $.get(local_server + `/getActiveCtiGenThreads`, function(data){
@@ -25,6 +26,8 @@ function awaitGenCtiCompletion(expr){
         let active_threads = data["active_threads"];
         $('#gen-ctis-btn').prop("disabled",true);
         $('#gen-ctis-btn-subtree').prop("disabled",true);
+
+
         if(active_threads.length > 0){
             setTimeout(() => awaitGenCtiCompletion(expr), awaitPollIntervalMS);
         } else{
@@ -33,6 +36,8 @@ function awaitGenCtiCompletion(expr){
             $('#gen-ctis-btn').prop("disabled",false);
             $('#gen-ctis-btn-subtree').prop("disabled",false);
             $('#cti-loading-icon').css('visibility', 'hidden');
+            $("#gen-ctis-btn").html("Generate CTIs");
+
         }
     });
 }
@@ -40,6 +45,7 @@ function awaitGenCtiCompletion(expr){
 function genCtis(exprName){
     console.log("Generating CTIs for '" + exprName + "'");
     $('#cti-loading-icon').css('visibility', 'visible');
+    $("#gen-ctis-btn").html("Generating CTIs " + loadingIcon);
 
     $.get(local_server + `/genCtis/single/${exprName}`, function(data){
         console.log(data);
@@ -108,12 +114,13 @@ function setCTIPaneHtml(nodeData){
     }
 
     // let generatingCTIsDiv = '<div id="cti-loading-icon">Generating CTIs <i class="fa fa-refresh fa-spin"></i></div>';
-    let generatingCTIsDiv = '<div id="cti-loading-icon">Generating CTIs <i class="fa fa-refresh fa-spin"></i></div>';
+    let generatingCTIsDiv = `<div id="cti-loading-icon">Generating CTIs ${loadingIcon}</div>`;
     // ctipane.innerHTML += generatingCTIsDiv;
     ctipane.innerHTML += `<div id='proof-node-name'> Proof node: ${nodeIdText} </div><br>`;
 
     // For now don't allow CTI generation for specific sub-actions, only for top-level node all at once.
-    ctipane.innerHTML += `<div><button id='gen-ctis-btn'> Generate CTIs </button> ${generatingCTIsDiv}</div> <br>`;
+    // ctipane.innerHTML += `<div><button id='gen-ctis-btn'> Generate CTIs </button> ${generatingCTIsDiv}</div> <br>`;
+    ctipane.innerHTML += `<div><button id='gen-ctis-btn'> Generate CTIs </button></div> <br>`;
     // ctipane.innerHTML += "<div><button id='gen-ctis-btn-subtree'> Gen CTIs (recursive) </button></div> <br>";
 
     // ctipane.innerHTML += "<div><button id='refresh-node-btn'> Refresh Proof Node </button></div> <br>";
@@ -134,6 +141,7 @@ function setCTIPaneHtml(nodeData){
 
     $("#gen-ctis-btn").prop('disabled', true);
     $("#gen-ctis-btn-subtree").prop('disabled', true);
+
 
     if(nodeData && !nodeData["actionNode"]){
         $("#gen-ctis-btn").prop('disabled', false);
