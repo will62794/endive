@@ -1335,7 +1335,8 @@ PendingBecomesFollowerProp ==
 DebugInvLeaderElected ==
     ~(
         /\ \E s \in Servers : state[s] = Leader
-        /\ Cardinality(messages) > 2
+        /\ Cardinality(messages) > 1
+        \* /\ TLCGet("level") > 29
     )
 
 \* This invariant is false with checkQuorum enabled but true with checkQuorum disabled
@@ -1379,6 +1380,16 @@ DebugInvRetirementReachable ==
 CONSTANT MaxTerm
 CONSTANT MaxClientRequests
 CONSTANT MaxLogLen
+
+\* Limit number of duplicate messages sent to the same server
+MCInMessagesLimit(i, j, index) ==
+    IF Len(messagesSent[i][j]) >= index
+    THEN messagesSent[i][j][index] < 1
+    ELSE TRUE
+
+\* Limit on number of request votes that can be sent to each other node
+MCInRequestVoteLimit(i,j) ==
+    votesRequested[i][j] < 1
 
 StateConstraint == 
     /\ \A s \in Servers : currentTerm[s] <= MaxTerm
