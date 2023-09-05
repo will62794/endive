@@ -16,8 +16,8 @@ class StructuredProofNode():
         self.name = name
         # Top level goal expression to be proven.
         self.expr = expr
-        if children is None:
-            self.children = dict()
+
+        self.children = dict() if children is None else children
 
         self.cti_view = None
 

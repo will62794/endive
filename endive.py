@@ -2165,6 +2165,7 @@ class InductiveInvGen():
         import proof_asr
         import proof_adr
         import proof_asr_coreLogInv
+        import proof_consensus_epr
 
         #
         # Set the specified spec appropriately.
@@ -2191,6 +2192,10 @@ class InductiveInvGen():
             root = proof_adr.adr_root
             actions = proof_adr.adr_actions
             nodes = proof_adr.adr_nodes
+        elif self.specname == "consensus_epr":
+            root = proof_consensus_epr.root
+            actions = proof_consensus_epr.actions
+            nodes = proof_consensus_epr.nodes
         else:
             logging.info("Unknown spec for proof structure: " + self.specname)
             root = StructuredProofNode("Safety", self.safety)
@@ -2273,7 +2278,7 @@ class InductiveInvGen():
             @app.route('/addNode/<expr>')
             def addNode(expr):
                 # Create new node without any children or edges to other nodes.
-                newNode = StructuredProofNode(expr, expr)
+                newNode = StructuredProofNode(expr.replace("H_", ""), expr)
                 # newNode.children = dict()
                 proof.nodes.append(newNode)
                 print("Added new node:", newNode)
