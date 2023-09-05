@@ -316,7 +316,9 @@ CInit == RM = {"1_OF_RM", "2_OF_RM", "3_OF_RM"}
 CTICost == 
     Cardinality(msgsAbortCommit) + 
     Cardinality(msgsPrepared) + 
-    Cardinality(tmPrepared)
+    Cardinality(tmPrepared) + 
+    \* Consider initial TM states as lower cost.
+    IF tmState = "init" THEN 0 ELSE 1
 
 
   (*************************************************************************)
