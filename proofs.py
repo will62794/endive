@@ -403,7 +403,7 @@ class StructuredProof():
         dot = graphviz.Digraph('proof-graph', strict=True, comment='Proof Structure')  
         # dot.graph_attr["rankdir"] = "LR"
         dot.node_attr["fontname"] = "courier"
-        # dot.node_attr["shape"] = "box"
+        dot.node_attr["shape"] = "box"
         
         # Store all nodes.
         self.add_node_to_dot_graph(dot, self.root)
