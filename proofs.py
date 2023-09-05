@@ -45,6 +45,9 @@ class StructuredProofNode():
         # self.ctis_eliminated = []
         self.ctis_eliminated = {}
 
+        # CTIs eliminated uniquely by each child, per action.
+        self.ctis_eliminated_uniquely = {}
+
         # Pointer to this node's parent, or None if it has no parent.
         self.parent = parent
 
@@ -95,6 +98,7 @@ class StructuredProofNode():
         cti_info = {
             "ctis": {a:[c.serialize() for c in self.ctis[a]] for a in self.ctis},
             "ctis_eliminated": self.ctis_eliminated, # eliminated CTIs are stored as CTI hashes, not full CTIs.
+            "ctis_eliminated_uniquely": self.ctis_eliminated_uniquely, # eliminated CTIs are stored as CTI hashes, not full CTIs.
             "ctis_remaining": {a:[str(hash(cti)) for cti in self.get_remaining_ctis(a)] for a in self.ctis},
             "num_parent_ctis_eliminated": len(self.parent_ctis_eliminated),
             # "parent_ctis_eliminated": [c for c in self.parent_ctis_eliminated],
@@ -500,10 +504,18 @@ class StructuredProof():
             ctis_eliminated_unique[inv] = unique
             # print("Unique:", len(unique))
             # print(ctis_eliminated_unique)
+
+
             child_node = sorted(node_children, key=lambda x : x.expr)[i]
             child_node.parent = node
             child_node.parent_ctis_eliminated = set(ctis_eliminated[inv])
             child_node.parent_ctis_uniquely_eliminated = set(ctis_eliminated_unique[inv])
+
+            if action not in node.ctis_eliminated_uniquely:
+                node.ctis_eliminated_uniquely[action] = {}
+
+            node.ctis_eliminated_uniquely[action][child_node.name] = list(ctis_eliminated_unique[inv])
+
             if len(child_node.parent_ctis_uniquely_eliminated) > 0:
                 one_unique_cti = random.sample(child_node.parent_ctis_uniquely_eliminated, 1)
                 for c in one_unique_cti:
@@ -607,7 +619,7 @@ class StructuredProof():
             
             for action in actions_to_check:
                 # Sample CTIs if we generated more than desired.
-                logging.info(f"Number of proof node CTIs generated for action '{action}': {len(new_ctis_by_action[action])}. Sampling a max of {indgen.max_proof_node_ctis} CTIs.")
+                logging.info(f"Number of CTIs generated for proof node, action '{action}': {len(new_ctis_by_action[action])}. Sampling a max of {indgen.max_proof_node_ctis} CTIs.")
                 if len(new_ctis_by_action[action]) > indgen.max_proof_node_ctis:
                     new_ctis_by_action[action] = random.sample(new_ctis_by_action[action], indgen.max_proof_node_ctis)
                 all_ctis_by_action[action].update(new_ctis_by_action[action])

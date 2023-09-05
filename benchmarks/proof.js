@@ -355,7 +355,7 @@ function focusOnNode(nodeId, nodeData){
 
             console.log("CTIs for action:", ctis_for_action);
 
-            let numCtisToShow = 1;
+            let numCtisToShow = 10;
 
             if(ctis_remaining && ctis_remaining.length > 0){
                 ctis_objs = _.sortBy(ctis_remaining, "cost").splice(0,numCtisToShow);
@@ -631,6 +631,8 @@ function addEdgesToGraph(proof_graph, node){
             // }
             if(!addedEdges.includes(edgeName)){
                 addedEdges.push(edgeName);
+                console.log("Adding edge from node:", node);
+
                 cy.add({
                     group: 'edges', 
                     data: {
@@ -638,6 +640,7 @@ function addEdgesToGraph(proof_graph, node){
                         source: child["expr"],
                         target: targetId,
                         targetParentId: node["expr"],
+                        ctis_eliminated_uniquely: node["ctis_eliminated_uniquely"],
                         targetNode: node,
                         child: child,
                         action: action 
@@ -645,7 +648,7 @@ function addEdgesToGraph(proof_graph, node){
                     style: {
                         "target-arrow-shape": "triangle",
                         "arrow-scale": 2.0,
-                        "line-color": "steelblue",
+                        // "line-color": "steelblue",
                         "target-arrow-color": "steelblue"
                     }
                 });
@@ -800,14 +803,6 @@ function reloadProofGraph(onCompleteFn){
                 // }
                 // return pos; 
             },
-            // edgeWeight: function(edge){
-            //     // console.log("edge data:", edge.data());
-            //     if(edge.data()["actionSubEdge"]){
-            //         return 10.0;
-            //     } else{
-            //         return 0.1;
-            //     }
-            // }
             });
         layout.run();
 
@@ -875,16 +870,34 @@ function reloadLayout(){
                 selector: 'edge',
                 style: {
                     'label': function (el) {
-                        // Disable for now.
-                        return "";
-                        let eliminated = el.data()["data"]["num_parent_ctis_eliminated"];
-                        if(eliminated > 0){
-                            return eliminated;
+                        // Show number of uniquely eliminated CTIs on incoming support edges.
+                        let data = el.data();
+                        if(data["actionSubnodeEdge"]){
+                            return "";
+                        }
+                        let ctis_uniquely_eliminated = data["ctis_eliminated_uniquely"];
+                        if(ctis_uniquely_eliminated.hasOwnProperty(data["action"])){
+                            let unique_ctis = ctis_uniquely_eliminated[data["action"]][data["child"]["name"]]
+                            return unique_ctis.length + " unique CTIs";
                         }
                     },
                     // "background-color": "lightgray",
-                    // "border-style": "solid",
-                    // "border-width": "1",
+                    "line-color": function(el){
+                        let data = el.data();
+                        if(data["actionSubnodeEdge"]){
+                            return "gray";
+                        } else{
+                            let ctis_uniquely_eliminated = data["ctis_eliminated_uniquely"];
+                            if(ctis_uniquely_eliminated.hasOwnProperty(data["action"])){
+                                let unique_ctis = ctis_uniquely_eliminated[data["action"]][data["child"]["name"]]
+                                if(unique_ctis.length === 0){
+                                    return "maroon";
+                                }
+                            }
+                            return "steelblue";
+                        }
+                    },
+                    "line-width": "1",
                     // "border-color": "black",
                     "font-size":"10px"
                 }
