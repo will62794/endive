@@ -49,6 +49,14 @@ children = {
 
 root = StructuredProofNode("Safety", "SafetyInv", children = children)
 nodes = [
+    uniqueLeaders,
+    decidedImpliesLeader,
+    leaderImpliesVotesInQuorum,
+    nodesCantVoteTwice,
+    voteRecordedImpliesNodeVoted,
+    nodesCantSentVotesToDifferentNodes,
+    voteMsgImpliesNodeVoted,
+    voteRecordedImpliesVoteMsg
 ]
 actions = [
     "SendRequestVoteAction",
