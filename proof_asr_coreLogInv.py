@@ -100,7 +100,7 @@ committedEntryExistsOnQuorum.children = {
 }
 committedEntryExistsOnQuorum.ctigen_typeok = "TypeOKSmallCommitted"
 
-coreLogInv = StructuredProofNode("CoreLogInv", "H_UniformLogEntriesInTerm_AND_TermsOfEntriesGrowMonotonically")
+coreLogInv = StructuredProofNode("CoreLogInv", "H_CoreLogInv")
 coreLogInv.children = {
     "ClientRequestAction": [
         logMatching,
@@ -136,55 +136,29 @@ primaryOrLogsLaterThanCommittedMustHaveEarlierCommitted.children = {
     ]
 }
 
-# Alternate proof structure that condense 'UniformLogEntries' and 'TermsGrowMonotonically' into a single,
-# central proof node.
-alt_children = {
-    "BecomeLeaderAction": [
-        coreLogInv,
-        committedEntryExistsOnQuorum_cycleBreak,
-    ],
-    "ClientRequestAction": [
-        coreLogInv
-    ],
-    "CommitEntryAction": [
-        # termsGrowMonotonically,
-        # primaryHasEntriesItCreated,
-        logEntryInTermImpliesSafeAtTerms,
-        quorumsSafeAtTerms
-    ],
-    "GetEntriesAction": [
-        coreLogInv
-    ]
-}
-# primaryOrLogsLaterThanCommittedMustHaveEarlierCommitted.children = alt_children
-
-
 logsLaterThanCommittedMustHaveCommitted.children = {
     "ClientRequestAction": [
-        # lemmaTRUE,
         leaderCompleteness,
     ],
     "CommitEntryAction": [
-        # lemmaTRUE,
         logEntryInTermImpliesSafeAtTerms
     ],
     "GetEntriesAction": [
-        # lemmaTRUE,
-        # logMatching,
-        termsGrowMonotonically,
-        uniformLogEntriesInTerm
+        coreLogInv
     ]
 }
 
 leaderCompleteness.children = {
     "BecomeLeaderAction": [
-        termsGrowMonotonically,
-        uniformLogEntriesInTerm,
+        # termsGrowMonotonically,
+        # uniformLogEntriesInTerm,
+        coreLogInv,
         committedEntryExistsOnQuorum,
         logsLaterThanCommittedMustHaveCommitted
     ],
     "CommitEntryAction": [
-        termsGrowMonotonically,
+        # termsGrowMonotonically,
+        coreLogInv,
         quorumsSafeAtTerms
     ],
 }
@@ -200,7 +174,8 @@ asr_root = StructuredProofNode("StateMachineSafety_Lemma", "StateMachineSafety",
 asr_nodes = [
     committedEntryExistsOnQuorum,
     logMatching,
-    currentTermsAtLeastLargeAsLogTermsForPrimary
+    currentTermsAtLeastLargeAsLogTermsForPrimary,
+    coreLogInv
     # primaryHasEntriesItCreated
 ]
 asr_actions = [

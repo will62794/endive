@@ -382,6 +382,8 @@ H_UniformLogEntriesInTerm_AND_TermsOfEntriesGrowMonotonically ==
     /\ H_UniformLogEntriesInTerm
     /\ H_TermsOfEntriesGrowMonotonically
 
+H_CoreLogInv == H_UniformLogEntriesInTerm_AND_TermsOfEntriesGrowMonotonically
+
 \* Invariant developed during inductive proof decomposition experimenting.
 \* 08/19/2023
 HumanDecompInd == 

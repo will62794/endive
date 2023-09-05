@@ -93,6 +93,7 @@ class InductiveInvGen():
         self.max_proof_node_ctis = all_args["max_proof_node_ctis"]
         self.proof_tree_mode = proof_tree_mode
         self.proof_tree_cmd = all_args["proof_tree_cmd"]
+        self.proof_struct_tag = all_args["proof_struct_tag"]
         self.interactive_mode = interactive_mode
         self.max_num_conjuncts_per_round = max_num_conjuncts_per_round
         self.override_num_cti_workers = override_num_cti_workers
@@ -2157,6 +2158,11 @@ class InductiveInvGen():
         lemmaTRUE = StructuredProofNode("LemmaTrue", "TRUE")
         lemmaTRUEShim = StructuredProofNode("LemmaTrueShim", "1=1")
 
+        # Import proof structure definitions for various protocols.
+        import proof_2pc
+        import proof_asr
+        import proof_adr
+        import proof_asr_coreLogInv
 
         #
         # Set the specified spec appropriately.
@@ -2164,18 +2170,22 @@ class InductiveInvGen():
         root = None
         actions = None
         nodes = None
+        print(self.proof_struct_tag)
         if self.specname == "TwoPhase":
-            import proof_2pc
             root = proof_2pc.root
             actions = proof_2pc.actions
             nodes = proof_2pc.nodes
         elif self.specname == "AbstractStaticRaft":
-            import proof_asr
-            root = proof_asr.asr_root
-            actions = proof_asr.asr_actions
-            nodes = proof_asr.asr_nodes
+            if self.proof_struct_tag == "coreLogInv":
+                print(f"Loading from proof struct tag: {self.proof_struct_tag}")
+                root = proof_asr_coreLogInv.asr_root
+                actions = proof_asr_coreLogInv.asr_actions
+                nodes = proof_asr_coreLogInv.asr_nodes
+            else:
+                root = proof_asr.asr_root
+                actions = proof_asr.asr_actions
+                nodes = proof_asr.asr_nodes
         elif self.specname == "AbstractDynamicRaft":
-            import proof_adr
             root = proof_adr.adr_root
             actions = proof_adr.adr_actions
             nodes = proof_adr.adr_nodes
@@ -2761,6 +2771,7 @@ if __name__ == "__main__":
     parser.add_argument('--interactive', help='Run in interactive proof tree mode (EXPERIMENTAL).', default=False, action='store_true')
     parser.add_argument('--max_proof_node_ctis', help='Maximum number of CTIs per proof node.', type=int, default=5000)
     parser.add_argument('--proof_tree_cmd', help='Proof tree command (EXPERIMENTAL).', default=None, type=str, required=False, nargs="+")
+    parser.add_argument('--proof_struct_tag', help='Tag of proof structure to load (EXPERIMENTAL).', default=None, type=str, required=False)
 
     # Apalache related commands.
     parser.add_argument('--use_apalache_ctigen', help='Use Apalache for CTI generation (experimental).', required=False, default=False, action='store_true')
