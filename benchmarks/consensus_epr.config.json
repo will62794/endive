@@ -44,7 +44,7 @@
     "quant_vars": ["VARI", "VARJ"],
     "model_consts"  :  "CONSTANT n1,n2,n3,v1,v2",
     "symmetry" : true,
-    "typeok"  :  "TypeOKRandom",
+    "typeok"  :  "TypeOK",
     "simulate"  :  true,
     "actions":[
         "SendRequestVoteAction",
