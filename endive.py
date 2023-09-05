@@ -2273,7 +2273,10 @@ class InductiveInvGen():
             @app.route('/addNode/<expr>')
             def addNode(expr):
                 # Create new node without any children or edges to other nodes.
-                proof.nodes.append(StructuredProofNode(expr, expr))
+                newNode = StructuredProofNode(expr, expr)
+                # newNode.children = dict()
+                proof.nodes.append(newNode)
+                print("Added new node:", newNode)
                 proof.save_proof()
                 response = flask.jsonify({'ok': True})
                 response.headers.add('Access-Control-Allow-Origin', '*')
@@ -2283,8 +2286,11 @@ class InductiveInvGen():
             def addSupportEdge(target, action, src):
                 target_node = proof.get_node_by_name(proof.root, target)
                 src_node = proof.get_node_by_name(proof.root, src)
-                print("Target:", target_node)
-                print("Source:", src_node)
+                print("Target:", target_node, target_node.name)
+                print("Source:", src_node, src_node.name)
+
+                # print("Target children:", target_node.children, id(target_node.children))
+                # print("Source children:", src_node.children, id( src_node.children))
 
                 if action not in target_node.children:
                     target_node.children[action] = []

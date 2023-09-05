@@ -11,12 +11,13 @@ import json
 
 class StructuredProofNode():
     """ Single node (i.e. lemma) of a structured proof tree. """
-    def __init__(self, name="", expr="", children={}, parent=None, load_from_obj = None):
+    def __init__(self, name="", expr="", children=None, parent=None, load_from_obj = None):
         # Name used to identify the expression.
         self.name = name
         # Top level goal expression to be proven.
         self.expr = expr
-        self.children = children
+        if children is None:
+            self.children = dict()
 
         self.cti_view = None
 
