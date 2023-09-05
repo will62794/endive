@@ -217,8 +217,10 @@ H_AbortMsgSentImpliesTMAborted == ([type |-> "Abort"] \in msgsAbortCommit) => tm
 H_RMAbortAfterPrepareImpliesTMAborted == \A rmi \in RM :  ((rmState[rmi] = "aborted") /\ ([type |-> "Prepared", rm |-> rmi] \in msgsPrepared)) => tmState = "aborted"
 
 
+H_RMCommittedImpliesNoAbortMsg == \A rmi \in RM : (rmState[rmi] = "committed") => ([type |-> "Abort"] \notin msgsAbortCommit)
 
-
+H_RMCommittedImpliesTMCommitted == \A rmi \in RM : (rmState[rmi] = "committed") => tmState = "committed"
+H_CommitMsgImpliesTMCommitted == \A rmi \in RM : ([type |-> "Commit"] \in msgsAbortCommit) => tmState = "committed"
 
 
 
