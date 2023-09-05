@@ -389,7 +389,10 @@ class StructuredProof():
 
     def add_node_to_dot_graph(self, dot, node):
         """ Add this node and its children, recursively, to DOT graph."""
-        dot.node(node.expr)
+        color = "black"
+        if node.expr == self.safety_goal:
+            color="green"
+        dot.node(node.expr, color=color)
         for c in node.children_list():
             dot.edge(c.expr, node.expr)
             self.add_node_to_dot_graph(dot, c)
