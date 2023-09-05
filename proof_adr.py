@@ -52,7 +52,8 @@ configVersionAndTermUnique_adr.children = {
 activeConfigsOverlap_adr.children = {
     "ReconfigAction": [
         onePrimaryPerTerm_adr,
-        activeConfigsSafeAtTerms_adr
+        activeConfigsSafeAtTerms_adr,
+        configVersionAndTermUnique_adr
     ],
     "BecomeLeaderAction": [
         activeConfigsSafeAtTerms_adr
@@ -198,7 +199,9 @@ leaderCompleteness.children = {
     "CommitEntryAction": [
         primaryConfigTermEqualToCurrentTerm_adr,
         activeConfigsOverlapWithCommittedEntry_adr,
-        uniformLogEntriesInTerm_adr
+        activeConfigsOverlap_adr,
+        uniformLogEntriesInTerm_adr,
+        newerConfigsDisablePrimaryCommitsInOlderTerms_adr
     ]
 }
 
@@ -219,7 +222,7 @@ activeConfigsOverlapWithCommittedEntry_adr.children = {
     "ReconfigAction": [
         activeConfigsOverlap_adr,
         primaryConfigTermEqualToCurrentTerm_adr,
-        # configVersionAndTermUnique_adr,
+        configVersionAndTermUnique_adr,
         uniformLogEntriesInTerm_adr
     ]
 }
