@@ -35,6 +35,8 @@ rMCommittedImpliesTMCommitted.children = {
     ]
 }
 
+rMAbortedImpliesTMAborted = StructuredProofNode("RMAbortedImpliesTMAborted", "H_RMAbortedImpliesTMAborted")
+
 
 rMCommittedImpliesNoAbortMsg.children = {
     "TMAbort":[
@@ -79,7 +81,7 @@ commitMsgImpliesNoRMAborted = StructuredProofNode("CommitMsgImpliesNoRMAborted",
     ],
     "TMCommit": [
         allPreparedImpliesAllPreparesSent,
-        rMAbortAfterPrepareImpliesTMAborted
+        rMAbortAfterPrepareImpliesTMAborted,
     ]
     
 })
