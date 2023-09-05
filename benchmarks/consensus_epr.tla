@@ -124,12 +124,30 @@ SafetyWithTypeOK ==
 
 NextUnchanged == UNCHANGED vars
 
+\* Sum the elements in the range of a function.
+RECURSIVE SumFnRange(_)
+SumFnRange(f) == IF DOMAIN f = {} THEN 0 ELSE
+  LET x == CHOOSE x \in DOMAIN f : TRUE
+    IN f[x] + SumFnRange([k \in (DOMAIN f) \ {x} |-> f[k]])
 
-CTICost == Cardinality(vote_msg) + Cardinality(vote_request_msg)
+CTICost == 
+    Cardinality(vote_msg) + 
+    Cardinality(vote_request_msg) + 
+    SumFnRange([n \in Node |-> Cardinality(decided[n])]) +
+    SumFnRange([n \in Node |-> Cardinality(votes[n])])
 
+\* 
+\* Helper lemmas.
+\* 
 
 H_UniqueLeaders == \A n1,n2 \in Node : leader[n1] /\ leader[n2] => n1 = n2
 H_DecidedImpliesLeader == \A n \in Node : decided[n] # {} => leader[n]
+H_LeaderImpliesVotesInQuorum == \A n \in Node : leader[n] => \E Q \in Quorum : votes[n] = Q
+H_NodesCantVoteTwice == \A n,ni,nj \in Node : ~(ni # nj /\ n \in votes[ni] /\ n \in votes[nj])
+H_VoteRecordedImpliesNodeVoted == \A ni,nj \in Node : (ni \in votes[nj]) => voted[ni]
+H_NodesCantSentVotesToDifferentNodes == \A mi,mj \in vote_msg : (mi[1] = mj[1]) => mi = mj
+H_VoteMsgImpliesNodeVoted == \A mi \in vote_msg : voted[mi[1]]
+H_VoteRecordedImpliesVoteMsg == \A ni,nj \in Node : nj \in votes[ni] => <<nj,ni>> \in vote_msg
 
 \* H_LeaderImpliesQuorumVotedForIt == 
     \* \A n \in Node : leader[n] => \E Q \in Quorum : \A s \in Q : 
