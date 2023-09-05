@@ -169,7 +169,6 @@ Next ==
   \/ RMRcvAbortMsgAction
 
 -----------------------------------------------------------------------------
-TPSpec == Init /\ [][Next]_<<rmState, tmState, tmPrepared, msgsPrepared, msgsAbortCommit>>
 
 NextUnchanged == UNCHANGED vars
 
@@ -181,12 +180,6 @@ TCConsistent ==
   (* conflicting decisions.                                                *)
   (*************************************************************************)
   \A rm1, rm2 \in RM : ~ (rmState[rm1] = "aborted" /\ rmState[rm2] = "committed")
-
-  (*************************************************************************)
-  (* The complete spec of the Two-Phase Commit protocol.                   *)
-  (*************************************************************************)
-
-THEOREM TPSpec => []TypeOK
 
 \* 
 \* Helper lemmas
@@ -331,25 +324,52 @@ CTICost ==
   (* an invariant of the specification.                                    *)
   (*************************************************************************)
 -----------------------------------------------------------------------------
-(***************************************************************************)
-(* We now assert that the Two-Phase Commit protocol implements the         *)
-(* Transaction Commit protocol of module $TCommit$.  The following         *)
-(* statement defines $TC!TCSpec$ to be formula $TSpec$ of module           *)
-(* $TCommit$.  (The TLA$^+$ \textsc{instance} statement is used to rename  *)
-(* the operators defined in module $TCommit$ avoids any name conflicts     *)
-(* that might exist with operators in the current module.)                 *)
-(***************************************************************************)
-\* TC == INSTANCE TCommit 
 
-\* THEOREM TPSpec => TC!TCSpec
-  (*************************************************************************)
-  (* This theorem asserts that the specification TPSpec of the Two-Phase   *)
-  (* Commit protocol implements the specification TCSpec of the            *)
-  (* Transaction Commit protocol.                                          *)
-  (*************************************************************************)
-(***************************************************************************)
-(* The two theorems in this module have been checked with TLC for six      *)
-(* RMs, a configuration with 50816 reachable states, in a little over a    *)
-(* minute on a 1 GHz PC.                                                   *)
-(***************************************************************************)
+
+\* 
+\* Some notes and stuff on liveness.
+\* 
+
+Fairness ==
+    /\ WF_vars(TMCommit)
+    /\ WF_vars(TMAbort)
+    /\ \A rm \in RM : WF_vars(TMRcvPrepared(rm))
+    /\ \A rm \in RM : WF_vars(RMPrepare(rm))
+    /\ \A rm \in RM : WF_vars(RMChooseToAbort(rm))
+    /\ \A rm \in RM : WF_vars(RMRcvCommitMsg(rm))
+    /\ \A rm \in RM : WF_vars(RMRcvAbortMsg(rm))
+
+Spec == Init /\ [][Next]_vars /\ Fairness
+
+\* Simple liveness property.
+TMCommitImpliesAllEventuallyCommit == \A rm \in RM : [](tmState = "committed" => <> (rmState[rm] = "committed"))
+
+\* If the TM has committed, then we always must be taking a step where 
+\* either (1) TM sends a commit message or (2) RM receives a commit message.
+RankingFunctionTest == 
+    LET commitMsgs == {s \in msgsAbortCommit : s.type = "Commit"}
+        committedRMs == {rm \in RM : rmState[rm] = "committed"}
+        maxSize == (1 + Cardinality(RM)) IN
+    maxSize - Cardinality(commitMsgs) - Cardinality(committedRMs)
+
+\* If we are in a state where the TM has committed, the ranking function decreasing condition must hold
+\* on any transition.
+RankingInit == (tmState = "committed")
+RankingNext == Next
+RankingInv == RankingFunctionTest' < RankingFunctionTest
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 =============================================================================
