@@ -143,12 +143,17 @@ CTICost ==
 H_UniqueLeaders == \A n1,n2 \in Node : leader[n1] /\ leader[n2] => n1 = n2
 H_DecidedImpliesLeader == \A n \in Node : decided[n] # {} => leader[n]
 H_LeaderImpliesVotesInQuorum == \A n \in Node : leader[n] => \E Q \in Quorum : votes[n] = Q
-H_NodesCantVoteTwice == \A n,ni,nj \in Node : ~(ni # nj /\ n \in votes[ni] /\ n \in votes[nj])
-H_VoteRecordedImpliesNodeVoted == \A ni,nj \in Node : (ni \in votes[nj]) => voted[ni]
-H_NodesCantSentVotesToDifferentNodes == \A mi,mj \in vote_msg : (mi[1] = mj[1]) => mi = mj
 H_VoteMsgImpliesNodeVoted == \A mi \in vote_msg : voted[mi[1]]
-H_VoteRecordedImpliesVoteMsg == \A ni,nj \in Node : nj \in votes[ni] => <<nj,ni>> \in vote_msg
 
-\* H_LeaderImpliesQuorumVotedForIt == 
-    \* \A n \in Node : leader[n] => \E Q \in Quorum : \A s \in Q : 
+RecvVote_Copy(n, sender) == 
+    /\ <<sender,n>> \in vote_msg
+    /\ votes' = [votes EXCEPT ![n] = votes[n] \cup {sender}]
+    /\ UNCHANGED <<vote_request_msg,voted,vote_msg,leader,decided>>
+
+H_NodesCantSentVotesToDifferentNodes == \A mi,mj \in vote_msg : (mi[1] = mj[1]) => mi = mj
+H_VoteRecordedImpliesVoteMsg == \A ni,nj \in Node : nj \in votes[ni] => <<nj,ni>> \in vote_msg
+H_VoteRecordedImpliesNodeVoted == \A ni,nj \in Node : (ni \in votes[nj]) => voted[ni]
+
+H_NodesCantVoteTwice == \A n,ni,nj \in Node : ~(ni # nj /\ n \in votes[ni] /\ n \in votes[nj])
+
 ====
