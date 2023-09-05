@@ -1417,6 +1417,8 @@ class InductiveInvGen():
         n_tlc_workers = 4
         cti_chunks = list(chunks(list(orig_ctis), n_tlc_workers))
 
+        sat_invs = sat_invs + [("DUMMY_INV", "TRUE")]
+
         # sat_invs = sorted(sat_invs)
         invs = sorted([x[1] for x in sat_invs])
         sat_invs = ["Inv" + str(i) for i,x in enumerate(sat_invs)]
@@ -1517,6 +1519,11 @@ class InductiveInvGen():
                     sval = cti_state["val"]
                     ctiHash = sval["ctiId"]
                     ctiCost = sval["ctiCost"]
+
+                    # print(sval)
+                    # if ctiCost == 0:
+                    #     print(sval)
+                    #     print(ctiCost)
 
                     cti_costs[ctiHash] = ctiCost
 
@@ -1670,6 +1677,15 @@ class InductiveInvGen():
             curr_ind += MAX_INVS_PER_GROUP
         # Return various CTI info.
         # print("CTI costs:", cti_costs)
+        # print(cti_states_eliminated_by_invs)
+        # print("CTI COSTS:", cti_costs)
+
+        # Remove the last dummy invariant, which is there just to ensure we compute costs for
+        # each CTI even if there are no invariants to check elimination for.
+
+        last_inv_ind = (len(sat_invs) - 1)
+        del cti_states_eliminated_by_invs["Inv" + str(last_inv_ind)]
+
         return {
             "eliminated": cti_states_eliminated_by_invs,
             "cost": cti_costs

@@ -438,10 +438,6 @@ class StructuredProof():
     def compute_cti_elimination_for_node(self, indgen, node, ctis, action, constants_obj=None):
         """ Compute CTIs that are eliminated by the children of this node, for given set of CTIs. """
 
-        ####
-        # TODO: Update the logic below to deal with per-action CTI structure.
-        ###
-
         # Mapping from CTI id to CTI object.
         cti_table = {}
         for c in ctis:
@@ -450,16 +446,20 @@ class StructuredProof():
         # Compute CTIs that are eliminated by each of the "support lemmas" for this node i.e.
         # its set of direct children.
 
+        # if action not in node.children:
+            # return {}
+        
         print(f"Checking CTI elimination for support lemmas of node ({node.name},{node.expr}), action={action}")
-        # ctis_eliminated = indgen.check_cti_elimination(node.ctis, [
-        #     (child.name,child.expr) for child in node.children
-        # ])
 
-        if action not in node.children:
-            return {}
+        # If action is not in node's chidlren, we still check CTI elimination to compute CTI costs.
+        if action in node.children:
+            node_children = node.children[action]
+        else:
+            node_children = []
+
 
         cti_info = indgen.check_cti_elimination(ctis, [
-            (child.name,child.expr) for child in node.children[action]
+            (child.name,child.expr) for child in node_children
         ], constants_obj=constants_obj)
 
         ctis_eliminated = cti_info["eliminated"]
@@ -472,6 +472,10 @@ class StructuredProof():
         for c in cti_cost:
             cost = cti_cost[c]
             cti_table[c].cost = cost
+            # print(cti_table[c].action_name)
+            # if cost == 0:
+                # print(cti_table[c])
+                # print(cost)
 
         # print("CTI eliminate response:", ctis_eliminated.keys())
 
@@ -492,7 +496,7 @@ class StructuredProof():
             ctis_eliminated_unique[inv] = unique
             # print("Unique:", len(unique))
             # print(ctis_eliminated_unique)
-            child_node = sorted(node.children[action], key=lambda x : x.expr)[i]
+            child_node = sorted(node_children, key=lambda x : x.expr)[i]
             child_node.parent = node
             child_node.parent_ctis_eliminated = set(ctis_eliminated[inv])
             child_node.parent_ctis_uniquely_eliminated = set(ctis_eliminated_unique[inv])
@@ -561,10 +565,10 @@ class StructuredProof():
             # Actions that we should skip and those for which we keep searching for CTIs.
             actions_to_skip = [a for a in actions if
                 a in all_ctis_by_action and 
-                # Some CTIs exist for this action, and they have all been eliminated
-                # by existing lemmas.
+                # Some CTIs exist for this action, and they have not yet all
+                # been eliminated.
                 len(all_ctis_by_action[a]) > 0 and 
-                len(node.ctis_eliminated[a]) == len(all_ctis_by_action[a])          
+                len(node.ctis_eliminated[a]) < len(all_ctis_by_action[a])          
             ]
             actions_to_check = [a for a in actions if a not in actions_to_skip]
 
@@ -593,6 +597,7 @@ class StructuredProof():
             for c in new_ctis:
                 # If we got new CTIs for an action that we already have CTIs for at a lower
                 # parameter bound, then ignore those CTIs for now.
+                # print("ACTION NAME", c.action_name)
                 if c.action_name in actions_to_check:
                     new_ctis_by_action[c.action_name].add(c)
             
@@ -610,13 +615,11 @@ class StructuredProof():
             # for action in actions:
             ctis_eliminated_by_action = {}
             for action in actions_to_check:
-                
                 # ctis_for_action = list(all_ctis_by_action[action])
                 # ctis_for_action.sort()
 
                 # Set CTIs for this node based on those generated and sample if needed.
                 # logging.info(f"Number of proof node CTIs generated for action '{action}': {len(new_ctis_by_action[action])}. Sampling a limit of {indgen.max_proof_node_ctis} CTIs.")
-                
                 ctis_eliminated = self.compute_cti_elimination_for_node(indgen, node, new_ctis_by_action[action], action, constants_obj = constants_obj)
                 ctis_eliminated_by_action[action] = ctis_eliminated
 
