@@ -59,7 +59,7 @@ table td:hover {
 
 #stategraph{
     width:56%;
-    height: 90%;
+    height: 98%;
     border-right:solid 1px black;
     float:left;
 }
@@ -121,13 +121,13 @@ button:disabled{
 #graph-legend{
     font-family: sans-serif;
     position: absolute;
-    left: 10px;
-    top: 10px;
+    left: 6px;
+    bottom: 6px;
     /* width:250px; */
     /* height:200px; */
     background-color: #eee;
-    padding:15px;
-    font-size:11px;
+    padding:10px;
+    font-size:10px;
 }
 
 #legend-list{
