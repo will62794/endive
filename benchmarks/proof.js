@@ -377,13 +377,15 @@ function focusOnNode(nodeId, nodeData){
                 // let cti_obj = data["ctis"][0];
                 let cti_text = cti_obj["cti_str"];
                 var ctidiv = document.createElement("div");
+                var preelem = document.createElement("pre");
                 ctidiv.classList.add("cti-box");
                 var i = 0;
                 // ctidiv.innerHTML += `<h2>Cluster: ${cluster_name.split(" ")[0]}</h2>`;
                 ctidiv.innerHTML += `<h3>CTI ${cti_ind} (${cti_obj["action_name"]}), cost=${cti_obj["cost"]}</h3>`;
                 for(const state of cti_obj["trace"]){
                     ctidiv.innerHTML += `<h4>CTI State ${i}</h4>`;
-                    ctidiv.innerHTML += "<pre>";
+                    let ctiHTML = ""
+                    ctiHTML += "<pre>";
                     let lineI = 0;
                     // console.log(cti_obj);
                     for(const line of state["state_lines"]){
@@ -393,10 +395,13 @@ function focusOnNode(nodeId, nodeData){
                         let prevLine = cti_obj["trace"][0]["state_lines"][lineI];
                         let isDiff = i==1 && (prevLine !== line);
                         let color = isDiff ? "blue" : "black";
-                        ctidiv.innerHTML += `<span style='color:${color}'>` + line + "</span><br>";
+                        let escapedLine = line.trim().replaceAll("<", "&lt;").replaceAll(">", "&gt;");
+                        ctiHTML += `<span style='color:${color}'>` + escapedLine + "</span><br>";
                         lineI += 1;
                     }
-                    ctidiv.innerHTML += "</pre>";
+                    ctiHTML += "</pre>";
+                    console.log(ctiHTML);
+                    ctidiv.innerHTML += ctiHTML;
                     i += 1;
                 }
                 ctipane.appendChild(ctidiv);
