@@ -39,6 +39,9 @@ rMCommittedImpliesTMCommitted.children = {
 rMCommittedImpliesNoAbortMsg.children = {
     "TMAbort":[
         rMCommittedImpliesTMCommitted
+    ],
+    "RMRcvCommitMsgAction": [
+        commitMsgImpliesNoAbortMsg
     ]
 }
 
