@@ -350,24 +350,32 @@ function focusOnNode(nodeId, nodeData){
             }
             console.log("CTI table:", cti_table);
 
-            // for(const cluster_name in data["cti_clusters"]){
+
+            // ctis_objs = _.sortBy(ctis_for_action, "cost").splice(0,numCtisToShow);
+
+            console.log("CTIs for action:", ctis_for_action);
+
+            let numCtisToShow = 1;
+
+            if(ctis_remaining && ctis_remaining.length > 0){
+                ctis_objs = _.sortBy(ctis_remaining, "cost").splice(0,numCtisToShow);
+            } else{
+                return;
+            }
+
+            // cti_objs = _.sortBy(ctis_for_action, "cost")[0];s
+            for(const cti_obj of ctis_objs){
+
                 // cluster_cti_ids = data["cti_clusters"][cluster_name];
                 // cti_id = data["cti_clusters"][cluster_name][0]
                 // cti_obj = cti_table[cti_id];
-                cti_obj = ctis_for_action[0];
-                console.log("CTIs for action:", ctis_for_action);
-
-                cti_obj = _.sortBy(ctis_for_action, "cost")[0];
+                // cti_obj = ctis_for_action[0];
+                
 
                 // console.log(cti_obj);
                 // console.log(ctis_remaining);
 
-                if(ctis_remaining && ctis_remaining.length > 0){
-                    cti_obj = _.sortBy(ctis_remaining, "cost")[0];
-                } else{
-                    return;
-                }
-
+            
                 // If all CTIs from this cluster are eliminated, then continue.
                 // if(cluster_cti_ids.every(cid => data["ctis_eliminated"].includes(cid))){
                 //     continue;
@@ -408,6 +416,7 @@ function focusOnNode(nodeId, nodeData){
                 cti_ind += 1;
             // }
         }
+    }
 
     });   
 
