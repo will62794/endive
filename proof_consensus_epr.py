@@ -27,7 +27,7 @@ nodesCantSentVotesToDifferentNodes.children = {
 
 nodesCantVoteTwice.children = {
     "RecvVoteAction": [
-        voteRecordedImpliesNodeVoted,
+        # voteRecordedImpliesNodeVoted,
         nodesCantSentVotesToDifferentNodes,
         voteRecordedImpliesVoteMsg
     ]
@@ -53,7 +53,7 @@ nodes = [
     decidedImpliesLeader,
     leaderImpliesVotesInQuorum,
     nodesCantVoteTwice,
-    voteRecordedImpliesNodeVoted,
+    # voteRecordedImpliesNodeVoted,
     nodesCantSentVotesToDifferentNodes,
     voteMsgImpliesNodeVoted,
     voteRecordedImpliesVoteMsg
