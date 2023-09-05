@@ -5,10 +5,9 @@ CONSTANT
     \* @type: Set(Str);
     Node,
     \* @type: Set(Str);
-    Quorum,
-    \* @type: Set(Str);
     Value
 
+Quorum == {i \in SUBSET(Node) : Cardinality(i) * 2 > Cardinality(Node)}
 
 VARIABLE 
     \* @type: Set(<<Str,Str>>);
@@ -63,12 +62,18 @@ Init ==
     /\ leader = [i \in Node |-> FALSE]
     /\ decided = [i \in Node |-> {}]
 
+SendRequestVoteAction == TRUE /\ \E i,j \in Node : SendRequestVote(i,j)
+SendVoteAction == TRUE /\ \E i,j \in Node : SendVote(i,j)
+RecvVoteAction == TRUE /\ \E i,j \in Node : RecvVote(i,j)
+BecomeLeaderAction == TRUE /\ \E i \in Node, Q \in Quorum : BecomeLeader(i,Q)
+DecideAction == TRUE /\ \E i,j \in Node, v \in Value : Decide(i,v)
+
 Next == 
-    \/ \E i,j \in Node : SendRequestVote(i,j)
-    \/ \E i,j \in Node : SendVote(i,j)
-    \/ \E i,j \in Node : RecvVote(i,j)
-    \/ \E i \in Node, Q \in Quorum : BecomeLeader(i,Q)
-    \/ \E i,j \in Node, v \in Value : Decide(i,v)
+    \/ SendRequestVoteAction
+    \/ SendVoteAction
+    \/ RecvVoteAction
+    \/ BecomeLeaderAction
+    \/ DecideAction
 
 Symmetry == Permutations(Node) \cup Permutations(Value)
 
@@ -107,7 +112,7 @@ TypeOKRandom ==
     \* \A BBBVARI \in Node : \A BBBVARK \in Node : (<<BBBVARI,BBBVARK>> \in vote_msg) \/ (~(BBBVARI \in votes[BBBVARK]))
     \* \E QJ \in Quorum : \A VARI \in Node : ~(VARI \in QJ /\ votes = votes) \/ (~(leader[VARI]))
 
-Safety ==
+SafetyInv ==
     \A n1,n2 \in Node, v1,v2 \in Value : 
         (v1 \in decided[n1] /\ v2 \in decided[n2]) => (v1 = v2)
 
@@ -118,4 +123,14 @@ SafetyWithTypeOK ==
 
 
 NextUnchanged == UNCHANGED vars
+
+
+CTICost == Cardinality(vote_msg) + Cardinality(vote_request_msg)
+
+
+H_UniqueLeaders == \A n1,n2 \in Node : leader[n1] /\ leader[n2] => n1 = n2
+H_DecidedImpliesLeader == \A n \in Node : decided[n] # {} => leader[n]
+
+\* H_LeaderImpliesQuorumVotedForIt == 
+    \* \A n \in Node : leader[n] => \E Q \in Quorum : \A s \in Q : 
 ====

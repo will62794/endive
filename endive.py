@@ -65,7 +65,7 @@ class InductiveInvGen():
                     symmetry=False, simulate=False, simulate_depth=6, typeok="TypeOK", tlc_specific_spec=False, seed=0, num_invs=1000, num_rounds=3, num_iters=3, 
                     num_simulate_traces=10000, tlc_workers=6, quant_vars=[],java_exe="java",cached_invs=None, cached_invs_gen_time_secs=None, use_cpp_invgen=False,
                     pregen_inv_cmd=None, opt_quant_minimize=False, try_final_minimize=False, proof_tree_mode=False, interactive_mode=False, max_num_conjuncts_per_round=10000,
-                    max_num_ctis_per_round=10000, override_num_cti_workers=None, use_apalache_ctigen=False,all_args={}):
+                    max_num_ctis_per_round=10000, override_num_cti_workers=None, use_apalache_ctigen=False,all_args={},spec_config=None):
         self.java_exe = java_exe
         self.java_version_info = None
         
@@ -77,6 +77,8 @@ class InductiveInvGen():
         self.cached_invs_gen_time_secs=cached_invs_gen_time_secs
         self.use_cpp_invgen = use_cpp_invgen
         self.pregen_inv_cmd = pregen_inv_cmd
+
+        self.spec_config = spec_config
 
         self.seed = seed
         self.num_rounds = num_rounds
@@ -2191,7 +2193,10 @@ class InductiveInvGen():
             nodes = proof_adr.adr_nodes
         else:
             logging.info("Unknown spec for proof structure: " + self.specname)
-            return
+            root = StructuredProofNode("Safety", self.safety)
+            nodes = []
+            actions = self.spec_config["actions"]
+            # return
 
         ###########
         ###########
@@ -2872,7 +2877,8 @@ if __name__ == "__main__":
                                 pregen_inv_cmd=pregen_inv_cmd, opt_quant_minimize=args["opt_quant_minimize"],try_final_minimize=try_final_minimize,proof_tree_mode=args["proof_tree_mode"],
                                 interactive_mode=args["interactive"],
                                 max_num_conjuncts_per_round=args["max_num_conjuncts_per_round"], max_num_ctis_per_round=args["max_num_ctis_per_round"],
-                                override_num_cti_workers=args["override_num_cti_workers"],use_apalache_ctigen=args["use_apalache_ctigen"],all_args=args)
+                                override_num_cti_workers=args["override_num_cti_workers"],use_apalache_ctigen=args["use_apalache_ctigen"],all_args=args,
+                                spec_config=spec_config)
 
 
     # Only do invariant generation, cache the invariants, and then exit.
