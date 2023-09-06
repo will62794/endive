@@ -631,7 +631,7 @@ function addEdgesToGraph(proof_graph, node){
             // }
             if(!addedEdges.includes(edgeName)){
                 addedEdges.push(edgeName);
-                console.log("Adding edge from node:", node);
+                // console.log("Adding edge from node:", node);
 
                 cy.add({
                     group: 'edges', 
