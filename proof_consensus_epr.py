@@ -9,7 +9,7 @@ decidedImpliesLeader = StructuredProofNode("DecidedImpliesLeader","H_DecidedImpl
 leaderImpliesVotesInQuorum = StructuredProofNode("LeaderImpliesVotesInQuorum","H_LeaderImpliesVotesInQuorum")
 nodesCantVoteTwice = StructuredProofNode("NodesCantVoteTwice","H_NodesCantVoteTwice")
 voteRecordedImpliesNodeVoted = StructuredProofNode("VoteRecordedImpliesNodeVoted","H_VoteRecordedImpliesNodeVoted")
-nodesCantSentVotesToDifferentNodes = StructuredProofNode("NodesCantSentVotesToDifferentNodes","H_NodesCantSentVotesToDifferentNodes")
+nodesCantSendVotesToDifferentNodes = StructuredProofNode("NodesCantSendVotesToDifferentNodes","H_NodesCantSendVotesToDifferentNodes")
 voteMsgImpliesNodeVoted = StructuredProofNode("VoteMsgImpliesNodeVoted","H_VoteMsgImpliesNodeVoted")
 voteRecordedImpliesVoteMsg = StructuredProofNode("VoteRecordedImpliesVoteMsg","H_VoteRecordedImpliesVoteMsg")
 
@@ -19,7 +19,7 @@ voteRecordedImpliesNodeVoted.children = {
     ]
 }
 
-nodesCantSentVotesToDifferentNodes.children = {
+nodesCantSendVotesToDifferentNodes.children = {
     "SendVoteAction": [
         voteMsgImpliesNodeVoted
     ]
@@ -27,8 +27,8 @@ nodesCantSentVotesToDifferentNodes.children = {
 
 nodesCantVoteTwice.children = {
     "RecvVoteAction": [
-        # voteRecordedImpliesNodeVoted,
-        nodesCantSentVotesToDifferentNodes,
+        voteRecordedImpliesNodeVoted,
+        nodesCantSendVotesToDifferentNodes,
         voteRecordedImpliesVoteMsg
     ]
 }
@@ -54,7 +54,7 @@ nodes = [
     leaderImpliesVotesInQuorum,
     nodesCantVoteTwice,
     # voteRecordedImpliesNodeVoted,
-    nodesCantSentVotesToDifferentNodes,
+    nodesCantSendVotesToDifferentNodes,
     voteMsgImpliesNodeVoted,
     voteRecordedImpliesVoteMsg
 ]
