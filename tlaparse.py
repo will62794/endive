@@ -78,15 +78,12 @@ class TLASpec:
         }
         return spec_obj
 
-    def get_vars_in_def_rec(self, elem, uids_to_ignore=set()):
+    def get_vars_in_def_rec(self, elem):
         uid = None
         if elem.tag in ["OpDeclNodeRef", "BuiltInKindRef"]:
             children = list(elem)
             assert children[0].tag == "UID"
             uid = children[0].text
-
-        if uid in uids_to_ignore:
-            return set()
 
         # if elem.tag == "BuiltInKindRef":
         #     name = self.spec_obj["builtins"][uid]["uniquename"]
@@ -136,10 +133,10 @@ class TLASpec:
                 assert children[0].tag == "UID"
                 uid = children[0].text
                 def_elem = self.spec_obj["defs"][uid]["elem"]
-                new_vars = self.get_vars_in_def_rec(def_elem, uids_to_ignore)
+                new_vars = self.get_vars_in_def_rec(def_elem)
                 all_vars.update(new_vars)
             else:
-                new_vars = self.get_vars_in_def_rec(sub_elem, uids_to_ignore)
+                new_vars = self.get_vars_in_def_rec(sub_elem)
                 all_vars.update(new_vars)
         return all_vars
 
@@ -185,7 +182,7 @@ class TLASpec:
 
         # root = copy.deepcopy(self.ast.getroot())
         # entries = root.findall("context")[0].findall("./entry")
-        print(node_uid)
+        # print(node_uid)
         res = [e for e in self.spec_obj["defs"].values() if e["uid"] == node_uid]
         if len(res) == 0:
             return None
@@ -201,12 +198,13 @@ class TLASpec:
         if ignore_unchanged:
             self.remove_unchanged_elems(elem)
 
-        all_vars = self.get_vars_in_def_rec(elem, uids_to_ignore=[])
-        print(all_vars)
+        all_vars = self.get_vars_in_def_rec(elem)
+        # print(all_vars)
+        return all_vars
 
         # print(entries)
         # spec_obj = self.extract_spec_obj(spec_ast)
-        return self.spec_obj["defs"]
+        # return self.spec_obj["defs"]
         # pass
 
     def get_all_user_defs(self, level=None):
@@ -218,7 +216,7 @@ class TLASpec:
             return [v["uniquename"] for v in self.spec_obj["defs"].values() if v["level"]==level] 
 
     def get_def_node_by_uniquename(self, uniquename):
-        objs = [a for a in spec_obj["defs"].values() if a["uniquename"] == uniquename]
+        objs = [a for a in self.spec_obj["defs"].values() if a["uniquename"] == uniquename]
         if len(objs) == 0:
             return None
         return objs[0]

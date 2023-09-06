@@ -249,6 +249,7 @@ class StructuredProof():
         self.actions = actions
 
         self.spec_defs = spec_defs
+        self.vars_in_action = dict()
 
         if load_from_obj:
             self.load_from(load_from_obj)
@@ -258,7 +259,8 @@ class StructuredProof():
             "safety": self.safety_goal, 
             "root": self.root.serialize(include_ctis=include_ctis),
             "nodes": [n.serialize() for n in self.nodes],
-            "spec_defs": self.spec_defs
+            "spec_defs": self.spec_defs,
+            "vars_in_action": {a:list(v) for a,v in self.vars_in_action.items()}
         }
     
     def save_proof(self, include_json=False, include_dot=False):

@@ -2216,10 +2216,23 @@ class InductiveInvGen():
         # Handle interactive proof tree commands.
         #
 
+        # Load parsed spec.
+        tla_spec_obj = tlaparse.parse_tla_file(self.specdir, f"{self.specname}")
+        vars_in_action = {}
+        for action in actions:
+            vars_in_action[action] = tla_spec_obj.get_vars_in_def(action)
+            print(vars_in_action[action])
+        # self.spec_obj = tla_spec_obj.get_all_user_defs(level="1")
+
         # Optionally reload proof structure from locally defined template.
         if self.proof_tree_cmd and self.proof_tree_cmd[0] in ["reload", "reload_proof_struct"]:
             logging.info(f"Reloading entire proof and re-generating CTIs.")
-            proof = StructuredProof(root, specname = self.specname, actions=actions, nodes=nodes, safety=self.safety)
+            proof = StructuredProof(root, 
+                                    specname = self.specname, 
+                                    actions=actions, 
+                                    nodes=nodes, 
+                                    safety=self.safety)
+            proof.vars_in_action = vars_in_action
             proof.save_proof()
 
             # Re-generate CTIs.
@@ -2651,8 +2664,8 @@ class InductiveInvGen():
         # Parse and save AST of spec if needed.
         if self.load_parse_tree:
             logging.info(f"Parsing spec '{self.specname}' into parse tree.")
-            tla_tree = tlaparse.parse_tla_file(self.specdir, f"{self.specname}")
-            self.spec_defs = tlaparse.get_all_user_defs(tla_tree)
+            tla_spec_obj = tlaparse.parse_tla_file(self.specdir, f"{self.specname}")
+            self.spec_defs = tla_spec_obj.get_all_user_defs(level="1")
 
         if self.proof_tree_mode:
 
