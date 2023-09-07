@@ -2225,10 +2225,12 @@ class InductiveInvGen():
         for action in actions:
             vars_in_action[action] = tla_spec_obj.get_vars_in_def(action)
             print(vars_in_action[action])
-        for udef in tla_spec_obj.get_all_user_defs():
-            if udef.startswith("H_"):
-                vars_in_lemma_defs[udef] = tla_spec_obj.get_vars_in_def(udef)
-                print(udef, vars_in_lemma_defs[udef])
+        for udef in tla_spec_obj.get_all_user_defs(level="1"):
+            # Getting all level 1 definitions should be sufficient here.
+            # Invariants (i.e. state predicates) should all be at level 1.
+            # if udef.startswith("H_"):
+            vars_in_lemma_defs[udef] = tla_spec_obj.get_vars_in_def(udef)
+            print(udef, vars_in_lemma_defs[udef])
 
         # self.spec_obj = tla_spec_obj.get_all_user_defs(level="1")
 
