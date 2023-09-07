@@ -150,7 +150,7 @@ RecvVote_Copy(n, sender) ==
     /\ votes' = [votes EXCEPT ![n] = votes[n] \cup {sender}]
     /\ UNCHANGED <<vote_request_msg,voted,vote_msg,leader,decided>>
 
-H_NodesCantSentVotesToDifferentNodes == \A mi,mj \in vote_msg : (mi[1] = mj[1]) => mi = mj
+H_NodesCantSendVotesToDifferentNodes == \A mi,mj \in vote_msg : (mi[1] = mj[1]) => mi = mj
 H_VoteRecordedImpliesVoteMsg == \A ni,nj \in Node : nj \in votes[ni] => <<nj,ni>> \in vote_msg
 H_VoteRecordedImpliesNodeVoted == \A ni,nj \in Node : (ni \in votes[nj]) => voted[ni]
 
