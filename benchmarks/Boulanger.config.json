@@ -1,0 +1,44 @@
+{
+    "preds"  :  [
+        "(currentTerm[VARI] > currentTerm[VARJ])",
+        "(currentTerm[VARJ] > currentTerm[VARI])",
+
+        "(currentTerm[VARI] >= currentTerm[VARJ])",
+        "(currentTerm[VARJ] >= currentTerm[VARI])",
+
+        "(currentTerm[VARI] <= currentTerm[VARJ])",
+        "(currentTerm[VARJ] <= currentTerm[VARI])",
+
+        "(currentTerm[VARI] = currentTerm[VARJ])",
+    
+        "(state[VARI] = Primary)",
+        "(state[VARJ] = Primary)"
+    ],
+    "preds_alt" : [],
+    "safety"  :  "H_MutualExclusion",
+    "constants"  : {
+        "N": ["1", "2", "3"],
+        "Nats": ["{0,1,2,3}"]
+    },
+    "actions": [
+        "ncsAction",
+        "e1Action",
+        "e2Action",
+        "e3Action",
+        "e4Action",
+        "w1Action",
+        "w2Action",
+        "csAction",
+        "exitAction"
+    ],
+    "constraint"  :  "",
+    "quant_inv"  :  "",
+    "quant_inv_alt"  :  null,
+    "quant_vars": ["VARI", "VARJ"],
+    "model_consts"  :  "",
+    "symmetry" : false,
+    "typeok"  :  "TypeOK",
+    "tlc_specific_spec": false,
+    "try_final_minimize": false,
+    "simulate"  :  true
+}
