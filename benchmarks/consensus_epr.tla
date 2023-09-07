@@ -112,7 +112,7 @@ TypeOKRandom ==
     \* \A BBBVARI \in Node : \A BBBVARK \in Node : (<<BBBVARI,BBBVARK>> \in vote_msg) \/ (~(BBBVARI \in votes[BBBVARK]))
     \* \E QJ \in Quorum : \A VARI \in Node : ~(VARI \in QJ /\ votes = votes) \/ (~(leader[VARI]))
 
-SafetyInv ==
+H_SafetyInv ==
     \A n1,n2 \in Node, v1,v2 \in Value : 
         (v1 \in decided[n1] /\ v2 \in decided[n2]) => (v1 = v2)
 
