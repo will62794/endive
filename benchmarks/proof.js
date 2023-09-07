@@ -396,11 +396,15 @@ function focusOnNode(nodeId, nodeData){
                     ctiHTML += "<pre>";
                     let lineI = 0;
                     // console.log(cti_obj);
-                    for(const line of state["state_lines"]){
-                        if(data["project_vars"] !== null && data["project_vars"].every(x => !line.includes(x))){
-                            continue;
-                        }
-                        let prevLine = cti_obj["trace"][0]["state_lines"][lineI];
+
+                    let state_lines_field = "state_lines";
+                    let enableProjection = true;
+                    if(enableProjection){
+                        state_lines_field = "state_lines_action_vars_projected";
+                    }
+
+                    for(const line of state[state_lines_field]){
+                        let prevLine = cti_obj["trace"][0][state_lines_field][lineI];
                         let isDiff = i==1 && (prevLine !== line);
                         let color = isDiff ? "blue" : "black";
                         let escapedLine = line.trim().replaceAll("<", "&lt;").replaceAll(">", "&gt;");

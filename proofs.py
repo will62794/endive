@@ -610,14 +610,30 @@ class StructuredProof():
                                 constants_obj=constants_obj)
             
 
+            # Add to CTI lines that are projected onto only the variables
+            # that appear only in its action and the target lemma.
+            for c in new_ctis:
+                action_vars = self.vars_in_action[c.action_name]
+                lemma_vars = self.vars_in_lemma_defs[node.expr]
+                all_vars = action_vars.union(lemma_vars)
+                for s in c.trace.getStates():
+                    s.state_lines_action_vars_projected = []
+                    for line in s.state_lines:
+                        vartext = line.split("=")[0]
+                        for a in all_vars:
+                            if a in vartext:
+                                # print(line)
+                                s.state_lines_action_vars_projected.append(line)
+                        # print(line)
+                # print(c.action_name)
+
             # Break down CTIs by action.
             new_ctis_by_action = {a:set() for a in actions}
             for c in new_ctis:
-                # If we got new CTIs for an action that we already have CTIs for at a lower
-                # parameter bound, then ignore those CTIs for now.
-                # print("ACTION NAME", c.action_name)
                 if c.action_name in actions_to_check:
                     new_ctis_by_action[c.action_name].add(c)
+
+            
             
             for action in actions_to_check:
                 # Sample CTIs if we generated more than desired.

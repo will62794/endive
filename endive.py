@@ -2216,12 +2216,20 @@ class InductiveInvGen():
         # Handle interactive proof tree commands.
         #
 
-        # Load parsed spec.
+        #
+        # Load parsed spec and vars appearing in actions and lemma defs.
+        #
         tla_spec_obj = tlaparse.parse_tla_file(self.specdir, f"{self.specname}")
         vars_in_action = {}
+        vars_in_lemma_defs = {}
         for action in actions:
             vars_in_action[action] = tla_spec_obj.get_vars_in_def(action)
             print(vars_in_action[action])
+        for udef in tla_spec_obj.get_all_user_defs():
+            if udef.startswith("H_"):
+                vars_in_lemma_defs[udef] = tla_spec_obj.get_vars_in_def(udef)
+                print(udef, vars_in_lemma_defs[udef])
+
         # self.spec_obj = tla_spec_obj.get_all_user_defs(level="1")
 
         # Optionally reload proof structure from locally defined template.
@@ -2233,6 +2241,7 @@ class InductiveInvGen():
                                     nodes=nodes, 
                                     safety=self.safety)
             proof.vars_in_action = vars_in_action
+            proof.vars_in_lemma_defs = vars_in_lemma_defs
             proof.save_proof()
 
             # Re-generate CTIs.

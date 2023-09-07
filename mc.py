@@ -210,10 +210,13 @@ class State():
         return out
     
     def serialize(self):
-        return {
+        ret = {
             "state_str": self.state_str,
             "state_lines": self.state_lines
         }
+        if hasattr(self, "state_lines_action_vars_projected"):
+            ret["state_lines_action_vars_projected"] = self.state_lines_action_vars_projected
+        return ret
     
     def load_from(self, obj):
         self.state_str = (obj["state_str"])
@@ -248,7 +251,7 @@ class CTI():
             self.load_from(load_from_obj)
 
     def serialize(self):
-        return {
+        ret = {
             "cti_str": self.cti_str,
             "action_name": self.action_name,
             "cti_lines": self.cti_lines,
@@ -256,6 +259,10 @@ class CTI():
             "cost": self.cost,
             "hashId": str(hash(self))
         }
+
+        if hasattr(self, "cti_lines_action_vars_projected"):
+            ret["cti_lines_action_vars_projected"] = self.cti_lines_action_vars_projected
+        return ret
     
     def load_from(self, obj):
         self.cti_str = obj["cti_str"]
