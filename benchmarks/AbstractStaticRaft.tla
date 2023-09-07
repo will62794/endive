@@ -222,20 +222,19 @@ LeaderAppendOnly ==
     [][\A s \in Server : state[s] = Primary => Len(log'[s]) >= Len(log[s])]_vars
 
 \* <<index, term>> pairs uniquely identify log prefixes.
-LogMatching == 
+H_LogMatching == 
     \A s,t \in Server : 
     \A i \in DOMAIN log[s] :
         (\E j \in DOMAIN log[t] : i = j /\ log[s][i] = log[t][j]) => 
         (SubSeq(log[s],1,i) = SubSeq(log[t],1,i)) \* prefixes must be the same.
 
 \* When a node gets elected as primary it contains all entries committed in previous terms.
-LeaderCompleteness == 
+H_LeaderCompleteness == 
     \A s \in Server : (state[s] = Primary) => 
-        \* \A c \in committed : (c[3] < currentTerm[s] => InLog(<<c[1],c[2]>>, s))
         \A c \in immediatelyCommitted : (c[2] < currentTerm[s] => InLog(<<c[1],c[2]>>, s))
 
 \* \* If two entries are committed at the same index, they must be the same entry.
-StateMachineSafety == 
+H_StateMachineSafety == 
     \A c1, c2 \in immediatelyCommitted : (c1[1] = c2[1]) => (c1 = c2)
 
 --------------------------------------------------------------------------------
@@ -337,7 +336,7 @@ H_LogsLaterThanCommittedMustHaveCommitted ==
 \* committed entry in its log. Also, primary logs must contain entries committed in earlier terms.
 H_PrimaryOrLogsLaterThanCommittedMustHaveEarlierCommitted ==
     /\ H_LogsLaterThanCommittedMustHaveCommitted
-    /\ LeaderCompleteness
+    /\ H_LeaderCompleteness
 
 H_LogsWithEntryInTermMustHaveEarlierCommittedEntriesFromTerm ==
     \A s \in Server : 
@@ -387,8 +386,8 @@ H_CoreLogInv == H_UniformLogEntriesInTerm_AND_TermsOfEntriesGrowMonotonically
 \* Invariant developed during inductive proof decomposition experimenting.
 \* 08/19/2023
 HumanDecompInd == 
-    /\ StateMachineSafety
-    /\ LeaderCompleteness
+    /\ H_StateMachineSafety
+    /\ H_LeaderCompleteness
     /\ H_CommittedEntryExistsOnQuorum
     /\ H_LogsLaterThanCommittedMustHaveCommitted
     /\ H_CurrentTermAtLeastAsLargeAsLogTermsForPrimary
@@ -399,7 +398,7 @@ HumanDecompInd ==
     /\ H_PrimaryHasEntriesItCreated
     /\ H_QuorumsSafeAtTerms
     /\ H_TermsOfEntriesGrowMonotonically
-    /\ LogMatching
+    /\ H_LogMatching
     /\ H_UniformLogEntriesInTerm
 
 HumanDecompIndWithApaTypeOK ==

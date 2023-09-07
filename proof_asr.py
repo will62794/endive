@@ -9,12 +9,12 @@ lemmaTRUEShim = StructuredProofNode("LemmaTrueShim", "1=1")
 
 quorumsSafeAtTerms = StructuredProofNode("QuorumsSafeAtTerms", "H_QuorumsSafeAtTerms")
 
-onePrimaryPerTerm = StructuredProofNode("OnePrimaryPerTerm_Lemma", "H_OnePrimaryPerTerm", children = {
+onePrimaryPerTerm = StructuredProofNode("OnePrimaryPerTerm", "H_OnePrimaryPerTerm", children = {
     "BecomeLeaderAction":[
         quorumsSafeAtTerms
     ]
 })
-onePrimaryPerTerm.ctigen_typeok = "TypeOKRandomEmptyCommitted"
+onePrimaryPerTerm.ctigen_typeok = "TypeOKSmallCommitted"
 
 
 logEntryInTermImpliesSafeAtTerms = StructuredProofNode("LogEntryInTermImpliesSafeAtTerm", "H_LogEntryInTermImpliesSafeAtTerm")
@@ -53,7 +53,7 @@ termsGrowMonotonically.children = {
 # termsGrowMonotonically.ctigen_typeok = "TypeOKRandomEmptyCommitted"
 
 
-logMatching = StructuredProofNode("LogMatching_Lemma", "LogMatching", children = {
+logMatching = StructuredProofNode("LogMatching", "H_LogMatching", children = {
     "ClientRequestAction":[
         primaryHasEntriesItCreated
     ]
@@ -72,7 +72,7 @@ uniformLogEntriesInTerm.children = {
         primaryHasEntriesItCreated
     ]
 }
-uniformLogEntriesInTerm.ctigen_typeok = "TypeOKRandomEmptyCommitted"
+uniformLogEntriesInTerm.ctigen_typeok = "TypeOKSmallCommitted"
 
 entriesCommittedInOwnTerm = StructuredProofNode("EntriesCommittedInOwnTerm", "H_EntriesCommittedInOwnTerm")
 
@@ -80,9 +80,9 @@ primaryOrLogsLaterThanCommittedMustHaveEarlierCommitted = StructuredProofNode("P
 
 logsLaterThanCommittedMustHaveCommitted = StructuredProofNode("LogsLaterThanCommittedMustHaveCommitted", "H_LogsLaterThanCommittedMustHaveCommitted")
 # logsLaterThanCommittedMustHaveCommitted.ctigen_typeok = "TypeOKSmallCommitted"
-logsLaterThanCommittedMustHaveCommitted.ctigen_typeok = "TypeOK"
+# logsLaterThanCommittedMustHaveCommitted.ctigen_typeok = "TypeOK"
 
-leaderCompleteness = StructuredProofNode("LeaderCompletenessLemma", "LeaderCompleteness")
+leaderCompleteness = StructuredProofNode("LeaderCompleteness", "H_LeaderCompleteness")
 
 committedEntryExistsOnQuorum = StructuredProofNode("CommittedEntryExistsOnQuorum", "H_CommittedEntryExistsOnQuorum")
 committedEntryExistsOnQuorum.children = {
@@ -169,8 +169,6 @@ logsLaterThanCommittedMustHaveCommitted.children = {
         logEntryInTermImpliesSafeAtTerms
     ],
     "GetEntriesAction": [
-        # lemmaTRUE,
-        # logMatching,
         termsGrowMonotonically,
         uniformLogEntriesInTerm
     ]
@@ -188,6 +186,7 @@ leaderCompleteness.children = {
         quorumsSafeAtTerms
     ],
 }
+leaderCompleteness.ctigen_typeok = "TypeOKSmallCommitted2"
 
 
 asr_children = {
@@ -196,7 +195,7 @@ asr_children = {
         committedEntryExistsOnQuorum
     ]
 }
-asr_root = StructuredProofNode("StateMachineSafety_Lemma", "StateMachineSafety", children = asr_children)
+asr_root = StructuredProofNode("StateMachineSafety", "H_StateMachineSafety", children = asr_children)
 asr_nodes = [
     committedEntryExistsOnQuorum,
     logMatching,
