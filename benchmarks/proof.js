@@ -653,7 +653,7 @@ function addEdgesToGraph(proof_graph, node){
                         "target-arrow-shape": "triangle",
                         "arrow-scale": 2.0,
                         // "line-color": "steelblue",
-                        "target-arrow-color": "steelblue"
+                        // "target-arrow-color": "steelblue"
                     }
                 });
             }
@@ -845,6 +845,22 @@ function reloadLayout(){
 
     setCTIPaneHtml();
 
+    function edgeColor(el){
+        let data = el.data();
+        if(data["actionSubnodeEdge"]){
+            return "gray";
+        } else{
+            let ctis_uniquely_eliminated = data["ctis_eliminated_uniquely"];
+            if(ctis_uniquely_eliminated.hasOwnProperty(data["action"])){
+                let unique_ctis = ctis_uniquely_eliminated[data["action"]][data["child"]["name"]]
+                if(unique_ctis.length === 0){
+                    return "maroon";
+                }
+            }
+            return "steelblue";
+        }        
+    }
+
     cy = cytoscape({
         container: document.getElementById('stategraph'), // container to render in
         wheelSensitivity: 0.1,
@@ -885,24 +901,9 @@ function reloadLayout(){
                             return unique_ctis.length + " unique CTIs";
                         }
                     },
-                    // "background-color": "lightgray",
-                    "line-color": function(el){
-                        let data = el.data();
-                        if(data["actionSubnodeEdge"]){
-                            return "gray";
-                        } else{
-                            let ctis_uniquely_eliminated = data["ctis_eliminated_uniquely"];
-                            if(ctis_uniquely_eliminated.hasOwnProperty(data["action"])){
-                                let unique_ctis = ctis_uniquely_eliminated[data["action"]][data["child"]["name"]]
-                                if(unique_ctis.length === 0){
-                                    return "maroon";
-                                }
-                            }
-                            return "steelblue";
-                        }
-                    },
+                    "line-color": edgeColor,
+                    "target-arrow-color": edgeColor,
                     "line-width": "1",
-                    // "border-color": "black",
                     "font-size":"10px"
                 }
             },

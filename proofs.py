@@ -98,7 +98,7 @@ class StructuredProofNode():
         cti_info = {
             "ctis": {a:[c.serialize() for c in self.ctis[a]] for a in self.ctis},
             "ctis_eliminated": self.ctis_eliminated, # eliminated CTIs are stored as CTI hashes, not full CTIs.
-            "ctis_eliminated_uniquely": self.ctis_eliminated_uniquely, # eliminated CTIs are stored as CTI hashes, not full CTIs.
+            "ctis_eliminated_uniquely": {a:{c:list(v[c]) for c in v} for a,v in self.ctis_eliminated_uniquely.items()}, # eliminated CTIs are stored as CTI hashes, not full CTIs.
             "ctis_remaining": {a:[str(hash(cti)) for cti in self.get_remaining_ctis(a)] for a in self.ctis},
             "num_parent_ctis_eliminated": len(self.parent_ctis_eliminated),
             # "parent_ctis_eliminated": [c for c in self.parent_ctis_eliminated],
@@ -492,56 +492,74 @@ class StructuredProof():
         ctis_eliminated_unique = {}
 
         # print("CTIs eliminated by invs")
+
+        # TODO: Account for CTIs at different parameter instances when computing unique CTI elimination.
+
         all_eliminated_ctis = set()
+        all_eliminated_uniquely_ctis = {}
         out_degrees_of_unique_eliminated = set()
         for i,inv in enumerate(sorted(ctis_eliminated.keys(), key=lambda k : int(k.replace("Inv", "")))):
-        # for child in node.children:
             # print(inv, ":", len(ctis_eliminated[inv]))
             # print(ctis_eliminated_by_invs[k])
-            all_eliminated_ctis.update(ctis_eliminated[inv])
 
+            child_node = sorted(node_children, key=lambda x : x.expr)[i]
+            child_node.parent = node
+
+            # Update the set of eliminated CTIs.
+            all_eliminated_ctis.update(ctis_eliminated[inv])
+            child_node.parent_ctis_eliminated = set(ctis_eliminated[inv])
+
+            # Compute the set of uniquely eliminated CTIs for this lemma.
             unique = ctis_eliminated[inv]
             for other in (ctis_eliminated.keys() - {inv}):
                 unique = unique.difference(ctis_eliminated[other])
             ctis_eliminated_unique[inv] = unique
-            # print("Unique:", len(unique))
-            # print(ctis_eliminated_unique)
 
+            print("Unique:", len(unique))
+            print(ctis_eliminated_unique)
 
-            child_node = sorted(node_children, key=lambda x : x.expr)[i]
-            child_node.parent = node
-            child_node.parent_ctis_eliminated = set(ctis_eliminated[inv])
             child_node.parent_ctis_uniquely_eliminated = set(ctis_eliminated_unique[inv])
 
-            if action not in node.ctis_eliminated_uniquely:
-                node.ctis_eliminated_uniquely[action] = {}
+            all_eliminated_uniquely_ctis[child_node.name] = set(ctis_eliminated_unique[inv])
+            print(all_eliminated_uniquely_ctis)
 
-            node.ctis_eliminated_uniquely[action][child_node.name] = list(ctis_eliminated_unique[inv])
+            # TODO: problematic for multiple parameter instance case.
+            # if action not in node.ctis_eliminated_uniquely:
+                # node.ctis_eliminated_uniquely[action] = {}
 
-            if len(child_node.parent_ctis_uniquely_eliminated) > 0:
-                one_unique_cti = random.sample(child_node.parent_ctis_uniquely_eliminated, 1)
-                for c in one_unique_cti:
-                    # Are the low outdegree CTIs among those CTIs that are uniquely eliminated?
+            # node.ctis_eliminated_uniquely[action][child_node.name] = list(ctis_eliminated_unique[inv])
+
+
+
+
+            # if len(child_node.parent_ctis_uniquely_eliminated) > 0:
+            #     one_unique_cti = random.sample(child_node.parent_ctis_uniquely_eliminated, 1)
+            #     for c in one_unique_cti:
+            #         # Are the low outdegree CTIs among those CTIs that are uniquely eliminated?
                     
-                    # print("Sample of uniquely eliminated CTI:")
-                    # print(child_node.name)
-                    # print(c)
+            #         # print("Sample of uniquely eliminated CTI:")
+            #         # print(child_node.name)
+            #         # print(c)
 
-                    # print([str(hash(x)) for x in node.ctis])
-                    uniq_cti_obj = [x for x in ctis if str(hash(x)) == c][0]
-                    # print(uniq_cti_obj.pretty_str())
+            #         # print([str(hash(x)) for x in node.ctis])
+            #         uniq_cti_obj = [x for x in ctis if str(hash(x)) == c][0]
+            #         # print(uniq_cti_obj.pretty_str())
 
-                    if indgen.cti_out_degrees:
-                        # print(len(indgen.cti_out_degrees))
-                        out_degree = indgen.cti_out_degrees[c]
-                        # print(type(c), c)
-                        # print("out_degree:", out_degree)
-                        out_degrees_of_unique_eliminated.add(out_degree)
+            #         if indgen.cti_out_degrees:
+            #             # print(len(indgen.cti_out_degrees))
+            #             out_degree = indgen.cti_out_degrees[c]
+            #             # print(type(c), c)
+            #             # print("out_degree:", out_degree)
+            #             out_degrees_of_unique_eliminated.add(out_degree)
 
         if indgen.cti_out_degrees:
             print("uniquely eliminated out degrees:", out_degrees_of_unique_eliminated)
-            
-        return all_eliminated_ctis
+        
+        return {
+            "eliminated": all_eliminated_ctis,
+            "eliminated_uniquely": all_eliminated_uniquely_ctis
+        }
+        # return all_eliminated_ctis
         # node.ctis_eliminated = all_eliminated_ctis
 
     def gen_ctis_for_node(self, indgen, node, target_node_name = None):
@@ -594,7 +612,7 @@ class StructuredProof():
             # Generate CTIs for all actions at once, and then break down into each action when we get the returned set of CTIs
             # labeled by action.
             # print(f"Generating CTIs for action {actions_to_check} of node ({node.name},{node.expr})")
-            print(f"Generating CTIs for node ({node.name},{node.expr}), constants instance:", constants_obj)
+            print(f"=== Generating CTIs for node ({node.name},{node.expr}), constants instance:", constants_obj)
             print(f"CONSTANT instance:", constants_obj)
             print("Actions to skip:", actions_to_skip)
             print("Actions to check:", actions_to_check)
@@ -646,22 +664,51 @@ class StructuredProof():
             #
             # Compute CTI elimination broken down per action.
             #
+
             # for action in actions:
             ctis_eliminated_by_action = {}
+            ctis_eliminated_uniquely_by_action = {}
             for action in actions_to_check:
                 # ctis_for_action = list(all_ctis_by_action[action])
                 # ctis_for_action.sort()
 
                 # Set CTIs for this node based on those generated and sample if needed.
                 # logging.info(f"Number of proof node CTIs generated for action '{action}': {len(new_ctis_by_action[action])}. Sampling a limit of {indgen.max_proof_node_ctis} CTIs.")
-                ctis_eliminated = self.compute_cti_elimination_for_node(indgen, node, new_ctis_by_action[action], action, constants_obj = constants_obj)
+                cti_elimination_info = self.compute_cti_elimination_for_node(indgen, node, new_ctis_by_action[action], action, constants_obj = constants_obj)
+                
+                ctis_eliminated = cti_elimination_info["eliminated"]
+                ctis_eliminated_uniquely = cti_elimination_info["eliminated_uniquely"]
+                
+                # Store CTIs eliminated per action.
                 ctis_eliminated_by_action[action] = ctis_eliminated
+                ctis_eliminated_uniquely_by_action[action] = ctis_eliminated_uniquely
+                # print("CTIs eliminated uniquely", ctis_eliminated_uniquely)
+
+            print("Actions to check:", actions_to_check)
+
 
             # Update CTIs eliminated.
             for action in actions_to_check:
                 logging.info(f"CTIs eliminated for action={action}: {len(ctis_eliminated_by_action[action])}")
                 node.ctis_eliminated[action].update(ctis_eliminated_by_action[action])
-        
+
+                # print("CTIs eliminated uniquely", ctis_eliminated_uniquely_by_action[action])
+
+                if action not in node.ctis_eliminated_uniquely:
+                    node.ctis_eliminated_uniquely[action] = {}
+
+                for c in ctis_eliminated_uniquely_by_action[action]:
+                    # Merge new CTIs eliminated uniquely.
+                    unique_ctis = set(ctis_eliminated_uniquely_by_action[action][c])
+                    if c not in node.ctis_eliminated_uniquely[action]:
+                        node.ctis_eliminated_uniquely[action][c] = set()
+                    node.ctis_eliminated_uniquely[action][c].update(unique_ctis)
+                    # print("CTIs uniquely elim:", c)
+                    print(f"CTIs eliminated uniquely, {c}", len(ctis_eliminated_uniquely_by_action[action][c]))
+
+
+                print("Node uniquely elim:", node.ctis_eliminated_uniquely[action])
+
         # Convert to list.
         for action in actions:
             node.ctis_eliminated[action] = list(node.ctis_eliminated[action])
