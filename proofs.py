@@ -704,10 +704,10 @@ class StructuredProof():
                         node.ctis_eliminated_uniquely[action][c] = set()
                     node.ctis_eliminated_uniquely[action][c].update(unique_ctis)
                     # print("CTIs uniquely elim:", c)
-                    print(f"CTIs eliminated uniquely, {c}", len(ctis_eliminated_uniquely_by_action[action][c]))
+                    # print(f"CTIs eliminated uniquely, {c}", len(ctis_eliminated_uniquely_by_action[action][c]))
 
 
-                print("Node uniquely elim:", node.ctis_eliminated_uniquely[action])
+                # print("Node uniquely elim:", node.ctis_eliminated_uniquely[action])
 
         # Convert to list.
         for action in actions:
