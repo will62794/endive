@@ -898,6 +898,9 @@ function reloadLayout(){
                         let ctis_uniquely_eliminated = data["ctis_eliminated_uniquely"];
                         if(ctis_uniquely_eliminated.hasOwnProperty(data["action"])){
                             let unique_ctis = ctis_uniquely_eliminated[data["action"]][data["child"]["name"]]
+                            if(unique_ctis === undefined){
+                                return "undefined";
+                            }
                             return unique_ctis.length + " unique CTIs";
                         }
                     },
