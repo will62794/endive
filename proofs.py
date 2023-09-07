@@ -515,13 +515,13 @@ class StructuredProof():
                 unique = unique.difference(ctis_eliminated[other])
             ctis_eliminated_unique[inv] = unique
 
-            print("Unique:", len(unique))
-            print(ctis_eliminated_unique)
+            # print("Unique:", len(unique))
+            # print(ctis_eliminated_unique)
 
             child_node.parent_ctis_uniquely_eliminated = set(ctis_eliminated_unique[inv])
 
             all_eliminated_uniquely_ctis[child_node.name] = set(ctis_eliminated_unique[inv])
-            print(all_eliminated_uniquely_ctis)
+            # print(all_eliminated_uniquely_ctis)
 
             # TODO: problematic for multiple parameter instance case.
             # if action not in node.ctis_eliminated_uniquely:
