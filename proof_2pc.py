@@ -36,9 +36,28 @@ rMCommittedImpliesTMCommitted.children = {
 }
 
 
-rMAbortedAndPreparedImpliesTMAborted = StructuredProofNode("RMAbortedAndPreparedImpliesTMAborted", "H_RMAbortedAndPreparedImpliesTMAborted")
+
+abortMsgImpliesTMAborted = StructuredProofNode("AbortMsgImpliesTMAborted", "H_AbortMsgImpliesTMAborted")
 
 rMSentPrepareImpliesNotWorking = StructuredProofNode("RMSentPrepareImpliesNotWorking", "H_RMSentPrepareImpliesNotWorking")
+
+tMKnowsPrepareImpliesRMPreparedCommittedOrAborted = StructuredProofNode(
+    "TMKnowsPrepareImpliesRMPreparedCommittedOrAborted", 
+    "H_TMKnowsPrepareImpliesRMPreparedCommittedOrAborted", children = {
+        # lemmaTRUE,
+        "TMRcvPreparedAction": [rMSentPrepareImpliesNotWorking]
+})
+
+rMAbortedAndPreparedImpliesTMAborted = StructuredProofNode("RMAbortedAndPreparedImpliesTMAborted", "H_RMAbortedAndPreparedImpliesTMAborted", children = {
+    "RMChooseToAbortAction": [
+        tMKnowsPrepareImpliesRMPreparedCommittedOrAborted,
+        rMSentPrepareImpliesNotWorking
+    ],
+    "RMRcvAbortMsgAction": [
+        abortMsgImpliesTMAborted,
+    ]
+})
+
 
 rMWorkingImpliesNotPrepared = StructuredProofNode("RMWorkingImpliesNotPrepared", "H_RMWorkingImpliesNotPrepared", children = {
     "TMRcvPreparedAction": [
@@ -112,12 +131,7 @@ commitMsgImpliesNoRMAborted = StructuredProofNode("CommitMsgImpliesNoRMAborted",
     
 })
 
-tMKnowsPrepareImpliesRMPreparedCommittedOrAborted = StructuredProofNode(
-    "TMKnowsPrepareImpliesRMPreparedCommittedOrAborted", 
-    "H_TMKnowsPrepareImpliesRMPreparedCommittedOrAborted", children = {
-        # lemmaTRUE,
-        "TMRcvPreparedAction": [rMSentPrepareImpliesNotWorking]
-})
+
 
 commitMsgImpliesAllPrepared = StructuredProofNode("CommitMsgImpliesAllPrepared", "H_CommitMsgImpliesAllPrepared")
 
@@ -141,6 +155,14 @@ rMCommittedImpliesOtherRMsPreparedOrCommitted.children = {
     ],
     "RMRcvCommitMsgAction": [
         commitMsgImpliesAllRMsPreparedOrCommitted
+    ]
+}
+
+commitMsgImpliesAllRMsPreparedOrCommitted.children = {
+    "RMRcvAbortMsgAction":[commitMsgImpliesNoAbortMsg],
+    "TMCommit":[
+        rMAbortedAndPreparedImpliesTMAborted,
+        tMKnowsPrepareImpliesRMPreparedCommittedOrAborted
     ]
 }
 

@@ -217,7 +217,10 @@ H_RMCommittedImpliesNoAbortMsg == \A rmi \in RM : (rmState[rmi] = "committed") =
 H_RMCommittedImpliesTMCommitted == \A rmi \in RM : (rmState[rmi] = "committed") => tmState = "committed"
 H_RMAbortedImpliesTMAborted == \A rmi \in RM : (rmState[rmi] = "aborted") => tmState = "aborted"
 
-H_RMAbortedAndPreparedImpliesTMAborted == \A rmi \in RM : (rmState[rmi] = "aborted" /\ rmi \in tmPrepared) => tmState = "aborted"
+H_RMAbortedAndPreparedImpliesTMAborted == 
+    \A rmi \in RM : 
+        ( /\ rmState[rmi] = "aborted" 
+          /\ ((rmi \in tmPrepared) \/ ([type |-> "Prepared", rm |-> rmi] \in msgsPrepared)) ) => tmState = "aborted"
 
 H_RMAbortedImpliesNoCommitMsg == \A rmi \in RM : (rmState[rmi] = "aborted") => ([type |-> "Commit"] \notin msgsAbortCommit)
 
@@ -238,6 +241,8 @@ H_InitImpliesNoCommitMsg == (tmState = "init") => ~([type |-> "Commit"] \in msgs
 
 H_TMAbortedImpliesAbortMsg == \A rmi \in RM : \A rmj \in RM : (tmState = "aborted") \/ (~([type |-> "Abort"] \in msgsAbortCommit))
 H_TMCommittedImpliesAbortMsg == \A rmi \in RM : \A rmj \in RM : (tmState = "committed") \/ (~([type |-> "Commit"] \in msgsAbortCommit))
+
+H_AbortMsgImpliesTMAborted == ([type |-> "Abort"] \in msgsAbortCommit) => tmState = "aborted"
 
 \* Level 3.
 H_Inv1863 == \A rmi \in RM : (rmState[rmi] = "prepared") \/ (~([type |-> "Prepared", rm |-> rmi] \in msgsPrepared) \/ (~(tmState = "init")))
