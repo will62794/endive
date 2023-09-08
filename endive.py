@@ -2284,6 +2284,10 @@ class InductiveInvGen():
 
             self.active_ctigen_threads = set()
 
+            @app.route('/')
+            def index():
+                return flask.redirect(f"/{self.proof_base_filename}.html")
+
             @app.route('/getProofGraph')
             def getProofGraph():
                 proof_json = proof.serialize(include_ctis=True)
