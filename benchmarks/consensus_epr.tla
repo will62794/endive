@@ -34,8 +34,8 @@ SendVote(src, dst) ==
     /\ <<dst,src>> \in vote_request_msg
     /\ vote_msg' = vote_msg \cup {<<src,dst>>}
     /\ voted' = [voted EXCEPT ![src] = TRUE]
-    /\ \/ vote_request_msg' = vote_request_msg \cup {<<src,dst>>}
-       \/ vote_request_msg' = vote_request_msg \ {<<src,dst>>}
+    \* Delete vote request message.
+    /\ vote_request_msg' = vote_request_msg \ {<<src,dst>>}
     /\ UNCHANGED <<votes, leader, decided>>
 
 RecvVote(n, sender) == 
