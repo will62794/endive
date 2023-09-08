@@ -46,6 +46,7 @@
     "symmetry" : true,
     "typeok"  :  "TypeOK",
     "simulate"  :  true,
+    "tlc_specific_spec": true,
     "actions":[
         "SendRequestVoteAction",
         "SendVoteAction",
