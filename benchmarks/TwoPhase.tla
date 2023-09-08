@@ -174,7 +174,7 @@ NextUnchanged == UNCHANGED vars
 
 Symmetry == Permutations(RM)
 
-TCConsistent ==  
+H_TCConsistent ==  
   (*************************************************************************)
   (* A state predicate asserting that two RMs have not arrived at          *)
   (* conflicting decisions.                                                *)
@@ -192,6 +192,8 @@ H_CommitMsgImpliesNoRMAborted == \A rmi \in RM : ~([type |-> "Commit"] \in msgsA
 H_CommittedRMImpliesCommitMsg == \A rmi \in RM : ([type |-> "Commit"] \in msgsAbortCommit) \/ (~(rmState[rmi] = "committed"))
 
 H_CommitMsgImpliesAllPrepared == ([type |-> "Commit"] \in msgsAbortCommit) => (tmPrepared = RM)
+
+H_CommitMsgImpliesAllRMsPreparedOrCommitted == ([type |-> "Commit"] \in msgsAbortCommit) => \A rmi \in RM : rmState[rmi] \in {"committed", "prepared"}
 
 H_AllPreparedImpliesNoRMsWorking == \A rmi \in RM : (tmPrepared = RM) => ~(rmState[rmi] = "working") 
 
@@ -213,11 +215,23 @@ H_RMAbortAfterPrepareImpliesTMAborted == \A rmi \in RM :  ((rmState[rmi] = "abor
 H_RMCommittedImpliesNoAbortMsg == \A rmi \in RM : (rmState[rmi] = "committed") => ([type |-> "Abort"] \notin msgsAbortCommit)
 
 H_RMCommittedImpliesTMCommitted == \A rmi \in RM : (rmState[rmi] = "committed") => tmState = "committed"
+H_RMAbortedImpliesTMAborted == \A rmi \in RM : (rmState[rmi] = "aborted") => tmState = "aborted"
+
+H_RMAbortedAndPreparedImpliesTMAborted == \A rmi \in RM : (rmState[rmi] = "aborted" /\ rmi \in tmPrepared) => tmState = "aborted"
+
+H_RMAbortedImpliesNoCommitMsg == \A rmi \in RM : (rmState[rmi] = "aborted") => ([type |-> "Commit"] \notin msgsAbortCommit)
+
 
 H_CommitMsgImpliesTMCommitted == \A rmi \in RM : ([type |-> "Commit"] \in msgsAbortCommit) => tmState = "committed"
 
+H_RMCommittedImpliesOtherRMsPreparedOrCommitted == 
+        \A rmi,rmj \in RM : (rmState[rmi] = "committed") => rmState[rmj] \in {"prepared", "committed"}
 
+H_RMWorkingImpliesNoCommitMsg == 
+    \A rmi \in RM : rmState[rmi] = "working" => ([type |-> "Commit"] \notin msgsAbortCommit)
 
+H_RMWorkingImpliesNotPrepared == 
+    \A rmi \in RM : rmState[rmi] = "working" => (rmi \notin tmPrepared)
 
 H_InitImpliesNoAbortMsg == (tmState = "init") => ~([type |-> "Abort"] \in msgsAbortCommit)
 H_InitImpliesNoCommitMsg == (tmState = "init") => ~([type |-> "Commit"] \in msgsAbortCommit) 
@@ -281,19 +295,6 @@ L3 == 3
 L4 == 5
 L5 == 5
 
-THEOREM TCConsistent
-  <1>1. L1
-    <2>1. L1
-        <3>1. L4 OBVIOUS
-        <3>2. L4 OBVIOUS
-        <3>3. L4 OBVIOUS
-        <3>4. QED OBVIOUS
-    <2>2. L5 OBVIOUS
-    <2>3. QED OBVIOUS
-  <1>2. L2 OBVIOUS
-  <1>3. L3 OBVIOUS
-  <1>4. L4 OBVIOUS
-  <1>5. QED OBVIOUS
 
 \* Constant initialization for model checking with Apalache.
 CInit == RM = {"1_OF_RM", "2_OF_RM", "3_OF_RM"}
