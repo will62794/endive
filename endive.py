@@ -2166,6 +2166,7 @@ class InductiveInvGen():
         import proof_adr
         import proof_asr_coreLogInv
         import proof_consensus_epr
+        import proof_async_raft
 
         #
         # Set the specified spec appropriately.
@@ -2196,6 +2197,10 @@ class InductiveInvGen():
             root = proof_consensus_epr.root
             actions = proof_consensus_epr.actions
             nodes = proof_consensus_epr.nodes
+        elif self.specname == "AsyncRaft":
+            root = proof_async_raft.root
+            actions = proof_async_raft.actions
+            nodes = proof_async_raft.nodes
         else:
             logging.info("Unknown spec for proof structure: " + self.specname)
             root = StructuredProofNode("Safety", self.safety)
@@ -2224,7 +2229,7 @@ class InductiveInvGen():
         vars_in_lemma_defs = {}
         for action in actions:
             vars_in_action[action] = tla_spec_obj.get_vars_in_def(action)
-            print(vars_in_action[action])
+            print(f"Vars in action '{action}':", vars_in_action[action])
         for udef in tla_spec_obj.get_all_user_defs(level="1"):
             # Getting all level 1 definitions should be sufficient here.
             # Invariants (i.e. state predicates) should all be at level 1.

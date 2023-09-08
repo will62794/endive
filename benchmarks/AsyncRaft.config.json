@@ -1,0 +1,62 @@
+{
+    "preds"  :  [
+        "(currentTerm[VARI] > currentTerm[VARJ])",
+        "(currentTerm[VARJ] > currentTerm[VARI])",
+
+        "(currentTerm[VARI] >= currentTerm[VARJ])",
+        "(currentTerm[VARJ] >= currentTerm[VARI])",
+
+        "(currentTerm[VARI] <= currentTerm[VARJ])",
+        "(currentTerm[VARJ] <= currentTerm[VARI])",
+
+        "(currentTerm[VARI] = currentTerm[VARJ])",
+    
+        "(state[VARI] = Primary)",
+        "(state[VARJ] = Primary)"
+    ],
+    "preds_alt" : [],
+    "safety"  :  "H_OnePrimaryPerTerm",
+    "constants"  : {
+        "n1" : "n1",
+        "n2" : "n2",
+        "n3" : "n3",
+        "v1" : "v1",
+        "Server" : "{n1, n2}",
+        "Follower" : "Follower",
+        "Candidate" : "Candidate",
+        "Leader" : "Leader",
+        "Nil" : "Nil",
+        "RequestVoteRequest" : "RequestVoteRequest",
+        "RequestVoteResponse" : "RequestVoteResponse",
+        "AppendEntriesRequest" : "AppendEntriesRequest",
+        "AppendEntriesResponse" : "AppendEntriesResponse",
+        "EqualTerm" : "EqualTerm",
+        "LessOrEqualTerm" : "LessOrEqualTerm",
+        "MaxTerm" : ["2"],
+        "MaxLogLen" : ["0", "2"]
+    },
+    "actions": [
+        "RestartAction",
+        "RequestVoteAction",
+        "BecomeLeaderAction",
+        "ClientRequestAction",
+        "AdvanceCommitIndexAction",
+        "AppendEntriesAction",
+        "UpdateTermAction",
+        "HandleRequestVoteRequestAction",
+        "HandleRequestVoteResponseAction",
+        "RejectAppendEntriesRequestAction",
+        "AcceptAppendEntriesRequestAction",
+        "HandleAppendEntriesResponseAction"
+    ],
+    "constraint"  :  "StateConstraint",
+    "quant_inv"  :  "",
+    "quant_inv_alt"  :  null,
+    "quant_vars": ["VARI", "VARJ"],
+    "model_consts"  :  "CONSTANT n1,n2,n3",
+    "symmetry" : true,
+    "typeok"  :  "TypeOK",
+    "tlc_specific_spec": false,
+    "try_final_minimize": false,
+    "simulate"  :  true
+}
