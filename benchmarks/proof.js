@@ -853,6 +853,9 @@ function reloadLayout(){
             let ctis_uniquely_eliminated = data["ctis_eliminated_uniquely"];
             if(ctis_uniquely_eliminated.hasOwnProperty(data["action"])){
                 let unique_ctis = ctis_uniquely_eliminated[data["action"]][data["child"]["name"]]
+                if(unique_ctis === undefined){
+                    return "steelblue";
+                }
                 if(unique_ctis.length === 0){
                     return "maroon";
                 }
@@ -899,7 +902,7 @@ function reloadLayout(){
                         if(ctis_uniquely_eliminated.hasOwnProperty(data["action"])){
                             let unique_ctis = ctis_uniquely_eliminated[data["action"]][data["child"]["name"]]
                             if(unique_ctis === undefined){
-                                return "undefined";
+                                return "";
                             }
                             return unique_ctis.length + " unique CTIs";
                         }
