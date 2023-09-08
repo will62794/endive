@@ -108,7 +108,7 @@ leaderVars == <<nextIndex, matchIndex>>
 \* End of per server variables.-
 
 \* All variables; used for stuttering (asserting state hasn't changed).
-vars == <<messages, currentTerm, state, votedFor, votesGranted, nextIndex, matchIndex, log, commitIndex>>
+vars == <<messages, requestVoteMsgs, currentTerm, state, votedFor, votesGranted, nextIndex, matchIndex, log, commitIndex>>
 
 view == <<messages, serverVars, candidateVars, leaderVars, logVars >>
 Symmetry == Permutations(Server)
@@ -509,17 +509,15 @@ Next ==
     \/ BecomeLeaderAction
     \/ ClientRequestAction
     \/ AdvanceCommitIndexAction
-    \/ AppendEntriesAction
+    \* \/ AppendEntriesAction
     \/ UpdateTermAction
     \/ HandleRequestVoteRequestAction
     \/ HandleRequestVoteResponseAction
-    \/ RejectAppendEntriesRequestAction
-    \/ AcceptAppendEntriesRequestAction
-    \/ HandleAppendEntriesResponseAction
+    \* \/ RejectAppendEntriesRequestAction
+    \* \/ AcceptAppendEntriesRequestAction
+    \* \/ HandleAppendEntriesResponseAction
 
 NextUnchanged == UNCHANGED vars
-
-CTICost == 0
 
 
 CONSTANT MaxTerm
@@ -602,35 +600,6 @@ Spec == Init /\ [][Next]_vars
 
 \* INVARIANTS -------------------------
 
-H_QuorumsSafeAtTerms ==
-    \A s \in Server : state[s] = Leader => 
-        \E Q \in Quorum : \A t \in Q : currentTerm[t] >= currentTerm[s]
-
-\* If two nodes are in the same term, then their votes granted
-\* sets cannot have intersecting voters.
-H_CandidateVotesGrantedInTermAreUnique ==
-    \A s,t \in Server :
-        (/\ s # t
-         /\ currentTerm[s] = currentTerm[t]) =>
-            (votesGranted[s] \cap votesGranted[t]) = {}
-
-\* If a node has garnered votes in a term as candidate, there must
-\* be no other leader in that term in existence.
-H_CandidateWithVotesGrantedInTermImplyNoOtherLeader ==
-    \A s,t \in Server :
-        (/\ s # t
-         /\ votesGranted[s] \in Quorum
-         /\ currentTerm[s] = currentTerm[t]) =>
-            state[t] # Leader
-
-H_OnePrimaryPerTerm == 
-    \A s,t \in Server : 
-        (s # t /\ state[s] = Leader /\ state[t] = Leader) => currentTerm[s] # currentTerm[t]
-
-H_LogTermsMonotonic == 
-    \A s \in Server : \A i,j \in DOMAIN log[s] : (i <= j) => (log[s][i] <= log[s][j])
-    
-
 MinCommitIndex(s1, s2) ==
     /\ PrintT(commitIndex)
     /\ IF commitIndex[s1] < commitIndex[s2]
@@ -696,5 +665,71 @@ CommittedEntriesReachMajority ==
 StateConstraint == 
     /\ \A s \in Server : currentTerm[s] <= MaxTerm
     /\ \A s \in Server : Len(log[s]) <= MaxLogLen
+
+
+\**************
+\* Helper lemmas.
+\**************
+
+\* Is log entry e = <<index, term>> in the log of node 'i'.
+InLog(e, i) == \E x \in DOMAIN log[i] : x = e[1] /\ log[i][x] = e[2]
+
+H_QuorumsSafeAtTerms ==
+    \A s \in Server : state[s] = Leader => 
+        \E Q \in Quorum : \A t \in Q : currentTerm[t] >= currentTerm[s]
+
+\* If two nodes are in the same term, then their votes granted
+\* sets cannot have intersecting voters.
+H_CandidateVotesGrantedInTermAreUnique ==
+    \A s,t \in Server :
+        (/\ s # t
+         /\ currentTerm[s] = currentTerm[t]) =>
+            (votesGranted[s] \cap votesGranted[t]) = {}
+
+\* If a node has garnered votes in a term as candidate, there must
+\* be no other leader in that term in existence.
+H_CandidateWithVotesGrantedInTermImplyNoOtherLeader ==
+    \A s,t \in Server :
+        (/\ s # t
+         /\ votesGranted[s] \in Quorum
+         /\ currentTerm[s] = currentTerm[t]) =>
+            state[t] # Leader
+
+H_CandidateWithVotesGrantedInTermImplyVotersSafeAtTerm ==
+    \A s \in Server : 
+        (state[s] = Candidate) =>
+            \A v \in votesGranted[s] :
+            currentTerm[v] >= currentTerm[s]
+
+H_OnePrimaryPerTerm == 
+    \A s,t \in Server : 
+        (s # t /\ state[s] = Leader /\ state[t] = Leader) => currentTerm[s] # currentTerm[t]
+
+\* A server's current term is always at least as large as the terms in its log.
+H_CurrentTermAtLeastAsLargeAsLogTermsForPrimary == 
+    \A s \in Server : 
+        (state[s] = Leader) => 
+            (\A i \in DOMAIN log[s] : currentTerm[s] >= log[s][i])
+
+H_LogTermsMonotonic == 
+    \A s \in Server : \A i,j \in DOMAIN log[s] : (i <= j) => (log[s][i] <= log[s][j])
+
+\* If a log entry exists in term T and there is a primary in term T, then this
+\* log entry should be present in that primary's log.
+H_PrimaryHasEntriesItCreated == 
+    \A i,j \in Server :
+    (state[i] = Leader) => 
+    \* Can't be that another node has an entry in this primary's term
+    \* but the primary doesn't have it.
+        ~(\E k \in DOMAIN log[j] :
+            /\ log[j][k] = currentTerm[i]
+            /\ ~InLog(<<k,log[j][k]>>, i))
+
+\* Existence of an entry in term T implies a past election in T, so 
+\* there must be some quorum at this term or greater.
+H_LogEntryInTermImpliesSafeAtTerm == 
+    \A s \in Server : 
+    \A i \in DOMAIN log[s] :
+        \E Q \in Quorum : \A n \in Q : currentTerm[n] >= log[s][i]
 
 ===============================================================================

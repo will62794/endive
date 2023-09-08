@@ -15,13 +15,13 @@
         "(state[VARJ] = Primary)"
     ],
     "preds_alt" : [],
-    "safety"  :  "H_OnePrimaryPerTerm",
+    "safety"  :  "NoLogDivergence",
     "constants"  : {
         "n1" : "n1",
         "n2" : "n2",
         "n3" : "n3",
         "v1" : "v1",
-        "Server" : "{n1, n2}",
+        "Server" : ["{n1}", "{n1, n2}"],
         "Follower" : "Follower",
         "Candidate" : "Candidate",
         "Leader" : "Leader",
@@ -33,7 +33,7 @@
         "EqualTerm" : "EqualTerm",
         "LessOrEqualTerm" : "LessOrEqualTerm",
         "MaxTerm" : ["2"],
-        "MaxLogLen" : ["0", "2"]
+        "MaxLogLen" : ["0", "1", "2"]
     },
     "actions": [
         "RestartAction",
@@ -56,7 +56,7 @@
     "model_consts"  :  "CONSTANT n1,n2,n3",
     "symmetry" : true,
     "typeok"  :  "TypeOK",
-    "tlc_specific_spec": false,
+    "tlc_specific_spec": true,
     "try_final_minimize": false,
     "simulate"  :  true
 }

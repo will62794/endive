@@ -4,6 +4,9 @@ from proofs import *
 # AbstractStaticRaft proof structure.
 #
 
+def make_node(expr):
+    return StructuredProofNode(expr[2:], expr)
+
 lemmaTRUE = StructuredProofNode("LemmaTrue", "TRUE")
 lemmaTRUEShim = StructuredProofNode("LemmaTrueShim", "1=1")
 
@@ -19,14 +22,52 @@ onePrimaryPerTerm = StructuredProofNode("OnePrimaryPerTerm", "H_OnePrimaryPerTer
     ]
 })
 
-logTermsMonotonic = StructuredProofNode("LogTermsMonotonic", "H_LogTermsMonotonic")
-logTermsMonotonic.children = {
-    "ClientRequest": [onePrimaryPerTerm]
+candidateWithVotesGrantedInTermImplyVotersSafeAtTerm = make_node("H_CandidateWithVotesGrantedInTermImplyVotersSafeAtTerm")
+
+quorumsSafeAtTerms = make_node("H_QuorumsSafeAtTerms")
+quorumsSafeAtTerms.children = {
+    "BecomeLeaderAction": [
+        candidateWithVotesGrantedInTermImplyVotersSafeAtTerm
+    ]
 }
 
-root = logTermsMonotonic
+logEntryInTermImpliesSafeAtTerms = StructuredProofNode("LogEntryInTermImpliesSafeAtTerm", "H_LogEntryInTermImpliesSafeAtTerm", children = {
+    "ClientRequestAction": [
+        quorumsSafeAtTerms
+    ]
+})
+
+currentTermsAtLeastLargeAsLogTermsForPrimary =  StructuredProofNode("CurrentTermAtLeastAsLargeAsLogTermsForPrimary", "H_CurrentTermAtLeastAsLargeAsLogTermsForPrimary")
+currentTermsAtLeastLargeAsLogTermsForPrimary.children = {
+    "BecomeLeaderAction": [
+        logEntryInTermImpliesSafeAtTerms
+    ]
+}
+
+logTermsMonotonic = StructuredProofNode("LogTermsMonotonic", "H_LogTermsMonotonic")
+logTermsMonotonic.children = {
+    "ClientRequestAction": [
+        # onePrimaryPerTerm,
+        currentTermsAtLeastLargeAsLogTermsForPrimary
+    ]
+}
+
+primaryHasEntriesItCreated = make_node("H_PrimaryHasEntriesItCreated")
+primaryHasEntriesItCreated.children = {
+    "ClientRequestAction":[
+        onePrimaryPerTerm
+    ]
+}
+
+lemmaTRUEShim.children = {
+    "BecomeLeaderAction":[
+        logTermsMonotonic,
+        primaryHasEntriesItCreated
+    ]
+}
+root = lemmaTRUEShim
 nodes = [
-    # primaryHasEntriesItCreated
+    primaryHasEntriesItCreated
 ]
 actions = [
     "RestartAction",

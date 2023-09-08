@@ -239,7 +239,7 @@ function computeNodeColor(data, action){
         ctis_eliminated = data["ctis_eliminated"][action];
     }
 
-    if(data["had_ctis_generated"] && ctis.length === ctis_eliminated.length){
+    if(data["had_ctis_generated"] && ctis_eliminated && ctis.length === ctis_eliminated.length){
         // style = {"background-color": "green"}
         return "green";
     }
