@@ -29,6 +29,7 @@ Notes on action enablement.
    AppendEntrieRequest. It won't be sent again, so no need for extra variables to track that. 
 
 Original source: https://github.com/Vanlightly/raft-tlaplus/blob/main/specifications/standard-raft/Raft.tla
+Modified further by Will Schultz for safety proof experiments, August 2023.
 *)
 
 EXTENDS Naturals, FiniteSets, FiniteSetsExt, Sequences, TLC
