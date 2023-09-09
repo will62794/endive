@@ -585,7 +585,7 @@ TypeOK ==
     /\ requestVoteMsgs \in (RequestVoteResponseTypeSampled \cup RequestVoteRequestTypeSampled)
     /\ currentTerm \in [Server -> Terms]
     /\ state       \in [Server -> {Leader, Follower, Candidate}]
-    /\ votedFor    \in [Server -> {Nil} \cup (SUBSET Server)]
+    /\ votedFor    \in [Server -> ({Nil} \cup Server)]
     /\ votesGranted \in [Server -> (SUBSET Server)]
     /\ nextIndex  \in [Server -> [Server -> LogIndices]]
     /\ matchIndex \in [Server -> [Server -> LogIndicesWithZero]]        
