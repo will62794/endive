@@ -580,7 +580,6 @@ RequestVoteRequestTypeSampled == UNION {
     kOrSmallerSubset(2, RequestVoteRequestTypeOp({t})) : t \in Terms 
 }
 
-\* TODO: Fill in type-correctness.
 TypeOK == 
     /\ messages \in {[m \in {} |-> 0]}
     /\ requestVoteMsgs \in (RequestVoteResponseTypeSampled \cup RequestVoteRequestTypeSampled)
