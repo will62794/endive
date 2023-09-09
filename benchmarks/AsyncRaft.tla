@@ -694,6 +694,11 @@ H_CandidateWithVotesGrantedInTermImplyNoOtherLeader ==
          /\ currentTerm[s] = currentTerm[t]) =>
             state[t] # Leader
 
+H_CandidateWithVotesGrantedInTermImplyNoOtherLogsInTerm ==
+    \A s,t \in Server :
+        (votesGranted[s] \in Quorum) =>
+            ~(\E i \in DOMAIN log[t] : log[t][i] = currentTerm[s])
+
 H_CandidateWithVotesGrantedInTermImplyVotersSafeAtTerm ==
     \A s \in Server : 
         (state[s] = Candidate) =>

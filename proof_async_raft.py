@@ -17,7 +17,7 @@ candidateWithVotesGrantedInTermImplyNoOtherLeader = StructuredProofNode("Candida
 
 onePrimaryPerTerm = StructuredProofNode("OnePrimaryPerTerm", "H_OnePrimaryPerTerm", children = {
     "BecomeLeaderAction": [
-        candidateVotesGrantedInTermAreUnique,
+        # candidateVotesGrantedInTermAreUnique,
         candidateWithVotesGrantedInTermImplyNoOtherLeader
     ]
 })
@@ -52,10 +52,15 @@ logTermsMonotonic.children = {
     ]
 }
 
+candidateWithVotesGrantedInTermImplyNoOtherLogsInTerm = make_node("H_CandidateWithVotesGrantedInTermImplyNoOtherLogsInTerm")
+
 primaryHasEntriesItCreated = make_node("H_PrimaryHasEntriesItCreated")
 primaryHasEntriesItCreated.children = {
     "ClientRequestAction":[
         onePrimaryPerTerm
+    ],
+    "BecomeLeaderAction": [
+        candidateWithVotesGrantedInTermImplyNoOtherLogsInTerm
     ]
 }
 
