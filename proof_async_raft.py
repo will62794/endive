@@ -79,18 +79,18 @@ primaryHasEntriesItCreated.children = {
     ]
 }
 
-lemmaTRUEShim.children = {
+noLogDivergence = make_node("H_NoLogDivergence")
+noLogDivergence.children = {
     "BecomeLeaderAction":[
         logTermsMonotonic,
         primaryHasEntriesItCreated
     ]
 }
-root = lemmaTRUEShim
+root = noLogDivergence
 nodes = [
     primaryHasEntriesItCreated
 ]
 actions = [
-    "RestartAction",
     "RequestVoteAction",
     "BecomeLeaderAction",
     "ClientRequestAction",

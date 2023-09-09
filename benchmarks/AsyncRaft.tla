@@ -553,24 +553,23 @@ Spec == Init /\ [][Next]_vars
 \* INVARIANTS -------------------------
 
 MinCommitIndex(s1, s2) ==
-    /\ PrintT(commitIndex)
-    /\ IF commitIndex[s1] < commitIndex[s2]
+    IF commitIndex[s1] < commitIndex[s2]
         THEN commitIndex[s1]
         ELSE commitIndex[s2]
 
 \* INV: NoLogDivergence
 \* The log index is consistent across all servers (on those
 \* servers whose commitIndex is equal or higher than the index).
-NoLogDivergence ==
+H_NoLogDivergence ==
     \A s1, s2 \in Server :
         (s1 # s2) =>
         (LET lowest_common_ci == MinCommitIndex(s1, s2) IN
-         IF lowest_common_ci > 0
-            THEN \A index \in 1..lowest_common_ci : 
-                    /\ index \in DOMAIN log[s1]
-                    /\ index \in DOMAIN log[s2]
-                    /\ log[s1][index] = log[s2][index]
-            ELSE TRUE)
+            IF lowest_common_ci > 0
+                THEN \A index \in 1..lowest_common_ci : 
+                        /\ index \in DOMAIN log[s1]
+                        /\ index \in DOMAIN log[s2]
+                        /\ log[s1][index] = log[s2][index]
+                ELSE TRUE)
 
 \* INV: Used in debugging
 TestInv ==
