@@ -557,20 +557,6 @@ MinCommitIndex(s1, s2) ==
         THEN commitIndex[s1]
         ELSE commitIndex[s2]
 
-\* INV: NoLogDivergence
-\* The log index is consistent across all servers (on those
-\* servers whose commitIndex is equal or higher than the index).
-H_NoLogDivergence ==
-    \A s1, s2 \in Server :
-        (s1 # s2) =>
-        (LET lowest_common_ci == MinCommitIndex(s1, s2) IN
-            IF lowest_common_ci > 0
-                THEN \A index \in 1..lowest_common_ci : 
-                        /\ index \in DOMAIN log[s1]
-                        /\ index \in DOMAIN log[s2]
-                        /\ log[s1][index] = log[s2][index]
-                ELSE TRUE)
-
 \* INV: Used in debugging
 TestInv ==
     \* ~\E m \in requestVoteMsgs : (m.mtype = RequestVoteResponse /\ m.mvoteGranted)
@@ -713,5 +699,26 @@ H_LogEntryInTermImpliesSafeAtTerm ==
     \A s \in Server : 
     \A i \in DOMAIN log[s] :
         \E Q \in Quorum : \A n \in Q : currentTerm[n] >= log[s][i]
+
+\* TODO: Consider how to state this.
+\* Leader logs contain all entries committed in previous terms.
+\* H_LeaderCompleteness == 
+\*     \A s \in Server : (state[s] = Leader) => 
+\*         \A c \in immediatelyCommitted : (c[2] < currentTerm[s] => InLog(<<c[1],c[2]>>, s))
+
+\* INV: NoLogDivergence
+\* The log index is consistent across all servers (on those
+\* servers whose commitIndex is equal or higher than the index).
+H_NoLogDivergence ==
+    \A s1, s2 \in Server :
+        (s1 # s2) =>
+        (LET lowest_common_ci == MinCommitIndex(s1, s2) IN
+            IF lowest_common_ci > 0
+                THEN \A index \in 1..lowest_common_ci : 
+                        /\ index \in DOMAIN log[s1]
+                        /\ index \in DOMAIN log[s2]
+                        /\ log[s1][index] = log[s2][index]
+                ELSE TRUE)
+
 
 ===============================================================================
