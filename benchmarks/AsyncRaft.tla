@@ -32,7 +32,7 @@ Original source: https://github.com/Vanlightly/raft-tlaplus/blob/main/specificat
 Modified further by Will Schultz for safety proof experiments, August 2023.
 *)
 
-EXTENDS Naturals, FiniteSets, FiniteSetsExt, Sequences, TLC
+EXTENDS Naturals, FiniteSets, FiniteSetsExt, Sequences, Bags, TLC, Randomization
 
 \* The set of server IDs
 CONSTANTS Server
@@ -219,7 +219,7 @@ InitLogVars == /\ log             = [i \in Server |-> << >>]
 Init == 
     /\ messages = [m \in {} |-> 0]
     /\ requestVoteMsgs = {}
-    /\ currentTerm = [i \in Server |-> 1]
+    /\ currentTerm = [i \in Server |-> 0]
     /\ state       = [i \in Server |-> Follower]
     /\ votedFor    = [i \in Server |-> Nil]
     /\ votesGranted = [i \in Server |-> {}]
@@ -270,10 +270,9 @@ AppendEntries(i, j) ==
     /\ i /= j
     /\ state[i] = Leader
     /\ LET prevLogIndex == nextIndex[i][j] - 1
-           prevLogTerm == IF prevLogIndex > 0 THEN
-                              log[i][prevLogIndex]
-                          ELSE
-                              0
+           prevLogTerm == IF (prevLogIndex > 0 /\ prevLogIndex \in DOMAIN log[i])
+                            THEN log[i][prevLogIndex]
+                            ELSE 0
            \* Send up to 1 entry, constrained by the end of the log.
            lastEntry == Min({Len(log[i]), nextIndex[i][j]})
            entries == SubSeq(log[i], nextIndex[i][j], lastEntry)
@@ -294,10 +293,8 @@ BecomeLeader(i) ==
     /\ state[i] = Candidate
     /\ votesGranted[i] \in Quorum
     /\ state'      = [state EXCEPT ![i] = Leader]
-    /\ nextIndex'  = [nextIndex EXCEPT ![i] =
-                         [j \in Server |-> Len(log[i]) + 1]]
-    /\ matchIndex' = [matchIndex EXCEPT ![i] =
-                         [j \in Server |-> 0]]
+    /\ nextIndex'  = [nextIndex EXCEPT ![i] = [j \in Server |-> Len(log[i]) + 1]]
+    /\ matchIndex' = [matchIndex EXCEPT ![i] = [j \in Server |-> 0]]
     /\ UNCHANGED <<messages, currentTerm, votedFor, candidateVars, logVars, requestVoteMsgs>>
 
 \* ACTION: ClientRequest ----------------------------------
@@ -338,7 +335,7 @@ AdvanceCommitIndex(i) ==
 \* ACTION: UpdateTerm
 \* Any RPC with a newer term causes the recipient to advance its term first.
 UpdateTerm ==
-    \E m \in DOMAIN messages :
+    \E m \in ((DOMAIN messages) \cup requestVoteMsgs) :
         /\ m.mterm > currentTerm[m.mdest]
         /\ currentTerm'    = [currentTerm EXCEPT ![m.mdest] = m.mterm]
         /\ state'          = [state       EXCEPT ![m.mdest] = Follower]
@@ -349,46 +346,43 @@ UpdateTerm ==
 \* ACTION: HandleRequestVoteRequest ------------------------------
 \* Server i receives a RequestVote request from server j with
 \* m.mterm <= currentTerm[i].
-HandleRequestVoteRequest ==
-    \E m \in requestVoteMsgs :
-        /\ ReceivableRequestVoteMessage(m, RequestVoteRequest, LessOrEqualTerm)
-        /\ LET i     == m.mdest
-               j     == m.msource
-               logOk == \/ m.mlastLogTerm > LastTerm(log[i])
-                        \/ /\ m.mlastLogTerm = LastTerm(log[i])
-                           /\ m.mlastLogIndex >= Len(log[i])
-               grant == /\ m.mterm = currentTerm[i]
-                        /\ logOk
-                        /\ votedFor[i] \in {Nil, j}
-            IN /\ m.mterm <= currentTerm[i]
-               /\ \/ grant  /\ votedFor' = [votedFor EXCEPT ![i] = j]
-                  \/ ~grant /\ UNCHANGED votedFor
-               /\ requestVoteMsgs' = requestVoteMsgs \cup{[
-                         mtype        |-> RequestVoteResponse,
-                         mterm        |-> currentTerm[i],
-                         mvoteGranted |-> grant,
-                         msource      |-> i,
-                         mdest        |-> j]}
-               /\ UNCHANGED <<state, currentTerm, candidateVars, leaderVars, logVars, messages>>
+HandleRequestVoteRequest(m) ==
+    /\ m.mtype = RequestVoteRequest
+    /\ m.mterm <= currentTerm[m.mdest]
+    \* /\ ReceivableRequestVoteMessage(m, RequestVoteRequest, LessOrEqualTerm)
+    /\ LET  i     == m.mdest
+            j     == m.msource
+            logOk == \/ m.mlastLogTerm > LastTerm(log[i])
+                     \/ /\ m.mlastLogTerm = LastTerm(log[i])
+                        /\ m.mlastLogIndex >= Len(log[i])
+            grant == /\ m.mterm = currentTerm[i]
+                     /\ logOk
+                     /\ votedFor[i] \in {Nil, j} IN
+            /\ m.mterm <= currentTerm[i]
+            /\ votedFor' = [votedFor EXCEPT ![i] = IF grant THEN j ELSE votedFor[i]]
+            /\ requestVoteMsgs' = requestVoteMsgs \cup {[
+                            mtype        |-> RequestVoteResponse,
+                            mterm        |-> currentTerm[i],
+                            mvoteGranted |-> grant,
+                            msource      |-> i,
+                            mdest        |-> j]}
+            /\ UNCHANGED <<state, currentTerm, candidateVars, leaderVars, logVars, messages>>
 
 \* ACTION: HandleRequestVoteResponse --------------------------------
 \* Server i receives a RequestVote response from server j with
 \* m.mterm = currentTerm[i].
-HandleRequestVoteResponse ==
-    \E m \in requestVoteMsgs :
-        \* This tallies votes even when the current state is not Candidate, but
-        \* they won't be looked at, so it doesn't matter.
-        /\ ReceivableRequestVoteMessage(m, RequestVoteResponse, EqualTerm)
-        /\ LET i     == m.mdest
-               j     == m.msource
-           IN
-              /\ \/ /\ m.mvoteGranted
-                    /\ votesGranted' = [votesGranted EXCEPT ![i] =
-                                              votesGranted[i] \cup {j}]
-                 \/ /\ ~m.mvoteGranted
-                    /\ UNCHANGED <<votesGranted>>
-              /\ Discard(m)
-              /\ UNCHANGED <<serverVars, votedFor, leaderVars, logVars, requestVoteMsgs>>
+HandleRequestVoteResponse(m) ==
+    \* This tallies votes even when the current state is not Candidate, but
+    \* they won't be looked at, so it doesn't matter.
+    /\ m.mtype = RequestVoteResponse
+    /\ m.mterm = currentTerm[m.mdest]
+    \* /\ ReceivableRequestVoteMessage(m, RequestVoteResponse, EqualTerm)
+    /\ votesGranted' = [votesGranted EXCEPT ![m.mdest] = 
+                                IF m.mvoteGranted 
+                                    THEN votesGranted[m.mdest] \cup {m.msource} 
+                                    ELSE votesGranted[m.mdest]]
+    /\ requestVoteMsgs' = requestVoteMsgs \ {m} \* discard the message.
+    /\ UNCHANGED <<serverVars, votedFor, leaderVars, logVars, messages>>
 
 \* ACTION: RejectAppendEntriesRequest -------------------
 \* Either the term of the message is stale or the message
@@ -496,32 +490,32 @@ ClientRequestAction == TRUE /\ \E i \in Server : ClientRequest(i)
 AdvanceCommitIndexAction == TRUE /\ \E i \in Server : AdvanceCommitIndex(i)
 AppendEntriesAction == TRUE /\ \E i,j \in Server : AppendEntries(i, j)
 UpdateTermAction == UpdateTerm
-HandleRequestVoteRequestAction == HandleRequestVoteRequest
-HandleRequestVoteResponseAction == HandleRequestVoteResponse
+HandleRequestVoteRequestAction == \E m \in requestVoteMsgs : HandleRequestVoteRequest(m)
+HandleRequestVoteResponseAction == \E m \in requestVoteMsgs : HandleRequestVoteResponse(m)
 RejectAppendEntriesRequestAction == RejectAppendEntriesRequest
 AcceptAppendEntriesRequestAction == AcceptAppendEntriesRequest
 HandleAppendEntriesResponseAction == HandleAppendEntriesResponse
 
 \* Defines how the variables may transition.
 Next == 
-    \/ RestartAction
     \/ RequestVoteAction
     \/ BecomeLeaderAction
     \/ ClientRequestAction
     \/ AdvanceCommitIndexAction
-    \* \/ AppendEntriesAction
+    \/ AppendEntriesAction
     \/ UpdateTermAction
     \/ HandleRequestVoteRequestAction
     \/ HandleRequestVoteResponseAction
-    \* \/ RejectAppendEntriesRequestAction
-    \* \/ AcceptAppendEntriesRequestAction
-    \* \/ HandleAppendEntriesResponseAction
+    \/ RejectAppendEntriesRequestAction
+    \/ AcceptAppendEntriesRequestAction
+    \/ HandleAppendEntriesResponseAction
 
 NextUnchanged == UNCHANGED vars
 
 
 CONSTANT MaxTerm
 CONSTANT MaxLogLen
+CONSTANT MaxNumVoteMsgs
 
 Terms == 0..MaxTerm
 LogIndices == 1..MaxLogLen
@@ -530,14 +524,14 @@ LogIndicesWithZero == 0..MaxLogLen
 SeqOf(S, n) == UNION {[1..m -> S] : m \in 0..n}
 BoundedSeq(S, n) == SeqOf(S, n)
 
-\* RequestVoteRequestType == [
-\*     mtype         : {RequestVoteRequest},
-\*     mterm         : Terms,
-\*     mlastLogTerm  : Terms,
-\*     mlastLogIndex : LogIndicesWithZero,
-\*     msource       : Server,
-\*     mdest         : Server
-\* ]
+RequestVoteRequestType == [
+    mtype         : {RequestVoteRequest},
+    mterm         : Terms,
+    mlastLogTerm  : Terms,
+    mlastLogIndex : LogIndicesWithZero,
+    msource       : Server,
+    mdest         : Server
+]
 
 RequestVoteRequestTypeOp(T) == [
     mtype         : {RequestVoteRequest},
@@ -549,13 +543,13 @@ RequestVoteRequestTypeOp(T) == [
 ]
 
 
-\* RequestVoteResponseType == [
-\*     mtype        : {RequestVoteResponse},
-\*     mterm        : Terms,
-\*     mvoteGranted : BOOLEAN,
-\*     msource      : Server,
-\*     mdest        : Server
-\* ]
+RequestVoteResponseType == [
+    mtype        : {RequestVoteResponse},
+    mterm        : Terms,
+    mvoteGranted : BOOLEAN,
+    msource      : Server,
+    mdest        : Server
+]
 
 RequestVoteResponseTypeOp(T) == [
     mtype        : {RequestVoteResponse},
@@ -580,9 +574,13 @@ RequestVoteRequestTypeSampled == UNION {
     kOrSmallerSubset(2, RequestVoteRequestTypeOp({t})) : t \in Terms 
 }
 
+RequestVoteType == RandomSetOfSubsets(3, 3, RequestVoteRequestType) \cup RandomSetOfSubsets(3, 3, RequestVoteResponseType)  
+\* \cup RandomSubset(3, RequestVoteRequestType)
+
 TypeOK == 
     /\ messages \in {[m \in {} |-> 0]}
-    /\ requestVoteMsgs \in (RequestVoteResponseTypeSampled \cup RequestVoteRequestTypeSampled)
+    \* /\ requestVoteMsgs \in (RequestVoteResponseTypeSampled \cup RequestVoteRequestTypeSampled)
+    /\ requestVoteMsgs \in RequestVoteType
     /\ currentTerm \in [Server -> Terms]
     /\ state       \in [Server -> {Leader, Follower, Candidate}]
     /\ votedFor    \in [Server -> ({Nil} \cup Server)]
@@ -621,7 +619,10 @@ NoLogDivergence ==
 
 \* INV: Used in debugging
 TestInv ==
-    TRUE
+    \* ~\E m \in requestVoteMsgs : (m.mtype = RequestVoteResponse /\ m.mvoteGranted)
+    \* ~\E s \in Server : Cardinality(votesGranted[s]) > 1
+    \* /\ \A s \in Server : log[s] = <<>>
+    ~\E s \in Server : state[s] = Leader
 
 \* INV: LeaderHasAllAckedValues
 \* A non-stale leader cannot be missing an acknowledged value
@@ -664,6 +665,8 @@ CommittedEntriesReachMajority ==
 StateConstraint == 
     /\ \A s \in Server : currentTerm[s] <= MaxTerm
     /\ \A s \in Server : Len(log[s]) <= MaxLogLen
+    /\ Cardinality(requestVoteMsgs) <= MaxNumVoteMsgs
+    \* + BagCardinality(messages) <= MaxNumMsgs
 
 
 \**************
@@ -682,6 +685,8 @@ H_QuorumsSafeAtTerms ==
 H_CandidateVotesGrantedInTermAreUnique ==
     \A s,t \in Server :
         (/\ s # t
+         /\ state[s] = Candidate
+         /\ state[t] = Candidate
          /\ currentTerm[s] = currentTerm[t]) =>
             (votesGranted[s] \cap votesGranted[t]) = {}
 
@@ -690,24 +695,42 @@ H_CandidateVotesGrantedInTermAreUnique ==
 H_CandidateWithVotesGrantedInTermImplyNoOtherLeader ==
     \A s,t \in Server :
         (/\ s # t
+         /\ state[s] = Candidate
          /\ votesGranted[s] \in Quorum
          /\ currentTerm[s] = currentTerm[t]) =>
             state[t] # Leader
 
 H_CandidateWithVotesGrantedInTermImplyNoOtherLogsInTerm ==
     \A s,t \in Server :
-        (votesGranted[s] \in Quorum) =>
+        (state[s] = Candidate /\ votesGranted[s] \in Quorum) =>
             ~(\E i \in DOMAIN log[t] : log[t][i] = currentTerm[s])
 
 H_CandidateWithVotesGrantedInTermImplyVotersSafeAtTerm ==
     \A s \in Server : 
         (state[s] = Candidate) =>
-            \A v \in votesGranted[s] :
-            currentTerm[v] >= currentTerm[s]
+            \A v \in votesGranted[s] : currentTerm[v] >= currentTerm[s]
+
+H_VotesCantBeGrantedTwiceToCandidatesInSameTerm ==
+    \A s,t \in Server : 
+        ( /\ s # t 
+          /\ state[s] = Candidate 
+          /\ state[t] = Candidate
+          /\ currentTerm[s] = currentTerm[t]) =>
+            \* Cannot be intersection between voters that gave votes to candidates in same term.
+            votesGranted[s] \cap votesGranted[t] = {}
+
+\* H_VotesCantBeGrantedTwiceToCandidatesInSameTerm == 
+\*     \A s,t \in Server : 
+\*         \* If s voted for t.
+\*         (votedFor[s] = t)
 
 H_OnePrimaryPerTerm == 
     \A s,t \in Server : 
         (s # t /\ state[s] = Leader /\ state[t] = Leader) => currentTerm[s] # currentTerm[t]
+
+H_CurrentTermAtLeastAsLargeAsLogTerms == 
+    \A s \in Server : 
+        (\A i \in DOMAIN log[s] : currentTerm[s] >= log[s][i])
 
 \* A server's current term is always at least as large as the terms in its log.
 H_CurrentTermAtLeastAsLargeAsLogTermsForPrimary == 

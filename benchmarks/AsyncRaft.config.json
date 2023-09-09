@@ -33,10 +33,10 @@
         "EqualTerm" : "EqualTerm",
         "LessOrEqualTerm" : "LessOrEqualTerm",
         "MaxTerm" : ["2"],
-        "MaxLogLen" : ["0", "1", "2"]
+        "MaxLogLen" : ["0", "1", "2"],
+        "MaxNumVoteMsgs": ["6"]
     },
     "actions": [
-        "RestartAction",
         "RequestVoteAction",
         "BecomeLeaderAction",
         "ClientRequestAction",

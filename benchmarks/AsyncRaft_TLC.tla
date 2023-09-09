@@ -10,6 +10,7 @@ SumFnRange(f) == IF DOMAIN f = {} THEN 0 ELSE
 CTICost == 
     SumFnRange([s \in Server |-> Cardinality(votesGranted[s])]) +
     SumFnRange([s \in Server |-> Len(log[s])]) +
-    SumFnRange(currentTerm)
+    SumFnRange(currentTerm) + 
+    Cardinality(requestVoteMsgs)
 
 ===============================================================================
