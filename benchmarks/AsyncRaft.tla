@@ -53,14 +53,10 @@ CONSTANTS RequestVoteRequest,
 CONSTANTS EqualTerm, LessOrEqualTerm
 
 ----
-\* Global variables
-
-\* A bag of records representing requests and responses sent from one server
-\* to another. TLAPS doesn't support the Bags module, so this is a function
-\* mapping Message to Nat.
-VARIABLE messages
+\* Global variables.
 
 VARIABLE requestVoteMsgs
+VARIABLE appendEntriesMsgs
 
 ----
 \* Auxilliary variables (used for state-space control, invariants etc)
@@ -108,9 +104,9 @@ leaderVars == <<nextIndex, matchIndex>>
 \* End of per server variables.-
 
 \* All variables; used for stuttering (asserting state hasn't changed).
-vars == <<messages, requestVoteMsgs, currentTerm, state, votedFor, votesGranted, nextIndex, matchIndex, log, commitIndex>>
+vars == <<requestVoteMsgs, currentTerm, state, votedFor, votesGranted, nextIndex, matchIndex, log, commitIndex>>
 
-view == <<messages, serverVars, candidateVars, leaderVars, logVars >>
+view == <<serverVars, candidateVars, leaderVars, logVars >>
 Symmetry == Permutations(Server)
 
 
@@ -124,56 +120,6 @@ Quorum == {i \in SUBSET(Server) : Cardinality(i) * 2 > Cardinality(Server)}
 \* The term of the last entry in a log, or 0 if the log is empty.
 LastTerm(xlog) == IF Len(xlog) = 0 THEN 0 ELSE xlog[Len(xlog)]
 
-\* Send the message whether it already exists or not.
-SendNoRestriction(m) ==
-    IF m \in DOMAIN messages
-    THEN messages' = [messages EXCEPT ![m] = @ + 1]
-    ELSE messages' = messages @@ (m :> 1)
-    
-\* Will only send the message if it hasn't been sent before.
-\* Basically disables the parent action once sent.    
-SendOnce(m) ==
-    /\ m \notin DOMAIN messages
-    /\ messages' = messages @@ (m :> 1)    
-
-\* Add a message to the bag of messages. 
-\* Note 1: to prevent infinite cycles, empty 
-\* AppendEntriesRequest messages can only be sent once.
-\* Note 2: a message can only match an existing message
-\* if it is identical (all fields).
-Send(m) ==
-    IF /\ m.mtype = AppendEntriesRequest
-       /\ m.mentries = <<>>
-    THEN SendOnce(m)
-    ELSE SendNoRestriction(m)
-
-\* Will only send the messages if it hasn't done so before
-\* Basically disables the parent action once sent.
-SendMultipleOnce(msgs) ==
-    /\ \A m \in msgs : m \notin DOMAIN messages
-    /\ messages' = messages @@ [msg \in msgs |-> 1]    
-
-\* Explicit duplicate operator for when we purposefully want message duplication
-Duplicate(m) == 
-    /\ m \in DOMAIN messages
-    /\ messages' = [messages EXCEPT ![m] = @ + 1]
-
-\* Remove a message from the bag of messages. Used when a server is done
-\* processing a message.
-Discard(m) ==
-    /\ m \in DOMAIN messages
-    /\ messages[m] > 0 \* message must exist
-    /\ messages' = [messages EXCEPT ![m] = @ - 1]
-
-\* Combination of Send and Discard
-Reply(response, request) ==
-    /\ messages[request] > 0 \* request must exist
-    /\ \/ /\ response \notin DOMAIN messages \* response does not exist, so add it
-          /\ messages' = [messages EXCEPT ![request] = @ - 1] @@ (response :> 1)
-       \/ /\ response \in DOMAIN messages \* response was sent previously, so increment delivery counter
-          /\ messages' = [messages EXCEPT ![request] = @ - 1,
-                                          ![response] = @ + 1]
-
 \* The message is of the type and has a matching term.
 \* Messages with a higher term are handled by the
 \* action UpdateTerm
@@ -185,16 +131,6 @@ ReceivableRequestVoteMessage(m, mtype, term_match) ==
        \/ /\ term_match = LessOrEqualTerm
           /\ m.mterm <= currentTerm[m.mdest]
 
-\* The message is of the type and has a matching term.
-\* Messages with a higher term are handled by the
-\* action UpdateTerm
-ReceivableMessage(m, mtype, term_match) ==
-    /\ messages[m] > 0
-    /\ m.mtype = mtype
-    /\ \/ /\ term_match = EqualTerm
-          /\ m.mterm = currentTerm[m.mdest]
-       \/ /\ term_match = LessOrEqualTerm
-          /\ m.mterm <= currentTerm[m.mdest]
 
 \* Return the minimum value from a set, or undefined if the set is empty.
 \* Min(s) == CHOOSE x \in s : \A y \in s : x <= y
@@ -217,8 +153,8 @@ InitLogVars == /\ log             = [i \in Server |-> << >>]
                /\ commitIndex     = [i \in Server |-> 0]
 
 Init == 
-    /\ messages = [m \in {} |-> 0]
     /\ requestVoteMsgs = {}
+    /\ appendEntriesMsgs = {}
     /\ currentTerm = [i \in Server |-> 0]
     /\ state       = [i \in Server |-> Follower]
     /\ votedFor    = [i \in Server |-> Nil]
@@ -240,7 +176,7 @@ Restart(i) ==
     /\ nextIndex'       = [nextIndex EXCEPT ![i] = [j \in Server |-> 1]]
     /\ matchIndex'      = [matchIndex EXCEPT ![i] = [j \in Server |-> 0]]
     /\ commitIndex'     = [commitIndex EXCEPT ![i] = 0]
-    /\ UNCHANGED <<messages, currentTerm, votedFor, log, requestVoteMsgs>>
+    /\ UNCHANGED <<currentTerm, votedFor, log, requestVoteMsgs, appendEntriesMsgs>>
 
 \* ACTION: RequestVote
 \* Combined Timeout and RequestVote of the original spec to reduce
@@ -260,7 +196,7 @@ RequestVote(i) ==
              mlastLogIndex |-> Len(log[i]),
              msource       |-> i,
              mdest         |-> j] : j \in Server \ {i}}
-    /\ UNCHANGED <<leaderVars, logVars, messages>>
+    /\ UNCHANGED <<leaderVars, logVars, appendEntriesMsgs>>
 
 \* ACTION: AppendEntries ----------------------------------------
 \* Leader i sends j an AppendEntries request containing up to 1 entry.
@@ -277,14 +213,15 @@ AppendEntries(i, j) ==
            lastEntry == Min({Len(log[i]), nextIndex[i][j]})
            entries == SubSeq(log[i], nextIndex[i][j], lastEntry)
        IN 
-          /\ Send([mtype          |-> AppendEntriesRequest,
+          /\ appendEntriesMsgs' = appendEntriesMsgs \cup {[
+                   mtype          |-> AppendEntriesRequest,
                    mterm          |-> currentTerm[i],
                    mprevLogIndex  |-> prevLogIndex,
                    mprevLogTerm   |-> prevLogTerm,
                    mentries       |-> entries,
                    mcommitIndex   |-> Min({commitIndex[i], lastEntry}),
                    msource        |-> i,
-                   mdest          |-> j])
+                   mdest          |-> j]}
     /\ UNCHANGED <<serverVars, candidateVars, nextIndex, matchIndex, logVars, requestVoteMsgs>>
 
 \* ACTION: BecomeLeader -------------------------------------------
@@ -295,7 +232,7 @@ BecomeLeader(i) ==
     /\ state'      = [state EXCEPT ![i] = Leader]
     /\ nextIndex'  = [nextIndex EXCEPT ![i] = [j \in Server |-> Len(log[i]) + 1]]
     /\ matchIndex' = [matchIndex EXCEPT ![i] = [j \in Server |-> 0]]
-    /\ UNCHANGED <<messages, currentTerm, votedFor, candidateVars, logVars, requestVoteMsgs>>
+    /\ UNCHANGED <<appendEntriesMsgs, currentTerm, votedFor, candidateVars, logVars, requestVoteMsgs>>
 
 \* ACTION: ClientRequest ----------------------------------
 \* Leader i receives a client request to add v to the log.
@@ -303,7 +240,7 @@ ClientRequest(i) ==
     /\ state[i] = Leader
     /\ LET newLog == Append(log[i], currentTerm[i])
        IN  /\ log' = [log EXCEPT ![i] = newLog]
-    /\ UNCHANGED <<messages, serverVars, candidateVars,
+    /\ UNCHANGED <<appendEntriesMsgs, serverVars, candidateVars,
                    leaderVars, commitIndex, requestVoteMsgs>>
 
 \* ACTION: AdvanceCommitIndex ---------------------------------
@@ -330,18 +267,18 @@ AdvanceCommitIndex(i) ==
        IN 
           /\ commitIndex[i] < newCommitIndex \* only enabled if it actually advances
           /\ commitIndex' = [commitIndex EXCEPT ![i] = newCommitIndex]
-    /\ UNCHANGED <<messages, serverVars, candidateVars, leaderVars, log, requestVoteMsgs>>
+    /\ UNCHANGED <<appendEntriesMsgs, serverVars, candidateVars, leaderVars, log, requestVoteMsgs>>
 
 \* ACTION: UpdateTerm
 \* Any RPC with a newer term causes the recipient to advance its term first.
 UpdateTerm ==
-    \E m \in ((DOMAIN messages) \cup requestVoteMsgs) :
+    \E m \in (appendEntriesMsgs \cup requestVoteMsgs) :
         /\ m.mterm > currentTerm[m.mdest]
         /\ currentTerm'    = [currentTerm EXCEPT ![m.mdest] = m.mterm]
         /\ state'          = [state       EXCEPT ![m.mdest] = Follower]
         /\ votedFor'       = [votedFor    EXCEPT ![m.mdest] = Nil]
            \* messages is unchanged so m can be processed further.
-        /\ UNCHANGED <<messages, candidateVars, leaderVars, logVars, requestVoteMsgs>>
+        /\ UNCHANGED <<appendEntriesMsgs, candidateVars, leaderVars, logVars, requestVoteMsgs>>
 
 \* ACTION: HandleRequestVoteRequest ------------------------------
 \* Server i receives a RequestVote request from server j with
@@ -366,7 +303,7 @@ HandleRequestVoteRequest(m) ==
                             mvoteGranted |-> grant,
                             msource      |-> i,
                             mdest        |-> j]}
-            /\ UNCHANGED <<state, currentTerm, candidateVars, leaderVars, logVars, messages>>
+            /\ UNCHANGED <<state, currentTerm, candidateVars, leaderVars, logVars, appendEntriesMsgs>>
 
 \* ACTION: HandleRequestVoteResponse --------------------------------
 \* Server i receives a RequestVote response from server j with
@@ -382,7 +319,7 @@ HandleRequestVoteResponse(m) ==
                                     THEN votesGranted[m.mdest] \cup {m.msource} 
                                     ELSE votesGranted[m.mdest]]
     /\ requestVoteMsgs' = requestVoteMsgs \ {m} \* discard the message.
-    /\ UNCHANGED <<serverVars, votedFor, leaderVars, logVars, messages>>
+    /\ UNCHANGED <<serverVars, votedFor, leaderVars, logVars, appendEntriesMsgs>>
 
 \* ACTION: RejectAppendEntriesRequest -------------------
 \* Either the term of the message is stale or the message
@@ -393,24 +330,26 @@ LogOk(i, m) ==
        /\ m.mprevLogIndex <= Len(log[i])
        /\ m.mprevLogTerm = log[i][m.mprevLogIndex]
 
-RejectAppendEntriesRequest ==
-    \E m \in DOMAIN messages :
-        /\ ReceivableMessage(m, AppendEntriesRequest, LessOrEqualTerm)
-        /\ LET i     == m.mdest
-               j     == m.msource
-               logOk == LogOk(i, m)
-           IN  /\ \/ m.mterm < currentTerm[i]
-                  \/ /\ m.mterm = currentTerm[i]
-                     /\ state[i] = Follower
-                     /\ \lnot logOk
-               /\ Reply([mtype           |-> AppendEntriesResponse,
-                         mterm           |-> currentTerm[i],
-                         msuccess        |-> FALSE,
-                         mmatchIndex     |-> 0,
-                         msource         |-> i,
-                         mdest           |-> j],
-                         m)
-               /\ UNCHANGED <<state, candidateVars, leaderVars, serverVars, logVars, requestVoteMsgs>>
+RejectAppendEntriesRequest(m) ==
+    \* /\ ReceivableMessage(m, AppendEntriesRequest, LessOrEqualTerm)
+    /\ m.mtype = AppendEntriesRequest
+    /\ m.mterm <= currentTerm[m.mdest]
+    /\ LET i     == m.mdest
+            j     == m.msource
+            logOk == LogOk(i, m)
+        IN  /\ \/ m.mterm < currentTerm[i]
+                \/ /\ m.mterm = currentTerm[i]
+                    /\ state[i] = Follower
+                    /\ \lnot logOk
+            /\ appendEntriesMsgs' = appendEntriesMsgs \cup 
+                {[
+                        mtype           |-> AppendEntriesResponse,
+                        mterm           |-> currentTerm[i],
+                        msuccess        |-> FALSE,
+                        mmatchIndex     |-> 0,
+                        msource         |-> i,
+                        mdest           |-> j]}
+            /\ UNCHANGED <<state, candidateVars, leaderVars, serverVars, logVars, requestVoteMsgs>>
 
 \* ACTION: AcceptAppendEntriesRequest ------------------
 \* The original spec had to three sub actions, this version is compressed.
@@ -434,54 +373,55 @@ NeedsTruncation(m, i, index) ==
 TruncateLog(m, i) ==
     [index \in 1..m.mprevLogIndex |-> log[i][index]]
 
-AcceptAppendEntriesRequest ==
-    \E m \in DOMAIN messages :
-        /\ ReceivableMessage(m, AppendEntriesRequest, EqualTerm)
-        /\ LET i     == m.mdest
-               j     == m.msource
-               logOk == LogOk(i, m)
-               index == m.mprevLogIndex + 1
-           IN 
-              /\ state[i] \in { Follower, Candidate }
-              /\ logOk
-              /\ LET new_log == 
-                    IF CanAppend(m, i) THEN [log EXCEPT ![i] = Append(log[i], m.mentries[1])] ELSE
-                    IF NeedsTruncation(m, i , index) /\ m.mentries # <<>> THEN [log EXCEPT ![i] = Append(TruncateLog(m, i), m.mentries[1])] ELSE
-                    IF NeedsTruncation(m, i , index) /\ m.mentries = <<>> THEN [log EXCEPT ![i] = TruncateLog(m, i)] ELSE
-                    log 
-                 IN
-                    /\ state' = [state EXCEPT ![i] = Follower]
-                    /\ commitIndex' = [commitIndex EXCEPT ![i] =
-                                              m.mcommitIndex]
-                    /\ log' = new_log
-                    /\ Reply([mtype           |-> AppendEntriesResponse,
-                              mterm           |-> currentTerm[i],
-                              msuccess        |-> TRUE,
-                              mmatchIndex     |-> m.mprevLogIndex +
-                                                    Len(m.mentries),
-                              msource         |-> i,
-                              mdest           |-> j],
-                              m)
-                    /\ UNCHANGED <<candidateVars, leaderVars, votedFor, currentTerm, requestVoteMsgs>>
+AcceptAppendEntriesRequest(m) ==
+    \* /\ ReceivableMessage(m, AppendEntriesRequest, EqualTerm)
+    /\ m.mtype = AppendEntriesRequest
+    /\ m.mterm = currentTerm[m.mdest]
+    /\ LET i     == m.mdest
+            j     == m.msource
+            logOk == LogOk(i, m)
+            index == m.mprevLogIndex + 1
+        IN 
+            /\ state[i] \in { Follower, Candidate }
+            /\ logOk
+            /\ LET new_log == 
+                IF CanAppend(m, i) THEN [log EXCEPT ![i] = Append(log[i], m.mentries[1])] ELSE
+                IF NeedsTruncation(m, i , index) /\ m.mentries # <<>> THEN [log EXCEPT ![i] = Append(TruncateLog(m, i), m.mentries[1])] ELSE
+                IF NeedsTruncation(m, i , index) /\ m.mentries = <<>> THEN [log EXCEPT ![i] = TruncateLog(m, i)] ELSE
+                log 
+                IN
+                /\ state' = [state EXCEPT ![i] = Follower]
+                /\ commitIndex' = [commitIndex EXCEPT ![i] =
+                                            m.mcommitIndex]
+                /\ log' = new_log
+                /\ appendEntriesMsgs' = appendEntriesMsgs \cup {[
+                            mtype           |-> AppendEntriesResponse,
+                            mterm           |-> currentTerm[i],
+                            msuccess        |-> TRUE,
+                            mmatchIndex     |-> m.mprevLogIndex +Len(m.mentries),
+                            msource         |-> i,
+                            mdest           |-> j]}
+                /\ UNCHANGED <<candidateVars, leaderVars, votedFor, currentTerm, requestVoteMsgs>>
        
 \* ACTION: HandleAppendEntriesResponse
 \* Server i receives an AppendEntries response from server j with
 \* m.mterm = currentTerm[i].
-HandleAppendEntriesResponse ==
-    \E m \in DOMAIN messages :
-        /\ ReceivableMessage(m, AppendEntriesResponse, EqualTerm)
-        /\ LET i     == m.mdest
-               j     == m.msource
-           IN
-              /\ \/ /\ m.msuccess \* successful
-                    /\ nextIndex'  = [nextIndex  EXCEPT ![i][j] = m.mmatchIndex + 1]
-                    /\ matchIndex' = [matchIndex EXCEPT ![i][j] = m.mmatchIndex]
-                 \/ /\ \lnot m.msuccess \* not successful
-                    /\ nextIndex' = [nextIndex EXCEPT ![i][j] =
-                                         Max({nextIndex[i][j] - 1, 1})]
-                    /\ UNCHANGED <<matchIndex>>
-              /\ Discard(m)
-              /\ UNCHANGED <<serverVars, candidateVars, logVars, requestVoteMsgs>>
+HandleAppendEntriesResponse(m) ==
+    \* /\ ReceivableMessage(m, AppendEntriesResponse, EqualTerm)
+    /\ m.mtype = AppendEntriesResponse
+    /\ m.mterm = currentTerm[m.mdest]
+    /\ LET i     == m.mdest
+           j     == m.msource
+        IN
+            /\ \/ /\ m.msuccess \* successful
+                  /\ nextIndex'  = [nextIndex  EXCEPT ![i][j] = m.mmatchIndex + 1]
+                  /\ matchIndex' = [matchIndex EXCEPT ![i][j] = m.mmatchIndex]
+               \/ /\ \lnot m.msuccess \* not successful
+                  /\ nextIndex' = [nextIndex EXCEPT ![i][j] = Max({nextIndex[i][j] - 1, 1})]
+                  /\ UNCHANGED <<matchIndex>>
+        \*   /\ Discard(m)
+            /\ appendEntriesMsgs' = appendEntriesMsgs \ {m}
+            /\ UNCHANGED <<serverVars, candidateVars, logVars, requestVoteMsgs>>
 
 RestartAction == TRUE /\ \E i \in Server : Restart(i)
 RequestVoteAction == TRUE /\ \E i \in Server : RequestVote(i)
@@ -492,9 +432,9 @@ AppendEntriesAction == TRUE /\ \E i,j \in Server : AppendEntries(i, j)
 UpdateTermAction == UpdateTerm
 HandleRequestVoteRequestAction == \E m \in requestVoteMsgs : HandleRequestVoteRequest(m)
 HandleRequestVoteResponseAction == \E m \in requestVoteMsgs : HandleRequestVoteResponse(m)
-RejectAppendEntriesRequestAction == RejectAppendEntriesRequest
-AcceptAppendEntriesRequestAction == AcceptAppendEntriesRequest
-HandleAppendEntriesResponseAction == HandleAppendEntriesResponse
+RejectAppendEntriesRequestAction == \E m \in appendEntriesMsgs : RejectAppendEntriesRequest(m)
+AcceptAppendEntriesRequestAction == \E m \in appendEntriesMsgs : AcceptAppendEntriesRequest(m)
+HandleAppendEntriesResponseAction == \E m \in appendEntriesMsgs : HandleAppendEntriesResponse(m)
 
 \* Defines how the variables may transition.
 Next == 
@@ -559,28 +499,43 @@ RequestVoteResponseTypeOp(T) == [
     mdest        : Server
 ]
 
+AppendEntriesRequestType == [
+    mtype      : {AppendEntriesRequest},
+    mterm      : Terms,
+    mprevLogIndex  : LogIndices,
+    mprevLogTerm   : Terms,
+    mentries       : BoundedSeq(Terms, MaxLogLen),
+    mcommitIndex   : LogIndicesWithZero,
+    msource        : Server,
+    mdest          : Server
+]
+
+AppendEntriesResponseType == [
+    mtype        : {AppendEntriesResponse},
+    mterm        : Terms,
+    msuccess     : BOOLEAN,
+    mmatchIndex  : LogIndices,
+    msource      : Server,
+    mdest        : Server
+]
+
 
 \* Set of all subsets of a set of size <= k.
 kOrSmallerSubset(k, S) == UNION {(kSubset(n, S)) : n \in 0..k}
 
-
+\* 
 \* Work around size limitations of TLC subset computations.
+\* 
 
-RequestVoteResponseTypeSampled == UNION {   
-    kOrSmallerSubset(2, RequestVoteResponseTypeOp({t})) : t \in Terms 
-}
-
-RequestVoteRequestTypeSampled == UNION {   
-    kOrSmallerSubset(2, RequestVoteRequestTypeOp({t})) : t \in Terms 
-}
+RequestVoteResponseTypeSampled == UNION { kOrSmallerSubset(2, RequestVoteResponseTypeOp({t})) : t \in Terms }
+RequestVoteRequestTypeSampled == UNION { kOrSmallerSubset(2, RequestVoteRequestTypeOp({t})) : t \in Terms }
 
 RequestVoteType == RandomSetOfSubsets(3, 3, RequestVoteRequestType) \cup RandomSetOfSubsets(3, 3, RequestVoteResponseType)  
-\* \cup RandomSubset(3, RequestVoteRequestType)
+AppendEntriesType == RandomSetOfSubsets(3, 3, AppendEntriesRequestType) \cup RandomSetOfSubsets(3, 3, AppendEntriesResponseType)  
 
 TypeOK == 
-    /\ messages \in {[m \in {} |-> 0]}
-    \* /\ requestVoteMsgs \in (RequestVoteResponseTypeSampled \cup RequestVoteRequestTypeSampled)
     /\ requestVoteMsgs \in RequestVoteType
+    /\ appendEntriesMsgs \in AppendEntriesType
     /\ currentTerm \in [Server -> Terms]
     /\ state       \in [Server -> {Leader, Follower, Candidate}]
     /\ votedFor    \in [Server -> ({Nil} \cup Server)]
@@ -621,8 +576,8 @@ NoLogDivergence ==
 TestInv ==
     \* ~\E m \in requestVoteMsgs : (m.mtype = RequestVoteResponse /\ m.mvoteGranted)
     \* ~\E s \in Server : Cardinality(votesGranted[s]) > 1
-    \* /\ \A s \in Server : log[s] = <<>>
-    ~\E s \in Server : state[s] = Leader
+    /\ ~\E s,t \in Server : s # t /\ log[s] # <<>> /\ log[t] # <<>>
+    \* ~\E s \in Server : state[s] = Leader
 
 \* INV: LeaderHasAllAckedValues
 \* A non-stale leader cannot be missing an acknowledged value
@@ -666,6 +621,7 @@ StateConstraint ==
     /\ \A s \in Server : currentTerm[s] <= MaxTerm
     /\ \A s \in Server : Len(log[s]) <= MaxLogLen
     /\ Cardinality(requestVoteMsgs) <= MaxNumVoteMsgs
+    /\ Cardinality(appendEntriesMsgs) <= MaxNumVoteMsgs
     \* + BagCardinality(messages) <= MaxNumMsgs
 
 
