@@ -11,6 +11,8 @@ lemmaTRUE = StructuredProofNode("LemmaTrue", "TRUE")
 lemmaTRUEShim = StructuredProofNode("LemmaTrueShim", "1=1")
 
 appendEntriesNeverSentToSelf = make_node("H_AppendEntriesNeverSentToSelf")
+requestVotesNeverSentToSelf = make_node("H_RequestVotesNeverSentToSelf")
+
 
 candidateWithVotesGrantedInTermImplyVotersSafeAtTerm = make_node("H_CandidateWithVotesGrantedInTermImplyVotersSafeAtTerm")
 
@@ -50,8 +52,20 @@ logEntryInTermImpliesSafeAtTerms = StructuredProofNode("LogEntryInTermImpliesSaf
     ]
 })
 
+successfulRequestVoteQuorumInTermImpliesNoLogsInTerm = make_node("H_SuccessfulRequestVoteQuorumInTermImpliesNoLogsInTerm")
+
 candidateWithVotesGrantedInTermImplyNoOtherLogsInTerm = make_node("H_CandidateWithVotesGrantedInTermImplyNoOtherLogsInTerm")
 candidateWithVotesGrantedInTermImplyNoOtherLogsInTerm.children = {
+    "ClientRequestAction":[
+        candidateWithVotesGrantedInTermImplyNoOtherLeader
+    ],
+    "RequestVoteAction":[
+        logEntryInTermImpliesSafeAtTerms
+    ],
+    "HandleRequestVoteResponseAction": [
+        # successfulRequestVoteQuorumInTermImpliesNoLogsInTerm,
+        requestVotesNeverSentToSelf
+    ]
 }
 
 currentTermsAtLeastLargeAsLogTermsForPrimary =  StructuredProofNode("CurrentTermAtLeastAsLargeAsLogTermsForPrimary", "H_CurrentTermAtLeastAsLargeAsLogTermsForPrimary")
@@ -81,9 +95,14 @@ primaryHasEntriesItCreated.children = {
     ]
 }
 
+logMatchingInAppendEntriesMsgs = make_node("H_LogMatchingInAppendEntriesMsgs")
+
 logMatching = StructuredProofNode("LogMatching", "H_LogMatching", children = {
     "ClientRequestAction":[
         primaryHasEntriesItCreated
+    ],
+    "AcceptAppendEntriesRequestAppendAction":[
+        logMatchingInAppendEntriesMsgs
     ]
 })
 

@@ -588,14 +588,6 @@ MinCommitIndex(s1, s2) ==
         THEN commitIndex[s1]
         ELSE commitIndex[s2]
 
-\* INV: Used in debugging
-TestInv ==
-    \* ~\E m \in requestVoteMsgs : (m.mtype = RequestVoteResponse /\ m.mvoteGranted)
-    \* ~\E s \in Server : Cardinality(votesGranted[s]) > 1
-    \* /\ ~\E s,t \in Server : s # t /\ log[s] # <<>> /\ log[t] # <<>>
-    [][~AcceptAppendEntriesRequestTruncateAction]_vars
-    \* ~\E s \in Server : state[s] = Leader
-
 \* INV: LeaderHasAllAckedValues
 \* A non-stale leader cannot be missing an acknowledged value
 \* LeaderHasAllAckedValues ==
@@ -673,6 +665,27 @@ H_CandidateWithVotesGrantedInTermImplyNoOtherLeader ==
          /\ currentTerm[s] = currentTerm[t]) =>
             state[t] # Leader
 
+\* Does there exist a quorum of RequestVote responses in term T
+\* that support voting for server S.
+ExistsRequestVoteResponseQuorum(T) == 
+    \E msgs \in SUBSET requestVoteMsgs : 
+    \E dest \in Server : 
+        /\ \A m \in msgs : m.mtype = RequestVoteResponse
+            /\ m.mterm = T
+            /\ m.mdest = dest
+            /\ m.mvoteGranted
+        \* Responses form a quorum.
+        /\ ({m.msource : m \in msgs} \cup {dest}) \in Quorum
+
+\* If a successful quorum of request vote repsonses was sent in term T, then 
+\* there can be no logs that exist in term T.
+\* TODO: Fix this to get a correct statement here.
+H_SuccessfulRequestVoteQuorumInTermImpliesNoLogsInTerm ==
+    \A t \in Terms : 
+        (/\ ExistsRequestVoteResponseQuorum(t)
+         /\ (~\E l \in Server : state[l] = Leader /\ currentTerm[l] = t)) => 
+            \A s \in Server : \A ind \in DOMAIN log[s] : log[s][ind] # t
+
 H_CandidateWithVotesGrantedInTermImplyNoOtherLogsInTerm ==
     \A s,t \in Server :
         (state[s] = Candidate /\ votesGranted[s] \in Quorum) =>
@@ -739,6 +752,20 @@ H_LogMatching ==
         (\E j \in DOMAIN log[t] : i = j /\ log[s][i] = log[t][j]) => 
         (SubSeq(log[s],1,i) = SubSeq(log[t],1,i)) \* prefixes must be the same.
 
+H_LogMatchingInAppendEntriesMsgs ==
+    \* If a server contains the log entry being sent in this AppendEntries, 
+    \* then the server's previous entry must match the AppendEntries previous entry.
+    \A m \in appendEntriesMsgs : 
+    \A s \in Server : 
+        (\E ind \in DOMAIN log[s] : 
+            /\ m.mtype = AppendEntriesRequest
+            /\ m.mentries # <<>>
+            /\ ind = m.mprevLogIndex + 1 
+            /\ log[s][ind] = m.mentries[1]
+            /\ m.mprevLogIndex \in DOMAIN log[s]) =>
+                log[s][m.mprevLogIndex] = m.mprevLogTerm
+
+
 \* TODO: Consider how to state this.
 \* Leader logs contain all entries committed in previous terms.
 \* H_LeaderCompleteness == 
@@ -754,6 +781,9 @@ H_LogMatching ==
 
 \* If a leader server has a match index recorded, the remote node's log
 \* must match its own log up to this index.
+
+H_RequestVotesNeverSentToSelf == 
+    \A m \in requestVoteMsgs : m.msource # m.mdest
 
 H_AppendEntriesNeverSentToSelf == 
     \A m \in appendEntriesMsgs : m.msource # m.mdest
@@ -822,4 +852,24 @@ H_NoLogDivergence ==
                 /\ log[s1][index] = log[s2][index]
 
 
+
+
+\* INV: Used in debugging
+TestInv ==
+    \* /\ ~\E msgs \in SUBSET appendEntriesMsgs : msgs # {}
+    /\ ~(\E msgs \in (SUBSET appendEntriesMsgs) : 
+            /\ PrintT(SUBSET appendEntriesMsgs)
+            /\ msgs # {} 
+            /\ (\A m \in msgs : m.mtype = RequestVoteResponse))
+    \* /\ PrintT({s \in Server : ExistsRequestVoteResponseQuorum(1, s)})
+    \* \A n \in Server : 
+    \* \A t \in Terms : 
+    \*     ~ExistsRequestVoteResponseQuorum(t, n)
+
+
+    \* ~\E m \in requestVoteMsgs : (m.mtype = RequestVoteResponse /\ m.mvoteGranted)
+    \* ~\E s \in Server : Cardinality(votesGranted[s]) > 1
+    \* /\ ~\E s,t \in Server : s # t /\ log[s] # <<>> /\ log[t] # <<>>
+    \* [][~AcceptAppendEntriesRequestTruncateAction]_vars
+    \* ~\E s \in Server : state[s] = Leader
 ===============================================================================
