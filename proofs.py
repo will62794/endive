@@ -459,7 +459,7 @@ class StructuredProof():
         # if action not in node.children:
             # return {}
         
-        print(f"Checking CTI elimination for support lemmas of node ({node.name},{node.expr}), action={action}")
+        print(f"Checking elimination of {len(ctis)} CTIs for support lemmas of node ({node.name},{node.expr}), action={action}")
 
         # If action is not in node's chidlren, we still check CTI elimination to compute CTI costs.
         if action in node.children:
@@ -674,6 +674,13 @@ class StructuredProof():
 
                 # Set CTIs for this node based on those generated and sample if needed.
                 # logging.info(f"Number of proof node CTIs generated for action '{action}': {len(new_ctis_by_action[action])}. Sampling a limit of {indgen.max_proof_node_ctis} CTIs.")
+                
+                # Just skip this action is there are no CTIs.
+                if len(new_ctis_by_action[action]) == 0:
+                    ctis_eliminated_by_action[action] = set()
+                    ctis_eliminated_uniquely_by_action[action] = set()
+                    continue
+
                 cti_elimination_info = self.compute_cti_elimination_for_node(indgen, node, new_ctis_by_action[action], action, constants_obj = constants_obj)
                 
                 ctis_eliminated = cti_elimination_info["eliminated"]
@@ -692,10 +699,12 @@ class StructuredProof():
                 logging.info(f"CTIs eliminated for action={action}: {len(ctis_eliminated_by_action[action])}")
                 node.ctis_eliminated[action].update(ctis_eliminated_by_action[action])
 
-                # print("CTIs eliminated uniquely", ctis_eliminated_uniquely_by_action[action])
 
                 if action not in node.ctis_eliminated_uniquely:
                     node.ctis_eliminated_uniquely[action] = {}
+
+                # print("CTIs eliminated uniquely", ctis_eliminated_uniquely_by_action[action])
+                # print("Node.CTIs eliminated uniquely", node.ctis_eliminated_uniquely[action])
 
                 for c in ctis_eliminated_uniquely_by_action[action]:
                     # Merge new CTIs eliminated uniquely.
