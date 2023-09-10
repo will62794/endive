@@ -46,7 +46,8 @@
         "HandleRequestVoteRequestAction",
         "HandleRequestVoteResponseAction",
         "RejectAppendEntriesRequestAction",
-        "AcceptAppendEntriesRequestAction",
+        "AcceptAppendEntriesRequestAppendAction",
+        "AcceptAppendEntriesRequestTruncateAction",
         "HandleAppendEntriesResponseAction"
     ],
     "constraint"  :  "StateConstraint",

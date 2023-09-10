@@ -10,6 +10,8 @@ def make_node(expr):
 lemmaTRUE = StructuredProofNode("LemmaTrue", "TRUE")
 lemmaTRUEShim = StructuredProofNode("LemmaTrueShim", "1=1")
 
+appendEntriesNeverSentToSelf = make_node("H_AppendEntriesNeverSentToSelf")
+
 candidateWithVotesGrantedInTermImplyVotersSafeAtTerm = make_node("H_CandidateWithVotesGrantedInTermImplyVotersSafeAtTerm")
 
 votesCantBeGrantedTwiceToCandidatesInSameTerm = make_node("H_VotesCantBeGrantedTwiceToCandidatesInSameTerm")
@@ -79,11 +81,23 @@ primaryHasEntriesItCreated.children = {
     ]
 }
 
+commitIndexBoundValid = make_node("H_CommitIndexBoundValid")
+commitIndexBoundValid.children = {
+}
+    
+leaderMatchIndexValid = make_node("H_LeaderMatchIndexValid")
+
+commitIndexCoversEntryImpliesExistsOnQuorum = make_node("H_CommitIndexCoversEntryImpliesExistsOnQuorum")
+
 noLogDivergence = make_node("H_NoLogDivergence")
 noLogDivergence.children = {
-    "BecomeLeaderAction":[
-        logTermsMonotonic,
-        primaryHasEntriesItCreated
+    "AcceptAppendEntriesRequestAction":[
+        appendEntriesNeverSentToSelf
+    ], 
+    "AdvanceCommitIndexAction":[
+        commitIndexBoundValid,
+        leaderMatchIndexValid,
+        commitIndexCoversEntryImpliesExistsOnQuorum
     ]
 }
 root = noLogDivergence
@@ -100,6 +114,7 @@ actions = [
     "HandleRequestVoteRequestAction",
     "HandleRequestVoteResponseAction",
     "RejectAppendEntriesRequestAction",
-    "AcceptAppendEntriesRequestAction",
+    "AcceptAppendEntriesRequestAppendAction",
+    "AcceptAppendEntriesRequestTruncateAction",
     "HandleAppendEntriesResponseAction"
 ]

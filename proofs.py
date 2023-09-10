@@ -613,7 +613,7 @@ class StructuredProof():
             # labeled by action.
             # print(f"Generating CTIs for action {actions_to_check} of node ({node.name},{node.expr})")
             print(f"=== Generating CTIs for node ({node.name},{node.expr}), constants instance:", constants_obj)
-            print(f"CONSTANT instance:", constants_obj)
+            # print(f"CONSTANT instance:", constants_obj)
             print("Actions to skip:", actions_to_skip)
             print("Actions to check:", actions_to_check)
 
