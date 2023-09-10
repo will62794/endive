@@ -81,11 +81,22 @@ primaryHasEntriesItCreated.children = {
     ]
 }
 
+logMatching = StructuredProofNode("LogMatching", "H_LogMatching", children = {
+    "ClientRequestAction":[
+        primaryHasEntriesItCreated
+    ]
+})
+
 commitIndexBoundValid = make_node("H_CommitIndexBoundValid")
     
 leaderMatchIndexValid = make_node("H_LeaderMatchIndexValid")
 
 commitIndexCoversEntryImpliesExistsOnQuorum = make_node("H_CommitIndexCoversEntryImpliesExistsOnQuorum")
+commitIndexCoversEntryImpliesExistsOnQuorum.children = {
+    "AdvanceCommitIndexAction": [
+        leaderMatchIndexValid
+    ]
+}
 
 noLogDivergence = make_node("H_NoLogDivergence")
 noLogDivergence.children = {
@@ -93,9 +104,9 @@ noLogDivergence.children = {
         appendEntriesNeverSentToSelf
     ], 
     "AdvanceCommitIndexAction":[
-        # commitIndexBoundValid,
         leaderMatchIndexValid,
-        commitIndexCoversEntryImpliesExistsOnQuorum
+        commitIndexCoversEntryImpliesExistsOnQuorum,
+        logMatching
     ]
 }
 root = noLogDivergence

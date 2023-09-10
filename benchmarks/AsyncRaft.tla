@@ -490,6 +490,10 @@ Terms == 0..MaxTerm
 LogIndices == 1..MaxLogLen
 LogIndicesWithZero == 0..MaxLogLen
 
+\* In this spec we send at most 1 log entry per AppendEntries message. 
+\* We encode this in the type invariant for convenience.
+MaxMEntriesLen == 1
+
 SeqOf(S, n) == UNION {[1..m -> S] : m \in 0..n}
 BoundedSeq(S, n) == SeqOf(S, n)
 
@@ -533,7 +537,7 @@ AppendEntriesRequestType == [
     mterm      : Terms,
     mprevLogIndex  : LogIndices,
     mprevLogTerm   : Terms,
-    mentries       : BoundedSeq(Terms, MaxLogLen),
+    mentries       : BoundedSeq(Terms, MaxMEntriesLen),
     mcommitIndex   : LogIndicesWithZero,
     msource        : Server,
     mdest          : Server
@@ -562,10 +566,6 @@ RequestVoteRequestTypeSampled == UNION { kOrSmallerSubset(2, RequestVoteRequestT
 RequestVoteType == RandomSetOfSubsets(3, 3, RequestVoteRequestType) \cup RandomSetOfSubsets(3, 3, RequestVoteResponseType)  
 AppendEntriesType == RandomSetOfSubsets(3, 3, AppendEntriesRequestType) \cup RandomSetOfSubsets(3, 3, AppendEntriesResponseType)  
 
-\* In this spec we send at most 1 log entry per AppendEntries message. 
-\* We encode this in the type invariant for convenience.
-MaxMEntriesSent == 1
-
 TypeOK == 
     /\ requestVoteMsgs \in RequestVoteType
     /\ appendEntriesMsgs \in AppendEntriesType
@@ -575,7 +575,7 @@ TypeOK ==
     /\ votesGranted \in [Server -> (SUBSET Server)]
     /\ nextIndex  \in [Server -> [Server -> LogIndices]]
     /\ matchIndex \in [Server -> [Server -> LogIndicesWithZero]]        
-    /\ log             \in [Server -> BoundedSeq(Terms, MaxMEntriesSent)]
+    /\ log             \in [Server -> BoundedSeq(Terms, MaxLogLen)]
     /\ commitIndex     \in [Server -> LogIndicesWithZero]
 
 
@@ -733,6 +733,13 @@ H_LogEntryInTermImpliesSafeAtTerm ==
     \A s \in Server : 
     \A i \in DOMAIN log[s] :
         \E Q \in Quorum : \A n \in Q : currentTerm[n] >= log[s][i]
+
+\* <<index, term>> pairs uniquely identify log prefixes.
+H_LogMatching == 
+    \A s,t \in Server : 
+    \A i \in DOMAIN log[s] :
+        (\E j \in DOMAIN log[t] : i = j /\ log[s][i] = log[t][j]) => 
+        (SubSeq(log[s],1,i) = SubSeq(log[t],1,i)) \* prefixes must be the same.
 
 \* TODO: Consider how to state this.
 \* Leader logs contain all entries committed in previous terms.
