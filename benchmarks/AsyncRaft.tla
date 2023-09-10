@@ -691,6 +691,14 @@ H_CandidateWithVotesGrantedInTermImplyNoOtherLogsInTerm ==
         (state[s] = Candidate /\ votesGranted[s] \in Quorum) =>
             ~(\E i \in DOMAIN log[t] : log[t][i] = currentTerm[s])
 
+H_CandidateWithVotesGrantedInTermImplyNoAppendEntryLogsInTerm ==
+    \A s \in Server :
+        (state[s] = Candidate /\ votesGranted[s] \in Quorum) =>
+        ~(\E m \in appendEntriesMsgs :   
+            /\ m.mtype = AppendEntriesRequest
+            /\ m.mentries # <<>>
+            /\ m.mentries[1] = currentTerm[s])
+
 H_CandidateWithVotesGrantedInTermImplyVotersSafeAtTerm ==
     \A s \in Server : 
         (state[s] = Candidate) =>
@@ -738,12 +746,31 @@ H_PrimaryHasEntriesItCreated ==
             /\ log[j][k] = currentTerm[i]
             /\ ~InLog(<<k,log[j][k]>>, i))
 
+\* If an AppendEntries request has been sent with some log entries in term T, then a current
+\* leader in term T must have these log entries.
+H_PrimaryHasEntriesItCreatedAppendEntries == 
+    \A s \in Server :
+    \A m \in appendEntriesMsgs :
+        (/\ m.mtype = AppendEntriesRequest
+         /\ m.mentries # <<>> 
+         /\ m.mentries[1] = currentTerm[s]
+         /\ state[s] = Leader) =>
+            /\ (m.mprevLogIndex + 1) \in DOMAIN log[s]
+            /\ log[s][m.mprevLogIndex + 1] = m.mentries[1]
+
 \* Existence of an entry in term T implies a past election in T, so 
 \* there must be some quorum at this term or greater.
 H_LogEntryInTermImpliesSafeAtTerm == 
     \A s \in Server : 
     \A i \in DOMAIN log[s] :
         \E Q \in Quorum : \A n \in Q : currentTerm[n] >= log[s][i]
+
+H_LogEntryInTermImpliesSafeAtTermAppendEntries ==
+    \A m \in appendEntriesMsgs : 
+        (/\ m.mtype = AppendEntriesRequest
+         /\ m.mentries # <<>>) =>
+            \E Q \in Quorum : \A n \in Q : currentTerm[n] >= m.mentries[1]
+
 
 \* <<index, term>> pairs uniquely identify log prefixes.
 H_LogMatching == 
@@ -764,6 +791,21 @@ H_LogMatchingInAppendEntriesMsgs ==
             /\ log[s][ind] = m.mentries[1]
             /\ m.mprevLogIndex \in DOMAIN log[s]) =>
                 log[s][m.mprevLogIndex] = m.mprevLogTerm
+
+\* Has a candidate server garnered all votes to win election in its term.
+CandidateWithVoteQuorumGranted(s) == 
+    /\ state[s] = Candidate
+    /\ votesGranted[s] \in Quorum
+
+H_DivergentEntriesInAppendEntriesMsgs ==
+    \* An AppendEntries cannot contain log entries in term T at newer indices than
+    \* a leader or pending candidate's log in term T.
+    \A m \in appendEntriesMsgs : 
+    \A s \in Server : 
+        (/\ m.mtype = AppendEntriesRequest
+         /\ (state[s] = Leader \/ CandidateWithVoteQuorumGranted(s))
+         /\ m.mprevLogIndex + 1 > Len(log[s])) => 
+            (m.mentries # <<>> => m.mentries[1] # currentTerm[s]) 
 
 
 \* TODO: Consider how to state this.

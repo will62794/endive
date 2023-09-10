@@ -84,27 +84,62 @@ logTermsMonotonic.children = {
     ]
 }
 
+candidateWithVotesGrantedInTermImplyNoAppendEntryLogsInTerm = make_node("H_CandidateWithVotesGrantedInTermImplyNoAppendEntryLogsInTerm")
 
 primaryHasEntriesItCreated = make_node("H_PrimaryHasEntriesItCreated")
+primaryHasEntriesItCreatedAppendEntries = make_node("H_PrimaryHasEntriesItCreatedAppendEntries")
+
+primaryHasEntriesItCreatedAppendEntries.children = {
+    "AppendEntriesAction": [primaryHasEntriesItCreated],
+    "BecomeLeaderAction": [candidateWithVotesGrantedInTermImplyNoAppendEntryLogsInTerm]
+}
+
 primaryHasEntriesItCreated.children = {
     "ClientRequestAction":[
         onePrimaryPerTerm
     ],
     "BecomeLeaderAction": [
         candidateWithVotesGrantedInTermImplyNoOtherLogsInTerm
+    ],
+    "AcceptAppendEntriesRequestAppendAction": [
+        primaryHasEntriesItCreatedAppendEntries
     ]
 }
 
-logMatchingInAppendEntriesMsgs = make_node("H_LogMatchingInAppendEntriesMsgs")
+logEntryInTermImpliesSafeAtTermAppendEntries = make_node("H_LogEntryInTermImpliesSafeAtTermAppendEntries")
 
-logMatching = StructuredProofNode("LogMatching", "H_LogMatching", children = {
+divergentEntriesInAppendEntriesMsgs = make_node("H_DivergentEntriesInAppendEntriesMsgs")
+divergentEntriesInAppendEntriesMsgs.children = {
+    "AppendEntriesAction":[
+        primaryHasEntriesItCreated,
+        # candidateWithVotesGrantedInTermImplyNoOtherLeader,
+        candidateWithVotesGrantedInTermImplyNoOtherLogsInTerm
+    ], 
+    "RequestVoteAction":[
+        logEntryInTermImpliesSafeAtTermAppendEntries
+    ]
+}
+
+logMatching = StructuredProofNode("LogMatching", "H_LogMatching")
+
+logMatchingInAppendEntriesMsgs = make_node("H_LogMatchingInAppendEntriesMsgs")
+logMatchingInAppendEntriesMsgs.children = {
+    "ClientRequestAction": [
+        divergentEntriesInAppendEntriesMsgs
+    ],
+    "AppendEntriesAction":[
+        logMatching
+    ]
+}
+
+logMatching.children = {
     "ClientRequestAction":[
         primaryHasEntriesItCreated
     ],
     "AcceptAppendEntriesRequestAppendAction":[
         logMatchingInAppendEntriesMsgs
     ]
-})
+}
 
 commitIndexBoundValid = make_node("H_CommitIndexBoundValid")
     
