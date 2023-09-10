@@ -1402,7 +1402,7 @@ class InductiveInvGen():
         # TODO: Sort out how we handle 'invs' and 'sat_invs' and CTI tables here, etc.
         #
 
-        logging.info(f"Checking invariant elimination for {len(orig_ctis)} CTIs.")
+        # logging.info(f"Checking invariant elimination for {len(orig_ctis)} CTIs.")
 
         # Initialize table mapping from invariants to a set of CTI states they violate.
         cti_states_eliminated_by_invs = {}
@@ -2221,20 +2221,18 @@ class InductiveInvGen():
         # Handle interactive proof tree commands.
         #
 
-        #
         # Load parsed spec and vars appearing in actions and lemma defs.
-        #
-        tla_spec_obj = tlaparse.parse_tla_file(self.specdir, f"{self.specname}")
+        assert self.load_parse_tree
         vars_in_action = {}
         vars_in_lemma_defs = {}
         for action in actions:
-            vars_in_action[action] = tla_spec_obj.get_vars_in_def(action)
+            vars_in_action[action] = self.tla_spec_obj.get_vars_in_def(action)
             print(f"Vars in action '{action}':", vars_in_action[action])
-        for udef in tla_spec_obj.get_all_user_defs(level="1"):
+        for udef in self.tla_spec_obj.get_all_user_defs(level="1"):
             # Getting all level 1 definitions should be sufficient here.
             # Invariants (i.e. state predicates) should all be at level 1.
             # if udef.startswith("H_"):
-            vars_in_lemma_defs[udef] = tla_spec_obj.get_vars_in_def(udef)
+            vars_in_lemma_defs[udef] = self.tla_spec_obj.get_vars_in_def(udef)
             print(udef, vars_in_lemma_defs[udef])
 
         # self.spec_obj = tla_spec_obj.get_all_user_defs(level="1")
@@ -2682,6 +2680,7 @@ class InductiveInvGen():
             logging.info(f"Parsing spec '{self.specname}' into parse tree.")
             tla_spec_obj = tlaparse.parse_tla_file(self.specdir, f"{self.specname}")
             self.spec_defs = tla_spec_obj.get_all_user_defs(level="1")
+            self.tla_spec_obj = tla_spec_obj
 
         if self.proof_tree_mode:
 
