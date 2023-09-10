@@ -417,14 +417,12 @@ AcceptAppendEntriesRequestTruncate(m) ==
             /\ Len(log[i]) >= index
             /\ log[i][index] # m.mentries[1]
             /\ state' = [state EXCEPT ![i] = Follower]
-            /\ log' = [log EXCEPT ![i] = Append(TruncateLog(m, i), m.mentries[1])]
+            /\ log' = [log EXCEPT ![i] = TruncateLog(m, i)]
             /\ appendEntriesMsgs' = appendEntriesMsgs \cup {[
                         mtype           |-> AppendEntriesResponse,
                         mterm           |-> currentTerm[i],
                         msuccess        |-> TRUE,
-                        \* Note that it is OK to add the length of m.mentries to matchIndex 
-                        \* since it will always be <= 1 in this spec.
-                        mmatchIndex     |-> m.mprevLogIndex + Len(m.mentries),
+                        mmatchIndex     |-> m.mprevLogIndex,
                         msource         |-> i,
                         mdest           |-> j]}
             /\ UNCHANGED <<candidateVars, leaderVars, commitIndex, votedFor, currentTerm, requestVoteMsgs>>
