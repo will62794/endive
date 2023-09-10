@@ -575,6 +575,9 @@ TypeOK ==
     /\ matchIndex \in [Server -> [Server -> LogIndicesWithZero]]        
     /\ log             \in [Server -> BoundedSeq(Terms, MaxLogLen)]
     /\ commitIndex     \in [Server -> LogIndicesWithZero]
+    \* Encode these basic invariants into type-correctness.
+    /\ \A m \in requestVoteMsgs : m.msource # m.mdest
+    /\ \A m \in appendEntriesMsgs : m.msource # m.mdest
 
 
 Spec == Init /\ [][Next]_vars
@@ -642,8 +645,11 @@ StateConstraint ==
 InLog(e, i) == \E x \in DOMAIN log[i] : x = e[1] /\ log[i][x] = e[2]
 
 H_QuorumsSafeAtTerms ==
-    \A s \in Server : state[s] = Leader => 
-        \E Q \in Quorum : \A t \in Q : currentTerm[t] >= currentTerm[s]
+    \A s \in Server : (state[s] = Leader) => 
+        \E Q \in Quorum : 
+            \A t \in Q : 
+                /\ currentTerm[t] >= currentTerm[s]
+                /\ (currentTerm[t] = currentTerm[s]) => votedFor[t] # Nil
 
 \* If two nodes are in the same term, then their votes granted
 \* sets cannot have intersecting voters.
@@ -666,10 +672,9 @@ H_CandidateWithVotesGrantedInTermImplyNoOtherLeader ==
             state[t] # Leader
 
 \* Does there exist a quorum of RequestVote responses in term T
-\* that support voting for server S.
-ExistsRequestVoteResponseQuorum(T) == 
+\* that support voting for server 'dest'.
+ExistsRequestVoteResponseQuorum(T, dest) == 
     \E msgs \in SUBSET requestVoteMsgs : 
-    \E dest \in Server : 
         /\ \A m \in msgs : m.mtype = RequestVoteResponse
             /\ m.mterm = T
             /\ m.mdest = dest
@@ -682,7 +687,8 @@ ExistsRequestVoteResponseQuorum(T) ==
 \* TODO: Fix this to get a correct statement here.
 H_SuccessfulRequestVoteQuorumInTermImpliesNoLogsInTerm ==
     \A t \in Terms : 
-        (/\ ExistsRequestVoteResponseQuorum(t)
+    \E dest \in Server : 
+        (/\ ExistsRequestVoteResponseQuorum(t, dest)
          /\ (~\E l \in Server : state[l] = Leader /\ currentTerm[l] = t)) => 
             \A s \in Server : \A ind \in DOMAIN log[s] : log[s][ind] # t
 
@@ -690,6 +696,22 @@ H_CandidateWithVotesGrantedInTermImplyNoOtherLogsInTerm ==
     \A s,t \in Server :
         (state[s] = Candidate /\ votesGranted[s] \in Quorum) =>
             ~(\E i \in DOMAIN log[t] : log[t][i] = currentTerm[s])
+
+H_RequestVoteQuorumInTermImpliesNoOtherLogsOrLeadersInTerm == 
+    \A s \in Server :
+        (/\ state[s] = Candidate
+         /\ ExistsRequestVoteResponseQuorum(currentTerm[s], s)) =>
+            /\ \A n \in Server : \A ind \in DOMAIN log[n] : log[n][ind] # currentTerm[s]
+            /\ \A n \in Server : ~(state[n] = Leader /\ currentTerm[n] = currentTerm[s])
+
+H_RequestVoteQuorumInTermImpliesNoAppendEntryLogsInTerm == 
+    \A s \in Server :
+        (/\ state[s] = Candidate
+         /\ ExistsRequestVoteResponseQuorum(currentTerm[s], s)) =>
+            ~(\E m \in appendEntriesMsgs :   
+                /\ m.mtype = AppendEntriesRequest
+                /\ m.mentries # <<>>
+                /\ m.mentries[1] = currentTerm[s])
 
 H_CandidateWithVotesGrantedInTermImplyNoAppendEntryLogsInTerm ==
     \A s \in Server :
@@ -701,8 +723,10 @@ H_CandidateWithVotesGrantedInTermImplyNoAppendEntryLogsInTerm ==
 
 H_CandidateWithVotesGrantedInTermImplyVotersSafeAtTerm ==
     \A s \in Server : 
-        (state[s] = Candidate) =>
-            \A v \in votesGranted[s] : currentTerm[v] >= currentTerm[s]
+        (state[s] = Candidate /\ votesGranted[s] \in Quorum) =>
+            \A v \in votesGranted[s] : 
+                /\ currentTerm[v] >= currentTerm[s]
+                /\ currentTerm[v] = currentTerm[s] => votedFor[v] # Nil
 
 H_VotesCantBeGrantedTwiceToCandidatesInSameTerm ==
     \A s,t \in Server : 
@@ -763,13 +787,18 @@ H_PrimaryHasEntriesItCreatedAppendEntries ==
 H_LogEntryInTermImpliesSafeAtTerm == 
     \A s \in Server : 
     \A i \in DOMAIN log[s] :
-        \E Q \in Quorum : \A n \in Q : currentTerm[n] >= log[s][i]
+        \E Q \in Quorum : \A n \in Q : 
+            /\ currentTerm[n] >= log[s][i]
+            /\ currentTerm[n] = log[s][i] => (votedFor[n] # Nil)
+
 
 H_LogEntryInTermImpliesSafeAtTermAppendEntries ==
     \A m \in appendEntriesMsgs : 
         (/\ m.mtype = AppendEntriesRequest
          /\ m.mentries # <<>>) =>
-            \E Q \in Quorum : \A n \in Q : currentTerm[n] >= m.mentries[1]
+            \E Q \in Quorum : \A n \in Q : 
+                /\ currentTerm[n] >= m.mentries[1]
+                /\ currentTerm[n] = m.mentries[1] => (votedFor[n] # Nil)
 
 
 \* <<index, term>> pairs uniquely identify log prefixes.

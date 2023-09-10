@@ -46,11 +46,23 @@ quorumsSafeAtTerms.children = {
     ]
 }
 
-logEntryInTermImpliesSafeAtTerms = StructuredProofNode("LogEntryInTermImpliesSafeAtTerm", "H_LogEntryInTermImpliesSafeAtTerm", children = {
+logEntryInTermImpliesSafeAtTerms = make_node("H_LogEntryInTermImpliesSafeAtTerm")
+logEntryInTermImpliesSafeAtTermAppendEntries = make_node("H_LogEntryInTermImpliesSafeAtTermAppendEntries")
+
+logEntryInTermImpliesSafeAtTermAppendEntries.children = {
+    "AppendEntriesAction":[
+        logEntryInTermImpliesSafeAtTerms
+    ]
+}
+
+logEntryInTermImpliesSafeAtTerms.children = {
     "ClientRequestAction": [
         quorumsSafeAtTerms
+    ],
+    "AcceptAppendEntriesRequestAppendAction": [
+        logEntryInTermImpliesSafeAtTermAppendEntries
     ]
-})
+}
 
 successfulRequestVoteQuorumInTermImpliesNoLogsInTerm = make_node("H_SuccessfulRequestVoteQuorumInTermImpliesNoLogsInTerm")
 
@@ -62,10 +74,10 @@ candidateWithVotesGrantedInTermImplyNoOtherLogsInTerm.children = {
     "RequestVoteAction":[
         logEntryInTermImpliesSafeAtTerms
     ],
-    "HandleRequestVoteResponseAction": [
-        # successfulRequestVoteQuorumInTermImpliesNoLogsInTerm,
-        requestVotesNeverSentToSelf
-    ]
+    # "HandleRequestVoteResponseAction": [
+    #     # successfulRequestVoteQuorumInTermImpliesNoLogsInTerm,
+    #     # requestVotesNeverSentToSelf
+    # ]
 }
 
 currentTermsAtLeastLargeAsLogTermsForPrimary =  StructuredProofNode("CurrentTermAtLeastAsLargeAsLogTermsForPrimary", "H_CurrentTermAtLeastAsLargeAsLogTermsForPrimary")
@@ -84,7 +96,23 @@ logTermsMonotonic.children = {
     ]
 }
 
+requestVoteQuorumInTermImpliesNoOtherLogsOrLeadersInTerm = make_node("H_RequestVoteQuorumInTermImpliesNoOtherLogsOrLeadersInTerm")
+requestVoteQuorumInTermImpliesNoAppendEntryLogsInTerm = make_node("H_RequestVoteQuorumInTermImpliesNoAppendEntryLogsInTerm")
+requestVoteQuorumInTermImpliesNoAppendEntryLogsInTerm.children = {
+    "AppendEntriesAction": [
+        requestVoteQuorumInTermImpliesNoOtherLogsOrLeadersInTerm
+    ]
+}
+
 candidateWithVotesGrantedInTermImplyNoAppendEntryLogsInTerm = make_node("H_CandidateWithVotesGrantedInTermImplyNoAppendEntryLogsInTerm")
+candidateWithVotesGrantedInTermImplyNoAppendEntryLogsInTerm.children = {
+    "AppendEntriesAction": [
+        candidateWithVotesGrantedInTermImplyNoOtherLogsInTerm
+    ],
+    "HandleRequestVoteResponseAction": [
+        requestVoteQuorumInTermImpliesNoAppendEntryLogsInTerm,
+    ]
+}
 
 primaryHasEntriesItCreated = make_node("H_PrimaryHasEntriesItCreated")
 primaryHasEntriesItCreatedAppendEntries = make_node("H_PrimaryHasEntriesItCreatedAppendEntries")
@@ -106,7 +134,6 @@ primaryHasEntriesItCreated.children = {
     ]
 }
 
-logEntryInTermImpliesSafeAtTermAppendEntries = make_node("H_LogEntryInTermImpliesSafeAtTermAppendEntries")
 
 divergentEntriesInAppendEntriesMsgs = make_node("H_DivergentEntriesInAppendEntriesMsgs")
 divergentEntriesInAppendEntriesMsgs.children = {
@@ -154,9 +181,9 @@ commitIndexCoversEntryImpliesExistsOnQuorum.children = {
 
 noLogDivergence = make_node("H_NoLogDivergence")
 noLogDivergence.children = {
-    "AcceptAppendEntriesRequestAppendAction":[
-        appendEntriesNeverSentToSelf
-    ], 
+    # "AcceptAppendEntriesRequestAppendAction":[
+    #     appendEntriesNeverSentToSelf
+    # ], 
     "AdvanceCommitIndexAction":[
         leaderMatchIndexValid,
         commitIndexCoversEntryImpliesExistsOnQuorum,
