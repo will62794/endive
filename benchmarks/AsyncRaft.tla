@@ -773,7 +773,11 @@ H_LeaderMatchIndexValid ==
 H_CommitIndexCoversEntryImpliesExistsOnQuorum == 
     \A s \in Server :
         (commitIndex[s] > 0) => 
-            \E Q \in Quorum : \A t \in Q : Len(log[t]) >= commitIndex[s] /\ log[t][commitIndex[s]] = log[s][commitIndex[s]]
+            \E Q \in Quorum :
+            \A t \in Q :
+                /\ Len(log[s]) >= commitIndex[s] 
+                /\ Len(log[t]) >= commitIndex[s] 
+                /\ log[t][commitIndex[s]] = log[s][commitIndex[s]]
 
 \* If a commit index covers a log entry in some term,
 \* then no primary in an earlier term can be enabled to commit any entries

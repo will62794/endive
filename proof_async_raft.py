@@ -82,8 +82,6 @@ primaryHasEntriesItCreated.children = {
 }
 
 commitIndexBoundValid = make_node("H_CommitIndexBoundValid")
-commitIndexBoundValid.children = {
-}
     
 leaderMatchIndexValid = make_node("H_LeaderMatchIndexValid")
 
@@ -91,11 +89,11 @@ commitIndexCoversEntryImpliesExistsOnQuorum = make_node("H_CommitIndexCoversEntr
 
 noLogDivergence = make_node("H_NoLogDivergence")
 noLogDivergence.children = {
-    "AcceptAppendEntriesRequestAction":[
+    "AcceptAppendEntriesRequestAppendAction":[
         appendEntriesNeverSentToSelf
     ], 
     "AdvanceCommitIndexAction":[
-        commitIndexBoundValid,
+        # commitIndexBoundValid,
         leaderMatchIndexValid,
         commitIndexCoversEntryImpliesExistsOnQuorum
     ]
