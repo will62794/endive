@@ -407,7 +407,10 @@ function focusOnNode(nodeId, nodeData){
                         let prevLine = cti_obj["trace"][0][state_lines_field][lineI];
                         let isDiff = i==1 && (prevLine !== line);
                         let color = isDiff ? "blue" : "black";
-                        let escapedLine = line.trim().replaceAll("<", "&lt;").replaceAll(">", "&gt;");
+                        // let escapedLine = line.trim().replaceAll("<", "&lt;").replaceAll(">", "&gt;");
+                        let escapedLine = line.replaceAll("<", "&lt;").replaceAll(">", "&gt;");
+                        // Replace excessive whitespace.
+                        escapedLine = escapedLine.replaceAll("    ", " ");
                         ctiHTML += `<span style='color:${color}'>` + escapedLine + "</span><br>";
                         lineI += 1;
                     }
@@ -879,7 +882,7 @@ function reloadLayout(){
                     "border-style": "solid",
                     "border-width": "1",
                     "border-color": "black",
-                    "font-size":"14px"
+                    "font-size":"13px"
                 }
             },
             {
