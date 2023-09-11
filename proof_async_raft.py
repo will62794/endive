@@ -190,14 +190,19 @@ commitIndexBoundValid = make_node("H_CommitIndexBoundValid")
     
 leaderMatchIndexValid = make_node("H_LeaderMatchIndexValid")
 
+commitIndexInAppendEntriesImpliesCommittedEntryExists = make_node("H_CommitIndexInAppendEntriesImpliesCommittedEntryExists")
+
+
 commitIndexCoversEntryImpliesExistsOnQuorum = make_node("H_CommitIndexCoversEntryImpliesExistsOnQuorum")
 commitIndexCoversEntryImpliesExistsOnQuorum.children = {
     "AdvanceCommitIndexAction": [
         leaderMatchIndexValid
+    ],
+    "AcceptAppendEntriesRequestLearnCommitAction": [
+        commitIndexInAppendEntriesImpliesCommittedEntryExists
     ]
 }
 
-commitIndexInAppendEntriesImpliesCommittedEntryExists = make_node("H_CommitIndexInAppendEntriesImpliesCommittedEntryExists")
 
 noLogDivergence = make_node("H_NoLogDivergence")
 noLogDivergence.children = {
