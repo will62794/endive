@@ -120,6 +120,8 @@ Quorum == {i \in SUBSET(Server) : Cardinality(i) * 2 > Cardinality(Server)}
 \* The term of the last entry in a log, or 0 if the log is empty.
 LastTerm(xlog) == IF Len(xlog) = 0 THEN 0 ELSE xlog[Len(xlog)]
 
+Range(f) == {f[x] : x \in DOMAIN f}
+
 \* The message is of the type and has a matching term.
 \* Messages with a higher term are handled by the
 \* action UpdateTerm
@@ -410,7 +412,7 @@ AcceptAppendEntriesRequestTruncate(m) ==
             \* portion of the log that is covered by a commitIndex.
             /\ m.mentries # << >>
             /\ Len(log[i]) >= index
-            /\ log[i][index] # m.mentries[1]
+            /\ m.mentries[1] > log[i][index]
             /\ state' = [state EXCEPT ![i] = Follower]
             /\ log' = [log EXCEPT ![i] = TruncateLog(m, i)]
             /\ appendEntriesMsgs' = appendEntriesMsgs \cup {[
@@ -911,6 +913,11 @@ H_AppendEntriesCommitIndexCannotBeLargerThanTheSender ==
     \A m \in appendEntriesMsgs :
         m.mtype = AppendEntriesRequest => 
         m.mcommitIndex <= commitIndex[m.msource] 
+
+\* Match index records for a leader must always be <= its own log length.
+H_LeaderMatchIndexBound == 
+    \A s \in Server : (state[s] = Leader) => 
+        \A t \in Server : matchIndex[s][t] <= Len(log[s])
 
 \* If matchIndex on a leader has quorum agreement on an index, then this entry must
 \* be present on a quorum of servers.

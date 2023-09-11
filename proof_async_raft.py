@@ -188,7 +188,14 @@ logMatching.children = {
 
 commitIndexBoundValid = make_node("H_CommitIndexBoundValid")
     
+leaderMatchIndexBound = make_node("H_LeaderMatchIndexBound")
+
 leaderMatchIndexValid = make_node("H_LeaderMatchIndexValid")
+leaderMatchIndexValid.children = {
+    "ClientRequestAction": [
+        leaderMatchIndexBound
+    ]
+}
 
 commitIndexInAppendEntriesImpliesCommittedEntryExists = make_node("H_CommitIndexInAppendEntriesImpliesCommittedEntryExists")
 
