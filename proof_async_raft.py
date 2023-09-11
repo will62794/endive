@@ -14,20 +14,37 @@ appendEntriesNeverSentToSelf = make_node("H_AppendEntriesNeverSentToSelf")
 requestVotesNeverSentToSelf = make_node("H_RequestVotesNeverSentToSelf")
 
 
+requestVoteResponseTermsMatchSource = make_node("H_RequestVoteResponseTermsMatchSource")
+
 candidateWithVotesGrantedInTermImplyVotersSafeAtTerm = make_node("H_CandidateWithVotesGrantedInTermImplyVotersSafeAtTerm")
+candidateWithVotesGrantedInTermImplyVotersSafeAtTerm.children = {
+    "HandleRequestVoteResponseAction": [
+        requestVoteResponseTermsMatchSource
+    ]
+}
+
+voteGrantedImpliesVoteResponseMsgConsistent = make_node("H_VoteGrantedImpliesVoteResponseMsgConsistent")
 
 votesCantBeGrantedTwiceToCandidatesInSameTerm = make_node("H_VotesCantBeGrantedTwiceToCandidatesInSameTerm")
 votesCantBeGrantedTwiceToCandidatesInSameTerm.children = {
     "RequestVoteAction": [
         candidateWithVotesGrantedInTermImplyVotersSafeAtTerm
+    ],
+    "HandleRequestVoteResponseAction": [
+        voteGrantedImpliesVoteResponseMsgConsistent
     ]
 }
+
+requestVoteQuorumInTermImpliesNoOtherLogsOrLeadersInTerm = make_node("H_RequestVoteQuorumInTermImpliesNoOtherLogsOrLeadersInTerm")
 
 candidateVotesGrantedInTermAreUnique = StructuredProofNode("CandidateVotesGrantedInTermAreUnique", "H_CandidateVotesGrantedInTermAreUnique")
 candidateWithVotesGrantedInTermImplyNoOtherLeader = StructuredProofNode("CandidateWithVotesGrantedInTermImplyNoOtherLeader", "H_CandidateWithVotesGrantedInTermImplyNoOtherLeader")
 candidateWithVotesGrantedInTermImplyNoOtherLeader.children = {
     "BecomeLeaderAction": [
         votesCantBeGrantedTwiceToCandidatesInSameTerm
+    ],
+    "HandleRequestVoteResponseAction":[
+        requestVoteQuorumInTermImpliesNoOtherLogsOrLeadersInTerm
     ]
 }
 
@@ -38,11 +55,13 @@ onePrimaryPerTerm = StructuredProofNode("OnePrimaryPerTerm", "H_OnePrimaryPerTer
     ]
 })
 
+candidateWithVotesGrantedInTermImplyVotedForSafeAtTerm = make_node("H_CandidateWithVotesGrantedInTermImplyVotedForSafeAtTerm")
 
 quorumsSafeAtTerms = make_node("H_QuorumsSafeAtTerms")
 quorumsSafeAtTerms.children = {
     "BecomeLeaderAction": [
-        candidateWithVotesGrantedInTermImplyVotersSafeAtTerm
+        candidateWithVotesGrantedInTermImplyVotersSafeAtTerm,
+        # candidateWithVotesGrantedInTermImplyVotedForSafeAtTerm
     ]
 }
 
@@ -96,7 +115,6 @@ logTermsMonotonic.children = {
     ]
 }
 
-requestVoteQuorumInTermImpliesNoOtherLogsOrLeadersInTerm = make_node("H_RequestVoteQuorumInTermImpliesNoOtherLogsOrLeadersInTerm")
 requestVoteQuorumInTermImpliesNoAppendEntryLogsInTerm = make_node("H_RequestVoteQuorumInTermImpliesNoAppendEntryLogsInTerm")
 requestVoteQuorumInTermImpliesNoAppendEntryLogsInTerm.children = {
     "AppendEntriesAction": [

@@ -721,12 +721,41 @@ H_CandidateWithVotesGrantedInTermImplyNoAppendEntryLogsInTerm ==
             /\ m.mentries # <<>>
             /\ m.mentries[1] = currentTerm[s])
 
+\* If request vote response message has been sent in term T,
+\* then the sender must be at least in term T.
+H_RequestVoteResponseTermsMatchSource ==
+    \A m \in requestVoteMsgs :
+        m.mtype = RequestVoteResponse => currentTerm[m.msource] >= m.mterm
+
+
+\* If a candidate C has garnered a set of granted votes in term T, 
+\* then all of those voters must be at term T or newer, and if they
+\* are in term T, then they must have voted for C.
 H_CandidateWithVotesGrantedInTermImplyVotersSafeAtTerm ==
     \A s \in Server : 
-        (state[s] = Candidate /\ votesGranted[s] \in Quorum) =>
+        (state[s] = Candidate) =>
             \A v \in votesGranted[s] : 
                 /\ currentTerm[v] >= currentTerm[s]
                 /\ currentTerm[v] = currentTerm[s] => votedFor[v] # Nil
+
+\* H_CandidateWithVotesGrantedInTermImplyVotedForSafeAtTerm ==
+\*     \A s \in Server : 
+\*         (state[s] = Candidate /\ votesGranted[s] \in Quorum) =>
+\*             \A v \in votesGranted[s] : 
+\*                 /\ currentTerm[v] = currentTerm[s] => votedFor[v] # Nil
+
+\* If a server has granted its vote to a server S in term T, then
+\* there can't be a vote response message from that server to some other server R # S.
+H_VoteGrantedImpliesVoteResponseMsgConsistent ==
+    \A s,t \in Server : 
+        ( /\ state[s] = Candidate 
+          /\ t \in votesGranted[s]) =>
+            ~\E m \in requestVoteMsgs :
+                /\ m.mtype = RequestVoteResponse
+                /\ m.mterm = currentTerm[s]
+                /\ m.msource = t
+                /\ m.mdest # s
+                /\ m.mvoteGranted
 
 H_VotesCantBeGrantedTwiceToCandidatesInSameTerm ==
     \A s,t \in Server : 
