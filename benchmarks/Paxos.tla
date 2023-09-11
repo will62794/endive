@@ -243,32 +243,58 @@ NextUnchanged == UNCHANGED vars
 K == \A ACCI \in Acceptor : (\E m \in msgs : m.bal >= maxBal[ACCI]) \/ ((maxVBal[ACCI] = -1) /\ (TRUE))
 
 (***************************************************************************)
-(* We now instantiate module Voting, substituting the constants Value,     *)
-(* Acceptor, and Quorum declared in this module for the corresponding      *)
-(* constants of that module Voting, and substituting the variable maxBal   *)
-(* and the defined state function `votes' for the correspondingly-named    *)
-(* variables of module Voting.                                             *)
+(* The inductive invariant Inv explains why the Paxos consensus algorithm  *)
+(* implements the Voting algorithm.  It is defined after the INSTANCE      *)
+(* statement because it uses the operator V!ShowsSafeAt imported by that   *)
+(* statement.                                                              *)
 (***************************************************************************)
-\* V == INSTANCE Voting 
 
-\* THEOREM Spec => V!Spec
------------------------------------------------------------------------------
-(***************************************************************************)
-(* Here is a first attempt at an inductive invariant used to prove this    *)
-(* theorem.                                                                *)
-(***************************************************************************)
-\* Inv == /\ TypeOK
-\*        /\ \A a \in Acceptor : IF maxVBal[a] = -1
-\*                                 THEN maxVal[a] = None
-\*                                 ELSE <<maxVBal[a], maxVal[a]>> \in votes[a]
-\*        /\ \A m \in msgs : 
-\*              /\ (m.type = "1b") => /\ maxBal[m.acc] \geq m.bal
-\*                                    /\ (m.mbal \geq 0) =>  
-\*                                        <<m.mbal, m.mval>> \in votes[m.acc]
-\*              /\ (m.type = "2a") => /\ \E Q \in Quorum : 
-\*                                          V!ShowsSafeAt(Q, m.bal, m.val)
-\*                                    /\ \A mm \in msgs : /\ mm.type = "2a"
-\*                                                        /\ mm.bal = m.bal
-\*                                                        => mm.val = m.val
-\*        /\ V!Inv
+
+L1 == \A a \in Acceptor : maxBal[a] >= maxVBal[a]
+
+L2 == \A a \in Acceptor : IF maxVBal[a] = -1
+                          THEN maxVal[a] = None
+                          ELSE <<maxVBal[a], maxVal[a]>> \in votes[a]
+
+L3 == \A m \in msgs : (m.type = "1b") => /\ maxBal[m.acc] >= m.bal
+
+L4 == \A m \in msgs : (m.type = "1b") =>
+                        ((m.mbal >= 0) => <<m.mbal, m.mval>> \in votes[m.acc])
+
+L5 == \A m \in msgs : (m.type = "2a") => /\ \E Q \in Quorum :  ShowsSafeAt(Q, m.bal, m.val)
+
+L6 == \A m \in msgs : (m.type = "2a") => \A mm \in msgs : /\ mm.type ="2a"
+                                                          /\ mm.bal = m.bal
+                                                            => mm.val = m.val
+
+L7 == \A m \in msgs : (m.type = "2b") => /\ maxVBal[m.acc] >= m.bal
+
+L8 == \A m \in msgs : (m.type = "2b") => \E mm \in msgs : 
+                                            /\ mm.type = "2a"
+                                            /\ mm.bal  = m.bal
+                                            /\ mm.val  = m.val
+
+\* 
+\* Originally from https://github.com/tlaplus/Examples/blob/master/specifications/PaxosHowToWinATuringAward/Paxos.tla.
+\* 
+IndInv == 
+ /\ TypeOK
+ /\ \A a \in Acceptor : maxBal[a] >= maxVBal[a]
+ /\ \A a \in Acceptor : IF maxVBal[a] = -1
+                          THEN maxVal[a] = None
+                          ELSE <<maxVBal[a], maxVal[a]>> \in votes[a]
+ /\ \A m \in msgs : 
+       /\ (m.type = "1b") => /\ maxBal[m.acc] >= m.bal
+                             /\ (m.mbal >= 0) =>  
+                                 <<m.mbal, m.mval>> \in votes[m.acc]
+       /\ (m.type = "2a") => /\ \E Q \in Quorum :  ShowsSafeAt(Q, m.bal, m.val)
+                             /\ \A mm \in msgs : /\ mm.type ="2a"
+                                                 /\ mm.bal = m.bal
+                                                 => mm.val = m.val
+       /\ (m.type = "2b") => /\ maxVBal[m.acc] >= m.bal
+                             /\ \E mm \in msgs : /\ mm.type = "2a"
+                                                 /\ mm.bal  = m.bal
+                                                 /\ mm.val  = m.val
+
+
 ============================================================================
