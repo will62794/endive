@@ -120,8 +120,6 @@ Quorum == {i \in SUBSET(Server) : Cardinality(i) * 2 > Cardinality(Server)}
 \* The term of the last entry in a log, or 0 if the log is empty.
 LastTerm(xlog) == IF Len(xlog) = 0 THEN 0 ELSE xlog[Len(xlog)]
 
-Range(f) == {f[x] : x \in DOMAIN f}
-
 \* The message is of the type and has a matching term.
 \* Messages with a higher term are handled by the
 \* action UpdateTerm
@@ -960,12 +958,13 @@ H_CommitIndexInAppendEntriesImpliesCommittedEntryExists ==
     \A m \in appendEntriesMsgs : 
         ( /\ m.mtype = AppendEntriesRequest 
           /\ m.mcommitIndex > 0
-          /\ m.mentries # <<>> ) =>
+          /\ m.mentries # <<>> 
+          /\ m.mprevLogIndex > 0) =>
             (\E n \in Server :
              \E ind \in DOMAIN log[n] :
-                /\ ind = m.mprevLogIndex + 1
-                /\ log[n][ind] = m.mentries[1]
-                /\ commitIndex[n] >= m.mcommitIndex)
+                (/\ ind = m.mprevLogIndex
+                 /\ log[n][ind] = m.mprevLogTerm
+                 /\ commitIndex[n] >= m.mcommitIndex))
 
 
 H_LogEntryInTermDisablesEarlierCommits == 
