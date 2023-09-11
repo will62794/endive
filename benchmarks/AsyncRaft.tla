@@ -438,6 +438,7 @@ AcceptAppendEntriesRequestLearnCommit(m) ==
             /\ logOk
             /\ Len(log[i]) = m.mprevLogIndex
             /\ CanAppend(m, i)
+            /\ m.mcommitIndex > commitIndex[i] \* no need to ever decrement our commitIndex.
             /\ state' = [state EXCEPT ![i] = Follower]
             /\ commitIndex' = [commitIndex EXCEPT ![i] = Min({m.mcommitIndex, Len(log[i])})]
             \* No need to send a response message since we are not updating our logs.
