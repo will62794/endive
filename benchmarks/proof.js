@@ -521,6 +521,10 @@ function addNodeToGraph(proof_graph, node){
             style: styleParentBox
         });
 
+        // style['label'] = function(data){
+        //     return "x";
+        // }
+
         // Add main lemma node.
         cy.add({
             group: 'nodes',
@@ -572,7 +576,10 @@ function addNodeToGraph(proof_graph, node){
                     "shape": "rectangle", 
                     "width": node_size, 
                     "height": node_size,
-                    "font-size":"12px"
+                    "font-size":"12px",
+                    // "label": function(data){
+                    //     return "x";
+                    // }
                 },
             });
 
