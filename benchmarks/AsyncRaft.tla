@@ -944,6 +944,22 @@ H_CommitIndexAtEntryInTermDisabledEarlierCommits ==
          /\ currentTerm[t] < log[s][commitIndex[s]]) =>
                 \A ind \in DOMAIN log[t] : Agree(t, ind) \notin Quorum 
 
+
+\* If an AppendEntries has been sent with a commitIndex that covers some 
+\* log entry in the message, there must be some node that has that entry 
+\* and equal or newer commitIndex.
+H_CommitIndexInAppendEntriesImpliesCommittedEntryExists == 
+    \A m \in appendEntriesMsgs : 
+        ( /\ m.mtype = AppendEntriesRequest 
+          /\ m.mcommitIndex > 0
+          /\ m.mentries # <<>> ) =>
+            (\E n \in Server :
+             \E ind \in DOMAIN log[n] :
+                /\ ind = m.mprevLogIndex + 1
+                /\ log[n][ind] = m.mentries[1]
+                /\ commitIndex[n] >= m.mcommitIndex)
+
+
 H_LogEntryInTermDisablesEarlierCommits == 
     \A s,t \in Server :
     \A si \in DOMAIN log[s] :

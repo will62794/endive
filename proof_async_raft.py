@@ -197,11 +197,13 @@ commitIndexCoversEntryImpliesExistsOnQuorum.children = {
     ]
 }
 
+commitIndexInAppendEntriesImpliesCommittedEntryExists = make_node("H_CommitIndexInAppendEntriesImpliesCommittedEntryExists")
+
 noLogDivergence = make_node("H_NoLogDivergence")
 noLogDivergence.children = {
-    # "AcceptAppendEntriesRequestAppendAction":[
-    #     appendEntriesNeverSentToSelf
-    # ], 
+    "AcceptAppendEntriesRequestLearnCommitAction":[
+        commitIndexInAppendEntriesImpliesCommittedEntryExists
+    ], 
     "AdvanceCommitIndexAction":[
         leaderMatchIndexValid,
         commitIndexCoversEntryImpliesExistsOnQuorum,
