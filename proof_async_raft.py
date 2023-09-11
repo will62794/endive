@@ -188,12 +188,25 @@ logMatching.children = {
 
 commitIndexBoundValid = make_node("H_CommitIndexBoundValid")
     
+leaderMatchIndexValidAppendEntries = make_node("H_LeaderMatchIndexValidAppendEntries")
+
 leaderMatchIndexBound = make_node("H_LeaderMatchIndexBound")
+leaderMatchIndexBound.children = {
+    "HandleAppendEntriesResponseAction": [
+        leaderMatchIndexValidAppendEntries
+    ]
+}
 
 leaderMatchIndexValid = make_node("H_LeaderMatchIndexValid")
 leaderMatchIndexValid.children = {
     "ClientRequestAction": [
         leaderMatchIndexBound
+    ],
+    "HandleAppendEntriesResponseAction": [
+        leaderMatchIndexValidAppendEntries
+    ],
+    "AcceptAppendEntriesRequestTruncateAction": [
+
     ]
 }
 

@@ -918,6 +918,19 @@ H_LeaderMatchIndexBound ==
     \A s \in Server : (state[s] = Leader) => 
         \A t \in Server : matchIndex[s][t] <= Len(log[s])
 
+\* If a AppendEntries response has been sent in term T recording a match up to
+\* index I, then the sender node should have the same entry as the leader.
+H_LeaderMatchIndexValidAppendEntries == 
+    \A m \in appendEntriesMsgs : 
+        (/\ m.mtype = AppendEntriesResponse
+         /\ m.msuccess
+         /\ m.mmatchIndex > 0
+         /\ state[m.mdest] = Leader
+         /\ m.mterm = currentTerm[m.mdest]) =>
+            /\ Len(log[m.msource]) >= m.mmatchIndex
+            /\ Len(log[m.mdest]) >= m.mmatchIndex
+            /\ log[m.msource][m.mmatchIndex] = log[m.mdest][m.mmatchIndex]
+
 \* If matchIndex on a leader has quorum agreement on an index, then this entry must
 \* be present on a quorum of servers.
 H_LeaderMatchIndexValid == 
