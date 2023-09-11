@@ -224,5 +224,6 @@ actions = [
     "RejectAppendEntriesRequestAction",
     "AcceptAppendEntriesRequestAppendAction",
     "AcceptAppendEntriesRequestTruncateAction",
+    "AcceptAppendEntriesRequestLearnCommitAction",
     "HandleAppendEntriesResponseAction"
 ]

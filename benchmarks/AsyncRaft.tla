@@ -382,24 +382,17 @@ AcceptAppendEntriesRequestAppend(m) ==
             /\ state[i] \in { Follower, Candidate }
             /\ logOk
             /\ CanAppend(m, i)
-            /\ LET new_log == 
-                IF CanAppend(m, i) THEN [log EXCEPT ![i] = Append(log[i], m.mentries[1])] ELSE
-                \* IF NeedsTruncation(m, i , index) /\ m.mentries # <<>> THEN [log EXCEPT ![i] = Append(TruncateLog(m, i), m.mentries[1])] ELSE
-                \* IF NeedsTruncation(m, i , index) /\ m.mentries = <<>> THEN [log EXCEPT ![i] = TruncateLog(m, i)] ELSE
-                log 
-                IN
-            \* /\ log' = [log EXCEPT ![i] = Append(log[i], m.mentries[1])]
-                    /\ state' = [state EXCEPT ![i] = Follower]
-                    /\ commitIndex' = [commitIndex EXCEPT ![i] = m.mcommitIndex]
-                    /\ log' = new_log
-                    /\ appendEntriesMsgs' = appendEntriesMsgs \cup {[
-                                mtype           |-> AppendEntriesResponse,
-                                mterm           |-> currentTerm[i],
-                                msuccess        |-> TRUE,
-                                mmatchIndex     |-> m.mprevLogIndex +Len(m.mentries),
-                                msource         |-> i,
-                                mdest           |-> j]}
-                    /\ UNCHANGED <<candidateVars, leaderVars, votedFor, currentTerm, requestVoteMsgs>>
+            /\ state' = [state EXCEPT ![i] = Follower]
+            \* Only update the logs in this action. commit learning is done in a separate action.
+            /\ log' = [log EXCEPT ![i] = Append(log[i], m.mentries[1])]
+            /\ appendEntriesMsgs' = appendEntriesMsgs \cup {[
+                        mtype           |-> AppendEntriesResponse,
+                        mterm           |-> currentTerm[i],
+                        msuccess        |-> TRUE,
+                        mmatchIndex     |-> m.mprevLogIndex + Len(m.mentries),
+                        msource         |-> i,
+                        mdest           |-> j]}
+            /\ UNCHANGED <<candidateVars, commitIndex, leaderVars, votedFor, currentTerm, requestVoteMsgs>>
        
 AcceptAppendEntriesRequestTruncate(m) ==
     /\ m.mtype = AppendEntriesRequest
@@ -412,7 +405,9 @@ AcceptAppendEntriesRequestTruncate(m) ==
             /\ state[i] \in { Follower, Candidate }
             /\ logOk
             \* We only truncate if terms do not match and our log index
-            \* is >= the log of the sender.
+            \* is >= the log of the sender. Note that we do not reset the commitIndex
+            \* here as well, since if safety holds, then we should never be truncating a 
+            \* portion of the log that is covered by a commitIndex.
             /\ m.mentries # << >>
             /\ Len(log[i]) >= index
             /\ log[i][index] # m.mentries[1]
@@ -426,6 +421,25 @@ AcceptAppendEntriesRequestTruncate(m) ==
                         msource         |-> i,
                         mdest           |-> j]}
             /\ UNCHANGED <<candidateVars, leaderVars, commitIndex, votedFor, currentTerm, requestVoteMsgs>>
+
+AcceptAppendEntriesRequestLearnCommit(m) ==
+    /\ m.mtype = AppendEntriesRequest
+    /\ m.mterm = currentTerm[m.mdest]
+    /\ LET  i     == m.mdest
+            j     == m.msource
+            logOk == LogOk(i, m)
+        IN 
+            /\ state[i] \in { Follower, Candidate }
+            \* We can learn a commitIndex as long as the log check passes, and if we could append these log entries.
+            \* We will not, however, advance our local commitIndex to a point beyond the end of our log. And,
+            \* we don't actually update our log here, only our commitIndex.
+            /\ logOk
+            /\ Len(log[i]) = m.mprevLogIndex
+            /\ CanAppend(m, i)
+            /\ state' = [state EXCEPT ![i] = Follower]
+            /\ commitIndex' = [commitIndex EXCEPT ![i] = Min({m.mcommitIndex, Len(log[i])})]
+            \* No need to send a response message since we are not updating our logs.
+            /\ UNCHANGED <<candidateVars, appendEntriesMsgs, leaderVars, log, votedFor, currentTerm, requestVoteMsgs>>
 
 
 \* ACTION: HandleAppendEntriesResponse
@@ -460,6 +474,7 @@ HandleRequestVoteResponseAction == \E m \in requestVoteMsgs : HandleRequestVoteR
 RejectAppendEntriesRequestAction == \E m \in appendEntriesMsgs : RejectAppendEntriesRequest(m)
 AcceptAppendEntriesRequestAppendAction == \E m \in appendEntriesMsgs : AcceptAppendEntriesRequestAppend(m)
 AcceptAppendEntriesRequestTruncateAction == \E m \in appendEntriesMsgs : AcceptAppendEntriesRequestTruncate(m)
+AcceptAppendEntriesRequestLearnCommitAction == \E m \in appendEntriesMsgs : AcceptAppendEntriesRequestLearnCommit(m)
 HandleAppendEntriesResponseAction == \E m \in appendEntriesMsgs : HandleAppendEntriesResponse(m)
 
 \* Defines how the variables may transition.
@@ -475,6 +490,7 @@ Next ==
     \/ RejectAppendEntriesRequestAction
     \/ AcceptAppendEntriesRequestAppendAction
     \/ AcceptAppendEntriesRequestTruncateAction
+    \/ AcceptAppendEntriesRequestLearnCommitAction
     \/ HandleAppendEntriesResponseAction
 
 NextUnchanged == UNCHANGED vars
@@ -788,6 +804,9 @@ H_CurrentTermAtLeastAsLargeAsLogTermsForPrimary ==
 H_LogTermsMonotonic == 
     \A s \in Server : \A i,j \in DOMAIN log[s] : (i <= j) => (log[s][i] <= log[s][j])
 
+H_LogTermsMonotonicAppendEntries == 
+    \A s \in Server : \A i,j \in DOMAIN log[s] : (i <= j) => (log[s][i] <= log[s][j])
+
 \* If a log entry exists in term T and there is a primary in term T, then this
 \* log entry should be present in that primary's log.
 H_PrimaryHasEntriesItCreated == 
@@ -956,11 +975,12 @@ H_NoLogDivergence ==
 
 \* INV: Used in debugging
 TestInv ==
+    ~\E s,t \in Server : s # t /\ commitIndex[s] > 0 /\ commitIndex[t] > 0
     \* /\ ~\E msgs \in SUBSET appendEntriesMsgs : msgs # {}
-    /\ ~(\E msgs \in (SUBSET appendEntriesMsgs) : 
-            /\ PrintT(SUBSET appendEntriesMsgs)
-            /\ msgs # {} 
-            /\ (\A m \in msgs : m.mtype = RequestVoteResponse))
+    \* /\ ~(\E msgs \in (SUBSET appendEntriesMsgs) : 
+    \*         /\ PrintT(SUBSET appendEntriesMsgs)
+    \*         /\ msgs # {} 
+    \*         /\ (\A m \in msgs : m.mtype = RequestVoteResponse))
     \* /\ PrintT({s \in Server : ExistsRequestVoteResponseQuorum(1, s)})
     \* \A n \in Server : 
     \* \A t \in Terms : 
