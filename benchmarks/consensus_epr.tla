@@ -75,7 +75,11 @@ Next ==
     \/ BecomeLeaderAction
     \/ DecideAction
 
-Symmetry == Permutations(Node) \cup Permutations(Value)
+\* Any two chosen values must be consistent.
+Safety == 
+    \A n1,n2 \in Node, v1,v2 \in Value : 
+        (v1 \in decided[n1] /\ v2 \in decided[n2]) => (v1 = v2)
+
 
 TypeOK == 
     /\ vote_request_msg \in SUBSET(Node \X Node)
@@ -93,28 +97,8 @@ TypeOKRandom ==
     /\ leader \in RandomSubset(4, [Node -> BOOLEAN])
     /\ decided \in RandomSubset(10, [Node -> SUBSET Value]) 
 
-\* TypeOKRandom ==
-\*     /\ vote_request_msg \in RandomSubset(80, SUBSET (Node \X Node)) 
-\*     /\ voted \in RandomSubset(7, [Node -> BOOLEAN])
-\*     /\ vote_msg \in RandomSubset(80, SUBSET(Node \X Node)) 
-\*     /\ votes \in RandomSubset(10, [Node -> SUBSET Node]) 
-\*     /\ leader \in RandomSubset(4, [Node -> BOOLEAN])
-\*     /\ decided \in RandomSubset(15, [Node -> SUBSET Value]) 
+Symmetry == Permutations(Node) \cup Permutations(Value)
 
-    \* \A VARI \in Node : \A VARK \in Node : (<<VARI,VARK>> \in vote_msg) \/ (~(VARI \in votes[VARK]))
-    \* \A VARI \in Node : \A VALI \in Value : (leader[VARI]) \/ (~(VALI \in decided[VARI]))
-    \* \A VARI \in Node : \A VARJ \in Node : (voted[VARI]) \/ (~(VARI \in votes[VARJ]))
-    \* \A VARI \in Node : \A VARJ \in Node : \A VARK \in Node : (VARJ = VARK /\ votes = votes) \/ (~(<<VARI,VARK>> \in vote_msg)) \/ (~(VARI \in votes[VARJ]))
-    \* \E QJ \in Quorum : \A VARJ \in Node : \A VALI \in Value : ~(VALI \in decided[VARJ]) \/ (~(VARJ \in QJ /\ votes = votes))
-    \* \A VARI \in Node : \A VARJ \in Node : (<<VARJ,VARI>> \in vote_msg) \/ (~(<<VARI,VARJ>> \in vote_msg) \/ (~(leader[VARI])))
-    \* \A VARI \in Node : \A VARJ \in Node : \A VARK \in Node : (VARI = VARJ /\ votes = votes) \/ (~(VARK \in votes[VARJ])) \/ (~(VARK \in votes[VARI]))
-    \* \E QJ \in Quorum : \A VARI \in Node : ~(VARI \in QJ /\ votes = votes) \/ (~(leader[VARI]))
-    \* \A BBBVARI \in Node : \A BBBVARK \in Node : (<<BBBVARI,BBBVARK>> \in vote_msg) \/ (~(BBBVARI \in votes[BBBVARK]))
-    \* \E QJ \in Quorum : \A VARI \in Node : ~(VARI \in QJ /\ votes = votes) \/ (~(leader[VARI]))
-
-H_SafetyInv ==
-    \A n1,n2 \in Node, v1,v2 \in Value : 
-        (v1 \in decided[n1] /\ v2 \in decided[n2]) => (v1 = v2)
 
 SafetyWithTypeOK ==
     /\ TypeOK 
@@ -128,20 +112,17 @@ NextUnchanged == UNCHANGED vars
 \* Helper lemmas.
 \* 
 
+H_SafetyInv == Safety
+
 H_UniqueLeaders == \A n1,n2 \in Node : leader[n1] /\ leader[n2] => n1 = n2
 H_DecidedImpliesLeader == \A n \in Node : decided[n] # {} => leader[n]
+
 H_LeaderImpliesVotesInQuorum == \A n \in Node : leader[n] => \E Q \in Quorum : votes[n] = Q
-H_VoteMsgImpliesNodeVoted == \A mi \in vote_msg : voted[mi[1]]
-
-RecvVote_Copy(n, sender) == 
-    /\ <<sender,n>> \in vote_msg
-    /\ votes' = [votes EXCEPT ![n] = votes[n] \cup {sender}]
-    /\ UNCHANGED <<vote_request_msg,voted,vote_msg,leader,decided>>
-
-H_NodesCantSendVotesToDifferentNodes == \A mi,mj \in vote_msg : (mi[1] = mj[1]) => mi = mj
-H_VoteRecordedImpliesVoteMsg == \A ni,nj \in Node : nj \in votes[ni] => <<nj,ni>> \in vote_msg
-H_VoteRecordedImpliesNodeVoted == \A ni,nj \in Node : (ni \in votes[nj]) => voted[ni]
-
 H_NodesCantVoteTwice == \A n,ni,nj \in Node : ~(ni # nj /\ n \in votes[ni] /\ n \in votes[nj])
+
+H_VoteRecordedImpliesVoteMsg == \A ni,nj \in Node : nj \in votes[ni] => <<nj,ni>> \in vote_msg
+H_NodesCantSendVotesToDifferentNodes == \A mi,mj \in vote_msg : (mi[1] = mj[1]) => mi = mj
+
+H_VoteMsgImpliesNodeVoted == \A mi \in vote_msg : voted[mi[1]]
 
 ====
