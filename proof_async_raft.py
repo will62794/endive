@@ -188,7 +188,37 @@ logMatching.children = {
 
 commitIndexBoundValid = make_node("H_CommitIndexBoundValid")
     
+requestVoteQuorumInTermImpliesNoAppendEntriesRequestsInTerm = make_node("H_RequestVoteQuorumInTermImpliesNoAppendEntriesRequestsInTerm")
+requestVoteQuorumInTermImpliesNoAppendEntriesRequestsInTerm.children = {
+    "AppendEntriesAction": [
+        requestVoteQuorumInTermImpliesNoOtherLogsOrLeadersInTerm
+    ]
+}    
+    
+candidateWithVotesGrantedImpliesNoAppendEntriesRequestsInTerm = make_node("H_CandidateWithVotesGrantedImpliesNoAppendEntriesRequestsInTerm")
+candidateWithVotesGrantedImpliesNoAppendEntriesRequestsInTerm.children = {
+    "AppendEntriesAction": [
+        candidateWithVotesGrantedInTermImplyNoOtherLeader
+    ],
+    "HandleRequestVoteResponseAction": [
+        requestVoteQuorumInTermImpliesNoAppendEntriesRequestsInTerm
+    ]
+}
+
+appendEntriesRequestLogEntriesMustBeInLeaderLog = make_node("H_AppendEntriesRequestLogEntriesMustBeInLeaderLog")
+appendEntriesRequestLogEntriesMustBeInLeaderLog.children = {
+    "BecomeLeaderAction":[
+        candidateWithVotesGrantedImpliesNoAppendEntriesRequestsInTerm
+    ]
+}
+    
 leaderMatchIndexValidAppendEntries = make_node("H_LeaderMatchIndexValidAppendEntries")
+leaderMatchIndexValidAppendEntries.children = {
+    "AcceptAppendEntriesRequestAppendAction": [
+        appendEntriesRequestLogEntriesMustBeInLeaderLog
+    ]
+}
+    
 
 leaderMatchIndexBound = make_node("H_LeaderMatchIndexBound")
 leaderMatchIndexBound.children = {
@@ -215,11 +245,12 @@ commitIndexInAppendEntriesImpliesCommittedEntryExists = make_node("H_CommitIndex
 
 commitIndexCoversEntryImpliesExistsOnQuorum = make_node("H_CommitIndexCoversEntryImpliesExistsOnQuorum")
 commitIndexCoversEntryImpliesExistsOnQuorum.children = {
+    "AcceptAppendEntriesRequestLearnCommitAction": [
+        commitIndexInAppendEntriesImpliesCommittedEntryExists,
+        logMatching
+    ],
     "AdvanceCommitIndexAction": [
         leaderMatchIndexValid
-    ],
-    "AcceptAppendEntriesRequestLearnCommitAction": [
-        commitIndexInAppendEntriesImpliesCommittedEntryExists
     ]
 }
 
@@ -227,7 +258,8 @@ commitIndexCoversEntryImpliesExistsOnQuorum.children = {
 noLogDivergence = make_node("H_NoLogDivergence")
 noLogDivergence.children = {
     "AcceptAppendEntriesRequestLearnCommitAction":[
-        commitIndexInAppendEntriesImpliesCommittedEntryExists
+        commitIndexInAppendEntriesImpliesCommittedEntryExists,
+        logMatching
     ], 
     "AdvanceCommitIndexAction":[
         leaderMatchIndexValid,

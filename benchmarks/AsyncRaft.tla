@@ -918,6 +918,38 @@ H_LeaderMatchIndexBound ==
     \A s \in Server : (state[s] = Leader) => 
         \A t \in Server : matchIndex[s][t] <= Len(log[s])
 
+H_RequestVoteQuorumInTermImpliesNoAppendEntriesRequestsInTerm == 
+    \A s \in Server :
+        (/\ state[s] = Candidate
+         /\ ExistsRequestVoteResponseQuorum(currentTerm[s], s)) =>
+            ~(\E m \in appendEntriesMsgs : 
+                /\ m.mtype = AppendEntriesRequest
+                /\ m.mterm = currentTerm[s])
+
+\* If a server candidate has won votes in term T, there can't be
+\* any AppendEntries messages already sent in that term.
+H_CandidateWithVotesGrantedImpliesNoAppendEntriesRequestsInTerm == 
+      \A s \in Server :
+        (/\ state[s] = Candidate
+         /\ votesGranted[s] \in Quorum) =>
+            ~\E m \in appendEntriesMsgs : 
+                /\ m.mtype = AppendEntriesRequest
+                /\ m.mterm = currentTerm[s]
+
+\* The logs in any AppendEntries message sent in term T must be present
+\* in the logs of a leader in term T.
+H_AppendEntriesRequestLogEntriesMustBeInLeaderLog == 
+    \A m \in appendEntriesMsgs : 
+        (/\ m.mtype = AppendEntriesRequest
+         /\ m.mentries # <<>>
+         /\ state[m.msource] = Leader
+         /\ m.mprevLogIndex > 0
+         /\ currentTerm[m.msource] = m.mterm) =>
+            /\ Len(log[m.msource]) >= m.mprevLogIndex + 1
+            /\ log[m.msource][m.mprevLogIndex + 1] = m.mentries[1]
+            /\ log[m.msource][m.mprevLogIndex] = m.mprevLogTerm
+
+
 \* If a AppendEntries response has been sent in term T recording a match up to
 \* index I, then the sender node should have the same entry as the leader.
 H_LeaderMatchIndexValidAppendEntries == 
