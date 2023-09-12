@@ -596,7 +596,9 @@ class StructuredProof():
         
         all_ctis_by_action = {a:set() for a in actions}
         node.ctis_eliminated = {a:set() for a in actions}
-        for constants_obj in indgen.get_config_constant_instances():
+        for ci,constants_obj in enumerate(indgen.get_config_constant_instances()):
+
+            self.current_config_instance_index = ci
 
             # Actions that we should skip and those for which we keep searching for CTIs.
             actions_to_skip = [a for a in actions if
@@ -616,6 +618,7 @@ class StructuredProof():
             # print(f"CONSTANT instance:", constants_obj)
             print("Actions to skip:", actions_to_skip)
             print("Actions to check:", actions_to_check)
+            self.ctigen_state = "ctigen"
 
             new_ctis, _ = indgen.generate_ctis(
                                 props=[(node.name, node.expr)], 
@@ -686,6 +689,7 @@ class StructuredProof():
                     ctis_eliminated_uniquely_by_action[action] = set()
                     continue
 
+                self.ctigen_state = "ctielim"
                 cti_elimination_info = self.compute_cti_elimination_for_node(indgen, node, new_ctis_by_action[action], action, constants_obj = constants_obj)
                 
                 ctis_eliminated = cti_elimination_info["eliminated"]

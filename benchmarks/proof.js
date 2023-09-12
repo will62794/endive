@@ -15,11 +15,33 @@ let specDefs = [];
 // Stores source node from which to create support lemma edge.
 let supportLemmaTarget = null;
 
-let awaitPollIntervalMS = 2000;
+let awaitPollIntervalMS = 1000;
 
 cytoscape.warnings(false);
 
 const loadingIcon = '<i class="fa fa-refresh fa-spin"></i>';
+
+//
+// consensus_epr demo proof steps.
+//
+
+function consensus_epr_demo1(){
+    addLemmaNode("H_UniqueLeaders", function(){
+        addSupportLemmaEdge("Safety", "DecideAction", "UniqueLeaders");
+    });
+}
+
+function consensus_epr_demo2(){
+    addLemmaNode("H_DecidedImpliesLeader", function(){
+        addSupportLemmaEdge("Safety", "DecideAction", "DecidedImpliesLeader");
+    });
+}
+
+function consensus_epr_demo3(){
+    addLemmaNode("H_LeaderImpliesVotesInQuorum", function(){
+        addSupportLemmaEdge("DecidedImpliesLeader", "BecomeLeaderAction", "LeaderImpliesVotesInQuorum");
+    });
+}
 
 function awaitGenCtiCompletion(expr, onCompleteFn){
     $.get(local_server + `/getActiveCtiGenThreads`, function(data){
@@ -28,6 +50,13 @@ function awaitGenCtiCompletion(expr, onCompleteFn){
         let active_threads = data["active_threads"];
         $('#gen-ctis-btn').prop("disabled",true);
         $('#gen-ctis-btn-subtree').prop("disabled",true);
+
+        let config_ind = data["current_config_instance_ind"];
+        let num_config_instances = data["num_config_instances"];
+        let ctigen_state = data["ctigen_state"];
+        let currHTML = $('#gen-ctis-btn').html().split(" - ")[0];
+        let addHTML = ` - Config instance ${config_ind + 1}/${num_config_instances} (${ctigen_state})`;
+        $('#gen-ctis-btn').html(currHTML + " " + addHTML);
 
 
         if(active_threads.length > 0){
@@ -118,10 +147,10 @@ function traverseProofGraph(startNodeExprName, onCompleteFn){
     });
 }
 
-function addLemmaNode(lemmaName){
+function addLemmaNode(lemmaName, onCompleteFn){
     console.log("Adding lemma:", lemmaName);
     $.get(local_server + `/addNode/${lemmaName}`, function(data){
-        reloadProofGraph();
+        reloadProofGraph(onCompleteFn);
     });
 }
 
@@ -153,6 +182,11 @@ function addSupportLemmaEdge(target, action, src){
     $.get(local_server + `/addSupportEdge/${target}/${action}/${src}`, function(data){
         // console.log(data);
         // console.log("add edge complete.");
+
+        if(!data["ok"]){
+            console.log("Error when adding lemma support edge.");
+            return;
+        }
 
         // Once we added the new support edge, we should reload the proof graph and re-generate CTIs
         // for the target node.
@@ -361,7 +395,7 @@ function focusOnNode(nodeId, nodeData){
             // ctis_objs = _.sortBy(ctis_for_action, "cost").splice(0,numCtisToShow);
             // console.log("CTIs for action:", ctis_for_action);
 
-            let numCtisToShow = 10;
+            let numCtisToShow = 1;
 
             if(ctis_remaining && ctis_remaining.length > 0){
                 ctis_objs = _.sortBy(ctis_remaining, "cost").splice(0,numCtisToShow);

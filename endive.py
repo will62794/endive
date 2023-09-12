@@ -2166,6 +2166,7 @@ class InductiveInvGen():
         import proof_adr
         import proof_asr_coreLogInv
         import proof_consensus_epr
+        import proof_consensus_epr_demo
         import proof_async_raft
 
         #
@@ -2194,9 +2195,14 @@ class InductiveInvGen():
             actions = proof_adr.adr_actions
             nodes = proof_adr.adr_nodes
         elif self.specname == "consensus_epr":
-            root = proof_consensus_epr.root
-            actions = proof_consensus_epr.actions
-            nodes = proof_consensus_epr.nodes
+            if self.proof_struct_tag == "demo":
+                root = proof_consensus_epr_demo.root
+                actions = proof_consensus_epr_demo.actions
+                nodes = proof_consensus_epr_demo.nodes
+            else:
+                root = proof_consensus_epr.root
+                actions = proof_consensus_epr.actions
+                nodes = proof_consensus_epr.nodes 
         elif self.specname == "AsyncRaft":
             root = proof_async_raft.root
             actions = proof_async_raft.actions
@@ -2308,7 +2314,7 @@ class InductiveInvGen():
                 newNode = StructuredProofNode(expr.replace("H_", ""), expr)
                 # newNode.children = dict()
                 proof.nodes.append(newNode)
-                print("Added new node:", newNode)
+                print("Adding new proof node, expr:", newNode.expr, "name:", newNode.name)
                 proof.save_proof()
                 response = flask.jsonify({'ok': True})
                 response.headers.add('Access-Control-Allow-Origin', '*')
@@ -2377,7 +2383,13 @@ class InductiveInvGen():
 
             @app.route('/getActiveCtiGenThreads')
             def getActiveCtiGenThreads():
-                response = flask.jsonify({'ok': True, 'active_threads': list(self.active_ctigen_threads)})
+                response = flask.jsonify({
+                    'ok': True, 
+                    'active_threads': list(self.active_ctigen_threads),
+                    'current_config_instance_ind': proof.current_config_instance_index,
+                    'num_config_instances': len(self.get_config_constant_instances()),
+                    'ctigen_state': proof.ctigen_state
+                })
                 response.headers.add('Access-Control-Allow-Origin', '*')
                 return response
 
