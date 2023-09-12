@@ -2317,8 +2317,23 @@ class InductiveInvGen():
             @app.route('/addSupportEdge/<target>/<action>/<src>')
             def addSupportEdge(target, action, src):
                 target_node = proof.get_node_by_name(proof.root, target)
+
+                if target_node is None:
+                    print(f"Target node '{target}' not found.")
+                    response = flask.jsonify({'ok': False})
+                    response.headers.add('Access-Control-Allow-Origin', '*')
+                    return response
+
                 src_node = proof.get_node_by_name(proof.root, src)
+
+                if src_node is None:
+                    print(f"Target node '{src}' not found.")
+                    response = flask.jsonify({'ok': False})
+                    response.headers.add('Access-Control-Allow-Origin', '*')
+                    return response
+
                 print("Target:", target_node, target_node.name)
+                print("Source:", src_node, src_node.name)
                 print("Source:", src_node, src_node.name)
 
                 # print("Target children:", target_node.children, id(target_node.children))
