@@ -93,10 +93,9 @@ candidateWithVotesGrantedInTermImplyNoOtherLogsInTerm.children = {
     "RequestVoteAction":[
         logEntryInTermImpliesSafeAtTerms
     ],
-    # "HandleRequestVoteResponseAction": [
-    #     # successfulRequestVoteQuorumInTermImpliesNoLogsInTerm,
-    #     # requestVotesNeverSentToSelf
-    # ]
+    "HandleRequestVoteResponseAction": [
+        requestVoteQuorumInTermImpliesNoOtherLogsOrLeadersInTerm
+    ]
 }
 
 currentTermsAtLeastLargeAsLogTermsForPrimary =  StructuredProofNode("CurrentTermAtLeastAsLargeAsLogTermsForPrimary", "H_CurrentTermAtLeastAsLargeAsLogTermsForPrimary")
