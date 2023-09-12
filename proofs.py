@@ -251,6 +251,8 @@ class StructuredProof():
         self.spec_defs = spec_defs
         self.vars_in_action = dict()
 
+        self.ctigen_state = "idle"
+
         if load_from_obj:
             self.load_from(load_from_obj)
 

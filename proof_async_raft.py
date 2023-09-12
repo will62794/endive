@@ -23,7 +23,25 @@ candidateWithVotesGrantedInTermImplyVotersSafeAtTerm.children = {
     ]
 }
 
+voteInGrantedImpliesVotedFor = make_node("H_VoteInGrantedImpliesVotedFor")
+voteInGrantedImpliesVotedFor.children = {
+    "UpdateTerm":[
+        candidateWithVotesGrantedInTermImplyVotersSafeAtTerm
+    ],
+    "HandleRequestVoteResponseAction":[
+        requestVoteResponseTermsMatchSource
+    ]
+}
+
 voteGrantedImpliesVoteResponseMsgConsistent = make_node("H_VoteGrantedImpliesVoteResponseMsgConsistent")
+voteGrantedImpliesVoteResponseMsgConsistent.children = {
+    "RequestVoteAction": [
+        requestVoteResponseTermsMatchSource
+    ],
+    "HandleRequestVoteRequestAction": [
+        voteInGrantedImpliesVotedFor
+    ]
+}
 
 votesCantBeGrantedTwiceToCandidatesInSameTerm = make_node("H_VotesCantBeGrantedTwiceToCandidatesInSameTerm")
 votesCantBeGrantedTwiceToCandidatesInSameTerm.children = {
@@ -187,10 +205,19 @@ logMatching.children = {
 
 commitIndexBoundValid = make_node("H_CommitIndexBoundValid")
     
+
+appendEntriesRequestInTermImpliesSafeAtTerms = make_node("H_AppendEntriesRequestInTermImpliesSafeAtTerms")
+
+nodesVotedInQuorumInTermImpliesNoAppendEntriesRequestsInTerm = make_node("H_NodesVotedInQuorumInTermImpliesNoAppendEntriesRequestsInTerm")
+    
 requestVoteQuorumInTermImpliesNoAppendEntriesRequestsInTerm = make_node("H_RequestVoteQuorumInTermImpliesNoAppendEntriesRequestsInTerm")
 requestVoteQuorumInTermImpliesNoAppendEntriesRequestsInTerm.children = {
     "AppendEntriesAction": [
         requestVoteQuorumInTermImpliesNoOtherLogsOrLeadersInTerm
+    ],
+    "RequestVoteAction": [
+        nodesVotedInQuorumInTermImpliesNoAppendEntriesRequestsInTerm,
+        appendEntriesRequestInTermImpliesSafeAtTerms
     ]
 }    
     
@@ -276,7 +303,7 @@ actions = [
     "ClientRequestAction",
     "AdvanceCommitIndexAction",
     "AppendEntriesAction",
-    "UpdateTermAction",
+    "UpdateTerm",
     "HandleRequestVoteRequestAction",
     "HandleRequestVoteResponseAction",
     "RejectAppendEntriesRequestAction",

@@ -48,8 +48,6 @@ function awaitGenCtiCompletion(expr, onCompleteFn){
         console.log("checking active cti threads:", data)
 
         let active_threads = data["active_threads"];
-        $('#gen-ctis-btn').prop("disabled",true);
-        $('#gen-ctis-btn-subtree').prop("disabled",true);
 
         let config_ind = data["current_config_instance_ind"];
         let num_config_instances = data["num_config_instances"];
@@ -57,7 +55,8 @@ function awaitGenCtiCompletion(expr, onCompleteFn){
         let currHTML = $('#gen-ctis-btn').html().split(" - ")[0];
         let addHTML = ` - Config instance ${config_ind + 1}/${num_config_instances} (${ctigen_state})`;
         $('#gen-ctis-btn').html(currHTML + " " + addHTML);
-
+        $('#gen-ctis-btn').prop("disabled", true);
+        $('#gen-ctis-btn-subtree').prop("disabled", true);
 
         if(active_threads.length > 0){
             setTimeout(() => awaitGenCtiCompletion(expr, onCompleteFn), awaitPollIntervalMS);
@@ -377,9 +376,9 @@ function focusOnNode(nodeId, nodeData){
             let varsProjected = Object.keys(state_var_proj_map).filter(k => !state_var_proj_map[k]);
             let varsRetained = Object.keys(state_var_proj_map).filter(k => state_var_proj_map[k]);
             ctiCounter.innerHTML += "<br>";
-            ctiCounter.innerHTML += `State variables projected (${varsProjected.length}/${numVars}): { ${varsProjected} }`;
+            ctiCounter.innerHTML += `State variables, projected out (${varsProjected.length}/${numVars}): { ${varsProjected} }`;
             ctiCounter.innerHTML += "<br>";
-            ctiCounter.innerHTML += `State variables node-local  (${numVars-varsProjected.length}/${numVars}): { ${varsRetained} }`;
+            ctiCounter.innerHTML += `State variables, node-local  (${numVars-varsProjected.length}/${numVars}): { ${varsRetained} }`;
         }
 
         ctipane.appendChild(ctiCounter);
@@ -395,7 +394,7 @@ function focusOnNode(nodeId, nodeData){
             // ctis_objs = _.sortBy(ctis_for_action, "cost").splice(0,numCtisToShow);
             // console.log("CTIs for action:", ctis_for_action);
 
-            let numCtisToShow = 1;
+            let numCtisToShow = 5;
 
             if(ctis_remaining && ctis_remaining.length > 0){
                 ctis_objs = _.sortBy(ctis_remaining, "cost").splice(0,numCtisToShow);

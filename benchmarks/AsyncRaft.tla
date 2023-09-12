@@ -469,7 +469,7 @@ BecomeLeaderAction == TRUE /\ \E i \in Server : BecomeLeader(i)
 ClientRequestAction == TRUE /\ \E i \in Server : ClientRequest(i)
 AdvanceCommitIndexAction == TRUE /\ \E i \in Server : AdvanceCommitIndex(i)
 AppendEntriesAction == TRUE /\ \E i,j \in Server : AppendEntries(i, j)
-UpdateTermAction == UpdateTerm
+\* UpdateTermAction == UpdateTerm
 HandleRequestVoteRequestAction == \E m \in requestVoteMsgs : HandleRequestVoteRequest(m)
 HandleRequestVoteResponseAction == \E m \in requestVoteMsgs : HandleRequestVoteResponse(m)
 RejectAppendEntriesRequestAction == \E m \in appendEntriesMsgs : RejectAppendEntriesRequest(m)
@@ -485,7 +485,7 @@ Next ==
     \/ ClientRequestAction
     \/ AdvanceCommitIndexAction
     \/ AppendEntriesAction
-    \/ UpdateTermAction
+    \/ UpdateTerm
     \/ HandleRequestVoteRequestAction
     \/ HandleRequestVoteResponseAction
     \/ RejectAppendEntriesRequestAction
@@ -764,6 +764,16 @@ H_CandidateWithVotesGrantedInTermImplyVotersSafeAtTerm ==
 \*             \A v \in votesGranted[s] : 
 \*                 /\ currentTerm[v] = currentTerm[s] => votedFor[v] # Nil
 
+\* If a server exists in voteGranted for some server in term T, and the node is still in
+\* term T, then it must have voted for that node.
+H_VoteInGrantedImpliesVotedFor == 
+    \A s,t \in Server :
+        (/\ state[s] = Candidate
+         /\ t \in votesGranted[s]) => 
+            /\ currentTerm[t] >= currentTerm[s]
+            /\ currentTerm[t] = currentTerm[s] => votedFor[t] = s
+
+
 \* If a server has granted its vote to a server S in term T, then
 \* there can't be a vote response message from that server to some other server R # S.
 H_VoteGrantedImpliesVoteResponseMsgConsistent ==
@@ -844,6 +854,13 @@ H_LogEntryInTermImpliesSafeAtTerm ==
             /\ currentTerm[n] = log[s][i] => (votedFor[n] # Nil)
 
 
+\* If an AppendEntries request was sent in term T, then there must have been a successful 
+\* election in term T.
+H_AppendEntriesRequestInTermImpliesSafeAtTerms == 
+    \A m \in appendEntriesMsgs : 
+        m.mtype = AppendEntriesRequest =>
+            \E Q \in Quorum : \A t \in Q : currentTerm[t] >= m.mterm
+
 H_LogEntryInTermImpliesSafeAtTermAppendEntries ==
     \A m \in appendEntriesMsgs : 
         (/\ m.mtype = AppendEntriesRequest
@@ -920,6 +937,21 @@ H_AppendEntriesCommitIndexCannotBeLargerThanTheSender ==
 H_LeaderMatchIndexBound == 
     \A s \in Server : (state[s] = Leader) => 
         \A t \in Server : matchIndex[s][t] <= Len(log[s])
+
+ExistsNodeQuorumThatVotedAtTermFor(T, s) == 
+    \E Q \in Quorum :
+    \A t \in Q :
+        /\ votedFor[t] = s
+        /\ currentTerm[t] = T
+
+H_NodesVotedInQuorumInTermImpliesNoAppendEntriesRequestsInTerm == 
+    \A s \in Server :
+        (/\ state[s] = Candidate
+         /\ ExistsNodeQuorumThatVotedAtTermFor(currentTerm[s], s)) =>
+            ~(\E m \in appendEntriesMsgs : 
+                /\ m.mtype = AppendEntriesRequest
+                /\ m.mterm = currentTerm[s])
+
 
 H_RequestVoteQuorumInTermImpliesNoAppendEntriesRequestsInTerm == 
     \A s \in Server :

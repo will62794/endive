@@ -42,7 +42,7 @@
         "ClientRequestAction",
         "AdvanceCommitIndexAction",
         "AppendEntriesAction",
-        "UpdateTermAction",
+        "UpdateTerm",
         "HandleRequestVoteRequestAction",
         "HandleRequestVoteResponseAction",
         "RejectAppendEntriesRequestAction",
