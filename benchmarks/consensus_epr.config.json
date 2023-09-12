@@ -30,7 +30,7 @@
     "preds_alt" : [],
     "safety"  :  "SafetyInv",
     "constants"  :  {
-        "Node": ["{n1}", "{n1,n2}", "{n1,n2,n3}"],
+        "Node": ["{n1}", "{n1,n2}"],
         "Value": ["{v1}","{v1,v2}"],
         "n1": "n1",
         "n2": "n2",
