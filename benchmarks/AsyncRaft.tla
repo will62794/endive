@@ -738,13 +738,14 @@ H_CandidateWithVotesGrantedInTermImplyNoAppendEntryLogsInTerm ==
             /\ m.mentries # <<>>
             /\ m.mentries[1] = currentTerm[s])
 
+
 \* If request vote response message has been sent in term T,
 \* then the sender must be at least in term T.
 H_RequestVoteResponseTermsMatchSource ==
     \A m \in requestVoteMsgs :
         m.mtype = RequestVoteResponse => 
             /\ currentTerm[m.msource] >= m.mterm
-            /\ (currentTerm[m.msource] = m.mterm) => votedFor[m.msource] = m.mdest
+            /\ (m.mvoteGranted /\ (currentTerm[m.msource] = m.mterm)) => votedFor[m.msource] = m.mdest
 
 
 \* If a candidate C has garnered a set of granted votes in term T, 
