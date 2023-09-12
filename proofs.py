@@ -635,11 +635,16 @@ class StructuredProof():
                 lemma_vars = self.vars_in_lemma_defs[node.expr]
                 all_vars = action_vars.union(lemma_vars)
                 for s in c.trace.getStates():
+                    s.state_var_projection_map = {}
                     s.state_lines_action_vars_projected = []
                     for line in s.state_lines:
                         vartext = line.split("=")[0]
+                        varname = vartext.split(" ")[1].strip()
+                        s.state_var_projection_map[varname] = False
+                        # Record projected variables and their state lines.
                         for a in all_vars:
                             if a in vartext:
+                                s.state_var_projection_map[a] = True
                                 # print(line)
                                 s.state_lines_action_vars_projected.append(line)
                         # print(line)

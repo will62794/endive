@@ -216,6 +216,8 @@ class State():
         }
         if hasattr(self, "state_lines_action_vars_projected"):
             ret["state_lines_action_vars_projected"] = self.state_lines_action_vars_projected
+        if hasattr(self, "state_var_projection_map"):
+            ret["state_var_projection_map"] = self.state_var_projection_map
         return ret
     
     def load_from(self, obj):

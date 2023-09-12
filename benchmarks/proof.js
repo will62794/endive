@@ -269,9 +269,8 @@ function focusOnNode(nodeId, nodeData){
     if(currentNodeId === nodeId){
         return;
     }
-    console.log("Focus on node: ", nodeId);
+    console.log("Focus on node:", nodeId, nodeData);
     currentNodeId = nodeId;
-    console.log(nodeData);
     setCTIPaneHtml(nodeData);
 
     let nodeIdArg = nodeId;
@@ -295,9 +294,8 @@ function focusOnNode(nodeId, nodeData){
             ctis_remaining = data["ctis"][actionName].filter(c => !data["ctis_eliminated"][actionName].includes(c["hashId"]));
             ctis_for_action = data["ctis"][actionName];
         }
-        console.log("actionName", actionName);
-        console.log("ctis for action:", ctis_for_action);
-        console.log("ctis for action remaining:", ctis_remaining.length);
+        console.log(`CTIs for action (${actionName}):`, ctis_for_action);
+        console.log("CTIs for action remaining:", ctis_remaining.length);
 
         num_ctis_remaining = ctis_remaining.length
 
@@ -337,9 +335,19 @@ function focusOnNode(nodeId, nodeData){
         ctiCounter.innerHTML = `Total CTIs: ${ctis_for_action.length}`;
         ctiCounter.innerHTML += `<br>Total CTIs remaining: ${num_ctis_remaining}`;
         ctiCounter.innerHTML += `<br>Apalache proof? ${data["apalache_proof_check"]}`;
-        if(data["project_vars"] !== null){
-            ctiCounter.innerHTML += `<br>Projected vars: << ${data["project_vars"]} >>`;
+
+        if(ctis_for_action.length > 0){
+            one_cti_obj = ctis_for_action[0];
+            state_var_proj_map = one_cti_obj["trace"][0]["state_var_projection_map"];
+            let numVars = Object.keys(state_var_proj_map).length;
+            let varsProjected = Object.keys(state_var_proj_map).filter(k => !state_var_proj_map[k]);
+            let varsRetained = Object.keys(state_var_proj_map).filter(k => state_var_proj_map[k]);
+            ctiCounter.innerHTML += "<br>";
+            ctiCounter.innerHTML += `State variables projected (${varsProjected.length}/${numVars}): { ${varsProjected} }`;
+            ctiCounter.innerHTML += "<br>";
+            ctiCounter.innerHTML += `State variables node-local  (${numVars-varsProjected.length}/${numVars}): { ${varsRetained} }`;
         }
+
         ctipane.appendChild(ctiCounter);
 
         if(ctis_for_action.length > 0){
@@ -350,10 +358,8 @@ function focusOnNode(nodeId, nodeData){
             }
             console.log("CTI table:", cti_table);
 
-
             // ctis_objs = _.sortBy(ctis_for_action, "cost").splice(0,numCtisToShow);
-
-            console.log("CTIs for action:", ctis_for_action);
+            // console.log("CTIs for action:", ctis_for_action);
 
             let numCtisToShow = 10;
 
@@ -415,7 +421,7 @@ function focusOnNode(nodeId, nodeData){
                         lineI += 1;
                     }
                     ctiHTML += "</pre>";
-                    console.log(ctiHTML);
+                    // console.log(ctiHTML);
                     ctidiv.innerHTML += ctiHTML;
                     i += 1;
                 }
