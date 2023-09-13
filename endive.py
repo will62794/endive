@@ -2290,7 +2290,7 @@ class InductiveInvGen():
 
             @app.route('/getProofGraph')
             def getProofGraph():
-                proof_json = proof.serialize(include_ctis=True)
+                proof_json = proof.serialize(include_ctis=True, cti_hashes_only=True)
                 response = flask.jsonify({'ok': True, 'proof_graph': proof_json})
                 response.headers.add('Access-Control-Allow-Origin', '*')
                 # print(proof_json)

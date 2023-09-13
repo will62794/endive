@@ -61,7 +61,7 @@ class StructuredProofNode():
         if load_from_obj:
             self.load_from(load_from_obj)
 
-    def serialize_rec(self, include_ctis=True, seen=set(), serialize_children=True):
+    def serialize_rec(self, include_ctis=True, cti_hashes_only=False, seen=set(), serialize_children=True):
         # if self.expr in seen:
         #     None
         # print(seen)
@@ -73,9 +73,9 @@ class StructuredProofNode():
         # but don't recursively serialize its children.
         def serialize_child(c):
             if c.expr in seen:
-                return c.serialize_rec(include_ctis=include_ctis, seen=set(seen), serialize_children=False)
+                return c.serialize_rec(include_ctis=include_ctis, cti_hashes_only=cti_hashes_only, seen=set(seen), serialize_children=False)
             else:
-                return c.serialize_rec(include_ctis=include_ctis, seen=set(seen))
+                return c.serialize_rec(include_ctis=include_ctis, cti_hashes_only=cti_hashes_only, seen=set(seen))
 
         children_serialized = {}
         if serialize_children:
@@ -95,8 +95,13 @@ class StructuredProofNode():
         cti_sort_key = lambda c : c.cost
         remaining_ctis_cost_sorted = sorted(self.get_remaining_ctis(), key = cti_sort_key)
 
+        if cti_hashes_only:
+            ctis_serialized = {a:[str(hash(c)) for c in self.ctis[a]] for a in self.ctis}
+        else:
+            ctis_serialized = {a:[c.serialize() for c in self.ctis[a]] for a in self.ctis}
+
         cti_info = {
-            "ctis": {a:[c.serialize() for c in self.ctis[a]] for a in self.ctis},
+            "ctis": ctis_serialized,
             "ctis_eliminated": self.ctis_eliminated, # eliminated CTIs are stored as CTI hashes, not full CTIs.
             "ctis_eliminated_uniquely": {a:{c:list(v[c]) for c in v} for a,v in self.ctis_eliminated_uniquely.items()}, # eliminated CTIs are stored as CTI hashes, not full CTIs.
             "ctis_remaining": {a:[str(hash(cti)) for cti in self.get_remaining_ctis(a)] for a in self.ctis},
@@ -111,9 +116,9 @@ class StructuredProofNode():
                 ret[k] = cti_info[k]
         return ret
 
-    def serialize(self, include_ctis=True):
+    def serialize(self, include_ctis=True, cti_hashes_only=False, serialize_children=True):
         seen_nodes = set()
-        return self.serialize_rec(include_ctis=include_ctis, seen=seen_nodes)
+        return self.serialize_rec(include_ctis=include_ctis, cti_hashes_only=cti_hashes_only, serialize_children=serialize_children, seen=seen_nodes)
 
 
     def load_from(self, obj):
@@ -256,11 +261,11 @@ class StructuredProof():
         if load_from_obj:
             self.load_from(load_from_obj)
 
-    def serialize(self, include_ctis=True):
+    def serialize(self, include_ctis=True, cti_hashes_only=False):
         return {
             "safety": self.safety_goal, 
-            "root": self.root.serialize(include_ctis=include_ctis),
-            "nodes": [n.serialize() for n in self.nodes],
+            "root": self.root.serialize(include_ctis=include_ctis, cti_hashes_only=cti_hashes_only),
+            "nodes": [n.serialize(serialize_children=True, cti_hashes_only=cti_hashes_only) for n in self.nodes],
             "spec_defs": self.spec_defs,
             "vars_in_action": {a:list(v) for a,v in self.vars_in_action.items()}
         }
