@@ -28,7 +28,7 @@
         "QJ \\subseteq votes[VARJ]"
     ],
     "preds_alt" : [],
-    "safety"  :  "SafetyInv",
+    "safety"  :  "H_NoConflictingValues",
     "constants"  :  {
         "Node": ["{n1}", "{n1,n2}"],
         "Value": ["{v1}","{v1,v2}"],

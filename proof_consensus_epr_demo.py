@@ -48,7 +48,7 @@ children = {
     # ]
 }
 
-root = StructuredProofNode("Safety", "H_SafetyInv", children = children)
+root = StructuredProofNode("NoConflictingValues", "H_NoConflictingValues", children = children)
 nodes = [
     # uniqueLeaders,
     # decidedImpliesLeader,

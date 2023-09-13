@@ -76,7 +76,7 @@ Next ==
     \/ DecideAction
 
 \* Any two chosen values must be consistent.
-Safety == 
+H_NoConflictingValues == 
     \A n1,n2 \in Node, v1,v2 \in Value : 
         (v1 \in decided[n1] /\ v2 \in decided[n2]) => (v1 = v2)
 
@@ -112,7 +112,9 @@ NextUnchanged == UNCHANGED vars
 \* Helper lemmas.
 \* 
 
-H_SafetyInv == Safety
+\* H_NoConflictingValues == 
+\*     \A n1,n2 \in Node, v1,v2 \in Value : 
+\*         (v1 \in decided[n1] /\ v2 \in decided[n2]) => (v1 = v2)
 
 H_UniqueLeaders == \A n1,n2 \in Node : leader[n1] /\ leader[n2] => n1 = n2
 H_DecidedImpliesLeader == \A n \in Node : decided[n] # {} => leader[n]
