@@ -169,6 +169,8 @@ primaryHasEntriesItCreated.children = {
     ]
 }
 
+divergentEntriesInAppendEntriesMsgsForRequestVoteQuorum = make_node("H_DivergentEntriesInAppendEntriesMsgsForRequestVoteQuorum")
+
 
 divergentEntriesInAppendEntriesMsgs = make_node("H_DivergentEntriesInAppendEntriesMsgs")
 divergentEntriesInAppendEntriesMsgs.children = {
@@ -179,6 +181,9 @@ divergentEntriesInAppendEntriesMsgs.children = {
     ], 
     "RequestVoteAction":[
         logEntryInTermImpliesSafeAtTermAppendEntries
+    ],
+    "HandleRequestVoteResponseAction":[
+        divergentEntriesInAppendEntriesMsgsForRequestVoteQuorum
     ]
 }
 

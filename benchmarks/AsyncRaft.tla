@@ -895,7 +895,15 @@ CandidateWithVoteQuorumGranted(s) ==
     /\ state[s] = Candidate
     /\ votesGranted[s] \in Quorum
 
-H_DivergentEntriesInAppendEntriesMsgs ==
+H_DivergentEntriesInAppendEntriesMsgsForRequestVoteQuorum ==
+    \A m \in appendEntriesMsgs : 
+    \A s \in Server : 
+        (/\ m.mtype = AppendEntriesRequest
+         /\ ExistsRequestVoteResponseQuorum(currentTerm[s], s)
+         /\ m.mprevLogIndex + 1 > Len(log[s])) => 
+            (m.mentries # <<>> => m.mentries[1] # currentTerm[s]) 
+
+H_DivergentEntriesInAppendEntriesMsgs == 
     \* An AppendEntries cannot contain log entries in term T at newer indices than
     \* a leader or pending candidate's log in term T.
     \A m \in appendEntriesMsgs : 
