@@ -2167,6 +2167,7 @@ class InductiveInvGen():
         import proof_asr_coreLogInv
         import proof_consensus_epr
         import proof_consensus_epr_demo
+        import proof_basic_consensus
         import proof_async_raft
 
         #
@@ -2207,6 +2208,10 @@ class InductiveInvGen():
             root = proof_async_raft.root
             actions = proof_async_raft.actions
             nodes = proof_async_raft.nodes
+        elif self.specname == "basic_consensus":
+            root = proof_basic_consensus.root
+            actions = proof_basic_consensus.actions
+            nodes = proof_basic_consensus.nodes
         else:
             logging.info("Unknown spec for proof structure: " + self.specname)
             root = StructuredProofNode("Safety", self.safety)
