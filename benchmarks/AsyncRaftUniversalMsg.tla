@@ -172,17 +172,19 @@ Init ==
 \* Universal message type sent from server s. 
 \* Includes that node's full state along with their node id.
 \* 
+\* Can omit unused information.
+\* 
 UniversalMsg(s) == 
     [
         from |-> s,
         currentTerm |-> currentTerm[s],
-        state |-> state[s],
+        \* state |-> state[s],
         votedFor |-> votedFor[s],
         log |-> log[s],
-        commitIndex |-> commitIndex[s],
-        votesGranted |-> votesGranted[s],
-        nextIndex |-> nextIndex[s],
-        matchIndex |-> matchIndex[s]    
+        commitIndex |-> commitIndex[s]
+        \* votesGranted |-> votesGranted[s],
+        \* nextIndex |-> nextIndex[s],
+        \* matchIndex |-> matchIndex[s]    
     ]
              
 
@@ -262,10 +264,8 @@ AdvanceCommitIndex(i) ==
 
 \* ACTION: UpdateTerm
 \* Any RPC with a newer term causes the recipient to advance its term first.
-UpdateTerm ==
+UpdateTerm(dest) ==
     \E m \in msgs :
-    \E dest \in Server :
-        \* /\ m.mterm > currentTerm[m.mdest]
         /\ m.currentTerm > currentTerm[dest]
         /\ currentTerm'    = [currentTerm EXCEPT ![dest] = m.currentTerm]
         /\ state'          = [state       EXCEPT ![dest] = Follower]
@@ -289,12 +289,6 @@ GrantVote(i, m) ==
             /\ m.currentTerm <= currentTerm[i]
             /\ votedFor' = [votedFor EXCEPT ![i] = IF grant THEN j ELSE votedFor[i]]
             /\ msgs' = {UniversalMsg(i)}
-            \* /\ msgs' = msgs \cup {[
-            \*                 mtype        |-> RequestVoteResponse,
-            \*                 mterm        |-> currentTerm[i],
-            \*                 mvoteGranted |-> grant,
-            \*                 msource      |-> i,
-            \*                 mdest        |-> j]}
             /\ UNCHANGED <<state, currentTerm, candidateVars, leaderVars, logVars>>
 
 \* ACTION: HandleRequestVoteResponse --------------------------------
@@ -411,6 +405,7 @@ PrimaryLearnsEntry(i, m) ==
     /\ msgs' = msgs \ {m}
     /\ UNCHANGED <<serverVars, candidateVars, logVars, nextIndex>>
 
+UpdateTermAction == \E i \in Server : UpdateTerm(i)
 BecomeCandidateAction == TRUE /\ \E i \in Server : BecomeCandidate(i)
 GrantVoteAction == \E i \in Server : \E m \in msgs : GrantVote(i, m)
 RecordGrantedVoteAction == \E i \in Server : \E m \in msgs : RecordGrantedVote(i, m)
@@ -425,7 +420,7 @@ LearnCommitAction == \E i \in Server : \E m \in msgs : LearnCommit(i, m)
 
 \* Defines how the variables may transition.
 Next == 
-    \/ UpdateTerm
+    \/ UpdateTermAction
     \/ BecomeCandidateAction
     \/ GrantVoteAction
     \/ RecordGrantedVoteAction
