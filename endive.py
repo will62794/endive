@@ -1197,8 +1197,8 @@ class InductiveInvGen():
 
             else:
                 logging.info(f"Starting CTI generation process {n} (of {num_cti_worker_procs} total workers)")
-                target_sample_states = 8000
-                target_sample_time_limit_ms = 6000
+                target_sample_states = 20000
+                target_sample_time_limit_ms = 15000
                 cti_subproc = self.generate_ctis_tlc_run_async(
                                     num_traces_per_tlc_instance,
                                     props=props, 

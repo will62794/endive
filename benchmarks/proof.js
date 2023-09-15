@@ -66,7 +66,8 @@ function awaitGenCtiCompletion(expr, onCompleteFn){
                 $('#gen-ctis-btn').prop("disabled",false);
                 $('#gen-ctis-btn-subtree').prop("disabled",false);
                 $('#cti-loading-icon').css('visibility', 'hidden');
-                $("#gen-ctis-btn").html("Generate CTIs");
+                // $("#gen-ctis-btn").html("Generate CTIs");
+                $("#gen-ctis-btn").html("Check node");
                 generatingCTIs = false;
     
                 if(onCompleteFn !== undefined){
@@ -210,8 +211,8 @@ function setCTIPaneHtml(nodeData){
 
     // For now don't allow CTI generation for specific sub-actions, only for top-level node all at once.
     // ctipane.innerHTML += `<div><button id='gen-ctis-btn'> Generate CTIs </button> ${generatingCTIsDiv}</div> <br>`;
-    ctipane.innerHTML += `<div><button id='gen-ctis-btn'> Generate CTIs </button></div> <br>`;
-    ctipane.innerHTML += "<div><button id='gen-ctis-btn-subtree'> Generate CTIs (recursive) </button></div> <br>";
+    ctipane.innerHTML += `<div><button id='gen-ctis-btn'> Check node </button></div> <br>`;
+    ctipane.innerHTML += "<div><button id='gen-ctis-btn-subtree'> Check node (recursive) </button></div> <br>";
 
     // ctipane.innerHTML += "<div><button id='refresh-node-btn'> Refresh Proof Node </button></div> <br>";
     ctipane.innerHTML += "<div><button id='add-support-lemma-btn'> Add support lemma </button></div><br>";
@@ -981,7 +982,7 @@ function reloadLayout(){
     legendDiv.innerHTML += `<li>(Click on edge to delete support lemma)<br></li>`;
     legendDiv.innerHTML += `<li>(Double click lemma node to re-generate CTIs)</li>`;
     legendDiv.innerHTML += `</ul>`;
-    stategraph.appendChild(legendDiv);
+    // stategraph.appendChild(legendDiv);
 
 }
 
