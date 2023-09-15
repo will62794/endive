@@ -377,25 +377,25 @@ TruncateEntry(i, m) ==
     \* There is no need to broadcast your state on this action.
     /\ UNCHANGED <<candidateVars, msgs, leaderVars, commitIndex, votedFor, currentTerm>>
 
-AcceptAppendEntriesRequestLearnCommit(m) ==
-    /\ m.mtype = AppendEntriesRequest
-    /\ m.mterm = currentTerm[m.mdest]
-    /\ LET  i     == m.mdest
-            j     == m.msource
-            logOk == LogOk(i, m)
-        IN 
-            /\ state[i] \in { Follower, Candidate }
-            \* We can learn a commitIndex as long as the log check passes, and if we could append these log entries.
-            \* We will not, however, advance our local commitIndex to a point beyond the end of our log. And,
-            \* we don't actually update our log here, only our commitIndex.
-            /\ logOk
-            /\ Len(log[i]) = m.mprevLogIndex
-            /\ CanAppend(m, i)
-            /\ m.mcommitIndex > commitIndex[i] \* no need to ever decrement our commitIndex.
-            /\ state' = [state EXCEPT ![i] = Follower]
-            /\ commitIndex' = [commitIndex EXCEPT ![i] = Min({m.mcommitIndex, Len(log[i])})]
-            \* No need to send a response message since we are not updating our logs.
-            /\ UNCHANGED <<candidateVars, msgs, leaderVars, log, votedFor, currentTerm, msgs>>
+\* TODO: I expect this to be incorrect in its current form.
+LearnCommit(i, m) ==
+    /\ m.currentTerm = currentTerm[i]
+    \* /\ LET  i     == m.mdest
+    \*         j     == m.msource
+    \*         logOk == LogOk(i, m)
+    \*     IN 
+    /\ state[i] \in { Follower, Candidate }
+    \* We can learn a commitIndex as long as the log check passes, and if we could append these log entries.
+    \* We will not, however, advance our local commitIndex to a point beyond the end of our log. And,
+    \* we don't actually update our log here, only our commitIndex.
+    \* /\ logOk
+    \* /\ Len(log[i]) = m.mprevLogIndex
+    \* /\ CanAppend(m, i)
+    /\ m.commitIndex > commitIndex[i] \* no need to ever decrement our commitIndex.
+    /\ state' = [state EXCEPT ![i] = Follower]
+    /\ commitIndex' = [commitIndex EXCEPT ![i] = Min({m.commitIndex, Len(log[i])})]
+    \* No need to send a response message since we are not updating our logs.
+    /\ UNCHANGED <<candidateVars, msgs, leaderVars, log, votedFor, currentTerm, msgs>>
 
 
 \* ACTION: HandleAppendEntriesResponse
@@ -421,7 +421,7 @@ AppendEntryAction == \E i \in Server : \E m \in msgs : AppendEntry(i, m)
 TruncateEntryAction == \E i \in Server : \E m \in msgs : TruncateEntry(i, m)
 PrimaryLearnsEntryAction == \E i \in Server : \E m \in msgs : PrimaryLearnsEntry(i, m)
 AdvanceCommitIndexAction == TRUE /\ \E i \in Server : AdvanceCommitIndex(i)
-AcceptAppendEntriesRequestLearnCommitAction == \E m \in msgs : AcceptAppendEntriesRequestLearnCommit(m)
+LearnCommitAction == \E i \in Server : \E m \in msgs : LearnCommit(i, m)
 
 \* Defines how the variables may transition.
 Next == 
@@ -436,7 +436,7 @@ Next ==
     \/ TruncateEntryAction
     \/ PrimaryLearnsEntryAction
     \/ AdvanceCommitIndexAction
-    \* \/ AcceptAppendEntriesRequestLearnCommitAction
+    \/ LearnCommitAction
 
 NextUnchanged == UNCHANGED vars
 
@@ -1047,6 +1047,6 @@ TestInv ==
     \* ~\E m \in msgs : (m.mtype = RequestVoteResponse /\ m.mvoteGranted)
     \* ~\E s \in Server : Cardinality(votesGranted[s]) > 1
     \* /\ ~\E s,t \in Server : s # t /\ log[s] # <<>> /\ log[t] # <<>>
-    [][~TruncateEntryAction]_vars
+    [][~AppendEntryAction]_vars
     \* ~\E s \in Server : state[s] = Leader
 ===============================================================================
