@@ -215,28 +215,9 @@ BecomeCandidate(i) ==
 \* Leader i sends j an AppendEntries request containing up to 1 entry.
 \* While implementations may want to send more than 1 at a time, this spec uses
 \* just 1 because it minimizes atomic regions without loss of generality.
-AppendEntries(i, j) ==
-    /\ i /= j
+LeaderBroadcast(i) ==
     /\ state[i] = Leader
-    /\ LET prevLogIndex == nextIndex[i][j] - 1
-           prevLogTerm == IF (prevLogIndex > 0 /\ prevLogIndex \in DOMAIN log[i])
-                            THEN log[i][prevLogIndex]
-                            ELSE 0
-           \* Send up to 1 entry, constrained by the end of the log.
-           \* NOTE: This spec never sends more than one entry at a time currently. (Will S.)
-           lastEntry == Min({Len(log[i]), nextIndex[i][j]})
-           entries == SubSeq(log[i], nextIndex[i][j], lastEntry)
-       IN 
-        \*   /\ msgs' = msgs \cup {[
-        \*            mtype          |-> AppendEntriesRequest,
-        \*            mterm          |-> currentTerm[i],
-        \*            mprevLogIndex  |-> prevLogIndex,
-        \*            mprevLogTerm   |-> prevLogTerm,
-        \*            mentries       |-> entries,
-        \*            mcommitIndex   |-> Min({commitIndex[i], lastEntry}),
-        \*            msource        |-> i,
-        \*            mdest          |-> j]}
-          /\ msgs' = msgs \cup {UniversalMsg(i)}
+    /\ msgs' = msgs \cup {UniversalMsg(i)}
     /\ UNCHANGED <<serverVars, candidateVars, nextIndex, matchIndex, logVars>>
 
 \* ACTION: BecomeLeader -------------------------------------------
@@ -282,7 +263,7 @@ AdvanceCommitIndex(i) ==
 \* ACTION: UpdateTerm
 \* Any RPC with a newer term causes the recipient to advance its term first.
 UpdateTerm ==
-    \E m \in (msgs) :
+    \E m \in msgs :
     \E dest \in Server :
         \* /\ m.mterm > currentTerm[m.mdest]
         /\ m.currentTerm > currentTerm[dest]
@@ -384,29 +365,23 @@ NeedsTruncation(m, i, index) ==
 TruncateLog(m, i) ==
     [index \in 1..m.mprevLogIndex |-> log[i][index]]
 
-AcceptAppendEntriesRequestAppend(m) ==
-    /\ m.mtype = AppendEntriesRequest
-    /\ m.mterm = currentTerm[m.mdest]
-    /\ LET  i     == m.mdest
-            j     == m.msource
-            logOk == LogOk(i, m)
-            index == m.mprevLogIndex + 1
-        IN 
-            /\ state[i] \in { Follower, Candidate }
-            /\ logOk
-            /\ CanAppend(m, i)
-            /\ state' = [state EXCEPT ![i] = Follower]
-            \* Only update the logs in this action. commit learning is done in a separate action.
-            /\ log' = [log EXCEPT ![i] = Append(log[i], m.mentries[1])]
-            /\ msgs' = msgs \cup {UniversalMsg(i)}
-                \* [
-                \*         mtype           |-> AppendEntriesResponse,
-                \*         mterm           |-> currentTerm[i],
-                \*         msuccess        |-> TRUE,
-                \*         mmatchIndex     |-> m.mprevLogIndex + Len(m.mentries),
-                \*         msource         |-> i,
-                \*         mdest           |-> j]}
-            /\ UNCHANGED <<candidateVars, commitIndex, leaderVars, votedFor, currentTerm>>
+\* Is log li a prefix of log lj.
+IsPrefix(li,lj) == 
+    /\ Len(li) <= Len(lj)
+    /\ SubSeq(li, 1, Len(li)) = SubSeq(lj, 1, Len(li))
+
+AppendEntry(i, m) ==
+    /\ m.currentTerm = currentTerm[i]
+    /\ state[i] \in { Follower, Candidate }
+    \* Can always append an entry if we are a prefix of the other log, and will only
+    \* append if other log actually has more entries than us.
+    /\ IsPrefix(log[i], m.log)
+    /\ Len(m.log) > Len(log[i])
+    /\ state' = [state EXCEPT ![i] = Follower]
+    \* Only update the logs in this action. Commit learning is done in a separate action.
+    /\ log' = [log EXCEPT ![i] = Append(log[i], m.log[Len(log[i]) + 1])]
+    /\ msgs' = msgs \cup {UniversalMsg(i)}
+    /\ UNCHANGED <<candidateVars, commitIndex, leaderVars, votedFor, currentTerm>>
        
 AcceptAppendEntriesRequestTruncate(m) ==
     /\ m.mtype = AppendEntriesRequest
@@ -484,9 +459,9 @@ RecordGrantedVoteAction == \E i \in Server : \E m \in msgs : RecordGrantedVote(i
 BecomeLeaderAction == TRUE /\ \E i \in Server : BecomeLeader(i)
 ClientRequestAction == TRUE /\ \E i \in Server : ClientRequest(i)
 AdvanceCommitIndexAction == TRUE /\ \E i \in Server : AdvanceCommitIndex(i)
-AppendEntriesAction == TRUE /\ \E i,j \in Server : AppendEntries(i, j)
+LeaderBroadcastAction == TRUE /\ \E i \in Server : LeaderBroadcast(i)
 RejectAppendEntriesRequestAction == \E m \in msgs : RejectAppendEntriesRequest(m)
-AcceptAppendEntriesRequestAppendAction == \E m \in msgs : AcceptAppendEntriesRequestAppend(m)
+AppendEntryAction == \E i \in Server : \E m \in msgs : AppendEntry(i, m)
 AcceptAppendEntriesRequestTruncateAction == \E m \in msgs : AcceptAppendEntriesRequestTruncate(m)
 AcceptAppendEntriesRequestLearnCommitAction == \E m \in msgs : AcceptAppendEntriesRequestLearnCommit(m)
 HandleAppendEntriesResponseAction == \E m \in msgs : HandleAppendEntriesResponse(m)
@@ -500,9 +475,9 @@ Next ==
     \/ BecomeLeaderAction
     \/ ClientRequestAction
     \* \/ AdvanceCommitIndexAction
-    \* \/ AppendEntriesAction
+    \/ LeaderBroadcastAction
     \* \/ RejectAppendEntriesRequestAction
-    \* \/ AcceptAppendEntriesRequestAppendAction
+    \/ AppendEntryAction
     \* \/ AcceptAppendEntriesRequestTruncateAction
     \* \/ AcceptAppendEntriesRequestLearnCommitAction
     \* \/ HandleAppendEntriesResponseAction
@@ -1099,7 +1074,8 @@ H_NoLogDivergence ==
 
 \* INV: Used in debugging
 TestInv ==
-    ~\E s \in Server : state[s] = Leader
+    \* ~\E s,t \in Server : state[s] = Leader /\ state[s] = Candidate /\ Len(log[t]) > 0 /\ currentTerm[s] = currentTerm[t]
+    \* \A s \in Server : state[s] = Candidate => Len(log[s]) = 0
     \* ~\E s,t \in Server : s # t /\ commitIndex[s] > 0 /\ commitIndex[t] > 0
     \* /\ ~\E msgs \in SUBSET msgs : msgs # {}
     \* /\ ~(\E msgs \in (SUBSET msgs) : 
@@ -1115,6 +1091,6 @@ TestInv ==
     \* ~\E m \in msgs : (m.mtype = RequestVoteResponse /\ m.mvoteGranted)
     \* ~\E s \in Server : Cardinality(votesGranted[s]) > 1
     \* /\ ~\E s,t \in Server : s # t /\ log[s] # <<>> /\ log[t] # <<>>
-    \* [][~AcceptAppendEntriesRequestTruncateAction]_vars
+    [][~AppendEntryAction]_vars
     \* ~\E s \in Server : state[s] = Leader
 ===============================================================================
