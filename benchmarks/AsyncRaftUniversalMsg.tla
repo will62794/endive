@@ -322,27 +322,6 @@ LogOk(i, m) ==
        /\ m.mprevLogIndex <= Len(log[i])
        /\ m.mprevLogTerm = log[i][m.mprevLogIndex]
 
-RejectAppendEntriesRequest(m) ==
-    \* /\ ReceivableMessage(m, AppendEntriesRequest, LessOrEqualTerm)
-    /\ m.mtype = AppendEntriesRequest
-    /\ m.mterm <= currentTerm[m.mdest]
-    /\ LET  i     == m.mdest
-            j     == m.msource
-            logOk == LogOk(i, m)
-        IN  /\ \/ m.mterm < currentTerm[i]
-                \/ /\ m.mterm = currentTerm[i]
-                   /\ state[i] = Follower
-                   /\ \lnot logOk
-            /\ msgs' = msgs \cup {UniversalMsg(i)}
-                \* {[
-                \*         mtype           |-> AppendEntriesResponse,
-                \*         mterm           |-> currentTerm[i],
-                \*         msuccess        |-> FALSE,
-                \*         mmatchIndex     |-> 0,
-                \*         msource         |-> i,
-                \*         mdest           |-> j]}
-            /\ UNCHANGED <<state, candidateVars, leaderVars, serverVars, logVars>>
-
 \* ACTION: AcceptAppendEntriesRequest ------------------
 \* The original spec had to three sub actions, this version is compressed.
 \* In one step it can:
@@ -383,34 +362,20 @@ AppendEntry(i, m) ==
     /\ msgs' = msgs \cup {UniversalMsg(i)}
     /\ UNCHANGED <<candidateVars, commitIndex, leaderVars, votedFor, currentTerm>>
        
-AcceptAppendEntriesRequestTruncate(m) ==
-    /\ m.mtype = AppendEntriesRequest
-    /\ m.mterm = currentTerm[m.mdest]
-    /\ LET  i     == m.mdest
-            j     == m.msource
-            logOk == LogOk(i, m)
-            index == m.mprevLogIndex + 1
-        IN 
-            /\ state[i] \in { Follower, Candidate }
-            /\ logOk
-            \* We only truncate if terms do not match and our log index
-            \* is >= the log of the sender. Note that we do not reset the commitIndex
-            \* here as well, since if safety holds, then we should never be truncating a 
-            \* portion of the log that is covered by a commitIndex.
-            /\ m.mentries # << >>
-            /\ Len(log[i]) >= index
-            /\ m.mentries[1] > log[i][index]
-            /\ state' = [state EXCEPT ![i] = Follower]
-            /\ log' = [log EXCEPT ![i] = TruncateLog(m, i)]
-            /\ msgs' = msgs \cup {UniversalMsg(i)}
-            \* /\ msgs' = msgs \cup {[
-                        \* mtype           |-> AppendEntriesResponse,
-                        \* mterm           |-> currentTerm[i],
-                        \* msuccess        |-> TRUE,
-                        \* mmatchIndex     |-> m.mprevLogIndex,
-                        \* msource         |-> i,
-                        \* mdest           |-> j]}
-            /\ UNCHANGED <<candidateVars, leaderVars, commitIndex, votedFor, currentTerm>>
+TruncateEntry(i, m) ==
+    \* /\ m.currentTerm = currentTerm[m.mdest]
+    /\ state[i] \in { Follower, Candidate }
+    \* Neither log is a prefix of the other.
+    /\ ~IsPrefix(m.log, log[i])
+    /\ ~IsPrefix(log[i], m.log)
+    \* Can't truncate an empty log.
+    /\ Len(log[i]) > 0
+    \* Their log term is newer than yours.
+    /\ LastTerm(m.log) > LastTerm(log[i])
+    /\ state' = [state EXCEPT ![i] = Follower]
+    /\ log' = [log EXCEPT ![i] = SubSeq(log[i], 1, Len(log[i])-1)]
+    \* There is no need to broadcast your state on this action.
+    /\ UNCHANGED <<candidateVars, msgs, leaderVars, commitIndex, votedFor, currentTerm>>
 
 AcceptAppendEntriesRequestLearnCommit(m) ==
     /\ m.mtype = AppendEntriesRequest
@@ -436,35 +401,27 @@ AcceptAppendEntriesRequestLearnCommit(m) ==
 \* ACTION: HandleAppendEntriesResponse
 \* Server i receives an AppendEntries response from server j with
 \* m.mterm = currentTerm[i].
-HandleAppendEntriesResponse(m) ==
-    \* /\ ReceivableMessage(m, AppendEntriesResponse, EqualTerm)
-    /\ m.mtype = AppendEntriesResponse
-    /\ m.mterm = currentTerm[m.mdest]
-    /\ LET i     == m.mdest
-           j     == m.msource
-        IN
-            /\ \/ /\ m.msuccess \* successful
-                  /\ nextIndex'  = [nextIndex  EXCEPT ![i][j] = m.mmatchIndex + 1]
-                  /\ matchIndex' = [matchIndex EXCEPT ![i][j] = m.mmatchIndex]
-               \/ /\ \lnot m.msuccess \* not successful
-                  /\ nextIndex' = [nextIndex EXCEPT ![i][j] = Max({nextIndex[i][j] - 1, 1})]
-                  /\ UNCHANGED <<matchIndex>>
-        \*   /\ Discard(m)
-            /\ msgs' = msgs \ {m}
-            /\ UNCHANGED <<serverVars, candidateVars, logVars>>
+PrimaryLearnsEntry(i, m) ==
+    \* needed?
+    \* /\ m.currentTerm = currentTerm[i]
+    \* Only need to update if newer.
+    /\ Len(m.log) > matchIndex[i][m.from]
+    \* Update matchIndex to highest index of their log.
+    /\ matchIndex' = [matchIndex EXCEPT ![i][m.from] = Len(m.log)]
+    /\ msgs' = msgs \ {m}
+    /\ UNCHANGED <<serverVars, candidateVars, logVars, nextIndex>>
 
 BecomeCandidateAction == TRUE /\ \E i \in Server : BecomeCandidate(i)
 GrantVoteAction == \E i \in Server : \E m \in msgs : GrantVote(i, m)
 RecordGrantedVoteAction == \E i \in Server : \E m \in msgs : RecordGrantedVote(i, m)
 BecomeLeaderAction == TRUE /\ \E i \in Server : BecomeLeader(i)
 ClientRequestAction == TRUE /\ \E i \in Server : ClientRequest(i)
-AdvanceCommitIndexAction == TRUE /\ \E i \in Server : AdvanceCommitIndex(i)
 LeaderBroadcastAction == TRUE /\ \E i \in Server : LeaderBroadcast(i)
-RejectAppendEntriesRequestAction == \E m \in msgs : RejectAppendEntriesRequest(m)
 AppendEntryAction == \E i \in Server : \E m \in msgs : AppendEntry(i, m)
-AcceptAppendEntriesRequestTruncateAction == \E m \in msgs : AcceptAppendEntriesRequestTruncate(m)
+TruncateEntryAction == \E i \in Server : \E m \in msgs : TruncateEntry(i, m)
+PrimaryLearnsEntryAction == \E i \in Server : \E m \in msgs : PrimaryLearnsEntry(i, m)
+AdvanceCommitIndexAction == TRUE /\ \E i \in Server : AdvanceCommitIndex(i)
 AcceptAppendEntriesRequestLearnCommitAction == \E m \in msgs : AcceptAppendEntriesRequestLearnCommit(m)
-HandleAppendEntriesResponseAction == \E m \in msgs : HandleAppendEntriesResponse(m)
 
 \* Defines how the variables may transition.
 Next == 
@@ -474,13 +431,12 @@ Next ==
     \/ RecordGrantedVoteAction
     \/ BecomeLeaderAction
     \/ ClientRequestAction
-    \* \/ AdvanceCommitIndexAction
     \/ LeaderBroadcastAction
-    \* \/ RejectAppendEntriesRequestAction
     \/ AppendEntryAction
-    \* \/ AcceptAppendEntriesRequestTruncateAction
+    \/ TruncateEntryAction
+    \/ PrimaryLearnsEntryAction
+    \/ AdvanceCommitIndexAction
     \* \/ AcceptAppendEntriesRequestLearnCommitAction
-    \* \/ HandleAppendEntriesResponseAction
 
 NextUnchanged == UNCHANGED vars
 
@@ -1091,6 +1047,6 @@ TestInv ==
     \* ~\E m \in msgs : (m.mtype = RequestVoteResponse /\ m.mvoteGranted)
     \* ~\E s \in Server : Cardinality(votesGranted[s]) > 1
     \* /\ ~\E s,t \in Server : s # t /\ log[s] # <<>> /\ log[t] # <<>>
-    [][~AppendEntryAction]_vars
+    [][~TruncateEntryAction]_vars
     \* ~\E s \in Server : state[s] = Leader
 ===============================================================================
