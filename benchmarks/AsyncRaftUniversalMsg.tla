@@ -395,9 +395,9 @@ LearnCommit(i, m) ==
 \* ACTION: HandleAppendEntriesResponse
 \* Server i receives an AppendEntries response from server j with
 \* m.mterm = currentTerm[i].
-PrimaryLearnsEntry(i, m) ==
-    \* needed?
-    \* /\ m.currentTerm = currentTerm[i]
+LeaderLearnsEntry(i, m) ==
+    /\ state[i] = Leader
+    /\ m.currentTerm = currentTerm[i]
     \* Only need to update if newer.
     /\ Len(m.log) > matchIndex[i][m.from]
     \* Update matchIndex to highest index of their log.
@@ -414,7 +414,7 @@ ClientRequestAction == TRUE /\ \E i \in Server : ClientRequest(i)
 LeaderBroadcastAction == TRUE /\ \E i \in Server : LeaderBroadcast(i)
 AppendEntryAction == \E i \in Server : \E m \in msgs : AppendEntry(i, m)
 TruncateEntryAction == \E i \in Server : \E m \in msgs : TruncateEntry(i, m)
-PrimaryLearnsEntryAction == \E i \in Server : \E m \in msgs : PrimaryLearnsEntry(i, m)
+LeaderLearnsEntryAction == \E i \in Server : \E m \in msgs : LeaderLearnsEntry(i, m)
 AdvanceCommitIndexAction == TRUE /\ \E i \in Server : AdvanceCommitIndex(i)
 LearnCommitAction == \E i \in Server : \E m \in msgs : LearnCommit(i, m)
 
@@ -429,9 +429,9 @@ Next ==
     \/ LeaderBroadcastAction
     \/ AppendEntryAction
     \/ TruncateEntryAction
-    \/ PrimaryLearnsEntryAction
+    \/ LeaderLearnsEntryAction
     \/ AdvanceCommitIndexAction
-    \/ LearnCommitAction
+    \* \/ LearnCommitAction
 
 NextUnchanged == UNCHANGED vars
 
