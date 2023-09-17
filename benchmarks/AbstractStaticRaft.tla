@@ -328,7 +328,16 @@ H_LogsLaterThanCommittedMustHaveCommitted ==
     \A s \in Server : 
     \A c \in immediatelyCommitted :
         \* Exists an entry in log[s] with a term greater than the term in which the entry was committed.
-        (\E i \in DOMAIN log[s] : (log[s][i] > c[2]) \/ (log[s][i] > c[2])) =>
+        (\E i \in DOMAIN log[s] : (log[s][i] > c[2])) =>
+            /\ Len(log[s]) >= c[1]
+            /\ log[s][c[1]] = c[2] \* entry exists in the server's log.
+
+\* Alternate statement of the above that I think works just as well.
+H_LogsLaterThanCommittedMustHaveCommittedAlt ==
+    \A s \in Server : 
+    \A c \in immediatelyCommitted :
+        \* Exists an entry in log[s] with a term greater than the term in which the entry was committed.
+        (LastTerm(log[s]) > c[2]) =>
             /\ Len(log[s]) >= c[1]
             /\ log[s][c[1]] = c[2] \* entry exists in the server's log.
 
