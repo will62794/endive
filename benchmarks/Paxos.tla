@@ -285,20 +285,27 @@ H_L2 == \A a \in Acceptor : IF maxVBal[a] = -1
 
 H_L3 == \A m \in msgs1b : (m.type = "1b") => /\ maxBal[m.acc] >= m.bal
 
-H_L4 == \A m \in msgs1b : (m.type = "1b") => ((m.mbal >= 0) => <<m.mbal, m.mval>> \in votes[m.acc])
+H_NonEmpty1bMsgImpliesAcceptorVotedInPastBallot == 
+    \A m \in msgs1b : 
+        (m.mbal >= 0) => <<m.mbal, m.mval>> \in votes[m.acc]
 
-H_L5 == \A m \in msgs2a : (m.type = "2a") => /\ \E Q \in Quorum : ShowsSafeAt(Q, m.bal, m.val)
+H_ValuesSafeAtBallotIn2a == 
+    \A m \in msgs2a : 
+    \E Q \in Quorum : 
+        ShowsSafeAt(Q, m.bal, m.val)
 
-H_L6 == \A m \in msgs2a : (m.type = "2a") => \A mm \in msgs2a : /\ mm.type ="2a"
-                                                                /\ mm.bal = m.bal
-                                                                    => mm.val = m.val
+H_UniqueValuesPerBallotIn2aMsgs == 
+    \A mi,mj \in msgs2a : 
+        (mj.type ="2a" /\ mj.bal = mi.bal) => mj.val = mi.val
 
 H_L7 == \A m \in msgs2b : (m.type = "2b") => /\ maxVBal[m.acc] >= m.bal
 
-H_L8 == \A m \in msgs2b : (m.type = "2b") => \E mm \in msgs2a : 
-                                                /\ mm.type = "2a"
-                                                /\ mm.bal  = m.bal
-                                                /\ mm.val  = m.val
+H_ValueAcceptedAtBallotImpliesCorresponding2a == 
+    \A m \in msgs2b : 
+    \E mm \in msgs2a : 
+        /\ mm.type = "2a"
+        /\ mm.bal  = m.bal
+        /\ mm.val  = m.val
 
 \* 
 \* Originally from https://github.com/tlaplus/Examples/blob/master/specifications/PaxosHowToWinATuringAward/Paxos.tla.
@@ -326,11 +333,11 @@ IndInv ==
     /\ H_L1
     /\ H_L2
     /\ H_L3
-    /\ H_L4
-    /\ H_L5
-    /\ H_L6
+    /\ H_NonEmpty1bMsgImpliesAcceptorVotedInPastBallot
+    /\ H_ValuesSafeAtBallotIn2a
+    /\ H_UniqueValuesPerBallotIn2aMsgs
     /\ H_L7
-    /\ H_L8
+    /\ H_ValueAcceptedAtBallotImpliesCorresponding2a
 
 
 CTICost == 

@@ -15,11 +15,11 @@ lemmaTRUEShim = StructuredProofNode("LemmaTrueShim", "1=1")
 L1 = make_node("H_L1")
 L2 = make_node("H_L2")
 L3 = make_node("H_L3")
-L4 = make_node("H_L4")
-L5 = make_node("H_L5")
-L6 = make_node("H_L6")
+L4 = make_node("H_NonEmpty1bMsgImpliesAcceptorVotedInPastBallot")
+L5 = make_node("H_ValuesSafeAtBallotIn2a")
+L6 = make_node("H_UniqueValuesPerBallotIn2aMsgs")
 L7 = make_node("H_L7")
-L8 = make_node("H_L8")
+L8 = make_node("H_ValueAcceptedAtBallotImpliesCorresponding2a")
 
 L7.children = {
     "Phase2bAction":[
@@ -45,7 +45,7 @@ children = {
     "Phase2bAction": [
         L5,
         L6,
-        L7,
+        # L7,
         L8
     ]
 }
