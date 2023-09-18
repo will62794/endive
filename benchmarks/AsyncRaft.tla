@@ -239,10 +239,8 @@ BecomeLeader(i) ==
 \* Leader i receives a client request to add v to the log.
 ClientRequest(i) ==
     /\ state[i] = Leader
-    /\ LET newLog == Append(log[i], currentTerm[i])
-       IN  /\ log' = [log EXCEPT ![i] = newLog]
-    /\ UNCHANGED <<appendEntriesMsgs, serverVars, candidateVars,
-                   leaderVars, commitIndex, requestVoteMsgs>>
+    /\ log' = [log EXCEPT ![i] = Append(log[i], currentTerm[i])]
+    /\ UNCHANGED <<appendEntriesMsgs, serverVars, candidateVars, leaderVars, commitIndex, requestVoteMsgs>>
 
 \* The set of servers that agree up through index.
 Agree(i, index) == {i} \cup {k \in Server : matchIndex[i][k] >= index }
