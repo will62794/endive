@@ -3,15 +3,17 @@
 (* This is a specification of the Paxos algorithm without explicit leaders *)
 (* or learners.  It refines the spec in Voting                             *)
 (***************************************************************************)
-EXTENDS Integers, FiniteSets, TLC, Randomization
+EXTENDS Integers, FiniteSets, TLC, Randomization, FiniteSetsExt
 -----------------------------------------------------------------------------
 (***************************************************************************)
 (* The constant parameters and the set Ballots are the same as in Voting.  *)
 (***************************************************************************)
-CONSTANT Value, Acceptor, Quorum
+CONSTANT Value, Acceptor
 
-ASSUME QuorumAssumption == /\ \A Q \in Quorum : Q \subseteq Acceptor
-                           /\ \A Q1, Q2 \in Quorum : Q1 \cap Q2 # {} 
+Quorum == {i \in SUBSET(Acceptor) : Cardinality(i) * 2 > Cardinality(Acceptor)}
+
+\* ASSUME QuorumAssumption == /\ \A Q \in Quorum : Q \subseteq Acceptor
+                        \*    /\ \A Q1, Q2 \in Quorum : Q1 \cap Q2 # {} 
       
 Ballot ==  Nat
 
@@ -29,6 +31,13 @@ Message ==      [type : {"1a"}, bal : Ballot]
            \cup [type : {"1b"}, acc : Acceptor, bal : Ballot, mbal : Ballot \cup {-1}, mval : Value \cup {None}]
            \cup [type : {"2a"}, bal : Ballot, val : Value]
            \cup [type : {"2b"}, acc : Acceptor, bal : Ballot, val : Value]
+
+
+Message1a ==      [type : {"1a"}, bal : Ballot]
+Message1b ==      [type : {"1b"}, acc : Acceptor, bal : Ballot, mbal : Ballot \cup {-1}, mval : Value \cup {None}]
+Message2a ==      [type : {"2a"}, bal : Ballot, val : Value]
+Message2b ==      [type : {"2b"}, acc : Acceptor, bal : Ballot, val : Value]
+
 -----------------------------------------------------------------------------
 VARIABLE maxBal, 
          maxVBal, \* <<maxVBal[a], maxVal[a]>> is the vote with the largest
@@ -63,13 +72,19 @@ vars == <<maxBal, maxVBal, maxVal, msgs1a, msgs1b, msgs2a, msgs2b>>
   (* variables.  I like to use the identifier `vars'.                      *)
   (*************************************************************************)
   
+\* Set of all subsets of a set of size <= k.
+kOrSmallerSubset(k, S) == UNION {(kSubset(n, S)) : n \in 0..k}
+
 (***************************************************************************)
 (* The type invariant and initial predicate.                               *)
 (***************************************************************************)
 TypeOK == /\ maxBal \in [Acceptor -> Ballot \cup {-1}]
           /\ maxVBal \in [Acceptor -> Ballot \cup {-1}]
           /\ maxVal \in [Acceptor -> Value \cup {None}]
-        \*   /\ msgs \subseteq Message
+          /\ msgs1a \in SUBSET Message1a
+          /\ msgs1b \in RandomSetOfSubsets(10, 4, Message1b)
+          /\ msgs2a \in SUBSET Message2a
+          /\ msgs2b \in kOrSmallerSubset(4, Message2b)
 
 
 NumRandSubsets == 35
@@ -177,13 +192,12 @@ Phase2a(b, v) ==
 (* message's.  ballot number                                               *)
 (***************************************************************************)
 Phase2b(a) == \E m \in msgs2a : /\ m.type = "2a"
-                              /\ m.bal \geq maxBal[a]
-                              /\ maxBal' = [maxBal EXCEPT ![a] = m.bal] 
-                              /\ maxVBal' = [maxVBal EXCEPT ![a] = m.bal] 
-                              /\ maxVal' = [maxVal EXCEPT ![a] = m.val]
-                              /\ Send([type |-> "2b", acc |-> a,
-                                       bal |-> m.bal, val |-> m.val], msgs2b) 
-                              /\ UNCHANGED <<msgs1a,msgs1b,msgs2a>>
+                                /\ m.bal \geq maxBal[a]
+                                /\ maxBal' = [maxBal EXCEPT ![a] = m.bal] 
+                                /\ maxVBal' = [maxVBal EXCEPT ![a] = m.bal] 
+                                /\ maxVal' = [maxVal EXCEPT ![a] = m.val]
+                                /\ Send([type |-> "2b", acc |-> a, bal |-> m.bal, val |-> m.val], msgs2b) 
+                                /\ UNCHANGED <<msgs1a,msgs1b,msgs2a>>
 
 (***************************************************************************)
 (* In an implementation, there will be learner processes that learn from   *)
@@ -191,14 +205,19 @@ Phase2b(a) == \E m \in msgs2a : /\ m.type = "2a"
 (* omitted from this abstract specification of the algorithm.              *)
 (***************************************************************************)
 
+Phase1aAction == TRUE /\ \E b \in Ballot : Phase1a(b)
+Phase2aAction == TRUE /\ \E b \in Ballot : \E v \in Value : Phase2a(b, v)
+Phase1bAction == TRUE /\ \E a \in Acceptor : Phase1b(a) 
+Phase2bAction == TRUE /\ \E a \in Acceptor : Phase2b(a)
+
 (***************************************************************************)
 (* Below are defined the next-state action and the complete spec.          *)
 (***************************************************************************)
 Next == 
-    \/ \E b \in Ballot : Phase1a(b)
-    \/ \E b \in Ballot : \E v \in Value : Phase2a(b, v)
-    \/ \E a \in Acceptor : Phase1b(a) 
-    \/ \E a \in Acceptor : Phase2b(a)
+    \/ Phase1aAction
+    \/ Phase2aAction
+    \/ Phase1bAction
+    \/ Phase2bAction
 
 Spec == Init /\ [][Next]_vars
 ----------------------------------------------------------------------------
@@ -238,8 +257,7 @@ ShowsSafeAt(Q, b, v) ==
       /\ (c /= -1) => \E a \in Q : VotedFor(a, c, v)
       /\ \A d \in (c+1)..(b-1), a \in Q : DidNotVoteAt(a, d)
 
-Inv == 
-    /\ Cardinality(chosen) <= 1
+Inv == Cardinality(chosen) <= 1
 
 Ind ==
     /\ TypeOKRandom
@@ -259,29 +277,28 @@ NextUnchanged == UNCHANGED vars
 (***************************************************************************)
 
 
-L1 == \A a \in Acceptor : maxBal[a] >= maxVBal[a]
+H_L1 == \A a \in Acceptor : maxBal[a] >= maxVBal[a]
 
-L2 == \A a \in Acceptor : IF maxVBal[a] = -1
-                          THEN maxVal[a] = None
-                          ELSE <<maxVBal[a], maxVal[a]>> \in votes[a]
+H_L2 == \A a \in Acceptor : IF maxVBal[a] = -1
+                                THEN maxVal[a] = None
+                                ELSE <<maxVBal[a], maxVal[a]>> \in votes[a]
 
-L3 == \A m \in msgs1b : (m.type = "1b") => /\ maxBal[m.acc] >= m.bal
+H_L3 == \A m \in msgs1b : (m.type = "1b") => /\ maxBal[m.acc] >= m.bal
 
-L4 == \A m \in msgs1b : (m.type = "1b") =>
-                        ((m.mbal >= 0) => <<m.mbal, m.mval>> \in votes[m.acc])
+H_L4 == \A m \in msgs1b : (m.type = "1b") => ((m.mbal >= 0) => <<m.mbal, m.mval>> \in votes[m.acc])
 
-L5 == \A m \in msgs2a : (m.type = "2a") => /\ \E Q \in Quorum :  ShowsSafeAt(Q, m.bal, m.val)
+H_L5 == \A m \in msgs2a : (m.type = "2a") => /\ \E Q \in Quorum : ShowsSafeAt(Q, m.bal, m.val)
 
-L6 == \A m \in msgs2a : (m.type = "2a") => \A mm \in msgs2a : /\ mm.type ="2a"
-                                                              /\ mm.bal = m.bal
-                                                                => mm.val = m.val
+H_L6 == \A m \in msgs2a : (m.type = "2a") => \A mm \in msgs2a : /\ mm.type ="2a"
+                                                                /\ mm.bal = m.bal
+                                                                    => mm.val = m.val
 
-L7 == \A m \in msgs2b : (m.type = "2b") => /\ maxVBal[m.acc] >= m.bal
+H_L7 == \A m \in msgs2b : (m.type = "2b") => /\ maxVBal[m.acc] >= m.bal
 
-L8 == \A m \in msgs2b : (m.type = "2b") => \E mm \in msgs2a : 
-                                            /\ mm.type = "2a"
-                                            /\ mm.bal  = m.bal
-                                            /\ mm.val  = m.val
+H_L8 == \A m \in msgs2b : (m.type = "2b") => \E mm \in msgs2a : 
+                                                /\ mm.type = "2a"
+                                                /\ mm.bal  = m.bal
+                                                /\ mm.val  = m.val
 
 \* 
 \* Originally from https://github.com/tlaplus/Examples/blob/master/specifications/PaxosHowToWinATuringAward/Paxos.tla.
@@ -306,14 +323,20 @@ L8 == \A m \in msgs2b : (m.type = "2b") => \E mm \in msgs2a :
 \*                                                  /\ mm.val  = m.val
 
 IndInv == 
-    /\ L1
-    /\ L2
-    /\ L3
-    /\ L4
-    /\ L5
-    /\ L6
-    /\ L7
-    /\ L8
+    /\ H_L1
+    /\ H_L2
+    /\ H_L3
+    /\ H_L4
+    /\ H_L5
+    /\ H_L6
+    /\ H_L7
+    /\ H_L8
 
+
+CTICost == 
+    Cardinality(msgs1a) + 
+    Cardinality(msgs1b) +
+    Cardinality(msgs2a) +
+    Cardinality(msgs2b)
 
 ============================================================================

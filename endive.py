@@ -2169,6 +2169,7 @@ class InductiveInvGen():
         import proof_consensus_epr_demo
         import proof_basic_consensus
         import proof_async_raft
+        import proof_Paxos
 
         #
         # Set the specified spec appropriately.
@@ -2212,6 +2213,10 @@ class InductiveInvGen():
             root = proof_basic_consensus.root
             actions = proof_basic_consensus.actions
             nodes = proof_basic_consensus.nodes
+        elif self.specname == "Paxos":
+            root = proof_Paxos.root
+            actions = proof_Paxos.actions
+            nodes = proof_Paxos.nodes
         else:
             logging.info("Unknown spec for proof structure: " + self.specname)
             root = StructuredProofNode("Safety", self.safety)

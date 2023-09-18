@@ -64,13 +64,29 @@
     ],
     "preds_alt" : [],
     "safety"  :  "Inv",
-    "constants"  :  "CONSTANTS\nAcceptor={a1,a2,a3}\nQuorum={{a1, a2}, {a1, a3}, {a2, a3}}\nBallot={0,1,2}\nNone=None\nValue={v1,v2}\nv1=v1\nv2=v2\na1=a1\na2=a2\na3=a3\n",
+    "constants"  :  {
+        "Acceptor": ["{a1,a2}", "{a1,a2,a3}"],
+        "Ballot": ["{0,1}", "{0,1,2}"],
+        "None": "None",
+        "Value": ["{v1}", "{v1,v2}"],
+        "v1": "v1",
+        "v2": "v2",
+        "a1": "a1",
+        "a2": "a2",
+        "a3": "a3"
+    },
     "constraint"  :  "",
     "quant_inv"  :  "\\A ACCI \\in Acceptor : \\A VALI \\in Value : \\A VALJ \\in Value : \\A BALI \\in Ballot : \\A BALJ \\in Ballot : \\A BALK \\in Ballot : ",
     "quant_inv_alt"  :  null,
     "quant_vars": ["VALI", "VALJ"],
     "model_consts"  :  "CONSTANT a1,a2,a3,v1,v2",
     "symmetry" : true,
-    "typeok"  :  "TypeOKRandom",
-    "simulate"  :  true      
+    "typeok"  :  "TypeOK",
+    "simulate"  :  true,      
+    "actions": [
+        "Phase1aAction",
+        "Phase2aAction",
+        "Phase1bAction",
+        "Phase2bAction"
+    ]
 }
