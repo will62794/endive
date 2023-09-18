@@ -659,12 +659,15 @@ StateConstraint ==
 \* Is log entry e = <<index, term>> in the log of node 'i'.
 InLog(e, i) == \E x \in DOMAIN log[i] : x = e[1] /\ log[i][x] = e[2]
 
+H_CandidateInTermVotedForItself == 
+    \A s \in Server : (state[s] = Candidate) => votedFor[s] = s
+
 H_QuorumsSafeAtTerms ==
     \A s \in Server : (state[s] = Leader) => 
         \E Q \in Quorum : 
-            \A t \in Q : 
-                /\ currentTerm[t] >= currentTerm[s]
-                /\ (currentTerm[t] = currentTerm[s]) => votedFor[t] # Nil
+        \A t \in Q : 
+            /\ currentTerm[t] >= currentTerm[s]
+            /\ (currentTerm[t] = currentTerm[s]) => votedFor[s] = s
 
 \* If two nodes are in the same term, then their votes granted
 \* sets cannot have intersecting voters.
@@ -712,11 +715,16 @@ H_CandidateWithVotesGrantedInTermImplyNoOtherLogsInTerm ==
         (state[s] = Candidate /\ votesGranted[s] \in Quorum) =>
             ~(\E i \in DOMAIN log[t] : log[t][i] = currentTerm[s])
 
-H_RequestVoteQuorumInTermImpliesNoOtherLogsOrLeadersInTerm == 
+H_RequestVoteQuorumInTermImpliesNoOtherLogsInTerm == 
     \A s \in Server :
         (/\ state[s] = Candidate
          /\ ExistsRequestVoteResponseQuorum(currentTerm[s], s)) =>
             /\ \A n \in Server : \A ind \in DOMAIN log[n] : log[n][ind] # currentTerm[s]
+
+H_RequestVoteQuorumInTermImpliesNoOtherLeadersInTerm == 
+    \A s \in Server :
+        (/\ state[s] = Candidate
+         /\ ExistsRequestVoteResponseQuorum(currentTerm[s], s)) =>
             /\ \A n \in Server : ~(state[n] = Leader /\ currentTerm[n] = currentTerm[s])
 
 H_RequestVoteQuorumInTermImpliesNoAppendEntryLogsInTerm == 

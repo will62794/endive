@@ -53,7 +53,40 @@ votesCantBeGrantedTwiceToCandidatesInSameTerm.children = {
     ]
 }
 
-requestVoteQuorumInTermImpliesNoOtherLogsOrLeadersInTerm = make_node("H_RequestVoteQuorumInTermImpliesNoOtherLogsOrLeadersInTerm")
+quorumsSafeAtTerms = make_node("H_QuorumsSafeAtTerms")
+
+logEntryInTermImpliesSafeAtTerms = make_node("H_LogEntryInTermImpliesSafeAtTerm")
+
+candidateInTermVotedForItself = make_node("H_CandidateInTermVotedForItself")
+
+requestVoteQuorumInTermImpliesNoOtherLogsInTerm = make_node("H_RequestVoteQuorumInTermImpliesNoOtherLogsInTerm")
+requestVoteQuorumInTermImpliesNoOtherLeadersInTerm = make_node("H_RequestVoteQuorumInTermImpliesNoOtherLeadersInTerm")
+
+requestVoteQuorumInTermImpliesNoOtherLeadersInTerm.children = {
+    "BecomeLeaderAction":[
+        candidateWithVotesGrantedInTermImplyVotersSafeAtTerm,
+        voteGrantedImpliesVoteResponseMsgConsistent
+    ],
+    "HandleRequestVoteRequestAction":[
+        quorumsSafeAtTerms,
+        candidateInTermVotedForItself
+    ],
+    "RequestVoteAction":[
+        quorumsSafeAtTerms
+    ]
+}
+
+requestVoteQuorumInTermImpliesNoOtherLogsInTerm.children = {
+    "ClientRequestAction": [
+        requestVoteQuorumInTermImpliesNoOtherLeadersInTerm
+    ],
+    "RequestVoteAction": [
+        logEntryInTermImpliesSafeAtTerms
+    ],
+    "HandleRequestVoteRequestAction": [
+        logEntryInTermImpliesSafeAtTerms
+    ]
+}
 
 candidateVotesGrantedInTermAreUnique = StructuredProofNode("CandidateVotesGrantedInTermAreUnique", "H_CandidateVotesGrantedInTermAreUnique")
 candidateWithVotesGrantedInTermImplyNoOtherLeader = StructuredProofNode("CandidateWithVotesGrantedInTermImplyNoOtherLeader", "H_CandidateWithVotesGrantedInTermImplyNoOtherLeader")
@@ -62,7 +95,8 @@ candidateWithVotesGrantedInTermImplyNoOtherLeader.children = {
         votesCantBeGrantedTwiceToCandidatesInSameTerm
     ],
     "HandleRequestVoteResponseAction":[
-        requestVoteQuorumInTermImpliesNoOtherLogsOrLeadersInTerm
+        requestVoteQuorumInTermImpliesNoOtherLeadersInTerm,
+        requestVoteQuorumInTermImpliesNoOtherLogsInTerm
     ]
 }
 
@@ -75,15 +109,13 @@ onePrimaryPerTerm = StructuredProofNode("OnePrimaryPerTerm", "H_OnePrimaryPerTer
 
 candidateWithVotesGrantedInTermImplyVotedForSafeAtTerm = make_node("H_CandidateWithVotesGrantedInTermImplyVotedForSafeAtTerm")
 
-quorumsSafeAtTerms = make_node("H_QuorumsSafeAtTerms")
 quorumsSafeAtTerms.children = {
     "BecomeLeaderAction": [
         candidateWithVotesGrantedInTermImplyVotersSafeAtTerm,
-        # candidateWithVotesGrantedInTermImplyVotedForSafeAtTerm
+        candidateInTermVotedForItself
     ]
 }
 
-logEntryInTermImpliesSafeAtTerms = make_node("H_LogEntryInTermImpliesSafeAtTerm")
 logEntryInTermImpliesSafeAtTermAppendEntries = make_node("H_LogEntryInTermImpliesSafeAtTermAppendEntries")
 
 logEntryInTermImpliesSafeAtTermAppendEntries.children = {
@@ -112,7 +144,8 @@ candidateWithVotesGrantedInTermImplyNoOtherLogsInTerm.children = {
         logEntryInTermImpliesSafeAtTerms
     ],
     "HandleRequestVoteResponseAction": [
-        requestVoteQuorumInTermImpliesNoOtherLogsOrLeadersInTerm
+        requestVoteQuorumInTermImpliesNoOtherLeadersInTerm,
+        requestVoteQuorumInTermImpliesNoOtherLogsInTerm
     ]
 }
 
@@ -135,7 +168,8 @@ logTermsMonotonic.children = {
 requestVoteQuorumInTermImpliesNoAppendEntryLogsInTerm = make_node("H_RequestVoteQuorumInTermImpliesNoAppendEntryLogsInTerm")
 requestVoteQuorumInTermImpliesNoAppendEntryLogsInTerm.children = {
     "AppendEntriesAction": [
-        requestVoteQuorumInTermImpliesNoOtherLogsOrLeadersInTerm
+        # requestVoteQuorumInTermImpliesNoOtherLeadersInTerm,
+        requestVoteQuorumInTermImpliesNoOtherLogsInTerm
     ]
 }
 
@@ -218,7 +252,8 @@ nodesVotedInQuorumInTermImpliesNoAppendEntriesRequestsInTerm = make_node("H_Node
 requestVoteQuorumInTermImpliesNoAppendEntriesRequestsInTerm = make_node("H_RequestVoteQuorumInTermImpliesNoAppendEntriesRequestsInTerm")
 requestVoteQuorumInTermImpliesNoAppendEntriesRequestsInTerm.children = {
     "AppendEntriesAction": [
-        requestVoteQuorumInTermImpliesNoOtherLogsOrLeadersInTerm
+        requestVoteQuorumInTermImpliesNoOtherLeadersInTerm,
+        # requestVoteQuorumInTermImpliesNoOtherLogsInTerm
     ],
     "RequestVoteAction": [
         nodesVotedInQuorumInTermImpliesNoAppendEntriesRequestsInTerm,
@@ -300,7 +335,8 @@ noLogDivergence.children = {
 }
 root = noLogDivergence
 nodes = [
-    primaryHasEntriesItCreated
+    primaryHasEntriesItCreated,
+    requestVoteQuorumInTermImpliesNoOtherLeadersInTerm
 ]
 actions = [
     "RequestVoteAction",
