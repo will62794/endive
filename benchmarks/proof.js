@@ -19,6 +19,8 @@ let awaitPollIntervalMS = 1000;
 
 cytoscape.warnings(false);
 
+var projectionStats = [];
+
 const loadingIcon = '<i class="fa fa-refresh fa-spin"></i>';
 
 //
@@ -609,6 +611,13 @@ function addNodeToGraph(proof_graph, node){
             if(node["ctis"][action] && node["ctis"][action].length === 0 && !child_actions.includes(action)){
                 continue;
             }
+
+            let actionvars = proof_graph["vars_in_action"][action];
+            let lemmavars = proof_graph["vars_in_lemma_defs"][node["expr"]];
+            console.log("actionvars:", actionvars);
+            console.log("lemmavars:", lemmavars);
+            let localvars = _.union(actionvars, lemmavars);
+            projectionStats.push(localvars);
             
             let actname = action.split(" ")[0];
             let nid = node["expr"] + "_" + actname;
@@ -617,7 +626,8 @@ function addNodeToGraph(proof_graph, node){
                 name: actname, 
                 actionNode: true,
                 parentId: node["name"],
-                parent: parentNodeBoxId
+                parent: parentNodeBoxId,
+                localvars: localvars
             };
 
             node_size = 18
@@ -703,6 +713,13 @@ function addEdgesToGraph(proof_graph, node){
                 addedEdges.push(edgeName);
                 // console.log("Adding edge from node:", node);
 
+                let actionvars = proof_graph["vars_in_action"][action];
+                let lemmavars = proof_graph["vars_in_lemma_defs"][node["expr"]];
+                console.log("actionvars:", actionvars);
+                console.log("lemmavars:", lemmavars);
+                let localvars = _.union(actionvars, lemmavars);
+                projectionStats.push(localvars);
+
                 cy.add({
                     group: 'edges', 
                     data: {
@@ -713,7 +730,7 @@ function addEdgesToGraph(proof_graph, node){
                         ctis_eliminated_uniquely: node["ctis_eliminated_uniquely"],
                         targetNode: node,
                         child: child,
-                        action: action 
+                        action: action,
                     }, 
                     style: {
                         "target-arrow-shape": "triangle",
@@ -846,6 +863,8 @@ function reloadProofGraph(onCompleteFn){
         // Save any global spec definitions.
         specDefs = proof_graph["spec_defs"];
 
+        projectionStats = [];
+
         addNodesToGraph(proof_graph, root);
         addEdgesToGraph(proof_graph, root);
 
@@ -930,6 +949,9 @@ function reloadLayout(){
         }        
     }
 
+    // Optionally show variables underneath action node name.
+    let includeVars = false;
+
     cy = cytoscape({
         container: document.getElementById('stategraph'), // container to render in
         wheelSensitivity: 0.1,
@@ -939,8 +961,16 @@ function reloadLayout(){
                 selector: 'node',
                 style: {
                     'label': function (el) {
-                        return el.data()["name"];
+                        if(el.data()["actionNode"]){
+                            let lbl = el.data()["name"] 
+                            if(includeVars){
+                                lbl += "\n" + "{" + el.data()["localvars"].join(", ") + "}";
+                            }
+                            return lbl;
+                        }
+                        return el.data()["name"] + "";
                     },
+                    "text-wrap": "wrap",
                     "background-color": "lightgray",
                     "border-style": "solid",
                     "border-width": "1",
