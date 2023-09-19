@@ -451,7 +451,23 @@ function focusOnNode(nodeId, nodeData){
                         let escapedLine = line.replaceAll("<", "&lt;").replaceAll(">", "&gt;");
                         // Replace excessive whitespace.
                         escapedLine = escapedLine.replaceAll("    ", " ");
-                        ctiHTML += `<span style='color:${color}'>` + escapedLine + "</span><br>";
+                        let maxLineLen = 100;
+                        let added = 0;
+                        // if(escapedLine.length > maxLineLen){
+                        //     while(added < escapedLine.length){
+                        //         let subline = escapedLine.substr(added, maxLineLen);
+                        //         console.log("subline:", subline);
+                        //         let space = "";
+                        //         if(added > 0){
+                        //             space = "    "
+                        //         }
+                        //         ctiHTML += `<span style='color:${color}'>` + space + subline + "</span><br>";
+                        //         added += maxLineLen;
+                        //     }
+                        // } 
+                        // else{
+                            ctiHTML += `<span style='color:${color}'>` + escapedLine + "</span><br>";
+                        // }
                         lineI += 1;
                     }
                     ctiHTML += "</pre>";
