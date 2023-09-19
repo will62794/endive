@@ -186,8 +186,8 @@ class TLASpec:
                 uid = children[0].text
                 def_elem = self.spec_obj["defs"][uid]["elem"]
                 (new_vars,new_updated_vars) = self.get_vars_in_def_rec(def_elem)
-                if len(new_vars) or len(new_updated_vars.keys()):
-                    print(new_vars, new_updated_vars)
+                # if len(new_vars) or len(new_updated_vars.keys()):
+                #     print(new_vars, new_updated_vars)
                 all_vars.update(new_vars)
                 for v in new_updated_vars:
                     if v in all_updated_vars:
@@ -196,8 +196,8 @@ class TLASpec:
                         all_updated_vars[v] = new_updated_vars
             else:
                 (new_vars,new_updated_vars) = self.get_vars_in_def_rec(sub_elem)
-                if len(new_vars) or len(new_updated_vars.keys()):
-                    print(new_vars, new_updated_vars)
+                # if len(new_vars) or len(new_updated_vars.keys()):
+                #     print(new_vars, new_updated_vars)
 
                 all_vars.update(new_vars)
                 for v in new_updated_vars:
@@ -243,7 +243,65 @@ class TLASpec:
         # print("UNCHANGED elems:", unchanged_elems)
         return unchanged
 
-    def get_vars_in_def(self, name, ignore_unchanged=True):
+    def remove_update_expressions(self, elem):
+        body = None
+        for child in elem:
+            if child.tag == "body":
+                body = child
+
+        to_remove = []
+
+        for sub_elem in body.iter():
+            for child in sub_elem:
+                if child.tag != "OpApplNode":
+                    continue
+                # print(sub_elem.tag)
+                # Is this an equality operator where the left hand side is a primed oeprator.
+                is_equality = False
+
+                operator = child.find("operator")
+                if operator is not None:
+                    builtInRef = operator.find("BuiltInKindRef")
+                    if builtInRef is not None and builtInRef.find("UID").text == "4":
+                        is_equality = True
+                        # print("IS EQUAL", operator)
+
+                operands = child.find("operands")
+                if operands is not None and is_equality:
+                    # print(operands[0])
+                    # for o in operands:
+                    #     print("operands:", o.tag)
+                    #     print(list(o))
+                    if operands[0].tag == "OpApplNode":
+                        # for el in operands[0]:
+                        prime_oper = operands[0].find("operator")
+                        prime_operands = operands[0].find("operands")
+                        # print("PRIME OPERANDS:", list(prime_operands))
+                        if prime_oper is not None:
+                            firstchild = list(prime_oper)[0]
+                            if firstchild.tag == "BuiltInKindRef":
+                                # Prime operator (') is UID=13.
+                                if firstchild.find("UID").text == "13":
+                                    # print("FC:", firstchild.tag)
+                                    # print("FC:", list(firstchild)[0].text)
+                                    # print(f"!! REMOVING child: {child}")
+
+                                    to_remove.append((sub_elem, child))
+
+                                    for x in prime_operands:
+                                        opDecl = x.find("operator").find("OpDeclNodeRef")
+                                        if opDecl is not None:
+                                            uid  = opDecl.find("UID").text
+                                            # print("UID:", uid)
+                                            if uid in self.spec_obj["var_decls"]:
+                                                varname = self.spec_obj["var_decls"][uid]["uniquename"]
+                                                print("$$$$ REMOVAL of:", varname)
+
+        print("TO REMOVE:", to_remove)
+        for (el,child) in to_remove:
+            print("Removing ", child)
+            el.remove(child)
+    def get_vars_in_def(self, name, ignore_unchanged=True, ignore_update_expressions=False):
         """ Get the set of variables that appear in a given definition body. """ 
         node = self.get_def_node_by_uniquename(name)
         node_uid = node["uid"]
@@ -265,6 +323,8 @@ class TLASpec:
         # Remove unchanged elements from the tree just for 
         if ignore_unchanged:
             self.remove_unchanged_elems(elem)
+        if ignore_update_expressions:
+            self.remove_update_expressions(elem)
 
         all_vars,updated_vars = self.get_vars_in_def_rec(elem)
         # print("updated vars:", updated_vars)
@@ -288,6 +348,92 @@ class TLASpec:
         if len(objs) == 0:
             return None
         return objs[0]
+    
+    def compute_coi(self, lemma, action, vars_in_action, action_updated_vars, vars_in_action_non_updated, vars_in_lemma):
+
+        # # action = "RequestVote"
+        # print("### Getting vars in action:", action)
+        # vars_in_action, action_updated_vars = self.get_vars_in_def(action)
+        # vars_in_action_non_updated, _ = self.get_vars_in_def(action, ignore_update_expressions=True)
+        # print(f"### Vars in action '{action}'", vars_in_action)
+        # print(f"### Vars in action non-updated '{action}'", vars_in_action_non_updated)
+        # print("### Vars COI for updated in action:", action_updated_vars)
+        # for v in action_updated_vars:
+        #     print(f"var: '{v}'", ", COI:", action_updated_vars[v])
+
+        # # lemma = "H_RequestVoteQuorumInTermImpliesNoOtherLeadersInTerm"
+        # # print("### Getting vars in def:", lemma)
+        # vars_in_lemma, updated_vars = self.get_vars_in_def(lemma)
+        # print(f"### Vars in lemma '{lemma}'", vars_in_lemma)
+
+        #
+        # Compute the COI reduction.
+        #
+        print("--------- Cone of influence ---------")
+        # Consider any variable that appears and is not updated to be a non-modified var.
+        # TODO: We may need to consider explicitly marking unchanged variables i.e. those only read in precondition.
+        # i.e. need to detect if a variable appears but only in the update expression of a variable.
+        # vars_in_action_not_updated = vars_in_action - action_updated_vars.keys()
+        lemma_vars_updated = vars_in_lemma.intersection(action_updated_vars.keys())
+        print("All action vars:", vars_in_action)
+        print("All non-updated action vars:", vars_in_action_non_updated)
+        print("All updated action vars:", set(action_updated_vars.keys()))
+        print("All lemma vars:", vars_in_lemma)
+        print("All updated lemma vars:", lemma_vars_updated)
+        coi_vars = set()
+        for v in lemma_vars_updated:
+            print(f"COI for updated lemma var '{v}':", action_updated_vars[v])
+            coi_vars.update(action_updated_vars[v])
+        print("All COI vars for updated lemma vars:", coi_vars)
+
+        projection_var_sets = [
+            vars_in_action_non_updated, # vars appearing in precondition.
+            vars_in_lemma, # vars appearing in lemma.
+            coi_vars, # cone-of-influence of all modified vars that appear in lemma.
+        ]
+        projected_vars = set.union(*projection_var_sets)
+        print("Overall projected vars:", projected_vars)
+        return projected_vars        
+
+    def compute_coi_table(self, lemmas, actions):
+        "Compute the set of cone-of-influence (COI) variables for an action lemma pair."
+
+        vars_in_action = {}
+        vars_in_action_non_updated = {}
+        vars_in_lemma_defs = {}
+        lemma_action_coi = {}
+        action_updated_vars = {}
+
+        # Extract variables per action.
+        for action in actions:
+            vars_in_action[action],action_updated_vars[action] = self.get_vars_in_def(action)
+            vars_in_action_non_updated[action] = self.get_vars_in_def(action, ignore_update_expressions=True)[0]
+            print(f"Vars in action '{action}':", vars_in_action[action])
+
+        # Extract variables per lemma.
+        # for udef in self.get_all_user_defs(level="1"):
+        for udef in lemmas:
+            # Getting all level 1 definitions should be sufficient here.
+            # Invariants (i.e. state predicates) should all be at level 1.
+            # if udef.startswith("H_"):
+            vars_in_lemma_defs[udef] = self.get_vars_in_def(udef)[0]
+            print(udef, vars_in_lemma_defs[udef])
+
+        # Compute COI for each action-lemma pair
+        for action in vars_in_action:
+            if action not in lemma_action_coi:
+                lemma_action_coi[action] = {}
+            for lemma in vars_in_lemma_defs:
+                # vars_in_action, action_updated_vars, vars_in_action_non_updated, vars_in_lemma
+                lemma_action_coi[action][lemma] = self.compute_coi(lemma, action, 
+                                                                    vars_in_action[action], 
+                                                                    action_updated_vars[action], 
+                                                                    vars_in_action_non_updated[action], 
+                                                                    vars_in_lemma_defs[lemma])
+
+        return lemma_action_coi
+
+
 
 def parse_tla_file(workdir, specname):
     xml_out_file = f"{specname}.xml"
@@ -310,17 +456,21 @@ if __name__ == "__main__":
     top_level_defs = my_spec.get_all_user_defs(level="1")
     spec_obj = my_spec.get_spec_obj()
     print(f"Found {len(top_level_defs)} top level defs.")
-    for d in top_level_defs:
-        print(" ", d)
+    # for d in top_level_defs:
+    #     print(" ", d)
 
     # action_node = [a for a in spec_obj["defs"].values() if a["uniquename"] == "RollbackEntriesAction"][0]
     # print(action_node, )
 
-    action = "BecomeLeader"
+    action = "RequestVote"
     print("### Getting vars in action:", action)
     vars_in_action, action_updated_vars = my_spec.get_vars_in_def(action)
+    vars_in_action_non_updated, _ = my_spec.get_vars_in_def(action, ignore_update_expressions=True)
     print(f"### Vars in action '{action}'", vars_in_action)
+    print(f"### Vars in action non-updated '{action}'", vars_in_action_non_updated)
     print("### Vars COI for updated in action:", action_updated_vars)
+    for v in action_updated_vars:
+        print(f"var: '{v}'", ", COI:", action_updated_vars[v])
 
     lemma = "H_RequestVoteQuorumInTermImpliesNoOtherLeadersInTerm"
     # print("### Getting vars in def:", lemma)
@@ -334,15 +484,26 @@ if __name__ == "__main__":
     # Consider any variable that appears and is not updated to be a non-modified var.
     # TODO: We may need to consider explicitly marking unchanged variables i.e. those only read in precondition.
     # i.e. need to detect if a variable appears but only in the update expression of a variable.
-    vars_in_action_not_updated = vars_in_action - action_updated_vars.keys()
+    # vars_in_action_not_updated = vars_in_action - action_updated_vars.keys()
     lemma_vars_updated = vars_in_lemma.intersection(action_updated_vars.keys())
-    print("All non-updated action vars:", vars_in_action_not_updated)
     print("All action vars:", vars_in_action)
+    print("All non-updated action vars:", vars_in_action_non_updated)
+    print("All updated action vars:", set(action_updated_vars.keys()))
     print("All lemma vars:", vars_in_lemma)
-    print("Lemma vars updated:", lemma_vars_updated)
+    print("All updated lemma vars:", lemma_vars_updated)
     coi_vars = set()
     for v in lemma_vars_updated:
-        print(f"Lemma var {v} updated COI:", action_updated_vars[v])
+        print(f"COI for updated lemma var '{v}':", action_updated_vars[v])
         coi_vars.update(action_updated_vars[v])
-    projected_vars = vars_in_lemma.union(coi_vars).union(vars_in_action_not_updated)
+    print("All COI vars for updated lemma vars:", coi_vars)
+
+    projection_var_sets = [
+        vars_in_action_non_updated, # vars appearing in precondition.
+        vars_in_lemma, # vars appearing in lemma.
+        coi_vars, # cone-of-influence of all modified vars that appear in lemma.
+    ]
+    projected_vars = set.union(*projection_var_sets)
     print("Overall projected vars:", projected_vars)
+
+    coi = my_spec.compute_coi("H_RequestVoteQuorumInTermImpliesNoOtherLeadersInTerm", "RequestVote")
+    print(f"Computed COI: {coi}")

@@ -2250,11 +2250,15 @@ class InductiveInvGen():
         # relation, plus all variables that appear in the target lemma.
         assert self.load_parse_tree
         vars_in_action = {}
+        vars_in_action_non_updated = {}
         vars_in_lemma_defs = {}
+        lemma_action_coi = {}
+        action_updated_vars = {}
 
         # Extract variables per action.
         for action in actions:
             vars_in_action[action] = self.tla_spec_obj.get_vars_in_def(action)[0]
+            # vars_in_action_non_updated[action] = self.tla_spec_obj.get_vars_in_def(action, ignore_update_expressions=)[0]
             print(f"Vars in action '{action}':", vars_in_action[action])
 
         # Extract variables per lemma.
@@ -2264,6 +2268,20 @@ class InductiveInvGen():
             # if udef.startswith("H_"):
             vars_in_lemma_defs[udef] = self.tla_spec_obj.get_vars_in_def(udef)[0]
             print(udef, vars_in_lemma_defs[udef])
+
+
+        lemma_action_coi = self.tla_spec_obj.compute_coi_table(set(vars_in_lemma_defs.keys()), actions)
+        print("LEMMA COI", lemma_action_coi)
+        for a in lemma_action_coi:
+            print("ACTION: ", a)
+            for l in lemma_action_coi[a]:
+                print("  ", l, lemma_action_coi[a][l])
+        # # Compute COI for each action-lemma pair
+        # for action in vars_in_action:
+        #     if action not in lemma_action_coi:
+        #         lemma_action_coi[action] = {}
+        #     for lemma in vars_in_lemma_defs:
+        #         lemma_action_coi[action][lemma] = self.tla_spec_obj.compute_coi(lemma, action)
 
         # self.spec_obj = tla_spec_obj.get_all_user_defs(level="1")
 
@@ -2277,6 +2295,7 @@ class InductiveInvGen():
                                     safety=self.safety)
             proof.vars_in_action = vars_in_action
             proof.vars_in_lemma_defs = vars_in_lemma_defs
+            proof.lemma_action_coi = lemma_action_coi
             proof.save_proof()
 
             # Re-generate CTIs.

@@ -268,7 +268,8 @@ class StructuredProof():
             "nodes": [n.serialize(serialize_children=True, cti_hashes_only=cti_hashes_only) for n in self.nodes],
             "spec_defs": self.spec_defs,
             "vars_in_action": {a:list(v) for a,v in self.vars_in_action.items()},
-            "vars_in_lemma_defs": {a:list(v) for a,v in self.vars_in_lemma_defs.items()}
+            "vars_in_lemma_defs": {a:list(v) for a,v in self.vars_in_lemma_defs.items()},
+            "lemma_action_coi": {a:{l:list(self.lemma_action_coi[a][l]) for l in self.lemma_action_coi[a]} for a in self.lemma_action_coi}
         }
     
     def save_proof(self, include_json=False, include_dot=False):
@@ -644,7 +645,10 @@ class StructuredProof():
             for c in new_ctis:
                 action_vars = self.vars_in_action[c.action_name]
                 lemma_vars = self.vars_in_lemma_defs[node.expr]
-                all_vars = action_vars.union(lemma_vars)
+                # all_vars = action_vars.union(lemma_vars)
+
+                # Use cone-of-influence for projection (COI).
+                all_vars = self.lemma_action_coi[c.action_name][node.expr]
                 for s in c.trace.getStates():
                     s.state_var_projection_map = {}
                     s.state_lines_action_vars_projected = []
