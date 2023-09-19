@@ -14,6 +14,16 @@ In order to run the tool you will need the following prerequisites:
 
 Note that the endive tool makes use of a slightly modified version of the TLC model checker, whose source code can be found [here](https://github.com/will62794/tlaplus/tree/ce9e63ab5242a596b8dec15000b5ed5f97f63300). The binary of this modified version of TLC is included in this repo, so there is no need to download and build it manually.
 
+## Example Usage (Interactive Proof Mode)
+
+You can load a simple example of an interactive proof for the [basic_consensus](https://github.com/will62794/endive/blob/0057248471c50343ea8dae8d094ce54d72cc215c/benchmarks/basic_consensus.tla) protocol with the following command:
+
+```
+python3 endive.py --spec benchmarks/basic_consensus --seed 23351 --num_simulate_traces 20000 --tlc_workers 2 --proof_tree_mode --interactive --max_proof_node_ctis 500 --override_num_cti_workers 3 --apalache_smt_timeout_secs 125 --debug --target_sample_states 8000 --target_sample_time_limit_ms 8000 --proof_tree_cmd reload_proof_struct
+```
+
+After running this you should be able to view the proof interface in a local browser at http://127.0.0.1:5000.
+
 ## Example Usage
 
 As a demonstration of using endive, you can run it on the [TwoPhase](benchmarks/TwoPhase.tla) benchmark, a TLA+ specification of the two-phase commit protocol. This will attempt to generate an inductive invariant for proving the [`TCConsistent`](https://github.com/will62794/endive/blob/master/benchmarks/TwoPhase.tla#L163-L168) safety property:
