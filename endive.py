@@ -2238,6 +2238,12 @@ class InductiveInvGen():
         #
 
         # Load parsed spec and vars appearing in actions and lemma defs.
+        # TODO: Eventually we want to actually implement the more precise slicing
+        # technique here, that projects out variables based on a more accurate data flow
+        # computation i.e. taking into account the cone of influence of modified variables 
+        # that appear in a target lemma. Right now we're just implementing a conservative 
+        # approximation by looking at all non-UNCHANGED variables that appear in the transition
+        # relation, plus all variables that appear in the target lemma.
         assert self.load_parse_tree
         vars_in_action = {}
         vars_in_lemma_defs = {}
