@@ -85,20 +85,62 @@ class TLASpec:
             assert children[0].tag == "UID"
             uid = children[0].text
 
-        # if elem.tag == "BuiltInKindRef":
-        #     name = self.spec_obj["builtins"][uid]["uniquename"]
-        #     # print(name)
-        #     # Ignore UNCHANGED in terms of variable occurrence counting.
-        #     if name == "UNCHANGED":
-        #         return set()
+        updated_vars = set()
+        if elem.tag == "OpApplNode":
+            # print(elem.tag)
+            # Is this an equality operator where the left hand side is a primed oeprator.
+            is_equality = False
+            is_primed_var = False
+            for c in elem:
+                if c.tag == "operator":
+                    # Equality operator.
+                    x = c.find("BuiltInKindRef")
+                    if x is not None and x.find("UID").text == "4":
+                        is_equality = True
+                if c.tag == "operands" and is_equality:
+                    # print("EQUALITY OPERANDS")
+                    operands = list(c)
+
+                    # print(operands[0])
+                    if operands[0].tag == "OpApplNode":
+                        for el in operands[0]:
+                            if el.tag == "operator":
+                                # print(el)
+                                firstchild = list(el)[0]
+                                if firstchild.tag == "BuiltInKindRef":
+                                    # Prime operator (') is UID=13.
+                                    if list(firstchild)[0].text == "13":
+                                        print("FC:", firstchild.tag)
+                                        print("FC:", list(firstchild)[0].text)
+                                        is_primed_var = True
+                            if el.tag == "operands" and is_primed_var:
+                                print("PRIMED OPERANDS")
+                                for oper in el:
+                                    print(oper.tag)
+                                    print(list(oper))
+                                    loc = oper.find("location")
+                                    line =  loc.find("line").find("begin")
+                                    print("line:", line.text)
+                                    op = oper.find("operator")
+                                    uid = op.find("OpDeclNodeRef").find("UID").text
+                                    # The modified variable.
+                                    # TODO: We also want to extract the cone of influece of this variable i.e.
+                                    # any variables that appear in its update expression.
+                                    var_decl = self.spec_obj["var_decls"][uid]
+                                    print(var_decl)
+                                    updated_vars.add(var_decl["uniquename"])
+                                    print(updated_vars)
+
+                                    return (set(), updated_vars)
+
 
         if elem.tag == "OpDeclNodeRef":
             # CONSTANT references are not variables.
             if uid in self.spec_obj["constant_decls"]:
-                return set()
+                return (set(), set())
             
             var_name = self.spec_obj["var_decls"][uid]["uniquename"]
-            return set([var_name])
+            return (set([var_name]), set())
         
         body = None
         for child in elem:
@@ -107,21 +149,10 @@ class TLASpec:
                 body = child
 
         if body is None:
-            return []
+            return ([],[])
         
         all_vars = set()
-
-        # unchanged = []
-        # for sub_elem in body.iter():
-        #     if elem.tag == "BuiltInKindRef":
-        #         children = list(elem)
-        #         assert children[0].tag == "UID"
-        #         uid = children[0].text
-        #         name = self.spec_obj["builtins"][uid]["uniquename"]
-        #         # print(name)
-        #         # Ignore UNCHANGED in terms of variable occurrence counting.
-        #         if name == "UNCHANGED" and ignore_unchanged:
-        #             return set()
+        all_updated_vars = set()
         
         # Traverse the whole subtree for this definition, looking up 
         # definitions as needed.
@@ -133,12 +164,14 @@ class TLASpec:
                 assert children[0].tag == "UID"
                 uid = children[0].text
                 def_elem = self.spec_obj["defs"][uid]["elem"]
-                new_vars = self.get_vars_in_def_rec(def_elem)
+                (new_vars,new_updated_vars) = self.get_vars_in_def_rec(def_elem)
                 all_vars.update(new_vars)
+                all_updated_vars.update(new_updated_vars)
             else:
-                new_vars = self.get_vars_in_def_rec(sub_elem)
+                (new_vars,new_updated_vars) = self.get_vars_in_def_rec(sub_elem)
                 all_vars.update(new_vars)
-        return all_vars
+                all_updated_vars.update(new_updated_vars)
+        return (all_vars, all_updated_vars)
 
     def remove_unchanged_elems(self, elem):
         body = None
@@ -198,9 +231,9 @@ class TLASpec:
         if ignore_unchanged:
             self.remove_unchanged_elems(elem)
 
-        all_vars = self.get_vars_in_def_rec(elem)
-        # print(all_vars)
-        return all_vars
+        all_vars,updated_vars = self.get_vars_in_def_rec(elem)
+        # print("updated vars:", updated_vars)
+        return (all_vars,updated_vars)
 
         # print(entries)
         # spec_obj = self.extract_spec_obj(spec_ast)
@@ -236,7 +269,7 @@ def parse_tla_file(workdir, specname):
     # return tree
 
 if __name__ == "__main__":
-    tla_file = "AbstractStaticRaft"
+    tla_file = "AsyncRaft"
     my_spec = parse_tla_file("benchmarks", tla_file)
 
     top_level_defs = my_spec.get_all_user_defs(level="1")
@@ -247,4 +280,9 @@ if __name__ == "__main__":
 
     # action_node = [a for a in spec_obj["defs"].values() if a["uniquename"] == "RollbackEntriesAction"][0]
     # print(action_node, )
-    my_spec.get_vars_in_def("H_OnePrimaryPerTerm")
+
+    action = "HandleRequestVoteRequest"
+    print("### Getting vars in action:", action)
+    vars_in, updated_vars = my_spec.get_vars_in_def(action)
+    print(f"### Vars in action '{action}'", vars_in)
+    print("### Vars updated in action:", updated_vars)

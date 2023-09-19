@@ -2251,14 +2251,18 @@ class InductiveInvGen():
         assert self.load_parse_tree
         vars_in_action = {}
         vars_in_lemma_defs = {}
+
+        # Extract variables per action.
         for action in actions:
-            vars_in_action[action] = self.tla_spec_obj.get_vars_in_def(action)
+            vars_in_action[action] = self.tla_spec_obj.get_vars_in_def(action)[0]
             print(f"Vars in action '{action}':", vars_in_action[action])
+
+        # Extract variables per lemma.
         for udef in self.tla_spec_obj.get_all_user_defs(level="1"):
             # Getting all level 1 definitions should be sufficient here.
             # Invariants (i.e. state predicates) should all be at level 1.
             # if udef.startswith("H_"):
-            vars_in_lemma_defs[udef] = self.tla_spec_obj.get_vars_in_def(udef)
+            vars_in_lemma_defs[udef] = self.tla_spec_obj.get_vars_in_def(udef)[0]
             print(udef, vars_in_lemma_defs[udef])
 
         # self.spec_obj = tla_spec_obj.get_all_user_defs(level="1")
