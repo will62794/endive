@@ -100,6 +100,10 @@ class InductiveInvGen():
         self.max_num_conjuncts_per_round = max_num_conjuncts_per_round
         self.override_num_cti_workers = override_num_cti_workers
 
+        self.target_sample_states = all_args["target_sample_states"]
+        self.target_sample_time_limit_ms = all_args["target_sample_time_limit_ms"]
+
+
         # Set an upper limit on CTIs per round to avoid TLC getting overwhelmend. Hope is that 
         # this will be enough to provide reasonably even sampling of the CTI space.
         self.MAX_NUM_CTIS_PER_ROUND = max_num_ctis_per_round
@@ -1197,8 +1201,8 @@ class InductiveInvGen():
 
             else:
                 logging.info(f"Starting CTI generation process {n} (of {num_cti_worker_procs} total workers)")
-                target_sample_states = 20000
-                target_sample_time_limit_ms = 15000
+                target_sample_states = self.target_sample_states
+                target_sample_time_limit_ms = self.target_sample_time_limit_ms
                 cti_subproc = self.generate_ctis_tlc_run_async(
                                     num_traces_per_tlc_instance,
                                     props=props, 
@@ -2859,6 +2863,8 @@ if __name__ == "__main__":
     parser.add_argument('--max_proof_node_ctis', help='Maximum number of CTIs per proof node.', type=int, default=5000)
     parser.add_argument('--proof_tree_cmd', help='Proof tree command (EXPERIMENTAL).', default=None, type=str, required=False, nargs="+")
     parser.add_argument('--proof_struct_tag', help='Tag of proof structure to load (EXPERIMENTAL).', default=None, type=str, required=False)
+    parser.add_argument('--target_sample_states', help='Target # initial states to sample. (EXPERIMENTAL).', default=10000, type=int, required=False)
+    parser.add_argument('--target_sample_time_limit_ms', help='Target initial state sampling time (EXPERIMENTAL).', default=10000, type=int, required=False)
 
     # Apalache related commands.
     parser.add_argument('--use_apalache_ctigen', help='Use Apalache for CTI generation (experimental).', required=False, default=False, action='store_true')

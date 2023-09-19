@@ -664,10 +664,10 @@ H_CandidateInTermVotedForItself ==
 
 H_QuorumsSafeAtTerms ==
     \A s \in Server : (state[s] = Leader) => 
-        \E Q \in Quorum : 
-        \A t \in Q : 
+        (\E Q \in Quorum : 
+         \A t \in Q : 
             /\ currentTerm[t] >= currentTerm[s]
-            /\ (currentTerm[t] = currentTerm[s]) => votedFor[s] = s
+            /\ (currentTerm[t] = currentTerm[s]) => votedFor[t] = s)
 
 \* If two nodes are in the same term, then their votes granted
 \* sets cannot have intersecting voters.
@@ -768,7 +768,7 @@ H_CandidateWithVotesGrantedInTermImplyVotersSafeAtTerm ==
         (state[s] = Candidate) =>
             \A v \in votesGranted[s] : 
                 /\ currentTerm[v] >= currentTerm[s]
-                /\ currentTerm[v] = currentTerm[s] => votedFor[v] # Nil
+                /\ currentTerm[v] = currentTerm[s] => votedFor[v] = s
 
 \* H_CandidateWithVotesGrantedInTermImplyVotedForSafeAtTerm ==
 \*     \A s \in Server : 
@@ -871,7 +871,9 @@ H_LogEntryInTermImpliesSafeAtTerm ==
 H_AppendEntriesRequestInTermImpliesSafeAtTerms == 
     \A m \in appendEntriesMsgs : 
         m.mtype = AppendEntriesRequest =>
-            \E Q \in Quorum : \A t \in Q : currentTerm[t] >= m.mterm
+            \E Q \in Quorum : \A t \in Q : 
+                /\ currentTerm[t] >= m.mterm
+                /\ currentTerm[t] = m.mterm => (votedFor[t] # Nil)
 
 H_LogEntryInTermImpliesSafeAtTermAppendEntries ==
     \A m \in appendEntriesMsgs : 

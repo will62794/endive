@@ -249,6 +249,16 @@ appendEntriesRequestInTermImpliesSafeAtTerms = make_node("H_AppendEntriesRequest
 
 nodesVotedInQuorumInTermImpliesNoAppendEntriesRequestsInTerm = make_node("H_NodesVotedInQuorumInTermImpliesNoAppendEntriesRequestsInTerm")
     
+nodesVotedInQuorumInTermImpliesNoAppendEntriesRequestsInTerm.children = {
+    "AppendEntriesAction": [
+        quorumsSafeAtTerms
+    ],
+    "HandleRequestVoteRequestAction": [
+        quorumsSafeAtTerms,
+        appendEntriesRequestInTermImpliesSafeAtTerms
+    ]
+}
+
 requestVoteQuorumInTermImpliesNoAppendEntriesInTerm = make_node("H_RequestVoteQuorumInTermImpliesNoAppendEntriesInTerm")
 requestVoteQuorumInTermImpliesNoAppendEntriesInTerm.children = {
     "AppendEntriesAction": [
