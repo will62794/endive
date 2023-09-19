@@ -267,7 +267,8 @@ class StructuredProof():
             "root": self.root.serialize(include_ctis=include_ctis, cti_hashes_only=cti_hashes_only),
             "nodes": [n.serialize(serialize_children=True, cti_hashes_only=cti_hashes_only) for n in self.nodes],
             "spec_defs": self.spec_defs,
-            "vars_in_action": {a:list(v) for a,v in self.vars_in_action.items()}
+            "vars_in_action": {a:list(v) for a,v in self.vars_in_action.items()},
+            "vars_in_lemma_defs": {a:list(v) for a,v in self.vars_in_lemma_defs.items()}
         }
     
     def save_proof(self, include_json=False, include_dot=False):
