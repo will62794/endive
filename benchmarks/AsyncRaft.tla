@@ -715,6 +715,12 @@ H_CandidateWithVotesGrantedInTermImplyNoOtherLogsInTerm ==
         (state[s] = Candidate /\ votesGranted[s] \in Quorum) =>
             ~(\E i \in DOMAIN log[t] : log[t][i] = currentTerm[s])
 
+\* H_RequestVoteInTermImpliesNoLogsInTerm == 
+\*     \A s \in Server :
+\*         (/\ state[s] = Candidate
+\*          /\ \E m \in requestVoteMsgs : m.mtype = RequestVoteRequest /\ m.mterm = currentTerm[s]) =>
+\*             \A n \in Server : \A ind \in DOMAIN log[n] : log[n][ind] # currentTerm[s]    
+
 H_RequestVoteQuorumInTermImpliesNoOtherLogsInTerm == 
     \A s \in Server :
         (/\ state[s] = Candidate
