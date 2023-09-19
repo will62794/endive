@@ -967,23 +967,23 @@ H_NodesVotedInQuorumInTermImpliesNoAppendEntriesRequestsInTerm ==
                 /\ m.mterm = currentTerm[s])
 
 
-H_RequestVoteQuorumInTermImpliesNoAppendEntriesRequestsInTerm == 
+H_RequestVoteQuorumInTermImpliesNoAppendEntriesInTerm == 
     \A s \in Server :
         (/\ state[s] = Candidate
          /\ ExistsRequestVoteResponseQuorum(currentTerm[s], s)) =>
             ~(\E m \in appendEntriesMsgs : 
-                /\ m.mtype = AppendEntriesRequest
-                /\ m.mterm = currentTerm[s])
+                \/ m.mtype = AppendEntriesRequest /\ m.mterm = currentTerm[s]
+                \/ m.mtype = AppendEntriesResponse /\ m.msuccess /\ m.mterm = currentTerm[s])
 
 \* If a server candidate has won votes in term T, there can't be
 \* any AppendEntries messages already sent in that term.
-H_CandidateWithVotesGrantedImpliesNoAppendEntriesRequestsInTerm == 
+H_CandidateWithVotesGrantedImpliesNoAppendEntriesInTerm == 
       \A s \in Server :
         (/\ state[s] = Candidate
          /\ votesGranted[s] \in Quorum) =>
             ~\E m \in appendEntriesMsgs : 
-                /\ m.mtype = AppendEntriesRequest
-                /\ m.mterm = currentTerm[s]
+                \/ m.mtype = AppendEntriesRequest /\ m.mterm = currentTerm[s]
+                \/ m.mtype = AppendEntriesResponse /\ m.msuccess /\ m.mterm = currentTerm[s]
 
 \* The logs in any AppendEntries message sent in term T must be present
 \* in the logs of a leader in term T.

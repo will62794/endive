@@ -957,8 +957,9 @@ function reloadLayout(){
                             return unique_ctis.length + " unique CTIs";
                         }
                     },
-                    "line-color": edgeColor,
-                    "target-arrow-color": edgeColor,
+                    "color": edgeColor,
+                    // "line-color": edgeColor,
+                    // "target-arrow-color": edgeColor,
                     "line-width": "1",
                     "font-size":"10px"
                 }

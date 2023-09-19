@@ -249,8 +249,8 @@ appendEntriesRequestInTermImpliesSafeAtTerms = make_node("H_AppendEntriesRequest
 
 nodesVotedInQuorumInTermImpliesNoAppendEntriesRequestsInTerm = make_node("H_NodesVotedInQuorumInTermImpliesNoAppendEntriesRequestsInTerm")
     
-requestVoteQuorumInTermImpliesNoAppendEntriesRequestsInTerm = make_node("H_RequestVoteQuorumInTermImpliesNoAppendEntriesRequestsInTerm")
-requestVoteQuorumInTermImpliesNoAppendEntriesRequestsInTerm.children = {
+requestVoteQuorumInTermImpliesNoAppendEntriesInTerm = make_node("H_RequestVoteQuorumInTermImpliesNoAppendEntriesInTerm")
+requestVoteQuorumInTermImpliesNoAppendEntriesInTerm.children = {
     "AppendEntriesAction": [
         requestVoteQuorumInTermImpliesNoOtherLeadersInTerm,
         # requestVoteQuorumInTermImpliesNoOtherLogsInTerm
@@ -261,20 +261,20 @@ requestVoteQuorumInTermImpliesNoAppendEntriesRequestsInTerm.children = {
     ]
 }    
     
-candidateWithVotesGrantedImpliesNoAppendEntriesRequestsInTerm = make_node("H_CandidateWithVotesGrantedImpliesNoAppendEntriesRequestsInTerm")
-candidateWithVotesGrantedImpliesNoAppendEntriesRequestsInTerm.children = {
+candidateWithVotesGrantedImpliesNoAppendEntriesInTerm = make_node("H_CandidateWithVotesGrantedImpliesNoAppendEntriesInTerm")
+candidateWithVotesGrantedImpliesNoAppendEntriesInTerm.children = {
     "AppendEntriesAction": [
         candidateWithVotesGrantedInTermImplyNoOtherLeader
     ],
     "HandleRequestVoteResponseAction": [
-        requestVoteQuorumInTermImpliesNoAppendEntriesRequestsInTerm
+        requestVoteQuorumInTermImpliesNoAppendEntriesInTerm
     ]
 }
 
 appendEntriesRequestLogEntriesMustBeInLeaderLog = make_node("H_AppendEntriesRequestLogEntriesMustBeInLeaderLog")
 appendEntriesRequestLogEntriesMustBeInLeaderLog.children = {
     "BecomeLeaderAction":[
-        candidateWithVotesGrantedImpliesNoAppendEntriesRequestsInTerm
+        candidateWithVotesGrantedImpliesNoAppendEntriesInTerm
     ]
 }
     
@@ -282,6 +282,9 @@ leaderMatchIndexValidAppendEntries = make_node("H_LeaderMatchIndexValidAppendEnt
 leaderMatchIndexValidAppendEntries.children = {
     "AcceptAppendEntriesRequestAppendAction": [
         appendEntriesRequestLogEntriesMustBeInLeaderLog
+    ],
+    "BecomeLeaderAction": [
+        candidateWithVotesGrantedImpliesNoAppendEntriesInTerm
     ]
 }
     
@@ -299,10 +302,8 @@ leaderMatchIndexValid.children = {
         leaderMatchIndexBound
     ],
     "HandleAppendEntriesResponseAction": [
-        leaderMatchIndexValidAppendEntries
-    ],
-    "AcceptAppendEntriesRequestTruncateAction": [
-
+        leaderMatchIndexValidAppendEntries,
+        logMatching
     ]
 }
 
