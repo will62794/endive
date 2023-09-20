@@ -2270,20 +2270,26 @@ class InductiveInvGen():
             print(udef, vars_in_lemma_defs[udef])
 
 
-        lemma_action_coi = self.tla_spec_obj.compute_coi_table(set(vars_in_lemma_defs.keys()), actions)
+        # Compute COI for each action-lemma pair
+        # Refer to actions by their underlying operator definition for computing COI.
+        actions_real_defs = [a.replace("Action", "") for a in actions]
+        lemma_action_coi = self.tla_spec_obj.compute_coi_table(set(vars_in_lemma_defs.keys()), actions_real_defs)
+        
+        # TODO: Eventually have COI properly drill down into action definitions.
+        orig_keys = list(lemma_action_coi.keys())
+        for a in orig_keys:
+            # Rename actions to original.
+            lemma_action_coi[a + "Action"] = lemma_action_coi[a]
+        for a in orig_keys:
+            del lemma_action_coi[a]
+        
         print("LEMMA COI", lemma_action_coi)
         for a in lemma_action_coi:
             print("ACTION: ", a)
             for l in lemma_action_coi[a]:
-                print("  ", l, lemma_action_coi[a][l])
-        # # Compute COI for each action-lemma pair
-        # for action in vars_in_action:
-        #     if action not in lemma_action_coi:
-        #         lemma_action_coi[action] = {}
-        #     for lemma in vars_in_lemma_defs:
-        #         lemma_action_coi[action][lemma] = self.tla_spec_obj.compute_coi(lemma, action)
+                if "H_" in l:
+                    print("  ", l, lemma_action_coi[a][l])
 
-        # self.spec_obj = tla_spec_obj.get_all_user_defs(level="1")
 
         # Optionally reload proof structure from locally defined template.
         if self.proof_tree_cmd and self.proof_tree_cmd[0] in ["reload", "reload_proof_struct"]:

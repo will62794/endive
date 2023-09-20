@@ -407,8 +407,8 @@ class TLASpec:
         # Extract variables per action.
         for action in actions:
             vars_in_action[action],action_updated_vars[action] = self.get_vars_in_def(action)
-            vars_in_action_non_updated[action] = self.get_vars_in_def(action, ignore_update_expressions=True)[0]
-            print(f"Vars in action '{action}':", vars_in_action[action])
+            vars_in_action_non_updated[action],_ = self.get_vars_in_def(action, ignore_update_expressions=True)
+            # print(f"Vars in action '{action}':", vars_in_action[action])
 
         # Extract variables per lemma.
         # for udef in self.get_all_user_defs(level="1"):
@@ -425,11 +425,12 @@ class TLASpec:
                 lemma_action_coi[action] = {}
             for lemma in vars_in_lemma_defs:
                 # vars_in_action, action_updated_vars, vars_in_action_non_updated, vars_in_lemma
-                lemma_action_coi[action][lemma] = self.compute_coi(lemma, action, 
-                                                                    vars_in_action[action], 
-                                                                    action_updated_vars[action], 
-                                                                    vars_in_action_non_updated[action], 
-                                                                    vars_in_lemma_defs[lemma])
+                lemma_action_coi[action][lemma] = self.compute_coi(lemma, 
+                                                                   action, 
+                                                                   vars_in_action[action], 
+                                                                   action_updated_vars[action], 
+                                                                   vars_in_action_non_updated[action], 
+                                                                   vars_in_lemma_defs[lemma])
 
         return lemma_action_coi
 
@@ -462,12 +463,13 @@ if __name__ == "__main__":
     # action_node = [a for a in spec_obj["defs"].values() if a["uniquename"] == "RollbackEntriesAction"][0]
     # print(action_node, )
 
-    action = "RequestVote"
+    action = "RequestVoteAction"
     print("### Getting vars in action:", action)
     vars_in_action, action_updated_vars = my_spec.get_vars_in_def(action)
     vars_in_action_non_updated, _ = my_spec.get_vars_in_def(action, ignore_update_expressions=True)
     print(f"### Vars in action '{action}'", vars_in_action)
     print(f"### Vars in action non-updated '{action}'", vars_in_action_non_updated)
+    exit(0)
     print("### Vars COI for updated in action:", action_updated_vars)
     for v in action_updated_vars:
         print(f"var: '{v}'", ", COI:", action_updated_vars[v])
@@ -505,5 +507,5 @@ if __name__ == "__main__":
     projected_vars = set.union(*projection_var_sets)
     print("Overall projected vars:", projected_vars)
 
-    coi = my_spec.compute_coi("H_RequestVoteQuorumInTermImpliesNoOtherLeadersInTerm", "RequestVote")
-    print(f"Computed COI: {coi}")
+    # coi = my_spec.compute_coi_table(["H_RequestVoteQuorumInTermImpliesNoOtherLeadersInTerm"], ["RequestVoteAction"])
+    # print(f"Computed COI: {coi}")
