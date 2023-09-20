@@ -42,10 +42,10 @@ uniqueLeaders.children = {
 
 # Comment out stuff below for demo.
 children = {
-    # "DecideAction": [
-    #     # uniqueLeaders,
-    #     # decidedImpliesLeader
-    # ]
+    "DecideAction": [
+        uniqueLeaders,
+        decidedImpliesLeader
+    ]
 }
 
 root = StructuredProofNode("NoConflictingValues", "H_NoConflictingValues", children = children)
