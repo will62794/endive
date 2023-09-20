@@ -333,8 +333,10 @@ if __name__ == "__main__":
     print("--------- Cone of influence ---------")
     # Consider any variable that appears and is not updated to be a non-modified var.
     # TODO: We may need to consider explicitly marking unchanged variables i.e. those only read in precondition.
+    # i.e. need to detect if a variable appears but only in the update expression of a variable.
     vars_in_action_not_updated = vars_in_action - action_updated_vars.keys()
     lemma_vars_updated = vars_in_lemma.intersection(action_updated_vars.keys())
+    print("All non-updated action vars:", vars_in_action_not_updated)
     print("All action vars:", vars_in_action)
     print("All lemma vars:", vars_in_lemma)
     print("Lemma vars updated:", lemma_vars_updated)
@@ -342,5 +344,5 @@ if __name__ == "__main__":
     for v in lemma_vars_updated:
         print(f"Lemma var {v} updated COI:", action_updated_vars[v])
         coi_vars.update(action_updated_vars[v])
-    projected_vars = vars_in_lemma.union(coi_vars).union()
-    print("Overall projected vars")
+    projected_vars = vars_in_lemma.union(coi_vars).union(vars_in_action_not_updated)
+    print("Overall projected vars:", projected_vars)
