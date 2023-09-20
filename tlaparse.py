@@ -85,7 +85,7 @@ class TLASpec:
             assert children[0].tag == "UID"
             uid = children[0].text
 
-        updated_vars = set()
+        updated_vars_with_coi = {}
         if elem.tag == "OpApplNode":
             # print(elem.tag)
             # Is this an equality operator where the left hand side is a primed oeprator.
@@ -116,31 +116,52 @@ class TLASpec:
                             if el.tag == "operands" and is_primed_var:
                                 print("PRIMED OPERANDS")
                                 for oper in el:
-                                    print(oper.tag)
-                                    print(list(oper))
+                                    # print(oper.tag)
+                                    # print(list(oper))
                                     loc = oper.find("location")
                                     line =  loc.find("line").find("begin")
                                     print("line:", line.text)
                                     op = oper.find("operator")
                                     uid = op.find("OpDeclNodeRef").find("UID").text
                                     # The modified variable.
-                                    # TODO: We also want to extract the cone of influece of this variable i.e.
+                                    # TODO: We also want to extract the cone-of-influence (COI) of this variable i.e.
                                     # any variables that appear in its update expression.
                                     var_decl = self.spec_obj["var_decls"][uid]
-                                    print(var_decl)
-                                    updated_vars.add(var_decl["uniquename"])
-                                    print(updated_vars)
+                                    # print(var_decl)
+                                    var_name = var_decl["uniquename"]
+                                    # updated_vars.add(var_decl["uniquename"])
+                                    if var_name not in updated_vars_with_coi:
+                                        # Initialize with empty cone of influence.
+                                        updated_vars_with_coi[var_name] = set()
 
-                                    return (set(), updated_vars)
+                                    # print(updated_vars_with_coi)
+
+                                    # The update expression, for computing COI.
+                                    # print("UPDATE EXPR:", operands[1])
+                                    # print(operands[1])
+                                    loc = operands[1].find("location").find("line").find("begin")
+                                    # cone_of_influence_vars = self.get_vars_in_def_rec(operands[1], only_body=False)
+                                    coi_vars = set()
+                                    for sub in operands[1].iter():
+                                        if sub.tag == "OpDeclNodeRef":
+                                            uid = sub.find("UID").text
+                                            if uid in self.spec_obj["var_decls"]:
+                                                coi_var_name = self.spec_obj["var_decls"][uid]["uniquename"]
+                                                print("coi var:", coi_var_name)
+                                                coi_vars.add(coi_var_name)
+
+                                    print("COI:", coi_vars)
+                                    updated_vars_with_coi[var_name].update(coi_vars)
+                                    return (set(), updated_vars_with_coi)
 
 
         if elem.tag == "OpDeclNodeRef":
             # CONSTANT references are not variables.
             if uid in self.spec_obj["constant_decls"]:
-                return (set(), set())
+                return (set(), {})
             
             var_name = self.spec_obj["var_decls"][uid]["uniquename"]
-            return (set([var_name]), set())
+            return (set([var_name]), {})
         
         body = None
         for child in elem:
@@ -149,10 +170,10 @@ class TLASpec:
                 body = child
 
         if body is None:
-            return ([],[])
+            return ([],{})
         
         all_vars = set()
-        all_updated_vars = set()
+        all_updated_vars = {}
         
         # Traverse the whole subtree for this definition, looking up 
         # definitions as needed.
@@ -165,12 +186,26 @@ class TLASpec:
                 uid = children[0].text
                 def_elem = self.spec_obj["defs"][uid]["elem"]
                 (new_vars,new_updated_vars) = self.get_vars_in_def_rec(def_elem)
+                if len(new_vars) or len(new_updated_vars.keys()):
+                    print(new_vars, new_updated_vars)
                 all_vars.update(new_vars)
-                all_updated_vars.update(new_updated_vars)
+                for v in new_updated_vars:
+                    if v in all_updated_vars:
+                        all_updated_vars[v].update(new_updated_vars[v])
+                    else:
+                        all_updated_vars[v] = new_updated_vars
             else:
                 (new_vars,new_updated_vars) = self.get_vars_in_def_rec(sub_elem)
+                if len(new_vars) or len(new_updated_vars.keys()):
+                    print(new_vars, new_updated_vars)
+
                 all_vars.update(new_vars)
-                all_updated_vars.update(new_updated_vars)
+                for v in new_updated_vars:
+                    if v in all_updated_vars:
+                        all_updated_vars[v].update(new_updated_vars[v])
+                    else:
+                        all_updated_vars[v] = new_updated_vars[v]
+                # all_updated_vars.update(new_updated_vars)
         return (all_vars, all_updated_vars)
 
     def remove_unchanged_elems(self, elem):
@@ -281,8 +316,31 @@ if __name__ == "__main__":
     # action_node = [a for a in spec_obj["defs"].values() if a["uniquename"] == "RollbackEntriesAction"][0]
     # print(action_node, )
 
-    action = "HandleRequestVoteRequest"
+    action = "BecomeLeader"
     print("### Getting vars in action:", action)
-    vars_in, updated_vars = my_spec.get_vars_in_def(action)
-    print(f"### Vars in action '{action}'", vars_in)
-    print("### Vars updated in action:", updated_vars)
+    vars_in_action, action_updated_vars = my_spec.get_vars_in_def(action)
+    print(f"### Vars in action '{action}'", vars_in_action)
+    print("### Vars COI for updated in action:", action_updated_vars)
+
+    lemma = "H_RequestVoteQuorumInTermImpliesNoOtherLeadersInTerm"
+    # print("### Getting vars in def:", lemma)
+    vars_in_lemma, updated_vars = my_spec.get_vars_in_def(lemma)
+    print(f"### Vars in lemma '{lemma}'", vars_in_lemma)
+
+    #
+    # Compute the COI reduction.
+    #
+    print("--------- Cone of influence ---------")
+    # Consider any variable that appears and is not updated to be a non-modified var.
+    # TODO: We may need to consider explicitly marking unchanged variables i.e. those only read in precondition.
+    vars_in_action_not_updated = vars_in_action - action_updated_vars.keys()
+    lemma_vars_updated = vars_in_lemma.intersection(action_updated_vars.keys())
+    print("All action vars:", vars_in_action)
+    print("All lemma vars:", vars_in_lemma)
+    print("Lemma vars updated:", lemma_vars_updated)
+    coi_vars = set()
+    for v in lemma_vars_updated:
+        print(f"Lemma var {v} updated COI:", action_updated_vars[v])
+        coi_vars.update(action_updated_vars[v])
+    projected_vars = vars_in_lemma.union(coi_vars).union()
+    print("Overall projected vars")
