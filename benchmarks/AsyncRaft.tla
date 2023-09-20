@@ -727,6 +727,14 @@ H_RequestVoteQuorumInTermImpliesNoOtherLogsInTerm ==
          /\ ExistsRequestVoteResponseQuorum(currentTerm[s], s)) =>
             /\ \A n \in Server : \A ind \in DOMAIN log[n] : log[n][ind] # currentTerm[s]
 
+\* If a node sent a successful request vote response to node S in term T, then
+\* node S must be in term >= T.
+H_RequestVoteResponseToNodeImpliesNodeSafeAtTerm == 
+    \A m \in requestVoteMsgs :
+        (/\ m.mtype = RequestVoteResponse
+         /\ m.mvoteGranted) =>
+            currentTerm[m.mdest] >= m.mterm
+
 H_RequestVoteQuorumInTermImpliesNoOtherLeadersInTerm == 
     \A s \in Server :
         (/\ state[s] = Candidate

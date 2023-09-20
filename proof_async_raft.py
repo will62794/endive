@@ -59,6 +59,8 @@ logEntryInTermImpliesSafeAtTerms = make_node("H_LogEntryInTermImpliesSafeAtTerm"
 
 candidateInTermVotedForItself = make_node("H_CandidateInTermVotedForItself")
 
+requestVoteResponseToNodeImpliesNodeSafeAtTerm = make_node("H_RequestVoteResponseToNodeImpliesNodeSafeAtTerm")
+
 requestVoteQuorumInTermImpliesNoOtherLogsInTerm = make_node("H_RequestVoteQuorumInTermImpliesNoOtherLogsInTerm")
 requestVoteQuorumInTermImpliesNoOtherLeadersInTerm = make_node("H_RequestVoteQuorumInTermImpliesNoOtherLeadersInTerm")
 
@@ -72,7 +74,8 @@ requestVoteQuorumInTermImpliesNoOtherLeadersInTerm.children = {
         candidateInTermVotedForItself
     ],
     "RequestVoteAction":[
-        quorumsSafeAtTerms
+        quorumsSafeAtTerms,
+        requestVoteResponseToNodeImpliesNodeSafeAtTerm
     ]
 }
 
