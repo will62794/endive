@@ -74,7 +74,7 @@ requestVoteQuorumInTermImpliesNoOtherLeadersInTerm.children = {
         candidateInTermVotedForItself
     ],
     "RequestVoteAction":[
-        quorumsSafeAtTerms,
+        # quorumsSafeAtTerms,
         requestVoteResponseToNodeImpliesNodeSafeAtTerm
     ]
 }
