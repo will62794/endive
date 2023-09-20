@@ -22,7 +22,7 @@ You can load a simple example of an interactive proof for the [basic_consensus](
 python3 endive.py --spec benchmarks/basic_consensus --seed 23351 --num_simulate_traces 20000 --tlc_workers 2 --proof_tree_mode --interactive --max_proof_node_ctis 500 --override_num_cti_workers 3 --apalache_smt_timeout_secs 125 --debug --target_sample_states 8000 --target_sample_time_limit_ms 8000 --proof_tree_cmd reload_proof_struct
 ```
 
-After running this you should be able to view the proof interface in a local browser at http://127.0.0.1:5000.
+After running this you should be able to view the proof interface by opening the `benchmarks/basic_consensus.proof.html` file in your local browser.
 
 ## Example Usage
 
