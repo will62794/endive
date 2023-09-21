@@ -968,7 +968,10 @@ class InductiveInvGen():
         # invariant violations that would violate the constraint, due to TLC default
         # behavior: https://groups.google.com/g/tlaplus/c/nfd1H-tZbe8/m/eCV3DNKZOicJ.
         precond = self.state_constraint if len(self.state_constraint) else "TRUE"
-        invcheck_tla_indcheck += f"InvStrengthened_Constraint == {precond} => InvStrengthened \n"
+        invcheck_tla_indcheck += f'InvStrengthened_Constraint == {precond} => InvStrengthened \n'
+        
+        # Use for k-induction?
+        # invcheck_tla_indcheck += f'InvStrengthened_Constraint == {precond} /\ TLCGet("level") = 3 => InvStrengthened \n'
 
         invcheck_tla_indcheck += "IndCand ==\n"
         typeok_expr = self.typeok
