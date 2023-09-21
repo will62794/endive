@@ -8,15 +8,39 @@ import copy
 
 class TLASpec:
     """ Represents a parsed TLA+ spec file. """
-    def __init__(self, xml_ast):
+    def __init__(self, xml_ast, spec_text_lines):
         self.ast = xml_ast
 
         # Extract XML AST into alternate structured representation
         # for convenience.
         self.spec_obj = self.extract_spec_obj(self.ast)
+        self.spec_text_lines = spec_text_lines
 
     def get_spec_obj(self):
         return self.spec_obj
+    
+    def get_text_from_location_endpoints(self, begin, end):
+        """ Retrieve text from spec given (line, col) begin and end points."""
+        (line_begin, col_begin) = begin
+        (line_end, col_end) = end
+
+        # Shift to account for 1-indexing
+        line_begin -= 1
+        col_begin -= 1
+        line_end -= 1
+        col_end -= 1
+
+        start_line = self.spec_text_lines[line_begin][col_begin:].strip()
+        middle_lines = self.spec_text_lines[line_begin+1:line_end]
+        if line_end > line_begin:
+            end_line = self.spec_text_lines[line_end][:col_end]
+        else:
+            end_line = ""
+        # print("start line:", start_line)
+        # print("middle line:", middle_lines)
+        # print("end line:", start_line)
+        out = start_line + "".join(middle_lines) + end_line
+        return out
 
     def extract_spec_obj(self, ast):
         """ Parse user definitions and variables, etc. from spec."""
@@ -27,6 +51,7 @@ class TLASpec:
         constant_decls = {}
         variable_decls = {}
         defs_table = {}
+        formal_params_table = {}
 
         # Extract all top-level definitions.
         for entry in entries:
@@ -37,6 +62,13 @@ class TLASpec:
                     curr_uid = elem.text
 
             for elem in entry:
+                if elem.tag == "FormalParamNode":
+                    op = {"uid": curr_uid, "elem": elem}
+                    # for opField in elem:
+                        # op[opField.tag] = opField.text
+                        # print("  ",opField.tag, ":", opField.text)
+                    formal_params_table[curr_uid] = op
+
                 # Extract user-defined ops.
                 if elem.tag == "UserDefinedOpKind":
                     op = {"uid": curr_uid, "elem": elem}
@@ -336,60 +368,113 @@ class TLASpec:
         # return self.spec_obj["defs"]
         # pass
 
-    def extract_quantifiers(self, elem):
+    def extract_quant_preds(self, elem, curr_quants=[], curr_preds=[]):
+        """ Extract quantifier prefixes and predicates in their scope. """
+
         # Extract quantifier prefixes.
-        for el in elem.find("body").iter():
-            if el.tag != "OpApplNode":
-                continue
+        # for el in elem:
 
-            bound = el.find("boundSymbols")
-            if bound is not None:
-                print("BOUND symbols:", bound)
+        if elem.tag == "UserDefinedOpKind":
+            uid = elem.find("UID")
+            udef = self.spec_obj["defs"][uid]
+            print("user def:", udef)
+            # op = {"uid": curr_uid, "elem": elem}
+            # for opField in elem:
+            #     op[opField.tag] = opField.text
+            #     # print("  ",opField.tag, ":", opField.text)
+            # defs_table[curr_uid] = op
 
-            operator = el.find("operator")
-            if operator is not None:
-                builtInRef = operator.find("BuiltInKindRef")
-                if builtInRef is None:
-                    break
+        if elem.tag == "body":
+            for el in elem:
+                self.extract_quant_preds(el, curr_quants, curr_preds)
 
-                uid = builtInRef.find("UID")
-                # print(self.spec_obj["builtins"])
-                # print(uid)
+        if elem.tag == "OpApplNode":
+
+            bound = elem.find("boundSymbols")
+            # if bound is not None:
+                # print("BOUND symbols:", bound)
+            operator = elem.find("operator")
+            userDef = operator.find("UserDefinedOpKindRef")
+
+            if userDef is not None:
+                uid = userDef.find("UID").text
+                udef = self.spec_obj["defs"][uid]
+                udef_elem = udef["elem"]
+                print(udef_elem.tag)
+                # for op in udef_elem.find("operands"):
+                #     print(op)
+                for a in udef_elem:
+                    print(a)
+                body = udef_elem.find("body")
+                print("user def:", udef)
+                if body is not None:
+                    self.extract_quant_preds(body, curr_quants, curr_preds)
+
+            builtInRef = operator.find("BuiltInKindRef")
+
+            if builtInRef is None:
+                for o in operator:
+                    print(o.tag)
+                return
+
+            uid = builtInRef.find("UID")
+
+            builtin = None
+            if uid is not None and uid.text in self.spec_obj["builtins"]:
+                builtin = self.spec_obj["builtins"][uid.text]
+
+                # uid = operator.find("./BuiltInKindRef/UID")
+                # # if ref is not None:
+                # #     ref.find("UID")
+                # # uid=83 -> conjunction list.
                 # if uid is not None:
-                #     print(uid.text)
-                if uid is not None and uid.text in self.spec_obj["builtins"]:
-                    builtin = self.spec_obj["builtins"][uid.text]
-                    if builtin["uniquename"] == "$BoundedForall":
-                        print("FORALL quant", uid.text)
-                    if builtin["uniquename"] == "$BoundedExists":
-                        print("EXISTS quant", uid.text)
-    
-    def extract_predicates(self, elem):
-        for el in elem.find("body").iter():
-            if el.tag != "OpApplNode":
-                continue
+                #     print("UID_", uid.text)
+                #     builtin = self.spec_obj["builtins"][uid.text]
+                #     print(builtin["uniquename"])
 
-            operator = el.find("operator")
-            # print(operator.tag)
-            if operator is not None:
-                uid = operator.find("./BuiltInKindRef/UID")
-                # if ref is not None:
-                #     ref.find("UID")
-                # uid=83 -> conjunction list.
-                if uid is not None:
-                    print("UID_", uid.text)
-                    builtin = self.spec_obj["builtins"][uid.text]
-                    print(builtin["uniquename"])
-                    if builtin["uniquename"] == "$ConjList":
-                        print("CONJUNCTION LIST")
-                        for conj in el.find("operands"):
-                            print(conj)
+            # Conjunction list.
+            if builtin is not None and builtin["uniquename"] == "$ConjList":
+                print("CONJUNCTION LIST")
+                for conj in elem.find("operands"):
+                    level = conj.find("level").text
+                    # print(conj)
+                    # print("conjunct level: ", level)
+                    # For now append level 1 conjunct predicates.
+                    if level == "1":
+                        curr_preds.append(conj)
 
-            # if operator is not None:
-            #     builtInRef = operator.find("BuiltInKindRef")
-            #     if builtInRef is None:
-            #         break
-            # print(el.tag)     
+
+            # print(self.spec_obj["builtins"])
+            # print(uid)
+            # if uid is not None:
+            #     print(uid.text)
+
+            # Bounded quantifier.
+            if builtin is not None and builtin["uniquename"] in ["$BoundedForall", "$BoundedExists"]:
+                # builtin = self.spec_obj["builtins"][uid.text]
+                # if builtin["uniquename"] in ["$BoundedForall", "$BoundedExists"]:
+                print("QUANT", builtin["uniquename"])
+                print("uid", uid.text)
+                operands = elem.find("operands")
+                curr_quants.append(builtin["uniquename"])
+                # curr_quants.append(builtin)
+                # curr_quants.append(elem)
+                print(curr_quants)
+                for elem in operands:
+                    print("operand:", elem.tag)
+                    self.extract_quant_preds(elem, curr_quants, curr_preds)
+
+                    # print("operands:", operands)
+                    # opAppl = operands.find("OpApplNode")
+                    # if opAppl is not None:
+                    #     if opAppl.find("operator") is not None:
+                    #         v = opAppl.find("operator").find("BuiltInKindRef")
+                    #         print(v)
+
+    def elem_to_location_tuple(self, elem, begin_or_end):
+        line = int(elem.find("location").find("line").find(begin_or_end).text)
+        col = int(elem.find("location").find("column").find(begin_or_end).text)   
+        return (line, col)    
 
     def extract_quant_and_predicate_grammar(self, defname):
         """ From a given quantified definition (either action or state predicate) extract quantifier prefix template and atomic predicates."""
@@ -398,8 +483,37 @@ class TLASpec:
         node_uid = node["uid"]
         node_elem = node["elem"]
 
-        self.extract_quantifiers(node_elem)
-        self.extract_predicates(node_elem)
+        print("--- EXTRACT QUANTS ---")
+        curr_quants = []
+        curr_preds = []
+        body = node_elem.find("body")
+        if body is None:
+            return
+        
+        self.extract_quant_preds(body, curr_quants, curr_preds)
+        print(curr_quants)
+        print(curr_preds)
+
+        print("CURR QUANT TEXT:")
+        for quant in curr_quants:
+            # begin = self.elem_to_location_tuple(quant, "begin")
+            # end = self.elem_to_location_tuple(quant, "end")
+            # print("BEGIN:", begin)
+            # print("END  :", end)
+            # text = self.get_text_from_location_endpoints(begin, end)
+            print(quant)           
+
+        print("CURR PRED TEXT:")
+        for pred in curr_preds:
+            begin = self.elem_to_location_tuple(pred, "begin")
+            end = self.elem_to_location_tuple(pred, "end")
+            # print("BEGIN:", begin)
+            # print("END  :", end)
+            text = self.get_text_from_location_endpoints(begin, end)
+            print(text)
+
+        # print("---EXTRACT PREDS")
+        # self.extract_predicates(node_elem)
  
 
     def get_all_user_defs(self, level=None):
@@ -512,9 +626,11 @@ def parse_tla_file(workdir, specname):
     subproc = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, cwd=workdir)
     subproc.wait()
 
+    spec_text_lines = open(f"{workdir}/{specname}.tla").readlines()
+
     xml_ast = f'{workdir}/{xml_out_file}'
     tree = ET.parse(xml_ast)
-    return TLASpec(tree)
+    return TLASpec(tree, spec_text_lines)
     # return tree
 
 if __name__ == "__main__":
@@ -579,4 +695,4 @@ if __name__ == "__main__":
 
     print("EXTRACT QUANT")
     # my_spec.extract_quant_and_predicate_grammar("HandleRequestVoteRequestAction")
-    my_spec.extract_quant_and_predicate_grammar("Test1")
+    my_spec.extract_quant_and_predicate_grammar("RequestVoteAction2")
