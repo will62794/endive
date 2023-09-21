@@ -249,6 +249,8 @@ commitIndexBoundValid = make_node("H_CommitIndexBoundValid")
     
 appendEntriesRequestImpliesSenderSafeAtTerm = make_node("H_AppendEntriesRequestImpliesSenderSafeAtTerm")
 
+appendEntriesResponseInTermImpliesSafeAtTerms = make_node("H_AppendEntriesResponseInTermImpliesSafeAtTerms")
+
 appendEntriesRequestInTermImpliesSafeAtTerms = make_node("H_AppendEntriesRequestInTermImpliesSafeAtTerms")
 appendEntriesRequestInTermImpliesSafeAtTerms.children = {
     "AppendEntriesAction": [
@@ -282,6 +284,9 @@ requestVoteQuorumInTermImpliesNoAppendEntriesInTerm.children = {
     "RequestVoteAction": [
         nodesVotedInQuorumInTermImpliesNoAppendEntriesRequestsInTerm,
         appendEntriesRequestInTermImpliesSafeAtTerms
+    ],
+    "HandleRequestVoteRequestAction": [
+        appendEntriesResponseInTermImpliesSafeAtTerms
     ]
 }    
     

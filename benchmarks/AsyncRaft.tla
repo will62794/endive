@@ -476,6 +476,10 @@ AcceptAppendEntriesRequestTruncateAction == \E m \in appendEntriesMsgs : AcceptA
 AcceptAppendEntriesRequestLearnCommitAction == \E m \in appendEntriesMsgs : AcceptAppendEntriesRequestLearnCommit(m)
 HandleAppendEntriesResponseAction == \E m \in appendEntriesMsgs : HandleAppendEntriesResponse(m)
 
+Test1 == \A s \in Server : \E r \in Server : 
+            /\ state[s] = Leader
+            /\ state[s] \in {Follower}
+
 \* Defines how the variables may transition.
 Next == 
     \/ RequestVoteAction
@@ -878,10 +882,17 @@ H_LogEntryInTermImpliesSafeAtTerm ==
 \* election in term T.
 H_AppendEntriesRequestInTermImpliesSafeAtTerms == 
     \A m \in appendEntriesMsgs : 
-        m.mtype = AppendEntriesRequest =>
+        (m.mtype = AppendEntriesRequest)  =>
             \E Q \in Quorum : \A t \in Q : 
                 /\ currentTerm[t] >= m.mterm
                 /\ currentTerm[t] = m.mterm => (votedFor[t] = m.msource)
+
+H_AppendEntriesResponseInTermImpliesSafeAtTerms == 
+    \A m \in appendEntriesMsgs : 
+        ((m.mtype = AppendEntriesResponse /\ m.msuccess))  =>
+            \E Q \in Quorum : \A t \in Q : 
+                /\ currentTerm[t] >= m.mterm
+                /\ currentTerm[t] = m.mterm => (votedFor[t] = m.mdest)
 
 H_LogEntryInTermImpliesSafeAtTermAppendEntries ==
     \A m \in appendEntriesMsgs : 
