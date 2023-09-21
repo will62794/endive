@@ -881,7 +881,7 @@ H_AppendEntriesRequestInTermImpliesSafeAtTerms ==
         m.mtype = AppendEntriesRequest =>
             \E Q \in Quorum : \A t \in Q : 
                 /\ currentTerm[t] >= m.mterm
-                /\ currentTerm[t] = m.mterm => (votedFor[t] # Nil)
+                /\ currentTerm[t] = m.mterm => (votedFor[t] = m.msource)
 
 H_LogEntryInTermImpliesSafeAtTermAppendEntries ==
     \A m \in appendEntriesMsgs : 
@@ -967,6 +967,11 @@ H_AppendEntriesCommitIndexCannotBeLargerThanTheSender ==
 H_LeaderMatchIndexBound == 
     \A s \in Server : (state[s] = Leader) => 
         \A t \in Server : matchIndex[s][t] <= Len(log[s])
+
+H_AppendEntriesRequestImpliesSenderSafeAtTerm == 
+    \A m \in appendEntriesMsgs :
+        (m.mtype = AppendEntriesRequest) =>
+            currentTerm[m.msource] >= m.mterm
 
 ExistsNodeQuorumThatVotedAtTermFor(T, s) == 
     \E Q \in Quorum :

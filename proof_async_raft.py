@@ -247,8 +247,14 @@ logMatching.children = {
 
 commitIndexBoundValid = make_node("H_CommitIndexBoundValid")
     
+appendEntriesRequestImpliesSenderSafeAtTerm = make_node("H_AppendEntriesRequestImpliesSenderSafeAtTerm")
 
 appendEntriesRequestInTermImpliesSafeAtTerms = make_node("H_AppendEntriesRequestInTermImpliesSafeAtTerms")
+appendEntriesRequestInTermImpliesSafeAtTerms.children = {
+    "AppendEntriesAction": [
+        quorumsSafeAtTerms
+    ]
+}
 
 nodesVotedInQuorumInTermImpliesNoAppendEntriesRequestsInTerm = make_node("H_NodesVotedInQuorumInTermImpliesNoAppendEntriesRequestsInTerm")
     
@@ -257,8 +263,13 @@ nodesVotedInQuorumInTermImpliesNoAppendEntriesRequestsInTerm.children = {
         quorumsSafeAtTerms
     ],
     "HandleRequestVoteRequestAction": [
-        quorumsSafeAtTerms,
+        # quorumsSafeAtTerms,
         appendEntriesRequestInTermImpliesSafeAtTerms
+    ],
+    "RequestVoteAction":[
+        # quorumsSafeAtTerms,
+        appendEntriesRequestInTermImpliesSafeAtTerms,
+        appendEntriesRequestImpliesSenderSafeAtTerm
     ]
 }
 
@@ -298,6 +309,9 @@ leaderMatchIndexValidAppendEntries.children = {
     ],
     "BecomeLeaderAction": [
         candidateWithVotesGrantedImpliesNoAppendEntriesInTerm
+    ],
+    "AcceptAppendEntriesRequestTruncateAction": [
+        appendEntriesRequestLogEntriesMustBeInLeaderLog
     ]
 }
     
