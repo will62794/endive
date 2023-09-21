@@ -99,6 +99,7 @@ class InductiveInvGen():
         self.interactive_mode = interactive_mode
         self.max_num_conjuncts_per_round = max_num_conjuncts_per_round
         self.override_num_cti_workers = override_num_cti_workers
+        self.k_cti_induction_depth = all_args["k_cti_induction_depth"]
 
         self.target_sample_states = all_args["target_sample_states"]
         self.target_sample_time_limit_ms = all_args["target_sample_time_limit_ms"]
@@ -968,10 +969,11 @@ class InductiveInvGen():
         # invariant violations that would violate the constraint, due to TLC default
         # behavior: https://groups.google.com/g/tlaplus/c/nfd1H-tZbe8/m/eCV3DNKZOicJ.
         precond = self.state_constraint if len(self.state_constraint) else "TRUE"
-        invcheck_tla_indcheck += f'InvStrengthened_Constraint == {precond} => InvStrengthened \n'
+        # invcheck_tla_indcheck += f'InvStrengthened_Constraint == {precond} => InvStrengthened \n'
         
         # Use for k-induction?
-        # invcheck_tla_indcheck += f'InvStrengthened_Constraint == {precond} /\ TLCGet("level") = 3 => InvStrengthened \n'
+        # self.k_cti_induction_depth = 2
+        invcheck_tla_indcheck += f'InvStrengthened_Constraint == {precond} /\ TLCGet("level") = {self.k_cti_induction_depth - 1} => InvStrengthened \n'
 
         invcheck_tla_indcheck += "IndCand ==\n"
         typeok_expr = self.typeok
@@ -2888,6 +2890,7 @@ if __name__ == "__main__":
     parser.add_argument('--max_num_conjuncts_per_round', help='Max number of conjuncts to learn per round.', type=int, default=10000)
     parser.add_argument('--max_num_ctis_per_round', help='Max number of CTIs per round.', type=int, default=10000)
     parser.add_argument('--override_num_cti_workers', help='Max number of TLC workers for CTI generation.', type=int, default=None)
+    parser.add_argument('--k_cti_induction_depth', help='CTI k-induction depth.', type=int, default=2)
     
     # Proof tree related commands.
     parser.add_argument('--proof_tree_mode', help='Run in inductive proof tree mode (EXPERIMENTAL).', default=False, action='store_true')
