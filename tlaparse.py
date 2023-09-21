@@ -301,6 +301,7 @@ class TLASpec:
         for (el,child) in to_remove:
             print("Removing ", child)
             el.remove(child)
+
     def get_vars_in_def(self, name, ignore_unchanged=True, ignore_update_expressions=False):
         """ Get the set of variables that appear in a given definition body. """ 
         node = self.get_def_node_by_uniquename(name)
@@ -334,6 +335,72 @@ class TLASpec:
         # spec_obj = self.extract_spec_obj(spec_ast)
         # return self.spec_obj["defs"]
         # pass
+
+    def extract_quantifiers(self, elem):
+        # Extract quantifier prefixes.
+        for el in elem.find("body").iter():
+            if el.tag != "OpApplNode":
+                continue
+
+            bound = el.find("boundSymbols")
+            if bound is not None:
+                print("BOUND symbols:", bound)
+
+            operator = el.find("operator")
+            if operator is not None:
+                builtInRef = operator.find("BuiltInKindRef")
+                if builtInRef is None:
+                    break
+
+                uid = builtInRef.find("UID")
+                # print(self.spec_obj["builtins"])
+                # print(uid)
+                # if uid is not None:
+                #     print(uid.text)
+                if uid is not None and uid.text in self.spec_obj["builtins"]:
+                    builtin = self.spec_obj["builtins"][uid.text]
+                    if builtin["uniquename"] == "$BoundedForall":
+                        print("FORALL quant", uid.text)
+                    if builtin["uniquename"] == "$BoundedExists":
+                        print("EXISTS quant", uid.text)
+    
+    def extract_predicates(self, elem):
+        for el in elem.find("body").iter():
+            if el.tag != "OpApplNode":
+                continue
+
+            operator = el.find("operator")
+            # print(operator.tag)
+            if operator is not None:
+                uid = operator.find("./BuiltInKindRef/UID")
+                # if ref is not None:
+                #     ref.find("UID")
+                # uid=83 -> conjunction list.
+                if uid is not None:
+                    print("UID_", uid.text)
+                    builtin = self.spec_obj["builtins"][uid.text]
+                    print(builtin["uniquename"])
+                    if builtin["uniquename"] == "$ConjList":
+                        print("CONJUNCTION LIST")
+                        for conj in el.find("operands"):
+                            print(conj)
+
+            # if operator is not None:
+            #     builtInRef = operator.find("BuiltInKindRef")
+            #     if builtInRef is None:
+            #         break
+            # print(el.tag)     
+
+    def extract_quant_and_predicate_grammar(self, defname):
+        """ From a given quantified definition (either action or state predicate) extract quantifier prefix template and atomic predicates."""
+        node = self.get_def_node_by_uniquename(defname)
+        print(node)
+        node_uid = node["uid"]
+        node_elem = node["elem"]
+
+        self.extract_quantifiers(node_elem)
+        self.extract_predicates(node_elem)
+ 
 
     def get_all_user_defs(self, level=None):
         """ Get all user defined ops at an optionally specified level."""
@@ -469,7 +536,6 @@ if __name__ == "__main__":
     vars_in_action_non_updated, _ = my_spec.get_vars_in_def(action, ignore_update_expressions=True)
     print(f"### Vars in action '{action}'", vars_in_action)
     print(f"### Vars in action non-updated '{action}'", vars_in_action_non_updated)
-    exit(0)
     print("### Vars COI for updated in action:", action_updated_vars)
     for v in action_updated_vars:
         print(f"var: '{v}'", ", COI:", action_updated_vars[v])
@@ -509,3 +575,8 @@ if __name__ == "__main__":
 
     # coi = my_spec.compute_coi_table(["H_RequestVoteQuorumInTermImpliesNoOtherLeadersInTerm"], ["RequestVoteAction"])
     # print(f"Computed COI: {coi}")
+
+
+    print("EXTRACT QUANT")
+    # my_spec.extract_quant_and_predicate_grammar("HandleRequestVoteRequestAction")
+    my_spec.extract_quant_and_predicate_grammar("Test1")
