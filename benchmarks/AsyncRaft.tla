@@ -368,6 +368,7 @@ TruncateLog(m, i) ==
     [index \in 1..m.mprevLogIndex |-> log[i][index]]
 
 AcceptAppendEntriesRequestAppend(m) ==
+    /\ m \in appendEntriesMsgs
     /\ m.mtype = AppendEntriesRequest
     /\ m.mterm = currentTerm[m.mdest]
     /\ LET  i     == m.mdest
@@ -391,6 +392,7 @@ AcceptAppendEntriesRequestAppend(m) ==
             /\ UNCHANGED <<candidateVars, commitIndex, leaderVars, votedFor, currentTerm, requestVoteMsgs>>
        
 AcceptAppendEntriesRequestTruncate(m) ==
+    /\ m \in appendEntriesMsgs
     /\ m.mtype = AppendEntriesRequest
     /\ m.mterm = currentTerm[m.mdest]
     /\ LET  i     == m.mdest
@@ -419,6 +421,7 @@ AcceptAppendEntriesRequestTruncate(m) ==
             /\ UNCHANGED <<candidateVars, leaderVars, commitIndex, votedFor, currentTerm, requestVoteMsgs>>
 
 AcceptAppendEntriesRequestLearnCommit(m) ==
+    /\ m \in appendEntriesMsgs
     /\ m.mtype = AppendEntriesRequest
     /\ m.mterm = currentTerm[m.mdest]
     /\ LET  i     == m.mdest
@@ -474,7 +477,7 @@ HandleRequestVoteRequestAction == \E m \in requestVoteMsgs : HandleRequestVoteRe
 HandleRequestVoteResponseAction == \E m \in requestVoteMsgs : HandleRequestVoteResponse(m)
 RejectAppendEntriesRequestAction == \E m \in appendEntriesMsgs : RejectAppendEntriesRequest(m)
 AcceptAppendEntriesRequestAppendAction == \E m \in appendEntriesMsgs : AcceptAppendEntriesRequestAppend(m)
-AcceptAppendEntriesRequestTruncateAction == \E m \in appendEntriesMsgs : AcceptAppendEntriesRequestTruncate(m)
+AcceptAppendEntriesRequestTruncateAction == TRUE /\ \E m \in appendEntriesMsgs : AcceptAppendEntriesRequestTruncate(m)
 AcceptAppendEntriesRequestLearnCommitAction == \E m \in appendEntriesMsgs : AcceptAppendEntriesRequestLearnCommit(m)
 HandleAppendEntriesResponseAction == \E m \in appendEntriesMsgs : HandleAppendEntriesResponse(m)
 
@@ -1079,6 +1082,26 @@ H_LeaderMatchIndexValid ==
          /\ Agree(s, ind) \in Quorum ) => 
             /\ ind \in DOMAIN log[t]
             /\ log[t][ind] = log[s][ind]
+
+\* If a log entry is covered by a commit index, there cannot be a conflicting
+\* log entry at that index in an AppendEntries message.
+H_NoLogDivergenceAppendEntries == 
+    \A s \in Server :
+    \A m \in appendEntriesMsgs :
+        (/\ m.mtype = AppendEntriesRequest
+         /\ m.mentries # <<>>
+         /\ m.mprevLogIndex = commitIndex[s] - 1) =>
+            log[s][commitIndex[s]] >= m.mentries[1]
+
+\* If a log entry is covered by a commit index, then a leader
+\* in a newer term must have that entry.
+H_LeaderHasEntriesCoveredByCommitIndexes == 
+    \A s,t \in Server :
+        (/\ state[s] = Leader
+         /\ commitIndex[t] > 0
+         /\ currentTerm[s] > log[t][commitIndex[t]]
+         /\ commitIndex[t] \in DOMAIN log[s]) =>
+            log[s][commitIndex[t]] = log[t][commitIndex[t]]
 
 H_CommitIndexCoversEntryImpliesExistsOnQuorum == 
     \A s \in Server :

@@ -94,7 +94,8 @@ requestVoteQuorumInTermImpliesNoOtherLogsInTerm.children = {
     ],
     "HandleRequestVoteRequestAction": [
         logEntryInTermImpliesSafeAtTerms,
-        logEntryInTermImpliesSafeAtTermCandidate
+        logEntryInTermImpliesSafeAtTermCandidate,
+        candidateInTermVotedForItself
     ],
     "RequestVoteAction": [
         logEntryInTermImpliesSafeAtTerms,
@@ -352,8 +353,22 @@ leaderMatchIndexValid.children = {
 
 commitIndexInAppendEntriesImpliesCommittedEntryExists = make_node("H_CommitIndexInAppendEntriesImpliesCommittedEntryExists")
 
+leaderHasEntriesCoveredByCommitIndexes = make_node("H_LeaderHasEntriesCoveredByCommitIndexes")
 
 commitIndexCoversEntryImpliesExistsOnQuorum = make_node("H_CommitIndexCoversEntryImpliesExistsOnQuorum")
+
+noLogDivergence = make_node("H_NoLogDivergence")
+
+noLogDivergenceAppendEntries = make_node("H_NoLogDivergenceAppendEntries")
+noLogDivergenceAppendEntries.children = {
+    "AppendEntriesAction":[
+        # commitIndexCoversEntryImpliesExistsOnQuorum,
+        noLogDivergence,
+        # leaderHasEntriesCoveredByCommitIndexes,
+        # logTermsMonotonic
+    ]
+}
+
 commitIndexCoversEntryImpliesExistsOnQuorum.children = {
     "AcceptAppendEntriesRequestLearnCommitAction": [
         commitIndexInAppendEntriesImpliesCommittedEntryExists,
@@ -361,11 +376,13 @@ commitIndexCoversEntryImpliesExistsOnQuorum.children = {
     ],
     "AdvanceCommitIndexAction": [
         leaderMatchIndexValid
+    ],
+    "AcceptAppendEntriesRequestTruncateAction": [
+        noLogDivergenceAppendEntries
     ]
 }
 
 
-noLogDivergence = make_node("H_NoLogDivergence")
 noLogDivergence.children = {
     "AcceptAppendEntriesRequestLearnCommitAction":[
         commitIndexInAppendEntriesImpliesCommittedEntryExists,
@@ -375,6 +392,9 @@ noLogDivergence.children = {
         leaderMatchIndexValid,
         commitIndexCoversEntryImpliesExistsOnQuorum,
         logMatching
+    ],
+    "AcceptAppendEntriesRequestTruncateAction": [
+        noLogDivergenceAppendEntries
     ]
 }
 root = noLogDivergence
