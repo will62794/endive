@@ -378,11 +378,7 @@ class TLASpec:
             uid = elem.find("UID")
             udef = self.spec_obj["defs"][uid]
             print("user def:", udef)
-            # op = {"uid": curr_uid, "elem": elem}
-            # for opField in elem:
-            #     op[opField.tag] = opField.text
-            #     # print("  ",opField.tag, ":", opField.text)
-            # defs_table[curr_uid] = op
+            self.extract_quant_preds(udef["elem"], curr_quants, curr_preds)
 
         if elem.tag == "body":
             for el in elem:
@@ -423,31 +419,16 @@ class TLASpec:
             if uid is not None and uid.text in self.spec_obj["builtins"]:
                 builtin = self.spec_obj["builtins"][uid.text]
 
-                # uid = operator.find("./BuiltInKindRef/UID")
-                # # if ref is not None:
-                # #     ref.find("UID")
-                # # uid=83 -> conjunction list.
-                # if uid is not None:
-                #     print("UID_", uid.text)
-                #     builtin = self.spec_obj["builtins"][uid.text]
-                #     print(builtin["uniquename"])
-
             # Conjunction list.
             if builtin is not None and builtin["uniquename"] == "$ConjList":
                 print("CONJUNCTION LIST")
                 for conj in elem.find("operands"):
                     level = conj.find("level").text
-                    # print(conj)
-                    # print("conjunct level: ", level)
+                    print(conj)
+                    print("conjunct level: ", level)
                     # For now append level 1 conjunct predicates.
-                    if level == "1":
+                    if level in ["0", "1"]:
                         curr_preds.append(conj)
-
-
-            # print(self.spec_obj["builtins"])
-            # print(uid)
-            # if uid is not None:
-            #     print(uid.text)
 
             # Bounded quantifier.
             if builtin is not None and builtin["uniquename"] in ["$BoundedForall", "$BoundedExists"]:
@@ -695,4 +676,4 @@ if __name__ == "__main__":
 
     print("EXTRACT QUANT")
     # my_spec.extract_quant_and_predicate_grammar("HandleRequestVoteRequestAction")
-    my_spec.extract_quant_and_predicate_grammar("RequestVoteAction2")
+    my_spec.extract_quant_and_predicate_grammar("HandleRequestVoteRequestAction2")
