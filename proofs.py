@@ -6,6 +6,7 @@ import random
 import pickle
 import graphviz
 from mc import CTI
+import mc
 import logging
 import json
 
@@ -743,6 +744,50 @@ class StructuredProof():
         for action in actions:
             node.ctis_eliminated[action] = list(node.ctis_eliminated[action])
 
+
+
+        ##
+        ## EXPERIMENTAL INVARIANT SYNTHESIS AFTER NODE CTI GENERATION.
+        EXPERIMENTAL_INV_SYNTH = False
+        if EXPERIMENTAL_INV_SYNTH:
+
+            #
+            # Predicates specifically for
+            # lemma: RequestVoteResponseToNodeImpliesNodeSafeAtTerm
+            # action: HandleRequestVoteRequestAction
+            # (AsyncRaft)
+            #
+
+            test_preds = [
+                "MJ.mtype = RequestVoteRequest",
+                "MJ.mterm <= currentTerm[MJ.mdest]",
+                "MI.mtype = RequestVoteResponse",
+                "MI.mtype = RequestVoteResponse /\ MI.mvoteGranted",
+                "currentTerm[MI.mdest] >= MI.mterm"
+            ]
+            test_quant_vars = ["MI", "MJ"]
+            num_inv_cands = 80
+            all_invs = mc.generate_invs(test_preds, num_inv_cands, 
+                                            min_num_conjuncts=2, max_num_conjuncts=3, 
+                                            process_local=False, 
+                                            quant_vars=test_quant_vars)
+            print(all_invs)
+            invs = list(all_invs["raw_invs"])
+            invs.sort()
+            for i in invs:
+                print(i)
+
+            indgen.quant_inv = "\\A MI \\in requestVoteMsgs : \\A MJ \\in requestVoteMsgs : "
+            indgen.initialize_quant_inv()
+
+            sat_invs = indgen.check_invariants(invs)
+            for s in sat_invs:
+                inv_index = int(s.replace("Inv", ""))
+                print(s, invs[inv_index])
+            print("==")
+
+        ############################################################
+        ############################################################
 
         # Re-write proof html.
         self.save_proof()
