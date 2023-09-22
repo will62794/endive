@@ -224,7 +224,8 @@ function setCTIPaneHtml(nodeData){
 
     ctipane.innerHTML += '<label for="lemmas">Choose a lemma node to add:</label><br>';
     let selectHTML = '<select name="lemmas" id="lemma-selection">';
-    for(const def of specDefs){
+    let defsSorted = specDefs.sort();
+    for(const def of defsSorted){
         if(def.startsWith("H_")){
             selectHTML += `<option value="${def}">${def}</option>`;
         }
