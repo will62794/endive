@@ -2288,12 +2288,13 @@ class InductiveInvGen():
         for a in orig_keys:
             del lemma_action_coi[a]
         
-        print("LEMMA COI", lemma_action_coi)
-        for a in lemma_action_coi:
-            print("ACTION: ", a)
-            for l in lemma_action_coi[a]:
-                if "H_" in l:
-                    print("  ", l, lemma_action_coi[a][l])
+        # Optionally print out full action-lemma COI table.
+        # print("LEMMA COI", lemma_action_coi)
+        # for a in lemma_action_coi:
+        #     print("ACTION: ", a)
+        #     for l in lemma_action_coi[a]:
+        #         if "H_" in l:
+        #             print("  ", l, lemma_action_coi[a][l])
 
 
         # Optionally reload proof structure from locally defined template.
