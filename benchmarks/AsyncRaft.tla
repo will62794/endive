@@ -282,7 +282,6 @@ UpdateTerm ==
 HandleRequestVoteRequest(m) ==
     /\ m.mtype = RequestVoteRequest
     /\ m.mterm <= currentTerm[m.mdest]
-    \* /\ ReceivableRequestVoteMessage(m, RequestVoteRequest, LessOrEqualTerm)
     /\ LET  i     == m.mdest
             j     == m.msource
             logOk == \/ m.mlastLogTerm > LastTerm(log[i])
@@ -291,7 +290,6 @@ HandleRequestVoteRequest(m) ==
             grant == /\ m.mterm = currentTerm[i]
                      /\ logOk
                      /\ votedFor[i] \in {Nil, j} IN
-            /\ m.mterm <= currentTerm[i]
             /\ votedFor' = [votedFor EXCEPT ![i] = IF grant THEN j ELSE votedFor[i]]
             /\ requestVoteMsgs' = requestVoteMsgs \cup {[
                             mtype        |-> RequestVoteResponse,
@@ -461,6 +459,10 @@ HandleAppendEntriesResponse(m) ==
             /\ appendEntriesMsgs' = appendEntriesMsgs \ {m}
             /\ UNCHANGED <<serverVars, candidateVars, logVars, requestVoteMsgs>>
 
+RequestVoteAction2 == \E i \in Server : RequestVote(i)
+HandleRequestVoteRequestAction2 == \E m \in requestVoteMsgs : HandleRequestVoteRequest(m)
+
+
 RestartAction == TRUE /\ \E i \in Server : Restart(i)
 RequestVoteAction == TRUE /\ \E i \in Server : RequestVote(i)
 BecomeLeaderAction == TRUE /\ \E i \in Server : BecomeLeader(i)
@@ -476,7 +478,7 @@ AcceptAppendEntriesRequestTruncateAction == \E m \in appendEntriesMsgs : AcceptA
 AcceptAppendEntriesRequestLearnCommitAction == \E m \in appendEntriesMsgs : AcceptAppendEntriesRequestLearnCommit(m)
 HandleAppendEntriesResponseAction == \E m \in appendEntriesMsgs : HandleAppendEntriesResponse(m)
 
-Test1 == \A s \in Server : \E r \in Server : 
+Test1 == \A s \in Server : \E r \in Server :
             /\ state[s] = Leader
             /\ state[s] \in {Follower}
 
@@ -730,6 +732,21 @@ H_RequestVoteQuorumInTermImpliesNoOtherLogsInTerm ==
         (/\ state[s] = Candidate
          /\ ExistsRequestVoteResponseQuorum(currentTerm[s], s)) =>
             /\ \A n \in Server : \A ind \in DOMAIN log[n] : log[n][ind] # currentTerm[s]
+
+
+\* H_LemmaAuto == 
+\*     \A mi \in requestVoteMsgs :
+\*     \A m \in requestVoteMsgs : 
+\*         ~(mi.mtype = RequestVoteResponse) \/
+\*             (mi.mvoteGranted
+\*                 \/ currentTerm[m.mdest] >= mi.mterm
+\*                 \/ ~(m.mtype = RequestVoteRequest) 
+\*                 \/ (m.mterm <= currentTerm[m.mdest]))
+
+H_RequestVoteRequestFromNodeImpliesSafeAtTerm == 
+    \A m \in requestVoteMsgs :
+        (m.mtype = RequestVoteRequest) => 
+            currentTerm[m.msource] >= m.mterm
 
 \* If a node sent a successful request vote response to node S in term T, then
 \* node S must be in term >= T.
