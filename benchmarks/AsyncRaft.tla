@@ -894,6 +894,13 @@ H_LogEntryInTermImpliesSafeAtTerm ==
             /\ currentTerm[n] >= log[s][i]
             /\ currentTerm[n] = log[s][i] => (votedFor[n] # Nil)
 
+H_LogEntryInTermImpliesSafeAtTermCandidate == 
+    \A s,t \in Server : 
+    \A i \in DOMAIN log[s] :
+        (state[t] = Candidate /\ currentTerm[t] = log[s][i]) =>
+            \E Q \in Quorum : \A n \in Q : 
+                /\ currentTerm[n] >= log[s][i]
+                /\ currentTerm[n] = log[s][i] => (votedFor[n] # t)
 
 \* If an AppendEntries request was sent in term T, then there must have been a successful 
 \* election in term T.

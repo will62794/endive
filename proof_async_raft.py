@@ -68,6 +68,8 @@ requestVoteResponseToNodeImpliesNodeSafeAtTerm.children = {
     ]
 }
 
+logEntryInTermImpliesSafeAtTermCandidate = make_node("H_LogEntryInTermImpliesSafeAtTermCandidate")
+
 requestVoteQuorumInTermImpliesNoOtherLogsInTerm = make_node("H_RequestVoteQuorumInTermImpliesNoOtherLogsInTerm")
 requestVoteQuorumInTermImpliesNoOtherLeadersInTerm = make_node("H_RequestVoteQuorumInTermImpliesNoOtherLeadersInTerm")
 
@@ -90,12 +92,14 @@ requestVoteQuorumInTermImpliesNoOtherLogsInTerm.children = {
     "ClientRequestAction": [
         requestVoteQuorumInTermImpliesNoOtherLeadersInTerm
     ],
-    "RequestVoteAction": [
-        logEntryInTermImpliesSafeAtTerms
-    ],
     "HandleRequestVoteRequestAction": [
-        logEntryInTermImpliesSafeAtTerms
-    ]
+        logEntryInTermImpliesSafeAtTerms,
+        logEntryInTermImpliesSafeAtTermCandidate
+    ],
+    "RequestVoteAction": [
+        logEntryInTermImpliesSafeAtTerms,
+        requestVoteResponseToNodeImpliesNodeSafeAtTerm
+    ],
 }
 
 candidateVotesGrantedInTermAreUnique = StructuredProofNode("CandidateVotesGrantedInTermAreUnique", "H_CandidateVotesGrantedInTermAreUnique")
