@@ -676,4 +676,5 @@ if __name__ == "__main__":
 
     print("EXTRACT QUANT")
     # my_spec.extract_quant_and_predicate_grammar("HandleRequestVoteRequestAction")
-    my_spec.extract_quant_and_predicate_grammar("HandleRequestVoteRequestAction2")
+    my_spec.extract_quant_and_predicate_grammar("AppendEntries")
+    my_spec.extract_quant_and_predicate_grammar("H_NoLogDivergenceAppendEntries")

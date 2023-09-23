@@ -1090,7 +1090,8 @@ H_NoLogDivergenceAppendEntries ==
     \A m \in appendEntriesMsgs :
         (/\ m.mtype = AppendEntriesRequest
          /\ m.mentries # <<>>
-         /\ m.mprevLogIndex = commitIndex[s] - 1) =>
+         /\ m.mprevLogIndex = commitIndex[s] - 1
+         /\ commitIndex[s] <= Len(log[s])) =>
             log[s][commitIndex[s]] >= m.mentries[1]
 
 \* If a log entry is covered by a commit index, then a leader

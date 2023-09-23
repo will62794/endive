@@ -366,6 +366,9 @@ noLogDivergenceAppendEntries.children = {
         noLogDivergence,
         # leaderHasEntriesCoveredByCommitIndexes,
         # logTermsMonotonic
+    ],
+    "ClientRequestAction": [
+        commitIndexBoundValid
     ]
 }
 
