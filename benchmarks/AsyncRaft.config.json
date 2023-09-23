@@ -60,5 +60,20 @@
     "typeok"  :  "TypeOK",
     "tlc_specific_spec": true,
     "try_final_minimize": false,
-    "simulate"  :  true
+    "simulate"  :  true,
+    "local_grammars": {
+        "AcceptAppendEntriesRequestTruncateAction": {
+            "H_LeaderMatchIndexValid": {
+                "quant_inv": "\\A VS \\in Server : \\A VIND \\in DOMAIN log[VS] : \\A VM \\in appendEntriesMsgs : ",
+                "quant_vars": ["VS", "VIND", "VM"],
+                "preds":[
+                    "state[VS] = Leader",
+                    "state[VS] \\in { Follower, Candidate }",
+                    "VM.mtype = AppendEntriesRequest /\\ Len(log[VS]) >= (VM.mprevLogIndex + 1)",
+                    "VM.mentries # << >>",
+                    "VM.mtype = AppendEntriesRequest /\\ (VM.mprevLogIndex + 1) \\in DOMAIN log[VS] /\\ VM.mentries # << >> /\\ VM.mentries[1] > log[VS][(VM.mprevLogIndex + 1)]"
+                ]
+            }
+        }
+    }
 }
