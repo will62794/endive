@@ -2970,6 +2970,8 @@ if __name__ == "__main__":
     tlc_specific_spec = spec_config.get("tlc_specific_spec", False)
     simulate = spec_config["simulate"]
     results_dir = args["results_dir"]
+    local_grammars = spec_config.get("local_grammars", None)
+
     if "use_cpp_invgen" in spec_config:
         use_cpp_invgen = spec_config["use_cpp_invgen"]
     else:
