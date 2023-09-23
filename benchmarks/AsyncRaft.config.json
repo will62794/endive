@@ -70,7 +70,7 @@
                     "state[VS] = Leader",
                     "state[VS] \\in { Follower, Candidate }",
                     "VM.mtype = AppendEntriesRequest /\\ Len(log[VS]) >= (VM.mprevLogIndex + 1)",
-                    "VM.mentries # << >>",
+                    "VM.mtype = AppendEntriesRequest /\\ VM.mentries # << >>",
                     "VM.mtype = AppendEntriesRequest /\\ (VM.mprevLogIndex + 1) \\in DOMAIN log[VS] /\\ VM.mentries # << >> /\\ VM.mentries[1] > log[VS][(VM.mprevLogIndex + 1)]"
                 ]
             }
