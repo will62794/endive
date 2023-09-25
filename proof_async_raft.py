@@ -258,11 +258,21 @@ divergentEntriesInAppendEntriesMsgs.children = {
     ]
 }
 
-logMatching = StructuredProofNode("LogMatching", "H_LogMatching")
+#
+# LogMatching related lemmas.
+#
 
+logMatching = StructuredProofNode("LogMatching", "H_LogMatching")
+logMatchingInAppendEntriesMsgs = make_node("H_LogMatchingInAppendEntriesMsgs")
 logMatchingBetweenAppendEntriesMsgs = make_node("H_LogMatchingBetweenAppendEntriesMsgs")
 
-logMatchingInAppendEntriesMsgs = make_node("H_LogMatchingInAppendEntriesMsgs")
+logMatchingBetweenAppendEntriesMsgs.children = {
+    "AppendEntriesAction": [
+        logMatching,
+        logMatchingInAppendEntriesMsgs
+    ]
+}
+
 logMatchingInAppendEntriesMsgs.children = {
     "ClientRequestAction": [
         divergentEntriesInAppendEntriesMsgs
