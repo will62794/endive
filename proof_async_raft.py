@@ -173,10 +173,21 @@ currentTermsAtLeastLargeAsLogTermsForPrimary.children = {
 }
 
 logTermsMonotonic = StructuredProofNode("LogTermsMonotonic", "H_LogTermsMonotonic")
+logTermsMonotonicAppendEntries = make_node("H_LogTermsMonotonicAppendEntries")
+
+logTermsMonotonicAppendEntries.children = {
+    "AppendEntriesAction" : [
+        logTermsMonotonic
+    ]
+}
+
 logTermsMonotonic.children = {
     "ClientRequestAction": [
         # onePrimaryPerTerm,
         currentTermsAtLeastLargeAsLogTermsForPrimary
+    ],
+    "AcceptAppendEntriesRequestAppendAction": [
+        logTermsMonotonicAppendEntries
     ]
 }
 
