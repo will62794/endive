@@ -50,3 +50,4 @@ apalache/
 *.svg
 trace.json
 benchmarks/*.xml
+*.DS_Store
