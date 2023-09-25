@@ -941,6 +941,19 @@ H_LogMatching ==
         (\E j \in DOMAIN log[t] : i = j /\ log[s][i] = log[t][j]) => 
         (SubSeq(log[s],1,i) = SubSeq(log[t],1,i)) \* prefixes must be the same.
 
+\* Log matching must hold between any two current AppendEntries requests.
+H_LogMatchingBetweenAppendEntriesMsgs ==
+    \A mi,mj \in appendEntriesMsgs : 
+        (/\ mi.mtype = AppendEntriesRequest
+         /\ mj.mtype = AppendEntriesRequest  
+         /\ mi.mprevLogIndex > 0
+         /\ mj.mprevLogIndex > 0
+         /\ mi.mprevLogIndex = mj.mprevLogIndex
+         /\ mi.mentries # <<>>
+         /\ mj.mentries # <<>>
+         /\ mi.mentries[1] = mj.mentries[1]) =>
+            mi.mprevLogTerm = mj.mprevLogTerm
+
 H_LogMatchingInAppendEntriesMsgs ==
     \* If a server contains the log entry being sent in this AppendEntries, 
     \* then the server's previous entry must match the AppendEntries previous entry.
