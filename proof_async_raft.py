@@ -164,11 +164,22 @@ candidateWithVotesGrantedInTermImplyNoOtherLogsInTerm.children = {
     ]
 }
 
-currentTermsAtLeastLargeAsLogTermsForPrimary =  StructuredProofNode("CurrentTermAtLeastAsLargeAsLogTermsForPrimary", "H_CurrentTermAtLeastAsLargeAsLogTermsForPrimary")
-currentTermsAtLeastLargeAsLogTermsForPrimary.children = {
+currentTermsAtLeastLargeAsLogTerms =  make_node("H_CurrentTermAtLeastAsLargeAsLogTerms")
+
+appendEntriesRequestLogTermsNoGreaterThanSenderTerm = make_node("H_AppendEntriesRequestLogTermsNoGreaterThanSenderTerm")
+appendEntriesRequestLogTermsNoGreaterThanSenderTerm.children = {
+    "AppendEntriesAction": [
+        currentTermsAtLeastLargeAsLogTerms
+    ]
+}
+
+currentTermsAtLeastLargeAsLogTerms.children = {
     "BecomeLeaderAction": [
         logEntryInTermImpliesSafeAtTerms,
         candidateWithVotesGrantedInTermImplyNoOtherLogsInTerm
+    ],
+    "AcceptAppendEntriesRequestAppendAction": [
+        appendEntriesRequestLogTermsNoGreaterThanSenderTerm
     ]
 }
 
@@ -184,7 +195,7 @@ logTermsMonotonicAppendEntries.children = {
 logTermsMonotonic.children = {
     "ClientRequestAction": [
         # onePrimaryPerTerm,
-        currentTermsAtLeastLargeAsLogTermsForPrimary
+        currentTermsAtLeastLargeAsLogTerms
     ],
     "AcceptAppendEntriesRequestAppendAction": [
         logTermsMonotonicAppendEntries

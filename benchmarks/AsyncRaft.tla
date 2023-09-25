@@ -1048,6 +1048,12 @@ H_CandidateWithVotesGrantedImpliesNoAppendEntriesInTerm ==
                 \/ m.mtype = AppendEntriesRequest /\ m.mterm = currentTerm[s]
                 \/ m.mtype = AppendEntriesResponse /\ m.msuccess /\ m.mterm = currentTerm[s]
 
+H_AppendEntriesRequestLogTermsNoGreaterThanSenderTerm == 
+    \A m \in appendEntriesMsgs : 
+        (/\ m.mtype = AppendEntriesRequest
+         /\ m.mentries # <<>>) =>
+            m.mentries[1] <= m.mterm
+
 \* The logs in any AppendEntries message sent in term T must be present
 \* in the logs of a leader in term T.
 H_AppendEntriesRequestLogEntriesMustBeInLeaderLog == 
@@ -1074,6 +1080,10 @@ H_LeaderMatchIndexValidAppendEntries ==
             /\ Len(log[m.msource]) >= m.mmatchIndex
             /\ Len(log[m.mdest]) >= m.mmatchIndex
             /\ log[m.msource][m.mmatchIndex] = log[m.mdest][m.mmatchIndex]
+
+\* L1 == 
+    \* \A VS \in Server : \A VIND \in DOMAIN log[VS] : \A VM \in appendEntriesMsgs : 
+        \* (VM.mtype = AppendEntriesRequest /\ (VM.mprevLogIndex + 1) \in DOMAIN log[VS] /\ VM.mentries # << >> /\ VM.mentries[1] > log[VS][(VM.mprevLogIndex + 1)]) \/ (~(state[VS] \in { Follower, Candidate }))
 
 \* If matchIndex on a leader has quorum agreement on an index, then this entry must
 \* be present on a quorum of servers.
