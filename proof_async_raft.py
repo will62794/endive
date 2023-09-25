@@ -150,6 +150,8 @@ logEntryInTermImpliesSafeAtTerms.children = {
 
 successfulRequestVoteQuorumInTermImpliesNoLogsInTerm = make_node("H_SuccessfulRequestVoteQuorumInTermImpliesNoLogsInTerm")
 
+candidateWithVotesGrantedInTermImplyNoAppendEntryLogsInTerm = make_node("H_CandidateWithVotesGrantedInTermImplyNoAppendEntryLogsInTerm")
+
 candidateWithVotesGrantedInTermImplyNoOtherLogsInTerm = make_node("H_CandidateWithVotesGrantedInTermImplyNoOtherLogsInTerm")
 candidateWithVotesGrantedInTermImplyNoOtherLogsInTerm.children = {
     "ClientRequestAction":[
@@ -161,6 +163,9 @@ candidateWithVotesGrantedInTermImplyNoOtherLogsInTerm.children = {
     "HandleRequestVoteResponseAction": [
         requestVoteQuorumInTermImpliesNoOtherLeadersInTerm,
         requestVoteQuorumInTermImpliesNoOtherLogsInTerm
+    ],
+    "AcceptAppendEntriesRequestAppendAction": [
+        candidateWithVotesGrantedInTermImplyNoAppendEntryLogsInTerm
     ]
 }
 
@@ -210,7 +215,6 @@ requestVoteQuorumInTermImpliesNoAppendEntryLogsInTerm.children = {
     ]
 }
 
-candidateWithVotesGrantedInTermImplyNoAppendEntryLogsInTerm = make_node("H_CandidateWithVotesGrantedInTermImplyNoAppendEntryLogsInTerm")
 candidateWithVotesGrantedInTermImplyNoAppendEntryLogsInTerm.children = {
     "AppendEntriesAction": [
         candidateWithVotesGrantedInTermImplyNoOtherLogsInTerm
@@ -250,9 +254,6 @@ divergentEntriesInAppendEntriesMsgs.children = {
         # candidateWithVotesGrantedInTermImplyNoOtherLeader,
         candidateWithVotesGrantedInTermImplyNoOtherLogsInTerm
     ], 
-    "RequestVoteAction":[
-        logEntryInTermImpliesSafeAtTermAppendEntries
-    ],
     "HandleRequestVoteResponseAction":[
         divergentEntriesInAppendEntriesMsgsForRequestVoteQuorum
     ]

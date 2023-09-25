@@ -906,9 +906,12 @@ H_LogEntryInTermImpliesSafeAtTermCandidate ==
     \A s,t \in Server : 
     \A i \in DOMAIN log[s] :
         (state[t] = Candidate /\ currentTerm[t] = log[s][i]) =>
-            \E Q \in Quorum : \A n \in Q : 
+            \E u \in Server :
+            \E Q \in Quorum : 
+            \A n \in Q : 
                 /\ currentTerm[n] >= log[s][i]
-                /\ currentTerm[n] = log[s][i] => (votedFor[n] # t)
+                \* The quorum must have voted for some leader in this term, and it is not this failed candidate.
+                /\ currentTerm[n] = log[s][i] => (votedFor[n] # t) /\ (votedFor[n] = u)
 
 \* If an AppendEntries request was sent in term T, then there must have been a successful 
 \* election in term T.
