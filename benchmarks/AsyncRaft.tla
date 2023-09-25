@@ -480,6 +480,7 @@ AcceptAppendEntriesRequestAppendAction == \E m \in appendEntriesMsgs : AcceptApp
 AcceptAppendEntriesRequestTruncateAction == TRUE /\ \E m \in appendEntriesMsgs : AcceptAppendEntriesRequestTruncate(m)
 AcceptAppendEntriesRequestLearnCommitAction == \E m \in appendEntriesMsgs : AcceptAppendEntriesRequestLearnCommit(m)
 HandleAppendEntriesResponseAction == \E m \in appendEntriesMsgs : HandleAppendEntriesResponse(m)
+UpdateTermAction == TRUE /\ UpdateTerm
 
 Test1 == \A s \in Server : \E r \in Server :
             /\ state[s] = Leader
@@ -492,7 +493,7 @@ Next ==
     \/ ClientRequestAction
     \/ AdvanceCommitIndexAction
     \/ AppendEntriesAction
-    \/ UpdateTerm
+    \/ UpdateTermAction
     \/ HandleRequestVoteRequestAction
     \/ HandleRequestVoteResponseAction
     \/ RejectAppendEntriesRequestAction

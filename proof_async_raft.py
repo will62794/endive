@@ -451,7 +451,7 @@ actions = [
     "ClientRequestAction",
     "AdvanceCommitIndexAction",
     "AppendEntriesAction",
-    "UpdateTerm",
+    "UpdateTermAction",
     "HandleRequestVoteRequestAction",
     "HandleRequestVoteResponseAction",
     "RejectAppendEntriesRequestAction",
