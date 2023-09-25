@@ -23,7 +23,7 @@
     "preds_alt" : [],
     "safety"  :  "TCConsistent",
     "constants"  :  {
-        "RM" : ["{rm1}","{rm1,rm2}","{rm1,rm2,rm3}"],
+        "RM" : ["{rm1}","{rm1,rm2}"],
         "rm1" : "rm1",
         "rm2" : "rm2",
         "rm3" : "rm3"
