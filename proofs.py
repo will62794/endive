@@ -797,7 +797,11 @@ class StructuredProof():
             indgen.quant_inv = local_grammar["quant_inv"]
             indgen.initialize_quant_inv()
 
-            sat_invs = indgen.check_invariants(invs)
+            # Bound max depth for checking invariants.
+            max_depth = 100
+            if "max_depth" in local_grammar:
+                max_depth = local_grammar["max_depth"]
+            sat_invs = indgen.check_invariants(invs, max_depth=max_depth)
             sat_invs_exprs = []
             for s in sat_invs:
                 inv_index = int(s.replace("Inv", ""))

@@ -150,12 +150,12 @@ def generate_invs(preds, num_invs, min_num_conjuncts=2, max_num_conjuncts=2,
 def greplines(pattern, lines):
     return [ln for ln in lines if re.search(pattern, ln)]
 
-def runtlc(spec,config=None,tlc_workers=6,cwd=None,java="java",tlc_flags=""):
+def runtlc(spec,config=None,tlc_workers=6,cwd=None,java="java",tlc_flags="", max_depth=2**30):
     # Make a best effort to attempt to avoid collisions between different
     # instances of TLC running on the same machine.
     dirpath = tempfile.mkdtemp()
     metadir_path = f"states/states_{uuid.uuid4().hex[:16]}"
-    cmd = java + (f' -Djava.io.tmpdir="{dirpath}" -cp tla2tools-checkall.jar tlc2.TLC {tlc_flags} -maxSetSize {TLC_MAX_SET_SIZE} -metadir {metadir_path} -noGenerateSpecTE -checkAllInvariants -deadlock -continue -workers {tlc_workers}')
+    cmd = java + (f' -Djava.io.tmpdir="{dirpath}" -cp tla2tools-checkall.jar tlc2.TLC {tlc_flags} -maxDepth {max_depth} -maxSetSize {TLC_MAX_SET_SIZE} -metadir {metadir_path} -noGenerateSpecTE -checkAllInvariants -deadlock -continue -workers {tlc_workers}')
     if config:
         cmd += " -config " + config
     cmd += " " + spec
@@ -178,12 +178,12 @@ def runtlc(spec,config=None,tlc_workers=6,cwd=None,java="java",tlc_flags=""):
 
 # Run TLC on spec to check all invariants and return the set 
 # of invariants that were violated.
-def runtlc_check_violated_invariants(spec,config=None, tlc_workers=6, cwd=None,java="java"):
+def runtlc_check_violated_invariants(spec,config=None, tlc_workers=6, cwd=None,java="java", max_depth=2**30):
     #
     # TODO: Check for this type of error:
     # 'Error: The invariant of Inv91 is equal to FALSE'
     #
-    lines = runtlc(spec,config=config,tlc_workers=tlc_workers,cwd=cwd,java=java)
+    lines = runtlc(spec,config=config,tlc_workers=tlc_workers,cwd=cwd,java=java, max_depth=max_depth)
     invs_violated = set()
     for l in greplines("is violated", lines):
         res = re.match(".*Invariant (Inv.*) is violated",l)

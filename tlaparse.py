@@ -531,22 +531,22 @@ class TLASpec:
         #
         # Compute the COI reduction.
         #
-        print("--------- Cone of influence ---------")
+        # print("--------- Cone of influence ---------")
         # Consider any variable that appears and is not updated to be a non-modified var.
         # TODO: We may need to consider explicitly marking unchanged variables i.e. those only read in precondition.
         # i.e. need to detect if a variable appears but only in the update expression of a variable.
         # vars_in_action_not_updated = vars_in_action - action_updated_vars.keys()
         lemma_vars_updated = vars_in_lemma.intersection(action_updated_vars.keys())
-        print("All action vars:", vars_in_action)
-        print("All non-updated action vars:", vars_in_action_non_updated)
-        print("All updated action vars:", set(action_updated_vars.keys()))
-        print("All lemma vars:", vars_in_lemma)
-        print("All updated lemma vars:", lemma_vars_updated)
+        # print("All action vars:", vars_in_action)
+        # print("All non-updated action vars:", vars_in_action_non_updated)
+        # print("All updated action vars:", set(action_updated_vars.keys()))
+        # print("All lemma vars:", vars_in_lemma)
+        # print("All updated lemma vars:", lemma_vars_updated)
         coi_vars = set()
         for v in lemma_vars_updated:
-            print(f"COI for updated lemma var '{v}':", action_updated_vars[v])
+            # print(f"COI for updated lemma var '{v}':", action_updated_vars[v])
             coi_vars.update(action_updated_vars[v])
-        print("All COI vars for updated lemma vars:", coi_vars)
+        # print("All COI vars for updated lemma vars:", coi_vars)
 
         projection_var_sets = [
             vars_in_action_non_updated, # vars appearing in precondition.
@@ -554,7 +554,7 @@ class TLASpec:
             coi_vars, # cone-of-influence of all modified vars that appear in lemma.
         ]
         projected_vars = set.union(*projection_var_sets)
-        print("Overall projected vars:", projected_vars)
+        # print("Overall projected vars:", projected_vars)
         return projected_vars        
 
     def compute_coi_table(self, lemmas, actions):

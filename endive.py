@@ -660,7 +660,7 @@ class InductiveInvGen():
 
     #     return set()
 
-    def check_invariants(self, invs, tlc_workers=6):
+    def check_invariants(self, invs, tlc_workers=6, max_depth=2**30):
         """ Check which of the given invariants are valid. """
         ta = time.time()
         invcheck_tla = "---- MODULE %s_InvCheck_%d ----\n" % (self.specname,self.seed)
@@ -705,7 +705,13 @@ class InductiveInvGen():
         # Check invariants.
         logging.info("Checking %d candidate invariants in spec file '%s'" % (len(invs), invcheck_spec_name))
         workdir = None if self.specdir == "" else self.specdir
-        violated_invs = mc.runtlc_check_violated_invariants(invcheck_spec_name, config=invcheck_cfg_filename, tlc_workers=self.tlc_workers, cwd=workdir,java=self.java_exe)
+        violated_invs = mc.runtlc_check_violated_invariants(
+                                invcheck_spec_name, 
+                                config=invcheck_cfg_filename, 
+                                tlc_workers=self.tlc_workers, 
+                                cwd=workdir,
+                                java=self.java_exe,
+                                max_depth=max_depth)
         sat_invs = (all_inv_names - violated_invs)
         logging.info(f"Found {len(sat_invs)} / {len(invs)} candidate invariants satisfied in {round(time.time()-ta,2)}s.")
 
