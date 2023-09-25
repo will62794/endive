@@ -348,6 +348,9 @@ leaderMatchIndexValid.children = {
     "HandleAppendEntriesResponseAction": [
         leaderMatchIndexValidAppendEntries,
         logMatching
+    ],
+    "AcceptAppendEntriesRequestTruncateAction": [
+        logTermsMonotonic
     ]
 }
 
