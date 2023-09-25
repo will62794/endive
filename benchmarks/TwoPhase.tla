@@ -158,10 +158,12 @@ RMPrepareAction == TRUE /\ \E rm \in RM : RMPrepare(rm)
 RMChooseToAbortAction == TRUE /\ \E rm \in RM : RMChooseToAbort(rm)
 RMRcvCommitMsgAction == TRUE /\ \E rm \in RM : RMRcvCommitMsg(rm) 
 RMRcvAbortMsgAction == TRUE /\ \E rm \in RM : RMRcvAbortMsg(rm)
+TMAbortAction == TRUE /\ TMAbort
+TMCommitAction == TRUE /\ TMCommit
 
 Next ==
-  \/ TMCommit 
-  \/ TMAbort
+  \/ TMCommitAction 
+  \/ TMAbortAction
   \/ TMRcvPreparedAction
   \/ RMPrepareAction
   \/ RMChooseToAbortAction
