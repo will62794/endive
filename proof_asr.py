@@ -208,5 +208,5 @@ asr_actions = [
     "RollbackEntriesAction",
     "BecomeLeaderAction",
     "CommitEntryAction",
-    "UpdateTermsActions"
+    "UpdateTermsAction"
 ]
