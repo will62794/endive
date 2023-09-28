@@ -282,6 +282,7 @@ UpdateTerm ==
 \* Server i receives a RequestVote request from server j with
 \* m.mterm <= currentTerm[i].
 HandleRequestVoteRequest(m) ==
+    /\ m \in requestVoteRequestMsgs
     /\ m.mtype = RequestVoteRequest
     /\ m.mterm <= currentTerm[m.mdest]
     /\ LET  i     == m.mdest
@@ -906,6 +907,20 @@ H_LogEntryInTermImpliesSafeAtTerm ==
         \E Q \in Quorum : \A n \in Q : 
             /\ currentTerm[n] >= log[s][i]
             /\ currentTerm[n] = log[s][i] => (votedFor[n] # Nil)
+
+H_LogEntryInTermImpliesSafeAtTermCandidateAppendEntries == 
+    \A t \in Server : 
+    \A m \in appendEntriesMsgs :
+        (/\ state[t] = Candidate 
+         /\ m.mtype = AppendEntriesRequest
+         /\ m.mentries # <<>>
+         /\ m.mentries[1] = currentTerm[t]) =>
+            \E u \in Server :
+            \E Q \in Quorum : 
+            \A n \in Q : 
+                /\ currentTerm[n] >= m.mentries[1]
+                \* The quorum must have voted for some leader in this term, and it is not this failed candidate.
+                /\ (currentTerm[n] = m.mentries[1]) => ((u # t) /\ (votedFor[n] = u))
 
 \* If a log entry exists in some term, and there is still some candidate C in term T,
 \* then there must be some quorum that voted in term T, but not for candidate C.

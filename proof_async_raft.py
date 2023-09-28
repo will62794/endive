@@ -33,7 +33,14 @@ voteInGrantedImpliesVotedFor.children = {
     ]
 }
 
+requestVoteRequestFromNodeImpliesSafeAtTerm = make_node("H_RequestVoteRequestFromNodeImpliesSafeAtTerm")
+
 votedForNodeInTermImpliesNodeSafeAtTerm = make_node("H_VotedForNodeInTermImpliesNodeSafeAtTerm")
+votedForNodeInTermImpliesNodeSafeAtTerm.children = {
+    "HandleRequestVoteRequestAction": [
+        requestVoteRequestFromNodeImpliesSafeAtTerm
+    ]
+}
 
 voteGrantedImpliesVoteResponseMsgConsistent = make_node("H_VoteGrantedImpliesVoteResponseMsgConsistent")
 voteGrantedImpliesVoteResponseMsgConsistent.children = {
@@ -61,8 +68,6 @@ logEntryInTermImpliesSafeAtTerms = make_node("H_LogEntryInTermImpliesSafeAtTerm"
 
 candidateInTermVotedForItself = make_node("H_CandidateInTermVotedForItself")
 
-requestVoteRequestFromNodeImpliesSafeAtTerm = make_node("H_RequestVoteRequestFromNodeImpliesSafeAtTerm")
-
 requestVoteResponseToNodeImpliesNodeSafeAtTerm = make_node("H_RequestVoteResponseToNodeImpliesNodeSafeAtTerm")
 requestVoteResponseToNodeImpliesNodeSafeAtTerm.children = {
     "HandleRequestVoteRequestAction": [
@@ -71,6 +76,17 @@ requestVoteResponseToNodeImpliesNodeSafeAtTerm.children = {
 }
 
 logEntryInTermImpliesSafeAtTermCandidate = make_node("H_LogEntryInTermImpliesSafeAtTermCandidate")
+
+logEntryInTermImpliesSafeAtTermCandidateAppendEntries = make_node("H_LogEntryInTermImpliesSafeAtTermCandidateAppendEntries")
+logEntryInTermImpliesSafeAtTermCandidateAppendEntries.children = {
+    "AppendEntriesAction": [
+        logEntryInTermImpliesSafeAtTermCandidate
+    ],
+    "RequestVoteAction": [
+        
+    ]
+}
+
 logEntryInTermImpliesSafeAtTermCandidate.children = {
     "ClientRequestAction": [
         quorumsSafeAtTerms
@@ -79,6 +95,9 @@ logEntryInTermImpliesSafeAtTermCandidate.children = {
         votedForNodeInTermImpliesNodeSafeAtTerm,
         candidateInTermVotedForItself,
         logEntryInTermImpliesSafeAtTerms
+    ],
+    "AcceptAppendEntriesRequestAppendAction": [
+        logEntryInTermImpliesSafeAtTermCandidateAppendEntries
     ]
 }
 
