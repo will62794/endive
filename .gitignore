@@ -51,3 +51,5 @@ apalache/
 trace.json
 benchmarks/*.xml
 *.DS_Store
+states2
+*_TTrace_*
