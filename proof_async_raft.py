@@ -312,12 +312,15 @@ logMatching.children = {
     ]
 }
 
+noLogDivergenceAppendEntries = make_node("H_NoLogDivergenceAppendEntries")
+
 commitIndexCoversEntryImpliesExistsOnQuorum = make_node("H_CommitIndexCoversEntryImpliesExistsOnQuorum")
 
 commitIndexBoundValid = make_node("H_CommitIndexBoundValid")
 commitIndexBoundValid.children = {
     "AcceptAppendEntriesRequestTruncateAction": [
-        commitIndexCoversEntryImpliesExistsOnQuorum
+        commitIndexCoversEntryImpliesExistsOnQuorum,
+        noLogDivergenceAppendEntries
     ]
 }
     
@@ -421,10 +424,15 @@ commitIndexInAppendEntriesImpliesCommittedEntryExists = make_node("H_CommitIndex
 leaderHasEntriesCoveredByCommitIndexes = make_node("H_LeaderHasEntriesCoveredByCommitIndexes")
 
 logsLaterThanCommittedMustHaveCommitted = make_node("H_LogsLaterThanCommittedMustHaveCommitted")
+logsLaterThanCommittedMustHaveCommitted.children = {
+    "ClientRequestAction": [
+        leaderHasEntriesCoveredByCommitIndexes,
+        commitIndexBoundValid
+    ]
+}
 
 noLogDivergence = make_node("H_NoLogDivergence")
 
-noLogDivergenceAppendEntries = make_node("H_NoLogDivergenceAppendEntries")
 noLogDivergenceAppendEntries.children = {
     "AppendEntriesAction":[
         # commitIndexCoversEntryImpliesExistsOnQuorum,

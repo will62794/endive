@@ -1145,7 +1145,7 @@ H_LogsLaterThanCommittedMustHaveCommitted ==
 H_LeaderHasEntriesCoveredByCommitIndexes == 
     \A s,t \in Server :
         (/\ state[s] = Leader
-         /\ commitIndex[t] > 0
+         /\ commitIndex[t] \in DOMAIN log[t]
          /\ currentTerm[s] > log[t][commitIndex[t]]
          /\ commitIndex[t] \in DOMAIN log[s]) =>
             log[s][commitIndex[t]] = log[t][commitIndex[t]]
