@@ -212,6 +212,11 @@ requestVoteQuorumInTermImpliesNoAppendEntryLogsInTerm.children = {
     "AppendEntriesAction": [
         # requestVoteQuorumInTermImpliesNoOtherLeadersInTerm,
         requestVoteQuorumInTermImpliesNoOtherLogsInTerm
+    ],
+    "HandleRequestVoteRequestAction": [
+        logEntryInTermImpliesSafeAtTermAppendEntries,
+        candidateInTermVotedForItself,
+        quorumsSafeAtTerms
     ]
 }
 
