@@ -420,6 +420,7 @@ commitIndexInAppendEntriesImpliesCommittedEntryExists = make_node("H_CommitIndex
 
 leaderHasEntriesCoveredByCommitIndexes = make_node("H_LeaderHasEntriesCoveredByCommitIndexes")
 
+logsLaterThanCommittedMustHaveCommitted = make_node("H_LogsLaterThanCommittedMustHaveCommitted")
 
 noLogDivergence = make_node("H_NoLogDivergence")
 
@@ -429,6 +430,7 @@ noLogDivergenceAppendEntries.children = {
         # commitIndexCoversEntryImpliesExistsOnQuorum,
         noLogDivergence,
         # leaderHasEntriesCoveredByCommitIndexes,
+        logsLaterThanCommittedMustHaveCommitted
         # logTermsMonotonic
     ],
     "ClientRequestAction": [

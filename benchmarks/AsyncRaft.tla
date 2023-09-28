@@ -1132,6 +1132,14 @@ H_NoLogDivergenceAppendEntries ==
          /\ commitIndex[s] <= Len(log[s])) =>
             log[s][commitIndex[s]] >= m.mentries[1]
 
+H_LogsLaterThanCommittedMustHaveCommitted ==
+    \A s,t \in Server : 
+        \* Exists an entry in log[s] with a term greater than the term in which another entry was committed.
+        (/\ commitIndex[t] > 0 
+         /\ \E i \in DOMAIN log[s] : (log[s][i] > log[t][commitIndex[t]])) =>
+                /\ Len(log[s]) >= commitIndex[t]
+                /\ log[s][commitIndex[t]] = log[t][commitIndex[t]] \* entry exists in the server's log.
+
 \* If a log entry is covered by a commit index, then a leader
 \* in a newer term must have that entry.
 H_LeaderHasEntriesCoveredByCommitIndexes == 
