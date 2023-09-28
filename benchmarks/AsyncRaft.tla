@@ -671,6 +671,9 @@ StateConstraint ==
 \* Is log entry e = <<index, term>> in the log of node 'i'.
 InLog(e, i) == \E x \in DOMAIN log[i] : x = e[1] /\ log[i][x] = e[2]
 
+H_VotedForNodeInTermImpliesNodeSafeAtTerm == 
+    \A s,t \in Server : (votedFor[s] = t) => currentTerm[t] >= currentTerm[s]
+
 H_CandidateInTermVotedForItself == 
     \A s \in Server : (state[s] = Candidate) => votedFor[s] = s
 
@@ -904,6 +907,8 @@ H_LogEntryInTermImpliesSafeAtTerm ==
             /\ currentTerm[n] >= log[s][i]
             /\ currentTerm[n] = log[s][i] => (votedFor[n] # Nil)
 
+\* If a log entry exists in some term, and there is still some candidate C in term T,
+\* then there must be some quorum that voted in term T, but not for candidate C.
 H_LogEntryInTermImpliesSafeAtTermCandidate == 
     \A s,t \in Server : 
     \A i \in DOMAIN log[s] :
@@ -913,7 +918,7 @@ H_LogEntryInTermImpliesSafeAtTermCandidate ==
             \A n \in Q : 
                 /\ currentTerm[n] >= log[s][i]
                 \* The quorum must have voted for some leader in this term, and it is not this failed candidate.
-                /\ currentTerm[n] = log[s][i] => (u # t) /\ (votedFor[n] = u)
+                /\ (currentTerm[n] = log[s][i]) => ((u # t) /\ (votedFor[n] = u))
 
 \* If an AppendEntries request was sent in term T, then there must have been a successful 
 \* election in term T.

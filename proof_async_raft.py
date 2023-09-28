@@ -33,6 +33,8 @@ voteInGrantedImpliesVotedFor.children = {
     ]
 }
 
+votedForNodeInTermImpliesNodeSafeAtTerm = make_node("H_VotedForNodeInTermImpliesNodeSafeAtTerm")
+
 voteGrantedImpliesVoteResponseMsgConsistent = make_node("H_VoteGrantedImpliesVoteResponseMsgConsistent")
 voteGrantedImpliesVoteResponseMsgConsistent.children = {
     "RequestVoteAction": [
@@ -69,6 +71,16 @@ requestVoteResponseToNodeImpliesNodeSafeAtTerm.children = {
 }
 
 logEntryInTermImpliesSafeAtTermCandidate = make_node("H_LogEntryInTermImpliesSafeAtTermCandidate")
+logEntryInTermImpliesSafeAtTermCandidate.children = {
+    "ClientRequestAction": [
+        quorumsSafeAtTerms
+    ],
+    "RequestVoteAction":[
+        votedForNodeInTermImpliesNodeSafeAtTerm,
+        candidateInTermVotedForItself,
+        logEntryInTermImpliesSafeAtTerms
+    ]
+}
 
 requestVoteQuorumInTermImpliesNoOtherLogsInTerm = make_node("H_RequestVoteQuorumInTermImpliesNoOtherLogsInTerm")
 requestVoteQuorumInTermImpliesNoOtherLeadersInTerm = make_node("H_RequestVoteQuorumInTermImpliesNoOtherLeadersInTerm")
