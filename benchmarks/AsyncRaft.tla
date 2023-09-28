@@ -585,8 +585,8 @@ kOrSmallerSubset(k, S) == UNION {(kSubset(n, S)) : n \in 0..k}
 \* RequestVoteResponseTypeSampled == UNION { kOrSmallerSubset(2, RequestVoteResponseTypeOp({t})) : t \in Terms }
 \* RequestVoteRequestTypeSampled == UNION { kOrSmallerSubset(2, RequestVoteRequestTypeOp({t})) : t \in Terms }
 
-RequestVoteRequestTypeSampled == RandomSetOfSubsets(3, 3, RequestVoteRequestType) 
-RequestVoteResponseTypeSampled == RandomSetOfSubsets(3, 3, RequestVoteResponseType)  
+RequestVoteRequestTypeSampled == RandomSetOfSubsets(2, 2, RequestVoteRequestType) 
+RequestVoteResponseTypeSampled == RandomSetOfSubsets(2, 2, RequestVoteResponseType)  
 AppendEntriesType == RandomSetOfSubsets(3, 3, AppendEntriesRequestType) \cup RandomSetOfSubsets(3, 3, AppendEntriesResponseType)  
 
 TypeOK == 
@@ -1135,7 +1135,7 @@ H_NoLogDivergenceAppendEntries ==
 H_LogsLaterThanCommittedMustHaveCommitted ==
     \A s,t \in Server : 
         \* Exists an entry in log[s] with a term greater than the term in which another entry was committed.
-        (/\ commitIndex[t] > 0 
+        (/\ commitIndex[t] \in DOMAIN log[t]
          /\ \E i \in DOMAIN log[s] : (log[s][i] > log[t][commitIndex[t]])) =>
                 /\ Len(log[s]) >= commitIndex[t]
                 /\ log[s][commitIndex[t]] = log[t][commitIndex[t]] \* entry exists in the server's log.

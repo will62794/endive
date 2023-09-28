@@ -428,7 +428,7 @@ noLogDivergenceAppendEntries = make_node("H_NoLogDivergenceAppendEntries")
 noLogDivergenceAppendEntries.children = {
     "AppendEntriesAction":[
         # commitIndexCoversEntryImpliesExistsOnQuorum,
-        noLogDivergence,
+        # noLogDivergence,
         # leaderHasEntriesCoveredByCommitIndexes,
         logsLaterThanCommittedMustHaveCommitted
         # logTermsMonotonic
