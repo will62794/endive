@@ -55,7 +55,8 @@ CONSTANTS EqualTerm, LessOrEqualTerm
 ----
 \* Global variables.
 
-VARIABLE requestVoteMsgs
+VARIABLE requestVoteRequestMsgs
+VARIABLE requestVoteResponseMsgs
 VARIABLE appendEntriesMsgs
 
 ----
@@ -104,7 +105,7 @@ leaderVars == <<nextIndex, matchIndex>>
 \* End of per server variables.-
 
 \* All variables; used for stuttering (asserting state hasn't changed).
-vars == <<requestVoteMsgs, appendEntriesMsgs, currentTerm, state, votedFor, votesGranted, nextIndex, matchIndex, log, commitIndex>>
+vars == <<requestVoteRequestMsgs, requestVoteResponseMsgs, appendEntriesMsgs, currentTerm, state, votedFor, votesGranted, nextIndex, matchIndex, log, commitIndex>>
 
 view == <<serverVars, candidateVars, leaderVars, logVars >>
 Symmetry == Permutations(Server)
@@ -153,7 +154,8 @@ InitLogVars == /\ log             = [i \in Server |-> << >>]
                /\ commitIndex     = [i \in Server |-> 0]
 
 Init == 
-    /\ requestVoteMsgs = {}
+    /\ requestVoteRequestMsgs = {}
+    /\ requestVoteResponseMsgs = {}
     /\ appendEntriesMsgs = {}
     /\ currentTerm = [i \in Server |-> 0]
     /\ state       = [i \in Server |-> Follower]
@@ -176,7 +178,7 @@ Restart(i) ==
     /\ nextIndex'       = [nextIndex EXCEPT ![i] = [j \in Server |-> 1]]
     /\ matchIndex'      = [matchIndex EXCEPT ![i] = [j \in Server |-> 0]]
     /\ commitIndex'     = [commitIndex EXCEPT ![i] = 0]
-    /\ UNCHANGED <<currentTerm, votedFor, log, requestVoteMsgs, appendEntriesMsgs>>
+    /\ UNCHANGED <<currentTerm, votedFor, log, requestVoteRequestMsgs, requestVoteResponseMsgs, appendEntriesMsgs>>
 
 \* ACTION: RequestVote
 \* Combined Timeout and RequestVote of the original spec to reduce
@@ -189,14 +191,14 @@ RequestVote(i) ==
     /\ currentTerm' = [currentTerm EXCEPT ![i] = currentTerm[i] + 1]
     /\ votedFor' = [votedFor EXCEPT ![i] = i] \* votes for itself
     /\ votesGranted'   = [votesGranted EXCEPT ![i] = {i}] \* votes for itself
-    /\ requestVoteMsgs' = requestVoteMsgs \cup
+    /\ requestVoteRequestMsgs' = requestVoteRequestMsgs \cup
            {[mtype         |-> RequestVoteRequest,
              mterm         |-> currentTerm[i] + 1,
              mlastLogTerm  |-> LastTerm(log[i]),
              mlastLogIndex |-> Len(log[i]),
              msource       |-> i,
              mdest         |-> j] : j \in Server \ {i}}
-    /\ UNCHANGED <<leaderVars, logVars, appendEntriesMsgs>>
+    /\ UNCHANGED <<leaderVars, logVars, appendEntriesMsgs, requestVoteResponseMsgs>>
 
 \* ACTION: AppendEntries ----------------------------------------
 \* Leader i sends j an AppendEntries request containing up to 1 entry.
@@ -223,7 +225,7 @@ AppendEntries(i, j) ==
                    mcommitIndex   |-> Min({commitIndex[i], lastEntry}),
                    msource        |-> i,
                    mdest          |-> j]}
-    /\ UNCHANGED <<serverVars, candidateVars, nextIndex, matchIndex, logVars, requestVoteMsgs>>
+    /\ UNCHANGED <<serverVars, candidateVars, nextIndex, matchIndex, logVars, requestVoteRequestMsgs, requestVoteResponseMsgs>>
 
 \* ACTION: BecomeLeader -------------------------------------------
 \* Candidate i transitions to leader.
@@ -233,14 +235,14 @@ BecomeLeader(i) ==
     /\ state'      = [state EXCEPT ![i] = Leader]
     /\ nextIndex'  = [nextIndex EXCEPT ![i] = [j \in Server |-> Len(log[i]) + 1]]
     /\ matchIndex' = [matchIndex EXCEPT ![i] = [j \in Server |-> 0]]
-    /\ UNCHANGED <<appendEntriesMsgs, currentTerm, votedFor, candidateVars, logVars, requestVoteMsgs>>
+    /\ UNCHANGED <<appendEntriesMsgs, currentTerm, votedFor, candidateVars, logVars, requestVoteRequestMsgs, requestVoteResponseMsgs>>
 
 \* ACTION: ClientRequest ----------------------------------
 \* Leader i receives a client request to add v to the log.
 ClientRequest(i) ==
     /\ state[i] = Leader
     /\ log' = [log EXCEPT ![i] = Append(log[i], currentTerm[i])]
-    /\ UNCHANGED <<appendEntriesMsgs, serverVars, candidateVars, leaderVars, commitIndex, requestVoteMsgs>>
+    /\ UNCHANGED <<appendEntriesMsgs, serverVars, candidateVars, leaderVars, commitIndex, requestVoteRequestMsgs, requestVoteResponseMsgs>>
 
 \* The set of servers that agree up through index.
 Agree(i, index) == {i} \cup {k \in Server : matchIndex[i][k] >= index }
@@ -263,18 +265,18 @@ AdvanceCommitIndex(i) ==
        IN 
           /\ commitIndex[i] < newCommitIndex \* only enabled if it actually advances
           /\ commitIndex' = [commitIndex EXCEPT ![i] = newCommitIndex]
-    /\ UNCHANGED <<appendEntriesMsgs, serverVars, candidateVars, leaderVars, log, requestVoteMsgs>>
+    /\ UNCHANGED <<appendEntriesMsgs, serverVars, candidateVars, leaderVars, log, requestVoteRequestMsgs, requestVoteResponseMsgs>>
 
 \* ACTION: UpdateTerm
 \* Any RPC with a newer term causes the recipient to advance its term first.
 UpdateTerm ==
-    \E m \in (appendEntriesMsgs \cup requestVoteMsgs) :
+    \E m \in (appendEntriesMsgs \cup requestVoteRequestMsgs \cup requestVoteResponseMsgs) :
         /\ m.mterm > currentTerm[m.mdest]
         /\ currentTerm'    = [currentTerm EXCEPT ![m.mdest] = m.mterm]
         /\ state'          = [state       EXCEPT ![m.mdest] = Follower]
         /\ votedFor'       = [votedFor    EXCEPT ![m.mdest] = Nil]
            \* messages is unchanged so m can be processed further.
-        /\ UNCHANGED <<appendEntriesMsgs, candidateVars, leaderVars, logVars, requestVoteMsgs>>
+        /\ UNCHANGED <<appendEntriesMsgs, candidateVars, leaderVars, logVars, requestVoteRequestMsgs, requestVoteResponseMsgs>>
 
 \* ACTION: HandleRequestVoteRequest ------------------------------
 \* Server i receives a RequestVote request from server j with
@@ -291,13 +293,13 @@ HandleRequestVoteRequest(m) ==
                      /\ logOk
                      /\ votedFor[i] \in {Nil, j} IN
             /\ votedFor' = [votedFor EXCEPT ![i] = IF grant THEN j ELSE votedFor[i]]
-            /\ requestVoteMsgs' = requestVoteMsgs \cup {[
+            /\ requestVoteResponseMsgs' = requestVoteResponseMsgs \cup {[
                             mtype        |-> RequestVoteResponse,
                             mterm        |-> currentTerm[i],
                             mvoteGranted |-> grant,
                             msource      |-> i,
                             mdest        |-> j]}
-            /\ UNCHANGED <<state, currentTerm, candidateVars, leaderVars, logVars, appendEntriesMsgs>>
+            /\ UNCHANGED <<state, currentTerm, candidateVars, leaderVars, logVars, appendEntriesMsgs, requestVoteRequestMsgs>>
 
 \* ACTION: HandleRequestVoteResponse --------------------------------
 \* Server i receives a RequestVote response from server j with
@@ -307,13 +309,12 @@ HandleRequestVoteResponse(m) ==
     \* they won't be looked at, so it doesn't matter.
     /\ m.mtype = RequestVoteResponse
     /\ m.mterm = currentTerm[m.mdest]
-    \* /\ ReceivableRequestVoteMessage(m, RequestVoteResponse, EqualTerm)
     /\ votesGranted' = [votesGranted EXCEPT ![m.mdest] = 
                                 IF m.mvoteGranted 
                                     THEN votesGranted[m.mdest] \cup {m.msource} 
                                     ELSE votesGranted[m.mdest]]
-    /\ requestVoteMsgs' = requestVoteMsgs \ {m} \* discard the message.
-    /\ UNCHANGED <<serverVars, votedFor, leaderVars, logVars, appendEntriesMsgs>>
+    /\ requestVoteResponseMsgs' = requestVoteResponseMsgs \ {m} \* discard the message.
+    /\ UNCHANGED <<serverVars, votedFor, leaderVars, logVars, appendEntriesMsgs, requestVoteRequestMsgs>>
 
 \* ACTION: RejectAppendEntriesRequest -------------------
 \* Either the term of the message is stale or the message
@@ -343,7 +344,7 @@ RejectAppendEntriesRequest(m) ==
                         mmatchIndex     |-> 0,
                         msource         |-> i,
                         mdest           |-> j]}
-            /\ UNCHANGED <<state, candidateVars, leaderVars, serverVars, logVars, requestVoteMsgs>>
+            /\ UNCHANGED <<state, candidateVars, leaderVars, serverVars, logVars, requestVoteRequestMsgs, requestVoteResponseMsgs>>
 
 \* ACTION: AcceptAppendEntriesRequest ------------------
 \* The original spec had to three sub actions, this version is compressed.
@@ -389,7 +390,7 @@ AcceptAppendEntriesRequestAppend(m) ==
                         mmatchIndex     |-> m.mprevLogIndex + Len(m.mentries),
                         msource         |-> i,
                         mdest           |-> j]}
-            /\ UNCHANGED <<candidateVars, commitIndex, leaderVars, votedFor, currentTerm, requestVoteMsgs>>
+            /\ UNCHANGED <<candidateVars, commitIndex, leaderVars, votedFor, currentTerm, requestVoteRequestMsgs, requestVoteResponseMsgs>>
        
 AcceptAppendEntriesRequestTruncate(m) ==
     /\ m \in appendEntriesMsgs
@@ -418,7 +419,7 @@ AcceptAppendEntriesRequestTruncate(m) ==
                         mmatchIndex     |-> m.mprevLogIndex,
                         msource         |-> i,
                         mdest           |-> j]}
-            /\ UNCHANGED <<candidateVars, leaderVars, commitIndex, votedFor, currentTerm, requestVoteMsgs>>
+            /\ UNCHANGED <<candidateVars, leaderVars, commitIndex, votedFor, currentTerm, requestVoteRequestMsgs, requestVoteResponseMsgs>>
 
 AcceptAppendEntriesRequestLearnCommit(m) ==
     /\ m \in appendEntriesMsgs
@@ -439,14 +440,13 @@ AcceptAppendEntriesRequestLearnCommit(m) ==
             /\ state' = [state EXCEPT ![i] = Follower]
             /\ commitIndex' = [commitIndex EXCEPT ![i] = Min({m.mcommitIndex, Len(log[i])})]
             \* No need to send a response message since we are not updating our logs.
-            /\ UNCHANGED <<candidateVars, appendEntriesMsgs, leaderVars, log, votedFor, currentTerm, requestVoteMsgs>>
+            /\ UNCHANGED <<candidateVars, appendEntriesMsgs, leaderVars, log, votedFor, currentTerm, requestVoteRequestMsgs, requestVoteResponseMsgs>>
 
 
 \* ACTION: HandleAppendEntriesResponse
 \* Server i receives an AppendEntries response from server j with
 \* m.mterm = currentTerm[i].
 HandleAppendEntriesResponse(m) ==
-    \* /\ ReceivableMessage(m, AppendEntriesResponse, EqualTerm)
     /\ m.mtype = AppendEntriesResponse
     /\ m.mterm = currentTerm[m.mdest]
     /\ LET i     == m.mdest
@@ -458,12 +458,11 @@ HandleAppendEntriesResponse(m) ==
                \/ /\ \lnot m.msuccess \* not successful
                   /\ nextIndex' = [nextIndex EXCEPT ![i][j] = Max({nextIndex[i][j] - 1, 1})]
                   /\ UNCHANGED <<matchIndex>>
-        \*   /\ Discard(m)
             /\ appendEntriesMsgs' = appendEntriesMsgs \ {m}
-            /\ UNCHANGED <<serverVars, candidateVars, logVars, requestVoteMsgs>>
+            /\ UNCHANGED <<serverVars, candidateVars, logVars, requestVoteRequestMsgs, requestVoteResponseMsgs>>
 
 RequestVoteAction2 == \E i \in Server : RequestVote(i)
-HandleRequestVoteRequestAction2 == \E m \in requestVoteMsgs : HandleRequestVoteRequest(m)
+\* HandleRequestVoteRequestAction2 == \E m \in requestVoteMsgs : HandleRequestVoteRequest(m)
 
 
 RestartAction == TRUE /\ \E i \in Server : Restart(i)
@@ -473,8 +472,8 @@ ClientRequestAction == TRUE /\ \E i \in Server : ClientRequest(i)
 AdvanceCommitIndexAction == TRUE /\ \E i \in Server : AdvanceCommitIndex(i)
 AppendEntriesAction == TRUE /\ \E i,j \in Server : AppendEntries(i, j)
 \* UpdateTermAction == UpdateTerm
-HandleRequestVoteRequestAction == \E m \in requestVoteMsgs : HandleRequestVoteRequest(m)
-HandleRequestVoteResponseAction == \E m \in requestVoteMsgs : HandleRequestVoteResponse(m)
+HandleRequestVoteRequestAction == \E m \in requestVoteRequestMsgs : HandleRequestVoteRequest(m)
+HandleRequestVoteResponseAction == \E m \in requestVoteResponseMsgs : HandleRequestVoteResponse(m)
 RejectAppendEntriesRequestAction == \E m \in appendEntriesMsgs : RejectAppendEntriesRequest(m)
 AcceptAppendEntriesRequestAppendAction == \E m \in appendEntriesMsgs : AcceptAppendEntriesRequestAppend(m)
 AcceptAppendEntriesRequestTruncateAction == TRUE /\ \E m \in appendEntriesMsgs : AcceptAppendEntriesRequestTruncate(m)
@@ -583,14 +582,16 @@ kOrSmallerSubset(k, S) == UNION {(kSubset(n, S)) : n \in 0..k}
 \* Work around size limitations of TLC subset computations.
 \* 
 
-RequestVoteResponseTypeSampled == UNION { kOrSmallerSubset(2, RequestVoteResponseTypeOp({t})) : t \in Terms }
-RequestVoteRequestTypeSampled == UNION { kOrSmallerSubset(2, RequestVoteRequestTypeOp({t})) : t \in Terms }
+\* RequestVoteResponseTypeSampled == UNION { kOrSmallerSubset(2, RequestVoteResponseTypeOp({t})) : t \in Terms }
+\* RequestVoteRequestTypeSampled == UNION { kOrSmallerSubset(2, RequestVoteRequestTypeOp({t})) : t \in Terms }
 
-RequestVoteType == RandomSetOfSubsets(3, 3, RequestVoteRequestType) \cup RandomSetOfSubsets(3, 3, RequestVoteResponseType)  
+RequestVoteRequestTypeSampled == RandomSetOfSubsets(3, 3, RequestVoteRequestType) 
+RequestVoteResponseTypeSampled == RandomSetOfSubsets(3, 3, RequestVoteResponseType)  
 AppendEntriesType == RandomSetOfSubsets(3, 3, AppendEntriesRequestType) \cup RandomSetOfSubsets(3, 3, AppendEntriesResponseType)  
 
 TypeOK == 
-    /\ requestVoteMsgs \in RequestVoteType
+    /\ requestVoteRequestMsgs \in RequestVoteRequestTypeSampled
+    /\ requestVoteResponseMsgs \in RequestVoteResponseTypeSampled
     /\ appendEntriesMsgs \in AppendEntriesType
     /\ currentTerm \in [Server -> Terms]
     /\ state       \in [Server -> {Leader, Follower, Candidate}]
@@ -601,7 +602,8 @@ TypeOK ==
     /\ log             \in [Server -> BoundedSeq(Terms, MaxLogLen)]
     /\ commitIndex     \in [Server -> LogIndicesWithZero]
     \* Encode these basic invariants into type-correctness.
-    /\ \A m \in requestVoteMsgs : m.msource # m.mdest
+    /\ \A m \in requestVoteRequestMsgs : m.msource # m.mdest
+    /\ \A m \in requestVoteResponseMsgs : m.msource # m.mdest
     /\ \A m \in appendEntriesMsgs : m.msource # m.mdest
 
 
@@ -702,7 +704,7 @@ H_CandidateWithVotesGrantedInTermImplyNoOtherLeader ==
 \* Does there exist a quorum of RequestVote responses in term T
 \* that support voting for server 'dest'.
 ExistsRequestVoteResponseQuorum(T, dest) == 
-    \E msgs \in SUBSET requestVoteMsgs : 
+    \E msgs \in SUBSET requestVoteResponseMsgs : 
         /\ \A m \in msgs : m.mtype = RequestVoteResponse
             /\ m.mterm = T
             /\ m.mdest = dest
@@ -748,14 +750,14 @@ H_RequestVoteQuorumInTermImpliesNoOtherLogsInTerm ==
 \*                 \/ (m.mterm <= currentTerm[m.mdest]))
 
 H_RequestVoteRequestFromNodeImpliesSafeAtTerm == 
-    \A m \in requestVoteMsgs :
+    \A m \in requestVoteRequestMsgs :
         (m.mtype = RequestVoteRequest) => 
             currentTerm[m.msource] >= m.mterm
 
 \* If a node sent a successful request vote response to node S in term T, then
 \* node S must be in term >= T.
 H_RequestVoteResponseToNodeImpliesNodeSafeAtTerm == 
-    \A m \in requestVoteMsgs :
+    \A m \in requestVoteResponseMsgs :
         (/\ m.mtype = RequestVoteResponse
          /\ m.mvoteGranted) =>
             currentTerm[m.mdest] >= m.mterm
@@ -787,7 +789,7 @@ H_CandidateWithVotesGrantedInTermImplyNoAppendEntryLogsInTerm ==
 \* If request vote response message has been sent in term T,
 \* then the sender must be at least in term T.
 H_RequestVoteResponseTermsMatchSource ==
-    \A m \in requestVoteMsgs :
+    \A m \in requestVoteResponseMsgs :
         m.mtype = RequestVoteResponse => 
             /\ currentTerm[m.msource] >= m.mterm
             /\ (m.mvoteGranted /\ (currentTerm[m.msource] = m.mterm)) => votedFor[m.msource] = m.mdest
@@ -825,7 +827,7 @@ H_VoteGrantedImpliesVoteResponseMsgConsistent ==
     \A s,t \in Server : 
         ( /\ state[s] = Candidate 
           /\ t \in votesGranted[s]) =>
-            ~\E m \in requestVoteMsgs :
+            ~\E m \in requestVoteResponseMsgs :
                 /\ m.mtype = RequestVoteResponse
                 /\ m.mterm = currentTerm[s]
                 /\ m.msource = t
@@ -1012,7 +1014,7 @@ H_DivergentEntriesInAppendEntriesMsgs ==
 \* must match its own log up to this index.
 
 H_RequestVotesNeverSentToSelf == 
-    \A m \in requestVoteMsgs : m.msource # m.mdest
+    \A m \in (requestVoteResponseMsgs \cup requestVoteRequestMsgs) : m.msource # m.mdest
 
 H_AppendEntriesNeverSentToSelf == 
     \A m \in appendEntriesMsgs : m.msource # m.mdest
