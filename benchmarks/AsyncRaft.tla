@@ -913,7 +913,7 @@ H_LogEntryInTermImpliesSafeAtTermCandidate ==
             \A n \in Q : 
                 /\ currentTerm[n] >= log[s][i]
                 \* The quorum must have voted for some leader in this term, and it is not this failed candidate.
-                /\ currentTerm[n] = log[s][i] => (votedFor[n] # t) /\ (votedFor[n] = u)
+                /\ currentTerm[n] = log[s][i] => (u # t) /\ (votedFor[n] = u)
 
 \* If an AppendEntries request was sent in term T, then there must have been a successful 
 \* election in term T.
