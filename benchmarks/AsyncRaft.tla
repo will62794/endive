@@ -657,8 +657,8 @@ CommittedEntriesReachMajority ==
 StateConstraint == 
     /\ \A s \in Server : currentTerm[s] <= MaxTerm
     /\ \A s \in Server : Len(log[s]) <= MaxLogLen
-    /\ Cardinality(requestVoteMsgs) <= MaxNumVoteMsgs
-    /\ Cardinality(appendEntriesMsgs) <= MaxNumVoteMsgs
+    \* /\ Cardinality(requestVoteMsgs) <= MaxNumVoteMsgs
+    \* /\ Cardinality(appendEntriesMsgs) <= MaxNumVoteMsgs
     \* + BagCardinality(messages) <= MaxNumMsgs
 
 
