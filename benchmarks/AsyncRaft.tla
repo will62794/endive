@@ -435,9 +435,12 @@ AcceptAppendEntriesRequestLearnCommit(m) ==
             \* We can learn a commitIndex as long as the log check passes, and if we could append these log entries.
             \* We will not, however, advance our local commitIndex to a point beyond the end of our log. And,
             \* we don't actually update our log here, only our commitIndex.
+
+            \* PRE
             /\ logOk
             /\ Len(log[i]) = m.mprevLogIndex
             /\ CanAppend(m, i)
+
             /\ m.mcommitIndex > commitIndex[i] \* no need to ever decrement our commitIndex.
             /\ state' = [state EXCEPT ![i] = Follower]
             /\ commitIndex' = [commitIndex EXCEPT ![i] = Min({m.mcommitIndex, Len(log[i])})]
