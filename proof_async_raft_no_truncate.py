@@ -119,6 +119,8 @@ requestVoteQuorumInTermImpliesNoOtherLeadersInTerm.children = {
     ]
 }
 
+requestVoteQuorumInTermImpliesNoAppendEntryLogsInTerm = make_node("H_RequestVoteQuorumInTermImpliesNoAppendEntryLogsInTerm")
+
 requestVoteQuorumInTermImpliesNoOtherLogsInTerm.children = {
     "ClientRequestAction": [
         requestVoteQuorumInTermImpliesNoOtherLeadersInTerm
@@ -132,6 +134,9 @@ requestVoteQuorumInTermImpliesNoOtherLogsInTerm.children = {
         logEntryInTermImpliesSafeAtTerms,
         requestVoteResponseToNodeImpliesNodeSafeAtTerm
     ],
+    "AcceptAppendEntriesRequestAppendAction": [
+        requestVoteQuorumInTermImpliesNoAppendEntryLogsInTerm
+    ]
 }
 
 candidateVotesGrantedInTermAreUnique = StructuredProofNode("CandidateVotesGrantedInTermAreUnique", "H_CandidateVotesGrantedInTermAreUnique")
@@ -238,7 +243,6 @@ logTermsMonotonic.children = {
     ]
 }
 
-requestVoteQuorumInTermImpliesNoAppendEntryLogsInTerm = make_node("H_RequestVoteQuorumInTermImpliesNoAppendEntryLogsInTerm")
 requestVoteQuorumInTermImpliesNoAppendEntryLogsInTerm.children = {
     "AppendEntriesAction": [
         # requestVoteQuorumInTermImpliesNoOtherLeadersInTerm,
