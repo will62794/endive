@@ -981,6 +981,22 @@ H_LogMatchingBetweenAppendEntriesMsgs ==
          /\ mi.mentries[1] = mj.mentries[1]) =>
             mi.mprevLogTerm = mj.mprevLogTerm
 
+\* If an AppendEntries request has been sent with log entries in term T, then these entries
+\* must have been created by primary in term T, and so this entry must match the log of a leader
+\* in term T.
+H_LogMatchingInAppendEntriesMsgsLeaders == 
+    \A m \in appendEntriesMsgs : 
+    \A s \in Server : 
+        (/\ m.mtype = AppendEntriesRequest
+         /\ m.mentries # <<>>
+         /\ state[s] = Leader
+         /\ m.mentries[1] = currentTerm[s]) => 
+            /\ \E ind \in DOMAIN log[s] : (ind = m.mprevLogIndex + 1) /\ (log[s][ind] = m.mentries[1])
+            /\ (m.mprevLogIndex > 0) => 
+                    (\E prevInd \in DOMAIN log[s] : 
+                        /\ prevInd = m.mprevLogIndex 
+                        /\ log[s][prevInd] = m.mprevLogTerm)
+
 H_LogMatchingInAppendEntriesMsgs ==
     \* If a server contains the log entry being sent in this AppendEntries, 
     \* then the server's previous entry must match the AppendEntries previous entry.

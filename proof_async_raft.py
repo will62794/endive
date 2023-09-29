@@ -83,7 +83,7 @@ logEntryInTermImpliesSafeAtTermCandidateAppendEntries.children = {
         logEntryInTermImpliesSafeAtTermCandidate
     ],
     "RequestVoteAction": [
-        
+
     ]
 }
 
@@ -300,8 +300,18 @@ divergentEntriesInAppendEntriesMsgs.children = {
 #
 
 logMatching = StructuredProofNode("LogMatching", "H_LogMatching")
+
+logMatchingInAppendEntriesMsgsLeaders = make_node("H_LogMatchingInAppendEntriesMsgsLeaders")
 logMatchingInAppendEntriesMsgs = make_node("H_LogMatchingInAppendEntriesMsgs")
 logMatchingBetweenAppendEntriesMsgs = make_node("H_LogMatchingBetweenAppendEntriesMsgs")
+
+logMatchingInAppendEntriesMsgsLeaders.children = {
+    "AppendEntriesAction": [
+        logMatching,
+        primaryHasEntriesItCreated
+    ],
+    "BecomeLeaderAction": []
+}
 
 logMatchingBetweenAppendEntriesMsgs.children = {
     "AppendEntriesAction": [
@@ -312,7 +322,8 @@ logMatchingBetweenAppendEntriesMsgs.children = {
 
 logMatchingInAppendEntriesMsgs.children = {
     "ClientRequestAction": [
-        divergentEntriesInAppendEntriesMsgs
+        # divergentEntriesInAppendEntriesMsgs,
+        logMatchingInAppendEntriesMsgsLeaders
     ],
     "AppendEntriesAction":[
         logMatching
@@ -493,7 +504,7 @@ noLogDivergence.children = {
         noLogDivergenceAppendEntries
     ]
 }
-root = noLogDivergence
+root = leaderMatchIndexValid
 nodes = [
     primaryHasEntriesItCreated,
     requestVoteQuorumInTermImpliesNoOtherLeadersInTerm
