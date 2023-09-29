@@ -1250,7 +1250,31 @@ H_NoLogDivergence ==
 
 \* INV: Used in debugging
 TestInv ==
-    ~\E s,t \in Server : s # t /\ commitIndex[s] > 0 /\ commitIndex[t] > 0
+    ~\E s,t \in Server : 
+        /\ s # t 
+        /\ commitIndex[s] > 0 
+        /\ currentTerm[s] = 2
+        /\ currentTerm[t] = 1
+        /\ state[s] = Leader
+        /\ Len(log[t]) > 0
+        /\ log[s][1] = 2
+        /\ log[t][1] = 1
+
+\* State that should be a violation of "no log divergence" i.e.
+\* node would have an entry in older term committed same index
+\* as conflicting entry in newer term.
+TestInv2 ==
+    ~\E s,t \in Server : 
+        /\ s # t 
+        /\ commitIndex[s] > 0 
+        /\ currentTerm[s] = 2
+        /\ currentTerm[t] = 1
+        /\ state[s] = Leader
+        /\ Len(log[t]) > 0
+        /\ log[s][1] = 2
+        /\ log[t][1] = 1
+        /\ commitIndex[t] > 0
+
     \* /\ ~\E msgs \in SUBSET appendEntriesMsgs : msgs # {}
     \* /\ ~(\E msgs \in (SUBSET appendEntriesMsgs) : 
     \*         /\ PrintT(SUBSET appendEntriesMsgs)
