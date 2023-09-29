@@ -1246,6 +1246,7 @@ H_NoLogDivergence ==
                 /\ log[s1][index] = log[s2][index]
 
 
+CONSTANT n1,n2,n3
 
 
 \* INV: Used in debugging
@@ -1275,6 +1276,74 @@ TestInv2 ==
         /\ log[s][1] = 2
         /\ log[t][1] = 1
         /\ commitIndex[t] > 0
+
+InitTestInv == 
+    /\ requestVoteResponseMsgs = {}
+    /\ appendEntriesMsgs = { [ mtype |-> AppendEntriesRequest,
+        mterm |-> 2,
+        mdest |-> n2,
+        msource |-> n1,
+        mprevLogIndex |-> 0,
+        mprevLogTerm |-> 0,
+        mentries |-> <<2>>,
+        mcommitIndex |-> 0 ],
+        [ mtype |-> AppendEntriesRequest,
+            mterm |-> 2,
+            mdest |-> n3,
+            msource |-> n1,
+            mprevLogIndex |-> 0,
+            mprevLogTerm |-> 0,
+            mentries |-> <<2>>,
+            mcommitIndex |-> 1 ] }
+    /\ nextIndex = ( n1 :> (n1 :> 1 @@ n2 :> 2 @@ n3 :> 1) @@
+        n2 :> (n1 :> 1 @@ n2 :> 1 @@ n3 :> 1) @@
+        n3 :> (n1 :> 1 @@ n2 :> 1 @@ n3 :> 1) )
+    /\ currentTerm = (n1 :> 2 @@ n2 :> 2 @@ n3 :> 1)
+    /\ votedFor = (n1 :> n1 @@ n2 :> n1 @@ n3 :> n3)
+    /\ matchIndex = ( n1 :> (n1 :> 0 @@ n2 :> 1 @@ n3 :> 0) @@
+        n2 :> (n1 :> 0 @@ n2 :> 0 @@ n3 :> 0) @@
+        n3 :> (n1 :> 0 @@ n2 :> 0 @@ n3 :> 0) )
+    /\ commitIndex = (n1 :> 1 @@ n2 :> 0 @@ n3 :> 0)
+    /\ state = (n1 :> Leader @@ n2 :> Follower @@ n3 :> Leader)
+    /\ requestVoteRequestMsgs = { [ mtype |-> RequestVoteRequest,
+        mterm |-> 1,
+        mdest |-> n1,
+        mlastLogTerm |-> 0,
+        mlastLogIndex |-> 0,
+        msource |-> n3 ],
+        [ mtype |-> RequestVoteRequest,
+            mterm |-> 1,
+            mdest |-> n2,
+            mlastLogTerm |-> 0,
+            mlastLogIndex |-> 0,
+            msource |-> n1 ],
+        [ mtype |-> RequestVoteRequest,
+            mterm |-> 1,
+            mdest |-> n2,
+            mlastLogTerm |-> 0,
+            mlastLogIndex |-> 0,
+            msource |-> n3 ],
+        [ mtype |-> RequestVoteRequest,
+            mterm |-> 1,
+            mdest |-> n3,
+            mlastLogTerm |-> 0,
+            mlastLogIndex |-> 0,
+            msource |-> n1 ],
+        [ mtype |-> RequestVoteRequest,
+            mterm |-> 2,
+            mdest |-> n2,
+            mlastLogTerm |-> 0,
+            mlastLogIndex |-> 0,
+            msource |-> n1 ],
+        [ mtype |-> RequestVoteRequest,
+            mterm |-> 2,
+            mdest |-> n3,
+            mlastLogTerm |-> 0,
+            mlastLogIndex |-> 0,
+            msource |-> n1 ] }
+    /\ log = (n1 :> <<2>> @@ n2 :> <<2>> @@ n3 :> <<1>>)
+    /\ votesGranted = (n1 :> {n1, n2} @@ n2 :> {} @@ n3 :> {n2, n3})
+
 
     \* /\ ~\E msgs \in SUBSET appendEntriesMsgs : msgs # {}
     \* /\ ~(\E msgs \in (SUBSET appendEntriesMsgs) : 
