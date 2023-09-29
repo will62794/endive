@@ -292,7 +292,8 @@ HandleRequestVoteRequest(m) ==
                         /\ m.mlastLogIndex >= Len(log[i])
             grant == /\ m.mterm = currentTerm[i]
                      /\ logOk
-                     /\ votedFor[i] \in {Nil, j} IN
+                     /\ votedFor[i] \in {Nil, j} 
+                     IN
             /\ votedFor' = [votedFor EXCEPT ![i] = IF grant THEN j ELSE votedFor[i]]
             /\ requestVoteResponseMsgs' = requestVoteResponseMsgs \cup {[
                             mtype        |-> RequestVoteResponse,
