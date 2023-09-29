@@ -21,7 +21,7 @@
         "n2" : "n2",
         "n3" : "n3",
         "v1" : "v1",
-        "Server" : ["{n1}", "{n1, n2}", "{n1,n2,n3}"],
+        "Server" : [ "{n1,n2}", "{n1,n2,n3}"],
         "Follower" : "Follower",
         "Candidate" : "Candidate",
         "Leader" : "Leader",
@@ -32,9 +32,9 @@
         "AppendEntriesResponse" : "AppendEntriesResponse",
         "EqualTerm" : "EqualTerm",
         "LessOrEqualTerm" : "LessOrEqualTerm",
-        "MaxTerm" : ["2"],
-        "MaxLogLen" : ["1", "2"],
-        "MaxNumVoteMsgs": ["6"]
+        "MaxTerm" : ["2", "3"],
+        "MaxLogLen" : ["1", "3"],
+        "MaxNumVoteMsgs": ["0"]
     },
     "actions": [
         "RequestVoteAction",
