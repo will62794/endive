@@ -2184,6 +2184,7 @@ class InductiveInvGen():
         import proof_consensus_epr_demo
         import proof_basic_consensus
         import proof_async_raft
+        import proof_async_raft_no_truncate
         import proof_Paxos
 
         #
@@ -2221,9 +2222,14 @@ class InductiveInvGen():
                 actions = proof_consensus_epr.actions
                 nodes = proof_consensus_epr.nodes 
         elif self.specname == "AsyncRaft":
-            root = proof_async_raft.root
-            actions = proof_async_raft.actions
-            nodes = proof_async_raft.nodes
+            if self.proof_struct_tag == "no_truncate":
+                root = proof_async_raft_no_truncate.root
+                actions = proof_async_raft_no_truncate.actions
+                nodes = proof_async_raft_no_truncate.nodes
+            else:
+                root = proof_async_raft.root
+                actions = proof_async_raft.actions
+                nodes = proof_async_raft.nodes
         elif self.specname == "basic_consensus":
             root = proof_basic_consensus.root
             actions = proof_basic_consensus.actions

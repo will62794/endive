@@ -348,10 +348,10 @@ commitIndexCoversEntryImpliesExistsOnQuorum = make_node("H_CommitIndexCoversEntr
 
 commitIndexBoundValid = make_node("H_CommitIndexBoundValid")
 commitIndexBoundValid.children = {
-    "AcceptAppendEntriesRequestTruncateAction": [
-        commitIndexCoversEntryImpliesExistsOnQuorum,
-        noLogDivergenceAppendEntries
-    ]
+    # "AcceptAppendEntriesRequestTruncateAction": [
+    #     commitIndexCoversEntryImpliesExistsOnQuorum,
+    #     noLogDivergenceAppendEntries
+    # ]
 }
     
 appendEntriesRequestImpliesSenderSafeAtTerm = make_node("H_AppendEntriesRequestImpliesSenderSafeAtTerm")
@@ -422,9 +422,9 @@ leaderMatchIndexValidAppendEntries.children = {
     "BecomeLeaderAction": [
         candidateWithVotesGrantedImpliesNoAppendEntriesInTerm
     ],
-    "AcceptAppendEntriesRequestTruncateAction": [
-        appendEntriesRequestLogEntriesMustBeInLeaderLog
-    ]
+    # "AcceptAppendEntriesRequestTruncateAction": [
+    #     appendEntriesRequestLogEntriesMustBeInLeaderLog
+    # ]
 }
     
 
@@ -444,9 +444,9 @@ leaderMatchIndexValid.children = {
         leaderMatchIndexValidAppendEntries,
         logMatching
     ],
-    "AcceptAppendEntriesRequestTruncateAction": [
-        logTermsMonotonic
-    ]
+    # "AcceptAppendEntriesRequestTruncateAction": [
+    #     logTermsMonotonic
+    # ]
 }
 
 commitIndexInAppendEntriesImpliesCommittedEntryExists = make_node("H_CommitIndexInAppendEntriesImpliesCommittedEntryExists")
@@ -484,9 +484,9 @@ commitIndexCoversEntryImpliesExistsOnQuorum.children = {
     "AdvanceCommitIndexAction": [
         leaderMatchIndexValid
     ],
-    "AcceptAppendEntriesRequestTruncateAction": [
-        noLogDivergenceAppendEntries
-    ]
+    # "AcceptAppendEntriesRequestTruncateAction": [
+    #     noLogDivergenceAppendEntries
+    # ]
 }
 
 
@@ -500,9 +500,9 @@ noLogDivergence.children = {
         commitIndexCoversEntryImpliesExistsOnQuorum,
         logMatching
     ],
-    "AcceptAppendEntriesRequestTruncateAction": [
-        noLogDivergenceAppendEntries
-    ]
+    # "AcceptAppendEntriesRequestTruncateAction": [
+    #     noLogDivergenceAppendEntries
+    # ]
 }
 root = noLogDivergence
 nodes = [
@@ -520,7 +520,7 @@ actions = [
     "HandleRequestVoteResponseAction",
     "RejectAppendEntriesRequestAction",
     "AcceptAppendEntriesRequestAppendAction",
-    "AcceptAppendEntriesRequestTruncateAction",
+    # "AcceptAppendEntriesRequestTruncateAction",
     "AcceptAppendEntriesRequestLearnCommitAction",
     "HandleAppendEntriesResponseAction"
 ]
