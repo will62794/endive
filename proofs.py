@@ -572,6 +572,82 @@ class StructuredProof():
         # return all_eliminated_ctis
         # node.ctis_eliminated = all_eliminated_ctis
 
+    def local_grammar_synth(self, indgen, node, actions, constants_obj):
+        #
+        # Predicates specifically for
+        # lemma: RequestVoteResponseToNodeImpliesNodeSafeAtTerm
+        # action: HandleRequestVoteRequestAction
+        # (AsyncRaft)
+        #
+
+        test_preds = [
+            "MJ.mtype = RequestVoteRequest",
+            "MJ.mterm <= currentTerm[MJ.mdest]",
+            "MI.mtype = RequestVoteResponse",
+            "MI.mtype = RequestVoteResponse /\ MI.mvoteGranted",
+            "currentTerm[MI.mdest] >= MI.mterm"
+        ]
+
+        actions_uneliminated = [a for a in actions if len(node.ctis_eliminated[a]) == len(node.ctis[a])]
+        action = None
+        if len(actions_uneliminated) > 0:
+            action = actions_uneliminated[0]
+        action = "BecomeLeaderAction"
+
+        print(action)
+
+        if action not in indgen.spec_config["local_grammars"]:
+            return
+        
+        if node.expr not in indgen.spec_config["local_grammars"][action]:
+            return
+
+        local_grammar = indgen.spec_config["local_grammars"][action][node.expr]
+        test_preds = local_grammar["preds"]
+        print("preds:", test_preds)
+
+        # test_quant_vars = ["MI", "MJ"]
+        test_quant_vars = local_grammar["quant_vars"]
+        num_inv_cands = 80
+        all_invs = mc.generate_invs(test_preds, num_inv_cands, 
+                                        min_num_conjuncts=2, max_num_conjuncts=3, 
+                                        process_local=False, 
+                                        quant_vars=test_quant_vars)
+        print(all_invs)
+        invs = list(all_invs["raw_invs"])
+        invs.sort()
+        for i in invs:
+            print(i)
+
+        # indgen.quant_inv = "\\A MI \\in requestVoteMsgs : \\A MJ \\in requestVoteMsgs : "
+        indgen.quant_inv = local_grammar["quant_inv"]
+        indgen.initialize_quant_inv()
+
+        # Bound max depth for checking invariants.
+        max_depth = 100
+        if "max_depth" in local_grammar:
+            max_depth = local_grammar["max_depth"]
+        sat_invs = indgen.check_invariants(invs, max_depth=max_depth)
+        sat_invs_exprs = []
+        for s in sat_invs:
+            inv_index = int(s.replace("Inv", ""))
+            sat_invs_exprs.append(invs[inv_index])
+            print(s, invs[inv_index])
+
+
+        ctis = node.ctis[action]
+        cti_info = indgen.check_cti_elimination(ctis, [
+            (f"Inv{i}", invexpr) for i,invexpr in enumerate(sat_invs_exprs)
+        ], constants_obj=constants_obj)
+
+        ctis_eliminated = cti_info["eliminated"]
+        for e in ctis_eliminated:
+            print(e, ctis_eliminated[e])
+        cti_cost = cti_info["cost"]
+
+        print("==")
+        
+
     def gen_ctis_for_node(self, indgen, node, target_node_name = None):
         """ Routine that updates set of CTIs for each proof node. 
         
@@ -750,77 +826,7 @@ class StructuredProof():
         ## EXPERIMENTAL INVARIANT SYNTHESIS AFTER NODE CTI GENERATION.
         EXPERIMENTAL_INV_SYNTH = False
         if EXPERIMENTAL_INV_SYNTH and "local_grammars" in indgen.spec_config:
-
-
-            #
-            # Predicates specifically for
-            # lemma: RequestVoteResponseToNodeImpliesNodeSafeAtTerm
-            # action: HandleRequestVoteRequestAction
-            # (AsyncRaft)
-            #
-
-            test_preds = [
-                "MJ.mtype = RequestVoteRequest",
-                "MJ.mterm <= currentTerm[MJ.mdest]",
-                "MI.mtype = RequestVoteResponse",
-                "MI.mtype = RequestVoteResponse /\ MI.mvoteGranted",
-                "currentTerm[MI.mdest] >= MI.mterm"
-            ]
-
-            actions_uneliminated = [a for a in actions if len(node.ctis_eliminated[a]) == len(node.ctis[a])]
-            action = None
-            if len(actions_uneliminated) > 0:
-                action = actions_uneliminated[0]
-            action = "AcceptAppendEntriesRequestTruncateAction"
-
-            print(action)
-
-
-            local_grammar = indgen.spec_config["local_grammars"][action][node.expr]
-            test_preds = local_grammar["preds"]
-            print("preds:", test_preds)
-
-            # test_quant_vars = ["MI", "MJ"]
-            test_quant_vars = local_grammar["quant_vars"]
-            num_inv_cands = 80
-            all_invs = mc.generate_invs(test_preds, num_inv_cands, 
-                                            min_num_conjuncts=2, max_num_conjuncts=3, 
-                                            process_local=False, 
-                                            quant_vars=test_quant_vars)
-            print(all_invs)
-            invs = list(all_invs["raw_invs"])
-            invs.sort()
-            for i in invs:
-                print(i)
-
-            # indgen.quant_inv = "\\A MI \\in requestVoteMsgs : \\A MJ \\in requestVoteMsgs : "
-            indgen.quant_inv = local_grammar["quant_inv"]
-            indgen.initialize_quant_inv()
-
-            # Bound max depth for checking invariants.
-            max_depth = 100
-            if "max_depth" in local_grammar:
-                max_depth = local_grammar["max_depth"]
-            sat_invs = indgen.check_invariants(invs, max_depth=max_depth)
-            sat_invs_exprs = []
-            for s in sat_invs:
-                inv_index = int(s.replace("Inv", ""))
-                sat_invs_exprs.append(invs[inv_index])
-                print(s, invs[inv_index])
-
-
-            ctis = node.ctis[action]
-            cti_info = indgen.check_cti_elimination(ctis, [
-                (f"Inv{i}", invexpr) for i,invexpr in enumerate(sat_invs_exprs)
-            ], constants_obj=constants_obj)
-
-            ctis_eliminated = cti_info["eliminated"]
-            for e in ctis_eliminated:
-                print(e, ctis_eliminated[e])
-            cti_cost = cti_info["cost"]
-
-            print("==")
-            
+            self.local_grammar_synth(indgen, node, actions, constants_obj)
 
         ############################################################
         ############################################################
