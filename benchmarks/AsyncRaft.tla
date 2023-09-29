@@ -1273,7 +1273,7 @@ TestInv2 ==
         /\ s # t 
         /\ commitIndex[s] > 0 
         /\ currentTerm[s] = 2
-        /\ currentTerm[t] = 1
+        /\ currentTerm[t] = 2
         /\ state[s] = Leader
         /\ Len(log[t]) > 0
         /\ log[s][1] = 2
