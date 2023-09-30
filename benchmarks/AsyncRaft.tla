@@ -979,9 +979,11 @@ H_LogEntryInTermImpliesSafeAtTermAppendEntries ==
     \A m \in appendEntriesRequestMsgs : 
         (/\ m.mtype = AppendEntriesRequest
          /\ m.mentries # <<>>) =>
-            \E Q \in Quorum : \A n \in Q : 
+            \E Q \in Quorum : 
+            \E u \in Server : 
+            \A n \in Q : 
                 /\ currentTerm[n] >= m.mentries[1]
-                /\ currentTerm[n] = m.mentries[1] => (votedFor[n] # Nil)
+                /\ currentTerm[n] = m.mentries[1] => (votedFor[n] = u)
 
 
 \* <<index, term>> pairs uniquely identify log prefixes.
