@@ -918,9 +918,11 @@ H_PrimaryHasEntriesItCreatedAppendEntries ==
 H_LogEntryInTermImpliesSafeAtTerm == 
     \A s \in Server : 
     \A i \in DOMAIN log[s] :
-        \E Q \in Quorum : \A n \in Q : 
+        \E Q \in Quorum : 
+        \E u \in Server : 
+        \A n \in Q : 
             /\ currentTerm[n] >= log[s][i]
-            /\ currentTerm[n] = log[s][i] => (votedFor[n] # Nil)
+            /\ currentTerm[n] = log[s][i] => (votedFor[n] = u)
 
 \* If a log entry appears in an AppendEntries request in a term that matches the
 \* term of some candidate, then that candidate must be "nilpotent" i.e. there must
