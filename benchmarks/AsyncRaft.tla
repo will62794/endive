@@ -227,7 +227,7 @@ AppendEntries(i, j) ==
                    mcommitIndex   |-> Min({commitIndex[i], lastEntry}),
                    msource        |-> i,
                    mdest          |-> j]}
-    /\ UNCHANGED <<serverVars, candidateVars, nextIndex, matchIndex, logVars, appendEntriesResponseMsgs, requestVoteRequestMsgs, requestVoteResponseMsgs>>
+    /\ UNCHANGED <<serverVars, candidateVars, nextIndex, matchIndex, logVars, appendEntriesResponseMsgs, requestVoteRequestMsgs, requestVoteResponseMsgs, appendEntriesResponseMsgs>>
 
 \* ACTION: BecomeLeader -------------------------------------------
 \* Candidate i transitions to leader.
@@ -340,7 +340,7 @@ RejectAppendEntriesRequest(m) ==
                 \/ /\ m.mterm = currentTerm[i]
                    /\ state[i] = Follower
                    /\ \lnot logOk
-            /\ appendEntriesRequestMsgs' = appendEntriesRequestMsgs \cup 
+            /\ appendEntriesResponseMsgs' = appendEntriesResponseMsgs \cup 
                 {[
                         mtype           |-> AppendEntriesResponse,
                         mterm           |-> currentTerm[i],
@@ -348,7 +348,7 @@ RejectAppendEntriesRequest(m) ==
                         mmatchIndex     |-> 0,
                         msource         |-> i,
                         mdest           |-> j]}
-            /\ UNCHANGED <<state, candidateVars, leaderVars, serverVars, logVars, requestVoteRequestMsgs, requestVoteResponseMsgs, appendEntriesResponseMsgs>>
+            /\ UNCHANGED <<state, candidateVars, leaderVars, serverVars, logVars, requestVoteRequestMsgs, requestVoteResponseMsgs, appendEntriesRequestMsgs>>
 
 \* ACTION: AcceptAppendEntriesRequest ------------------
 \* The original spec had to three sub actions, this version is compressed.
@@ -387,14 +387,14 @@ AcceptAppendEntriesRequestAppend(m) ==
             /\ state' = [state EXCEPT ![i] = Follower]
             \* Only update the logs in this action. commit learning is done in a separate action.
             /\ log' = [log EXCEPT ![i] = Append(log[i], m.mentries[1])]
-            /\ appendEntriesRequestMsgs' = appendEntriesRequestMsgs \cup {[
+            /\ appendEntriesResponseMsgs' = appendEntriesResponseMsgs \cup {[
                         mtype           |-> AppendEntriesResponse,
                         mterm           |-> currentTerm[i],
                         msuccess        |-> TRUE,
                         mmatchIndex     |-> m.mprevLogIndex + Len(m.mentries),
                         msource         |-> i,
                         mdest           |-> j]}
-            /\ UNCHANGED <<candidateVars, commitIndex, leaderVars, votedFor, currentTerm, requestVoteRequestMsgs, requestVoteResponseMsgs, appendEntriesResponseMsgs>>
+            /\ UNCHANGED <<candidateVars, commitIndex, leaderVars, votedFor, currentTerm, requestVoteRequestMsgs, requestVoteResponseMsgs, appendEntriesRequestMsgs>>
        
 AcceptAppendEntriesRequestTruncate(m) ==
     /\ m \in appendEntriesRequestMsgs
@@ -416,14 +416,14 @@ AcceptAppendEntriesRequestTruncate(m) ==
             /\ m.mentries[1] > log[i][index]
             /\ state' = [state EXCEPT ![i] = Follower]
             /\ log' = [log EXCEPT ![i] = TruncateLog(m, i)]
-            /\ appendEntriesRequestMsgs' = appendEntriesRequestMsgs \cup {[
+            /\ appendEntriesResponseMsgs' = appendEntriesResponseMsgs \cup {[
                         mtype           |-> AppendEntriesResponse,
                         mterm           |-> currentTerm[i],
                         msuccess        |-> TRUE,
                         mmatchIndex     |-> m.mprevLogIndex,
                         msource         |-> i,
                         mdest           |-> j]}
-            /\ UNCHANGED <<candidateVars, leaderVars, commitIndex, votedFor, currentTerm, requestVoteRequestMsgs, requestVoteResponseMsgs>>
+            /\ UNCHANGED <<candidateVars, leaderVars, commitIndex, votedFor, currentTerm, requestVoteRequestMsgs, requestVoteResponseMsgs, appendEntriesRequestMsgs>>
 
 AcceptAppendEntriesRequestLearnCommit(m) ==
     /\ m \in appendEntriesRequestMsgs
@@ -466,7 +466,7 @@ HandleAppendEntriesResponse(m) ==
                   /\ nextIndex' = [nextIndex EXCEPT ![i][j] = Max({nextIndex[i][j] - 1, 1})]
                   /\ UNCHANGED <<matchIndex>>
             /\ appendEntriesResponseMsgs' = appendEntriesResponseMsgs \ {m}
-            /\ UNCHANGED <<serverVars, candidateVars, logVars, requestVoteRequestMsgs, requestVoteResponseMsgs>>
+            /\ UNCHANGED <<serverVars, candidateVars, logVars, requestVoteRequestMsgs, requestVoteResponseMsgs, appendEntriesRequestMsgs>>
 
 RequestVoteAction2 == \E i \in Server : RequestVote(i)
 \* HandleRequestVoteRequestAction2 == \E m \in requestVoteMsgs : HandleRequestVoteRequest(m)
@@ -931,8 +931,10 @@ H_LogEntryInTermImpliesSafeAtTermCandidateAppendEntries ==
     \A m \in appendEntriesRequestMsgs :
         (/\ m.mtype = AppendEntriesRequest
          /\ m.mentries # <<>>
-         /\ m.mentries[1] = currentTerm[t]
-         /\ state[t] = Candidate) =>
+        \*  /\ m.mentries[1] = currentTerm[t]
+         /\ currentTerm[t] <= m.mentries[1] /\ state[t] # Leader
+        \*  /\ state[t] = Candidate
+         ) =>
             \* There is a quorum that is safe at the term, and if they voted in that term, they 
             \* must have voted for some other leader in this term i.e., not the failed candidate.
             \E Q \in Quorum : 

@@ -13,7 +13,7 @@ CTICost ==
     SumFnRange(currentTerm) + 
     SumFnRange(commitIndex) + 
     Cardinality(requestVoteRequestMsgs \cup requestVoteResponseMsgs) + 
-    Cardinality(appendEntriesMsgs) + 
+    Cardinality(appendEntriesRequestMsgs \cup appendEntriesResponseMsgs) + 
     SumFnRange([s \in Server |-> IF state[s] \in {Follower,Candidate} THEN 0 ELSE 1])
 
 
