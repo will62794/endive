@@ -257,6 +257,9 @@ requestVoteQuorumInTermImpliesNoAppendEntryLogsInTerm.children = {
         logEntryInTermImpliesSafeAtTermAppendEntries,
         candidateInTermVotedForItself,
         quorumsSafeAtTerms
+    ],
+    "RequestVoteAction": [
+        logEntryInTermImpliesSafeAtTermAppendEntries
     ]
 }
 
@@ -319,7 +322,10 @@ logMatchingInAppendEntriesMsgsLeaders.children = {
         logMatching,
         primaryHasEntriesItCreated
     ],
-    "BecomeLeaderAction": []
+    "BecomeLeaderAction": [
+        logEntryInTermImpliesSafeAtTermAppendEntries,
+        candidateWithVotesGrantedInTermImplyNoAppendEntryLogsInTerm
+    ]
 }
 
 logMatchingBetweenAppendEntriesMsgs.children = {
