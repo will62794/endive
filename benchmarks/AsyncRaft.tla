@@ -951,7 +951,7 @@ H_LogEntryInTermImpliesSafeAtTermCandidateAppendEntries ==
 H_LogEntryInTermImpliesSafeAtTermCandidate == 
     \A s,t \in Server : 
     \A i \in DOMAIN log[s] :
-        (state[t] = Candidate /\ currentTerm[t] = log[s][i]) =>
+        (state[t] = Candidate /\ currentTerm[t] <= log[s][i]) =>
             \E u \in Server :
             \E Q \in Quorum : 
             \A n \in Q : 
