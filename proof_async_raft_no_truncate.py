@@ -82,7 +82,7 @@ logEntryInTermImpliesSafeAtTermAppendEntries = make_node("H_LogEntryInTermImplie
 logEntryInTermImpliesSafeAtTermCandidateAppendEntries = make_node("H_LogEntryInTermImpliesSafeAtTermCandidateAppendEntries")
 logEntryInTermImpliesSafeAtTermCandidateAppendEntries.children = {
     "AppendEntriesAction": [
-        logEntryInTermImpliesSafeAtTermCandidate,
+        # logEntryInTermImpliesSafeAtTermCandidate,
         logEntryInTermImpliesSafeAtTerms,
         quorumsSafeAtTerms
     ],
@@ -134,7 +134,7 @@ requestVoteQuorumInTermImpliesNoOtherLogsInTerm.children = {
     ],
     "HandleRequestVoteRequestAction": [
         logEntryInTermImpliesSafeAtTerms,
-        logEntryInTermImpliesSafeAtTermCandidate,
+        # logEntryInTermImpliesSafeAtTermCandidate,
         candidateInTermVotedForItself
     ],
     "RequestVoteAction": [

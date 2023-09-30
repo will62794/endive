@@ -920,14 +920,20 @@ H_LogEntryInTermImpliesSafeAtTerm ==
     \A i \in DOMAIN log[s] :
         \E Q \in Quorum : 
         \E u \in Server : 
-        \A n \in Q : 
-            /\ currentTerm[n] >= log[s][i]
-            /\ currentTerm[n] = log[s][i] => (votedFor[n] = u)
+            /\ currentTerm[u] >= log[s][i]
+            /\ (currentTerm[u] = log[s][i]) => (state[u] = Leader)
+            /\ \A n \in Q : 
+                /\ currentTerm[n] >= log[s][i]
+                /\ currentTerm[n] = log[s][i] => (votedFor[n] = u)
 
 \* If a log entry appears in an AppendEntries request in a term that matches the
 \* term of some candidate, then that candidate must be "nilpotent" i.e. there must
 \* have been an election in that term that disabled that candidate from becoming elected
 \* in future.
+
+\* If there is a log entry that appears in an AppendEntries request in term T, this must mean
+\* that the system is safe at term T i.e., an election must have occurred in term T, so a quorum
+\* are safe at that term, and 
 H_LogEntryInTermImpliesSafeAtTermCandidateAppendEntries == 
     \A t \in Server : 
     \A m \in appendEntriesRequestMsgs :
@@ -942,6 +948,8 @@ H_LogEntryInTermImpliesSafeAtTermCandidateAppendEntries ==
             \E Q \in Quorum : 
             \E u \in Server :
                 /\ u # t
+                /\ currentTerm[u] >= m.mentries[1]
+                /\ currentTerm[u] = m.mentries[1] => state[u] = Leader
                 /\ \A n \in Q : 
                     /\ currentTerm[n] >= m.mentries[1]
                     /\ (currentTerm[n] = m.mentries[1]) => (votedFor[n] = u)
@@ -981,9 +989,11 @@ H_LogEntryInTermImpliesSafeAtTermAppendEntries ==
          /\ m.mentries # <<>>) =>
             \E Q \in Quorum : 
             \E u \in Server : 
-            \A n \in Q : 
-                /\ currentTerm[n] >= m.mentries[1]
-                /\ currentTerm[n] = m.mentries[1] => (votedFor[n] = u)
+                /\ currentTerm[u] >= m.mentries[1]
+                /\ (currentTerm[u] = m.mentries[1]) => state[u] = Leader
+                /\ \A n \in Q : 
+                    /\ currentTerm[n] >= m.mentries[1]
+                    /\ currentTerm[n] = m.mentries[1] => (votedFor[n] = u)
 
 
 \* <<index, term>> pairs uniquely identify log prefixes.
