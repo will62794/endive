@@ -408,7 +408,8 @@ requestVoteQuorumInTermImpliesNoAppendEntriesInTerm.children = {
         appendEntriesRequestInTermImpliesSafeAtTerms
     ],
     "HandleRequestVoteRequestAction": [
-        appendEntriesResponseInTermImpliesSafeAtTerms
+        appendEntriesResponseInTermImpliesSafeAtTerms,
+        appendEntriesRequestInTermImpliesSafeAtTerms
     ]
 }    
     

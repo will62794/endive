@@ -972,16 +972,25 @@ H_LogEntryInTermImpliesSafeAtTermCandidate ==
 H_AppendEntriesRequestInTermImpliesSafeAtTerms == 
     \A m \in appendEntriesRequestMsgs : 
         (m.mtype = AppendEntriesRequest)  =>
-            \E Q \in Quorum : \A t \in Q : 
-                /\ currentTerm[t] >= m.mterm
-                /\ currentTerm[t] = m.mterm => (votedFor[t] = m.msource)
+            \E u \in Server :
+            \E Q \in Quorum :
+                /\ u = m.msource \* sender of the AppendEntries must have been leader of that term.
+                /\ currentTerm[u] >= m.mterm
+                /\ (currentTerm[u] = m.mterm) => state[u] = Leader
+                /\ \A t \in Q : 
+                    /\ currentTerm[t] >= m.mterm
+                    /\ currentTerm[t] = m.mterm => (votedFor[t] = m.msource)
 
 H_AppendEntriesResponseInTermImpliesSafeAtTerms == 
     \A m \in appendEntriesResponseMsgs : 
         ((m.mtype = AppendEntriesResponse /\ m.msuccess))  =>
-            \E Q \in Quorum : \A t \in Q : 
-                /\ currentTerm[t] >= m.mterm
-                /\ currentTerm[t] = m.mterm => (votedFor[t] = m.mdest)
+            \E u \in Server :
+            \E Q \in Quorum : 
+                /\ currentTerm[u] >= m.mterm
+                /\ (currentTerm[u] = m.mterm) => state[u] = Leader
+                /\ \A t \in Q : 
+                    /\ currentTerm[t] >= m.mterm
+                    /\ currentTerm[t] = m.mterm => (votedFor[t] = m.mdest)
 
 H_LogEntryInTermImpliesSafeAtTermAppendEntries ==
     \A m \in appendEntriesRequestMsgs : 
