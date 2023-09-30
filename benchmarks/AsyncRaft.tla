@@ -912,19 +912,25 @@ H_LogEntryInTermImpliesSafeAtTerm ==
             /\ currentTerm[n] >= log[s][i]
             /\ currentTerm[n] = log[s][i] => (votedFor[n] # Nil)
 
+\* If a log entry appears in an AppendEntries request in a term that matches the
+\* term of some candidate, then that candidate must be "nilpotent" i.e. there must
+\* have been an election in that term that disabled that candidate from becoming elected
+\* in future.
 H_LogEntryInTermImpliesSafeAtTermCandidateAppendEntries == 
     \A t \in Server : 
     \A m \in appendEntriesMsgs :
-        (/\ state[t] = Candidate 
-         /\ m.mtype = AppendEntriesRequest
+        (/\ m.mtype = AppendEntriesRequest
          /\ m.mentries # <<>>
-         /\ m.mentries[1] = currentTerm[t]) =>
-            \E u \in Server :
+         /\ m.mentries[1] = currentTerm[t]
+         /\ state[t] = Candidate) =>
+            \* There is a quorum that is safe at the term, and if they voted in that term, they 
+            \* must have voted for some other leader in this term i.e., not the failed candidate.
             \E Q \in Quorum : 
-            \A n \in Q : 
-                /\ currentTerm[n] >= m.mentries[1]
-                \* The quorum must have voted for some leader in this term, and it is not this failed candidate.
-                /\ (currentTerm[n] = m.mentries[1]) => ((u # t) /\ (votedFor[n] = u))
+            \E u \in Server :
+                /\ u # t
+                /\ \A n \in Q : 
+                    /\ currentTerm[n] >= m.mentries[1]
+                    /\ (currentTerm[n] = m.mentries[1]) => (votedFor[n] = u)
 
 \* If a log entry exists in some term, and there is still some candidate C in term T,
 \* then there must be some quorum that voted in term T, but not for candidate C.
