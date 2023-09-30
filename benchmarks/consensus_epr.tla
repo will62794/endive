@@ -127,4 +127,213 @@ H_NodesCantSendVotesToDifferentNodes == \A mi,mj \in vote_msg : (mi[1] = mj[1]) 
 
 H_VoteMsgImpliesNodeVoted == \A mi \in vote_msg : voted[mi[1]]
 
+
+
+
+
+CONSTANT n1,n2,n3,n4,n5
+
+Init_H_NodesCantSendVotesToDifferentNodes_Violation == 
+\/ /\ leader = (n1 :> FALSE @@ n2 :> FALSE @@ n3 :> FALSE @@ n4 :> FALSE @@ n5 :> FALSE)
+   /\ vote_msg = {<<n5, n4>>}
+   /\ voted = (n1 :> FALSE @@ n2 :> FALSE @@ n3 :> FALSE @@ n4 :> FALSE @@ n5 :> TRUE)
+   /\ decided = (n1 :> {} @@ n2 :> {} @@ n3 :> {} @@ n4 :> {} @@ n5 :> {})
+   /\ votes = (n1 :> {} @@ n2 :> {} @@ n3 :> {} @@ n4 :> {} @@ n5 :> {})
+   /\ vote_request_msg = {<<n1, n5>>, <<n3, n5>>, <<n4, n3>>, <<n4, n5>>}
+
+\/ /\ leader = (n1 :> FALSE @@ n2 :> FALSE @@ n3 :> FALSE @@ n4 :> FALSE @@ n5 :> FALSE)
+   /\ vote_msg = {<<n5, n2>>}
+   /\ voted = (n1 :> FALSE @@ n2 :> FALSE @@ n3 :> FALSE @@ n4 :> FALSE @@ n5 :> TRUE)
+   /\ decided = (n1 :> {} @@ n2 :> {} @@ n3 :> {} @@ n4 :> {} @@ n5 :> {})
+   /\ votes = (n1 :> {} @@ n2 :> {n5} @@ n3 :> {} @@ n4 :> {} @@ n5 :> {})
+   /\ vote_request_msg = {<<n1, n3>>, <<n2, n5>>, <<n4, n5>>}
+
+\/ /\ leader = (n1 :> FALSE @@ n2 :> FALSE @@ n3 :> FALSE @@ n4 :> FALSE @@ n5 :> FALSE)
+   /\ vote_msg = {<<n3, n1>>, <<n3, n2>>}
+   /\ voted = (n1 :> FALSE @@ n2 :> FALSE @@ n3 :> TRUE @@ n4 :> FALSE @@ n5 :> FALSE)
+   /\ decided = (n1 :> {} @@ n2 :> {} @@ n3 :> {} @@ n4 :> {} @@ n5 :> {})
+   /\ votes = (n1 :> {} @@ n2 :> {n3} @@ n3 :> {} @@ n4 :> {} @@ n5 :> {})
+   /\ vote_request_msg = {<<n1, n3>>, <<n2, n3>>}
+
+\/ /\ leader = (n1 :> FALSE @@ n2 :> FALSE @@ n3 :> FALSE @@ n4 :> FALSE @@ n5 :> FALSE)
+   /\ vote_msg = {<<n1, n1>>, <<n3, n3>>}
+   /\ voted = (n1 :> TRUE @@ n2 :> FALSE @@ n3 :> TRUE @@ n4 :> FALSE @@ n5 :> FALSE)
+   /\ decided = (n1 :> {} @@ n2 :> {} @@ n3 :> {} @@ n4 :> {} @@ n5 :> {})
+   /\ votes = (n1 :> {} @@ n2 :> {} @@ n3 :> {} @@ n4 :> {} @@ n5 :> {})
+   /\ vote_request_msg = {<<n5, n3>>}
+
+\/ /\ leader = (n1 :> FALSE @@ n2 :> FALSE @@ n3 :> FALSE @@ n4 :> FALSE @@ n5 :> FALSE)
+   /\ vote_msg = {<<n4, n4>>}
+   /\ voted = (n1 :> FALSE @@ n2 :> FALSE @@ n3 :> FALSE @@ n4 :> TRUE @@ n5 :> FALSE)
+   /\ decided = (n1 :> {} @@ n2 :> {} @@ n3 :> {} @@ n4 :> {} @@ n5 :> {})
+   /\ votes = (n1 :> {} @@ n2 :> {} @@ n3 :> {} @@ n4 :> {n4} @@ n5 :> {})
+   /\ vote_request_msg = {<<n2, n4>>}
+
+\/ /\ leader = (n1 :> FALSE @@ n2 :> FALSE @@ n3 :> FALSE @@ n4 :> FALSE @@ n5 :> FALSE)
+   /\ vote_msg = {<<n3, n3>>}
+   /\ voted = (n1 :> FALSE @@ n2 :> FALSE @@ n3 :> TRUE @@ n4 :> FALSE @@ n5 :> FALSE)
+   /\ decided = (n1 :> {} @@ n2 :> {} @@ n3 :> {} @@ n4 :> {} @@ n5 :> {})
+   /\ votes = (n1 :> {} @@ n2 :> {} @@ n3 :> {} @@ n4 :> {} @@ n5 :> {})
+   /\ vote_request_msg = {<<n1, n3>>, <<n1, n5>>, <<n2, n5>>}
+
+\/ /\ leader = (n1 :> FALSE @@ n2 :> FALSE @@ n3 :> FALSE @@ n4 :> FALSE @@ n5 :> FALSE)
+   /\ vote_msg = {<<n4, n2>>}
+   /\ voted = (n1 :> FALSE @@ n2 :> FALSE @@ n3 :> FALSE @@ n4 :> TRUE @@ n5 :> FALSE)
+   /\ decided = (n1 :> {} @@ n2 :> {} @@ n3 :> {} @@ n4 :> {} @@ n5 :> {})
+   /\ votes = (n1 :> {} @@ n2 :> {} @@ n3 :> {} @@ n4 :> {} @@ n5 :> {})
+   /\ vote_request_msg = {<<n2, n1>>, <<n2, n4>>, <<n3, n4>>}
+
+\/ /\ leader = (n1 :> FALSE @@ n2 :> FALSE @@ n3 :> FALSE @@ n4 :> FALSE @@ n5 :> FALSE)
+   /\ vote_msg = {<<n4, n3>>}
+   /\ voted = (n1 :> FALSE @@ n2 :> FALSE @@ n3 :> FALSE @@ n4 :> TRUE @@ n5 :> FALSE)
+   /\ decided = (n1 :> {} @@ n2 :> {} @@ n3 :> {} @@ n4 :> {} @@ n5 :> {})
+   /\ votes = (n1 :> {} @@ n2 :> {} @@ n3 :> {n4} @@ n4 :> {} @@ n5 :> {})
+   /\ vote_request_msg = {<<n1, n4>>, <<n3, n4>>}
+
+\/ /\ leader = (n1 :> FALSE @@ n2 :> FALSE @@ n3 :> FALSE @@ n4 :> FALSE @@ n5 :> FALSE)
+   /\ vote_msg = {<<n4, n3>>}
+   /\ voted = (n1 :> FALSE @@ n2 :> FALSE @@ n3 :> FALSE @@ n4 :> TRUE @@ n5 :> FALSE)
+   /\ decided = (n1 :> {} @@ n2 :> {} @@ n3 :> {} @@ n4 :> {} @@ n5 :> {})
+   /\ votes = (n1 :> {} @@ n2 :> {} @@ n3 :> {} @@ n4 :> {} @@ n5 :> {})
+   /\ vote_request_msg = {<<n1, n5>>, <<n2, n3>>, <<n3, n4>>, <<n5, n4>>}
+
+
+
+
+Init_H_NodesCantVoteTwice_Violation == 
+\/ /\ leader = (n1 :> FALSE @@ n2 :> FALSE @@ n3 :> FALSE @@ n4 :> FALSE @@ n5 :> FALSE)
+   /\ vote_msg = {<<n3, n1>>, <<n3, n2>>}
+   /\ voted = (n1 :> FALSE @@ n2 :> FALSE @@ n3 :> TRUE @@ n4 :> FALSE @@ n5 :> FALSE)
+   /\ decided = (n1 :> {} @@ n2 :> {} @@ n3 :> {} @@ n4 :> {} @@ n5 :> {})
+   /\ votes = (n1 :> {n3} @@ n2 :> {n3} @@ n3 :> {} @@ n4 :> {} @@ n5 :> {})
+   /\ vote_request_msg = {<<n1, n3>>, <<n1, n4>>, <<n2, n1>>, <<n2, n3>>, <<n3, n2>>, <<n3, n5>>}
+
+\/ /\ leader = (n1 :> FALSE @@ n2 :> FALSE @@ n3 :> FALSE @@ n4 :> FALSE @@ n5 :> FALSE)
+   /\ vote_msg = {<<n4, n1>>, <<n4, n3>>}
+   /\ voted = (n1 :> FALSE @@ n2 :> FALSE @@ n3 :> FALSE @@ n4 :> TRUE @@ n5 :> FALSE)
+   /\ decided = (n1 :> {} @@ n2 :> {} @@ n3 :> {} @@ n4 :> {} @@ n5 :> {})
+   /\ votes = (n1 :> {} @@ n2 :> {} @@ n3 :> {n4} @@ n4 :> {} @@ n5 :> {})
+   /\ vote_request_msg = {<<n1, n1>>, <<n1, n4>>, <<n2, n1>>, <<n3, n4>>, <<n5, n5>>}
+
+\/ /\ leader = (n1 :> FALSE @@ n2 :> FALSE @@ n3 :> FALSE @@ n4 :> FALSE @@ n5 :> FALSE)
+   /\ vote_msg = {<<n3, n1>>, <<n5, n2>>, <<n5, n4>>}
+   /\ voted = (n1 :> FALSE @@ n2 :> FALSE @@ n3 :> TRUE @@ n4 :> FALSE @@ n5 :> TRUE)
+   /\ decided = (n1 :> {} @@ n2 :> {} @@ n3 :> {} @@ n4 :> {} @@ n5 :> {})
+   /\ votes = (n1 :> {} @@ n2 :> {n5} @@ n3 :> {} @@ n4 :> {n5} @@ n5 :> {})
+   /\ vote_request_msg = {<<n1, n2>>, <<n1, n3>>, <<n2, n5>>, <<n4, n5>>}
+
+\/ /\ leader = (n1 :> FALSE @@ n2 :> FALSE @@ n3 :> FALSE @@ n4 :> FALSE @@ n5 :> FALSE)
+   /\ vote_msg = {<<n5, n1>>, <<n5, n4>>}
+   /\ voted = (n1 :> FALSE @@ n2 :> FALSE @@ n3 :> FALSE @@ n4 :> FALSE @@ n5 :> TRUE)
+   /\ decided = (n1 :> {} @@ n2 :> {} @@ n3 :> {} @@ n4 :> {} @@ n5 :> {})
+   /\ votes = (n1 :> {} @@ n2 :> {} @@ n3 :> {} @@ n4 :> {n5} @@ n5 :> {})
+   /\ vote_request_msg = {<<n1, n5>>, <<n2, n2>>, <<n3, n2>>, <<n3, n5>>, <<n4, n3>>, <<n4, n5>>}
+
+\/ /\ leader = (n1 :> FALSE @@ n2 :> FALSE @@ n3 :> FALSE @@ n4 :> FALSE @@ n5 :> FALSE)
+   /\ vote_msg = {<<n4, n2>>, <<n4, n4>>}
+   /\ voted = (n1 :> FALSE @@ n2 :> FALSE @@ n3 :> FALSE @@ n4 :> TRUE @@ n5 :> FALSE)
+   /\ decided = (n1 :> {} @@ n2 :> {} @@ n3 :> {} @@ n4 :> {} @@ n5 :> {})
+   /\ votes = (n1 :> {} @@ n2 :> {} @@ n3 :> {} @@ n4 :> {n4} @@ n5 :> {})
+   /\ vote_request_msg = {<<n2, n4>>}
+
+\/ /\ leader = (n1 :> FALSE @@ n2 :> FALSE @@ n3 :> FALSE @@ n4 :> FALSE @@ n5 :> FALSE)
+   /\ vote_msg = {<<n5, n1>>, <<n5, n4>>}
+   /\ voted = (n1 :> FALSE @@ n2 :> FALSE @@ n3 :> FALSE @@ n4 :> FALSE @@ n5 :> TRUE)
+   /\ decided = (n1 :> {} @@ n2 :> {} @@ n3 :> {} @@ n4 :> {} @@ n5 :> {})
+   /\ votes = (n1 :> {n5} @@ n2 :> {} @@ n3 :> {} @@ n4 :> {n5} @@ n5 :> {})
+   /\ vote_request_msg = {<<n1, n5>>, <<n3, n5>>, <<n4, n3>>, <<n4, n5>>}
+
+\/ /\ leader = (n1 :> FALSE @@ n2 :> FALSE @@ n3 :> FALSE @@ n4 :> FALSE @@ n5 :> FALSE)
+   /\ vote_msg = {<<n1, n2>>, <<n4, n2>>, <<n4, n3>>}
+   /\ voted = (n1 :> TRUE @@ n2 :> FALSE @@ n3 :> FALSE @@ n4 :> TRUE @@ n5 :> FALSE)
+   /\ decided = (n1 :> {} @@ n2 :> {} @@ n3 :> {} @@ n4 :> {} @@ n5 :> {})
+   /\ votes = (n1 :> {} @@ n2 :> {n4} @@ n3 :> {n4} @@ n4 :> {} @@ n5 :> {})
+   /\ vote_request_msg = {<<n2, n1>>, <<n2, n4>>, <<n3, n4>>}
+
+\/ /\ leader = (n1 :> FALSE @@ n2 :> FALSE @@ n3 :> FALSE @@ n4 :> FALSE @@ n5 :> FALSE)
+   /\ vote_msg = {<<n1, n1>>, <<n3, n3>>, <<n3, n5>>}
+   /\ voted = (n1 :> TRUE @@ n2 :> FALSE @@ n3 :> TRUE @@ n4 :> FALSE @@ n5 :> FALSE)
+   /\ decided = (n1 :> {} @@ n2 :> {} @@ n3 :> {} @@ n4 :> {} @@ n5 :> {})
+   /\ votes = (n1 :> {} @@ n2 :> {} @@ n3 :> {n3} @@ n4 :> {} @@ n5 :> {n3})
+   /\ vote_request_msg = {<<n1, n3>>, <<n5, n3>>}
+
+\/ /\ leader = (n1 :> FALSE @@ n2 :> FALSE @@ n3 :> FALSE @@ n4 :> FALSE @@ n5 :> FALSE)
+   /\ vote_msg = {<<n4, n1>>, <<n4, n3>>}
+   /\ voted = (n1 :> FALSE @@ n2 :> FALSE @@ n3 :> FALSE @@ n4 :> TRUE @@ n5 :> FALSE)
+   /\ decided = (n1 :> {} @@ n2 :> {} @@ n3 :> {} @@ n4 :> {} @@ n5 :> {})
+   /\ votes = (n1 :> {n4} @@ n2 :> {} @@ n3 :> {n4} @@ n4 :> {} @@ n5 :> {})
+   /\ vote_request_msg = {<<n1, n4>>, <<n3, n4>>}
+
+\/ /\ leader = (n1 :> FALSE @@ n2 :> FALSE @@ n3 :> FALSE @@ n4 :> FALSE @@ n5 :> FALSE)
+   /\ vote_msg = {<<n2, n5>>, <<n5, n1>>, <<n5, n4>>}
+   /\ voted = (n1 :> FALSE @@ n2 :> TRUE @@ n3 :> FALSE @@ n4 :> FALSE @@ n5 :> TRUE)
+   /\ decided = (n1 :> {} @@ n2 :> {} @@ n3 :> {} @@ n4 :> {} @@ n5 :> {})
+   /\ votes = (n1 :> {} @@ n2 :> {} @@ n3 :> {} @@ n4 :> {n5} @@ n5 :> {})
+   /\ vote_request_msg = {<<n1, n5>>, <<n3, n5>>, <<n4, n3>>, <<n4, n5>>, <<n5, n2>>}
+
+\/ /\ leader = (n1 :> FALSE @@ n2 :> FALSE @@ n3 :> FALSE @@ n4 :> FALSE @@ n5 :> FALSE)
+   /\ vote_msg = {<<n5, n1>>, <<n5, n4>>}
+   /\ voted = (n1 :> FALSE @@ n2 :> FALSE @@ n3 :> FALSE @@ n4 :> FALSE @@ n5 :> TRUE)
+   /\ decided = (n1 :> {} @@ n2 :> {} @@ n3 :> {} @@ n4 :> {} @@ n5 :> {})
+   /\ votes = (n1 :> {} @@ n2 :> {} @@ n3 :> {} @@ n4 :> {n5} @@ n5 :> {})
+   /\ vote_request_msg = {<<n1, n3>>, <<n1, n5>>, <<n3, n5>>, <<n4, n3>>, <<n4, n5>>}
+
+\/ /\ leader = (n1 :> FALSE @@ n2 :> FALSE @@ n3 :> FALSE @@ n4 :> FALSE @@ n5 :> FALSE)
+   /\ vote_msg = {<<n4, n2>>, <<n4, n4>>}
+   /\ voted = (n1 :> FALSE @@ n2 :> FALSE @@ n3 :> FALSE @@ n4 :> TRUE @@ n5 :> FALSE)
+   /\ decided = (n1 :> {} @@ n2 :> {} @@ n3 :> {} @@ n4 :> {} @@ n5 :> {})
+   /\ votes = (n1 :> {} @@ n2 :> {n4} @@ n3 :> {} @@ n4 :> {n4} @@ n5 :> {})
+   /\ vote_request_msg = {<<n2, n4>>, <<n4, n5>>}
+
+\/ /\ leader = (n1 :> FALSE @@ n2 :> FALSE @@ n3 :> FALSE @@ n4 :> FALSE @@ n5 :> FALSE)
+   /\ vote_msg = {<<n1, n1>>, <<n3, n3>>, <<n3, n5>>}
+   /\ voted = (n1 :> TRUE @@ n2 :> FALSE @@ n3 :> TRUE @@ n4 :> FALSE @@ n5 :> FALSE)
+   /\ decided = (n1 :> {} @@ n2 :> {} @@ n3 :> {} @@ n4 :> {} @@ n5 :> {})
+   /\ votes = (n1 :> {n1} @@ n2 :> {} @@ n3 :> {n3} @@ n4 :> {} @@ n5 :> {})
+   /\ vote_request_msg = {<<n1, n5>>, <<n5, n3>>, <<n5, n5>>}
+
+\/ /\ leader = (n1 :> FALSE @@ n2 :> FALSE @@ n3 :> FALSE @@ n4 :> FALSE @@ n5 :> FALSE)
+   /\ vote_msg = {<<n4, n3>>, <<n4, n5>>, <<n5, n1>>}
+   /\ voted = (n1 :> FALSE @@ n2 :> FALSE @@ n3 :> FALSE @@ n4 :> TRUE @@ n5 :> TRUE)
+   /\ decided = (n1 :> {} @@ n2 :> {} @@ n3 :> {} @@ n4 :> {} @@ n5 :> {})
+   /\ votes = (n1 :> {} @@ n2 :> {} @@ n3 :> {} @@ n4 :> {} @@ n5 :> {n4})
+   /\ vote_request_msg = {<<n1, n5>>, <<n2, n3>>, <<n3, n2>>, <<n3, n4>>, <<n5, n4>>, <<n5, n5>>}
+
+\/ /\ leader = (n1 :> FALSE @@ n2 :> FALSE @@ n3 :> FALSE @@ n4 :> FALSE @@ n5 :> FALSE)
+   /\ vote_msg = {<<n4, n2>>, <<n4, n4>>, <<n5, n3>>}
+   /\ voted = (n1 :> FALSE @@ n2 :> FALSE @@ n3 :> FALSE @@ n4 :> TRUE @@ n5 :> TRUE)
+   /\ decided = (n1 :> {} @@ n2 :> {} @@ n3 :> {} @@ n4 :> {} @@ n5 :> {})
+   /\ votes = (n1 :> {} @@ n2 :> {n4} @@ n3 :> {} @@ n4 :> {n4} @@ n5 :> {})
+   /\ vote_request_msg = {<<n2, n4>>, <<n3, n5>>}
+
+\/ /\ leader = (n1 :> FALSE @@ n2 :> FALSE @@ n3 :> FALSE @@ n4 :> FALSE @@ n5 :> FALSE)
+   /\ vote_msg = {<<n4, n3>>, <<n4, n5>>, <<n5, n1>>}
+   /\ voted = (n1 :> FALSE @@ n2 :> FALSE @@ n3 :> FALSE @@ n4 :> TRUE @@ n5 :> TRUE)
+   /\ decided = (n1 :> {} @@ n2 :> {} @@ n3 :> {} @@ n4 :> {} @@ n5 :> {})
+   /\ votes = (n1 :> {} @@ n2 :> {} @@ n3 :> {n4} @@ n4 :> {} @@ n5 :> {n4})
+   /\ vote_request_msg = {<<n1, n5>>, <<n2, n3>>, <<n2, n5>>, <<n3, n4>>, <<n5, n4>>}
+
+\/ /\ leader = (n1 :> FALSE @@ n2 :> FALSE @@ n3 :> FALSE @@ n4 :> FALSE @@ n5 :> FALSE)
+   /\ vote_msg = {<<n4, n1>>, <<n4, n3>>}
+   /\ voted = (n1 :> FALSE @@ n2 :> FALSE @@ n3 :> FALSE @@ n4 :> TRUE @@ n5 :> FALSE)
+   /\ decided = (n1 :> {} @@ n2 :> {} @@ n3 :> {} @@ n4 :> {} @@ n5 :> {})
+   /\ votes = (n1 :> {n4} @@ n2 :> {} @@ n3 :> {n4} @@ n4 :> {} @@ n5 :> {})
+   /\ vote_request_msg = {<<n1, n4>>, <<n3, n4>>, <<n4, n4>>, <<n5, n4>>}
+
+\/ /\ leader = (n1 :> FALSE @@ n2 :> FALSE @@ n3 :> FALSE @@ n4 :> FALSE @@ n5 :> FALSE)
+   /\ vote_msg = {<<n1, n1>>, <<n3, n3>>, <<n3, n5>>}
+   /\ voted = (n1 :> TRUE @@ n2 :> FALSE @@ n3 :> TRUE @@ n4 :> FALSE @@ n5 :> FALSE)
+   /\ decided = (n1 :> {} @@ n2 :> {} @@ n3 :> {} @@ n4 :> {} @@ n5 :> {})
+   /\ votes = (n1 :> {} @@ n2 :> {} @@ n3 :> {n3} @@ n4 :> {} @@ n5 :> {n3})
+   /\ vote_request_msg = {<<n5, n3>>}
+
+\/ /\ leader = (n1 :> FALSE @@ n2 :> FALSE @@ n3 :> FALSE @@ n4 :> FALSE @@ n5 :> FALSE)
+   /\ vote_msg = {<<n5, n3>>, <<n5, n4>>}
+   /\ voted = (n1 :> FALSE @@ n2 :> FALSE @@ n3 :> FALSE @@ n4 :> FALSE @@ n5 :> TRUE)
+   /\ decided = (n1 :> {} @@ n2 :> {} @@ n3 :> {} @@ n4 :> {} @@ n5 :> {})
+   /\ votes = (n1 :> {} @@ n2 :> {} @@ n3 :> {n5} @@ n4 :> {n5} @@ n5 :> {})
+   /\ vote_request_msg = {<<n1, n5>>, <<n3, n1>>, <<n3, n5>>, <<n4, n3>>, <<n4, n5>>, <<n5, n2>>}
+
+
+
 ====
