@@ -1,8 +1,6 @@
 --------------------------------- MODULE AsyncRaft_TLC ---------------------------------
 EXTENDS AsyncRaft
 
-Symmetry == Permutations(Server)
-
 \* Sum the elements in the range of a function.
 RECURSIVE SumFnRange(_)
 SumFnRange(f) == IF DOMAIN f = {} THEN 0 ELSE
