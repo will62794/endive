@@ -541,6 +541,8 @@ Terms == 0..MaxTerm
 LogIndices == 1..MaxLogLen
 LogIndicesWithZero == 0..MaxLogLen
 
+Symmetry == Permutations(Server)
+
 \* In this spec we send at most 1 log entry per AppendEntries message. 
 \* We encode this in the type invariant for convenience.
 MaxMEntriesLen == 1
