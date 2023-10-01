@@ -35,67 +35,107 @@ Modified further by Will Schultz for safety proof experiments, August 2023.
 EXTENDS Naturals, FiniteSets, FiniteSetsExt, Sequences, Bags, TLC, Randomization
 
 \* The set of server IDs
-CONSTANTS Server
+CONSTANTS 
+    \* @typeAlias: SERVER = Str;
+    \* @type: Set(SERVER);
+    Server
 
 \* Server states.
-CONSTANTS Follower, Candidate, Leader
+CONSTANTS 
+    \* @type: Str;
+    Follower, 
+    \* @type: Str;
+    Candidate, 
+    \* @type: Str;
+    Leader
 
 \* A reserved value.
-CONSTANTS Nil
+CONSTANTS 
+    \* @type: Str;
+    Nil
 
 \* Message types:
-CONSTANTS RequestVoteRequest, 
-          RequestVoteResponse,
-          AppendEntriesRequest, 
-          AppendEntriesResponse
-
-\* Used for filtering messages under different circumstance
-CONSTANTS EqualTerm, LessOrEqualTerm
+CONSTANTS 
+    \* @type: Str;
+    RequestVoteRequest, 
+    \* @type: Str;
+    RequestVoteResponse,
+    \* @type: Str;
+    AppendEntriesRequest, 
+    \* @type: Str;
+    AppendEntriesResponse
 
 ----
 \* Global variables.
 
-VARIABLE requestVoteRequestMsgs
-VARIABLE requestVoteResponseMsgs
-VARIABLE appendEntriesRequestMsgs
-VARIABLE appendEntriesResponseMsgs
+VARIABLE 
+    \* @type: { mtype: Str, mterm: Int, mlastLogTerm: Int, mLastLogIndex: Int, msource: SERVER, mdest: SERVER };
+    requestVoteRequestMsgs
+
+VARIABLE 
+    \* @type: { mtype: Str, mterm: Int, mvoteGranted: Bool, msource: SERVER, mdest: SERVER };
+    requestVoteResponseMsgs
+
+VARIABLE 
+    \* @type: { mtype: Str, mterm: Int, mprevLogIndex: Int, mprevLogTerm: Int, mentries: Seq(Int), mcommitIndex: Int, msource: SERVER, mdest: SERVER };
+    appendEntriesRequestMsgs
+
+VARIABLE 
+    \* @type: { mtype: Str, mterm: Int, msuccess: Bool, mmatchIndex: Int, msource: SERVER, mdest: SERVER };
+    appendEntriesResponseMsgs
 
 ----
 \* Auxilliary variables (used for state-space control, invariants etc)
 
 \* The server's term number.
-VARIABLE currentTerm
+VARIABLE 
+    \* @type: SERVER -> Int; 
+    currentTerm
 
 \* The server's state (Follower, Candidate, or Leader).
-VARIABLE state
+VARIABLE 
+    \* @type: SERVER -> Str; 
+    state
 
 \* The candidate the server voted for in its current term, or
 \* Nil if it hasn't voted for any.
-VARIABLE votedFor
+VARIABLE 
+    \* @type: SERVER -> SERVER;
+    votedFor
 
 \* A Sequence of log entries. The index into this sequence is the index of the
 \* log entry. Unfortunately, the Sequence module defines Head(s) as the entry
 \* with index 1, so be careful not to use that!
-VARIABLE log
+VARIABLE 
+    \* @type: SERVER -> Seq(Int);
+    log
 
 \* The index of the latest entry in the log the state machine may apply.
-VARIABLE commitIndex
+VARIABLE 
+    \* @type: SERVER -> Int;
+    commitIndex
 
 
 \* The following variables are used only on candidates:
 
 \* The set of servers from which the candidate has received a vote in its
 \* currentTerm.
-VARIABLE votesGranted
+VARIABLE 
+    \* @type: SERVER -> Set(SERVER);
+    votesGranted
 
 
 \* The following variables are used only on leaders:
 \* The next entry to send to each follower.
-VARIABLE nextIndex
+VARIABLE
+    \* @type: SERVER -> Int;
+    nextIndex
 
 \* The latest entry that each follower has acknowledged is the same as the
 \* leader's. This is used to calculate commitIndex on the leader.
-VARIABLE matchIndex
+VARIABLE 
+    \* @type: SERVER -> Int;
+    matchIndex
 
 
 serverVars == <<currentTerm, state, votedFor>>
@@ -109,9 +149,6 @@ leaderVars == <<nextIndex, matchIndex>>
 vars == <<requestVoteRequestMsgs, requestVoteResponseMsgs, appendEntriesRequestMsgs, appendEntriesResponseMsgs, currentTerm, state, votedFor, votesGranted, nextIndex, matchIndex, log, commitIndex>>
 
 view == <<serverVars, candidateVars, leaderVars, logVars >>
-Symmetry == Permutations(Server)
-
-
 
 \* Helpers
 
@@ -121,23 +158,6 @@ Quorum == {i \in SUBSET(Server) : Cardinality(i) * 2 > Cardinality(Server)}
 
 \* The term of the last entry in a log, or 0 if the log is empty.
 LastTerm(xlog) == IF Len(xlog) = 0 THEN 0 ELSE xlog[Len(xlog)]
-
-\* The message is of the type and has a matching term.
-\* Messages with a higher term are handled by the
-\* action UpdateTerm
-ReceivableRequestVoteMessage(m, mtype, term_match) ==
-    \* /\ requestVoteMsgs # {}
-    /\ m.mtype = mtype
-    /\ \/ /\ term_match = EqualTerm
-          /\ m.mterm = currentTerm[m.mdest]
-       \/ /\ term_match = LessOrEqualTerm
-          /\ m.mterm <= currentTerm[m.mdest]
-
-
-\* Return the minimum value from a set, or undefined if the set is empty.
-\* Min(s) == CHOOSE x \in s : \A y \in s : x <= y
-\* Return the maximum value from a set, or undefined if the set is empty.
-\* Max(s) == CHOOSE x \in s : \A y \in s : x >= y
 
 ----
 \* Define initial values for all variables
@@ -330,7 +350,6 @@ LogOk(i, m) ==
        /\ m.mprevLogTerm = log[i][m.mprevLogIndex]
 
 RejectAppendEntriesRequest(m) ==
-    \* /\ ReceivableMessage(m, AppendEntriesRequest, LessOrEqualTerm)
     /\ m.mtype = AppendEntriesRequest
     /\ m.mterm <= currentTerm[m.mdest]
     /\ LET  i     == m.mdest
@@ -511,9 +530,12 @@ Next ==
 NextUnchanged == UNCHANGED vars
 
 
-CONSTANT MaxTerm
-CONSTANT MaxLogLen
-CONSTANT MaxNumVoteMsgs
+CONSTANT 
+    \* @type: Int;
+    MaxTerm
+CONSTANT 
+    \* @type: Int;
+    MaxLogLen
 
 Terms == 0..MaxTerm
 LogIndices == 1..MaxLogLen
@@ -1289,7 +1311,13 @@ H_NoLogDivergence ==
                 /\ log[s1][index] = log[s2][index]
 
 
-CONSTANT n1,n2,n3
+CONSTANT 
+    \* @type: Str;
+    n1,
+    \* @type: Str;
+    n2,
+    \* @type: Str;
+    n3
 
 
 \* INV: Used in debugging
