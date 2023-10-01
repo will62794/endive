@@ -523,7 +523,7 @@ Next ==
     \/ HandleRequestVoteResponseAction
     \/ RejectAppendEntriesRequestAction
     \/ AcceptAppendEntriesRequestAppendAction
-    \* \/ AcceptAppendEntriesRequestTruncateAction
+    \* \/ AcceptAppendEntriesRequestTruncateAction \* (DISABLE FOR NOW FOR SMALLER PROOF)
     \/ AcceptAppendEntriesRequestLearnCommitAction
     \/ HandleAppendEntriesResponseAction
 
