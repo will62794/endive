@@ -1,4 +1,5 @@
-local_server = "http://127.0.0.1:5000"
+// local_server = "http://127.0.0.1:5000"
+local_server = "http://" + location.host
 cy = null;
 
 currentNodeId = null;
