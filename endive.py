@@ -2360,7 +2360,8 @@ class InductiveInvGen():
                 proof_json = proof.serialize(include_ctis=True, cti_hashes_only=True)
                 response = flask.jsonify({'ok': True, 'proof_graph': proof_json})
                 response.headers.add('Access-Control-Allow-Origin', '*')
-                # print(proof_json)
+                print("----- TLAPS PROOF -----")
+                proof.to_tlaps_proof_skeleton()
                 return response
 
             @app.route('/getNode/<expr>')

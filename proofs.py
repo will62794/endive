@@ -234,7 +234,21 @@ class StructuredProofNode():
         if serialize:
             return {a:[str(hash(c)) for c in cti_clusters[a]] for a in cti_clusters}
         return cti_clusters
-
+    
+    def to_tlaps_proof_obligation(self):
+        """ Export this node and support lemmas as TLAPS proof obligation skeleton."""
+        # "THEOREM IndAuto /\ Next => IndAuto'"
+        out_str = "\n"
+        for a in self.children:
+            land = " /\\ "
+            supports = [c.expr for c in self.children[a]]
+            supports_conj = land.join(supports)
+            supports_list = ",".join(supports)
+            out_str += f"\* ({self.expr},{a})\n"
+            out_str += f"""THEOREM {supports_conj}{land}{self.expr} /\\ {a} => {self.expr}'\n"""
+            out_str += f"   <1> QED BY DEF {supports_list},{a},{a.replace('Action', '')},{self.expr}\n" 
+            out_str += "\n"
+        return out_str
 
 class StructuredProof():
     """ Structured safety proof of an inductive invariant. 
@@ -261,6 +275,39 @@ class StructuredProof():
 
         if load_from_obj:
             self.load_from(load_from_obj)
+
+    def walk_proof_graph(self, curr_node, visit_fn=None, seen = set(), all_nodes=[]):
+        if visit_fn is not None:
+            visit_fn(curr_node)
+        seen.add(curr_node.expr)
+        all_nodes.append(curr_node)
+        for a in curr_node.children:
+            for c in curr_node.children[a]:
+                # print(c)
+                if c.expr not in seen:
+                    self.walk_proof_graph(c, visit_fn, seen, all_nodes=all_nodes)
+
+    def to_tlaps_proof_skeleton(self):
+        """ Export proof graph obligations to TLAPS proof structure."""
+        modname = self.specname + "_IndDecompProof"
+        f = open("benchmarks/" + modname + ".tla", 'w')
+        spec_lines = f"---- MODULE {modname} ----\n"
+        spec_lines += f"EXTENDS {self.specname}\n"
+
+        nodes = []
+        seen = set()
+        self.walk_proof_graph(self.root, seen=seen, all_nodes=nodes)
+        # print(nodes)
+        for n in nodes:
+            if n.expr == self.root.expr:
+                spec_lines += "\n\* (ROOT SAFETY PROP)"
+            spec_lines += f"\n\* -- {n.expr}\n"
+            spec_lines += n.to_tlaps_proof_obligation()
+            spec_lines += "\n"
+        spec_lines += "\n"
+        spec_lines += "===="
+        f.write(spec_lines)
+        f.close()
 
     def serialize(self, include_ctis=True, cti_hashes_only=False):
         return {
