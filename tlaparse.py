@@ -142,17 +142,17 @@ class TLASpec:
                                 if firstchild.tag == "BuiltInKindRef":
                                     # Prime operator (') is UID=13.
                                     if list(firstchild)[0].text == "13":
-                                        print("FC:", firstchild.tag)
-                                        print("FC:", list(firstchild)[0].text)
+                                        # print("FC:", firstchild.tag)
+                                        # print("FC:", list(firstchild)[0].text)
                                         is_primed_var = True
                             if el.tag == "operands" and is_primed_var:
-                                print("PRIMED OPERANDS")
+                                # print("PRIMED OPERANDS")
                                 for oper in el:
                                     # print(oper.tag)
                                     # print(list(oper))
                                     loc = oper.find("location")
                                     line =  loc.find("line").find("begin")
-                                    print("line:", line.text)
+                                    # print("line:", line.text)
                                     op = oper.find("operator")
                                     uid = op.find("OpDeclNodeRef").find("UID").text
                                     # The modified variable.
@@ -179,10 +179,10 @@ class TLASpec:
                                             uid = sub.find("UID").text
                                             if uid in self.spec_obj["var_decls"]:
                                                 coi_var_name = self.spec_obj["var_decls"][uid]["uniquename"]
-                                                print("coi var:", coi_var_name)
+                                                # print("coi var:", coi_var_name)
                                                 coi_vars.add(coi_var_name)
 
-                                    print("COI:", coi_vars)
+                                    # print("COI:", coi_vars)
                                     updated_vars_with_coi[var_name].update(coi_vars)
                                     return (set(), updated_vars_with_coi)
 
@@ -327,11 +327,11 @@ class TLASpec:
                                             # print("UID:", uid)
                                             if uid in self.spec_obj["var_decls"]:
                                                 varname = self.spec_obj["var_decls"][uid]["uniquename"]
-                                                print("$$$$ REMOVAL of:", varname)
+                                                # print("$$$$ REMOVAL of:", varname)
 
-        print("TO REMOVE:", to_remove)
+        # print("TO REMOVE:", to_remove)
         for (el,child) in to_remove:
-            print("Removing ", child)
+            # print("Removing ", child)
             el.remove(child)
 
     def get_vars_in_def(self, name, ignore_unchanged=True, ignore_update_expressions=False):
