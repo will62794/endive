@@ -113,6 +113,10 @@ function genCtis(exprName, onCompleteFn){
     $("#gen-ctis-btn").html("Generating CTIs " + loadingIcon);
     generatingCTIs = true;
 
+    // Mark the node we are actively generating CTIs for.
+    let activeStyle = {"border-color": "blue", "border-width": "6px", "background-color": "steelblue"};
+    cy.nodes(`node[name = "${exprName}"]`).style(activeStyle);
+
     $.get(local_server + `/genCtis/single/${exprName}`, function(data){
         // console.log(data);
         awaitGenCtiCompletion(exprName, onCompleteFn);
@@ -616,8 +620,8 @@ function addNodeToGraph(proof_graph, node){
 
             let actionvars = proof_graph["vars_in_action"][action];
             let lemmavars = proof_graph["vars_in_lemma_defs"][node["expr"]];
-            console.log("actionvars:", actionvars);
-            console.log("lemmavars:", lemmavars);
+            // console.log("actionvars:", actionvars);
+            // console.log("lemmavars:", lemmavars);
             let localvars = _.union(actionvars, lemmavars);
             projectionStats.push(localvars);
             
@@ -717,8 +721,8 @@ function addEdgesToGraph(proof_graph, node){
 
                 let actionvars = proof_graph["vars_in_action"][action];
                 let lemmavars = proof_graph["vars_in_lemma_defs"][node["expr"]];
-                console.log("actionvars:", actionvars);
-                console.log("lemmavars:", lemmavars);
+                // console.log("actionvars:", actionvars);
+                // console.log("lemmavars:", lemmavars);
                 let localvars = _.union(actionvars, lemmavars);
                 projectionStats.push(localvars);
 
