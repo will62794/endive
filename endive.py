@@ -1092,6 +1092,8 @@ class InductiveInvGen():
         simulate_depth = self.simulate_depth
         if depth is not None:
             simulate_depth = depth
+        if self.k_cti_induction_depth > 2:
+            simulate_depth = self.k_cti_induction_depth - 1
         
         sampling_args = f"-Dtlc2.tool.impl.Tool.autoInitStatesSampling=true -Dtlc2.tool.impl.Tool.autoInitSamplingTimeLimitMS={sampling_target_time_limit_ms} -Dtlc2.tool.impl.Tool.autoInitSamplingTargetNumInitStates={sampling_target_num_init_states}"
         args = (dirpath, sampling_args, "tla2tools-checkall.jar", mc.TLC_MAX_SET_SIZE, simulate_flag, simulate_depth, ctiseed, tag, num_ctigen_tlc_workers, indcheckcfgfilename(action), indchecktlafilename)
