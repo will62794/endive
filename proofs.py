@@ -62,6 +62,13 @@ class StructuredProofNode():
         if load_from_obj:
             self.load_from(load_from_obj)
 
+    def num_children(self):
+        cnt = 0
+        for a in self.children:
+            for c in self.children[a]:
+                cnt += 1
+        return cnt
+
     def serialize_rec(self, include_ctis=True, cti_hashes_only=False, seen=set(), serialize_children=True):
         # if self.expr in seen:
         #     None
@@ -298,6 +305,21 @@ class StructuredProof():
         seen = set()
         self.walk_proof_graph(self.root, seen=seen, all_nodes=nodes)
         # print(nodes)
+
+        # Some proof graph info.
+        spec_lines += "\n"
+        spec_lines += f"\* Proof Graph Stats\n"
+        spec_lines += f"\* ==================\n"
+        spec_lines += f"\* num proof graph nodes: {len(nodes)}\n"
+        in_degrees = list(map(lambda n : n.num_children(), nodes))
+        mean_in_degree = sum(in_degrees)/len(nodes)
+        sorted_in_degrees = list(sorted(in_degrees))
+        median_in_degree = sorted_in_degrees[len(sorted_in_degrees)//2]
+        spec_lines += f"\* mean in-degree: {mean_in_degree}\n"
+        spec_lines += f"\* median in-degree: {median_in_degree}\n"
+        spec_lines += f"\* max in-degree: {max(in_degrees)}\n"
+        spec_lines += f"\* min in-degree: {min(in_degrees)}\n"
+
         for n in nodes:
             if n.expr == self.root.expr:
                 spec_lines += "\n\* (ROOT SAFETY PROP)"
