@@ -207,7 +207,8 @@ H_CommitMsgImpliesAllPreparesSent == \A rmi \in RM : ([type |-> "Commit"] \in ms
 
 H_TMKnowsPrepareImpliesRMSentPrepare == \A rmi \in RM : (tmPrepared = tmPrepared \cup {rmi}) => ([type |-> "Prepared", rm |-> rmi] \in msgsPrepared) 
 
-H_TMKnowsPrepareImpliesRMPreparedCommittedOrAborted == \A rmi \in RM : (rmi \in tmPrepared) => rmState[rmi] \in {"prepared", "committed", "aborted"}
+\* H_TMKnowsPrepareImpliesRMPreparedCommittedOrAborted
+H_TMKnowsPrepareImpliesRMWorking == \A rmi \in RM : (rmi \in tmPrepared) => rmState[rmi] \in {"prepared", "committed", "aborted"}
 
 H_AbortMsgSentImpliesTMAborted == ([type |-> "Abort"] \in msgsAbortCommit) => tmState = "aborted"
 
@@ -238,8 +239,8 @@ H_RMWorkingImpliesNoCommitMsg ==
 H_RMWorkingImpliesNotPrepared == 
     \A rmi \in RM : rmState[rmi] = "working" => (rmi \notin tmPrepared)
 
-H_InitImpliesNoAbortMsg == (tmState = "init") => ~([type |-> "Abort"] \in msgsAbortCommit)
-H_InitImpliesNoCommitMsg == (tmState = "init") => ~([type |-> "Commit"] \in msgsAbortCommit) 
+H_InitNoAbortMsg == (tmState = "init") => ~([type |-> "Abort"] \in msgsAbortCommit)
+H_InitNoCommitMsg == (tmState = "init") => ~([type |-> "Commit"] \in msgsAbortCommit) 
 
 H_TMAbortedImpliesAbortMsg == \A rmi \in RM : \A rmj \in RM : (tmState = "aborted") \/ (~([type |-> "Abort"] \in msgsAbortCommit))
 H_TMCommittedImpliesAbortMsg == \A rmi \in RM : \A rmj \in RM : (tmState = "committed") \/ (~([type |-> "Commit"] \in msgsAbortCommit))
@@ -306,7 +307,19 @@ L5 == 5
 \* Constant initialization for model checking with Apalache.
 CInit == RM = {"1_OF_RM", "2_OF_RM", "3_OF_RM"}
 
-\* ApaInv == TypeOK /\ TCConsistent
+ApaInv == 
+    /\ TypeOK 
+    /\ H_CommitMsgImpliesNoAbortMsg
+    /\ H_CommitMsgImpliesNoRMAborted
+    \* /\ H_CommittedRMImpliesCommitMsg
+    \* /\ H_CommitMsgImpliesAllPrepared
+    \* /\ H_CommitMsgImpliesAllRMsPreparedOrCommitted
+    \* /\ H_AllPreparedImpliesNoRMsWorking
+    \* /\ H_RMSentPrepareImpliesNotWorking
+
+Safe == H_TCConsistent
+
+
 \* ApaInv == TypeOK /\ H_Inv344
 
 \* ApaInv == TypeOK /\ H_Inv446

@@ -17,10 +17,10 @@ tMKnowsPrepareImpliesRMSentPrepare = StructuredProofNode("TMKnowsPrepareImpliesR
 commitMsgImpliesNoAbortMsg = StructuredProofNode("CommitMsgImpliesNoAbortMsg", "H_CommitMsgImpliesNoAbortMsg", children = {
     # lemmaTRUE,
     "TMAbortAction": [
-        StructuredProofNode("InitImpliesNoCommitMsg", "H_InitImpliesNoCommitMsg")
+        StructuredProofNode("InitNoCommitMsg", "H_InitNoCommitMsg")
     ],
     "TMCommitAction": [
-        StructuredProofNode("InitImpliesNoAbortMsg", "H_InitImpliesNoAbortMsg")
+        StructuredProofNode("InitNoAbortMsg", "H_InitNoAbortMsg")
     ]
 })
 
@@ -42,8 +42,8 @@ abortMsgImpliesTMAborted = StructuredProofNode("AbortMsgImpliesTMAborted", "H_Ab
 rMSentPrepareImpliesNotWorking = StructuredProofNode("RMSentPrepareImpliesNotWorking", "H_RMSentPrepareImpliesNotWorking")
 
 tMKnowsPrepareImpliesRMPreparedCommittedOrAborted = StructuredProofNode(
-    "TMKnowsPrepareImpliesRMPreparedCommittedOrAborted", 
-    "H_TMKnowsPrepareImpliesRMPreparedCommittedOrAborted", children = {
+    "TMKnowsPrepareImpliesRMWorking", 
+    "H_TMKnowsPrepareImpliesRMWorking", children = {
         # lemmaTRUE,
         "TMRcvPreparedAction": [rMSentPrepareImpliesNotWorking]
 })

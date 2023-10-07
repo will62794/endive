@@ -472,19 +472,24 @@ class StructuredProof():
 
         return html
 
-    def add_node_to_dot_graph(self, dot, node):
+    def add_node_to_dot_graph(self, dot, node, seen=set()):
         """ Add this node and its children, recursively, to DOT graph."""
         color = "black"
         penwidth="3"
         if node.expr == self.safety_goal:
             color="green"
             penwidth="5"
+
+        if node.expr in seen:
+            return
+        
         dot.node(node.expr, color=color, shape="ellipse", penwidth=penwidth, label=node.expr.replace("H_", ""))
+        seen.add(node.expr)
 
         # Add sub-nodes for each action child.
         for action in node.children:
             action_node_id = node.expr + "_" + action
-            dot.node(action_node_id, label=action.replace("Action", ""))
+            dot.node(action_node_id, label=action.replace("Action", ""), style="filled", fillcolor="lightgray")
             dot.edge(action_node_id, node.expr)
 
         for action in node.children:
@@ -492,7 +497,7 @@ class StructuredProof():
                 action_node_id = node.expr + "_" + action
                 # dot.edge(c.expr, node.expr)
                 dot.edge(c.expr, action_node_id)
-                self.add_node_to_dot_graph(dot, c)
+                self.add_node_to_dot_graph(dot, c, seen=seen)
 
 
     def save_as_dot(self, out_file):
@@ -503,7 +508,7 @@ class StructuredProof():
         dot.node_attr["shape"] = "box"
         
         # Store all nodes.
-        self.add_node_to_dot_graph(dot, self.root)
+        self.add_node_to_dot_graph(dot, self.root, seen=set())
 
         # print("Final proof graph:")
         # print(dot.source)
