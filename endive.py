@@ -825,6 +825,7 @@ class InductiveInvGen():
             action_name = trace_action_names[k+1]
             cti.setActionName(action_name)
             cti.setTrace(trace)
+            cti.trace_index = k
         
         # for cti in trace_ctis:
             # print(cti.getActionName())
@@ -979,7 +980,7 @@ class InductiveInvGen():
         
         # Use for k-induction?
         # self.k_cti_induction_depth = 2
-        invcheck_tla_indcheck += f'InvStrengthened_Constraint == {precond} /\ TLCGet("level") = {self.k_cti_induction_depth - 1} => InvStrengthened \n'
+        invcheck_tla_indcheck += f'InvStrengthened_Constraint == {precond} /\ TLCGet("level") = {self.k_cti_induction_depth} => InvStrengthened \n'
 
         invcheck_tla_indcheck += "IndCand ==\n"
         typeok_expr = self.typeok
@@ -993,7 +994,7 @@ class InductiveInvGen():
         invcheck_tla_indcheck += f"    /\ InvStrengthened\n"
 
         depth_bound = 2
-        level_bound_precond = f'TLCGet("level") < {depth_bound}'
+        level_bound_precond = f'TLCGet("level") < {self.k_cti_induction_depth}'
         if self.use_apalache_ctigen:
             level_bound_precond = "TRUE"
         invcheck_tla_indcheck += f'NextBounded ==  {level_bound_precond} /\ Next\n'
@@ -1092,8 +1093,8 @@ class InductiveInvGen():
         simulate_depth = self.simulate_depth
         if depth is not None:
             simulate_depth = depth
-        if self.k_cti_induction_depth > 2:
-            simulate_depth = self.k_cti_induction_depth - 1
+        if self.k_cti_induction_depth > 1:
+            simulate_depth = self.k_cti_induction_depth
         
         sampling_args = f"-Dtlc2.tool.impl.Tool.autoInitStatesSampling=true -Dtlc2.tool.impl.Tool.autoInitSamplingTimeLimitMS={sampling_target_time_limit_ms} -Dtlc2.tool.impl.Tool.autoInitSamplingTargetNumInitStates={sampling_target_num_init_states}"
         args = (dirpath, sampling_args, "tla2tools-checkall.jar", mc.TLC_MAX_SET_SIZE, simulate_flag, simulate_depth, ctiseed, tag, num_ctigen_tlc_workers, indcheckcfgfilename(action), indchecktlafilename)
@@ -2906,7 +2907,7 @@ if __name__ == "__main__":
     parser.add_argument('--max_num_conjuncts_per_round', help='Max number of conjuncts to learn per round.', type=int, default=10000)
     parser.add_argument('--max_num_ctis_per_round', help='Max number of CTIs per round.', type=int, default=10000)
     parser.add_argument('--override_num_cti_workers', help='Max number of TLC workers for CTI generation.', type=int, default=None)
-    parser.add_argument('--k_cti_induction_depth', help='CTI k-induction depth.', type=int, default=2)
+    parser.add_argument('--k_cti_induction_depth', help='CTI k-induction depth.', type=int, default=1)
     
     # Proof tree related commands.
     parser.add_argument('--proof_tree_mode', help='Run in inductive proof tree mode (EXPERIMENTAL).', default=False, action='store_true')

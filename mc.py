@@ -249,6 +249,8 @@ class CTI():
         # Optional cost metric for this CTI
         self.cost = 0
 
+        self.trace_index = -1
+
         if load_from_obj:
             self.load_from(load_from_obj)
 

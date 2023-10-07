@@ -814,6 +814,11 @@ class StructuredProof():
             # Break down CTIs by action.
             new_ctis_by_action = {a:set() for a in actions}
             for c in new_ctis:
+                # print("TRACE---")
+                # print(c.action_name)
+                # print(c.trace_index)
+                # for s in c.trace.getStates():
+                #     print(s)
                 if c.action_name in actions_to_check:
                     new_ctis_by_action[c.action_name].add(c)
 
