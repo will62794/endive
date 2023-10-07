@@ -21,7 +21,7 @@
         "tmPrepared = tmPrepared \\cup {rmi}"
     ],
     "preds_alt" : [],
-    "safety"  :  "TCConsistent",
+    "safety"  :  "H_TCConsistent",
     "constants"  :  {
         "RM" : ["{rm1}","{rm1,rm2}"],
         "rm1" : "rm1",

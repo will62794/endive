@@ -342,7 +342,7 @@ class StructuredProof():
             "lemma_action_coi": {a:{l:list(self.lemma_action_coi[a][l]) for l in self.lemma_action_coi[a]} for a in self.lemma_action_coi}
         }
     
-    def save_proof(self, include_json=False, include_dot=False):
+    def save_proof(self, include_json=False, include_dot=True):
         """ Visualize proof structure in HTML format for inspection, and serialize to JSON. """
         filename = f"{self.proof_base_filename}.html"
         pickle_filename = f"{self.proof_base_filename}.pickle"
@@ -475,12 +475,24 @@ class StructuredProof():
     def add_node_to_dot_graph(self, dot, node):
         """ Add this node and its children, recursively, to DOT graph."""
         color = "black"
+        penwidth="3"
         if node.expr == self.safety_goal:
             color="green"
-        dot.node(node.expr, color=color)
-        for c in node.children_list():
-            dot.edge(c.expr, node.expr)
-            self.add_node_to_dot_graph(dot, c)
+            penwidth="5"
+        dot.node(node.expr, color=color, shape="ellipse", penwidth=penwidth, label=node.expr.replace("H_", ""))
+
+        # Add sub-nodes for each action child.
+        for action in node.children:
+            action_node_id = node.expr + "_" + action
+            dot.node(action_node_id, label=action.replace("Action", ""))
+            dot.edge(action_node_id, node.expr)
+
+        for action in node.children:
+            for c in node.children[action]:
+                action_node_id = node.expr + "_" + action
+                # dot.edge(c.expr, node.expr)
+                dot.edge(c.expr, action_node_id)
+                self.add_node_to_dot_graph(dot, c)
 
 
     def save_as_dot(self, out_file):
