@@ -248,12 +248,13 @@ class StructuredProofNode():
         out_str = "\n"
         for a in self.children:
             land = " /\\ "
+            typeok = "TypeOK"
             supports = [c.expr for c in self.children[a]]
             supports_conj = land.join(supports)
             supports_list = ",".join(supports)
             out_str += f"\* ({self.expr},{a})\n"
-            out_str += f"""THEOREM {supports_conj}{land}{self.expr} /\\ {a} => {self.expr}'\n"""
-            out_str += f"   <1> QED BY DEF {supports_list},{a},{a.replace('Action', '')},{self.expr}\n" 
+            out_str += f"""THEOREM {typeok} /\\ {supports_conj}{land}{self.expr} /\\ {a} => {self.expr}'\n"""
+            out_str += f"   <1> QED BY DEF {typeok},{supports_list},{a},{a.replace('Action', '')},{self.expr}\n" 
             out_str += "\n"
         return out_str
 
@@ -279,6 +280,8 @@ class StructuredProof():
         self.vars_in_action = dict()
 
         self.ctigen_state = "idle"
+
+        self.current_config_instance_index = -1
 
         if load_from_obj:
             self.load_from(load_from_obj)
@@ -321,6 +324,8 @@ class StructuredProof():
         spec_lines += f"\* min in-degree: {min(in_degrees)}\n"
 
         for n in nodes:
+            if len(n.children.keys()) == 0:
+                continue
             if n.expr == self.root.expr:
                 spec_lines += "\n\* (ROOT SAFETY PROP)"
             spec_lines += f"\n\* -- {n.expr}\n"

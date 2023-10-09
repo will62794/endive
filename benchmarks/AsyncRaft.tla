@@ -32,7 +32,9 @@ Original source: https://github.com/Vanlightly/raft-tlaplus/blob/main/specificat
 Modified further by Will Schultz for safety proof experiments, August 2023.
 *)
 
-EXTENDS Naturals, FiniteSets, FiniteSetsExt, Sequences, Bags, TLC, Randomization
+\* EXTENDS Naturals, FiniteSets, FiniteSetsExt, Sequences, Bags, TLC
+EXTENDS Naturals, FiniteSets, Sequences, TLC
+\* , Randomization
 
 \* The set of server IDs
 CONSTANTS 
@@ -148,9 +150,10 @@ leaderVars == <<nextIndex, matchIndex>>
 \* All variables; used for stuttering (asserting state hasn't changed).
 vars == <<requestVoteRequestMsgs, requestVoteResponseMsgs, appendEntriesRequestMsgs, appendEntriesResponseMsgs, currentTerm, state, votedFor, votesGranted, nextIndex, matchIndex, log, commitIndex>>
 
-view == <<serverVars, candidateVars, leaderVars, logVars >>
-
 \* Helpers
+
+Min(s) == CHOOSE x \in s : \A y \in s : x <= y
+Max(s) == CHOOSE x \in s : \A y \in s : x >= y
 
 \* The set of all quorums. This just calculates simple majorities, but the only
 \* important property is that every quorum overlaps with every other.
@@ -162,17 +165,17 @@ LastTerm(xlog) == IF Len(xlog) = 0 THEN 0 ELSE xlog[Len(xlog)]
 ----
 \* Define initial values for all variables
 
-InitServerVars == /\ currentTerm = [i \in Server |-> 1]
-                  /\ state       = [i \in Server |-> Follower]
-                  /\ votedFor    = [i \in Server |-> Nil]
-InitCandidateVars == votesGranted   = [i \in Server |-> {}]
-\* The values nextIndex[i][i] and matchIndex[i][i] are never read, since the
-\* leader does not send itself messages. It's still easier to include these
-\* in the functions.
-InitLeaderVars == /\ nextIndex  = [i \in Server |-> [j \in Server |-> 1]]
-                  /\ matchIndex = [i \in Server |-> [j \in Server |-> 0]]
-InitLogVars == /\ log             = [i \in Server |-> << >>]
-               /\ commitIndex     = [i \in Server |-> 0]
+\* InitServerVars == /\ currentTerm = [i \in Server |-> 1]
+\*                   /\ state       = [i \in Server |-> Follower]
+\*                   /\ votedFor    = [i \in Server |-> Nil]
+\* InitCandidateVars == votesGranted   = [i \in Server |-> {}]
+\* \* The values nextIndex[i][i] and matchIndex[i][i] are never read, since the
+\* \* leader does not send itself messages. It's still easier to include these
+\* \* in the functions.
+\* InitLeaderVars == /\ nextIndex  = [i \in Server |-> [j \in Server |-> 1]]
+\*                   /\ matchIndex = [i \in Server |-> [j \in Server |-> 0]]
+\* InitLogVars == /\ log             = [i \in Server |-> << >>]
+\*                /\ commitIndex     = [i \in Server |-> 0]
 
 Init == 
     /\ requestVoteRequestMsgs = {}
@@ -458,9 +461,9 @@ AcceptAppendEntriesRequestLearnCommit(m) ==
             \* we don't actually update our log here, only our commitIndex.
 
             \* PRE
-            /\ logOk
-            /\ Len(log[i]) = m.mprevLogIndex
-            /\ CanAppend(m, i)
+            \* /\ logOk
+            \* /\ Len(log[i]) = m.mprevLogIndex
+            \* /\ CanAppend(m, i)
 
             /\ m.mcommitIndex > commitIndex[i] \* no need to ever decrement our commitIndex.
             /\ state' = [state EXCEPT ![i] = Follower]
@@ -606,34 +609,19 @@ AppendEntriesResponseType == [
 ]
 
 
-\* Set of all subsets of a set of size <= k.
-kOrSmallerSubset(k, S) == UNION {(kSubset(n, S)) : n \in 0..k}
-
-\* 
-\* Work around size limitations of TLC subset computations.
-\* 
-
-\* RequestVoteResponseTypeSampled == UNION { kOrSmallerSubset(2, RequestVoteResponseTypeOp({t})) : t \in Terms }
-\* RequestVoteRequestTypeSampled == UNION { kOrSmallerSubset(2, RequestVoteRequestTypeOp({t})) : t \in Terms }
-
-RequestVoteRequestTypeSampled == RandomSetOfSubsets(2, 2, RequestVoteRequestType) 
-RequestVoteResponseTypeSampled == RandomSetOfSubsets(2, 2, RequestVoteResponseType)  
-AppendEntriesRequestTypeSampled == RandomSetOfSubsets(3, 3, AppendEntriesRequestType)
-AppendEntriesResponseTypeSampled == RandomSetOfSubsets(3, 3, AppendEntriesResponseType)  
-
 TypeOK == 
-    /\ requestVoteRequestMsgs \in RequestVoteRequestTypeSampled
-    /\ requestVoteResponseMsgs \in RequestVoteResponseTypeSampled
-    /\ appendEntriesRequestMsgs \in AppendEntriesRequestTypeSampled
-    /\ appendEntriesResponseMsgs \in AppendEntriesResponseTypeSampled
-    /\ currentTerm \in [Server -> Terms]
+    /\ requestVoteRequestMsgs \in RequestVoteRequestType
+    /\ requestVoteResponseMsgs \in RequestVoteResponseType
+    /\ appendEntriesRequestMsgs \in AppendEntriesRequestType
+    /\ appendEntriesResponseMsgs \in AppendEntriesResponseType
+    /\ currentTerm \in [Server -> Nat]
     /\ state       \in [Server -> {Leader, Follower, Candidate}]
     /\ votedFor    \in [Server -> ({Nil} \cup Server)]
     /\ votesGranted \in [Server -> (SUBSET Server)]
-    /\ nextIndex  \in [Server -> [Server -> LogIndices]]
-    /\ matchIndex \in [Server -> [Server -> LogIndicesWithZero]]        
-    /\ log             \in [Server -> BoundedSeq(Terms, MaxLogLen)]
-    /\ commitIndex     \in [Server -> LogIndicesWithZero]
+    /\ nextIndex  \in [Server -> [Server -> Nat]]
+    /\ matchIndex \in [Server -> [Server -> Nat]]        
+    /\ log             \in [Server -> Seq(Nat)]
+    /\ commitIndex     \in [Server -> Nat]
     \* Encode these basic invariants into type-correctness.
     /\ \A m \in requestVoteRequestMsgs : m.msource # m.mdest
     /\ \A m \in requestVoteResponseMsgs : m.msource # m.mdest
