@@ -599,6 +599,17 @@ AppendEntriesRequestType == [
     mdest          : Server
 ]
 
+AppendEntriesRequestTypeFull == [
+    mtype      : {AppendEntriesRequest},
+    mterm      : Terms,
+    mprevLogIndex  : LogIndices,
+    mprevLogTerm   : Terms,
+    mentries       : Seq(Terms),
+    mcommitIndex   : LogIndicesWithZero,
+    msource        : Server,
+    mdest          : Server
+]
+
 AppendEntriesResponseType == [
     mtype        : {AppendEntriesResponse},
     mterm        : Terms,
@@ -612,7 +623,7 @@ AppendEntriesResponseType == [
 TypeOK == 
     /\ requestVoteRequestMsgs \in RequestVoteRequestType
     /\ requestVoteResponseMsgs \in RequestVoteResponseType
-    /\ appendEntriesRequestMsgs \in AppendEntriesRequestType
+    /\ appendEntriesRequestMsgs \in AppendEntriesRequestTypeFull
     /\ appendEntriesResponseMsgs \in AppendEntriesResponseType
     /\ currentTerm \in [Server -> Nat]
     /\ state       \in [Server -> {Leader, Follower, Candidate}]
