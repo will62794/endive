@@ -33,7 +33,7 @@ Modified further by Will Schultz for safety proof experiments, August 2023.
 *)
 
 \* EXTENDS Naturals, FiniteSets, FiniteSetsExt, Sequences, Bags, TLC
-EXTENDS Naturals, FiniteSets, Sequences, TLC
+EXTENDS Naturals, FiniteSets, Sequences, TLC, Apalache
 \* , Randomization
 
 \* The set of server IDs
@@ -565,16 +565,6 @@ RequestVoteRequestType == [
     mdest         : Server
 ]
 
-RequestVoteRequestTypeOp(T) == [
-    mtype         : {RequestVoteRequest},
-    mterm         : T,
-    mlastLogTerm  : Terms,
-    mlastLogIndex : LogIndicesWithZero,
-    msource       : Server,
-    mdest         : Server
-]
-
-
 RequestVoteResponseType == [
     mtype        : {RequestVoteResponse},
     mterm        : Terms,
@@ -604,24 +594,63 @@ AppendEntriesResponseType == [
 ]
 
 
-\* TypeOK == 
-\*     /\ requestVoteRequestMsgs \in RequestVoteRequestType
-\*     /\ requestVoteResponseMsgs \in RequestVoteResponseType
-\*     /\ appendEntriesRequestMsgs \in AppendEntriesRequestType
-\*     /\ appendEntriesResponseMsgs \in AppendEntriesResponseType
-\*     /\ currentTerm \in [Server -> Nat]
-\*     /\ state       \in [Server -> {Leader, Follower, Candidate}]
-\*     /\ votedFor    \in [Server -> ({Nil} \cup Server)]
-\*     /\ votesGranted \in [Server -> (SUBSET Server)]
-\*     /\ nextIndex  \in [Server -> [Server -> Nat]]
-\*     /\ matchIndex \in [Server -> [Server -> Nat]]        
-\*     /\ log             \in [Server -> Seq(Nat)]
-\*     /\ commitIndex     \in [Server -> Nat]
-\*     \* Encode these basic invariants into type-correctness.
-\*     /\ \A m \in requestVoteRequestMsgs : m.msource # m.mdest
-\*     /\ \A m \in requestVoteResponseMsgs : m.msource # m.mdest
-\*     /\ \A m \in appendEntriesRequestMsgs : m.msource # m.mdest
-\*     /\ \A m \in appendEntriesResponseMsgs : m.msource # m.mdest
+TypeOK == 
+    /\ requestVoteRequestMsgs \in SUBSET RequestVoteRequestType
+    /\ requestVoteResponseMsgs \in SUBSET RequestVoteResponseType
+    /\ appendEntriesRequestMsgs \in SUBSET AppendEntriesRequestType
+    /\ appendEntriesResponseMsgs \in SUBSET AppendEntriesResponseType
+    /\ currentTerm \in [Server -> Nat]
+    /\ state       \in [Server -> {Leader, Follower, Candidate}]
+    /\ votedFor    \in [Server -> ({Nil} \cup Server)]
+    /\ votesGranted \in [Server -> (SUBSET Server)]
+    /\ nextIndex  \in [Server -> [Server -> Nat]]
+    /\ matchIndex \in [Server -> [Server -> Nat]]        
+    /\ log             \in [Server -> Seq(Nat)]
+    /\ commitIndex     \in [Server -> Nat]
+    \* Encode these basic invariants into type-correctness.
+    /\ \A m \in requestVoteRequestMsgs : m.msource # m.mdest
+    /\ \A m \in requestVoteResponseMsgs : m.msource # m.mdest
+    /\ \A m \in appendEntriesRequestMsgs : m.msource # m.mdest
+    /\ \A m \in appendEntriesResponseMsgs : m.msource # m.mdest
+
+CurrentTermType == currentTerm \in [Server -> Nat]
+
+Apa_AppendEntriesRequestType == [
+    mtype      : {AppendEntriesRequest},
+    mterm      : Terms,
+    mprevLogIndex  : LogIndicesWithZero,
+    mprevLogTerm   : Terms,
+    mentries       : {<<>>},
+    mcommitIndex   : LogIndicesWithZero,
+    msource        : Server,
+    mdest          : Server
+]
+
+ApaTypeOK ==
+    /\ requestVoteRequestMsgs \in SUBSET RequestVoteRequestType
+    /\ requestVoteResponseMsgs \in SUBSET RequestVoteResponseType
+    /\ appendEntriesRequestMsgs \in SUBSET Apa_AppendEntriesRequestType
+    \* /\ appendEntriesRequestMsgs \in AppendEntriesRequestType
+    \* /\ \A m \in appendEntriesRequestMsgs : \A i \in DOMAIN m.mentries : m.mentries[i] \in Nat
+    \* /\ \A m \in appendEntriesRequestMsgs : Len(m.mentries) <= MaxLogLen
+    /\ appendEntriesResponseMsgs \in SUBSET AppendEntriesResponseType
+    /\ currentTerm \in [Server -> Terms]
+    /\ state       \in [Server -> {Leader, Follower, Candidate}]
+    /\ votedFor    \in [Server -> ({Nil} \cup Server)]
+    /\ votesGranted \in [Server -> (SUBSET Server)]
+    /\ nextIndex  \in [Server -> [Server -> LogIndicesWithZero]]
+    /\ matchIndex \in [Server -> [Server -> LogIndicesWithZero]]    
+    \* /\ log = Gen(3)
+    \* /\ \A s \in Server : \A i \in DOMAIN log[s] : log[s][i] \in Terms
+    \* /\ \A s \in Server : Len(log[s]) <= MaxLogLen
+    \* /\ DOMAIN log = Server
+    /\ log             \in [Server -> {<<>>}]
+    /\ commitIndex     \in [Server -> LogIndicesWithZero]
+    \* Encode these basic invariants into type-correctness.
+    /\ \A m \in requestVoteRequestMsgs : m.msource # m.mdest
+    /\ \A m \in requestVoteResponseMsgs : m.msource # m.mdest
+    /\ \A m \in appendEntriesRequestMsgs : m.msource # m.mdest
+    /\ \A m \in appendEntriesResponseMsgs : m.msource # m.mdest
 
 
 Spec == Init /\ [][Next]_vars
