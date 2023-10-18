@@ -934,7 +934,7 @@ H_PrimaryHasEntriesItCreated ==
     \* but the primary doesn't have it.
         ~(\E k \in DOMAIN log[j] :
             /\ log[j][k] = currentTerm[i]
-            /\ \E ind \in DOMAIN log[i] : (ind = k /\ log[i][k] = log[j][k]) 
+            /\ ~\E ind \in DOMAIN log[i] : (ind = k /\ log[i][k] = log[j][k]) 
             )
 
 \* If an AppendEntries request has been sent with some log entries in term T, then a current
