@@ -2365,6 +2365,8 @@ class InductiveInvGen():
                 response.headers.add('Access-Control-Allow-Origin', '*')
                 # Save TLAPS proof.
                 proof.to_tlaps_proof_skeleton()
+                # Save Apalache inductive proof obligations.
+                proof.to_apalache_proof_obligations()
                 return response
 
             @app.route('/getNode/<expr>')

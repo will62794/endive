@@ -242,6 +242,28 @@ class StructuredProofNode():
             return {a:[str(hash(c)) for c in cti_clusters[a]] for a in cti_clusters}
         return cti_clusters
     
+    def to_apalache_inductive_proof_obligation(self, modname):
+        """ Export this node and support lemmas as base for Apalache checking."""
+        # "THEOREM IndAuto /\ Next => IndAuto'"
+        out_str = "\n"
+        def_name = f"{self.expr}_IndCheck"
+        apa_cmd = f"""JVM_ARGS="-Xss16m" ./apalache/bin/apalache-mc check --init={def_name} --next=Next --inv={self.expr} --cinit=CInit --tuning-options='search.invariantFilter=1->.*' --length=1 --debug --out-dir=apa_indcheck/{self.expr} --run-dir=apa_indcheck/{self.expr} {modname}.tla"""
+        out_str += f"(** \n Apalache command:\n {apa_cmd}\n **)\n"
+        out_str += f"{def_name} == \n"
+        typeok = "ApaTypeOK"
+        land = "/\\"
+        out_str += f"  {land} {typeok}\n"
+        for a in self.children:
+            supports = [c.expr for c in self.children[a]]
+            supports_conj = land.join(supports)
+            supports_list = ",".join(supports)
+            out_str += f"  \* Action support lemmas: {a}\n"
+            for s in supports:
+                out_str += f"  {land} {s}\n"
+        out_str += f"  \* Target lemma.\n"
+        out_str += f"  {land} {self.expr}\n"
+        return out_str
+
     def to_tlaps_proof_obligation(self):
         """ Export this node and support lemmas as TLAPS proof obligation skeleton."""
         # "THEOREM IndAuto /\ Next => IndAuto'"
@@ -330,6 +352,46 @@ class StructuredProof():
                 spec_lines += "\n\* (ROOT SAFETY PROP)"
             spec_lines += f"\n\* -- {n.expr}\n"
             spec_lines += n.to_tlaps_proof_obligation()
+            spec_lines += "\n"
+        spec_lines += "\n"
+        spec_lines += "===="
+        f.write(spec_lines)
+        f.close()
+
+
+    def to_apalache_proof_obligations(self):
+        """ Export proof graph obligations to TLAPS proof structure."""
+        modname = self.specname + "_ApaIndProofCheck"
+        f = open("benchmarks/" + modname + ".tla", 'w')
+        spec_lines = f"---- MODULE {modname} ----\n"
+        spec_lines += f"EXTENDS {self.specname}\n"
+
+        nodes = []
+        seen = set()
+        self.walk_proof_graph(self.root, seen=seen, all_nodes=nodes)
+        # print(nodes)
+
+        # Some proof graph info.
+        spec_lines += "\n"
+        spec_lines += f"\* Proof Graph Stats\n"
+        spec_lines += f"\* ==================\n"
+        spec_lines += f"\* num proof graph nodes: {len(nodes)}\n"
+        in_degrees = list(map(lambda n : n.num_children(), nodes))
+        mean_in_degree = sum(in_degrees)/len(nodes)
+        sorted_in_degrees = list(sorted(in_degrees))
+        median_in_degree = sorted_in_degrees[len(sorted_in_degrees)//2]
+        spec_lines += f"\* mean in-degree: {mean_in_degree}\n"
+        spec_lines += f"\* median in-degree: {median_in_degree}\n"
+        spec_lines += f"\* max in-degree: {max(in_degrees)}\n"
+        spec_lines += f"\* min in-degree: {min(in_degrees)}\n"
+
+        for n in nodes:
+            if len(n.children.keys()) == 0:
+                continue
+            # if n.expr == self.root.expr:
+                # spec_lines += "\n\* (ROOT SAFETY PROP)"
+            # spec_lines += f"\n\* -- {n.expr}\n"
+            spec_lines += n.to_apalache_inductive_proof_obligation(modname)
             spec_lines += "\n"
         spec_lines += "\n"
         spec_lines += "===="
