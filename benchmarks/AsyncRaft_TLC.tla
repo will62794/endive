@@ -13,10 +13,61 @@ kOrSmallerSubset(k, S) == UNION {(kSubset(n, S)) : n \in 0..k}
 \* RequestVoteResponseTypeSampled == UNION { kOrSmallerSubset(2, RequestVoteResponseTypeOp({t})) : t \in Terms }
 \* RequestVoteRequestTypeSampled == UNION { kOrSmallerSubset(2, RequestVoteRequestTypeOp({t})) : t \in Terms }
 
-RequestVoteRequestTypeSampled == RandomSetOfSubsets(2, 2, RequestVoteRequestType) 
-RequestVoteResponseTypeSampled == RandomSetOfSubsets(2, 2, RequestVoteResponseType)  
-AppendEntriesRequestTypeSampled == RandomSetOfSubsets(3, 3, AppendEntriesRequestType)
-AppendEntriesResponseTypeSampled == RandomSetOfSubsets(3, 3, AppendEntriesResponseType)  
+
+\* Terms == 0..MaxTerm
+\* LogIndices == 1..MaxLogLen
+\* LogIndicesWithZero == 0..MaxLogLen
+
+\* Symmetry == Permutations(Server)
+
+\* \* In this spec we send at most 1 log entry per AppendEntries message. 
+\* \* We encode this in the type invariant for convenience.
+\* MaxMEntriesLen == 1
+
+SeqOf(S, n) == UNION {[1..m -> S] : m \in 0..n}
+BoundedSeq(S, n) == SeqOf(S, n)
+
+RequestVoteRequestTypeBounded == [
+    mtype         : {RequestVoteRequest},
+    mterm         : Terms,
+    mlastLogTerm  : Terms,
+    mlastLogIndex : LogIndicesWithZero,
+    msource       : Server,
+    mdest         : Server
+]
+
+RequestVoteResponseTypeBounded == [
+    mtype        : {RequestVoteResponse},
+    mterm        : Terms,
+    mvoteGranted : BOOLEAN,
+    msource      : Server,
+    mdest        : Server
+]
+
+AppendEntriesRequestTypeBounded == [
+    mtype      : {AppendEntriesRequest},
+    mterm      : Terms,
+    mprevLogIndex  : LogIndices,
+    mprevLogTerm   : Terms,
+    mentries       : BoundedSeq(Terms, MaxMEntriesLen),
+    mcommitIndex   : LogIndicesWithZero,
+    msource        : Server,
+    mdest          : Server
+]
+
+AppendEntriesResponseTypeBounded == [
+    mtype        : {AppendEntriesResponse},
+    mterm        : Terms,
+    msuccess     : BOOLEAN,
+    mmatchIndex  : LogIndices,
+    msource      : Server,
+    mdest        : Server
+]
+
+RequestVoteRequestTypeSampled == RandomSetOfSubsets(2, 2, RequestVoteRequestTypeBounded) 
+RequestVoteResponseTypeSampled == RandomSetOfSubsets(2, 2, RequestVoteResponseTypeBounded)  
+AppendEntriesRequestTypeSampled == RandomSetOfSubsets(3, 3, AppendEntriesRequestTypeBounded)
+AppendEntriesResponseTypeSampled == RandomSetOfSubsets(3, 3, AppendEntriesResponseTypeBounded)  
 
 TypeOKRandom == 
     /\ requestVoteRequestMsgs \in RequestVoteRequestTypeSampled
@@ -37,7 +88,7 @@ TypeOKRandom ==
     /\ \A m \in appendEntriesRequestMsgs : m.msource # m.mdest
     /\ \A m \in appendEntriesResponseMsgs : m.msource # m.mdest
 
-
+Symmetry == Permutations(Server)
 
 \* Sum the elements in the range of a function.
 RECURSIVE SumFnRange(_)
