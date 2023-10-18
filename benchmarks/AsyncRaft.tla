@@ -615,12 +615,16 @@ TypeOK ==
 
 CurrentTermType == currentTerm \in [Server -> Nat]
 
+\* @type: Set(Seq(Int));
+\* Can be empty or contain 1 log entry.
+MEntriesType == {<<>>} \cup {<<t>> : t \in Terms}
+
 Apa_AppendEntriesRequestType == [
     mtype      : {AppendEntriesRequest},
     mterm      : Terms,
     mprevLogIndex  : LogIndicesWithZero,
     mprevLogTerm   : Terms,
-    mentries       : {<<>>},
+    mentries       : MEntriesType,
     mcommitIndex   : LogIndicesWithZero,
     msource        : Server,
     mdest          : Server
@@ -629,22 +633,19 @@ Apa_AppendEntriesRequestType == [
 ApaTypeOK ==
     /\ requestVoteRequestMsgs \in SUBSET RequestVoteRequestType
     /\ requestVoteResponseMsgs \in SUBSET RequestVoteResponseType
-    /\ appendEntriesRequestMsgs \in SUBSET Apa_AppendEntriesRequestType
-    \* /\ appendEntriesRequestMsgs \in AppendEntriesRequestType
-    \* /\ \A m \in appendEntriesRequestMsgs : \A i \in DOMAIN m.mentries : m.mentries[i] \in Nat
-    \* /\ \A m \in appendEntriesRequestMsgs : Len(m.mentries) <= MaxLogLen
     /\ appendEntriesResponseMsgs \in SUBSET AppendEntriesResponseType
+    /\ appendEntriesRequestMsgs \in SUBSET Apa_AppendEntriesRequestType
     /\ currentTerm \in [Server -> Terms]
     /\ state       \in [Server -> {Leader, Follower, Candidate}]
     /\ votedFor    \in [Server -> ({Nil} \cup Server)]
     /\ votesGranted \in [Server -> (SUBSET Server)]
     /\ nextIndex  \in [Server -> [Server -> LogIndicesWithZero]]
     /\ matchIndex \in [Server -> [Server -> LogIndicesWithZero]]    
-    \* /\ log = Gen(3)
-    \* /\ \A s \in Server : \A i \in DOMAIN log[s] : log[s][i] \in Terms
-    \* /\ \A s \in Server : Len(log[s]) <= MaxLogLen
-    \* /\ DOMAIN log = Server
-    /\ log             \in [Server -> {<<>>}]
+    \* Constrain 'log' as a bounded sequence type.
+    /\ log = Gen(3)
+    /\ \A s \in Server : \A i \in DOMAIN log[s] : log[s][i] \in Terms
+    /\ \A s \in Server : Len(log[s]) <= MaxLogLen
+    /\ DOMAIN log = Server
     /\ commitIndex     \in [Server -> LogIndicesWithZero]
     \* Encode these basic invariants into type-correctness.
     /\ \A m \in requestVoteRequestMsgs : m.msource # m.mdest
@@ -661,8 +662,8 @@ CInit ==
     /\ Candidate = "Candidate"
     /\ Nil = "Nil"
     /\ Server = {"s1", "s2", "s3"}
-    /\ MaxLogLen = 3
-    /\ MaxTerm = 3
+    /\ MaxLogLen = 2
+    /\ MaxTerm = 2
     /\ RequestVoteRequest = "RequestVoteRequest"
     /\ RequestVoteResponse = "RequestVoteResponse"
     /\ AppendEntriesRequest = "AppendEntriesRequest"
