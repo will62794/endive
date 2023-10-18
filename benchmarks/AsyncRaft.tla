@@ -1309,6 +1309,12 @@ H_NoLogDivergence ==
                 /\ log[s1][index] = log[s2][index]
 
 
+PrimaryHasEntriesItCreatedTypeOK == 
+    /\ ApaTypeOK
+    /\ H_OnePrimaryPerTerm
+    /\ H_CandidateWithVotesGrantedInTermImplyNoOtherLogsInTerm
+    /\ H_PrimaryHasEntriesItCreatedAppendEntries
+    /\ H_PrimaryHasEntriesItCreated
 
 ------------------------------------------------------------------------------------------------------------------------
 
