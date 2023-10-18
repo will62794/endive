@@ -1308,6 +1308,14 @@ H_NoLogDivergence ==
                 /\ index \in DOMAIN log[s2]
                 /\ log[s1][index] = log[s2][index]
 
+\* 
+\* Some sample inductive proof obligations
+\*  
+
+OnePrimaryPerTermTypeOK == 
+    /\ ApaTypeOK
+    /\ H_CandidateWithVotesGrantedInTermImplyNoOtherLeader
+    /\ H_OnePrimaryPerTerm
 
 PrimaryHasEntriesItCreatedTypeOK == 
     /\ ApaTypeOK
