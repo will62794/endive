@@ -520,7 +520,7 @@ actions = [
     "HandleRequestVoteResponseAction",
     "RejectAppendEntriesRequestAction",
     "AcceptAppendEntriesRequestAppendAction",
-    "AcceptAppendEntriesRequestTruncateAction",
     "AcceptAppendEntriesRequestLearnCommitAction",
     "HandleAppendEntriesResponseAction"
+    # "AcceptAppendEntriesRequestTruncateAction",
 ]
