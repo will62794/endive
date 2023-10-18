@@ -642,6 +642,8 @@ ApaTypeOK ==
     /\ nextIndex  \in [Server -> [Server -> LogIndicesWithZero]]
     /\ matchIndex \in [Server -> [Server -> LogIndicesWithZero]]    
     \* Constrain 'log' as a bounded sequence type.
+    \* Note that this parameter size will, I believe, always need to be at least
+    \* as large as the cardinality of 'Server'.
     /\ log = Gen(3)
     /\ \A s \in Server : \A i \in DOMAIN log[s] : log[s][i] \in Terms
     /\ \A s \in Server : Len(log[s]) <= MaxLogLen
@@ -662,6 +664,7 @@ CInit ==
     /\ Candidate = "Candidate"
     /\ Nil = "Nil"
     /\ Server = {"s1", "s2", "s3"}
+    \* /\ Server = {"s1", "s2", "s3", "s4"}
     /\ MaxLogLen = 2
     /\ MaxTerm = 2
     /\ RequestVoteRequest = "RequestVoteRequest"
