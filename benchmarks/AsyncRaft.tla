@@ -1345,10 +1345,13 @@ H_CommitIndexBoundValid ==
 H_NoLogDivergence ==
     \A s1, s2 \in Server :
         (s1 # s2) =>
-            \A index \in 1..MinCommitIndex(s1, s2) : 
-                /\ index \in DOMAIN log[s1]
-                /\ index \in DOMAIN log[s2]
-                /\ log[s1][index] = log[s2][index]
+            \A index \in ((DOMAIN log[s1]) \cap (DOMAIN log[s2])) : 
+                \* If an index is covered by a commitIndex in both logs, then the 
+                \* entry must be the same between the two servers.
+                (index < commitIndex[s1] /\ index < commitIndex[s2]) =>
+                    /\ index \in DOMAIN log[s1]
+                    /\ index \in DOMAIN log[s2]
+                    /\ log[s1][index] = log[s2][index]
 
 \* 
 \* Some sample inductive proof obligations
