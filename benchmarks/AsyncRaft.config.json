@@ -33,7 +33,7 @@
         "EqualTerm" : "EqualTerm",
         "LessOrEqualTerm" : "LessOrEqualTerm",
         "MaxTerm" : ["2", "3"],
-        "MaxLogLen" : ["1", "3"],
+        "MaxLogLen" : ["1", "2", "3"],
         "MaxNumVoteMsgs": ["0"]
     },
     "actions": [
