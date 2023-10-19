@@ -415,16 +415,16 @@ requestVoteQuorumInTermImpliesNoAppendEntriesInTerm = make_node("H_RequestVoteQu
 requestVoteQuorumInTermImpliesNoAppendEntriesInTerm.children = {
     "AppendEntriesAction": [
         requestVoteQuorumInTermImpliesNoOtherLeadersInTerm,
-        # requestVoteQuorumInTermImpliesNoOtherLogsInTerm
     ],
     "RequestVoteAction": [
-        nodesVotedInQuorumInTermImpliesNoAppendEntriesRequestsInTerm,
         appendEntriesRequestInTermImpliesSafeAtTerms,
         appendEntriesResponseInTermImpliesSafeAtTerms,
+        requestVoteResponseToNodeImpliesNodeSafeAtTerm
     ],
     "HandleRequestVoteRequestAction": [
         appendEntriesResponseInTermImpliesSafeAtTerms,
-        appendEntriesRequestInTermImpliesSafeAtTerms
+        appendEntriesRequestInTermImpliesSafeAtTerms,
+        candidateInTermVotedForItself
     ]
 }    
     

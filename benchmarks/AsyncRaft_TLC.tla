@@ -66,8 +66,8 @@ AppendEntriesResponseTypeBounded == [
 
 RequestVoteRequestTypeSampled == RandomSetOfSubsets(3, 3, RequestVoteRequestTypeBounded) 
 RequestVoteResponseTypeSampled == RandomSetOfSubsets(3, 3, RequestVoteResponseTypeBounded)  
-AppendEntriesRequestTypeSampled == RandomSetOfSubsets(3, 3, AppendEntriesRequestTypeBounded)
-AppendEntriesResponseTypeSampled == RandomSetOfSubsets(3, 3, AppendEntriesResponseTypeBounded)  
+AppendEntriesRequestTypeSampled == RandomSetOfSubsets(2, 2, AppendEntriesRequestTypeBounded) \cup RandomSetOfSubsets(3, 3, AppendEntriesRequestTypeBounded)
+AppendEntriesResponseTypeSampled == RandomSetOfSubsets(1, 1, AppendEntriesResponseTypeBounded) \cup RandomSetOfSubsets(2, 2, AppendEntriesResponseTypeBounded) \cup RandomSetOfSubsets(3, 3, AppendEntriesResponseTypeBounded)  
 
 TypeOKRandom == 
     /\ requestVoteRequestMsgs \in RequestVoteRequestTypeSampled

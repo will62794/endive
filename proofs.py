@@ -262,7 +262,10 @@ class StructuredProofNode():
                 out_str += f"  {land} {s}\n"
         out_str += f"  \* Target lemma.\n"
         out_str += f"  {land} {self.expr}\n"
-        return out_str
+        return {
+            "out_str": out_str,
+            "cmd": apa_cmd
+        }
 
     def to_tlaps_proof_obligation(self):
         """ Export this node and support lemmas as TLAPS proof obligation skeleton."""
@@ -385,18 +388,32 @@ class StructuredProof():
         spec_lines += f"\* max in-degree: {max(in_degrees)}\n"
         spec_lines += f"\* min in-degree: {min(in_degrees)}\n"
 
+        apa_cmds = []
         for n in nodes:
             # if len(n.children.keys()) == 0:
             #     continue
             # if n.expr == self.root.expr:
                 # spec_lines += "\n\* (ROOT SAFETY PROP)"
             # spec_lines += f"\n\* -- {n.expr}\n"
-            spec_lines += n.to_apalache_inductive_proof_obligation(modname)
+            obl = n.to_apalache_inductive_proof_obligation(modname)
+            spec_lines += obl["out_str"]
+            apa_cmds.append(obl["cmd"])
             spec_lines += "\n"
         spec_lines += "\n"
         spec_lines += "===="
         f.write(spec_lines)
         f.close()
+
+        f = open(f"benchmarks/apacheck_{self.specname}.sh", 'w')
+        f.write("#!/bin/bash\n\n")
+        f.write(f"#\n# Inductive proof obligations for '{self.specname}'\n")
+        f.write(f"# Total num proof obligations: {len(nodes)}\n#\n\n")
+        f.write("rm -rf apa_indcheck\n")
+        for cmd in apa_cmds:
+            f.write(cmd)
+            f.write("\n")
+        f.close()
+
 
     def serialize(self, include_ctis=True, cti_hashes_only=False):
         return {
