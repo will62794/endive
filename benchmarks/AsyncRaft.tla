@@ -1237,11 +1237,10 @@ H_AppendEntriesRequestLogEntriesMustBeInLeaderLog ==
         (/\ m.mtype = AppendEntriesRequest
          /\ m.mentries # <<>>
          /\ state[m.msource] = Leader
-         /\ m.mprevLogIndex > 0
          /\ currentTerm[m.msource] = m.mterm) =>
             /\ Len(log[m.msource]) >= m.mprevLogIndex + 1
             /\ log[m.msource][m.mprevLogIndex + 1] = m.mentries[1]
-            /\ log[m.msource][m.mprevLogIndex] = m.mprevLogTerm
+            /\ m.mprevLogIndex > 0 => log[m.msource][m.mprevLogIndex] = m.mprevLogTerm
 
 
 \* If a AppendEntries response has been sent in term T recording a match up to
