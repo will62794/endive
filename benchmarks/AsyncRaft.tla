@@ -656,10 +656,19 @@ Apa_AppendEntriesRequestType == [
 ]
 
 ApaTypeOK ==
-    /\ requestVoteRequestMsgs \in SUBSET RequestVoteRequestType
-    /\ requestVoteResponseMsgs \in SUBSET RequestVoteResponseType
-    /\ appendEntriesResponseMsgs \in SUBSET AppendEntriesResponseType
-    /\ appendEntriesRequestMsgs \in SUBSET Apa_AppendEntriesRequestType
+    \* /\ requestVoteRequestMsgs \in SUBSET RequestVoteRequestType
+    /\ requestVoteRequestMsgs = Gen(6)
+    /\ \A m \in requestVoteRequestMsgs : m \in RequestVoteRequestType
+    \* /\ requestVoteResponseMsgs \in SUBSET RequestVoteResponseType
+    /\ requestVoteResponseMsgs = Gen(6)
+    /\ \A m \in requestVoteResponseMsgs : m \in RequestVoteResponseType
+    \* /\ appendEntriesResponseMsgs \in SUBSET AppendEntriesResponseType
+    /\ appendEntriesResponseMsgs = Gen(6)
+    /\ \A m \in appendEntriesResponseMsgs : m \in AppendEntriesResponseType
+    \* /\ appendEntriesRequestMsgs \in SUBSET Apa_AppendEntriesRequestType
+    \* TODO: Think carefully about how to handle this bounding safely.
+    /\ appendEntriesRequestMsgs = Gen(6)
+    /\ \A m \in appendEntriesRequestMsgs : m \in Apa_AppendEntriesRequestType
     /\ currentTerm \in [Server -> Terms]
     /\ state       \in [Server -> {Leader, Follower, Candidate}]
     /\ votedFor    \in [Server -> ({Nil} \cup Server)]
