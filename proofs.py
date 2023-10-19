@@ -248,7 +248,7 @@ class StructuredProofNode():
         out_str = "\n"
         def_name = f"{self.expr}_IndCheck"
         apa_cmd = f"""JVM_ARGS="-Xss16m" ./apalache/bin/apalache-mc check --init={def_name} --next=Next --inv={self.expr} --cinit=CInit --tuning-options='search.invariantFilter=1->.*' --length=1 --smtprof --debug --out-dir=apa_indcheck/{self.expr} --run-dir=apa_indcheck/{self.expr} {modname}.tla"""
-        out_str += f"(** \n Apalache command:\n {apa_cmd}\n **)\n"
+        out_str += f"(** \nApalache command:\n{apa_cmd}\n **)\n"
         out_str += f"{def_name} == \n"
         typeok = "ApaTypeOK"
         land = "/\\"
