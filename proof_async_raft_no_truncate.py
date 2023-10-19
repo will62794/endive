@@ -260,16 +260,15 @@ logTermsMonotonic.children = {
 
 requestVoteQuorumInTermImpliesNoAppendEntryLogsInTerm.children = {
     "AppendEntriesAction": [
-        # requestVoteQuorumInTermImpliesNoOtherLeadersInTerm,
         requestVoteQuorumInTermImpliesNoOtherLogsInTerm
     ],
     "HandleRequestVoteRequestAction": [
         logEntryInTermImpliesSafeAtTermAppendEntries,
         candidateInTermVotedForItself,
-        quorumsSafeAtTerms
     ],
     "RequestVoteAction": [
-        logEntryInTermImpliesSafeAtTermAppendEntries
+        logEntryInTermImpliesSafeAtTermAppendEntries,
+        requestVoteResponseToNodeImpliesNodeSafeAtTerm
     ]
 }
 

@@ -12,8 +12,6 @@
  JVM_ARGS="-Xss16m" ./apalache/bin/apalache-mc check --init=H_QuorumsSafeAtTerms_IndCheck --next=Next --inv=H_QuorumsSafeAtTerms --cinit=CInit --tuning-options='search.invariantFilter=1->.*' --length=1 --debug --out-dir=apa_indcheck/H_QuorumsSafeAtTerms --run-dir=apa_indcheck/H_QuorumsSafeAtTerms AsyncRaft_ApaIndProofCheck.tla
  JVM_ARGS="-Xss16m" ./apalache/bin/apalache-mc check --init=H_RequestVoteResponseToNodeImpliesNodeSafeAtTerm_IndCheck --next=Next --inv=H_RequestVoteResponseToNodeImpliesNodeSafeAtTerm --cinit=CInit --tuning-options='search.invariantFilter=1->.*' --length=1 --debug --out-dir=apa_indcheck/H_RequestVoteResponseToNodeImpliesNodeSafeAtTerm --run-dir=apa_indcheck/H_RequestVoteResponseToNodeImpliesNodeSafeAtTerm AsyncRaft_ApaIndProofCheck.tla
  JVM_ARGS="-Xss16m" ./apalache/bin/apalache-mc check --init=H_LogEntryInTermImpliesSafeAtTermAppendEntries_IndCheck --next=Next --inv=H_LogEntryInTermImpliesSafeAtTermAppendEntries --cinit=CInit --tuning-options='search.invariantFilter=1->.*' --length=1 --debug --out-dir=apa_indcheck/H_LogEntryInTermImpliesSafeAtTermAppendEntries --run-dir=apa_indcheck/H_LogEntryInTermImpliesSafeAtTermAppendEntries AsyncRaft_ApaIndProofCheck.tla
- 
- # COUNTEREXAMPLE found.
  JVM_ARGS="-Xss16m" ./apalache/bin/apalache-mc check --init=H_RequestVoteQuorumInTermImpliesNoAppendEntryLogsInTerm_IndCheck --next=Next --inv=H_RequestVoteQuorumInTermImpliesNoAppendEntryLogsInTerm --cinit=CInit --tuning-options='search.invariantFilter=1->.*' --length=1 --debug --out-dir=apa_indcheck/H_RequestVoteQuorumInTermImpliesNoAppendEntryLogsInTerm --run-dir=apa_indcheck/H_RequestVoteQuorumInTermImpliesNoAppendEntryLogsInTerm AsyncRaft_ApaIndProofCheck.tla
 
  # COUNTEREXAMPLE found.
