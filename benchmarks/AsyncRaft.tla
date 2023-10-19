@@ -1207,10 +1207,8 @@ H_RequestVoteQuorumInTermImpliesNoAppendEntriesInTerm ==
     \A s \in Server :
         (/\ state[s] = Candidate
          /\ ExistsRequestVoteResponseQuorum(currentTerm[s], s)) =>
-            /\ ~(\E m \in (appendEntriesRequestMsgs) : 
-                    \/ m.mtype = AppendEntriesRequest /\ m.mterm = currentTerm[s])
-            /\ ~(\E m \in (appendEntriesResponseMsgs) : 
-                    \/ m.mtype = AppendEntriesResponse /\ m.msuccess /\ m.mterm = currentTerm[s])
+            /\ ~(\E m \in (appendEntriesRequestMsgs) : m.mterm = currentTerm[s])
+            /\ ~(\E m \in (appendEntriesResponseMsgs) : m.msuccess /\ m.mterm = currentTerm[s])
 
 \* If a server candidate has won votes in term T, there can't be
 \* any AppendEntries messages already sent in that term.
