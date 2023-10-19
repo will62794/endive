@@ -488,10 +488,10 @@ AcceptAppendEntriesRequestLearnCommit(m) ==
             \* We will not, however, advance our local commitIndex to a point beyond the end of our log. And,
             \* we don't actually update our log here, only our commitIndex.
 
-            \* PRE
-            \* /\ logOk
-            \* /\ Len(log[i]) = m.mprevLogIndex
-            \* /\ CanAppend(m, i)
+            \* PRE (can comment these conditions out to introduce bug)
+            /\ logOk
+            /\ Len(log[i]) = m.mprevLogIndex
+            /\ CanAppend(m, i)
 
             /\ m.mcommitIndex > commitIndex[i] \* no need to ever decrement our commitIndex.
             /\ state' = [state EXCEPT ![i] = Follower]
