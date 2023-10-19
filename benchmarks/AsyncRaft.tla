@@ -768,7 +768,7 @@ H_VotedForNodeInTermImpliesNodeSafeAtTerm ==
     \A s,t \in Server : (votedFor[s] = t) => currentTerm[t] >= currentTerm[s]
 
 H_CandidateInTermVotedForItself == 
-    \A s \in Server : (state[s] = Candidate) => votedFor[s] = s
+    \A s \in Server : (state[s] \in {Candidate,Leader}) => votedFor[s] = s
 
 H_QuorumsSafeAtTerms ==
     \A s \in Server : (state[s] = Leader) => 
@@ -1067,6 +1067,7 @@ H_AppendEntriesResponseInTermImpliesSafeAtTerms ==
         ((m.mtype = AppendEntriesResponse /\ m.msuccess))  =>
             \E u \in Server :
             \E Q \in Quorum : 
+                /\ u = m.mdest
                 /\ currentTerm[u] >= m.mterm
                 /\ (currentTerm[u] = m.mterm) => state[u] = Leader
                 /\ \A t \in Q : 

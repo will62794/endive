@@ -378,11 +378,16 @@ commitIndexBoundValid.children = {
     # ]
 }
     
+appendEntriesRequestInTermImpliesSafeAtTerms = make_node("H_AppendEntriesRequestInTermImpliesSafeAtTerms")
 appendEntriesRequestImpliesSenderSafeAtTerm = make_node("H_AppendEntriesRequestImpliesSenderSafeAtTerm")
 
 appendEntriesResponseInTermImpliesSafeAtTerms = make_node("H_AppendEntriesResponseInTermImpliesSafeAtTerms")
+appendEntriesResponseInTermImpliesSafeAtTerms.children = {
+    "AcceptAppendEntriesRequestAppendAction": [
+        appendEntriesRequestInTermImpliesSafeAtTerms
+    ]
+}
 
-appendEntriesRequestInTermImpliesSafeAtTerms = make_node("H_AppendEntriesRequestInTermImpliesSafeAtTerms")
 appendEntriesRequestInTermImpliesSafeAtTerms.children = {
     "AppendEntriesAction": [
         quorumsSafeAtTerms
