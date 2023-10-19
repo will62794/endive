@@ -1,10 +1,10 @@
 --------------------------------- MODULE AsyncRaft_TLC ---------------------------------
-EXTENDS AsyncRaft, FiniteSetsExt, Randomization
+EXTENDS AsyncRaft, Randomization
 
 
 
 \* Set of all subsets of a set of size <= k.
-kOrSmallerSubset(k, S) == UNION {(kSubset(n, S)) : n \in 0..k}
+\* kOrSmallerSubset(k, S) == UNION {(kSubset(n, S)) : n \in 0..k}
 
 \* 
 \* Work around size limitations of TLC subset computations.
@@ -64,8 +64,8 @@ AppendEntriesResponseTypeBounded == [
     mdest        : Server
 ]
 
-RequestVoteRequestTypeSampled == RandomSetOfSubsets(2, 2, RequestVoteRequestTypeBounded) 
-RequestVoteResponseTypeSampled == RandomSetOfSubsets(2, 2, RequestVoteResponseTypeBounded)  
+RequestVoteRequestTypeSampled == RandomSetOfSubsets(3, 3, RequestVoteRequestTypeBounded) 
+RequestVoteResponseTypeSampled == RandomSetOfSubsets(3, 3, RequestVoteResponseTypeBounded)  
 AppendEntriesRequestTypeSampled == RandomSetOfSubsets(3, 3, AppendEntriesRequestTypeBounded)
 AppendEntriesResponseTypeSampled == RandomSetOfSubsets(3, 3, AppendEntriesResponseTypeBounded)  
 

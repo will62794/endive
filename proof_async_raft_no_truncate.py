@@ -42,6 +42,13 @@ votedForNodeInTermImpliesNodeSafeAtTerm.children = {
     ]
 }
 
+requestVoteResponseMsgsInTermUnique = make_node("H_RequestVoteResponseMsgsInTermUnique")
+requestVoteResponseMsgsInTermUnique.children = {
+    "HandleRequestVoteRequestAction":[
+        requestVoteResponseTermsMatchSource
+    ]
+}
+
 voteGrantedImpliesVoteResponseMsgConsistent = make_node("H_VoteGrantedImpliesVoteResponseMsgConsistent")
 voteGrantedImpliesVoteResponseMsgConsistent.children = {
     "RequestVoteAction": [
@@ -49,6 +56,9 @@ voteGrantedImpliesVoteResponseMsgConsistent.children = {
     ],
     "HandleRequestVoteRequestAction": [
         voteInGrantedImpliesVotedFor
+    ],
+    "HandleRequestVoteResponseAction": [
+        requestVoteResponseMsgsInTermUnique
     ]
 }
 

@@ -911,6 +911,13 @@ H_VoteInGrantedImpliesVotedFor ==
             /\ currentTerm[t] >= currentTerm[s]
             /\ currentTerm[t] = currentTerm[s] => votedFor[t] = s
 
+\* A node can't have sent a RequestVoteResponse ack to two different servers in the same term.
+H_RequestVoteResponseMsgsInTermUnique ==
+    \A mi,mj \in requestVoteResponseMsgs :
+        (/\ mi.mterm = mj.mterm
+         /\ mi.msource = mj.msource
+         /\ mi.mvoteGranted
+         /\ mj.mvoteGranted) => mi.mdest = mj.mdest
 
 \* If a server has granted its vote to a server S in term T, then
 \* there can't be a vote response message from that server to some other server R # S.
