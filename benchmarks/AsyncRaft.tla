@@ -1351,9 +1351,7 @@ H_NoLogDivergence ==
                 \* If an index is covered by a commitIndex in both logs, then the 
                 \* entry must be the same between the two servers.
                 (index < commitIndex[s1] /\ index < commitIndex[s2]) =>
-                    /\ index \in DOMAIN log[s1]
-                    /\ index \in DOMAIN log[s2]
-                    /\ log[s1][index] = log[s2][index]
+                    log[s1][index] = log[s2][index]
 
 \* 
 \* Some sample inductive proof obligations
