@@ -414,7 +414,8 @@ requestVoteQuorumInTermImpliesNoAppendEntriesInTerm.children = {
     ],
     "RequestVoteAction": [
         nodesVotedInQuorumInTermImpliesNoAppendEntriesRequestsInTerm,
-        appendEntriesRequestInTermImpliesSafeAtTerms
+        appendEntriesRequestInTermImpliesSafeAtTerms,
+        appendEntriesResponseInTermImpliesSafeAtTerms,
     ],
     "HandleRequestVoteRequestAction": [
         appendEntriesResponseInTermImpliesSafeAtTerms,
