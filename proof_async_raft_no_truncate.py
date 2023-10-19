@@ -531,9 +531,9 @@ noLogDivergence.children = {
         commitIndexCoversEntryImpliesExistsOnQuorum,
         logMatching
     ],
-    # "AcceptAppendEntriesRequestTruncateAction": [
-    #     noLogDivergenceAppendEntries
-    # ]
+    "ClientRequestAction": [
+        commitIndexBoundValid
+    ]
 }
 root = noLogDivergence
 nodes = [

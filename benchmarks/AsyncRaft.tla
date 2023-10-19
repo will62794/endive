@@ -1342,8 +1342,8 @@ H_CommitIndexBoundValid ==
 
 
 \* INV: NoLogDivergence
-\* The log index is consistent across all servers (on those
-\* servers whose commitIndex is equal or higher than the index).
+\* If a log index is covered by a commitIndex on two different servers, then
+\* the entry at that index must be the same on both servers.
 H_NoLogDivergence ==
     \A s1, s2 \in Server :
         (s1 # s2) =>
