@@ -386,8 +386,8 @@ class StructuredProof():
         spec_lines += f"\* min in-degree: {min(in_degrees)}\n"
 
         for n in nodes:
-            if len(n.children.keys()) == 0:
-                continue
+            # if len(n.children.keys()) == 0:
+            #     continue
             # if n.expr == self.root.expr:
                 # spec_lines += "\n\* (ROOT SAFETY PROP)"
             # spec_lines += f"\n\* -- {n.expr}\n"
