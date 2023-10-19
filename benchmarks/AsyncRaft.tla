@@ -656,19 +656,26 @@ Apa_AppendEntriesRequestType == [
 ]
 
 ApaTypeOK ==
+    \* 
+    \* TODO: Think carefully about how to handle the bounding of these message types safely.
+    \* 
     \* /\ requestVoteRequestMsgs \in SUBSET RequestVoteRequestType
-    /\ requestVoteRequestMsgs = Gen(6)
+    /\ requestVoteRequestMsgs = Gen(7)
     /\ \A m \in requestVoteRequestMsgs : m \in RequestVoteRequestType
     \* /\ requestVoteResponseMsgs \in SUBSET RequestVoteResponseType
-    /\ requestVoteResponseMsgs = Gen(6)
+    /\ requestVoteResponseMsgs = Gen(7)
     /\ \A m \in requestVoteResponseMsgs : m \in RequestVoteResponseType
     \* /\ appendEntriesResponseMsgs \in SUBSET AppendEntriesResponseType
-    /\ appendEntriesResponseMsgs = Gen(6)
+    /\ appendEntriesResponseMsgs = Gen(7)
     /\ \A m \in appendEntriesResponseMsgs : m \in AppendEntriesResponseType
     \* /\ appendEntriesRequestMsgs \in SUBSET Apa_AppendEntriesRequestType
-    \* TODO: Think carefully about how to handle this bounding safely.
-    /\ appendEntriesRequestMsgs = Gen(6)
+    /\ appendEntriesRequestMsgs = Gen(7)
     /\ \A m \in appendEntriesRequestMsgs : m \in Apa_AppendEntriesRequestType
+    \* Encode these basic message invariants into type-correctness.
+    /\ \A m \in requestVoteRequestMsgs : m.msource # m.mdest
+    /\ \A m \in requestVoteResponseMsgs : m.msource # m.mdest
+    /\ \A m \in appendEntriesRequestMsgs : m.msource # m.mdest
+    /\ \A m \in appendEntriesResponseMsgs : m.msource # m.mdest
     /\ currentTerm \in [Server -> Terms]
     /\ state       \in [Server -> {Leader, Follower, Candidate}]
     /\ votedFor    \in [Server -> ({Nil} \cup Server)]
@@ -683,11 +690,6 @@ ApaTypeOK ==
     /\ \A s \in Server : Len(log[s]) <= MaxLogLen
     /\ DOMAIN log = Server
     /\ commitIndex     \in [Server -> LogIndicesWithZero]
-    \* Encode these basic invariants into type-correctness.
-    /\ \A m \in requestVoteRequestMsgs : m.msource # m.mdest
-    /\ \A m \in requestVoteResponseMsgs : m.msource # m.mdest
-    /\ \A m \in appendEntriesRequestMsgs : m.msource # m.mdest
-    /\ \A m \in appendEntriesResponseMsgs : m.msource # m.mdest
 
 
 Spec == Init /\ [][Next]_vars
