@@ -10,6 +10,9 @@ import mc
 import logging
 import json
 
+def mean(S):
+    return sum(S) / len(S)
+
 class StructuredProofNode():
     """ Single node (i.e. lemma) of a structured proof tree. """
     def __init__(self, name="", expr="", children=None, parent=None, load_from_obj = None):
@@ -343,19 +346,34 @@ class StructuredProof():
         mean_in_degree = sum(in_degrees)/len(nodes)
         sorted_in_degrees = list(sorted(in_degrees))
         median_in_degree = sorted_in_degrees[len(sorted_in_degrees)//2]
+
+        all_var_slices = []
+        proof_obligation_lines = ""
+        for n in nodes:
+            if len(n.children.keys()) == 0:
+                continue
+            for a in n.children:
+                if a in self.lemma_action_coi:
+                    slicevars = self.lemma_action_coi[a][n.expr]
+                    all_var_slices.append(slicevars)
+
+            if n.expr == self.root.expr:
+                proof_obligation_lines += "\n\* (ROOT SAFETY PROP)"
+            proof_obligation_lines += f"\n\* -- {n.expr}\n"
+            proof_obligation_lines += n.to_tlaps_proof_obligation()
+            proof_obligation_lines += "\n"
+
+        var_slice_sizes = [len(s) for s in all_var_slices]
+        mean_slice_size = mean(var_slice_sizes)
+
+        # Add lines to the spec.
         spec_lines += f"\* mean in-degree: {mean_in_degree}\n"
         spec_lines += f"\* median in-degree: {median_in_degree}\n"
         spec_lines += f"\* max in-degree: {max(in_degrees)}\n"
         spec_lines += f"\* min in-degree: {min(in_degrees)}\n"
+        spec_lines += f"\* mean variable slice size: {mean_slice_size}\n"
+        spec_lines += proof_obligation_lines
 
-        for n in nodes:
-            if len(n.children.keys()) == 0:
-                continue
-            if n.expr == self.root.expr:
-                spec_lines += "\n\* (ROOT SAFETY PROP)"
-            spec_lines += f"\n\* -- {n.expr}\n"
-            spec_lines += n.to_tlaps_proof_obligation()
-            spec_lines += "\n"
         spec_lines += "\n"
         spec_lines += "===="
         f.write(spec_lines)
