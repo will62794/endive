@@ -6,7 +6,7 @@ from proofs import *
 
 uniqueLeaders = StructuredProofNode("UniqueLeaders","H_UniqueLeaders")
 decidedImpliesLeader = StructuredProofNode("DecidedImpliesLeader","H_DecidedImpliesLeader")
-leaderImpliesVotesInQuorum = StructuredProofNode("LeaderImpliesVotesInQuorum","H_LeaderImpliesVotesInQuorum")
+leaderHasQuorum = StructuredProofNode("LeaderImpliesVotesInQuorum","H_LeaderImpliesVotesInQuorum")
 nodesCantVoteTwice = StructuredProofNode("NodesCantVoteTwice","H_NodesCantVoteTwice")
 voteRecordedImpliesNodeVoted = StructuredProofNode("VoteRecordedImpliesNodeVoted","H_VoteRecordedImpliesNodeVoted")
 nodesCantSendVotesToDifferentNodes = StructuredProofNode("NodesCantSendVotesToDifferentNodes","H_NodesCantSendVotesToDifferentNodes")
@@ -35,7 +35,7 @@ nodesCantVoteTwice.children = {
 
 uniqueLeaders.children = {
     "BecomeLeaderAction": [
-        leaderImpliesVotesInQuorum,
+        leaderHasQuorum,
         nodesCantVoteTwice
     ]
 }
@@ -51,7 +51,7 @@ root = StructuredProofNode("NoConflictingValues", "H_NoConflictingValues", child
 nodes = [
     uniqueLeaders,
     decidedImpliesLeader,
-    leaderImpliesVotesInQuorum,
+    leaderHasQuorum,
     nodesCantVoteTwice,
     # voteRecordedImpliesNodeVoted,
     nodesCantSendVotesToDifferentNodes,

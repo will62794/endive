@@ -119,7 +119,7 @@ NextUnchanged == UNCHANGED vars
 H_UniqueLeaders == \A n1,n2 \in Node : leader[n1] /\ leader[n2] => n1 = n2
 H_DecidedImpliesLeader == \A n \in Node : decided[n] # {} => leader[n]
 
-H_LeaderImpliesVotesInQuorum == \A n \in Node : leader[n] => \E Q \in Quorum : votes[n] = Q
+H_LeaderHasQuorum == \A n \in Node : leader[n] => \E Q \in Quorum : votes[n] = Q
 H_NodesCantVoteTwice == \A n,ni,nj \in Node : ~(ni # nj /\ n \in votes[ni] /\ n \in votes[nj])
 
 H_VoteRecordedImpliesVoteMsg == \A ni,nj \in Node : nj \in votes[ni] => <<nj,ni>> \in vote_msg
