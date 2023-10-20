@@ -56,3 +56,4 @@ benchmarks/*.xml
 states2
 *_TTrace_*
 logout
+*.log
