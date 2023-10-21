@@ -59,7 +59,7 @@
     "quant_inv"  :  "",
     "quant_inv_alt"  :  null,
     "quant_vars": ["VARI", "VARJ"],
-    "model_consts"  :  "CONSTANT n1,n2,n3",
+    "model_consts"  :  "CONSTANT n1,n2,n3,n4,n5",
     "symmetry" : true,
     "typeok"  :  "TypeOKRandom",
     "tlc_specific_spec": true,
