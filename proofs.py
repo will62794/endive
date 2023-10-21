@@ -392,6 +392,8 @@ class StructuredProof():
         self.walk_proof_graph(self.root, seen=seen, all_nodes=nodes)
         # print(nodes)
 
+        stats = {}
+
         # Some proof graph info.
         spec_lines += "\n"
         spec_lines += f"\* Proof Graph Stats\n"
@@ -406,6 +408,7 @@ class StructuredProof():
         spec_lines += f"\* max in-degree: {max(in_degrees)}\n"
         spec_lines += f"\* min in-degree: {min(in_degrees)}\n"
 
+        all_var_slices = []
         apa_cmds = []
         for n in nodes:
             # if len(n.children.keys()) == 0:
@@ -417,6 +420,11 @@ class StructuredProof():
             spec_lines += obl["out_str"]
             apa_cmds.append(obl["cmd"])
             spec_lines += "\n"
+
+            for a in n.children:
+                if a in self.lemma_action_coi:
+                    slicevars = self.lemma_action_coi[a][n.expr]
+                    all_var_slices.append(list(slicevars))
         spec_lines += "\n"
         spec_lines += "===="
         f.write(spec_lines)
@@ -430,6 +438,15 @@ class StructuredProof():
         for cmd in apa_cmds:
             f.write(cmd)
             f.write("\n")
+        f.close()
+
+        # Dump stats JSON file.
+        stats["mean_in_degree"] = mean_in_degree
+        stats["all_var_slices"] = all_var_slices
+        # TODO: Add this stat.
+        # stats["num_state_vars"] = 0
+        f = open(f"benchmarks/{self.specname}_proofstats.json", 'w')
+        json.dump(stats, f, indent=2)
         f.close()
 
 
