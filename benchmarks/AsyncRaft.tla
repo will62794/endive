@@ -358,6 +358,7 @@ HandleRequestVoteRequest(m) ==
 HandleRequestVoteResponse(m) ==
     \* This tallies votes even when the current state is not Candidate, but
     \* they won't be looked at, so it doesn't matter.
+    /\ m \in requestVoteResponseMsgs
     /\ m.mtype = RequestVoteResponse
     /\ m.mterm = currentTerm[m.mdest]
     /\ votesGranted' = [votesGranted EXCEPT ![m.mdest] = 
