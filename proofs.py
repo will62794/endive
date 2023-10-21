@@ -443,8 +443,13 @@ class StructuredProof():
         # Dump stats JSON file.
         stats["mean_in_degree"] = mean_in_degree
         stats["all_var_slices"] = all_var_slices
-        # TODO: Add this stat.
-        # stats["num_state_vars"] = 0
+
+        # TODO: Could compute this more simply.
+        all_vars = set()
+        for x in all_var_slices:
+            all_vars.update(set(x))
+        stats["num_state_vars"] = len(all_vars)
+
         f = open(f"benchmarks/{self.specname}_proofstats.json", 'w')
         json.dump(stats, f, indent=2)
         f.close()
