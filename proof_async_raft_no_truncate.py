@@ -165,9 +165,7 @@ candidateWithVotesGrantedInTermImplyNoOtherLeader.children = {
         votesCantBeGrantedTwiceToCandidatesInSameTerm
     ],
     "HandleRequestVoteResponseAction":[
-        requestVoteQuorumInTermImpliesNoOtherLeadersInTerm,
         votesCantBeGrantedTwiceToCandidatesInSameTerm,
-        voteGrantedImpliesVoteResponseMsgConsistent,
         leaderHasVotesGrantedQuorum
     ]
 }

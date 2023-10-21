@@ -57,3 +57,4 @@ states2
 *_TTrace_*
 logout
 *.log
+apacheck_*.sh
