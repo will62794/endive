@@ -10,17 +10,18 @@ Ind1 ==
     /\ TypeOK
     /\ H_NoConflictingValues
     /\ H_UniqueLeaders
-    /\ H_LeaderImpliesVotesInQuorum
+    /\ H_LeaderHasQuorum
 
 Ind2 ==
     /\ TypeOK
     /\ H_NoConflictingValues
     /\ H_UniqueLeaders
-    /\ H_LeaderImpliesVotesInQuorum
+    /\ H_LeaderHasQuorum
     /\ H_DecidedImpliesLeader
 
 
 Ind0_Constraint == TLCGet("level") = 1 => Ind0 
+H_UniqueLeaders_Constraint == TLCGet("level") = 1 => H_UniqueLeaders 
 Ind1_Constraint == TLCGet("level") = 1 => Ind1 
 Ind2_Constraint == TLCGet("level") = 1 => Ind2 
 NextBounded ==  TLCGet("level") < 1 /\ Next

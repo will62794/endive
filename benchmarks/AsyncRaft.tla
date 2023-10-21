@@ -926,7 +926,7 @@ H_RequestVoteResponseMsgsInTermUnique ==
 \* there can't be a vote response message from that server to some other server R # S.
 H_VoteGrantedImpliesVoteResponseMsgConsistent ==
     \A s,t \in Server : 
-        ( /\ state[s] = Candidate 
+        ( /\ state[s] \in {Candidate,Leader}
           /\ t \in votesGranted[s]) =>
             ~\E m \in requestVoteResponseMsgs :
                 /\ m.mtype = RequestVoteResponse
@@ -938,8 +938,8 @@ H_VoteGrantedImpliesVoteResponseMsgConsistent ==
 H_VotesCantBeGrantedTwiceToCandidatesInSameTerm ==
     \A s,t \in Server : 
         ( /\ s # t 
-          /\ state[s] = Candidate 
-          /\ state[t] = Candidate
+          /\ state[s] \in {Leader,Candidate} 
+          /\ state[t] \in {Leader,Candidate} 
           /\ currentTerm[s] = currentTerm[t]) =>
             \* Cannot be intersection between voters that gave votes to candidates in same term.
             votesGranted[s] \cap votesGranted[t] = {}
