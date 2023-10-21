@@ -25,7 +25,16 @@ candidateWithVotesGrantedInTermImplyVotersSafeAtTerm.children = {
 
 voteInGrantedImpliesVotedFor = make_node("H_VoteInGrantedImpliesVotedFor")
 voteInGrantedImpliesVotedFor.children = {
-    "UpdateTermAction":[
+    "UpdateTermRVReqAction":[
+        candidateWithVotesGrantedInTermImplyVotersSafeAtTerm
+    ],
+    "UpdateTermRVResAction":[
+        candidateWithVotesGrantedInTermImplyVotersSafeAtTerm
+    ],
+    "UpdateTermAEReqAction":[
+        candidateWithVotesGrantedInTermImplyVotersSafeAtTerm
+    ],
+    "UpdateTermAEResAction":[
         candidateWithVotesGrantedInTermImplyVotersSafeAtTerm
     ],
     "HandleRequestVoteResponseAction":[
