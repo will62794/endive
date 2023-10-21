@@ -71,10 +71,13 @@ voteGrantedImpliesVoteResponseMsgConsistent.children = {
     ]
 }
 
+voteGrantedImpliesNodeSafeAtTerm = make_node("H_VoteGrantedImpliesNodeSafeAtTerm")
+
 votesCantBeGrantedTwiceToCandidatesInSameTerm = make_node("H_VotesCantBeGrantedTwiceToCandidatesInSameTerm")
 votesCantBeGrantedTwiceToCandidatesInSameTerm.children = {
     "RequestVoteAction": [
-        candidateWithVotesGrantedInTermImplyVotersSafeAtTerm
+        candidateWithVotesGrantedInTermImplyVotersSafeAtTerm,
+        voteGrantedImpliesNodeSafeAtTerm
     ],
     "HandleRequestVoteResponseAction": [
         voteGrantedImpliesVoteResponseMsgConsistent

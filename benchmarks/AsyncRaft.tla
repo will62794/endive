@@ -938,6 +938,13 @@ H_VoteGrantedImpliesVoteResponseMsgConsistent ==
                 /\ m.mdest # s
                 /\ m.mvoteGranted
 
+\* If a node has granted its vote to some node in term T, then the granting
+\* node must be safe at term T.
+H_VoteGrantedImpliesNodeSafeAtTerm == 
+    \A s \in Server : 
+        state[s] \in {Candidate,Leader} => 
+        (\A t \in votesGranted[s] : currentTerm[t] >= currentTerm[s])
+
 H_VotesCantBeGrantedTwiceToCandidatesInSameTerm ==
     \A s,t \in Server : 
         ( /\ s # t 
