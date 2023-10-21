@@ -156,6 +156,8 @@ requestVoteQuorumInTermImpliesNoOtherLogsInTerm.children = {
     ]
 }
 
+leaderHasVotesGrantedQuorum = make_node("H_LeaderHasVotesGrantedQuorum")
+
 candidateVotesGrantedInTermAreUnique = StructuredProofNode("CandidateVotesGrantedInTermAreUnique", "H_CandidateVotesGrantedInTermAreUnique")
 candidateWithVotesGrantedInTermImplyNoOtherLeader = StructuredProofNode("CandidateWithVotesGrantedInTermImplyNoOtherLeader", "H_CandidateWithVotesGrantedInTermImplyNoOtherLeader")
 candidateWithVotesGrantedInTermImplyNoOtherLeader.children = {
@@ -165,7 +167,8 @@ candidateWithVotesGrantedInTermImplyNoOtherLeader.children = {
     "HandleRequestVoteResponseAction":[
         requestVoteQuorumInTermImpliesNoOtherLeadersInTerm,
         votesCantBeGrantedTwiceToCandidatesInSameTerm,
-        voteGrantedImpliesVoteResponseMsgConsistent
+        voteGrantedImpliesVoteResponseMsgConsistent,
+        leaderHasVotesGrantedQuorum
     ]
 }
 

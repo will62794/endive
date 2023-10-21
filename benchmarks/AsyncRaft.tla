@@ -790,6 +790,9 @@ H_CandidateVotesGrantedInTermAreUnique ==
          /\ currentTerm[s] = currentTerm[t]) =>
             (votesGranted[s] \cap votesGranted[t]) = {}
 
+H_LeaderHasVotesGrantedQuorum == 
+    \A s \in Server : (state[s] = Leader) => votesGranted[s] \in Quorum
+
 \* If a node has garnered votes in a term as candidate, there must
 \* be no other leader in that term in existence.
 H_CandidateWithVotesGrantedInTermImplyNoOtherLeader ==
