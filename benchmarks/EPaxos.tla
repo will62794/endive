@@ -6,7 +6,7 @@
 \* 
 
 
-EXTENDS Naturals, FiniteSets
+EXTENDS Naturals, FiniteSets, TLC
 
 (*********************************************************************************)
 (* Constant parameters:                                                          *)
@@ -675,8 +675,25 @@ ReplicaAction ==
 (***************************************************************************)
 
 Next == 
-    \/ CommandLeaderAction
-    \/ ReplicaAction
+    \* CommandLeaderAction
+    \/ \E C \in (Commands \ proposed) : \E cleader \in Replicas : Propose(C, cleader)
+    \/ (\E cleader \in Replicas : \E inst \in leaderOfInst[cleader] :
+            \/ (\E Q \in FastQuorums(cleader) : Phase1Fast(cleader, inst, Q))
+            \/ (\E Q \in SlowQuorums(cleader) : Phase1Slow(cleader, inst, Q))
+            \/ (\E Q \in SlowQuorums(cleader) : Phase2Finalize(cleader, inst, Q))
+            \/ (\E Q \in SlowQuorums(cleader) : FinalizeTryPreAccept(cleader, inst, Q)))
+    \* ReplicaAction.
+    \/ \E replica \in Replicas : Phase1Reply(replica)
+    \/ \E replica \in Replicas : Phase2Reply(replica)
+    \/ \E replica \in Replicas : \E cmsg \in sentMsg : (cmsg.type = "commit" /\ Commit(replica, cmsg))
+    \/ \E replica \in Replicas : \E i \in Instances : 
+        \* This condition states that the instance has been started by its original owner.
+        /\ crtInst[i[1]] > i[2] 
+        /\ \E Q \in SlowQuorums(replica) : SendPrepare(replica, i, Q)
+    \/ \E replica \in Replicas : ReplyPrepare(replica)
+    \/ \E replica \in Replicas : \E i \in preparing[replica] :
+        \E Q \in SlowQuorums(replica) : PrepareFinalize(replica, i, Q)
+    \/ \E replica \in Replicas : ReplyTryPreaccept(replica)
 
 
 (***************************************************************************)
@@ -711,6 +728,8 @@ Consistency ==
     \A i \in Instances : Cardinality(committed[i]) <= 1
 
 THEOREM Spec => ([]TypeOK) /\ Nontriviality /\ Stability /\ Consistency
+
+Symmetry == Permutations(Replicas)
 
 =============================================================================
 \* Modification History
