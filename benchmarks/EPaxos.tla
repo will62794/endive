@@ -69,6 +69,50 @@ Status == {"not-seen", "pre-accepted", "accepted", "committed"}
 (* All possible protocol messages:                                         *)
 (***************************************************************************)
 
+
+PreAcceptMessage == 
+    [type: {"pre-accept"}, src: Replicas, dst: Replicas,
+        inst: Instances, ballot: Nat \X Replicas,
+        cmd: Commands \cup {none}, deps: SUBSET Instances, seq: Nat]
+
+AcceptMessage ==
+    [type: {"accept"}, src: Replicas, dst: Replicas,
+        inst: Instances, ballot: Nat \X Replicas,
+        cmd: Commands \cup {none}, deps: SUBSET Instances, seq: Nat]
+
+CommitMessage == 
+    [type: {"commit"},
+        inst: Instances, ballot: Nat \X Replicas,
+        cmd: Commands \cup {none}, deps: SUBSET Instances, seq: Nat]
+
+PrepareMessage ==
+    [type: {"prepare"}, src: Replicas, dst: Replicas,
+        inst: Instances, ballot: Nat \X Replicas]
+
+PreAcceptReplyMessage == 
+    [type: {"pre-accept-reply"}, src: Replicas, dst: Replicas,
+        inst: Instances, ballot: Nat \X Replicas,
+        deps: SUBSET Instances, seq: Nat, committed: SUBSET Instances]
+
+AcceptReplyMessage ==
+    [type: {"accept-reply"}, src: Replicas, dst: Replicas,
+        inst: Instances, ballot: Nat \X Replicas]
+
+PrepareReplyMessage ==
+    [type: {"prepare-reply"}, src: Replicas, dst: Replicas,
+            inst: Instances, ballot: Nat \X Replicas, prev_ballot: Nat \X Replicas,
+            status: Status,
+            cmd: Commands \cup {none}, deps: SUBSET Instances, seq: Nat]    
+
+TryPreAcceptMessage == 
+    [type: {"try-pre-accept"}, src: Replicas, dst: Replicas,
+            inst: Instances, ballot: Nat \X Replicas,
+            cmd: Commands \cup {none}, deps: SUBSET Instances, seq: Nat]
+                
+TryPreAcceptReplyMessage == 
+    [type: {"try-pre-accept-reply"}, src: Replicas, dst: Replicas,
+        inst: Instances, ballot: Nat \X Replicas, status: Status \cup {"OK"}]
+
 Message ==
         [type: {"pre-accept"}, src: Replicas, dst: Replicas,
         inst: Instances, ballot: Nat \X Replicas,
@@ -121,8 +165,15 @@ Message ==
 (*******************************************************************************)
 
  
-VARIABLES cmdLog, proposed, executed, sentMsg, crtInst, leaderOfInst,
-          committed, ballots, preparing
+VARIABLES cmdLog, 
+          proposed, 
+          executed, 
+          sentMsg, 
+          crtInst, 
+          leaderOfInst,
+          committed, 
+          ballots, 
+          preparing
 
 TypeOK ==
     /\ cmdLog \in [Replicas -> SUBSET [inst: Instances, 
@@ -191,8 +242,7 @@ Propose(C, cleader) ==
     LET newInst == <<cleader, crtInst[cleader]>> 
         newBallot == <<0, cleader>> 
     IN  /\ proposed' = proposed \cup {C}
-        /\ (\E Q \in FastQuorums(cleader):
-                 StartPhase1(C, cleader, Q, newInst, newBallot, {}))
+        /\ (\E Q \in FastQuorums(cleader) : StartPhase1(C, cleader, Q, newInst, newBallot, {}))
         /\ crtInst' = [crtInst EXCEPT ![cleader] = @ + 1]
         /\ UNCHANGED << executed, committed, ballots, preparing >>
 
@@ -226,8 +276,7 @@ Phase1Reply(replica) ==
                                       deps  |-> newDeps,
                                       seq   |-> newSeq,
                                       committed|-> instCom]}
-                /\ UNCHANGED << proposed, crtInst, executed, leaderOfInst,
-                                committed, ballots, preparing >>
+                /\ UNCHANGED << proposed, crtInst, executed, leaderOfInst, committed, ballots, preparing >>
 
 Phase1Fast(cleader, i, Q) ==
     /\ i \in leaderOfInst[cleader]
@@ -403,8 +452,7 @@ SendPrepare(replica, i, Q) ==
     /\ UNCHANGED << cmdLog, proposed, executed, crtInst,
                     leaderOfInst, committed >>
     
-ReplyPrepare(replica) ==
-    \E msg \in sentMsg : 
+ReplyPrepare(replica, msg) ==
         /\ msg.type = "prepare"
         /\ msg.dst = replica
         /\ \/ \E rec \in cmdLog[replica] : 
@@ -455,8 +503,7 @@ ReplyPrepare(replica) ==
                               cmd   |-> none,
                               deps  |-> {},
                               seq   |-> 0]}]
-              /\ UNCHANGED << proposed, executed, committed, crtInst, ballots,
-                              leaderOfInst, preparing >> 
+              /\ UNCHANGED << proposed, executed, committed, crtInst, ballots,leaderOfInst, preparing >> 
     
 PrepareFinalize(replica, i, Q) ==
     /\ i \in preparing[replica]
@@ -647,28 +694,28 @@ FinalizeTryPreAccept(cleader, i, Q) ==
 (* Action groups                                                           *)
 (***************************************************************************)        
 
-CommandLeaderAction ==
-    \/ (\E C \in (Commands \ proposed) :
-            \E cleader \in Replicas : Propose(C, cleader))
-    \/ (\E cleader \in Replicas : \E inst \in leaderOfInst[cleader] :
-            \/ (\E Q \in FastQuorums(cleader) : Phase1Fast(cleader, inst, Q))
-            \/ (\E Q \in SlowQuorums(cleader) : Phase1Slow(cleader, inst, Q))
-            \/ (\E Q \in SlowQuorums(cleader) : Phase2Finalize(cleader, inst, Q))
-            \/ (\E Q \in SlowQuorums(cleader) : FinalizeTryPreAccept(cleader, inst, Q)))
+\* CommandLeaderAction ==
+\*     \/ (\E C \in (Commands \ proposed) :
+\*             \E cleader \in Replicas : Propose(C, cleader))
+\*     \/ (\E cleader \in Replicas : \E inst \in leaderOfInst[cleader] :
+\*             \/ (\E Q \in FastQuorums(cleader) : Phase1Fast(cleader, inst, Q))
+\*             \/ (\E Q \in SlowQuorums(cleader) : Phase1Slow(cleader, inst, Q))
+\*             \/ (\E Q \in SlowQuorums(cleader) : Phase2Finalize(cleader, inst, Q))
+\*             \/ (\E Q \in SlowQuorums(cleader) : FinalizeTryPreAccept(cleader, inst, Q)))
             
-ReplicaAction ==
-    \E replica \in Replicas :
-        (\/ Phase1Reply(replica)
-         \/ Phase2Reply(replica)
-         \/ \E cmsg \in sentMsg : (cmsg.type = "commit" /\ Commit(replica, cmsg))
-         \/ \E i \in Instances : 
-            /\ crtInst[i[1]] > i[2] (* This condition states that the instance has *) 
-                                    (* been started by its original owner          *)
-            /\ \E Q \in SlowQuorums(replica) : SendPrepare(replica, i, Q)
-         \/ ReplyPrepare(replica)
-         \/ \E i \in preparing[replica] :
-            \E Q \in SlowQuorums(replica) : PrepareFinalize(replica, i, Q)
-         \/ ReplyTryPreaccept(replica))
+\* ReplicaAction ==
+\*     \E replica \in Replicas :
+\*         (\/ Phase1Reply(replica)
+\*          \/ Phase2Reply(replica)
+\*          \/ \E cmsg \in sentMsg : (cmsg.type = "commit" /\ Commit(replica, cmsg))
+\*          \/ \E i \in Instances : 
+\*             /\ crtInst[i[1]] > i[2] (* This condition states that the instance has *) 
+\*                                     (* been started by its original owner          *)
+\*             /\ \E Q \in SlowQuorums(replica) : SendPrepare(replica, i, Q)
+\*          \/ ReplyPrepare(replica)
+\*          \/ \E i \in preparing[replica] :
+\*             \E Q \in SlowQuorums(replica) : PrepareFinalize(replica, i, Q)
+\*          \/ ReplyTryPreaccept(replica))
 
 
 (***************************************************************************)
@@ -678,11 +725,10 @@ ReplicaAction ==
 Next == 
     \* CommandLeaderAction
     \/ \E C \in (Commands \ proposed) : \E cleader \in Replicas : Propose(C, cleader)
-    \/ (\E cleader \in Replicas : \E inst \in leaderOfInst[cleader] :
-            \/ (\E Q \in FastQuorums(cleader) : Phase1Fast(cleader, inst, Q))
-            \/ (\E Q \in SlowQuorums(cleader) : Phase1Slow(cleader, inst, Q))
-            \/ (\E Q \in SlowQuorums(cleader) : Phase2Finalize(cleader, inst, Q))
-            \/ (\E Q \in SlowQuorums(cleader) : FinalizeTryPreAccept(cleader, inst, Q)))
+    \/ \E cleader \in Replicas : \E inst \in leaderOfInst[cleader] : \E Q \in FastQuorums(cleader) : Phase1Fast(cleader, inst, Q)
+    \/ \E cleader \in Replicas : \E inst \in leaderOfInst[cleader] : \E Q \in SlowQuorums(cleader) : Phase1Slow(cleader, inst, Q)
+    \/ \E cleader \in Replicas : \E inst \in leaderOfInst[cleader] : \E Q \in SlowQuorums(cleader) : Phase2Finalize(cleader, inst, Q)
+    \/ \E cleader \in Replicas : \E inst \in leaderOfInst[cleader] : \E Q \in SlowQuorums(cleader) : FinalizeTryPreAccept(cleader, inst, Q)
     \* ReplicaAction.
     \/ \E replica \in Replicas : Phase1Reply(replica)
     \/ \E replica \in Replicas : Phase2Reply(replica)
@@ -691,9 +737,8 @@ Next ==
         \* This condition states that the instance has been started by its original owner.
         /\ crtInst[i[1]] > i[2] 
         /\ \E Q \in SlowQuorums(replica) : SendPrepare(replica, i, Q)
-    \/ \E replica \in Replicas : ReplyPrepare(replica)
-    \/ \E replica \in Replicas : \E i \in preparing[replica] :
-        \E Q \in SlowQuorums(replica) : PrepareFinalize(replica, i, Q)
+    \/ \E replica \in Replicas : \E msg \in sentMsg : ReplyPrepare(replica, msg)
+    \/ \E replica \in Replicas : \E i \in preparing[replica] : \E Q \in SlowQuorums(replica) : PrepareFinalize(replica, i, Q)
     \/ \E replica \in Replicas : ReplyTryPreaccept(replica)
 
 
