@@ -58,3 +58,11 @@ states2
 logout
 *.log
 apacheck_*.sh
+*.out
+*.bbl
+*.gz
+*.blg
+*.fdb_latexmk
+*.fls
+*.vtc
+*.aux
