@@ -66,3 +66,6 @@ apacheck_*.sh
 *.fls
 *.vtc
 *.aux
+*IndDecompProof*
+*ApaIndProofCheck*
+*_proofstats.json
