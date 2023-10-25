@@ -849,6 +849,9 @@ Stability ==
 H_Consistency ==
     \A i \in Instances : Cardinality(committed[i]) <= 1
 
+\* Debug invariant.
+Inv1 == ~(\E i \in Instances : Cardinality(committed[i]) = 1)
+
 Symmetry == Permutations(Replicas)
 
 NextUnchanged == UNCHANGED <<cmdLog, proposed, executed, sentMsg, preAcceptMsg, preAcceptReplyMsg,commitMsg,acceptMsg,acceptReplyMsg,prepareMsg,prepareReplyMsg,tryPreAcceptMsg,tryPreAcceptReplyMsg,crtInst, leaderOfInst,committed, ballots, preparing>>
