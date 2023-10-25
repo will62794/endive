@@ -305,11 +305,11 @@ StartPhase1(C, cleader, Q, inst, ballot, oldMsg) ==
                                   seq   : {newSeq}]
         /\ UNCHANGED <<sentMsg,preAcceptReplyMsg,commitMsg,acceptMsg,acceptReplyMsg,prepareMsg,prepareReplyMsg,tryPreAcceptMsg,tryPreAcceptReplyMsg>>
 
-Propose(C, cleader) ==
+Propose(C, cleader, Q) ==
     LET newInst == <<cleader, crtInst[cleader]>> 
         newBallot == <<0, cleader>> 
     IN  /\ proposed' = proposed \cup {C}
-        /\ (\E Q \in FastQuorums(cleader) : StartPhase1(C, cleader, Q, newInst, newBallot, {}))
+        /\ StartPhase1(C, cleader, Q, newInst, newBallot, {})
         /\ crtInst' = [crtInst EXCEPT ![cleader] = @ + 1]
         /\ UNCHANGED << executed, committed, ballots, preparing >>
 
@@ -788,7 +788,7 @@ FinalizeTryPreAccept(cleader, i, Q) ==
 (***************************************************************************)
 
 
-ProposeAction == TRUE /\ \E C \in (Commands \ proposed) : \E cleader \in Replicas : Propose(C, cleader)
+ProposeAction == TRUE /\ \E C \in (Commands \ proposed) : \E cleader \in Replicas : \E Q \in FastQuorums(cleader) : Propose(C, cleader, Q)
 Phase1FastAction ==  TRUE /\ \E cleader \in Replicas : \E inst \in leaderOfInst[cleader] : \E Q \in FastQuorums(cleader) : Phase1Fast(cleader, inst, Q)
 Phase1SlowAction == TRUE /\ \E cleader \in Replicas : \E inst \in leaderOfInst[cleader] : \E Q \in SlowQuorums(cleader) : Phase1Slow(cleader, inst, Q)
 Phase2FinalizeAction == TRUE /\ \E cleader \in Replicas : \E inst \in leaderOfInst[cleader] : \E Q \in SlowQuorums(cleader) : Phase2Finalize(cleader, inst, Q)
