@@ -16,7 +16,9 @@ EXTENDS Naturals, FiniteSets, TLC
 (*       SlowQuorums(r): the set of all slow quorums where r is a command leader *)
 (*********************************************************************************)
 
-CONSTANTS Commands, Replicas, FastQuorums(_), SlowQuorums(_), MaxBallot
+CONSTANTS Commands, Replicas, MaxBallot
+
+\* CONSTANTS FastQuorums(_), SlowQuorums(_), 
 
 ASSUME IsFiniteSet(Replicas)
 
@@ -25,23 +27,21 @@ ASSUME IsFiniteSet(Replicas)
 (*  (simplified)                                                           *)
 (***************************************************************************)
 
-ASSUME \A r \in Replicas:
-  /\ SlowQuorums(r) \subseteq SUBSET Replicas
-  /\ \A SQ \in SlowQuorums(r): 
-    /\ r \in SQ
-    /\ Cardinality(SQ) = (Cardinality(Replicas) \div 2) + 1
+\* ASSUME \A r \in Replicas:
+\*   /\ SlowQuorums(r) \subseteq SUBSET Replicas
+\*   /\ \A SQ \in SlowQuorums(r): 
+\*     /\ r \in SQ
+\*     /\ Cardinality(SQ) = (Cardinality(Replicas) \div 2) + 1
 
-ASSUME \A r \in Replicas:
-  /\ FastQuorums(r) \subseteq SUBSET Replicas
-  /\ \A FQ \in FastQuorums(r):
-    /\ r \in FQ
-    /\ Cardinality(FQ) = (Cardinality(Replicas) \div 2) + 
-                         ((Cardinality(Replicas) \div 2) + 1) \div 2
+\* ASSUME \A r \in Replicas:
+\*   /\ FastQuorums(r) \subseteq SUBSET Replicas
+\*   /\ \A FQ \in FastQuorums(r):
+\*     /\ r \in FQ
+\*     /\ Cardinality(FQ) = (Cardinality(Replicas) \div 2) + 
+\*                          ((Cardinality(Replicas) \div 2) + 1) \div 2
     
-    
-FastQuorumsMaj(r) == {a \in SUBSET Replicas: r \in a /\ Cardinality(a) = ((Cardinality(Replicas) \div 2) + ((Cardinality(Replicas) \div 2) + 1) \div 2)}
-
-SlowQuorumsMaj(r) == {a \in SUBSET Replicas: r \in a /\ Cardinality(a) = ((Cardinality(Replicas) \div 2) + 1) }
+FastQuorums(r) == {a \in SUBSET Replicas: r \in a /\ Cardinality(a) = ((Cardinality(Replicas) \div 2) + ((Cardinality(Replicas) \div 2) + 1) \div 2)}
+SlowQuorums(r) == {a \in SUBSET Replicas: r \in a /\ Cardinality(a) = ((Cardinality(Replicas) \div 2) + 1) }
 
 Max(S) == IF S = {} THEN 0 ELSE CHOOSE i \in S : \A j \in S : j <= i
 
@@ -770,10 +770,8 @@ Stability ==
                         /\ rec2.cmd = C
                         /\ rec2.status \in {"committed", "executed"}))
 
-Consistency ==
+H_Consistency ==
     \A i \in Instances : Cardinality(committed[i]) <= 1
-
-THEOREM Spec => ([]TypeOK) /\ Nontriviality /\ Stability /\ Consistency
 
 Symmetry == Permutations(Replicas)
 
