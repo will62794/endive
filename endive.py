@@ -2307,7 +2307,8 @@ class InductiveInvGen():
         lemma_action_coi = {}
         try:
             lemma_action_coi = self.tla_spec_obj.compute_coi_table(set(vars_in_lemma_defs.keys()), actions_real_defs)
-        except:
+        except Exception as e:
+            print(e)
             print("ERROR: Failed to generate lemma-action COI table, defaulting to all variable COI.")
             # Fall back to most conservative COI computation, including all vars.
             for a in actions:

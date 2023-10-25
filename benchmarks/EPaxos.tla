@@ -230,7 +230,7 @@ TypeOK ==
 \* RandomSetOfSubsets(2, 2, AppendEntriesRequestTypeBounded)
 
 TypeOKRandom == 
-    /\ cmdLog \in [Replicas -> RandomSetOfSubsets(3, 3, CommandType)]
+    /\ cmdLog \in [Replicas -> RandomSetOfSubsets(2, 2, CommandType)]
     /\ proposed \in SUBSET Commands
     /\ executed \in [Replicas -> SUBSET (Nat \X Commands)]
     /\ sentMsg = {}
@@ -238,7 +238,7 @@ TypeOKRandom ==
     /\ preAcceptReplyMsg \in RandomSetOfSubsets(3,3,PreAcceptReplyMessage)
     /\ commitMsg \in RandomSetOfSubsets(3,3,CommitMessage)
     /\ acceptMsg \in RandomSetOfSubsets(3,3,AcceptMessage)
-    /\ acceptReplyMsg \in RandomSetOfSubsets(3,3,AcceptReplyMessage)
+    /\ acceptReplyMsg \in RandomSetOfSubsets(2,2,AcceptReplyMessage)
     /\ prepareMsg \in RandomSetOfSubsets(3,3,PrepareMessage)
     /\ prepareReplyMsg \in RandomSetOfSubsets(3,3,PrepareReplyMessage)
     /\ tryPreAcceptMsg \in RandomSetOfSubsets(3,3,TryPreAcceptMessage)
