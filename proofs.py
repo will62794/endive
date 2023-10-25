@@ -364,7 +364,10 @@ class StructuredProof():
             proof_obligation_lines += "\n"
 
         var_slice_sizes = [len(s) for s in all_var_slices]
-        mean_slice_size = mean(var_slice_sizes)
+        if len(var_slice_sizes):
+            mean_slice_size = mean(var_slice_sizes)
+        else:
+            mean_slice_size = 0
 
         # Add lines to the spec.
         spec_lines += f"\* mean in-degree: {mean_in_degree}\n"

@@ -2281,10 +2281,16 @@ class InductiveInvGen():
         action_updated_vars = {}
 
         # Extract variables per action.
+        all_state_vars = self.tla_spec_obj.get_all_vars()
         for action in actions:
-            vars_in_action[action] = self.tla_spec_obj.get_vars_in_def(action)[0]
-            # vars_in_action_non_updated[action] = self.tla_spec_obj.get_vars_in_def(action, ignore_update_expressions=)[0]
-            print(f"Vars in action '{action}':", vars_in_action[action])
+            try:
+                vars_in_action[action] = self.tla_spec_obj.get_vars_in_def(action)[0]
+                # vars_in_action_non_updated[action] = self.tla_spec_obj.get_vars_in_def(action, ignore_update_expressions=)[0]
+                print(f"Vars in action '{action}':", vars_in_action[action])
+            except:
+                # Fall back to just adding all variables for now.
+                print(f"Action '{action}': failed to get variables in action. Using all state variables.")
+                vars_in_action[action] = all_state_vars
 
         # Extract variables per lemma.
         for udef in self.tla_spec_obj.get_all_user_defs(level="1"):
@@ -2298,8 +2304,15 @@ class InductiveInvGen():
         # Compute COI for each action-lemma pair
         # Refer to actions by their underlying operator definition for computing COI.
         actions_real_defs = [a.replace("Action", "") for a in actions]
-        lemma_action_coi = self.tla_spec_obj.compute_coi_table(set(vars_in_lemma_defs.keys()), actions_real_defs)
-        
+        lemma_action_coi = {}
+        try:
+            lemma_action_coi = self.tla_spec_obj.compute_coi_table(set(vars_in_lemma_defs.keys()), actions_real_defs)
+        except:
+            print("ERROR: Failed to generate lemma-action COI table, defaulting to all variable COI.")
+            # Fall back to most conservative COI computation, including all vars.
+            for a in actions:
+                lemma_action_coi[a.replace("Action", "")] = {lemma:all_state_vars for lemma in vars_in_lemma_defs.keys()}
+
         # TODO: Eventually have COI properly drill down into action definitions.
         orig_keys = list(lemma_action_coi.keys())
         for a in orig_keys:

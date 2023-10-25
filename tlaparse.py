@@ -109,6 +109,13 @@ class TLASpec:
             "builtins": builtins
         }
         return spec_obj
+    
+    def get_all_vars(self):
+        varnames = []
+        for k in self.spec_obj["var_decls"]:
+            varname = self.spec_obj["var_decls"][k]["uniquename"]
+            varnames.append(varname)
+        return varnames
 
     def get_vars_in_def_rec(self, elem):
         uid = None
@@ -678,3 +685,6 @@ if __name__ == "__main__":
     # my_spec.extract_quant_and_predicate_grammar("HandleRequestVoteRequestAction")
     my_spec.extract_quant_and_predicate_grammar("AppendEntries")
     my_spec.extract_quant_and_predicate_grammar("H_NoLogDivergenceAppendEntries")
+
+    all_vars = my_spec.get_all_vars()
+    print(all_vars)

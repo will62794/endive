@@ -6,7 +6,7 @@
 \* 
 
 
-EXTENDS Naturals, FiniteSets, TLC
+EXTENDS Naturals, FiniteSets, TLC, Randomization
 
 (*********************************************************************************)
 (* Constant parameters:                                                          *)
@@ -65,84 +65,6 @@ Instances == Replicas \X (1..Cardinality(Commands))
 Status == {"not-seen", "pre-accepted", "accepted", "committed"}
 
 
-(***************************************************************************)
-(* All possible protocol messages:                                         *)
-(***************************************************************************)
-
-
-PreAcceptMessage == 
-    [type: {"pre-accept"}, src: Replicas, dst: Replicas,
-        inst: Instances, ballot: Nat \X Replicas,
-        cmd: Commands \cup {none}, deps: SUBSET Instances, seq: Nat]
-
-AcceptMessage ==
-    [type: {"accept"}, src: Replicas, dst: Replicas,
-        inst: Instances, ballot: Nat \X Replicas,
-        cmd: Commands \cup {none}, deps: SUBSET Instances, seq: Nat]
-
-CommitMessage == 
-    [type: {"commit"},
-        inst: Instances, ballot: Nat \X Replicas,
-        cmd: Commands \cup {none}, deps: SUBSET Instances, seq: Nat]
-
-PrepareMessage ==
-    [type: {"prepare"}, src: Replicas, dst: Replicas,
-        inst: Instances, ballot: Nat \X Replicas]
-
-PreAcceptReplyMessage == 
-    [type: {"pre-accept-reply"}, src: Replicas, dst: Replicas,
-        inst: Instances, ballot: Nat \X Replicas,
-        deps: SUBSET Instances, seq: Nat, committed: SUBSET Instances]
-
-AcceptReplyMessage ==
-    [type: {"accept-reply"}, src: Replicas, dst: Replicas,
-        inst: Instances, ballot: Nat \X Replicas]
-
-PrepareReplyMessage ==
-    [type: {"prepare-reply"}, src: Replicas, dst: Replicas,
-            inst: Instances, ballot: Nat \X Replicas, prev_ballot: Nat \X Replicas,
-            status: Status,
-            cmd: Commands \cup {none}, deps: SUBSET Instances, seq: Nat]    
-
-TryPreAcceptMessage == 
-    [type: {"try-pre-accept"}, src: Replicas, dst: Replicas,
-            inst: Instances, ballot: Nat \X Replicas,
-            cmd: Commands \cup {none}, deps: SUBSET Instances, seq: Nat]
-                
-TryPreAcceptReplyMessage == 
-    [type: {"try-pre-accept-reply"}, src: Replicas, dst: Replicas,
-        inst: Instances, ballot: Nat \X Replicas, status: Status \cup {"OK"}]
-
-Message ==
-        [type: {"pre-accept"}, src: Replicas, dst: Replicas,
-        inst: Instances, ballot: Nat \X Replicas,
-        cmd: Commands \cup {none}, deps: SUBSET Instances, seq: Nat]
-  \cup  [type: {"accept"}, src: Replicas, dst: Replicas,
-        inst: Instances, ballot: Nat \X Replicas,
-        cmd: Commands \cup {none}, deps: SUBSET Instances, seq: Nat]
-  \cup  [type: {"commit"},
-        inst: Instances, ballot: Nat \X Replicas,
-        cmd: Commands \cup {none}, deps: SUBSET Instances, seq: Nat]
-  \cup  [type: {"prepare"}, src: Replicas, dst: Replicas,
-        inst: Instances, ballot: Nat \X Replicas]
-  \cup  [type: {"pre-accept-reply"}, src: Replicas, dst: Replicas,
-        inst: Instances, ballot: Nat \X Replicas,
-        deps: SUBSET Instances, seq: Nat, committed: SUBSET Instances]
-  \cup  [type: {"accept-reply"}, src: Replicas, dst: Replicas,
-        inst: Instances, ballot: Nat \X Replicas]
-  \cup  [type: {"prepare-reply"}, src: Replicas, dst: Replicas,
-        inst: Instances, ballot: Nat \X Replicas, prev_ballot: Nat \X Replicas,
-        status: Status,
-        cmd: Commands \cup {none}, deps: SUBSET Instances, seq: Nat]
-  \cup  [type: {"try-pre-accept"}, src: Replicas, dst: Replicas,
-        inst: Instances, ballot: Nat \X Replicas,
-        cmd: Commands \cup {none}, deps: SUBSET Instances, seq: Nat]
-  \cup  [type: {"try-pre-accept-reply"}, src: Replicas, dst: Replicas,
-        inst: Instances, ballot: Nat \X Replicas, status: Status \cup {"OK"}]
-        
-        
- 
-
 (*******************************************************************************)
 (* Variables:                                                                  *)
 (*                                                                             *)
@@ -164,24 +86,136 @@ Message ==
 (*                                                                             *)
 (*******************************************************************************)
 
- 
 VARIABLES cmdLog, 
           proposed, 
           executed, 
           sentMsg, 
+          preAcceptMsg, 
+          preAcceptReplyMsg,
+          commitMsg,
+          acceptMsg,
+          acceptReplyMsg,
+          prepareMsg,
+          prepareReplyMsg,
+          tryPreAcceptMsg,
+          tryPreAcceptReplyMsg,
           crtInst, 
           leaderOfInst,
           committed, 
           ballots, 
           preparing
 
+
+(***************************************************************************)
+(* All possible protocol messages:                                         *)
+(***************************************************************************)
+
+
+PreAcceptMessage == 
+    [type: {"pre-accept"}, 
+     src: Replicas, 
+     dst: Replicas,
+     inst: Instances, 
+     ballot: Nat \X Replicas,
+     cmd: Commands \cup {none}, 
+     deps: SUBSET Instances, 
+     seq: Nat]
+
+AcceptMessage ==
+    [type: {"accept"}, 
+     src: Replicas, 
+     dst: Replicas,
+     inst: Instances, 
+     ballot: Nat \X Replicas,
+     cmd: Commands \cup {none}, 
+     deps: SUBSET Instances, 
+     seq: Nat]
+
+CommitMessage == 
+    [type: {"commit"},
+     inst: Instances, 
+     ballot: Nat \X Replicas,
+     cmd: Commands \cup {none}, 
+     deps: SUBSET Instances, 
+     seq: Nat]
+
+PrepareMessage ==
+    [type: {"prepare"}, 
+     src: Replicas, 
+     dst: Replicas,
+     inst: Instances, 
+     ballot: Nat \X Replicas]
+
+PreAcceptReplyMessage == 
+    [type: {"pre-accept-reply"}, 
+     src: Replicas, 
+     dst: Replicas,
+     inst: Instances, 
+     ballot: Nat \X Replicas,
+     deps: SUBSET Instances, 
+     seq: Nat, 
+     committed: SUBSET Instances]
+
+AcceptReplyMessage ==
+    [type: {"accept-reply"}, 
+     src: Replicas, 
+     dst: Replicas,
+     inst: Instances, 
+     ballot: Nat \X Replicas]
+
+PrepareReplyMessage ==
+    [type: {"prepare-reply"}, 
+     src: Replicas, 
+     dst: Replicas,
+     inst: Instances, 
+     ballot: Nat \X Replicas, 
+     prev_ballot: Nat \X Replicas,
+     status: Status,
+     cmd: Commands \cup {none}, 
+     deps: SUBSET Instances, 
+     seq: Nat]    
+
+TryPreAcceptMessage == 
+    [type: {"try-pre-accept"}, 
+     src: Replicas, 
+     dst: Replicas,
+     inst: Instances, 
+     ballot: Nat \X Replicas,
+     cmd: Commands \cup {none}, 
+     deps: SUBSET Instances, 
+     seq: Nat]
+                
+TryPreAcceptReplyMessage == 
+    [type: {"try-pre-accept-reply"}, 
+     src: Replicas, 
+     dst: Replicas,
+     inst: Instances, 
+     ballot: Nat \X Replicas, 
+     status: Status \cup {"OK"}]
+
+Message ==
+    PreAcceptMessage \cup
+    AcceptMessage \cup
+    CommitMessage \cup
+    PrepareMessage \cup
+    PreAcceptReplyMessage \cup
+    AcceptReplyMessage \cup
+    PrepareReplyMessage \cup
+    TryPreAcceptMessage \cup
+    TryPreAcceptReplyMessage
+        
+CommandType == 
+    [   inst: Instances, 
+        status: Status,
+        ballot: Nat \X Replicas,
+        cmd: Commands \cup {none},
+        deps: SUBSET Instances,
+        seq: Nat ]
+
+CommittedType == ((Commands \cup {none}) \X (SUBSET Instances) \X Nat)
+
 TypeOK ==
-    /\ cmdLog \in [Replicas -> SUBSET [inst: Instances, 
-                                       status: Status,
-                                       ballot: Nat \X Replicas,
-                                       cmd: Commands \cup {none},
-                                       deps: SUBSET Instances,
-                                       seq: Nat]]
+    /\ cmdLog \in [Replicas -> SUBSET CommandType]
     /\ proposed \in SUBSET Commands
     /\ executed \in [Replicas -> SUBSET (Nat \X Commands)]
     /\ sentMsg \in SUBSET Message
@@ -193,21 +227,25 @@ TypeOK ==
     /\ ballots \in Nat
     /\ preparing \in [Replicas -> SUBSET Instances]
     
+\* RandomSetOfSubsets(2, 2, AppendEntriesRequestTypeBounded)
+
 TypeOKRandom == 
-    /\ cmdLog \in [Replicas -> SUBSET [inst: Instances, 
-                                       status: Status,
-                                       ballot: Nat \X Replicas,
-                                       cmd: Commands \cup {none},
-                                       deps: SUBSET Instances,
-                                       seq: Nat]]
+    /\ cmdLog \in [Replicas -> RandomSetOfSubsets(3, 3, CommandType)]
     /\ proposed \in SUBSET Commands
     /\ executed \in [Replicas -> SUBSET (Nat \X Commands)]
-    /\ sentMsg \in SUBSET Message
+    /\ sentMsg = {}
+    /\ preAcceptMsg \in RandomSetOfSubsets(3,3,PreAcceptMessage)
+    /\ preAcceptReplyMsg \in RandomSetOfSubsets(3,3,PreAcceptReplyMessage)
+    /\ commitMsg \in RandomSetOfSubsets(3,3,CommitMessage)
+    /\ acceptMsg \in RandomSetOfSubsets(3,3,AcceptMessage)
+    /\ acceptReplyMsg \in RandomSetOfSubsets(3,3,AcceptReplyMessage)
+    /\ prepareMsg \in RandomSetOfSubsets(3,3,PrepareMessage)
+    /\ prepareReplyMsg \in RandomSetOfSubsets(3,3,PrepareReplyMessage)
+    /\ tryPreAcceptMsg \in RandomSetOfSubsets(3,3,TryPreAcceptMessage)
+    /\ tryPreAcceptReplyMsg \in RandomSetOfSubsets(3,3,TryPreAcceptReplyMessage)
     /\ crtInst \in [Replicas -> Nat]
     /\ leaderOfInst \in [Replicas -> SUBSET Instances]
-    /\ committed \in [Instances -> SUBSET ((Commands \cup {none}) \X
-                                           (SUBSET Instances) \X 
-                                           Nat)]
+    /\ committed \in [Instances -> RandomSetOfSubsets(3, 3, CommittedType)]
     /\ ballots \in Nat
     /\ preparing \in [Replicas -> SUBSET Instances]    
 
@@ -219,6 +257,15 @@ vars == << cmdLog, proposed, executed, sentMsg, crtInst, leaderOfInst, committed
 
 Init ==
   /\ sentMsg = {}
+  /\ preAcceptMsg = {}
+  /\ preAcceptReplyMsg = {}
+  /\ commitMsg = {}
+  /\ acceptMsg = {}
+  /\ acceptReplyMsg = {}
+  /\ prepareMsg = {}
+  /\ prepareReplyMsg = {}
+  /\ tryPreAcceptMsg = {}
+  /\ tryPreAcceptReplyMsg = {}
   /\ cmdLog = [r \in Replicas |-> {}]
   /\ proposed = {}
   /\ executed = [r \in Replicas |-> {}]
@@ -246,7 +293,8 @@ StartPhase1(C, cleader, Q, inst, ballot, oldMsg) ==
                                   deps   |-> newDeps,
                                   seq    |-> newSeq ]}]
         /\ leaderOfInst' = [leaderOfInst EXCEPT ![cleader] = @ \cup {inst}]
-        /\ sentMsg' = (sentMsg \ oldMsg) \cup 
+        \* /\ sentMsg' = (sentMsg \ oldMsg) \cup 
+        /\ preAcceptMsg' = (preAcceptMsg \ oldMsg) \cup 
                                 [type  : {"pre-accept"},
                                   src   : {cleader},
                                   dst   : Q \ {cleader},
@@ -255,6 +303,7 @@ StartPhase1(C, cleader, Q, inst, ballot, oldMsg) ==
                                   cmd   : {C},
                                   deps  : {newDeps},
                                   seq   : {newSeq}]
+        /\ UNCHANGED <<sentMsg,preAcceptReplyMsg,commitMsg,acceptMsg,acceptReplyMsg,prepareMsg,prepareReplyMsg,tryPreAcceptMsg,tryPreAcceptReplyMsg>>
 
 Propose(C, cleader) ==
     LET newInst == <<cleader, crtInst[cleader]>> 
@@ -266,7 +315,7 @@ Propose(C, cleader) ==
 
 
 Phase1Reply(replica) ==
-    \E msg \in sentMsg:
+    \E msg \in preAcceptMsg:
         /\ msg.type = "pre-accept"
         /\ msg.dst = replica
         /\ LET oldRec == {rec \in cmdLog[replica]: rec.inst = msg.inst} IN
@@ -285,7 +334,8 @@ Phase1Reply(replica) ==
                                       cmd    |-> msg.cmd,
                                       deps   |-> newDeps,
                                       seq    |-> newSeq]}]
-                /\ sentMsg' = (sentMsg \ {msg}) \cup
+                /\ preAcceptMsg' = (preAcceptMsg \ {msg})
+                /\ preAcceptReplyMsg' = preAcceptReplyMsg \cup
                                     {[type  |-> "pre-accept-reply",
                                       src   |-> replica,
                                       dst   |-> msg.src,
@@ -294,7 +344,7 @@ Phase1Reply(replica) ==
                                       deps  |-> newDeps,
                                       seq   |-> newSeq,
                                       committed|-> instCom]}
-                /\ UNCHANGED << proposed, crtInst, executed, leaderOfInst, committed, ballots, preparing >>
+                /\ UNCHANGED << sentMsg,commitMsg,acceptMsg,acceptReplyMsg,prepareMsg,prepareReplyMsg,tryPreAcceptMsg,tryPreAcceptReplyMsg, proposed, crtInst, executed, leaderOfInst, committed, ballots, preparing >>
 
 Phase1Fast(cleader, i, Q) ==
     /\ i \in leaderOfInst[cleader]
@@ -303,7 +353,7 @@ Phase1Fast(cleader, i, Q) ==
         /\ record.inst = i
         /\ record.status = "pre-accepted"
         /\ record.ballot[1] = 0
-        /\ LET replies == {msg \in sentMsg: 
+        /\ LET replies == {msg \in preAcceptReplyMsg: 
                                 /\ msg.inst = i
                                 /\ msg.type = "pre-accept-reply"
                                 /\ msg.dst = cleader
@@ -327,7 +377,8 @@ Phase1Fast(cleader, i, Q) ==
                                           cmd    |-> record.cmd,
                                           deps   |-> r.deps,
                                           seq    |-> r.seq ]}]
-                /\ sentMsg' = (sentMsg \ replies) \cup
+                /\ preAcceptReplyMsg' = preAcceptReplyMsg \ replies
+                /\ commitMsg' = commitMsg \cup
                             {[type  |-> "commit",
                             inst    |-> i,
                             ballot  |-> record.ballot,
@@ -337,7 +388,7 @@ Phase1Fast(cleader, i, Q) ==
                 /\ leaderOfInst' = [leaderOfInst EXCEPT ![cleader] = @ \ {i}]
                 /\ committed' = [committed EXCEPT ![i] = 
                                             @ \cup {<<record.cmd, r.deps, r.seq>>}]
-                /\ UNCHANGED << proposed, executed, crtInst, ballots, preparing >>
+                /\ UNCHANGED << sentMsg,preAcceptMsg,acceptMsg,acceptReplyMsg,prepareMsg,prepareReplyMsg,tryPreAcceptMsg,tryPreAcceptReplyMsg, proposed, executed, crtInst, ballots, preparing >>
 
 Phase1Slow(cleader, i, Q) ==
     /\ i \in leaderOfInst[cleader]
@@ -345,7 +396,7 @@ Phase1Slow(cleader, i, Q) ==
     /\ \E record \in cmdLog[cleader]:
         /\ record.inst = i
         /\ record.status = "pre-accepted"
-        /\ LET replies == {msg \in sentMsg: 
+        /\ LET replies == {msg \in preAcceptReplyMsg: 
                                 /\ msg.inst = i 
                                 /\ msg.type = "pre-accept-reply" 
                                 /\ msg.dst = cleader 
@@ -362,7 +413,8 @@ Phase1Slow(cleader, i, Q) ==
                                           deps   |-> finalDeps,
                                           seq    |-> finalSeq ]}]
                 /\ \E SQ \in SlowQuorums(cleader):
-                   (sentMsg' = (sentMsg \ replies) \cup
+                    /\ preAcceptReplyMsg' = preAcceptReplyMsg \ replies
+                    /\ acceptMsg' = acceptMsg \cup
                             [type : {"accept"},
                             src : {cleader},
                             dst : SQ \ {cleader},
@@ -370,12 +422,11 @@ Phase1Slow(cleader, i, Q) ==
                             ballot: {record.ballot},
                             cmd : {record.cmd},
                             deps : {finalDeps},
-                            seq : {finalSeq}])
-                /\ UNCHANGED << proposed, executed, crtInst, leaderOfInst,
-                                committed, ballots, preparing >>
+                            seq : {finalSeq}]
+                /\ UNCHANGED << sentMsg,preAcceptMsg,commitMsg,acceptReplyMsg,prepareMsg,prepareReplyMsg,tryPreAcceptMsg,tryPreAcceptReplyMsg, proposed, executed, crtInst, leaderOfInst, committed, ballots, preparing >>
                 
 Phase2Reply(replica) ==
-    \E msg \in sentMsg: 
+    \E msg \in acceptMsg: 
         /\ msg.type = "accept"
         /\ msg.dst = replica
         /\ LET oldRec == {rec \in cmdLog[replica]: rec.inst = msg.inst} IN
@@ -388,14 +439,14 @@ Phase2Reply(replica) ==
                                   cmd    |-> msg.cmd,
                                   deps   |-> msg.deps,
                                   seq    |-> msg.seq]}]
-            /\ sentMsg' = (sentMsg \ {msg}) \cup
-                                {[type  |-> "accept-reply",
-                                  src   |-> replica,
-                                  dst   |-> msg.src,
-                                  inst  |-> msg.inst,
-                                  ballot|-> msg.ballot]}
-            /\ UNCHANGED << proposed, crtInst, executed, leaderOfInst,
-                            committed, ballots, preparing >>
+            /\ acceptMsg' = acceptMsg \ {msg}
+            /\ acceptReplyMsg' = acceptReplyMsg \cup
+                                    {[type  |-> "accept-reply",
+                                    src   |-> replica,
+                                    dst   |-> msg.src,
+                                    inst  |-> msg.inst,
+                                    ballot|-> msg.ballot]}
+            /\ UNCHANGED << sentMsg,preAcceptMsg,preAcceptReplyMsg,commitMsg,prepareMsg,prepareReplyMsg,tryPreAcceptMsg,tryPreAcceptReplyMsg, proposed, crtInst, executed, leaderOfInst, committed, ballots, preparing >>
 
 
 Phase2Finalize(cleader, i, Q) ==
@@ -404,7 +455,7 @@ Phase2Finalize(cleader, i, Q) ==
     /\ \E record \in cmdLog[cleader]:
         /\ record.inst = i
         /\ record.status = "accepted"
-        /\ LET replies == {msg \in sentMsg: 
+        /\ LET replies == {msg \in acceptReplyMsg: 
                                 /\ msg.inst = i 
                                 /\ msg.type = "accept-reply" 
                                 /\ msg.dst = cleader 
@@ -419,17 +470,17 @@ Phase2Finalize(cleader, i, Q) ==
                                       cmd    |-> record.cmd,
                                       deps   |-> record.deps,
                                       seq    |-> record.seq ]}]
-            /\ sentMsg' = (sentMsg \ replies) \cup
-                        {[type  |-> "commit",
-                        inst    |-> i,
-                        ballot  |-> record.ballot,
-                        cmd     |-> record.cmd,
-                        deps    |-> record.deps,
-                        seq     |-> record.seq]}
-            /\ committed' = [committed EXCEPT ![i] = @ \cup 
-                               {<<record.cmd, record.deps, record.seq>>}]
+            /\ acceptReplyMsg' = acceptReplyMsg \ replies
+            /\ commitMsg' = commitMsg \cup
+                                {[type  |-> "commit",
+                                inst    |-> i,
+                                ballot  |-> record.ballot,
+                                cmd     |-> record.cmd,
+                                deps    |-> record.deps,
+                                seq     |-> record.seq]}
+            /\ committed' = [committed EXCEPT ![i] = @ \cup {<<record.cmd, record.deps, record.seq>>}]
             /\ leaderOfInst' = [leaderOfInst EXCEPT ![cleader] = @ \ {i}]
-            /\ UNCHANGED << proposed, executed, crtInst, ballots, preparing >>
+            /\ UNCHANGED << sentMsg,preAcceptMsg,preAcceptReplyMsg,acceptMsg,prepareMsg,prepareReplyMsg,tryPreAcceptMsg,tryPreAcceptReplyMsg, proposed, executed, crtInst, ballots, preparing >>
 
 Commit(replica, cmsg) ==
     LET oldRec == {rec \in cmdLog[replica] : rec.inst = cmsg.inst} IN
@@ -444,8 +495,7 @@ Commit(replica, cmsg) ==
                                       seq      |-> cmsg.seq]}]
         /\ committed' = [committed EXCEPT ![cmsg.inst] = @ \cup 
                                {<<cmsg.cmd, cmsg.deps, cmsg.seq>>}]
-        /\ UNCHANGED << proposed, executed, crtInst, leaderOfInst,
-                        sentMsg, ballots, preparing >>
+        /\ UNCHANGED << sentMsg,preAcceptMsg,preAcceptReplyMsg,commitMsg,acceptMsg,acceptReplyMsg,prepareMsg,prepareReplyMsg,tryPreAcceptMsg,tryPreAcceptReplyMsg, proposed, executed, crtInst, leaderOfInst, sentMsg, ballots, preparing >>
 
 
 (***************************************************************************)
@@ -459,7 +509,7 @@ SendPrepare(replica, i, Q) ==
     /\ ~(\E rec \in cmdLog[replica] :
                         /\ rec.inst = i
                         /\ rec.status \in {"committed", "executed"})
-    /\ sentMsg' = sentMsg \cup
+    /\ prepareMsg' = prepareMsg \cup
                     [type   : {"prepare"},
                      src    : {replica},
                      dst    : Q,
@@ -467,8 +517,7 @@ SendPrepare(replica, i, Q) ==
                      ballot : {<< ballots, replica >>}]
     /\ ballots' = ballots + 1
     /\ preparing' = [preparing EXCEPT ![replica] = @ \cup {i}]
-    /\ UNCHANGED << cmdLog, proposed, executed, crtInst,
-                    leaderOfInst, committed >>
+    /\ UNCHANGED << sentMsg,preAcceptMsg,preAcceptReplyMsg,commitMsg,acceptMsg,acceptReplyMsg,prepareReplyMsg,tryPreAcceptMsg,tryPreAcceptReplyMsg, cmdLog, proposed, executed, crtInst, leaderOfInst, committed >>
     
 ReplyPrepare(replica, msg) ==
         /\ msg.type = "prepare"
@@ -476,7 +525,8 @@ ReplyPrepare(replica, msg) ==
         /\ \/ \E rec \in cmdLog[replica] : 
                 /\ rec.inst = msg.inst
                 /\ msg.ballot[1] > rec.ballot[1]
-                /\ sentMsg' = (sentMsg \ {msg}) \cup
+                /\ prepareMsg' = prepareMsg \ {msg}
+                /\ prepareReplyMsg' = prepareReplyMsg \cup
                             {[type  |-> "prepare-reply",
                               src   |-> replica,
                               dst   |-> msg.src,
@@ -497,13 +547,12 @@ ReplyPrepare(replica, msg) ==
                  /\ IF rec.inst \in leaderOfInst[replica] THEN
                         /\ leaderOfInst' = [leaderOfInst EXCEPT ![replica] = 
                                                                 @ \ {rec.inst}]
-                        /\ UNCHANGED << proposed, executed, committed,
-                                        crtInst, ballots, preparing >>
-                    ELSE UNCHANGED << proposed, executed, committed, crtInst,
-                                      ballots, preparing, leaderOfInst >>
+                        /\ UNCHANGED << sentMsg,preAcceptMsg,preAcceptReplyMsg,commitMsg,acceptMsg,acceptReplyMsg,tryPreAcceptMsg,tryPreAcceptReplyMsg, proposed, executed, committed, crtInst, ballots, preparing >>
+                    ELSE UNCHANGED << sentMsg,preAcceptMsg,preAcceptReplyMsg,commitMsg,acceptMsg,acceptReplyMsg,tryPreAcceptMsg,tryPreAcceptReplyMsg, proposed, executed, committed, crtInst, ballots, preparing, leaderOfInst >>
                         
            \/ /\ ~(\E rec \in cmdLog[replica] : rec.inst = msg.inst)
-              /\ sentMsg' = (sentMsg \ {msg}) \cup
+              /\ prepareMsg' = prepareMsg \ {msg}
+              /\ prepareReplyMsg' = prepareReplyMsg \cup
                             {[type  |-> "prepare-reply",
                               src   |-> replica,
                               dst   |-> msg.src,
@@ -521,14 +570,14 @@ ReplyPrepare(replica, msg) ==
                               cmd   |-> none,
                               deps  |-> {},
                               seq   |-> 0]}]
-              /\ UNCHANGED << proposed, executed, committed, crtInst, ballots,leaderOfInst, preparing >> 
+              /\ UNCHANGED << sentMsg,preAcceptMsg,preAcceptReplyMsg,commitMsg,acceptMsg,acceptReplyMsg,tryPreAcceptMsg,tryPreAcceptReplyMsg, proposed, executed, committed, crtInst, ballots,leaderOfInst, preparing >> 
     
 PrepareFinalize(replica, i, Q) ==
     /\ i \in preparing[replica]
     /\ \E rec \in cmdLog[replica] :
        /\ rec.inst = i
        /\ rec.status \notin {"committed", "executed"}
-       /\ LET replies == {msg \in sentMsg : 
+       /\ LET replies == {msg \in prepareReplyMsg : 
                         /\ msg.inst = i
                         /\ msg.type = "prepare-reply"
                         /\ msg.dst = replica
@@ -537,16 +586,16 @@ PrepareFinalize(replica, i, Q) ==
             /\  \/ \E com \in replies :
                         /\ (com.status \in {"committed", "executed"})
                         /\ preparing' = [preparing EXCEPT ![replica] = @ \ {i}]
-                        /\ sentMsg' = sentMsg \ replies
-                        /\ UNCHANGED << cmdLog, proposed, executed, crtInst, leaderOfInst,
-                                        committed, ballots >>
+                        /\ prepareReplyMsg' = prepareReplyMsg \ replies
+                        /\ UNCHANGED << sentMsg,preAcceptMsg,preAcceptReplyMsg,commitMsg,acceptMsg,acceptReplyMsg,prepareMsg,tryPreAcceptMsg,tryPreAcceptReplyMsg, cmdLog, proposed, executed, crtInst, leaderOfInst, committed, ballots >>
                 \/ /\ ~(\E msg \in replies : msg.status \in {"committed", "executed"})
                    /\ \E acc \in replies :
                         /\ acc.status = "accepted"
                         /\ (\A msg \in (replies \ {acc}) : 
                             (msg.prev_ballot[1] <= acc.prev_ballot[1] \/ 
                              msg.status # "accepted"))
-                        /\ sentMsg' = (sentMsg \ replies) \cup
+                        /\ prepareReplyMsg' = prepareReplyMsg \ replies
+                        /\ acceptMsg' = acceptMsg \cup
                                  [type  : {"accept"},
                                   src   : {replica},
                                   dst   : Q \ {replica},
@@ -564,16 +613,16 @@ PrepareFinalize(replica, i, Q) ==
                                   seq   |-> acc.seq]}]
                          /\ preparing' = [preparing EXCEPT ![replica] = @ \ {i}]
                          /\ leaderOfInst' = [leaderOfInst EXCEPT ![replica] = @ \cup {i}]
-                         /\ UNCHANGED << proposed, executed, crtInst, committed, ballots >>
-                \/ /\ ~(\E msg \in replies : 
-                        msg.status \in {"accepted", "committed", "executed"})
+                         /\ UNCHANGED << sentMsg,preAcceptMsg,preAcceptReplyMsg,commitMsg,acceptReplyMsg,prepareMsg,tryPreAcceptMsg,tryPreAcceptReplyMsg, proposed, executed, crtInst, committed, ballots >>
+                \/ /\ ~(\E msg \in replies : msg.status \in {"accepted", "committed", "executed"})
                    /\ LET preaccepts == {msg \in replies : msg.status = "pre-accepted"} IN
                        (\/  /\ \A p1, p2 \in preaccepts :
                                     p1.cmd = p2.cmd /\ p1.deps = p2.deps /\ p1.seq = p2.seq
                             /\ ~(\E pl \in preaccepts : pl.src = i[1])
                             /\ Cardinality(preaccepts) >= Cardinality(Q) - 1
                             /\ LET pac == CHOOSE pac \in preaccepts : TRUE IN
-                                /\ sentMsg' = (sentMsg \ replies) \cup
+                                /\ prepareReplyMsg' = prepareReplyMsg \ replies
+                                /\ acceptMsg' = acceptMsg \cup
                                          [type  : {"accept"},
                                           src   : {replica},
                                           dst   : Q \ {replica},
@@ -591,7 +640,7 @@ PrepareFinalize(replica, i, Q) ==
                                           seq   |-> pac.seq]}]
                                  /\ preparing' = [preparing EXCEPT ![replica] = @ \ {i}]
                                  /\ leaderOfInst' = [leaderOfInst EXCEPT ![replica] = @ \cup {i}]
-                                 /\ UNCHANGED << proposed, executed, crtInst, committed, ballots >>
+                                 /\ UNCHANGED << sentMsg,preAcceptMsg,preAcceptReplyMsg,commitMsg,acceptReplyMsg,prepareMsg,tryPreAcceptMsg,tryPreAcceptReplyMsg, proposed, executed, crtInst, committed, ballots >>
                         \/  /\ \A p1, p2 \in preaccepts : p1.cmd = p2.cmd /\ 
                                                           p1.deps = p2.deps /\
                                                           p1.seq = p2.seq
@@ -599,7 +648,8 @@ PrepareFinalize(replica, i, Q) ==
                             /\ Cardinality(preaccepts) < Cardinality(Q) - 1
                             /\ Cardinality(preaccepts) >= Cardinality(Q) \div 2
                             /\ LET pac == CHOOSE pac \in preaccepts : TRUE IN
-                                /\ sentMsg' = (sentMsg \ replies) \cup
+                                /\ prepareReplyMsg' = prepareReplyMsg \ replies
+                                /\ tryPreAcceptMsg' = tryPreAcceptMsg \cup
                                          [type  : {"try-pre-accept"},
                                           src   : {replica},
                                           dst   : Q,
@@ -610,8 +660,7 @@ PrepareFinalize(replica, i, Q) ==
                                           seq   : {pac.seq}]
                                 /\ preparing' = [preparing EXCEPT ![replica] = @ \ {i}]
                                 /\ leaderOfInst' = [leaderOfInst EXCEPT ![replica] = @ \cup {i}]
-                                /\ UNCHANGED << cmdLog, proposed, executed,
-                                                crtInst, committed, ballots >>
+                                /\ UNCHANGED << sentMsg,preAcceptMsg,preAcceptReplyMsg,commitMsg,acceptMsg,acceptReplyMsg,prepareMsg,tryPreAcceptReplyMsg, cmdLog, proposed, executed, crtInst, committed, ballots >>
                         \/  /\ \/ \E p1, p2 \in preaccepts : p1.cmd # p2.cmd \/ 
                                                              p1.deps # p2.deps \/
                                                              p1.seq # p2.seq
@@ -622,14 +671,14 @@ PrepareFinalize(replica, i, Q) ==
                             /\ LET pac == CHOOSE pac \in preaccepts : pac.cmd # none IN
                                 /\ StartPhase1(pac.cmd, replica, Q, i, rec.ballot, replies)
                                 /\ preparing' = [preparing EXCEPT ![replica] = @ \ {i}]
-                                /\ UNCHANGED << proposed, executed, crtInst, committed, ballots >>)
+                                /\ UNCHANGED << sentMsg,preAcceptReplyMsg,commitMsg,acceptMsg,acceptReplyMsg,prepareMsg,prepareReplyMsg,tryPreAcceptMsg,tryPreAcceptReplyMsg, proposed, executed, crtInst, committed, ballots >>)
                 \/  /\ \A msg \in replies : msg.status = "not-seen"
                     /\ StartPhase1(none, replica, Q, i, rec.ballot, replies)
                     /\ preparing' = [preparing EXCEPT ![replica] = @ \ {i}]
                     /\ UNCHANGED << proposed, executed, crtInst, committed, ballots >>
                     
 ReplyTryPreaccept(replica) ==
-    \E tpa \in sentMsg :
+    \E tpa \in tryPreAcceptMsg :
         /\ tpa.type = "try-pre-accept" 
         /\ tpa.dst = replica
         /\ LET oldRec == {rec \in cmdLog[replica] : rec.inst = tpa.inst} IN
@@ -639,19 +688,20 @@ ReplyTryPreaccept(replica) ==
                         /\ tpa.inst \notin rec.deps
                         /\ \/ rec.inst \notin tpa.deps
                            \/ rec.seq >= tpa.seq
-                        /\ sentMsg' = (sentMsg \ {tpa}) \cup
+                        /\ tryPreAcceptMsg' = tryPreAcceptMsg \ {tpa}
+                        /\ tryPreAcceptReplyMsg' = tryPreAcceptReplyMsg \cup
                                     {[type  |-> "try-pre-accept-reply",
                                       src   |-> replica,
                                       dst   |-> tpa.src,
                                       inst  |-> tpa.inst,
                                       ballot|-> tpa.ballot,
                                       status|-> rec.status]})
-                        /\ UNCHANGED << cmdLog, proposed, executed, committed, crtInst,
-                                        ballots, leaderOfInst, preparing >>
+                        /\ UNCHANGED << sentMsg,preAcceptMsg,preAcceptReplyMsg,commitMsg,acceptMsg,acceptReplyMsg,prepareMsg,prepareReplyMsg, cmdLog, proposed, executed, committed, crtInst, ballots, leaderOfInst, preparing >>
                \/ /\ (\A rec \in cmdLog[replica] \ oldRec: 
                             tpa.inst \in rec.deps \/ (rec.inst \in tpa.deps /\
                                                       rec.seq < tpa.seq))
-                  /\ sentMsg' = (sentMsg \ {tpa}) \cup
+                  /\ tryPreAcceptMsg' = tryPreAcceptMsg \ {tpa}
+                  /\ tryPreAcceptReplyMsg' = tryPreAcceptReplyMsg \cup
                                     {[type  |-> "try-pre-accept-reply",
                                       src   |-> replica,
                                       dst   |-> tpa.src,
@@ -665,19 +715,19 @@ ReplyTryPreaccept(replica) ==
                                       cmd   |-> tpa.cmd,
                                       deps  |-> tpa.deps,
                                       seq   |-> tpa.seq]}]
-                  /\ UNCHANGED << proposed, executed, committed, crtInst, ballots,
-                                  leaderOfInst, preparing >>
+                  /\ UNCHANGED << sentMsg,preAcceptMsg,preAcceptReplyMsg,commitMsg,acceptMsg,acceptReplyMsg,prepareMsg,prepareReplyMsg, proposed, executed, committed, crtInst, ballots, leaderOfInst, preparing >>
                       
              
 FinalizeTryPreAccept(cleader, i, Q) ==
     \E rec \in cmdLog[cleader]:
         /\ rec.inst = i
-        /\ LET tprs == {msg \in sentMsg : msg.type = "try-pre-accept-reply" /\
+        /\ LET tprs == {msg \in tryPreAcceptReplyMsg : msg.type = "try-pre-accept-reply" /\
                             msg.dst = cleader /\ msg.inst = i /\
                             msg.ballot = rec.ballot} IN
             /\ \A r \in Q: \E tpr \in tprs : tpr.src = r
             /\ \/ /\ \A tpr \in tprs: tpr.status = "OK"
-                  /\ sentMsg' = (sentMsg \ tprs) \cup
+                  /\ tryPreAcceptReplyMsg' = tryPreAcceptReplyMsg \ tprs
+                  /\ acceptMsg' = acceptMsg \cup
                              [type  : {"accept"},
                               src   : {cleader},
                               dst   : Q \ {cleader},
@@ -693,18 +743,15 @@ FinalizeTryPreAccept(cleader, i, Q) ==
                               cmd   |-> rec.cmd,
                               deps  |-> rec.deps,
                               seq   |-> rec.seq]}]
-                  /\ UNCHANGED << proposed, executed, committed, crtInst, ballots,
-                                  leaderOfInst, preparing >>
+                  /\ UNCHANGED << sentMsg, proposed, executed, committed, crtInst, ballots, leaderOfInst, preparing >>
                \/ /\ \E tpr \in tprs: tpr.status \in {"accepted", "committed", "executed"}
                   /\ StartPhase1(rec.cmd, cleader, Q, i, rec.ballot, tprs)
-                  /\ UNCHANGED << proposed, executed, committed, crtInst, ballots,
-                                  leaderOfInst, preparing >>
+                  /\ UNCHANGED << sentMsg,preAcceptMsg,preAcceptReplyMsg,commitMsg,acceptReplyMsg,prepareMsg,prepareReplyMsg,tryPreAcceptMsg, proposed, executed, committed, crtInst, ballots, leaderOfInst, preparing >>
                \/ /\ \E tpr \in tprs: tpr.status = "pre-accepted"
                   /\ \A tpr \in tprs: tpr.status \in {"OK", "pre-accepted"}
-                  /\ sentMsg' = sentMsg \ tprs
+                  /\ tryPreAcceptReplyMsg' = tryPreAcceptReplyMsg \ tprs
                   /\ leaderOfInst' = [leaderOfInst EXCEPT ![cleader] = @ \ {i}]
-                  /\ UNCHANGED << cmdLog, proposed, executed, committed, crtInst,
-                                  ballots, preparing >>
+                  /\ UNCHANGED <<preAcceptMsg,preAcceptReplyMsg,commitMsg,acceptReplyMsg,prepareMsg,prepareReplyMsg,tryPreAcceptMsg, sentMsg, cmdLog, proposed, executed, committed, crtInst, ballots, preparing >>
          
 
 
@@ -741,21 +788,21 @@ FinalizeTryPreAccept(cleader, i, Q) ==
 (***************************************************************************)
 
 
-ProposeAction == \E C \in (Commands \ proposed) : \E cleader \in Replicas : Propose(C, cleader)
-Phase1FastAction == \E cleader \in Replicas : \E inst \in leaderOfInst[cleader] : \E Q \in FastQuorums(cleader) : Phase1Fast(cleader, inst, Q)
-Phase1SlowAction == \E cleader \in Replicas : \E inst \in leaderOfInst[cleader] : \E Q \in SlowQuorums(cleader) : Phase1Slow(cleader, inst, Q)
-Phase2FinalizeAction == \E cleader \in Replicas : \E inst \in leaderOfInst[cleader] : \E Q \in SlowQuorums(cleader) : Phase2Finalize(cleader, inst, Q)
-FinalizeTryPreAcceptAction == \E cleader \in Replicas : \E inst \in leaderOfInst[cleader] : \E Q \in SlowQuorums(cleader) : FinalizeTryPreAccept(cleader, inst, Q)
-Phase1ReplyAction == \E replica \in Replicas : Phase1Reply(replica)
-Phase2ReplyAction == \E replica \in Replicas : Phase2Reply(replica)
-CommitAction == \E replica \in Replicas : \E cmsg \in sentMsg : (cmsg.type = "commit" /\ Commit(replica, cmsg))
-SendPrepareAction == \E replica \in Replicas : \E i \in Instances : 
+ProposeAction == TRUE /\ \E C \in (Commands \ proposed) : \E cleader \in Replicas : Propose(C, cleader)
+Phase1FastAction ==  TRUE /\ \E cleader \in Replicas : \E inst \in leaderOfInst[cleader] : \E Q \in FastQuorums(cleader) : Phase1Fast(cleader, inst, Q)
+Phase1SlowAction == TRUE /\ \E cleader \in Replicas : \E inst \in leaderOfInst[cleader] : \E Q \in SlowQuorums(cleader) : Phase1Slow(cleader, inst, Q)
+Phase2FinalizeAction == TRUE /\ \E cleader \in Replicas : \E inst \in leaderOfInst[cleader] : \E Q \in SlowQuorums(cleader) : Phase2Finalize(cleader, inst, Q)
+FinalizeTryPreAcceptAction == TRUE /\ \E cleader \in Replicas : \E inst \in leaderOfInst[cleader] : \E Q \in SlowQuorums(cleader) : FinalizeTryPreAccept(cleader, inst, Q)
+Phase1ReplyAction == TRUE /\ \E replica \in Replicas : Phase1Reply(replica)
+Phase2ReplyAction == TRUE /\ \E replica \in Replicas : Phase2Reply(replica)
+CommitAction == TRUE /\ \E replica \in Replicas : \E cmsg \in sentMsg : (cmsg.type = "commit" /\ Commit(replica, cmsg))
+SendPrepareAction == TRUE /\ \E replica \in Replicas : \E i \in Instances : 
     \* This condition states that the instance has been started by its original owner.
     /\ crtInst[i[1]] > i[2] 
     /\ \E Q \in SlowQuorums(replica) : SendPrepare(replica, i, Q)
-ReplyPrepareAction == \E replica \in Replicas : \E msg \in sentMsg : ReplyPrepare(replica, msg)
-PrepareFinalizeAction == \E replica \in Replicas : \E i \in preparing[replica] : \E Q \in SlowQuorums(replica) : PrepareFinalize(replica, i, Q)
-ReplyTryPreacceptAction == \E replica \in Replicas : ReplyTryPreaccept(replica)
+ReplyPrepareAction == TRUE /\ \E replica \in Replicas : \E msg \in prepareMsg : ReplyPrepare(replica, msg)
+PrepareFinalizeAction == TRUE /\ \E replica \in Replicas : \E i \in preparing[replica] : \E Q \in SlowQuorums(replica) : PrepareFinalize(replica, i, Q)
+ReplyTryPreacceptAction == TRUE /\ \E replica \in Replicas : ReplyTryPreaccept(replica)
 
 Next ==
     \/ ProposeAction
@@ -803,6 +850,10 @@ H_Consistency ==
     \A i \in Instances : Cardinality(committed[i]) <= 1
 
 Symmetry == Permutations(Replicas)
+
+NextUnchanged == UNCHANGED <<cmdLog, proposed, executed, sentMsg, preAcceptMsg, preAcceptReplyMsg,commitMsg,acceptMsg,acceptReplyMsg,prepareMsg,prepareReplyMsg,tryPreAcceptMsg,tryPreAcceptReplyMsg,crtInst, leaderOfInst,committed, ballots, preparing>>
+
+CTICost == 0
 
 =============================================================================
 \* Modification History
