@@ -1,0 +1,2508 @@
+TLC2 Version 2.15 of Day Month 20?? (rev: ${git.shortRevision})
+Warning: Please run the Java VM, which executes TLC with a throughput optimized garbage collector, by passing the "-XX:+UseParallelGC" property.
+(Use the -nowarning option to disable this warning.)
+Running Random Simulation with seed 13 with 7 workers on 8 cores with 4096MB heap and 64MB offheap memory [pid: 91046] (Mac OS X 10.16 x86_64, Oracle Corporation 16 x86_64).
+Parsing file /Users/willyschultz/Dropbox/PhD/Research/inductive-invariant-inference/endive/benchmarks/EPaxos.tla
+Parsing file /private/var/folders/f8/s3kg1k4d4fd6zkzkrw8xbk_80000gn/T/Naturals.tla (jar:file:/Users/willyschultz/Dropbox/PhD/Research/inductive-invariant-inference/endive/benchmarks/tla2tools-checkall.jar!/tla2sany/StandardModules/Naturals.tla)
+Parsing file /private/var/folders/f8/s3kg1k4d4fd6zkzkrw8xbk_80000gn/T/FiniteSets.tla (jar:file:/Users/willyschultz/Dropbox/PhD/Research/inductive-invariant-inference/endive/benchmarks/tla2tools-checkall.jar!/tla2sany/StandardModules/FiniteSets.tla)
+Parsing file /private/var/folders/f8/s3kg1k4d4fd6zkzkrw8xbk_80000gn/T/TLC.tla (jar:file:/Users/willyschultz/Dropbox/PhD/Research/inductive-invariant-inference/endive/benchmarks/tla2tools-checkall.jar!/tla2sany/StandardModules/TLC.tla)
+Parsing file /Users/willyschultz/Dropbox/PhD/Research/inductive-invariant-inference/endive/benchmarks/Randomization.tla
+Parsing file /private/var/folders/f8/s3kg1k4d4fd6zkzkrw8xbk_80000gn/T/Sequences.tla (jar:file:/Users/willyschultz/Dropbox/PhD/Research/inductive-invariant-inference/endive/benchmarks/tla2tools-checkall.jar!/tla2sany/StandardModules/Sequences.tla)
+Semantic processing of module Naturals
+Semantic processing of module Sequences
+Semantic processing of module FiniteSets
+Semantic processing of module TLC
+Semantic processing of module Randomization
+Semantic processing of module EPaxos
+Starting... (2023-10-25 10:28:21)
+Computed 1 initial states...
+Progress: 731612 states checked, 8836 traces generated (trace length: mean=22, var(x)=17, sd=4)
+Error: Invariant H_Consistency is violated.
+Error: The behavior up to this point is:
+State 1: <Initial predicate>
+/\ tryPreAcceptMsg = {}
+/\ acceptMsg = {}
+/\ prepareReplyMsg = {}
+/\ sentMsg = {}
+/\ preAcceptMsg = {}
+/\ executed = (r1 :> {} @@ r2 :> {} @@ r3 :> {})
+/\ crtInst = (r1 :> 1 @@ r2 :> 1 @@ r3 :> 1)
+/\ ballots = 1
+/\ cmdLog = (r1 :> {} @@ r2 :> {} @@ r3 :> {})
+/\ leaderOfInst = (r1 :> {} @@ r2 :> {} @@ r3 :> {})
+/\ preAcceptReplyMsg = {}
+/\ committed = ( <<r1, 1>> :> {} @@
+  <<r1, 2>> :> {} @@
+  <<r2, 1>> :> {} @@
+  <<r2, 2>> :> {} @@
+  <<r3, 1>> :> {} @@
+  <<r3, 2>> :> {} )
+/\ proposed = {}
+/\ tryPreAcceptReplyMsg = {}
+/\ preparing = (r1 :> {} @@ r2 :> {} @@ r3 :> {})
+/\ prepareMsg = {}
+/\ acceptReplyMsg = {}
+/\ commitMsg = {}
+
+Progress: 1990874 states checked, 24024 traces generated (trace length: mean=22, var(x)=17, sd=4)
+State 2: <ProposeAction line 791, col 18 to line 791, col 138 of module EPaxos>
+/\ tryPreAcceptMsg = {}
+/\ acceptMsg = {}
+/\ prepareReplyMsg = {}
+/\ sentMsg = {}
+/\ preAcceptMsg = { [ type |-> "pre-accept",
+    src |-> r2,
+    dst |-> r3,
+    inst |-> <<r2, 1>>,
+    ballot |-> <<0, r2>>,
+    cmd |-> c2,
+    deps |-> {},
+    seq |-> 1 ] }
+/\ executed = (r1 :> {} @@ r2 :> {} @@ r3 :> {})
+/\ crtInst = (r1 :> 1 @@ r2 :> 2 @@ r3 :> 1)
+/\ ballots = 1
+/\ cmdLog = ( r1 :> {} @@
+  r2 :>
+      { [ inst |-> <<r2, 1>>,
+          ballot |-> <<0, r2>>,
+          cmd |-> c2,
+          deps |-> {},
+          seq |-> 1,
+          status |-> "pre-accepted" ] } @@
+  r3 :> {} )
+/\ leaderOfInst = (r1 :> {} @@ r2 :> {<<r2, 1>>} @@ r3 :> {})
+/\ preAcceptReplyMsg = {}
+/\ committed = ( <<r1, 1>> :> {} @@
+  <<r1, 2>> :> {} @@
+  <<r2, 1>> :> {} @@
+  <<r2, 2>> :> {} @@
+  <<r3, 1>> :> {} @@
+  <<r3, 2>> :> {} )
+/\ proposed = {c2}
+/\ tryPreAcceptReplyMsg = {}
+/\ preparing = (r1 :> {} @@ r2 :> {} @@ r3 :> {})
+/\ prepareMsg = {}
+/\ acceptReplyMsg = {}
+/\ commitMsg = {}
+
+State 3: <SendPrepareAction line 799, col 22 to line 802, col 65 of module EPaxos>
+/\ tryPreAcceptMsg = {}
+/\ acceptMsg = {}
+/\ prepareReplyMsg = {}
+/\ sentMsg = {}
+/\ preAcceptMsg = { [ type |-> "pre-accept",
+    src |-> r2,
+    dst |-> r3,
+    inst |-> <<r2, 1>>,
+    ballot |-> <<0, r2>>,
+    cmd |-> c2,
+    deps |-> {},
+    seq |-> 1 ] }
+/\ executed = (r1 :> {} @@ r2 :> {} @@ r3 :> {})
+/\ crtInst = (r1 :> 1 @@ r2 :> 2 @@ r3 :> 1)
+/\ ballots = 2
+/\ cmdLog = ( r1 :> {} @@
+  r2 :>
+      { [ inst |-> <<r2, 1>>,
+          ballot |-> <<0, r2>>,
+          cmd |-> c2,
+          deps |-> {},
+          seq |-> 1,
+          status |-> "pre-accepted" ] } @@
+  r3 :> {} )
+/\ leaderOfInst = (r1 :> {} @@ r2 :> {<<r2, 1>>} @@ r3 :> {})
+/\ preAcceptReplyMsg = {}
+/\ committed = ( <<r1, 1>> :> {} @@
+  <<r1, 2>> :> {} @@
+  <<r2, 1>> :> {} @@
+  <<r2, 2>> :> {} @@
+  <<r3, 1>> :> {} @@
+  <<r3, 2>> :> {} )
+/\ proposed = {c2}
+/\ tryPreAcceptReplyMsg = {}
+/\ preparing = (r1 :> {<<r2, 1>>} @@ r2 :> {} @@ r3 :> {})
+/\ prepareMsg = { [ type |-> "prepare",
+    src |-> r1,
+    dst |-> r1,
+    inst |-> <<r2, 1>>,
+    ballot |-> <<1, r1>> ],
+  [ type |-> "prepare",
+    src |-> r1,
+    dst |-> r2,
+    inst |-> <<r2, 1>>,
+    ballot |-> <<1, r1>> ] }
+/\ acceptReplyMsg = {}
+/\ commitMsg = {}
+
+State 4: <ReplyPrepareAction line 803, col 23 to line 803, col 106 of module EPaxos>
+/\ tryPreAcceptMsg = {}
+/\ acceptMsg = {}
+/\ prepareReplyMsg = {[type |-> "prepare-reply", src |-> r1, dst |-> r1, inst |-> <<r2, 1>>, ballot |-> <<1, r1>>, cmd |-> None, deps |-> {}, seq |-> 0, prev_ballot |-> <<0, r1>>, status |-> "not-seen"]}
+/\ sentMsg = {}
+/\ preAcceptMsg = { [ type |-> "pre-accept",
+    src |-> r2,
+    dst |-> r3,
+    inst |-> <<r2, 1>>,
+    ballot |-> <<0, r2>>,
+    cmd |-> c2,
+    deps |-> {},
+    seq |-> 1 ] }
+/\ executed = (r1 :> {} @@ r2 :> {} @@ r3 :> {})
+/\ crtInst = (r1 :> 1 @@ r2 :> 2 @@ r3 :> 1)
+/\ ballots = 2
+/\ cmdLog = ( r1 :>
+      { [ inst |-> <<r2, 1>>,
+          ballot |-> <<1, r1>>,
+          cmd |-> None,
+          deps |-> {},
+          seq |-> 0,
+          status |-> "not-seen" ] } @@
+  r2 :>
+      { [ inst |-> <<r2, 1>>,
+          ballot |-> <<0, r2>>,
+          cmd |-> c2,
+          deps |-> {},
+          seq |-> 1,
+          status |-> "pre-accepted" ] } @@
+  r3 :> {} )
+/\ leaderOfInst = (r1 :> {} @@ r2 :> {<<r2, 1>>} @@ r3 :> {})
+/\ preAcceptReplyMsg = {}
+/\ committed = ( <<r1, 1>> :> {} @@
+  <<r1, 2>> :> {} @@
+  <<r2, 1>> :> {} @@
+  <<r2, 2>> :> {} @@
+  <<r3, 1>> :> {} @@
+  <<r3, 2>> :> {} )
+/\ proposed = {c2}
+/\ tryPreAcceptReplyMsg = {}
+/\ preparing = (r1 :> {<<r2, 1>>} @@ r2 :> {} @@ r3 :> {})
+/\ prepareMsg = { [ type |-> "prepare",
+    src |-> r1,
+    dst |-> r2,
+    inst |-> <<r2, 1>>,
+    ballot |-> <<1, r1>> ] }
+/\ acceptReplyMsg = {}
+/\ commitMsg = {}
+
+State 5: <ReplyPrepareAction line 803, col 23 to line 803, col 106 of module EPaxos>
+/\ tryPreAcceptMsg = {}
+/\ acceptMsg = {}
+/\ prepareReplyMsg = {[type |-> "prepare-reply", src |-> r1, dst |-> r1, inst |-> <<r2, 1>>, ballot |-> <<1, r1>>, cmd |-> None, deps |-> {}, seq |-> 0, prev_ballot |-> <<0, r1>>, status |-> "not-seen"], [type |-> "prepare-reply", src |-> r2, dst |-> r1, inst |-> <<r2, 1>>, ballot |-> <<1, r1>>, cmd |-> c2, deps |-> {}, seq |-> 1, prev_ballot |-> <<0, r2>>, status |-> "pre-accepted"]}
+/\ sentMsg = {}
+/\ preAcceptMsg = { [ type |-> "pre-accept",
+    src |-> r2,
+    dst |-> r3,
+    inst |-> <<r2, 1>>,
+    ballot |-> <<0, r2>>,
+    cmd |-> c2,
+    deps |-> {},
+    seq |-> 1 ] }
+/\ executed = (r1 :> {} @@ r2 :> {} @@ r3 :> {})
+/\ crtInst = (r1 :> 1 @@ r2 :> 2 @@ r3 :> 1)
+/\ ballots = 2
+/\ cmdLog = ( r1 :>
+      { [ inst |-> <<r2, 1>>,
+          ballot |-> <<1, r1>>,
+          cmd |-> None,
+          deps |-> {},
+          seq |-> 0,
+          status |-> "not-seen" ] } @@
+  r2 :>
+      { [ inst |-> <<r2, 1>>,
+          ballot |-> <<1, r1>>,
+          cmd |-> c2,
+          deps |-> {},
+          seq |-> 1,
+          status |-> "pre-accepted" ] } @@
+  r3 :> {} )
+/\ leaderOfInst = (r1 :> {} @@ r2 :> {} @@ r3 :> {})
+/\ preAcceptReplyMsg = {}
+/\ committed = ( <<r1, 1>> :> {} @@
+  <<r1, 2>> :> {} @@
+  <<r2, 1>> :> {} @@
+  <<r2, 2>> :> {} @@
+  <<r3, 1>> :> {} @@
+  <<r3, 2>> :> {} )
+/\ proposed = {c2}
+/\ tryPreAcceptReplyMsg = {}
+/\ preparing = (r1 :> {<<r2, 1>>} @@ r2 :> {} @@ r3 :> {})
+/\ prepareMsg = {}
+/\ acceptReplyMsg = {}
+/\ commitMsg = {}
+
+State 6: <PrepareFinalizeAction line 804, col 26 to line 804, col 151 of module EPaxos>
+/\ tryPreAcceptMsg = {}
+/\ acceptMsg = {}
+/\ prepareReplyMsg = {[type |-> "prepare-reply", src |-> r1, dst |-> r1, inst |-> <<r2, 1>>, ballot |-> <<1, r1>>, cmd |-> None, deps |-> {}, seq |-> 0, prev_ballot |-> <<0, r1>>, status |-> "not-seen"], [type |-> "prepare-reply", src |-> r2, dst |-> r1, inst |-> <<r2, 1>>, ballot |-> <<1, r1>>, cmd |-> c2, deps |-> {}, seq |-> 1, prev_ballot |-> <<0, r2>>, status |-> "pre-accepted"]}
+/\ sentMsg = {}
+/\ preAcceptMsg = { [ type |-> "pre-accept",
+    src |-> r1,
+    dst |-> r2,
+    inst |-> <<r2, 1>>,
+    ballot |-> <<1, r1>>,
+    cmd |-> c2,
+    deps |-> {<<r2, 1>>},
+    seq |-> 1 ],
+  [ type |-> "pre-accept",
+    src |-> r2,
+    dst |-> r3,
+    inst |-> <<r2, 1>>,
+    ballot |-> <<0, r2>>,
+    cmd |-> c2,
+    deps |-> {},
+    seq |-> 1 ] }
+/\ executed = (r1 :> {} @@ r2 :> {} @@ r3 :> {})
+/\ crtInst = (r1 :> 1 @@ r2 :> 2 @@ r3 :> 1)
+/\ ballots = 2
+/\ cmdLog = ( r1 :>
+      { [ inst |-> <<r2, 1>>,
+          ballot |-> <<1, r1>>,
+          cmd |-> c2,
+          deps |-> {<<r2, 1>>},
+          seq |-> 1,
+          status |-> "pre-accepted" ] } @@
+  r2 :>
+      { [ inst |-> <<r2, 1>>,
+          ballot |-> <<1, r1>>,
+          cmd |-> c2,
+          deps |-> {},
+          seq |-> 1,
+          status |-> "pre-accepted" ] } @@
+  r3 :> {} )
+/\ leaderOfInst = (r1 :> {<<r2, 1>>} @@ r2 :> {} @@ r3 :> {})
+/\ preAcceptReplyMsg = {}
+/\ committed = ( <<r1, 1>> :> {} @@
+  <<r1, 2>> :> {} @@
+  <<r2, 1>> :> {} @@
+  <<r2, 2>> :> {} @@
+  <<r3, 1>> :> {} @@
+  <<r3, 2>> :> {} )
+/\ proposed = {c2}
+/\ tryPreAcceptReplyMsg = {}
+/\ preparing = (r1 :> {} @@ r2 :> {} @@ r3 :> {})
+/\ prepareMsg = {}
+/\ acceptReplyMsg = {}
+/\ commitMsg = {}
+
+State 7: <SendPrepareAction line 799, col 22 to line 802, col 65 of module EPaxos>
+/\ tryPreAcceptMsg = {}
+/\ acceptMsg = {}
+/\ prepareReplyMsg = {[type |-> "prepare-reply", src |-> r1, dst |-> r1, inst |-> <<r2, 1>>, ballot |-> <<1, r1>>, cmd |-> None, deps |-> {}, seq |-> 0, prev_ballot |-> <<0, r1>>, status |-> "not-seen"], [type |-> "prepare-reply", src |-> r2, dst |-> r1, inst |-> <<r2, 1>>, ballot |-> <<1, r1>>, cmd |-> c2, deps |-> {}, seq |-> 1, prev_ballot |-> <<0, r2>>, status |-> "pre-accepted"]}
+/\ sentMsg = {}
+/\ preAcceptMsg = { [ type |-> "pre-accept",
+    src |-> r1,
+    dst |-> r2,
+    inst |-> <<r2, 1>>,
+    ballot |-> <<1, r1>>,
+    cmd |-> c2,
+    deps |-> {<<r2, 1>>},
+    seq |-> 1 ],
+  [ type |-> "pre-accept",
+    src |-> r2,
+    dst |-> r3,
+    inst |-> <<r2, 1>>,
+    ballot |-> <<0, r2>>,
+    cmd |-> c2,
+    deps |-> {},
+    seq |-> 1 ] }
+/\ executed = (r1 :> {} @@ r2 :> {} @@ r3 :> {})
+/\ crtInst = (r1 :> 1 @@ r2 :> 2 @@ r3 :> 1)
+/\ ballots = 3
+/\ cmdLog = ( r1 :>
+      { [ inst |-> <<r2, 1>>,
+          ballot |-> <<1, r1>>,
+          cmd |-> c2,
+          deps |-> {<<r2, 1>>},
+          seq |-> 1,
+          status |-> "pre-accepted" ] } @@
+  r2 :>
+      { [ inst |-> <<r2, 1>>,
+          ballot |-> <<1, r1>>,
+          cmd |-> c2,
+          deps |-> {},
+          seq |-> 1,
+          status |-> "pre-accepted" ] } @@
+  r3 :> {} )
+/\ leaderOfInst = (r1 :> {<<r2, 1>>} @@ r2 :> {} @@ r3 :> {})
+/\ preAcceptReplyMsg = {}
+/\ committed = ( <<r1, 1>> :> {} @@
+  <<r1, 2>> :> {} @@
+  <<r2, 1>> :> {} @@
+  <<r2, 2>> :> {} @@
+  <<r3, 1>> :> {} @@
+  <<r3, 2>> :> {} )
+/\ proposed = {c2}
+/\ tryPreAcceptReplyMsg = {}
+/\ preparing = (r1 :> {} @@ r2 :> {<<r2, 1>>} @@ r3 :> {})
+/\ prepareMsg = { [ type |-> "prepare",
+    src |-> r2,
+    dst |-> r2,
+    inst |-> <<r2, 1>>,
+    ballot |-> <<2, r2>> ],
+  [ type |-> "prepare",
+    src |-> r2,
+    dst |-> r3,
+    inst |-> <<r2, 1>>,
+    ballot |-> <<2, r2>> ] }
+/\ acceptReplyMsg = {}
+/\ commitMsg = {}
+
+State 8: <Phase1ReplyAction line 796, col 22 to line 796, col 75 of module EPaxos>
+/\ tryPreAcceptMsg = {}
+/\ acceptMsg = {}
+/\ prepareReplyMsg = {[type |-> "prepare-reply", src |-> r1, dst |-> r1, inst |-> <<r2, 1>>, ballot |-> <<1, r1>>, cmd |-> None, deps |-> {}, seq |-> 0, prev_ballot |-> <<0, r1>>, status |-> "not-seen"], [type |-> "prepare-reply", src |-> r2, dst |-> r1, inst |-> <<r2, 1>>, ballot |-> <<1, r1>>, cmd |-> c2, deps |-> {}, seq |-> 1, prev_ballot |-> <<0, r2>>, status |-> "pre-accepted"]}
+/\ sentMsg = {}
+/\ preAcceptMsg = { [ type |-> "pre-accept",
+    src |-> r1,
+    dst |-> r2,
+    inst |-> <<r2, 1>>,
+    ballot |-> <<1, r1>>,
+    cmd |-> c2,
+    deps |-> {<<r2, 1>>},
+    seq |-> 1 ] }
+/\ executed = (r1 :> {} @@ r2 :> {} @@ r3 :> {})
+/\ crtInst = (r1 :> 1 @@ r2 :> 2 @@ r3 :> 1)
+/\ ballots = 3
+/\ cmdLog = ( r1 :>
+      { [ inst |-> <<r2, 1>>,
+          ballot |-> <<1, r1>>,
+          cmd |-> c2,
+          deps |-> {<<r2, 1>>},
+          seq |-> 1,
+          status |-> "pre-accepted" ] } @@
+  r2 :>
+      { [ inst |-> <<r2, 1>>,
+          ballot |-> <<1, r1>>,
+          cmd |-> c2,
+          deps |-> {},
+          seq |-> 1,
+          status |-> "pre-accepted" ] } @@
+  r3 :>
+      { [ inst |-> <<r2, 1>>,
+          ballot |-> <<0, r2>>,
+          cmd |-> c2,
+          deps |-> {},
+          seq |-> 1,
+          status |-> "pre-accepted" ] } )
+/\ leaderOfInst = (r1 :> {<<r2, 1>>} @@ r2 :> {} @@ r3 :> {})
+/\ preAcceptReplyMsg = { [ committed |-> {},
+    type |-> "pre-accept-reply",
+    src |-> r3,
+    dst |-> r2,
+    inst |-> <<r2, 1>>,
+    ballot |-> <<0, r2>>,
+    deps |-> {},
+    seq |-> 1 ] }
+/\ committed = ( <<r1, 1>> :> {} @@
+  <<r1, 2>> :> {} @@
+  <<r2, 1>> :> {} @@
+  <<r2, 2>> :> {} @@
+  <<r3, 1>> :> {} @@
+  <<r3, 2>> :> {} )
+/\ proposed = {c2}
+/\ tryPreAcceptReplyMsg = {}
+/\ preparing = (r1 :> {} @@ r2 :> {<<r2, 1>>} @@ r3 :> {})
+/\ prepareMsg = { [ type |-> "prepare",
+    src |-> r2,
+    dst |-> r2,
+    inst |-> <<r2, 1>>,
+    ballot |-> <<2, r2>> ],
+  [ type |-> "prepare",
+    src |-> r2,
+    dst |-> r3,
+    inst |-> <<r2, 1>>,
+    ballot |-> <<2, r2>> ] }
+/\ acceptReplyMsg = {}
+/\ commitMsg = {}
+
+State 9: <ProposeAction line 791, col 18 to line 791, col 138 of module EPaxos>
+/\ tryPreAcceptMsg = {}
+/\ acceptMsg = {}
+/\ prepareReplyMsg = {[type |-> "prepare-reply", src |-> r1, dst |-> r1, inst |-> <<r2, 1>>, ballot |-> <<1, r1>>, cmd |-> None, deps |-> {}, seq |-> 0, prev_ballot |-> <<0, r1>>, status |-> "not-seen"], [type |-> "prepare-reply", src |-> r2, dst |-> r1, inst |-> <<r2, 1>>, ballot |-> <<1, r1>>, cmd |-> c2, deps |-> {}, seq |-> 1, prev_ballot |-> <<0, r2>>, status |-> "pre-accepted"]}
+/\ sentMsg = {}
+/\ preAcceptMsg = { [ type |-> "pre-accept",
+    src |-> r1,
+    dst |-> r2,
+    inst |-> <<r1, 1>>,
+    ballot |-> <<0, r1>>,
+    cmd |-> c1,
+    deps |-> {<<r2, 1>>},
+    seq |-> 2 ],
+  [ type |-> "pre-accept",
+    src |-> r1,
+    dst |-> r2,
+    inst |-> <<r2, 1>>,
+    ballot |-> <<1, r1>>,
+    cmd |-> c2,
+    deps |-> {<<r2, 1>>},
+    seq |-> 1 ] }
+/\ executed = (r1 :> {} @@ r2 :> {} @@ r3 :> {})
+/\ crtInst = (r1 :> 2 @@ r2 :> 2 @@ r3 :> 1)
+/\ ballots = 3
+/\ cmdLog = ( r1 :>
+      { [ inst |-> <<r1, 1>>,
+          ballot |-> <<0, r1>>,
+          cmd |-> c1,
+          deps |-> {<<r2, 1>>},
+          seq |-> 2,
+          status |-> "pre-accepted" ],
+        [ inst |-> <<r2, 1>>,
+          ballot |-> <<1, r1>>,
+          cmd |-> c2,
+          deps |-> {<<r2, 1>>},
+          seq |-> 1,
+          status |-> "pre-accepted" ] } @@
+  r2 :>
+      { [ inst |-> <<r2, 1>>,
+          ballot |-> <<1, r1>>,
+          cmd |-> c2,
+          deps |-> {},
+          seq |-> 1,
+          status |-> "pre-accepted" ] } @@
+  r3 :>
+      { [ inst |-> <<r2, 1>>,
+          ballot |-> <<0, r2>>,
+          cmd |-> c2,
+          deps |-> {},
+          seq |-> 1,
+          status |-> "pre-accepted" ] } )
+/\ leaderOfInst = (r1 :> {<<r1, 1>>, <<r2, 1>>} @@ r2 :> {} @@ r3 :> {})
+/\ preAcceptReplyMsg = { [ committed |-> {},
+    type |-> "pre-accept-reply",
+    src |-> r3,
+    dst |-> r2,
+    inst |-> <<r2, 1>>,
+    ballot |-> <<0, r2>>,
+    deps |-> {},
+    seq |-> 1 ] }
+/\ committed = ( <<r1, 1>> :> {} @@
+  <<r1, 2>> :> {} @@
+  <<r2, 1>> :> {} @@
+  <<r2, 2>> :> {} @@
+  <<r3, 1>> :> {} @@
+  <<r3, 2>> :> {} )
+/\ proposed = {c1, c2}
+/\ tryPreAcceptReplyMsg = {}
+/\ preparing = (r1 :> {} @@ r2 :> {<<r2, 1>>} @@ r3 :> {})
+/\ prepareMsg = { [ type |-> "prepare",
+    src |-> r2,
+    dst |-> r2,
+    inst |-> <<r2, 1>>,
+    ballot |-> <<2, r2>> ],
+  [ type |-> "prepare",
+    src |-> r2,
+    dst |-> r3,
+    inst |-> <<r2, 1>>,
+    ballot |-> <<2, r2>> ] }
+/\ acceptReplyMsg = {}
+/\ commitMsg = {}
+
+State 10: <ReplyPrepareAction line 803, col 23 to line 803, col 106 of module EPaxos>
+/\ tryPreAcceptMsg = {}
+/\ acceptMsg = {}
+/\ prepareReplyMsg = {[type |-> "prepare-reply", src |-> r1, dst |-> r1, inst |-> <<r2, 1>>, ballot |-> <<1, r1>>, cmd |-> None, deps |-> {}, seq |-> 0, prev_ballot |-> <<0, r1>>, status |-> "not-seen"], [type |-> "prepare-reply", src |-> r2, dst |-> r1, inst |-> <<r2, 1>>, ballot |-> <<1, r1>>, cmd |-> c2, deps |-> {}, seq |-> 1, prev_ballot |-> <<0, r2>>, status |-> "pre-accepted"], [type |-> "prepare-reply", src |-> r3, dst |-> r2, inst |-> <<r2, 1>>, ballot |-> <<2, r2>>, cmd |-> c2, deps |-> {}, seq |-> 1, prev_ballot |-> <<0, r2>>, status |-> "pre-accepted"]}
+/\ sentMsg = {}
+/\ preAcceptMsg = { [ type |-> "pre-accept",
+    src |-> r1,
+    dst |-> r2,
+    inst |-> <<r1, 1>>,
+    ballot |-> <<0, r1>>,
+    cmd |-> c1,
+    deps |-> {<<r2, 1>>},
+    seq |-> 2 ],
+  [ type |-> "pre-accept",
+    src |-> r1,
+    dst |-> r2,
+    inst |-> <<r2, 1>>,
+    ballot |-> <<1, r1>>,
+    cmd |-> c2,
+    deps |-> {<<r2, 1>>},
+    seq |-> 1 ] }
+/\ executed = (r1 :> {} @@ r2 :> {} @@ r3 :> {})
+/\ crtInst = (r1 :> 2 @@ r2 :> 2 @@ r3 :> 1)
+/\ ballots = 3
+/\ cmdLog = ( r1 :>
+      { [ inst |-> <<r1, 1>>,
+          ballot |-> <<0, r1>>,
+          cmd |-> c1,
+          deps |-> {<<r2, 1>>},
+          seq |-> 2,
+          status |-> "pre-accepted" ],
+        [ inst |-> <<r2, 1>>,
+          ballot |-> <<1, r1>>,
+          cmd |-> c2,
+          deps |-> {<<r2, 1>>},
+          seq |-> 1,
+          status |-> "pre-accepted" ] } @@
+  r2 :>
+      { [ inst |-> <<r2, 1>>,
+          ballot |-> <<1, r1>>,
+          cmd |-> c2,
+          deps |-> {},
+          seq |-> 1,
+          status |-> "pre-accepted" ] } @@
+  r3 :>
+      { [ inst |-> <<r2, 1>>,
+          ballot |-> <<2, r2>>,
+          cmd |-> c2,
+          deps |-> {},
+          seq |-> 1,
+          status |-> "pre-accepted" ] } )
+/\ leaderOfInst = (r1 :> {<<r1, 1>>, <<r2, 1>>} @@ r2 :> {} @@ r3 :> {})
+/\ preAcceptReplyMsg = { [ committed |-> {},
+    type |-> "pre-accept-reply",
+    src |-> r3,
+    dst |-> r2,
+    inst |-> <<r2, 1>>,
+    ballot |-> <<0, r2>>,
+    deps |-> {},
+    seq |-> 1 ] }
+/\ committed = ( <<r1, 1>> :> {} @@
+  <<r1, 2>> :> {} @@
+  <<r2, 1>> :> {} @@
+  <<r2, 2>> :> {} @@
+  <<r3, 1>> :> {} @@
+  <<r3, 2>> :> {} )
+/\ proposed = {c1, c2}
+/\ tryPreAcceptReplyMsg = {}
+/\ preparing = (r1 :> {} @@ r2 :> {<<r2, 1>>} @@ r3 :> {})
+/\ prepareMsg = { [ type |-> "prepare",
+    src |-> r2,
+    dst |-> r2,
+    inst |-> <<r2, 1>>,
+    ballot |-> <<2, r2>> ] }
+/\ acceptReplyMsg = {}
+/\ commitMsg = {}
+
+State 11: <Phase1ReplyAction line 796, col 22 to line 796, col 75 of module EPaxos>
+/\ tryPreAcceptMsg = {}
+/\ acceptMsg = {}
+/\ prepareReplyMsg = {[type |-> "prepare-reply", src |-> r1, dst |-> r1, inst |-> <<r2, 1>>, ballot |-> <<1, r1>>, cmd |-> None, deps |-> {}, seq |-> 0, prev_ballot |-> <<0, r1>>, status |-> "not-seen"], [type |-> "prepare-reply", src |-> r2, dst |-> r1, inst |-> <<r2, 1>>, ballot |-> <<1, r1>>, cmd |-> c2, deps |-> {}, seq |-> 1, prev_ballot |-> <<0, r2>>, status |-> "pre-accepted"], [type |-> "prepare-reply", src |-> r3, dst |-> r2, inst |-> <<r2, 1>>, ballot |-> <<2, r2>>, cmd |-> c2, deps |-> {}, seq |-> 1, prev_ballot |-> <<0, r2>>, status |-> "pre-accepted"]}
+/\ sentMsg = {}
+/\ preAcceptMsg = { [ type |-> "pre-accept",
+    src |-> r1,
+    dst |-> r2,
+    inst |-> <<r1, 1>>,
+    ballot |-> <<0, r1>>,
+    cmd |-> c1,
+    deps |-> {<<r2, 1>>},
+    seq |-> 2 ] }
+/\ executed = (r1 :> {} @@ r2 :> {} @@ r3 :> {})
+/\ crtInst = (r1 :> 2 @@ r2 :> 2 @@ r3 :> 1)
+/\ ballots = 3
+/\ cmdLog = ( r1 :>
+      { [ inst |-> <<r1, 1>>,
+          ballot |-> <<0, r1>>,
+          cmd |-> c1,
+          deps |-> {<<r2, 1>>},
+          seq |-> 2,
+          status |-> "pre-accepted" ],
+        [ inst |-> <<r2, 1>>,
+          ballot |-> <<1, r1>>,
+          cmd |-> c2,
+          deps |-> {<<r2, 1>>},
+          seq |-> 1,
+          status |-> "pre-accepted" ] } @@
+  r2 :>
+      { [ inst |-> <<r2, 1>>,
+          ballot |-> <<1, r1>>,
+          cmd |-> c2,
+          deps |-> {<<r2, 1>>},
+          seq |-> 2,
+          status |-> "pre-accepted" ] } @@
+  r3 :>
+      { [ inst |-> <<r2, 1>>,
+          ballot |-> <<2, r2>>,
+          cmd |-> c2,
+          deps |-> {},
+          seq |-> 1,
+          status |-> "pre-accepted" ] } )
+/\ leaderOfInst = (r1 :> {<<r1, 1>>, <<r2, 1>>} @@ r2 :> {} @@ r3 :> {})
+/\ preAcceptReplyMsg = { [ committed |-> {},
+    type |-> "pre-accept-reply",
+    src |-> r2,
+    dst |-> r1,
+    inst |-> <<r2, 1>>,
+    ballot |-> <<1, r1>>,
+    deps |-> {<<r2, 1>>},
+    seq |-> 2 ],
+  [ committed |-> {},
+    type |-> "pre-accept-reply",
+    src |-> r3,
+    dst |-> r2,
+    inst |-> <<r2, 1>>,
+    ballot |-> <<0, r2>>,
+    deps |-> {},
+    seq |-> 1 ] }
+/\ committed = ( <<r1, 1>> :> {} @@
+  <<r1, 2>> :> {} @@
+  <<r2, 1>> :> {} @@
+  <<r2, 2>> :> {} @@
+  <<r3, 1>> :> {} @@
+  <<r3, 2>> :> {} )
+/\ proposed = {c1, c2}
+/\ tryPreAcceptReplyMsg = {}
+/\ preparing = (r1 :> {} @@ r2 :> {<<r2, 1>>} @@ r3 :> {})
+/\ prepareMsg = { [ type |-> "prepare",
+    src |-> r2,
+    dst |-> r2,
+    inst |-> <<r2, 1>>,
+    ballot |-> <<2, r2>> ] }
+/\ acceptReplyMsg = {}
+/\ commitMsg = {}
+
+State 12: <Phase1ReplyAction line 796, col 22 to line 796, col 75 of module EPaxos>
+/\ tryPreAcceptMsg = {}
+/\ acceptMsg = {}
+/\ prepareReplyMsg = {[type |-> "prepare-reply", src |-> r1, dst |-> r1, inst |-> <<r2, 1>>, ballot |-> <<1, r1>>, cmd |-> None, deps |-> {}, seq |-> 0, prev_ballot |-> <<0, r1>>, status |-> "not-seen"], [type |-> "prepare-reply", src |-> r2, dst |-> r1, inst |-> <<r2, 1>>, ballot |-> <<1, r1>>, cmd |-> c2, deps |-> {}, seq |-> 1, prev_ballot |-> <<0, r2>>, status |-> "pre-accepted"], [type |-> "prepare-reply", src |-> r3, dst |-> r2, inst |-> <<r2, 1>>, ballot |-> <<2, r2>>, cmd |-> c2, deps |-> {}, seq |-> 1, prev_ballot |-> <<0, r2>>, status |-> "pre-accepted"]}
+/\ sentMsg = {}
+/\ preAcceptMsg = {}
+/\ executed = (r1 :> {} @@ r2 :> {} @@ r3 :> {})
+/\ crtInst = (r1 :> 2 @@ r2 :> 2 @@ r3 :> 1)
+/\ ballots = 3
+/\ cmdLog = ( r1 :>
+      { [ inst |-> <<r1, 1>>,
+          ballot |-> <<0, r1>>,
+          cmd |-> c1,
+          deps |-> {<<r2, 1>>},
+          seq |-> 2,
+          status |-> "pre-accepted" ],
+        [ inst |-> <<r2, 1>>,
+          ballot |-> <<1, r1>>,
+          cmd |-> c2,
+          deps |-> {<<r2, 1>>},
+          seq |-> 1,
+          status |-> "pre-accepted" ] } @@
+  r2 :>
+      { [ inst |-> <<r1, 1>>,
+          ballot |-> <<0, r1>>,
+          cmd |-> c1,
+          deps |-> {<<r2, 1>>},
+          seq |-> 3,
+          status |-> "pre-accepted" ],
+        [ inst |-> <<r2, 1>>,
+          ballot |-> <<1, r1>>,
+          cmd |-> c2,
+          deps |-> {<<r2, 1>>},
+          seq |-> 2,
+          status |-> "pre-accepted" ] } @@
+  r3 :>
+      { [ inst |-> <<r2, 1>>,
+          ballot |-> <<2, r2>>,
+          cmd |-> c2,
+          deps |-> {},
+          seq |-> 1,
+          status |-> "pre-accepted" ] } )
+/\ leaderOfInst = (r1 :> {<<r1, 1>>, <<r2, 1>>} @@ r2 :> {} @@ r3 :> {})
+/\ preAcceptReplyMsg = { [ committed |-> {},
+    type |-> "pre-accept-reply",
+    src |-> r2,
+    dst |-> r1,
+    inst |-> <<r1, 1>>,
+    ballot |-> <<0, r1>>,
+    deps |-> {<<r2, 1>>},
+    seq |-> 3 ],
+  [ committed |-> {},
+    type |-> "pre-accept-reply",
+    src |-> r2,
+    dst |-> r1,
+    inst |-> <<r2, 1>>,
+    ballot |-> <<1, r1>>,
+    deps |-> {<<r2, 1>>},
+    seq |-> 2 ],
+  [ committed |-> {},
+    type |-> "pre-accept-reply",
+    src |-> r3,
+    dst |-> r2,
+    inst |-> <<r2, 1>>,
+    ballot |-> <<0, r2>>,
+    deps |-> {},
+    seq |-> 1 ] }
+/\ committed = ( <<r1, 1>> :> {} @@
+  <<r1, 2>> :> {} @@
+  <<r2, 1>> :> {} @@
+  <<r2, 2>> :> {} @@
+  <<r3, 1>> :> {} @@
+  <<r3, 2>> :> {} )
+/\ proposed = {c1, c2}
+/\ tryPreAcceptReplyMsg = {}
+/\ preparing = (r1 :> {} @@ r2 :> {<<r2, 1>>} @@ r3 :> {})
+/\ prepareMsg = { [ type |-> "prepare",
+    src |-> r2,
+    dst |-> r2,
+    inst |-> <<r2, 1>>,
+    ballot |-> <<2, r2>> ] }
+/\ acceptReplyMsg = {}
+/\ commitMsg = {}
+
+State 13: <ReplyPrepareAction line 803, col 23 to line 803, col 106 of module EPaxos>
+/\ tryPreAcceptMsg = {}
+/\ acceptMsg = {}
+/\ prepareReplyMsg = {[type |-> "prepare-reply", src |-> r1, dst |-> r1, inst |-> <<r2, 1>>, ballot |-> <<1, r1>>, cmd |-> None, deps |-> {}, seq |-> 0, prev_ballot |-> <<0, r1>>, status |-> "not-seen"], [type |-> "prepare-reply", src |-> r2, dst |-> r1, inst |-> <<r2, 1>>, ballot |-> <<1, r1>>, cmd |-> c2, deps |-> {}, seq |-> 1, prev_ballot |-> <<0, r2>>, status |-> "pre-accepted"], [type |-> "prepare-reply", src |-> r2, dst |-> r2, inst |-> <<r2, 1>>, ballot |-> <<2, r2>>, cmd |-> c2, deps |-> {<<r2, 1>>}, seq |-> 2, prev_ballot |-> <<1, r1>>, status |-> "pre-accepted"], [type |-> "prepare-reply", src |-> r3, dst |-> r2, inst |-> <<r2, 1>>, ballot |-> <<2, r2>>, cmd |-> c2, deps |-> {}, seq |-> 1, prev_ballot |-> <<0, r2>>, status |-> "pre-accepted"]}
+/\ sentMsg = {}
+/\ preAcceptMsg = {}
+/\ executed = (r1 :> {} @@ r2 :> {} @@ r3 :> {})
+/\ crtInst = (r1 :> 2 @@ r2 :> 2 @@ r3 :> 1)
+/\ ballots = 3
+/\ cmdLog = ( r1 :>
+      { [ inst |-> <<r1, 1>>,
+          ballot |-> <<0, r1>>,
+          cmd |-> c1,
+          deps |-> {<<r2, 1>>},
+          seq |-> 2,
+          status |-> "pre-accepted" ],
+        [ inst |-> <<r2, 1>>,
+          ballot |-> <<1, r1>>,
+          cmd |-> c2,
+          deps |-> {<<r2, 1>>},
+          seq |-> 1,
+          status |-> "pre-accepted" ] } @@
+  r2 :>
+      { [ inst |-> <<r1, 1>>,
+          ballot |-> <<0, r1>>,
+          cmd |-> c1,
+          deps |-> {<<r2, 1>>},
+          seq |-> 3,
+          status |-> "pre-accepted" ],
+        [ inst |-> <<r2, 1>>,
+          ballot |-> <<2, r2>>,
+          cmd |-> c2,
+          deps |-> {<<r2, 1>>},
+          seq |-> 2,
+          status |-> "pre-accepted" ] } @@
+  r3 :>
+      { [ inst |-> <<r2, 1>>,
+          ballot |-> <<2, r2>>,
+          cmd |-> c2,
+          deps |-> {},
+          seq |-> 1,
+          status |-> "pre-accepted" ] } )
+/\ leaderOfInst = (r1 :> {<<r1, 1>>, <<r2, 1>>} @@ r2 :> {} @@ r3 :> {})
+/\ preAcceptReplyMsg = { [ committed |-> {},
+    type |-> "pre-accept-reply",
+    src |-> r2,
+    dst |-> r1,
+    inst |-> <<r1, 1>>,
+    ballot |-> <<0, r1>>,
+    deps |-> {<<r2, 1>>},
+    seq |-> 3 ],
+  [ committed |-> {},
+    type |-> "pre-accept-reply",
+    src |-> r2,
+    dst |-> r1,
+    inst |-> <<r2, 1>>,
+    ballot |-> <<1, r1>>,
+    deps |-> {<<r2, 1>>},
+    seq |-> 2 ],
+  [ committed |-> {},
+    type |-> "pre-accept-reply",
+    src |-> r3,
+    dst |-> r2,
+    inst |-> <<r2, 1>>,
+    ballot |-> <<0, r2>>,
+    deps |-> {},
+    seq |-> 1 ] }
+/\ committed = ( <<r1, 1>> :> {} @@
+  <<r1, 2>> :> {} @@
+  <<r2, 1>> :> {} @@
+  <<r2, 2>> :> {} @@
+  <<r3, 1>> :> {} @@
+  <<r3, 2>> :> {} )
+/\ proposed = {c1, c2}
+/\ tryPreAcceptReplyMsg = {}
+/\ preparing = (r1 :> {} @@ r2 :> {<<r2, 1>>} @@ r3 :> {})
+/\ prepareMsg = {}
+/\ acceptReplyMsg = {}
+/\ commitMsg = {}
+
+State 14: <Phase1SlowAction line 793, col 21 to line 793, col 150 of module EPaxos>
+/\ tryPreAcceptMsg = {}
+/\ acceptMsg = { [ type |-> "accept",
+    src |-> r1,
+    dst |-> r2,
+    inst |-> <<r2, 1>>,
+    ballot |-> <<1, r1>>,
+    cmd |-> c2,
+    deps |-> {<<r2, 1>>},
+    seq |-> 2 ] }
+/\ prepareReplyMsg = {[type |-> "prepare-reply", src |-> r1, dst |-> r1, inst |-> <<r2, 1>>, ballot |-> <<1, r1>>, cmd |-> None, deps |-> {}, seq |-> 0, prev_ballot |-> <<0, r1>>, status |-> "not-seen"], [type |-> "prepare-reply", src |-> r2, dst |-> r1, inst |-> <<r2, 1>>, ballot |-> <<1, r1>>, cmd |-> c2, deps |-> {}, seq |-> 1, prev_ballot |-> <<0, r2>>, status |-> "pre-accepted"], [type |-> "prepare-reply", src |-> r2, dst |-> r2, inst |-> <<r2, 1>>, ballot |-> <<2, r2>>, cmd |-> c2, deps |-> {<<r2, 1>>}, seq |-> 2, prev_ballot |-> <<1, r1>>, status |-> "pre-accepted"], [type |-> "prepare-reply", src |-> r3, dst |-> r2, inst |-> <<r2, 1>>, ballot |-> <<2, r2>>, cmd |-> c2, deps |-> {}, seq |-> 1, prev_ballot |-> <<0, r2>>, status |-> "pre-accepted"]}
+/\ sentMsg = {}
+/\ preAcceptMsg = {}
+/\ executed = (r1 :> {} @@ r2 :> {} @@ r3 :> {})
+/\ crtInst = (r1 :> 2 @@ r2 :> 2 @@ r3 :> 1)
+/\ ballots = 3
+/\ cmdLog = ( r1 :>
+      { [ inst |-> <<r1, 1>>,
+          ballot |-> <<0, r1>>,
+          cmd |-> c1,
+          deps |-> {<<r2, 1>>},
+          seq |-> 2,
+          status |-> "pre-accepted" ],
+        [ inst |-> <<r2, 1>>,
+          ballot |-> <<1, r1>>,
+          cmd |-> c2,
+          deps |-> {<<r2, 1>>},
+          seq |-> 2,
+          status |-> "accepted" ] } @@
+  r2 :>
+      { [ inst |-> <<r1, 1>>,
+          ballot |-> <<0, r1>>,
+          cmd |-> c1,
+          deps |-> {<<r2, 1>>},
+          seq |-> 3,
+          status |-> "pre-accepted" ],
+        [ inst |-> <<r2, 1>>,
+          ballot |-> <<2, r2>>,
+          cmd |-> c2,
+          deps |-> {<<r2, 1>>},
+          seq |-> 2,
+          status |-> "pre-accepted" ] } @@
+  r3 :>
+      { [ inst |-> <<r2, 1>>,
+          ballot |-> <<2, r2>>,
+          cmd |-> c2,
+          deps |-> {},
+          seq |-> 1,
+          status |-> "pre-accepted" ] } )
+/\ leaderOfInst = (r1 :> {<<r1, 1>>, <<r2, 1>>} @@ r2 :> {} @@ r3 :> {})
+/\ preAcceptReplyMsg = { [ committed |-> {},
+    type |-> "pre-accept-reply",
+    src |-> r2,
+    dst |-> r1,
+    inst |-> <<r1, 1>>,
+    ballot |-> <<0, r1>>,
+    deps |-> {<<r2, 1>>},
+    seq |-> 3 ],
+  [ committed |-> {},
+    type |-> "pre-accept-reply",
+    src |-> r3,
+    dst |-> r2,
+    inst |-> <<r2, 1>>,
+    ballot |-> <<0, r2>>,
+    deps |-> {},
+    seq |-> 1 ] }
+/\ committed = ( <<r1, 1>> :> {} @@
+  <<r1, 2>> :> {} @@
+  <<r2, 1>> :> {} @@
+  <<r2, 2>> :> {} @@
+  <<r3, 1>> :> {} @@
+  <<r3, 2>> :> {} )
+/\ proposed = {c1, c2}
+/\ tryPreAcceptReplyMsg = {}
+/\ preparing = (r1 :> {} @@ r2 :> {<<r2, 1>>} @@ r3 :> {})
+/\ prepareMsg = {}
+/\ acceptReplyMsg = {}
+/\ commitMsg = {}
+
+State 15: <SendPrepareAction line 799, col 22 to line 802, col 65 of module EPaxos>
+/\ tryPreAcceptMsg = {}
+/\ acceptMsg = { [ type |-> "accept",
+    src |-> r1,
+    dst |-> r2,
+    inst |-> <<r2, 1>>,
+    ballot |-> <<1, r1>>,
+    cmd |-> c2,
+    deps |-> {<<r2, 1>>},
+    seq |-> 2 ] }
+/\ prepareReplyMsg = {[type |-> "prepare-reply", src |-> r1, dst |-> r1, inst |-> <<r2, 1>>, ballot |-> <<1, r1>>, cmd |-> None, deps |-> {}, seq |-> 0, prev_ballot |-> <<0, r1>>, status |-> "not-seen"], [type |-> "prepare-reply", src |-> r2, dst |-> r1, inst |-> <<r2, 1>>, ballot |-> <<1, r1>>, cmd |-> c2, deps |-> {}, seq |-> 1, prev_ballot |-> <<0, r2>>, status |-> "pre-accepted"], [type |-> "prepare-reply", src |-> r2, dst |-> r2, inst |-> <<r2, 1>>, ballot |-> <<2, r2>>, cmd |-> c2, deps |-> {<<r2, 1>>}, seq |-> 2, prev_ballot |-> <<1, r1>>, status |-> "pre-accepted"], [type |-> "prepare-reply", src |-> r3, dst |-> r2, inst |-> <<r2, 1>>, ballot |-> <<2, r2>>, cmd |-> c2, deps |-> {}, seq |-> 1, prev_ballot |-> <<0, r2>>, status |-> "pre-accepted"]}
+/\ sentMsg = {}
+/\ preAcceptMsg = {}
+/\ executed = (r1 :> {} @@ r2 :> {} @@ r3 :> {})
+/\ crtInst = (r1 :> 2 @@ r2 :> 2 @@ r3 :> 1)
+/\ ballots = 4
+/\ cmdLog = ( r1 :>
+      { [ inst |-> <<r1, 1>>,
+          ballot |-> <<0, r1>>,
+          cmd |-> c1,
+          deps |-> {<<r2, 1>>},
+          seq |-> 2,
+          status |-> "pre-accepted" ],
+        [ inst |-> <<r2, 1>>,
+          ballot |-> <<1, r1>>,
+          cmd |-> c2,
+          deps |-> {<<r2, 1>>},
+          seq |-> 2,
+          status |-> "accepted" ] } @@
+  r2 :>
+      { [ inst |-> <<r1, 1>>,
+          ballot |-> <<0, r1>>,
+          cmd |-> c1,
+          deps |-> {<<r2, 1>>},
+          seq |-> 3,
+          status |-> "pre-accepted" ],
+        [ inst |-> <<r2, 1>>,
+          ballot |-> <<2, r2>>,
+          cmd |-> c2,
+          deps |-> {<<r2, 1>>},
+          seq |-> 2,
+          status |-> "pre-accepted" ] } @@
+  r3 :>
+      { [ inst |-> <<r2, 1>>,
+          ballot |-> <<2, r2>>,
+          cmd |-> c2,
+          deps |-> {},
+          seq |-> 1,
+          status |-> "pre-accepted" ] } )
+/\ leaderOfInst = (r1 :> {<<r1, 1>>, <<r2, 1>>} @@ r2 :> {} @@ r3 :> {})
+/\ preAcceptReplyMsg = { [ committed |-> {},
+    type |-> "pre-accept-reply",
+    src |-> r2,
+    dst |-> r1,
+    inst |-> <<r1, 1>>,
+    ballot |-> <<0, r1>>,
+    deps |-> {<<r2, 1>>},
+    seq |-> 3 ],
+  [ committed |-> {},
+    type |-> "pre-accept-reply",
+    src |-> r3,
+    dst |-> r2,
+    inst |-> <<r2, 1>>,
+    ballot |-> <<0, r2>>,
+    deps |-> {},
+    seq |-> 1 ] }
+/\ committed = ( <<r1, 1>> :> {} @@
+  <<r1, 2>> :> {} @@
+  <<r2, 1>> :> {} @@
+  <<r2, 2>> :> {} @@
+  <<r3, 1>> :> {} @@
+  <<r3, 2>> :> {} )
+/\ proposed = {c1, c2}
+/\ tryPreAcceptReplyMsg = {}
+/\ preparing = (r1 :> {} @@ r2 :> {<<r2, 1>>} @@ r3 :> {<<r2, 1>>})
+/\ prepareMsg = { [ type |-> "prepare",
+    src |-> r3,
+    dst |-> r1,
+    inst |-> <<r2, 1>>,
+    ballot |-> <<3, r3>> ],
+  [ type |-> "prepare",
+    src |-> r3,
+    dst |-> r3,
+    inst |-> <<r2, 1>>,
+    ballot |-> <<3, r3>> ] }
+/\ acceptReplyMsg = {}
+/\ commitMsg = {}
+
+State 16: <SendPrepareAction line 799, col 22 to line 802, col 65 of module EPaxos>
+/\ tryPreAcceptMsg = {}
+/\ acceptMsg = { [ type |-> "accept",
+    src |-> r1,
+    dst |-> r2,
+    inst |-> <<r2, 1>>,
+    ballot |-> <<1, r1>>,
+    cmd |-> c2,
+    deps |-> {<<r2, 1>>},
+    seq |-> 2 ] }
+/\ prepareReplyMsg = {[type |-> "prepare-reply", src |-> r1, dst |-> r1, inst |-> <<r2, 1>>, ballot |-> <<1, r1>>, cmd |-> None, deps |-> {}, seq |-> 0, prev_ballot |-> <<0, r1>>, status |-> "not-seen"], [type |-> "prepare-reply", src |-> r2, dst |-> r1, inst |-> <<r2, 1>>, ballot |-> <<1, r1>>, cmd |-> c2, deps |-> {}, seq |-> 1, prev_ballot |-> <<0, r2>>, status |-> "pre-accepted"], [type |-> "prepare-reply", src |-> r2, dst |-> r2, inst |-> <<r2, 1>>, ballot |-> <<2, r2>>, cmd |-> c2, deps |-> {<<r2, 1>>}, seq |-> 2, prev_ballot |-> <<1, r1>>, status |-> "pre-accepted"], [type |-> "prepare-reply", src |-> r3, dst |-> r2, inst |-> <<r2, 1>>, ballot |-> <<2, r2>>, cmd |-> c2, deps |-> {}, seq |-> 1, prev_ballot |-> <<0, r2>>, status |-> "pre-accepted"]}
+/\ sentMsg = {}
+/\ preAcceptMsg = {}
+/\ executed = (r1 :> {} @@ r2 :> {} @@ r3 :> {})
+/\ crtInst = (r1 :> 2 @@ r2 :> 2 @@ r3 :> 1)
+/\ ballots = 5
+/\ cmdLog = ( r1 :>
+      { [ inst |-> <<r1, 1>>,
+          ballot |-> <<0, r1>>,
+          cmd |-> c1,
+          deps |-> {<<r2, 1>>},
+          seq |-> 2,
+          status |-> "pre-accepted" ],
+        [ inst |-> <<r2, 1>>,
+          ballot |-> <<1, r1>>,
+          cmd |-> c2,
+          deps |-> {<<r2, 1>>},
+          seq |-> 2,
+          status |-> "accepted" ] } @@
+  r2 :>
+      { [ inst |-> <<r1, 1>>,
+          ballot |-> <<0, r1>>,
+          cmd |-> c1,
+          deps |-> {<<r2, 1>>},
+          seq |-> 3,
+          status |-> "pre-accepted" ],
+        [ inst |-> <<r2, 1>>,
+          ballot |-> <<2, r2>>,
+          cmd |-> c2,
+          deps |-> {<<r2, 1>>},
+          seq |-> 2,
+          status |-> "pre-accepted" ] } @@
+  r3 :>
+      { [ inst |-> <<r2, 1>>,
+          ballot |-> <<2, r2>>,
+          cmd |-> c2,
+          deps |-> {},
+          seq |-> 1,
+          status |-> "pre-accepted" ] } )
+/\ leaderOfInst = (r1 :> {<<r1, 1>>, <<r2, 1>>} @@ r2 :> {} @@ r3 :> {})
+/\ preAcceptReplyMsg = { [ committed |-> {},
+    type |-> "pre-accept-reply",
+    src |-> r2,
+    dst |-> r1,
+    inst |-> <<r1, 1>>,
+    ballot |-> <<0, r1>>,
+    deps |-> {<<r2, 1>>},
+    seq |-> 3 ],
+  [ committed |-> {},
+    type |-> "pre-accept-reply",
+    src |-> r3,
+    dst |-> r2,
+    inst |-> <<r2, 1>>,
+    ballot |-> <<0, r2>>,
+    deps |-> {},
+    seq |-> 1 ] }
+/\ committed = ( <<r1, 1>> :> {} @@
+  <<r1, 2>> :> {} @@
+  <<r2, 1>> :> {} @@
+  <<r2, 2>> :> {} @@
+  <<r3, 1>> :> {} @@
+  <<r3, 2>> :> {} )
+/\ proposed = {c1, c2}
+/\ tryPreAcceptReplyMsg = {}
+/\ preparing = (r1 :> {} @@ r2 :> {<<r2, 1>>} @@ r3 :> {<<r2, 1>>})
+/\ prepareMsg = { [ type |-> "prepare",
+    src |-> r3,
+    dst |-> r1,
+    inst |-> <<r2, 1>>,
+    ballot |-> <<3, r3>> ],
+  [ type |-> "prepare",
+    src |-> r3,
+    dst |-> r1,
+    inst |-> <<r2, 1>>,
+    ballot |-> <<4, r3>> ],
+  [ type |-> "prepare",
+    src |-> r3,
+    dst |-> r3,
+    inst |-> <<r2, 1>>,
+    ballot |-> <<3, r3>> ],
+  [ type |-> "prepare",
+    src |-> r3,
+    dst |-> r3,
+    inst |-> <<r2, 1>>,
+    ballot |-> <<4, r3>> ] }
+/\ acceptReplyMsg = {}
+/\ commitMsg = {}
+
+State 17: <Phase1SlowAction line 793, col 21 to line 793, col 150 of module EPaxos>
+/\ tryPreAcceptMsg = {}
+/\ acceptMsg = { [ type |-> "accept",
+    src |-> r1,
+    dst |-> r2,
+    inst |-> <<r1, 1>>,
+    ballot |-> <<0, r1>>,
+    cmd |-> c1,
+    deps |-> {<<r2, 1>>},
+    seq |-> 3 ],
+  [ type |-> "accept",
+    src |-> r1,
+    dst |-> r2,
+    inst |-> <<r2, 1>>,
+    ballot |-> <<1, r1>>,
+    cmd |-> c2,
+    deps |-> {<<r2, 1>>},
+    seq |-> 2 ] }
+/\ prepareReplyMsg = {[type |-> "prepare-reply", src |-> r1, dst |-> r1, inst |-> <<r2, 1>>, ballot |-> <<1, r1>>, cmd |-> None, deps |-> {}, seq |-> 0, prev_ballot |-> <<0, r1>>, status |-> "not-seen"], [type |-> "prepare-reply", src |-> r2, dst |-> r1, inst |-> <<r2, 1>>, ballot |-> <<1, r1>>, cmd |-> c2, deps |-> {}, seq |-> 1, prev_ballot |-> <<0, r2>>, status |-> "pre-accepted"], [type |-> "prepare-reply", src |-> r2, dst |-> r2, inst |-> <<r2, 1>>, ballot |-> <<2, r2>>, cmd |-> c2, deps |-> {<<r2, 1>>}, seq |-> 2, prev_ballot |-> <<1, r1>>, status |-> "pre-accepted"], [type |-> "prepare-reply", src |-> r3, dst |-> r2, inst |-> <<r2, 1>>, ballot |-> <<2, r2>>, cmd |-> c2, deps |-> {}, seq |-> 1, prev_ballot |-> <<0, r2>>, status |-> "pre-accepted"]}
+/\ sentMsg = {}
+/\ preAcceptMsg = {}
+/\ executed = (r1 :> {} @@ r2 :> {} @@ r3 :> {})
+/\ crtInst = (r1 :> 2 @@ r2 :> 2 @@ r3 :> 1)
+/\ ballots = 5
+/\ cmdLog = ( r1 :>
+      { [ inst |-> <<r1, 1>>,
+          ballot |-> <<0, r1>>,
+          cmd |-> c1,
+          deps |-> {<<r2, 1>>},
+          seq |-> 3,
+          status |-> "accepted" ],
+        [ inst |-> <<r2, 1>>,
+          ballot |-> <<1, r1>>,
+          cmd |-> c2,
+          deps |-> {<<r2, 1>>},
+          seq |-> 2,
+          status |-> "accepted" ] } @@
+  r2 :>
+      { [ inst |-> <<r1, 1>>,
+          ballot |-> <<0, r1>>,
+          cmd |-> c1,
+          deps |-> {<<r2, 1>>},
+          seq |-> 3,
+          status |-> "pre-accepted" ],
+        [ inst |-> <<r2, 1>>,
+          ballot |-> <<2, r2>>,
+          cmd |-> c2,
+          deps |-> {<<r2, 1>>},
+          seq |-> 2,
+          status |-> "pre-accepted" ] } @@
+  r3 :>
+      { [ inst |-> <<r2, 1>>,
+          ballot |-> <<2, r2>>,
+          cmd |-> c2,
+          deps |-> {},
+          seq |-> 1,
+          status |-> "pre-accepted" ] } )
+/\ leaderOfInst = (r1 :> {<<r1, 1>>, <<r2, 1>>} @@ r2 :> {} @@ r3 :> {})
+/\ preAcceptReplyMsg = { [ committed |-> {},
+    type |-> "pre-accept-reply",
+    src |-> r3,
+    dst |-> r2,
+    inst |-> <<r2, 1>>,
+    ballot |-> <<0, r2>>,
+    deps |-> {},
+    seq |-> 1 ] }
+/\ committed = ( <<r1, 1>> :> {} @@
+  <<r1, 2>> :> {} @@
+  <<r2, 1>> :> {} @@
+  <<r2, 2>> :> {} @@
+  <<r3, 1>> :> {} @@
+  <<r3, 2>> :> {} )
+/\ proposed = {c1, c2}
+/\ tryPreAcceptReplyMsg = {}
+/\ preparing = (r1 :> {} @@ r2 :> {<<r2, 1>>} @@ r3 :> {<<r2, 1>>})
+/\ prepareMsg = { [ type |-> "prepare",
+    src |-> r3,
+    dst |-> r1,
+    inst |-> <<r2, 1>>,
+    ballot |-> <<3, r3>> ],
+  [ type |-> "prepare",
+    src |-> r3,
+    dst |-> r1,
+    inst |-> <<r2, 1>>,
+    ballot |-> <<4, r3>> ],
+  [ type |-> "prepare",
+    src |-> r3,
+    dst |-> r3,
+    inst |-> <<r2, 1>>,
+    ballot |-> <<3, r3>> ],
+  [ type |-> "prepare",
+    src |-> r3,
+    dst |-> r3,
+    inst |-> <<r2, 1>>,
+    ballot |-> <<4, r3>> ] }
+/\ acceptReplyMsg = {}
+/\ commitMsg = {}
+
+State 18: <PrepareFinalizeAction line 804, col 26 to line 804, col 151 of module EPaxos>
+/\ tryPreAcceptMsg = {}
+/\ acceptMsg = { [ type |-> "accept",
+    src |-> r1,
+    dst |-> r2,
+    inst |-> <<r1, 1>>,
+    ballot |-> <<0, r1>>,
+    cmd |-> c1,
+    deps |-> {<<r2, 1>>},
+    seq |-> 3 ],
+  [ type |-> "accept",
+    src |-> r1,
+    dst |-> r2,
+    inst |-> <<r2, 1>>,
+    ballot |-> <<1, r1>>,
+    cmd |-> c2,
+    deps |-> {<<r2, 1>>},
+    seq |-> 2 ] }
+/\ prepareReplyMsg = {[type |-> "prepare-reply", src |-> r1, dst |-> r1, inst |-> <<r2, 1>>, ballot |-> <<1, r1>>, cmd |-> None, deps |-> {}, seq |-> 0, prev_ballot |-> <<0, r1>>, status |-> "not-seen"], [type |-> "prepare-reply", src |-> r2, dst |-> r1, inst |-> <<r2, 1>>, ballot |-> <<1, r1>>, cmd |-> c2, deps |-> {}, seq |-> 1, prev_ballot |-> <<0, r2>>, status |-> "pre-accepted"], [type |-> "prepare-reply", src |-> r2, dst |-> r2, inst |-> <<r2, 1>>, ballot |-> <<2, r2>>, cmd |-> c2, deps |-> {<<r2, 1>>}, seq |-> 2, prev_ballot |-> <<1, r1>>, status |-> "pre-accepted"], [type |-> "prepare-reply", src |-> r3, dst |-> r2, inst |-> <<r2, 1>>, ballot |-> <<2, r2>>, cmd |-> c2, deps |-> {}, seq |-> 1, prev_ballot |-> <<0, r2>>, status |-> "pre-accepted"]}
+/\ sentMsg = {}
+/\ preAcceptMsg = { [ type |-> "pre-accept",
+    src |-> r2,
+    dst |-> r3,
+    inst |-> <<r2, 1>>,
+    ballot |-> <<2, r2>>,
+    cmd |-> c2,
+    deps |-> {<<r1, 1>>, <<r2, 1>>},
+    seq |-> 4 ] }
+/\ executed = (r1 :> {} @@ r2 :> {} @@ r3 :> {})
+/\ crtInst = (r1 :> 2 @@ r2 :> 2 @@ r3 :> 1)
+/\ ballots = 5
+/\ cmdLog = ( r1 :>
+      { [ inst |-> <<r1, 1>>,
+          ballot |-> <<0, r1>>,
+          cmd |-> c1,
+          deps |-> {<<r2, 1>>},
+          seq |-> 3,
+          status |-> "accepted" ],
+        [ inst |-> <<r2, 1>>,
+          ballot |-> <<1, r1>>,
+          cmd |-> c2,
+          deps |-> {<<r2, 1>>},
+          seq |-> 2,
+          status |-> "accepted" ] } @@
+  r2 :>
+      { [ inst |-> <<r1, 1>>,
+          ballot |-> <<0, r1>>,
+          cmd |-> c1,
+          deps |-> {<<r2, 1>>},
+          seq |-> 3,
+          status |-> "pre-accepted" ],
+        [ inst |-> <<r2, 1>>,
+          ballot |-> <<2, r2>>,
+          cmd |-> c2,
+          deps |-> {<<r1, 1>>, <<r2, 1>>},
+          seq |-> 4,
+          status |-> "pre-accepted" ] } @@
+  r3 :>
+      { [ inst |-> <<r2, 1>>,
+          ballot |-> <<2, r2>>,
+          cmd |-> c2,
+          deps |-> {},
+          seq |-> 1,
+          status |-> "pre-accepted" ] } )
+/\ leaderOfInst = (r1 :> {<<r1, 1>>, <<r2, 1>>} @@ r2 :> {<<r2, 1>>} @@ r3 :> {})
+/\ preAcceptReplyMsg = { [ committed |-> {},
+    type |-> "pre-accept-reply",
+    src |-> r3,
+    dst |-> r2,
+    inst |-> <<r2, 1>>,
+    ballot |-> <<0, r2>>,
+    deps |-> {},
+    seq |-> 1 ] }
+/\ committed = ( <<r1, 1>> :> {} @@
+  <<r1, 2>> :> {} @@
+  <<r2, 1>> :> {} @@
+  <<r2, 2>> :> {} @@
+  <<r3, 1>> :> {} @@
+  <<r3, 2>> :> {} )
+/\ proposed = {c1, c2}
+/\ tryPreAcceptReplyMsg = {}
+/\ preparing = (r1 :> {} @@ r2 :> {} @@ r3 :> {<<r2, 1>>})
+/\ prepareMsg = { [ type |-> "prepare",
+    src |-> r3,
+    dst |-> r1,
+    inst |-> <<r2, 1>>,
+    ballot |-> <<3, r3>> ],
+  [ type |-> "prepare",
+    src |-> r3,
+    dst |-> r1,
+    inst |-> <<r2, 1>>,
+    ballot |-> <<4, r3>> ],
+  [ type |-> "prepare",
+    src |-> r3,
+    dst |-> r3,
+    inst |-> <<r2, 1>>,
+    ballot |-> <<3, r3>> ],
+  [ type |-> "prepare",
+    src |-> r3,
+    dst |-> r3,
+    inst |-> <<r2, 1>>,
+    ballot |-> <<4, r3>> ] }
+/\ acceptReplyMsg = {}
+/\ commitMsg = {}
+
+State 19: <Phase1ReplyAction line 796, col 22 to line 796, col 75 of module EPaxos>
+/\ tryPreAcceptMsg = {}
+/\ acceptMsg = { [ type |-> "accept",
+    src |-> r1,
+    dst |-> r2,
+    inst |-> <<r1, 1>>,
+    ballot |-> <<0, r1>>,
+    cmd |-> c1,
+    deps |-> {<<r2, 1>>},
+    seq |-> 3 ],
+  [ type |-> "accept",
+    src |-> r1,
+    dst |-> r2,
+    inst |-> <<r2, 1>>,
+    ballot |-> <<1, r1>>,
+    cmd |-> c2,
+    deps |-> {<<r2, 1>>},
+    seq |-> 2 ] }
+/\ prepareReplyMsg = {[type |-> "prepare-reply", src |-> r1, dst |-> r1, inst |-> <<r2, 1>>, ballot |-> <<1, r1>>, cmd |-> None, deps |-> {}, seq |-> 0, prev_ballot |-> <<0, r1>>, status |-> "not-seen"], [type |-> "prepare-reply", src |-> r2, dst |-> r1, inst |-> <<r2, 1>>, ballot |-> <<1, r1>>, cmd |-> c2, deps |-> {}, seq |-> 1, prev_ballot |-> <<0, r2>>, status |-> "pre-accepted"], [type |-> "prepare-reply", src |-> r2, dst |-> r2, inst |-> <<r2, 1>>, ballot |-> <<2, r2>>, cmd |-> c2, deps |-> {<<r2, 1>>}, seq |-> 2, prev_ballot |-> <<1, r1>>, status |-> "pre-accepted"], [type |-> "prepare-reply", src |-> r3, dst |-> r2, inst |-> <<r2, 1>>, ballot |-> <<2, r2>>, cmd |-> c2, deps |-> {}, seq |-> 1, prev_ballot |-> <<0, r2>>, status |-> "pre-accepted"]}
+/\ sentMsg = {}
+/\ preAcceptMsg = {}
+/\ executed = (r1 :> {} @@ r2 :> {} @@ r3 :> {})
+/\ crtInst = (r1 :> 2 @@ r2 :> 2 @@ r3 :> 1)
+/\ ballots = 5
+/\ cmdLog = ( r1 :>
+      { [ inst |-> <<r1, 1>>,
+          ballot |-> <<0, r1>>,
+          cmd |-> c1,
+          deps |-> {<<r2, 1>>},
+          seq |-> 3,
+          status |-> "accepted" ],
+        [ inst |-> <<r2, 1>>,
+          ballot |-> <<1, r1>>,
+          cmd |-> c2,
+          deps |-> {<<r2, 1>>},
+          seq |-> 2,
+          status |-> "accepted" ] } @@
+  r2 :>
+      { [ inst |-> <<r1, 1>>,
+          ballot |-> <<0, r1>>,
+          cmd |-> c1,
+          deps |-> {<<r2, 1>>},
+          seq |-> 3,
+          status |-> "pre-accepted" ],
+        [ inst |-> <<r2, 1>>,
+          ballot |-> <<2, r2>>,
+          cmd |-> c2,
+          deps |-> {<<r1, 1>>, <<r2, 1>>},
+          seq |-> 4,
+          status |-> "pre-accepted" ] } @@
+  r3 :>
+      { [ inst |-> <<r2, 1>>,
+          ballot |-> <<2, r2>>,
+          cmd |-> c2,
+          deps |-> {<<r1, 1>>, <<r2, 1>>},
+          seq |-> 4,
+          status |-> "pre-accepted" ] } )
+/\ leaderOfInst = (r1 :> {<<r1, 1>>, <<r2, 1>>} @@ r2 :> {<<r2, 1>>} @@ r3 :> {})
+/\ preAcceptReplyMsg = { [ committed |-> {},
+    type |-> "pre-accept-reply",
+    src |-> r3,
+    dst |-> r2,
+    inst |-> <<r2, 1>>,
+    ballot |-> <<0, r2>>,
+    deps |-> {},
+    seq |-> 1 ],
+  [ committed |-> {},
+    type |-> "pre-accept-reply",
+    src |-> r3,
+    dst |-> r2,
+    inst |-> <<r2, 1>>,
+    ballot |-> <<2, r2>>,
+    deps |-> {<<r1, 1>>, <<r2, 1>>},
+    seq |-> 4 ] }
+/\ committed = ( <<r1, 1>> :> {} @@
+  <<r1, 2>> :> {} @@
+  <<r2, 1>> :> {} @@
+  <<r2, 2>> :> {} @@
+  <<r3, 1>> :> {} @@
+  <<r3, 2>> :> {} )
+/\ proposed = {c1, c2}
+/\ tryPreAcceptReplyMsg = {}
+/\ preparing = (r1 :> {} @@ r2 :> {} @@ r3 :> {<<r2, 1>>})
+/\ prepareMsg = { [ type |-> "prepare",
+    src |-> r3,
+    dst |-> r1,
+    inst |-> <<r2, 1>>,
+    ballot |-> <<3, r3>> ],
+  [ type |-> "prepare",
+    src |-> r3,
+    dst |-> r1,
+    inst |-> <<r2, 1>>,
+    ballot |-> <<4, r3>> ],
+  [ type |-> "prepare",
+    src |-> r3,
+    dst |-> r3,
+    inst |-> <<r2, 1>>,
+    ballot |-> <<3, r3>> ],
+  [ type |-> "prepare",
+    src |-> r3,
+    dst |-> r3,
+    inst |-> <<r2, 1>>,
+    ballot |-> <<4, r3>> ] }
+/\ acceptReplyMsg = {}
+/\ commitMsg = {}
+
+State 20: <Phase2ReplyAction line 797, col 22 to line 797, col 75 of module EPaxos>
+/\ tryPreAcceptMsg = {}
+/\ acceptMsg = { [ type |-> "accept",
+    src |-> r1,
+    dst |-> r2,
+    inst |-> <<r2, 1>>,
+    ballot |-> <<1, r1>>,
+    cmd |-> c2,
+    deps |-> {<<r2, 1>>},
+    seq |-> 2 ] }
+/\ prepareReplyMsg = {[type |-> "prepare-reply", src |-> r1, dst |-> r1, inst |-> <<r2, 1>>, ballot |-> <<1, r1>>, cmd |-> None, deps |-> {}, seq |-> 0, prev_ballot |-> <<0, r1>>, status |-> "not-seen"], [type |-> "prepare-reply", src |-> r2, dst |-> r1, inst |-> <<r2, 1>>, ballot |-> <<1, r1>>, cmd |-> c2, deps |-> {}, seq |-> 1, prev_ballot |-> <<0, r2>>, status |-> "pre-accepted"], [type |-> "prepare-reply", src |-> r2, dst |-> r2, inst |-> <<r2, 1>>, ballot |-> <<2, r2>>, cmd |-> c2, deps |-> {<<r2, 1>>}, seq |-> 2, prev_ballot |-> <<1, r1>>, status |-> "pre-accepted"], [type |-> "prepare-reply", src |-> r3, dst |-> r2, inst |-> <<r2, 1>>, ballot |-> <<2, r2>>, cmd |-> c2, deps |-> {}, seq |-> 1, prev_ballot |-> <<0, r2>>, status |-> "pre-accepted"]}
+/\ sentMsg = {}
+/\ preAcceptMsg = {}
+/\ executed = (r1 :> {} @@ r2 :> {} @@ r3 :> {})
+/\ crtInst = (r1 :> 2 @@ r2 :> 2 @@ r3 :> 1)
+/\ ballots = 5
+/\ cmdLog = ( r1 :>
+      { [ inst |-> <<r1, 1>>,
+          ballot |-> <<0, r1>>,
+          cmd |-> c1,
+          deps |-> {<<r2, 1>>},
+          seq |-> 3,
+          status |-> "accepted" ],
+        [ inst |-> <<r2, 1>>,
+          ballot |-> <<1, r1>>,
+          cmd |-> c2,
+          deps |-> {<<r2, 1>>},
+          seq |-> 2,
+          status |-> "accepted" ] } @@
+  r2 :>
+      { [ inst |-> <<r1, 1>>,
+          ballot |-> <<0, r1>>,
+          cmd |-> c1,
+          deps |-> {<<r2, 1>>},
+          seq |-> 3,
+          status |-> "accepted" ],
+        [ inst |-> <<r2, 1>>,
+          ballot |-> <<2, r2>>,
+          cmd |-> c2,
+          deps |-> {<<r1, 1>>, <<r2, 1>>},
+          seq |-> 4,
+          status |-> "pre-accepted" ] } @@
+  r3 :>
+      { [ inst |-> <<r2, 1>>,
+          ballot |-> <<2, r2>>,
+          cmd |-> c2,
+          deps |-> {<<r1, 1>>, <<r2, 1>>},
+          seq |-> 4,
+          status |-> "pre-accepted" ] } )
+/\ leaderOfInst = (r1 :> {<<r1, 1>>, <<r2, 1>>} @@ r2 :> {<<r2, 1>>} @@ r3 :> {})
+/\ preAcceptReplyMsg = { [ committed |-> {},
+    type |-> "pre-accept-reply",
+    src |-> r3,
+    dst |-> r2,
+    inst |-> <<r2, 1>>,
+    ballot |-> <<0, r2>>,
+    deps |-> {},
+    seq |-> 1 ],
+  [ committed |-> {},
+    type |-> "pre-accept-reply",
+    src |-> r3,
+    dst |-> r2,
+    inst |-> <<r2, 1>>,
+    ballot |-> <<2, r2>>,
+    deps |-> {<<r1, 1>>, <<r2, 1>>},
+    seq |-> 4 ] }
+/\ committed = ( <<r1, 1>> :> {} @@
+  <<r1, 2>> :> {} @@
+  <<r2, 1>> :> {} @@
+  <<r2, 2>> :> {} @@
+  <<r3, 1>> :> {} @@
+  <<r3, 2>> :> {} )
+/\ proposed = {c1, c2}
+/\ tryPreAcceptReplyMsg = {}
+/\ preparing = (r1 :> {} @@ r2 :> {} @@ r3 :> {<<r2, 1>>})
+/\ prepareMsg = { [ type |-> "prepare",
+    src |-> r3,
+    dst |-> r1,
+    inst |-> <<r2, 1>>,
+    ballot |-> <<3, r3>> ],
+  [ type |-> "prepare",
+    src |-> r3,
+    dst |-> r1,
+    inst |-> <<r2, 1>>,
+    ballot |-> <<4, r3>> ],
+  [ type |-> "prepare",
+    src |-> r3,
+    dst |-> r3,
+    inst |-> <<r2, 1>>,
+    ballot |-> <<3, r3>> ],
+  [ type |-> "prepare",
+    src |-> r3,
+    dst |-> r3,
+    inst |-> <<r2, 1>>,
+    ballot |-> <<4, r3>> ] }
+/\ acceptReplyMsg = { [ type |-> "accept-reply",
+    src |-> r2,
+    dst |-> r1,
+    inst |-> <<r1, 1>>,
+    ballot |-> <<0, r1>> ] }
+/\ commitMsg = {}
+
+State 21: <Phase1SlowAction line 793, col 21 to line 793, col 150 of module EPaxos>
+/\ tryPreAcceptMsg = {}
+/\ acceptMsg = { [ type |-> "accept",
+    src |-> r1,
+    dst |-> r2,
+    inst |-> <<r2, 1>>,
+    ballot |-> <<1, r1>>,
+    cmd |-> c2,
+    deps |-> {<<r2, 1>>},
+    seq |-> 2 ],
+  [ type |-> "accept",
+    src |-> r2,
+    dst |-> r3,
+    inst |-> <<r2, 1>>,
+    ballot |-> <<2, r2>>,
+    cmd |-> c2,
+    deps |-> {<<r1, 1>>, <<r2, 1>>},
+    seq |-> 4 ] }
+/\ prepareReplyMsg = {[type |-> "prepare-reply", src |-> r1, dst |-> r1, inst |-> <<r2, 1>>, ballot |-> <<1, r1>>, cmd |-> None, deps |-> {}, seq |-> 0, prev_ballot |-> <<0, r1>>, status |-> "not-seen"], [type |-> "prepare-reply", src |-> r2, dst |-> r1, inst |-> <<r2, 1>>, ballot |-> <<1, r1>>, cmd |-> c2, deps |-> {}, seq |-> 1, prev_ballot |-> <<0, r2>>, status |-> "pre-accepted"], [type |-> "prepare-reply", src |-> r2, dst |-> r2, inst |-> <<r2, 1>>, ballot |-> <<2, r2>>, cmd |-> c2, deps |-> {<<r2, 1>>}, seq |-> 2, prev_ballot |-> <<1, r1>>, status |-> "pre-accepted"], [type |-> "prepare-reply", src |-> r3, dst |-> r2, inst |-> <<r2, 1>>, ballot |-> <<2, r2>>, cmd |-> c2, deps |-> {}, seq |-> 1, prev_ballot |-> <<0, r2>>, status |-> "pre-accepted"]}
+/\ sentMsg = {}
+/\ preAcceptMsg = {}
+/\ executed = (r1 :> {} @@ r2 :> {} @@ r3 :> {})
+/\ crtInst = (r1 :> 2 @@ r2 :> 2 @@ r3 :> 1)
+/\ ballots = 5
+/\ cmdLog = ( r1 :>
+      { [ inst |-> <<r1, 1>>,
+          ballot |-> <<0, r1>>,
+          cmd |-> c1,
+          deps |-> {<<r2, 1>>},
+          seq |-> 3,
+          status |-> "accepted" ],
+        [ inst |-> <<r2, 1>>,
+          ballot |-> <<1, r1>>,
+          cmd |-> c2,
+          deps |-> {<<r2, 1>>},
+          seq |-> 2,
+          status |-> "accepted" ] } @@
+  r2 :>
+      { [ inst |-> <<r1, 1>>,
+          ballot |-> <<0, r1>>,
+          cmd |-> c1,
+          deps |-> {<<r2, 1>>},
+          seq |-> 3,
+          status |-> "accepted" ],
+        [ inst |-> <<r2, 1>>,
+          ballot |-> <<2, r2>>,
+          cmd |-> c2,
+          deps |-> {<<r1, 1>>, <<r2, 1>>},
+          seq |-> 4,
+          status |-> "accepted" ] } @@
+  r3 :>
+      { [ inst |-> <<r2, 1>>,
+          ballot |-> <<2, r2>>,
+          cmd |-> c2,
+          deps |-> {<<r1, 1>>, <<r2, 1>>},
+          seq |-> 4,
+          status |-> "pre-accepted" ] } )
+/\ leaderOfInst = (r1 :> {<<r1, 1>>, <<r2, 1>>} @@ r2 :> {<<r2, 1>>} @@ r3 :> {})
+/\ preAcceptReplyMsg = { [ committed |-> {},
+    type |-> "pre-accept-reply",
+    src |-> r3,
+    dst |-> r2,
+    inst |-> <<r2, 1>>,
+    ballot |-> <<0, r2>>,
+    deps |-> {},
+    seq |-> 1 ] }
+/\ committed = ( <<r1, 1>> :> {} @@
+  <<r1, 2>> :> {} @@
+  <<r2, 1>> :> {} @@
+  <<r2, 2>> :> {} @@
+  <<r3, 1>> :> {} @@
+  <<r3, 2>> :> {} )
+/\ proposed = {c1, c2}
+/\ tryPreAcceptReplyMsg = {}
+/\ preparing = (r1 :> {} @@ r2 :> {} @@ r3 :> {<<r2, 1>>})
+/\ prepareMsg = { [ type |-> "prepare",
+    src |-> r3,
+    dst |-> r1,
+    inst |-> <<r2, 1>>,
+    ballot |-> <<3, r3>> ],
+  [ type |-> "prepare",
+    src |-> r3,
+    dst |-> r1,
+    inst |-> <<r2, 1>>,
+    ballot |-> <<4, r3>> ],
+  [ type |-> "prepare",
+    src |-> r3,
+    dst |-> r3,
+    inst |-> <<r2, 1>>,
+    ballot |-> <<3, r3>> ],
+  [ type |-> "prepare",
+    src |-> r3,
+    dst |-> r3,
+    inst |-> <<r2, 1>>,
+    ballot |-> <<4, r3>> ] }
+/\ acceptReplyMsg = { [ type |-> "accept-reply",
+    src |-> r2,
+    dst |-> r1,
+    inst |-> <<r1, 1>>,
+    ballot |-> <<0, r1>> ] }
+/\ commitMsg = {}
+
+State 22: <Phase2ReplyAction line 797, col 22 to line 797, col 75 of module EPaxos>
+/\ tryPreAcceptMsg = {}
+/\ acceptMsg = { [ type |-> "accept",
+    src |-> r1,
+    dst |-> r2,
+    inst |-> <<r2, 1>>,
+    ballot |-> <<1, r1>>,
+    cmd |-> c2,
+    deps |-> {<<r2, 1>>},
+    seq |-> 2 ] }
+/\ prepareReplyMsg = {[type |-> "prepare-reply", src |-> r1, dst |-> r1, inst |-> <<r2, 1>>, ballot |-> <<1, r1>>, cmd |-> None, deps |-> {}, seq |-> 0, prev_ballot |-> <<0, r1>>, status |-> "not-seen"], [type |-> "prepare-reply", src |-> r2, dst |-> r1, inst |-> <<r2, 1>>, ballot |-> <<1, r1>>, cmd |-> c2, deps |-> {}, seq |-> 1, prev_ballot |-> <<0, r2>>, status |-> "pre-accepted"], [type |-> "prepare-reply", src |-> r2, dst |-> r2, inst |-> <<r2, 1>>, ballot |-> <<2, r2>>, cmd |-> c2, deps |-> {<<r2, 1>>}, seq |-> 2, prev_ballot |-> <<1, r1>>, status |-> "pre-accepted"], [type |-> "prepare-reply", src |-> r3, dst |-> r2, inst |-> <<r2, 1>>, ballot |-> <<2, r2>>, cmd |-> c2, deps |-> {}, seq |-> 1, prev_ballot |-> <<0, r2>>, status |-> "pre-accepted"]}
+/\ sentMsg = {}
+/\ preAcceptMsg = {}
+/\ executed = (r1 :> {} @@ r2 :> {} @@ r3 :> {})
+/\ crtInst = (r1 :> 2 @@ r2 :> 2 @@ r3 :> 1)
+/\ ballots = 5
+/\ cmdLog = ( r1 :>
+      { [ inst |-> <<r1, 1>>,
+          ballot |-> <<0, r1>>,
+          cmd |-> c1,
+          deps |-> {<<r2, 1>>},
+          seq |-> 3,
+          status |-> "accepted" ],
+        [ inst |-> <<r2, 1>>,
+          ballot |-> <<1, r1>>,
+          cmd |-> c2,
+          deps |-> {<<r2, 1>>},
+          seq |-> 2,
+          status |-> "accepted" ] } @@
+  r2 :>
+      { [ inst |-> <<r1, 1>>,
+          ballot |-> <<0, r1>>,
+          cmd |-> c1,
+          deps |-> {<<r2, 1>>},
+          seq |-> 3,
+          status |-> "accepted" ],
+        [ inst |-> <<r2, 1>>,
+          ballot |-> <<2, r2>>,
+          cmd |-> c2,
+          deps |-> {<<r1, 1>>, <<r2, 1>>},
+          seq |-> 4,
+          status |-> "accepted" ] } @@
+  r3 :>
+      { [ inst |-> <<r2, 1>>,
+          ballot |-> <<2, r2>>,
+          cmd |-> c2,
+          deps |-> {<<r1, 1>>, <<r2, 1>>},
+          seq |-> 4,
+          status |-> "accepted" ] } )
+/\ leaderOfInst = (r1 :> {<<r1, 1>>, <<r2, 1>>} @@ r2 :> {<<r2, 1>>} @@ r3 :> {})
+/\ preAcceptReplyMsg = { [ committed |-> {},
+    type |-> "pre-accept-reply",
+    src |-> r3,
+    dst |-> r2,
+    inst |-> <<r2, 1>>,
+    ballot |-> <<0, r2>>,
+    deps |-> {},
+    seq |-> 1 ] }
+/\ committed = ( <<r1, 1>> :> {} @@
+  <<r1, 2>> :> {} @@
+  <<r2, 1>> :> {} @@
+  <<r2, 2>> :> {} @@
+  <<r3, 1>> :> {} @@
+  <<r3, 2>> :> {} )
+/\ proposed = {c1, c2}
+/\ tryPreAcceptReplyMsg = {}
+/\ preparing = (r1 :> {} @@ r2 :> {} @@ r3 :> {<<r2, 1>>})
+/\ prepareMsg = { [ type |-> "prepare",
+    src |-> r3,
+    dst |-> r1,
+    inst |-> <<r2, 1>>,
+    ballot |-> <<3, r3>> ],
+  [ type |-> "prepare",
+    src |-> r3,
+    dst |-> r1,
+    inst |-> <<r2, 1>>,
+    ballot |-> <<4, r3>> ],
+  [ type |-> "prepare",
+    src |-> r3,
+    dst |-> r3,
+    inst |-> <<r2, 1>>,
+    ballot |-> <<3, r3>> ],
+  [ type |-> "prepare",
+    src |-> r3,
+    dst |-> r3,
+    inst |-> <<r2, 1>>,
+    ballot |-> <<4, r3>> ] }
+/\ acceptReplyMsg = { [ type |-> "accept-reply",
+    src |-> r2,
+    dst |-> r1,
+    inst |-> <<r1, 1>>,
+    ballot |-> <<0, r1>> ],
+  [ type |-> "accept-reply",
+    src |-> r3,
+    dst |-> r2,
+    inst |-> <<r2, 1>>,
+    ballot |-> <<2, r2>> ] }
+/\ commitMsg = {}
+
+State 23: <Phase2FinalizeAction line 794, col 25 to line 794, col 158 of module EPaxos>
+/\ tryPreAcceptMsg = {}
+/\ acceptMsg = { [ type |-> "accept",
+    src |-> r1,
+    dst |-> r2,
+    inst |-> <<r2, 1>>,
+    ballot |-> <<1, r1>>,
+    cmd |-> c2,
+    deps |-> {<<r2, 1>>},
+    seq |-> 2 ] }
+/\ prepareReplyMsg = {[type |-> "prepare-reply", src |-> r1, dst |-> r1, inst |-> <<r2, 1>>, ballot |-> <<1, r1>>, cmd |-> None, deps |-> {}, seq |-> 0, prev_ballot |-> <<0, r1>>, status |-> "not-seen"], [type |-> "prepare-reply", src |-> r2, dst |-> r1, inst |-> <<r2, 1>>, ballot |-> <<1, r1>>, cmd |-> c2, deps |-> {}, seq |-> 1, prev_ballot |-> <<0, r2>>, status |-> "pre-accepted"], [type |-> "prepare-reply", src |-> r2, dst |-> r2, inst |-> <<r2, 1>>, ballot |-> <<2, r2>>, cmd |-> c2, deps |-> {<<r2, 1>>}, seq |-> 2, prev_ballot |-> <<1, r1>>, status |-> "pre-accepted"], [type |-> "prepare-reply", src |-> r3, dst |-> r2, inst |-> <<r2, 1>>, ballot |-> <<2, r2>>, cmd |-> c2, deps |-> {}, seq |-> 1, prev_ballot |-> <<0, r2>>, status |-> "pre-accepted"]}
+/\ sentMsg = {}
+/\ preAcceptMsg = {}
+/\ executed = (r1 :> {} @@ r2 :> {} @@ r3 :> {})
+/\ crtInst = (r1 :> 2 @@ r2 :> 2 @@ r3 :> 1)
+/\ ballots = 5
+/\ cmdLog = ( r1 :>
+      { [ inst |-> <<r1, 1>>,
+          ballot |-> <<0, r1>>,
+          cmd |-> c1,
+          deps |-> {<<r2, 1>>},
+          seq |-> 3,
+          status |-> "committed" ],
+        [ inst |-> <<r2, 1>>,
+          ballot |-> <<1, r1>>,
+          cmd |-> c2,
+          deps |-> {<<r2, 1>>},
+          seq |-> 2,
+          status |-> "accepted" ] } @@
+  r2 :>
+      { [ inst |-> <<r1, 1>>,
+          ballot |-> <<0, r1>>,
+          cmd |-> c1,
+          deps |-> {<<r2, 1>>},
+          seq |-> 3,
+          status |-> "accepted" ],
+        [ inst |-> <<r2, 1>>,
+          ballot |-> <<2, r2>>,
+          cmd |-> c2,
+          deps |-> {<<r1, 1>>, <<r2, 1>>},
+          seq |-> 4,
+          status |-> "accepted" ] } @@
+  r3 :>
+      { [ inst |-> <<r2, 1>>,
+          ballot |-> <<2, r2>>,
+          cmd |-> c2,
+          deps |-> {<<r1, 1>>, <<r2, 1>>},
+          seq |-> 4,
+          status |-> "accepted" ] } )
+/\ leaderOfInst = (r1 :> {<<r2, 1>>} @@ r2 :> {<<r2, 1>>} @@ r3 :> {})
+/\ preAcceptReplyMsg = { [ committed |-> {},
+    type |-> "pre-accept-reply",
+    src |-> r3,
+    dst |-> r2,
+    inst |-> <<r2, 1>>,
+    ballot |-> <<0, r2>>,
+    deps |-> {},
+    seq |-> 1 ] }
+/\ committed = ( <<r1, 1>> :> {<<c1, {<<r2, 1>>}, 3>>} @@
+  <<r1, 2>> :> {} @@
+  <<r2, 1>> :> {} @@
+  <<r2, 2>> :> {} @@
+  <<r3, 1>> :> {} @@
+  <<r3, 2>> :> {} )
+/\ proposed = {c1, c2}
+/\ tryPreAcceptReplyMsg = {}
+/\ preparing = (r1 :> {} @@ r2 :> {} @@ r3 :> {<<r2, 1>>})
+/\ prepareMsg = { [ type |-> "prepare",
+    src |-> r3,
+    dst |-> r1,
+    inst |-> <<r2, 1>>,
+    ballot |-> <<3, r3>> ],
+  [ type |-> "prepare",
+    src |-> r3,
+    dst |-> r1,
+    inst |-> <<r2, 1>>,
+    ballot |-> <<4, r3>> ],
+  [ type |-> "prepare",
+    src |-> r3,
+    dst |-> r3,
+    inst |-> <<r2, 1>>,
+    ballot |-> <<3, r3>> ],
+  [ type |-> "prepare",
+    src |-> r3,
+    dst |-> r3,
+    inst |-> <<r2, 1>>,
+    ballot |-> <<4, r3>> ] }
+/\ acceptReplyMsg = { [ type |-> "accept-reply",
+    src |-> r3,
+    dst |-> r2,
+    inst |-> <<r2, 1>>,
+    ballot |-> <<2, r2>> ] }
+/\ commitMsg = { [ type |-> "commit",
+    inst |-> <<r1, 1>>,
+    ballot |-> <<0, r1>>,
+    cmd |-> c1,
+    deps |-> {<<r2, 1>>},
+    seq |-> 3 ] }
+
+State 24: <Phase2FinalizeAction line 794, col 25 to line 794, col 158 of module EPaxos>
+/\ tryPreAcceptMsg = {}
+/\ acceptMsg = { [ type |-> "accept",
+    src |-> r1,
+    dst |-> r2,
+    inst |-> <<r2, 1>>,
+    ballot |-> <<1, r1>>,
+    cmd |-> c2,
+    deps |-> {<<r2, 1>>},
+    seq |-> 2 ] }
+/\ prepareReplyMsg = {[type |-> "prepare-reply", src |-> r1, dst |-> r1, inst |-> <<r2, 1>>, ballot |-> <<1, r1>>, cmd |-> None, deps |-> {}, seq |-> 0, prev_ballot |-> <<0, r1>>, status |-> "not-seen"], [type |-> "prepare-reply", src |-> r2, dst |-> r1, inst |-> <<r2, 1>>, ballot |-> <<1, r1>>, cmd |-> c2, deps |-> {}, seq |-> 1, prev_ballot |-> <<0, r2>>, status |-> "pre-accepted"], [type |-> "prepare-reply", src |-> r2, dst |-> r2, inst |-> <<r2, 1>>, ballot |-> <<2, r2>>, cmd |-> c2, deps |-> {<<r2, 1>>}, seq |-> 2, prev_ballot |-> <<1, r1>>, status |-> "pre-accepted"], [type |-> "prepare-reply", src |-> r3, dst |-> r2, inst |-> <<r2, 1>>, ballot |-> <<2, r2>>, cmd |-> c2, deps |-> {}, seq |-> 1, prev_ballot |-> <<0, r2>>, status |-> "pre-accepted"]}
+/\ sentMsg = {}
+/\ preAcceptMsg = {}
+/\ executed = (r1 :> {} @@ r2 :> {} @@ r3 :> {})
+/\ crtInst = (r1 :> 2 @@ r2 :> 2 @@ r3 :> 1)
+/\ ballots = 5
+/\ cmdLog = ( r1 :>
+      { [ inst |-> <<r1, 1>>,
+          ballot |-> <<0, r1>>,
+          cmd |-> c1,
+          deps |-> {<<r2, 1>>},
+          seq |-> 3,
+          status |-> "committed" ],
+        [ inst |-> <<r2, 1>>,
+          ballot |-> <<1, r1>>,
+          cmd |-> c2,
+          deps |-> {<<r2, 1>>},
+          seq |-> 2,
+          status |-> "accepted" ] } @@
+  r2 :>
+      { [ inst |-> <<r1, 1>>,
+          ballot |-> <<0, r1>>,
+          cmd |-> c1,
+          deps |-> {<<r2, 1>>},
+          seq |-> 3,
+          status |-> "accepted" ],
+        [ inst |-> <<r2, 1>>,
+          ballot |-> <<2, r2>>,
+          cmd |-> c2,
+          deps |-> {<<r1, 1>>, <<r2, 1>>},
+          seq |-> 4,
+          status |-> "committed" ] } @@
+  r3 :>
+      { [ inst |-> <<r2, 1>>,
+          ballot |-> <<2, r2>>,
+          cmd |-> c2,
+          deps |-> {<<r1, 1>>, <<r2, 1>>},
+          seq |-> 4,
+          status |-> "accepted" ] } )
+/\ leaderOfInst = (r1 :> {<<r2, 1>>} @@ r2 :> {} @@ r3 :> {})
+/\ preAcceptReplyMsg = { [ committed |-> {},
+    type |-> "pre-accept-reply",
+    src |-> r3,
+    dst |-> r2,
+    inst |-> <<r2, 1>>,
+    ballot |-> <<0, r2>>,
+    deps |-> {},
+    seq |-> 1 ] }
+/\ committed = [i \in {<<r1, 1>>, <<r1, 2>>, <<r2, 1>>, <<r2, 2>>, <<r3, 1>>, <<r3, 2>>} |-> <expression line 274, col 39 to line 274, col 40 of module EPaxos>]
+/\ proposed = {c1, c2}
+/\ tryPreAcceptReplyMsg = {}
+/\ preparing = (r1 :> {} @@ r2 :> {} @@ r3 :> {<<r2, 1>>})
+/\ prepareMsg = { [ type |-> "prepare",
+    src |-> r3,
+    dst |-> r1,
+    inst |-> <<r2, 1>>,
+    ballot |-> <<3, r3>> ],
+  [ type |-> "prepare",
+    src |-> r3,
+    dst |-> r1,
+    inst |-> <<r2, 1>>,
+    ballot |-> <<4, r3>> ],
+  [ type |-> "prepare",
+    src |-> r3,
+    dst |-> r3,
+    inst |-> <<r2, 1>>,
+    ballot |-> <<3, r3>> ],
+  [ type |-> "prepare",
+    src |-> r3,
+    dst |-> r3,
+    inst |-> <<r2, 1>>,
+    ballot |-> <<4, r3>> ] }
+/\ acceptReplyMsg = {}
+/\ commitMsg = { [ type |-> "commit",
+    inst |-> <<r1, 1>>,
+    ballot |-> <<0, r1>>,
+    cmd |-> c1,
+    deps |-> {<<r2, 1>>},
+    seq |-> 3 ],
+  [ type |-> "commit",
+    inst |-> <<r2, 1>>,
+    ballot |-> <<2, r2>>,
+    cmd |-> c2,
+    deps |-> {<<r1, 1>>, <<r2, 1>>},
+    seq |-> 4 ] }
+
+State 25: <ReplyPrepareAction line 803, col 23 to line 803, col 106 of module EPaxos>
+/\ tryPreAcceptMsg = {}
+/\ acceptMsg = { [ type |-> "accept",
+    src |-> r1,
+    dst |-> r2,
+    inst |-> <<r2, 1>>,
+    ballot |-> <<1, r1>>,
+    cmd |-> c2,
+    deps |-> {<<r2, 1>>},
+    seq |-> 2 ] }
+/\ prepareReplyMsg = {[type |-> "prepare-reply", src |-> r1, dst |-> r1, inst |-> <<r2, 1>>, ballot |-> <<1, r1>>, cmd |-> None, deps |-> {}, seq |-> 0, prev_ballot |-> <<0, r1>>, status |-> "not-seen"], [type |-> "prepare-reply", src |-> r2, dst |-> r1, inst |-> <<r2, 1>>, ballot |-> <<1, r1>>, cmd |-> c2, deps |-> {}, seq |-> 1, prev_ballot |-> <<0, r2>>, status |-> "pre-accepted"], [type |-> "prepare-reply", src |-> r2, dst |-> r2, inst |-> <<r2, 1>>, ballot |-> <<2, r2>>, cmd |-> c2, deps |-> {<<r2, 1>>}, seq |-> 2, prev_ballot |-> <<1, r1>>, status |-> "pre-accepted"], [type |-> "prepare-reply", src |-> r3, dst |-> r2, inst |-> <<r2, 1>>, ballot |-> <<2, r2>>, cmd |-> c2, deps |-> {}, seq |-> 1, prev_ballot |-> <<0, r2>>, status |-> "pre-accepted"], [type |-> "prepare-reply", src |-> r3, dst |-> r3, inst |-> <<r2, 1>>, ballot |-> <<3, r3>>, cmd |-> c2, deps |-> {<<r1, 1>>, <<r2, 1>>}, seq |-> 4, prev_ballot |-> <<2, r2>>, status |-> "accepted"]}
+/\ sentMsg = {}
+/\ preAcceptMsg = {}
+/\ executed = (r1 :> {} @@ r2 :> {} @@ r3 :> {})
+/\ crtInst = (r1 :> 2 @@ r2 :> 2 @@ r3 :> 1)
+/\ ballots = 5
+/\ cmdLog = ( r1 :>
+      { [ inst |-> <<r1, 1>>,
+          ballot |-> <<0, r1>>,
+          cmd |-> c1,
+          deps |-> {<<r2, 1>>},
+          seq |-> 3,
+          status |-> "committed" ],
+        [ inst |-> <<r2, 1>>,
+          ballot |-> <<1, r1>>,
+          cmd |-> c2,
+          deps |-> {<<r2, 1>>},
+          seq |-> 2,
+          status |-> "accepted" ] } @@
+  r2 :>
+      { [ inst |-> <<r1, 1>>,
+          ballot |-> <<0, r1>>,
+          cmd |-> c1,
+          deps |-> {<<r2, 1>>},
+          seq |-> 3,
+          status |-> "accepted" ],
+        [ inst |-> <<r2, 1>>,
+          ballot |-> <<2, r2>>,
+          cmd |-> c2,
+          deps |-> {<<r1, 1>>, <<r2, 1>>},
+          seq |-> 4,
+          status |-> "committed" ] } @@
+  r3 :>
+      { [ inst |-> <<r2, 1>>,
+          ballot |-> <<3, r3>>,
+          cmd |-> c2,
+          deps |-> {<<r1, 1>>, <<r2, 1>>},
+          seq |-> 4,
+          status |-> "accepted" ] } )
+/\ leaderOfInst = (r1 :> {<<r2, 1>>} @@ r2 :> {} @@ r3 :> {})
+/\ preAcceptReplyMsg = { [ committed |-> {},
+    type |-> "pre-accept-reply",
+    src |-> r3,
+    dst |-> r2,
+    inst |-> <<r2, 1>>,
+    ballot |-> <<0, r2>>,
+    deps |-> {},
+    seq |-> 1 ] }
+/\ committed = ( <<r1, 1>> :> {} @@
+  <<r1, 2>> :> {} @@
+  <<r2, 1>> :> {} @@
+  <<r2, 2>> :> {} @@
+  <<r3, 1>> :> {} @@
+  <<r3, 2>> :> {} )
+/\ proposed = {c1, c2}
+/\ tryPreAcceptReplyMsg = {}
+/\ preparing = (r1 :> {} @@ r2 :> {} @@ r3 :> {<<r2, 1>>})
+/\ prepareMsg = { [ type |-> "prepare",
+    src |-> r3,
+    dst |-> r1,
+    inst |-> <<r2, 1>>,
+    ballot |-> <<3, r3>> ],
+  [ type |-> "prepare",
+    src |-> r3,
+    dst |-> r1,
+    inst |-> <<r2, 1>>,
+    ballot |-> <<4, r3>> ],
+  [ type |-> "prepare",
+    src |-> r3,
+    dst |-> r3,
+    inst |-> <<r2, 1>>,
+    ballot |-> <<4, r3>> ] }
+/\ acceptReplyMsg = {}
+/\ commitMsg = { [ type |-> "commit",
+    inst |-> <<r1, 1>>,
+    ballot |-> <<0, r1>>,
+    cmd |-> c1,
+    deps |-> {<<r2, 1>>},
+    seq |-> 3 ],
+  [ type |-> "commit",
+    inst |-> <<r2, 1>>,
+    ballot |-> <<2, r2>>,
+    cmd |-> c2,
+    deps |-> {<<r1, 1>>, <<r2, 1>>},
+    seq |-> 4 ] }
+
+State 26: <ReplyPrepareAction line 803, col 23 to line 803, col 106 of module EPaxos>
+/\ tryPreAcceptMsg = {}
+/\ acceptMsg = { [ type |-> "accept",
+    src |-> r1,
+    dst |-> r2,
+    inst |-> <<r2, 1>>,
+    ballot |-> <<1, r1>>,
+    cmd |-> c2,
+    deps |-> {<<r2, 1>>},
+    seq |-> 2 ] }
+/\ prepareReplyMsg = {[type |-> "prepare-reply", src |-> r1, dst |-> r1, inst |-> <<r2, 1>>, ballot |-> <<1, r1>>, cmd |-> None, deps |-> {}, seq |-> 0, prev_ballot |-> <<0, r1>>, status |-> "not-seen"], [type |-> "prepare-reply", src |-> r2, dst |-> r1, inst |-> <<r2, 1>>, ballot |-> <<1, r1>>, cmd |-> c2, deps |-> {}, seq |-> 1, prev_ballot |-> <<0, r2>>, status |-> "pre-accepted"], [type |-> "prepare-reply", src |-> r2, dst |-> r2, inst |-> <<r2, 1>>, ballot |-> <<2, r2>>, cmd |-> c2, deps |-> {<<r2, 1>>}, seq |-> 2, prev_ballot |-> <<1, r1>>, status |-> "pre-accepted"], [type |-> "prepare-reply", src |-> r3, dst |-> r2, inst |-> <<r2, 1>>, ballot |-> <<2, r2>>, cmd |-> c2, deps |-> {}, seq |-> 1, prev_ballot |-> <<0, r2>>, status |-> "pre-accepted"], [type |-> "prepare-reply", src |-> r3, dst |-> r3, inst |-> <<r2, 1>>, ballot |-> <<3, r3>>, cmd |-> c2, deps |-> {<<r1, 1>>, <<r2, 1>>}, seq |-> 4, prev_ballot |-> <<2, r2>>, status |-> "accepted"], [type |-> "prepare-reply", src |-> r3, dst |-> r3, inst |-> <<r2, 1>>, ballot |-> <<4, r3>>, cmd |-> c2, deps |-> {<<r1, 1>>, <<r2, 1>>}, seq |-> 4, prev_ballot |-> <<3, r3>>, status |-> "accepted"]}
+/\ sentMsg = {}
+/\ preAcceptMsg = {}
+/\ executed = (r1 :> {} @@ r2 :> {} @@ r3 :> {})
+/\ crtInst = (r1 :> 2 @@ r2 :> 2 @@ r3 :> 1)
+/\ ballots = 5
+/\ cmdLog = ( r1 :>
+      { [ inst |-> <<r1, 1>>,
+          ballot |-> <<0, r1>>,
+          cmd |-> c1,
+          deps |-> {<<r2, 1>>},
+          seq |-> 3,
+          status |-> "committed" ],
+        [ inst |-> <<r2, 1>>,
+          ballot |-> <<1, r1>>,
+          cmd |-> c2,
+          deps |-> {<<r2, 1>>},
+          seq |-> 2,
+          status |-> "accepted" ] } @@
+  r2 :>
+      { [ inst |-> <<r1, 1>>,
+          ballot |-> <<0, r1>>,
+          cmd |-> c1,
+          deps |-> {<<r2, 1>>},
+          seq |-> 3,
+          status |-> "accepted" ],
+        [ inst |-> <<r2, 1>>,
+          ballot |-> <<2, r2>>,
+          cmd |-> c2,
+          deps |-> {<<r1, 1>>, <<r2, 1>>},
+          seq |-> 4,
+          status |-> "committed" ] } @@
+  r3 :>
+      { [ inst |-> <<r2, 1>>,
+          ballot |-> <<4, r3>>,
+          cmd |-> c2,
+          deps |-> {<<r1, 1>>, <<r2, 1>>},
+          seq |-> 4,
+          status |-> "accepted" ] } )
+/\ leaderOfInst = (r1 :> {<<r2, 1>>} @@ r2 :> {} @@ r3 :> {})
+/\ preAcceptReplyMsg = { [ committed |-> {},
+    type |-> "pre-accept-reply",
+    src |-> r3,
+    dst |-> r2,
+    inst |-> <<r2, 1>>,
+    ballot |-> <<0, r2>>,
+    deps |-> {},
+    seq |-> 1 ] }
+/\ committed = ( <<r1, 1>> :> {} @@
+  <<r1, 2>> :> {} @@
+  <<r2, 1>> :> {} @@
+  <<r2, 2>> :> {} @@
+  <<r3, 1>> :> {} @@
+  <<r3, 2>> :> {} )
+/\ proposed = {c1, c2}
+/\ tryPreAcceptReplyMsg = {}
+/\ preparing = (r1 :> {} @@ r2 :> {} @@ r3 :> {<<r2, 1>>})
+/\ prepareMsg = { [ type |-> "prepare",
+    src |-> r3,
+    dst |-> r1,
+    inst |-> <<r2, 1>>,
+    ballot |-> <<3, r3>> ],
+  [ type |-> "prepare",
+    src |-> r3,
+    dst |-> r1,
+    inst |-> <<r2, 1>>,
+    ballot |-> <<4, r3>> ] }
+/\ acceptReplyMsg = {}
+/\ commitMsg = { [ type |-> "commit",
+    inst |-> <<r1, 1>>,
+    ballot |-> <<0, r1>>,
+    cmd |-> c1,
+    deps |-> {<<r2, 1>>},
+    seq |-> 3 ],
+  [ type |-> "commit",
+    inst |-> <<r2, 1>>,
+    ballot |-> <<2, r2>>,
+    cmd |-> c2,
+    deps |-> {<<r1, 1>>, <<r2, 1>>},
+    seq |-> 4 ] }
+
+State 27: <ReplyPrepareAction line 803, col 23 to line 803, col 106 of module EPaxos>
+/\ tryPreAcceptMsg = {}
+/\ acceptMsg = { [ type |-> "accept",
+    src |-> r1,
+    dst |-> r2,
+    inst |-> <<r2, 1>>,
+    ballot |-> <<1, r1>>,
+    cmd |-> c2,
+    deps |-> {<<r2, 1>>},
+    seq |-> 2 ] }
+/\ prepareReplyMsg = {[type |-> "prepare-reply", src |-> r1, dst |-> r1, inst |-> <<r2, 1>>, ballot |-> <<1, r1>>, cmd |-> None, deps |-> {}, seq |-> 0, prev_ballot |-> <<0, r1>>, status |-> "not-seen"], [type |-> "prepare-reply", src |-> r1, dst |-> r3, inst |-> <<r2, 1>>, ballot |-> <<3, r3>>, cmd |-> c2, deps |-> {<<r2, 1>>}, seq |-> 2, prev_ballot |-> <<1, r1>>, status |-> "accepted"], [type |-> "prepare-reply", src |-> r2, dst |-> r1, inst |-> <<r2, 1>>, ballot |-> <<1, r1>>, cmd |-> c2, deps |-> {}, seq |-> 1, prev_ballot |-> <<0, r2>>, status |-> "pre-accepted"], [type |-> "prepare-reply", src |-> r2, dst |-> r2, inst |-> <<r2, 1>>, ballot |-> <<2, r2>>, cmd |-> c2, deps |-> {<<r2, 1>>}, seq |-> 2, prev_ballot |-> <<1, r1>>, status |-> "pre-accepted"], [type |-> "prepare-reply", src |-> r3, dst |-> r2, inst |-> <<r2, 1>>, ballot |-> <<2, r2>>, cmd |-> c2, deps |-> {}, seq |-> 1, prev_ballot |-> <<0, r2>>, status |-> "pre-accepted"], [type |-> "prepare-reply", src |-> r3, dst |-> r3, inst |-> <<r2, 1>>, ballot |-> <<3, r3>>, cmd |-> c2, deps |-> {<<r1, 1>>, <<r2, 1>>}, seq |-> 4, prev_ballot |-> <<2, r2>>, status |-> "accepted"], [type |-> "prepare-reply", src |-> r3, dst |-> r3, inst |-> <<r2, 1>>, ballot |-> <<4, r3>>, cmd |-> c2, deps |-> {<<r1, 1>>, <<r2, 1>>}, seq |-> 4, prev_ballot |-> <<3, r3>>, status |-> "accepted"]}
+/\ sentMsg = {}
+/\ preAcceptMsg = {}
+/\ executed = (r1 :> {} @@ r2 :> {} @@ r3 :> {})
+/\ crtInst = (r1 :> 2 @@ r2 :> 2 @@ r3 :> 1)
+/\ ballots = 5
+/\ cmdLog = ( r1 :>
+      { [ inst |-> <<r1, 1>>,
+          ballot |-> <<0, r1>>,
+          cmd |-> c1,
+          deps |-> {<<r2, 1>>},
+          seq |-> 3,
+          status |-> "committed" ],
+        [ inst |-> <<r2, 1>>,
+          ballot |-> <<3, r3>>,
+          cmd |-> c2,
+          deps |-> {<<r2, 1>>},
+          seq |-> 2,
+          status |-> "accepted" ] } @@
+  r2 :>
+      { [ inst |-> <<r1, 1>>,
+          ballot |-> <<0, r1>>,
+          cmd |-> c1,
+          deps |-> {<<r2, 1>>},
+          seq |-> 3,
+          status |-> "accepted" ],
+        [ inst |-> <<r2, 1>>,
+          ballot |-> <<2, r2>>,
+          cmd |-> c2,
+          deps |-> {<<r1, 1>>, <<r2, 1>>},
+          seq |-> 4,
+          status |-> "committed" ] } @@
+  r3 :>
+      { [ inst |-> <<r2, 1>>,
+          ballot |-> <<4, r3>>,
+          cmd |-> c2,
+          deps |-> {<<r1, 1>>, <<r2, 1>>},
+          seq |-> 4,
+          status |-> "accepted" ] } )
+/\ leaderOfInst = (r1 :> {} @@ r2 :> {} @@ r3 :> {})
+/\ preAcceptReplyMsg = { [ committed |-> {},
+    type |-> "pre-accept-reply",
+    src |-> r3,
+    dst |-> r2,
+    inst |-> <<r2, 1>>,
+    ballot |-> <<0, r2>>,
+    deps |-> {},
+    seq |-> 1 ] }
+/\ committed = ( <<r1, 1>> :> {} @@
+  <<r1, 2>> :> {} @@
+  <<r2, 1>> :> {} @@
+  <<r2, 2>> :> {} @@
+  <<r3, 1>> :> {} @@
+  <<r3, 2>> :> {} )
+/\ proposed = {c1, c2}
+/\ tryPreAcceptReplyMsg = {}
+/\ preparing = (r1 :> {} @@ r2 :> {} @@ r3 :> {<<r2, 1>>})
+/\ prepareMsg = { [ type |-> "prepare",
+    src |-> r3,
+    dst |-> r1,
+    inst |-> <<r2, 1>>,
+    ballot |-> <<4, r3>> ] }
+/\ acceptReplyMsg = {}
+/\ commitMsg = { [ type |-> "commit",
+    inst |-> <<r1, 1>>,
+    ballot |-> <<0, r1>>,
+    cmd |-> c1,
+    deps |-> {<<r2, 1>>},
+    seq |-> 3 ],
+  [ type |-> "commit",
+    inst |-> <<r2, 1>>,
+    ballot |-> <<2, r2>>,
+    cmd |-> c2,
+    deps |-> {<<r1, 1>>, <<r2, 1>>},
+    seq |-> 4 ] }
+
+State 28: <ReplyPrepareAction line 803, col 23 to line 803, col 106 of module EPaxos>
+/\ tryPreAcceptMsg = {}
+/\ acceptMsg = { [ type |-> "accept",
+    src |-> r1,
+    dst |-> r2,
+    inst |-> <<r2, 1>>,
+    ballot |-> <<1, r1>>,
+    cmd |-> c2,
+    deps |-> {<<r2, 1>>},
+    seq |-> 2 ] }
+/\ prepareReplyMsg = {[type |-> "prepare-reply", src |-> r1, dst |-> r1, inst |-> <<r2, 1>>, ballot |-> <<1, r1>>, cmd |-> None, deps |-> {}, seq |-> 0, prev_ballot |-> <<0, r1>>, status |-> "not-seen"], [type |-> "prepare-reply", src |-> r1, dst |-> r3, inst |-> <<r2, 1>>, ballot |-> <<3, r3>>, cmd |-> c2, deps |-> {<<r2, 1>>}, seq |-> 2, prev_ballot |-> <<1, r1>>, status |-> "accepted"], [type |-> "prepare-reply", src |-> r1, dst |-> r3, inst |-> <<r2, 1>>, ballot |-> <<4, r3>>, cmd |-> c2, deps |-> {<<r2, 1>>}, seq |-> 2, prev_ballot |-> <<3, r3>>, status |-> "accepted"], [type |-> "prepare-reply", src |-> r2, dst |-> r1, inst |-> <<r2, 1>>, ballot |-> <<1, r1>>, cmd |-> c2, deps |-> {}, seq |-> 1, prev_ballot |-> <<0, r2>>, status |-> "pre-accepted"], [type |-> "prepare-reply", src |-> r2, dst |-> r2, inst |-> <<r2, 1>>, ballot |-> <<2, r2>>, cmd |-> c2, deps |-> {<<r2, 1>>}, seq |-> 2, prev_ballot |-> <<1, r1>>, status |-> "pre-accepted"], [type |-> "prepare-reply", src |-> r3, dst |-> r2, inst |-> <<r2, 1>>, ballot |-> <<2, r2>>, cmd |-> c2, deps |-> {}, seq |-> 1, prev_ballot |-> <<0, r2>>, status |-> "pre-accepted"], [type |-> "prepare-reply", src |-> r3, dst |-> r3, inst |-> <<r2, 1>>, ballot |-> <<3, r3>>, cmd |-> c2, deps |-> {<<r1, 1>>, <<r2, 1>>}, seq |-> 4, prev_ballot |-> <<2, r2>>, status |-> "accepted"], [type |-> "prepare-reply", src |-> r3, dst |-> r3, inst |-> <<r2, 1>>, ballot |-> <<4, r3>>, cmd |-> c2, deps |-> {<<r1, 1>>, <<r2, 1>>}, seq |-> 4, prev_ballot |-> <<3, r3>>, status |-> "accepted"]}
+/\ sentMsg = {}
+/\ preAcceptMsg = {}
+/\ executed = (r1 :> {} @@ r2 :> {} @@ r3 :> {})
+/\ crtInst = (r1 :> 2 @@ r2 :> 2 @@ r3 :> 1)
+/\ ballots = 5
+/\ cmdLog = ( r1 :>
+      { [ inst |-> <<r1, 1>>,
+          ballot |-> <<0, r1>>,
+          cmd |-> c1,
+          deps |-> {<<r2, 1>>},
+          seq |-> 3,
+          status |-> "committed" ],
+        [ inst |-> <<r2, 1>>,
+          ballot |-> <<4, r3>>,
+          cmd |-> c2,
+          deps |-> {<<r2, 1>>},
+          seq |-> 2,
+          status |-> "accepted" ] } @@
+  r2 :>
+      { [ inst |-> <<r1, 1>>,
+          ballot |-> <<0, r1>>,
+          cmd |-> c1,
+          deps |-> {<<r2, 1>>},
+          seq |-> 3,
+          status |-> "accepted" ],
+        [ inst |-> <<r2, 1>>,
+          ballot |-> <<2, r2>>,
+          cmd |-> c2,
+          deps |-> {<<r1, 1>>, <<r2, 1>>},
+          seq |-> 4,
+          status |-> "committed" ] } @@
+  r3 :>
+      { [ inst |-> <<r2, 1>>,
+          ballot |-> <<4, r3>>,
+          cmd |-> c2,
+          deps |-> {<<r1, 1>>, <<r2, 1>>},
+          seq |-> 4,
+          status |-> "accepted" ] } )
+/\ leaderOfInst = (r1 :> {} @@ r2 :> {} @@ r3 :> {})
+/\ preAcceptReplyMsg = { [ committed |-> {},
+    type |-> "pre-accept-reply",
+    src |-> r3,
+    dst |-> r2,
+    inst |-> <<r2, 1>>,
+    ballot |-> <<0, r2>>,
+    deps |-> {},
+    seq |-> 1 ] }
+/\ committed = ( <<r1, 1>> :> {} @@
+  <<r1, 2>> :> {} @@
+  <<r2, 1>> :> {} @@
+  <<r2, 2>> :> {} @@
+  <<r3, 1>> :> {} @@
+  <<r3, 2>> :> {} )
+/\ proposed = {c1, c2}
+/\ tryPreAcceptReplyMsg = {}
+/\ preparing = (r1 :> {} @@ r2 :> {} @@ r3 :> {<<r2, 1>>})
+/\ prepareMsg = {}
+/\ acceptReplyMsg = {}
+/\ commitMsg = { [ type |-> "commit",
+    inst |-> <<r1, 1>>,
+    ballot |-> <<0, r1>>,
+    cmd |-> c1,
+    deps |-> {<<r2, 1>>},
+    seq |-> 3 ],
+  [ type |-> "commit",
+    inst |-> <<r2, 1>>,
+    ballot |-> <<2, r2>>,
+    cmd |-> c2,
+    deps |-> {<<r1, 1>>, <<r2, 1>>},
+    seq |-> 4 ] }
+
+State 29: <PrepareFinalizeAction line 804, col 26 to line 804, col 151 of module EPaxos>
+/\ tryPreAcceptMsg = {}
+/\ acceptMsg = { [ type |-> "accept",
+    src |-> r1,
+    dst |-> r2,
+    inst |-> <<r2, 1>>,
+    ballot |-> <<1, r1>>,
+    cmd |-> c2,
+    deps |-> {<<r2, 1>>},
+    seq |-> 2 ],
+  [ type |-> "accept",
+    src |-> r3,
+    dst |-> r1,
+    inst |-> <<r2, 1>>,
+    ballot |-> <<4, r3>>,
+    cmd |-> c2,
+    deps |-> {<<r2, 1>>},
+    seq |-> 2 ] }
+/\ prepareReplyMsg = {[type |-> "prepare-reply", src |-> r1, dst |-> r1, inst |-> <<r2, 1>>, ballot |-> <<1, r1>>, cmd |-> None, deps |-> {}, seq |-> 0, prev_ballot |-> <<0, r1>>, status |-> "not-seen"], [type |-> "prepare-reply", src |-> r1, dst |-> r3, inst |-> <<r2, 1>>, ballot |-> <<3, r3>>, cmd |-> c2, deps |-> {<<r2, 1>>}, seq |-> 2, prev_ballot |-> <<1, r1>>, status |-> "accepted"], [type |-> "prepare-reply", src |-> r2, dst |-> r1, inst |-> <<r2, 1>>, ballot |-> <<1, r1>>, cmd |-> c2, deps |-> {}, seq |-> 1, prev_ballot |-> <<0, r2>>, status |-> "pre-accepted"], [type |-> "prepare-reply", src |-> r2, dst |-> r2, inst |-> <<r2, 1>>, ballot |-> <<2, r2>>, cmd |-> c2, deps |-> {<<r2, 1>>}, seq |-> 2, prev_ballot |-> <<1, r1>>, status |-> "pre-accepted"], [type |-> "prepare-reply", src |-> r3, dst |-> r2, inst |-> <<r2, 1>>, ballot |-> <<2, r2>>, cmd |-> c2, deps |-> {}, seq |-> 1, prev_ballot |-> <<0, r2>>, status |-> "pre-accepted"], [type |-> "prepare-reply", src |-> r3, dst |-> r3, inst |-> <<r2, 1>>, ballot |-> <<3, r3>>, cmd |-> c2, deps |-> {<<r1, 1>>, <<r2, 1>>}, seq |-> 4, prev_ballot |-> <<2, r2>>, status |-> "accepted"]}
+/\ sentMsg = {}
+/\ preAcceptMsg = {}
+/\ executed = (r1 :> {} @@ r2 :> {} @@ r3 :> {})
+/\ crtInst = (r1 :> 2 @@ r2 :> 2 @@ r3 :> 1)
+/\ ballots = 5
+/\ cmdLog = ( r1 :>
+      { [ inst |-> <<r1, 1>>,
+          ballot |-> <<0, r1>>,
+          cmd |-> c1,
+          deps |-> {<<r2, 1>>},
+          seq |-> 3,
+          status |-> "committed" ],
+        [ inst |-> <<r2, 1>>,
+          ballot |-> <<4, r3>>,
+          cmd |-> c2,
+          deps |-> {<<r2, 1>>},
+          seq |-> 2,
+          status |-> "accepted" ] } @@
+  r2 :>
+      { [ inst |-> <<r1, 1>>,
+          ballot |-> <<0, r1>>,
+          cmd |-> c1,
+          deps |-> {<<r2, 1>>},
+          seq |-> 3,
+          status |-> "accepted" ],
+        [ inst |-> <<r2, 1>>,
+          ballot |-> <<2, r2>>,
+          cmd |-> c2,
+          deps |-> {<<r1, 1>>, <<r2, 1>>},
+          seq |-> 4,
+          status |-> "committed" ] } @@
+  r3 :>
+      { [ inst |-> <<r2, 1>>,
+          ballot |-> <<4, r3>>,
+          cmd |-> c2,
+          deps |-> {<<r2, 1>>},
+          seq |-> 2,
+          status |-> "accepted" ] } )
+/\ leaderOfInst = (r1 :> {} @@ r2 :> {} @@ r3 :> {<<r2, 1>>})
+/\ preAcceptReplyMsg = { [ committed |-> {},
+    type |-> "pre-accept-reply",
+    src |-> r3,
+    dst |-> r2,
+    inst |-> <<r2, 1>>,
+    ballot |-> <<0, r2>>,
+    deps |-> {},
+    seq |-> 1 ] }
+/\ committed = ( <<r1, 1>> :> {} @@
+  <<r1, 2>> :> {} @@
+  <<r2, 1>> :> {} @@
+  <<r2, 2>> :> {} @@
+  <<r3, 1>> :> {} @@
+  <<r3, 2>> :> {} )
+/\ proposed = {c1, c2}
+/\ tryPreAcceptReplyMsg = {}
+/\ preparing = (r1 :> {} @@ r2 :> {} @@ r3 :> {})
+/\ prepareMsg = {}
+/\ acceptReplyMsg = {}
+/\ commitMsg = { [ type |-> "commit",
+    inst |-> <<r1, 1>>,
+    ballot |-> <<0, r1>>,
+    cmd |-> c1,
+    deps |-> {<<r2, 1>>},
+    seq |-> 3 ],
+  [ type |-> "commit",
+    inst |-> <<r2, 1>>,
+    ballot |-> <<2, r2>>,
+    cmd |-> c2,
+    deps |-> {<<r1, 1>>, <<r2, 1>>},
+    seq |-> 4 ] }
+
+State 30: <Phase2ReplyAction line 797, col 22 to line 797, col 75 of module EPaxos>
+/\ tryPreAcceptMsg = {}
+/\ acceptMsg = { [ type |-> "accept",
+    src |-> r1,
+    dst |-> r2,
+    inst |-> <<r2, 1>>,
+    ballot |-> <<1, r1>>,
+    cmd |-> c2,
+    deps |-> {<<r2, 1>>},
+    seq |-> 2 ] }
+/\ prepareReplyMsg = {[type |-> "prepare-reply", src |-> r1, dst |-> r1, inst |-> <<r2, 1>>, ballot |-> <<1, r1>>, cmd |-> None, deps |-> {}, seq |-> 0, prev_ballot |-> <<0, r1>>, status |-> "not-seen"], [type |-> "prepare-reply", src |-> r1, dst |-> r3, inst |-> <<r2, 1>>, ballot |-> <<3, r3>>, cmd |-> c2, deps |-> {<<r2, 1>>}, seq |-> 2, prev_ballot |-> <<1, r1>>, status |-> "accepted"], [type |-> "prepare-reply", src |-> r2, dst |-> r1, inst |-> <<r2, 1>>, ballot |-> <<1, r1>>, cmd |-> c2, deps |-> {}, seq |-> 1, prev_ballot |-> <<0, r2>>, status |-> "pre-accepted"], [type |-> "prepare-reply", src |-> r2, dst |-> r2, inst |-> <<r2, 1>>, ballot |-> <<2, r2>>, cmd |-> c2, deps |-> {<<r2, 1>>}, seq |-> 2, prev_ballot |-> <<1, r1>>, status |-> "pre-accepted"], [type |-> "prepare-reply", src |-> r3, dst |-> r2, inst |-> <<r2, 1>>, ballot |-> <<2, r2>>, cmd |-> c2, deps |-> {}, seq |-> 1, prev_ballot |-> <<0, r2>>, status |-> "pre-accepted"], [type |-> "prepare-reply", src |-> r3, dst |-> r3, inst |-> <<r2, 1>>, ballot |-> <<3, r3>>, cmd |-> c2, deps |-> {<<r1, 1>>, <<r2, 1>>}, seq |-> 4, prev_ballot |-> <<2, r2>>, status |-> "accepted"]}
+/\ sentMsg = {}
+/\ preAcceptMsg = {}
+/\ executed = (r1 :> {} @@ r2 :> {} @@ r3 :> {})
+/\ crtInst = (r1 :> 2 @@ r2 :> 2 @@ r3 :> 1)
+/\ ballots = 5
+/\ cmdLog = ( r1 :>
+      { [ inst |-> <<r1, 1>>,
+          ballot |-> <<0, r1>>,
+          cmd |-> c1,
+          deps |-> {<<r2, 1>>},
+          seq |-> 3,
+          status |-> "committed" ],
+        [ inst |-> <<r2, 1>>,
+          ballot |-> <<4, r3>>,
+          cmd |-> c2,
+          deps |-> {<<r2, 1>>},
+          seq |-> 2,
+          status |-> "accepted" ] } @@
+  r2 :>
+      { [ inst |-> <<r1, 1>>,
+          ballot |-> <<0, r1>>,
+          cmd |-> c1,
+          deps |-> {<<r2, 1>>},
+          seq |-> 3,
+          status |-> "accepted" ],
+        [ inst |-> <<r2, 1>>,
+          ballot |-> <<2, r2>>,
+          cmd |-> c2,
+          deps |-> {<<r1, 1>>, <<r2, 1>>},
+          seq |-> 4,
+          status |-> "committed" ] } @@
+  r3 :>
+      { [ inst |-> <<r2, 1>>,
+          ballot |-> <<4, r3>>,
+          cmd |-> c2,
+          deps |-> {<<r2, 1>>},
+          seq |-> 2,
+          status |-> "accepted" ] } )
+/\ leaderOfInst = (r1 :> {} @@ r2 :> {} @@ r3 :> {<<r2, 1>>})
+/\ preAcceptReplyMsg = { [ committed |-> {},
+    type |-> "pre-accept-reply",
+    src |-> r3,
+    dst |-> r2,
+    inst |-> <<r2, 1>>,
+    ballot |-> <<0, r2>>,
+    deps |-> {},
+    seq |-> 1 ] }
+/\ committed = ( <<r1, 1>> :> {} @@
+  <<r1, 2>> :> {} @@
+  <<r2, 1>> :> {} @@
+  <<r2, 2>> :> {} @@
+  <<r3, 1>> :> {} @@
+  <<r3, 2>> :> {} )
+/\ proposed = {c1, c2}
+/\ tryPreAcceptReplyMsg = {}
+/\ preparing = (r1 :> {} @@ r2 :> {} @@ r3 :> {})
+/\ prepareMsg = {}
+/\ acceptReplyMsg = { [ type |-> "accept-reply",
+    src |-> r1,
+    dst |-> r3,
+    inst |-> <<r2, 1>>,
+    ballot |-> <<4, r3>> ] }
+/\ commitMsg = { [ type |-> "commit",
+    inst |-> <<r1, 1>>,
+    ballot |-> <<0, r1>>,
+    cmd |-> c1,
+    deps |-> {<<r2, 1>>},
+    seq |-> 3 ],
+  [ type |-> "commit",
+    inst |-> <<r2, 1>>,
+    ballot |-> <<2, r2>>,
+    cmd |-> c2,
+    deps |-> {<<r1, 1>>, <<r2, 1>>},
+    seq |-> 4 ] }
+
+State 31: <Phase2FinalizeAction line 794, col 25 to line 794, col 158 of module EPaxos>
+/\ tryPreAcceptMsg = {}
+/\ acceptMsg = { [ type |-> "accept",
+    src |-> r1,
+    dst |-> r2,
+    inst |-> <<r2, 1>>,
+    ballot |-> <<1, r1>>,
+    cmd |-> c2,
+    deps |-> {<<r2, 1>>},
+    seq |-> 2 ] }
+/\ prepareReplyMsg = {[type |-> "prepare-reply", src |-> r1, dst |-> r1, inst |-> <<r2, 1>>, ballot |-> <<1, r1>>, cmd |-> None, deps |-> {}, seq |-> 0, prev_ballot |-> <<0, r1>>, status |-> "not-seen"], [type |-> "prepare-reply", src |-> r1, dst |-> r3, inst |-> <<r2, 1>>, ballot |-> <<3, r3>>, cmd |-> c2, deps |-> {<<r2, 1>>}, seq |-> 2, prev_ballot |-> <<1, r1>>, status |-> "accepted"], [type |-> "prepare-reply", src |-> r2, dst |-> r1, inst |-> <<r2, 1>>, ballot |-> <<1, r1>>, cmd |-> c2, deps |-> {}, seq |-> 1, prev_ballot |-> <<0, r2>>, status |-> "pre-accepted"], [type |-> "prepare-reply", src |-> r2, dst |-> r2, inst |-> <<r2, 1>>, ballot |-> <<2, r2>>, cmd |-> c2, deps |-> {<<r2, 1>>}, seq |-> 2, prev_ballot |-> <<1, r1>>, status |-> "pre-accepted"], [type |-> "prepare-reply", src |-> r3, dst |-> r2, inst |-> <<r2, 1>>, ballot |-> <<2, r2>>, cmd |-> c2, deps |-> {}, seq |-> 1, prev_ballot |-> <<0, r2>>, status |-> "pre-accepted"], [type |-> "prepare-reply", src |-> r3, dst |-> r3, inst |-> <<r2, 1>>, ballot |-> <<3, r3>>, cmd |-> c2, deps |-> {<<r1, 1>>, <<r2, 1>>}, seq |-> 4, prev_ballot |-> <<2, r2>>, status |-> "accepted"]}
+/\ sentMsg = {}
+/\ preAcceptMsg = {}
+/\ executed = (r1 :> {} @@ r2 :> {} @@ r3 :> {})
+/\ crtInst = (r1 :> 2 @@ r2 :> 2 @@ r3 :> 1)
+/\ ballots = 5
+/\ cmdLog = ( r1 :>
+      { [ inst |-> <<r1, 1>>,
+          ballot |-> <<0, r1>>,
+          cmd |-> c1,
+          deps |-> {<<r2, 1>>},
+          seq |-> 3,
+          status |-> "committed" ],
+        [ inst |-> <<r2, 1>>,
+          ballot |-> <<4, r3>>,
+          cmd |-> c2,
+          deps |-> {<<r2, 1>>},
+          seq |-> 2,
+          status |-> "accepted" ] } @@
+  r2 :>
+      { [ inst |-> <<r1, 1>>,
+          ballot |-> <<0, r1>>,
+          cmd |-> c1,
+          deps |-> {<<r2, 1>>},
+          seq |-> 3,
+          status |-> "accepted" ],
+        [ inst |-> <<r2, 1>>,
+          ballot |-> <<2, r2>>,
+          cmd |-> c2,
+          deps |-> {<<r1, 1>>, <<r2, 1>>},
+          seq |-> 4,
+          status |-> "committed" ] } @@
+  r3 :>
+      { [ inst |-> <<r2, 1>>,
+          status |-> "committed",
+          ballot |-> <<4, r3>>,
+          cmd |-> c2,
+          deps |-> {<<r2, 1>>},
+          seq |-> 2 ] } )
+/\ leaderOfInst = (r1 :> {} @@ r2 :> {} @@ r3 :> {})
+/\ preAcceptReplyMsg = { [ committed |-> {},
+    type |-> "pre-accept-reply",
+    src |-> r3,
+    dst |-> r2,
+    inst |-> <<r2, 1>>,
+    ballot |-> <<0, r2>>,
+    deps |-> {},
+    seq |-> 1 ] }
+/\ committed = [i \in {<<r1, 1>>, <<r1, 2>>, <<r2, 1>>, <<r2, 2>>, <<r3, 1>>, <<r3, 2>>} |-> <expression line 274, col 39 to line 274, col 40 of module EPaxos>]
+/\ proposed = {c1, c2}
+/\ tryPreAcceptReplyMsg = {}
+/\ preparing = (r1 :> {} @@ r2 :> {} @@ r3 :> {})
+/\ prepareMsg = {}
+/\ acceptReplyMsg = {}
+/\ commitMsg = { [ type |-> "commit",
+    inst |-> <<r1, 1>>,
+    ballot |-> <<0, r1>>,
+    cmd |-> c1,
+    deps |-> {<<r2, 1>>},
+    seq |-> 3 ],
+  [ type |-> "commit",
+    inst |-> <<r2, 1>>,
+    ballot |-> <<2, r2>>,
+    cmd |-> c2,
+    deps |-> {<<r1, 1>>, <<r2, 1>>},
+    seq |-> 4 ],
+  [ type |-> "commit",
+    inst |-> <<r2, 1>>,
+    ballot |-> <<4, r3>>,
+    cmd |-> c2,
+    deps |-> {<<r2, 1>>},
+    seq |-> 2 ] }
+
+The number of states generated: 2123599
+Simulation using seed 13 and aril 0
+Progress: 2125380 states checked, 25647 traces generated (trace length: mean=22, var(x)=17, sd=4)
+Finished in 11s at (2023-10-25 10:28:32)
+Trace exploration spec path: ./EPaxos_TTrace_1698244100.tla
