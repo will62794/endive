@@ -193,6 +193,24 @@ TypeOK ==
     /\ ballots \in Nat
     /\ preparing \in [Replicas -> SUBSET Instances]
     
+TypeOKRandom == 
+    /\ cmdLog \in [Replicas -> SUBSET [inst: Instances, 
+                                       status: Status,
+                                       ballot: Nat \X Replicas,
+                                       cmd: Commands \cup {none},
+                                       deps: SUBSET Instances,
+                                       seq: Nat]]
+    /\ proposed \in SUBSET Commands
+    /\ executed \in [Replicas -> SUBSET (Nat \X Commands)]
+    /\ sentMsg \in SUBSET Message
+    /\ crtInst \in [Replicas -> Nat]
+    /\ leaderOfInst \in [Replicas -> SUBSET Instances]
+    /\ committed \in [Instances -> SUBSET ((Commands \cup {none}) \X
+                                           (SUBSET Instances) \X 
+                                           Nat)]
+    /\ ballots \in Nat
+    /\ preparing \in [Replicas -> SUBSET Instances]    
+
 vars == << cmdLog, proposed, executed, sentMsg, crtInst, leaderOfInst, committed, ballots, preparing >>
 
 (***************************************************************************)
@@ -722,25 +740,36 @@ FinalizeTryPreAccept(cleader, i, Q) ==
 (* Next action                                                             *)
 (***************************************************************************)
 
-Next == 
-    \* CommandLeaderAction
-    \/ \E C \in (Commands \ proposed) : \E cleader \in Replicas : Propose(C, cleader)
-    \/ \E cleader \in Replicas : \E inst \in leaderOfInst[cleader] : \E Q \in FastQuorums(cleader) : Phase1Fast(cleader, inst, Q)
-    \/ \E cleader \in Replicas : \E inst \in leaderOfInst[cleader] : \E Q \in SlowQuorums(cleader) : Phase1Slow(cleader, inst, Q)
-    \/ \E cleader \in Replicas : \E inst \in leaderOfInst[cleader] : \E Q \in SlowQuorums(cleader) : Phase2Finalize(cleader, inst, Q)
-    \/ \E cleader \in Replicas : \E inst \in leaderOfInst[cleader] : \E Q \in SlowQuorums(cleader) : FinalizeTryPreAccept(cleader, inst, Q)
-    \* ReplicaAction.
-    \/ \E replica \in Replicas : Phase1Reply(replica)
-    \/ \E replica \in Replicas : Phase2Reply(replica)
-    \/ \E replica \in Replicas : \E cmsg \in sentMsg : (cmsg.type = "commit" /\ Commit(replica, cmsg))
-    \/ \E replica \in Replicas : \E i \in Instances : 
-        \* This condition states that the instance has been started by its original owner.
-        /\ crtInst[i[1]] > i[2] 
-        /\ \E Q \in SlowQuorums(replica) : SendPrepare(replica, i, Q)
-    \/ \E replica \in Replicas : \E msg \in sentMsg : ReplyPrepare(replica, msg)
-    \/ \E replica \in Replicas : \E i \in preparing[replica] : \E Q \in SlowQuorums(replica) : PrepareFinalize(replica, i, Q)
-    \/ \E replica \in Replicas : ReplyTryPreaccept(replica)
 
+ProposeAction == \E C \in (Commands \ proposed) : \E cleader \in Replicas : Propose(C, cleader)
+Phase1FastAction == \E cleader \in Replicas : \E inst \in leaderOfInst[cleader] : \E Q \in FastQuorums(cleader) : Phase1Fast(cleader, inst, Q)
+Phase1SlowAction == \E cleader \in Replicas : \E inst \in leaderOfInst[cleader] : \E Q \in SlowQuorums(cleader) : Phase1Slow(cleader, inst, Q)
+Phase2FinalizeAction == \E cleader \in Replicas : \E inst \in leaderOfInst[cleader] : \E Q \in SlowQuorums(cleader) : Phase2Finalize(cleader, inst, Q)
+FinalizeTryPreAcceptAction == \E cleader \in Replicas : \E inst \in leaderOfInst[cleader] : \E Q \in SlowQuorums(cleader) : FinalizeTryPreAccept(cleader, inst, Q)
+Phase1ReplyAction == \E replica \in Replicas : Phase1Reply(replica)
+Phase2ReplyAction == \E replica \in Replicas : Phase2Reply(replica)
+CommitAction == \E replica \in Replicas : \E cmsg \in sentMsg : (cmsg.type = "commit" /\ Commit(replica, cmsg))
+SendPrepareAction == \E replica \in Replicas : \E i \in Instances : 
+    \* This condition states that the instance has been started by its original owner.
+    /\ crtInst[i[1]] > i[2] 
+    /\ \E Q \in SlowQuorums(replica) : SendPrepare(replica, i, Q)
+ReplyPrepareAction == \E replica \in Replicas : \E msg \in sentMsg : ReplyPrepare(replica, msg)
+PrepareFinalizeAction == \E replica \in Replicas : \E i \in preparing[replica] : \E Q \in SlowQuorums(replica) : PrepareFinalize(replica, i, Q)
+ReplyTryPreacceptAction == \E replica \in Replicas : ReplyTryPreaccept(replica)
+
+Next ==
+    \/ ProposeAction
+    \/ Phase1FastAction
+    \/ Phase1SlowAction
+    \/ Phase2FinalizeAction
+    \/ FinalizeTryPreAcceptAction
+    \/ Phase1ReplyAction
+    \/ Phase2ReplyAction
+    \/ CommitAction
+    \/ SendPrepareAction
+    \/ ReplyPrepareAction
+    \/ PrepareFinalizeAction
+    \/ ReplyTryPreacceptAction
 
 (***************************************************************************)
 (* The complete definition of the algorithm                                *)

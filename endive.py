@@ -2189,6 +2189,7 @@ class InductiveInvGen():
         import proof_async_raft
         import proof_async_raft_no_truncate
         import proof_Paxos
+        import proof_EPaxos
 
         #
         # Set the specified spec appropriately.
@@ -2233,6 +2234,10 @@ class InductiveInvGen():
                 root = proof_async_raft.root
                 actions = proof_async_raft.actions
                 nodes = proof_async_raft.nodes
+        elif self.specname == "EPaxos":
+            root = proof_EPaxos.root
+            actions = proof_EPaxos.actions
+            nodes = proof_EPaxos.nodes
         elif self.specname == "basic_consensus":
             root = proof_basic_consensus.root
             actions = proof_basic_consensus.actions

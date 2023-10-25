@@ -1,0 +1,45 @@
+{
+    "preds"  :  [
+        "(currentTerm[VARI] > currentTerm[VARJ])",
+        "(currentTerm[VARJ] > currentTerm[VARI])"
+    ],
+    "preds_alt" : [],
+    "safety"  :  "H_Consistency",
+    "constants"  : {
+        "c1" : "c1",
+        "c2" : "c2",
+        "r1" : "r1",
+        "r2" : "r2",
+        "Commands" : ["{c1,c2}"],
+        "Replicas" : ["{r1,r2}"],
+        "MaxBallot" : ["2"],
+        "none" : "None"
+    },
+    "actions": [
+        "RequestVoteAction",
+        "BecomeLeaderAction",
+        "ClientRequestAction",
+        "AdvanceCommitIndexAction",
+        "AppendEntriesAction",
+        "UpdateTermRVReqAction",
+        "UpdateTermRVResAction",
+        "UpdateTermAEReqAction",
+        "UpdateTermAEResAction",
+        "HandleRequestVoteRequestAction",
+        "HandleRequestVoteResponseAction",
+        "RejectAppendEntriesRequestAction",
+        "AcceptAppendEntriesRequestAppendAction",
+        "AcceptAppendEntriesRequestLearnCommitAction",
+        "HandleAppendEntriesResponseAction"
+    ],
+    "constraint"  :  "",
+    "quant_inv"  :  "",
+    "quant_inv_alt"  :  null,
+    "quant_vars": ["VARI", "VARJ"],
+    "model_consts"  :  "CONSTANT c1,c2,r1,r2",
+    "symmetry" : true,
+    "typeok"  :  "TypeOKRandom",
+    "tlc_specific_spec": true,
+    "try_final_minimize": false,
+    "simulate"  :  true
+}
