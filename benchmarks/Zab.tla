@@ -129,25 +129,40 @@ TypeOK ==
     \* /\ msgs \in [Server -> [Server -> Seq([mtype: {CEPOCH, NEWEPOCH, ACKEPOCH, NEWLEADER, ACKLD, COMMITLD, PROPOSE, ACK, COMMIT}, 
                                             \* mepoch: Nat, 
 
+CONSTANT MaxEpoch
+CONSTANT MaxHistLen
+
+Epoch == 1..MaxEpoch
+
+SeqOf(S, n) == UNION {[1..m -> S] : m \in 0..n}
+BoundedSeq(S, n) == SeqOf(S, n)
+
+HistTypeBounded == BoundedSeq([zxid: Nat, value: Nat, ackSid: Nat, epoch: Epoch], MaxHistLen)
+
+AckeRecvTypeBounded == RandomSetOfSubsets(2, 2, [sid: Server, connected: BOOLEAN, peerLastEpoch: Nat, peerHistory: HistTypeBounded])
+
+
 TypeOKRandom == 
     /\ state \in [Server -> {LOOKING, FOLLOWING, LEADING}]
     /\ zabState \in [Server -> {ELECTION, DISCOVERY, SYNCHRONIZATION, BROADCAST}]
-    /\ acceptedEpoch \in [Server -> Nat]
-    /\ currentEpoch \in [Server -> Nat]
-    /\ history \in [Server -> Seq([zxid: Nat, value: Nat, ackSid: Nat, epoch: Nat])]
+    /\ acceptedEpoch \in [Server -> Epoch]
+    /\ currentEpoch \in [Server -> Epoch]
+    /\ history \in [Server -> HistTypeBounded]
     /\ lastCommitted \in [Server -> [index: Nat, zxid: Nat \X Nat]]
     /\ learners \in [Server -> SUBSET Server]
-    /\ cepochRecv \in [Server -> SUBSET [sid: Server, connected: BOOLEAN, epoch: Nat]]
-    /\ ackeRecv \in [Server -> SUBSET [sid: Server, connected: BOOLEAN, peerLastEpoch: Nat, peerHistory: Seq([zxid: Nat, value: Nat, ackSid: Nat, epoch: Nat])]]
+    /\ cepochRecv \in [Server -> SUBSET [sid: Server, connected: BOOLEAN, epoch: Epoch]]
+    /\ ackeRecv \in [Server -> AckeRecvTypeBounded]
     /\ ackldRecv \in [Server -> SUBSET [sid: Server, connected: BOOLEAN]]
     /\ sendCounter \in [Server -> Nat]
     /\ connectInfo \in [Server -> Server]
     /\ leaderOracle \in Server
-    /\ msgs = {}
+    /\ msgs = [s \in Server |-> [v \in Server |-> << >>] ]
     \* /\ msgs \in [Server -> [Server -> Seq([mtype: {CEPOCH, NEWEPOCH, ACKEPOCH, NEWLEADER, ACKLD, COMMITLD, PROPOSE, ACK, COMMIT}, 
                                             \* mepoch: Nat, 
-
-
+    /\ proposalMsgsLog    = {}
+    /\ epochLeader        = [i \in 1..MaxEpoch |-> {} ]
+    /\ violatedInvariants = {}
+    /\ recorder = <<>>
 
 -----------------------------------------------------------------------------
 \* Return the maximum value from the set S

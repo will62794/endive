@@ -4,6 +4,9 @@
     "safety"  :  "H_PrefixConsistency",
     "constants"  :  {
         "Server": ["{s1,s2}"],
+        "MaxEpoch": ["2"],
+        "Nat": ["{0,1,2}"],
+        "MaxHistLen": ["1"],
         "LOOKING": "LOOKING",
         "FOLLOWING": "FOLLOWING",
         "LEADING": "LEADING",
