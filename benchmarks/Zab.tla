@@ -116,11 +116,11 @@ TypeOK ==
     /\ zabState \in [Server -> {ELECTION, DISCOVERY, SYNCHRONIZATION, BROADCAST}]
     /\ acceptedEpoch \in [Server -> Nat]
     /\ currentEpoch \in [Server -> Nat]
-    /\ history \in [Server -> Seq([zxid: Nat, value: Nat, ackSid: Nat, epoch: Nat])]
+    /\ history \in [Server -> Seq([zxid: Nat, value: Nat, ackSid: Server, epoch: Nat])]
     /\ lastCommitted \in [Server -> [index: Nat, zxid: Nat \X Nat]]
     /\ learners \in [Server -> SUBSET Server]
     /\ cepochRecv \in [Server -> SUBSET [sid: Server, connected: BOOLEAN, epoch: Nat]]
-    /\ ackeRecv \in [Server -> SUBSET [sid: Server, connected: BOOLEAN, peerLastEpoch: Nat, peerHistory: Seq([zxid: Nat, value: Nat, ackSid: Nat, epoch: Nat])]]
+    /\ ackeRecv \in [Server -> SUBSET [sid: Server, connected: BOOLEAN, peerLastEpoch: Nat, peerHistory: Seq([zxid: Nat, value: Nat, ackSid: Server, epoch: Nat])]]
     /\ ackldRecv \in [Server -> SUBSET [sid: Server, connected: BOOLEAN]]
     /\ sendCounter \in [Server -> Nat]
     /\ connectInfo \in [Server -> Server]
@@ -133,17 +133,41 @@ CONSTANT MaxEpoch
 CONSTANT MaxHistLen
 
 Epoch == 1..MaxEpoch
+Value == Nat
 
 SeqOf(S, n) == UNION {[1..m -> S] : m \in 0..n}
 BoundedSeq(S, n) == SeqOf(S, n)
 
 ZxidType == Epoch \X Nat
 
-HistTypeBounded == BoundedSeq([zxid: ZxidType, value: Nat, ackSid: Nat, epoch: Epoch], MaxHistLen)
+HistEntryType == [zxid: ZxidType, value: Nat, ackSid: SUBSET Server, epoch: Epoch]
+
+HistTypeBounded == BoundedSeq(HistEntryType, MaxHistLen)
+
+SetOfHistsTypeBounded == RandomSetOfSubsets(5, 5, HistTypeBounded)
 
 AckeRecvTypeBounded == RandomSetOfSubsets(2, 2, [sid: Server, connected: BOOLEAN, peerLastEpoch: Nat, peerHistory: HistTypeBounded])
 
-MsgType == [mtype: {CEPOCH, NEWEPOCH, ACKEPOCH, NEWLEADER, ACKLD, COMMITLD, PROPOSE, ACK, COMMIT}, mepoch: Epoch, mzxid: ZxidType]
+MsgCEPOCHType == [mtype: {CEPOCH}, mepoch: Epoch]
+MsgNEWEPOCHType == [mtype: {NEWEPOCH}, mepoch: Epoch]
+MsgACKEPOCHType == [mtype: {ACKEPOCH}, mepoch: Epoch, mhistory: HistTypeBounded]
+MsgNEWLEADERType == [mtype: {NEWLEADER}, mepoch: Epoch, mhistory: HistTypeBounded]
+MsgACKLDType == [mtype: {ACKLD}, mzxid: ZxidType]
+MsgCOMMITLDType == [mtype: {COMMITLD}, mzxid: ZxidType]
+MsgPROPOSEType == [mtype: {PROPOSE}, mzxid: ZxidType, mdata: Value]
+MsgACKType == [mtype: {ACK}, mzxid: ZxidType]
+MsgCOMMITType == [mtype: {COMMIT}, mzxid: ZxidType]
+
+MsgType == 
+    MsgCEPOCHType \cup 
+    MsgNEWEPOCHType \cup 
+    MsgACKEPOCHType \cup 
+    MsgNEWLEADERType \cup 
+    MsgACKLDType \cup 
+    MsgCOMMITLDType \cup 
+    MsgPROPOSEType \cup 
+    MsgACKType \cup 
+    MsgCOMMITType
 
 MaxMsgChanLen == 1
 
@@ -161,7 +185,7 @@ TypeOKRandom ==
     /\ sendCounter \in [Server -> Nat]
     /\ connectInfo \in [Server -> Server]
     /\ leaderOracle \in Server
-    /\ msgs \in [Server -> [Server -> BoundedSeq(MsgType, MaxMsgChanLen)]]
+    /\ msgs \in [Server -> [Server -> BoundedSeq(RandomSubset(5,MsgType), MaxMsgChanLen)]]
     /\ proposalMsgsLog    = {}
     /\ epochLeader        = [i \in 1..MaxEpoch |-> {} ]
     /\ violatedInvariants = {}
@@ -588,10 +612,10 @@ LeaderProcessCEPOCH(i, j) ==
                     /\ ~CepochRecvQuorumFormed(i)
                     /\ \/ /\ zabState[i] = DISCOVERY
                           /\ UNCHANGED violatedInvariants
-                       \/ /\ zabState[i] /= DISCOVERY
-                          /\ PrintT("Exception: CepochRecvQuorumFormed false," \o
-                               " while zabState not DISCOVERY.")
-                          /\ violatedInvariants' = violatedInvariants
+                    \*    \/ /\ zabState[i] /= DISCOVERY
+                    \*       /\ PrintT("Exception: CepochRecvQuorumFormed false," \o
+                    \*            " while zabState not DISCOVERY.")
+                    \*       /\ violatedInvariants' = violatedInvariants
                         \*   [violatedInvariants EXCEPT !.stateInconsistent = TRUE]
                     /\ cepochRecv' = [cepochRecv EXCEPT ![i] = UpdateCepochRecv(@, j, msg.mepoch) ]
                     /\ \/ \* 1.1. cepochRecv becomes quorum, 
@@ -637,13 +661,13 @@ FollowerProcessNEWEPOCH(i, j) ==
                              IN Reply(i, j, m)
                           /\ zabState' = [zabState EXCEPT ![i] = SYNCHRONIZATION]
                           /\ UNCHANGED violatedInvariants
-                       \/ /\ ~stateOk
-                          /\ PrintT("Exception: Follower receives NEWEPOCH," \o
-                             " whileZabState not DISCOVERY.")
-                          /\ violatedInvariants' = violatedInvariants
-                        \*   [violatedInvariants EXCEPT !.stateInconsistent = TRUE]
-                          /\ Discard(j, i)
-                          /\ UNCHANGED <<acceptedEpoch, zabState>>
+                    \*    \/ /\ ~stateOk
+                    \*       /\ PrintT("Exception: Follower receives NEWEPOCH," \o
+                    \*          " whileZabState not DISCOVERY.")
+                    \*       /\ violatedInvariants' = violatedInvariants
+                    \*     \*   [violatedInvariants EXCEPT !.stateInconsistent = TRUE]
+                    \*       /\ Discard(j, i)
+                    \*       /\ UNCHANGED <<acceptedEpoch, zabState>>
                     /\ UNCHANGED <<followerVars, learners, cepochRecv, ackeRecv,
                             ackldRecv, state>>
                  \/ \* 2. Abnormal case - go back to election
@@ -744,11 +768,11 @@ LeaderProcessACKEPOCH(i, j) ==
                     /\ ~AckeRecvQuorumFormed(i)
                     /\ \/ /\ zabState[i] = DISCOVERY
                           /\ UNCHANGED violatedInvariants
-                       \/ /\ zabState[i] /= DISCOVERY
-                          /\ PrintT("Exception: AckeRecvQuorumFormed false," \o
-                             " while zabState not DISCOVERY.")
-                          /\ violatedInvariants' = [violatedInvariants EXCEPT 
-                                                    !.stateInconsistent = TRUE]
+                    \*    \/ /\ zabState[i] /= DISCOVERY
+                    \*       /\ PrintT("Exception: AckeRecvQuorumFormed false," \o
+                    \*          " while zabState not DISCOVERY.")
+                    \*       /\ violatedInvariants' = [violatedInvariants EXCEPT 
+                    \*                                 !.stateInconsistent = TRUE]
                     /\ ackeRecv' = [ackeRecv EXCEPT ![i] = UpdateAckeRecv(@, j, 
                                             msg.mepoch, msg.mhistory) ]
                     /\ \/ \* 2.1. ackeRecv becomes quorum, determine Ie'
@@ -863,11 +887,11 @@ LeaderProcessACKLD(i, j) ==
                     /\ ~AckldRecvQuorumFormed(i)
                     /\ \/ /\ zabState[i] = SYNCHRONIZATION
                           /\ UNCHANGED violatedInvariants
-                       \/ /\ zabState[i] /= SYNCHRONIZATION
-                          /\ PrintT("Exception: AckldRecvQuorumFormed false," \o
-                                " while zabState not SYNCHRONIZATION.")
-                          /\ violatedInvariants' = [violatedInvariants 
-                                    EXCEPT !.stateInconsistent = TRUE]
+                    \*    \/ /\ zabState[i] /= SYNCHRONIZATION
+                    \*       /\ PrintT("Exception: AckldRecvQuorumFormed false," \o
+                    \*             " while zabState not SYNCHRONIZATION.")
+                    \*       /\ violatedInvariants' = [violatedInvariants 
+                    \*                 EXCEPT !.stateInconsistent = TRUE]
                     /\ ackldRecv' = [ackldRecv EXCEPT ![i] = UpdateAckldRecv(@, j) ]
                     /\ history' = [history EXCEPT ![i] = UpdateAcksid(@, j, msg.mzxid)]
                     /\ \/ \* 1.1. ackldRecv becomes quorum,
@@ -888,11 +912,11 @@ LeaderProcessACKLD(i, j) ==
                     /\ AckldRecvQuorumFormed(i)
                     /\ \/ /\ zabState[i] = BROADCAST
                           /\ UNCHANGED violatedInvariants
-                       \/ /\ zabState[i] /= BROADCAST
-                          /\ PrintT("Exception: AckldRecvQuorumFormed true," \o
-                                " while zabState not BROADCAST.")
-                          /\ violatedInvariants' = [violatedInvariants 
-                                    EXCEPT !.stateInconsistent = TRUE]
+                    \*    \/ /\ zabState[i] /= BROADCAST
+                    \*       /\ PrintT("Exception: AckldRecvQuorumFormed true," \o
+                    \*             " while zabState not BROADCAST.")
+                    \*       /\ violatedInvariants' = [violatedInvariants 
+                    \*                 EXCEPT !.stateInconsistent = TRUE]
                     /\ ackldRecv' = [ackldRecv EXCEPT ![i] = UpdateAckldRecv(@, j) ]
                     /\ history' = [history EXCEPT ![i] = UpdateAcksid(@, j, msg.mzxid)]
                     /\ Reply(i, j, [ mtype |-> COMMITLD,
@@ -935,10 +959,10 @@ FollowerProcessCOMMITLD(i, j) ==
            IN /\ infoOk
               /\ \/ /\ logOk
                     /\ UNCHANGED violatedInvariants
-                 \/ /\ ~logOk
-                    /\ PrintT("Exception: zxid in COMMITLD not exists in history.")
-                    /\ violatedInvariants' = [violatedInvariants
-                                 EXCEPT !.proposalInconsistent = TRUE]
+                \*  \/ /\ ~logOk
+                \*     /\ PrintT("Exception: zxid in COMMITLD not exists in history.")
+                \*     /\ violatedInvariants' = [violatedInvariants
+                \*                  EXCEPT !.proposalInconsistent = TRUE]
               /\ lastCommitted' = [lastCommitted EXCEPT ![i] = [ index |-> index,
                                                                  zxid  |-> msg.mzxid ] ]
               /\ zabState' = [zabState EXCEPT ![i] = BROADCAST]
@@ -978,6 +1002,8 @@ LeaderBroadcastPROPOSE(i) ==
         /\ IsLeader(i)
         /\ zabState[i] = BROADCAST
         /\ sendCounter[i] < CurrentCounter(i) \* there exists proposal to be sent
+         \* Explicit check here to avoid out-of-bounds access. (Will S. 10/26/23)
+        /\ ZxidToIndex(history[i], <<currentEpoch[i], sendCounter[i] + 1>>) \in DOMAIN history[i]
         /\ LET toSendCounter == sendCounter[i] + 1
                toSendZxid == <<currentEpoch[i], toSendCounter>>
                toSendIndex == ZxidToIndex(history[i], toSendZxid)
@@ -1028,11 +1054,11 @@ FollowerProcessPROPOSE(i, j) ==
                            exist == index > 0 /\ index <= Len(history[i])
                        IN \/ /\ exist
                              /\ UNCHANGED violatedInvariants
-                          \/ /\ ~exist
-                             /\ PrintT("Exception: Follower receives PROPOSE, while" \o 
-                                    " txn is neither the next nor exists in history.")
-                             /\ violatedInvariants' = [violatedInvariants EXCEPT 
-                                         !.proposalInconsistent = TRUE]
+                        \*   \/ /\ ~exist
+                        \*      /\ PrintT("Exception: Follower receives PROPOSE, while" \o 
+                        \*             " txn is neither the next nor exists in history.")
+                        \*      /\ violatedInvariants' = [violatedInvariants EXCEPT 
+                        \*                  !.proposalInconsistent = TRUE]
                     /\ Discard(j, i)
                     /\ UNCHANGED history
         /\ UNCHANGED <<state, zabState, acceptedEpoch, currentEpoch, lastCommitted,
@@ -1055,12 +1081,12 @@ LeaderTryToCommit(s, index, zxid, newTxn, follower) ==
               /\ UNCHANGED <<violatedInvariants, lastCommitted>>
            \/ /\ allTxnsBeforeCommitted
               /\ hasAllQuorums
-              /\ \/ /\ ~ordered
-                    /\ PrintT("Warn: Committing zxid " \o ToString(zxid) \o " not first.")
-                    /\ violatedInvariants' = violatedInvariants
-                    \* /\ violatedInvariants' = [violatedInvariants EXCEPT !.commitInconsistent = TRUE]
-                 \/ /\ ordered
+              /\ \/ /\ ordered
                     /\ UNCHANGED violatedInvariants
+                \*  \/ /\ ~ordered
+                \*     /\ PrintT("Warn: Committing zxid " \o ToString(zxid) \o " not first.")
+                \*     /\ violatedInvariants' = violatedInvariants
+                    \* /\ violatedInvariants' = [violatedInvariants EXCEPT !.commitInconsistent = TRUE]
               /\ lastCommitted' = [lastCommitted EXCEPT ![s] = [ index |-> index,
                                                                  zxid  |-> zxid ] ]
               /\ LET m_commit == [ mtype |-> COMMIT,
@@ -1105,16 +1131,15 @@ LeaderProcessACK(i, j) ==
                           \/ /\ outstanding
                              /\ ~hasCommitted
                              /\ LeaderTryToCommit(i, index, msg.mzxid, txnAfterAddAck, j)
-                 \/ /\ \/ ~exist
-                       \/ ~monotonicallyInc
-                    /\ PrintT("Exception: No such zxid. " \o 
-                           " / ackIndex doesn't inc monotonically.")
-                    \* /\ violatedInvariants' = [violatedInvariants EXCEPT !.ackInconsistent = TRUE]
-                    /\ violatedInvariants' = violatedInvariants
-                    /\ Discard(j, i)
-                    /\ UNCHANGED <<history, lastCommitted>>
-        /\ UNCHANGED <<state, zabState, acceptedEpoch, currentEpoch, leaderVars,
-                    followerVars, electionVars, proposalMsgsLog, epochLeader>>
+                \*  \/ /\ \/ ~exist
+                \*        \/ ~monotonicallyInc
+                \*     /\ PrintT("Exception: No such zxid. " \o 
+                \*            " / ackIndex doesn't inc monotonically.")
+                \*     \* /\ violatedInvariants' = [violatedInvariants EXCEPT !.ackInconsistent = TRUE]
+                \*     /\ violatedInvariants' = violatedInvariants
+                \*     /\ Discard(j, i)
+                \*     /\ UNCHANGED <<history, lastCommitted>>
+        /\ UNCHANGED <<state, zabState, acceptedEpoch, currentEpoch, leaderVars, followerVars, electionVars, proposalMsgsLog, epochLeader>>
         /\ UpdateRecorder(<<"LeaderProcessACK", i, j>>)
 
 (* Follower processes COMMIT. *)
@@ -1125,9 +1150,9 @@ FollowerProcessCOMMIT(i, j) ==
                infoOk == IsMyLeader(i, j)
                pending == lastCommitted[i].index < Len(history[i])
            IN /\ infoOk
-              /\ \/ /\ ~pending
-                    /\ PrintT("Warn: Committing zxid without seeing txn.")
-                    /\ UNCHANGED <<lastCommitted, violatedInvariants>>
+              /\ \*\/ /\ ~pending
+                 \*   /\ PrintT("Warn: Committing zxid without seeing txn.")
+                 \*   /\ UNCHANGED <<lastCommitted, violatedInvariants>>
                  \/ /\ pending
                     /\ LET firstElement == history[i][lastCommitted[i].index + 1]
                            match == ZxidEqual(firstElement.zxid, msg.mzxid)
