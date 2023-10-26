@@ -884,19 +884,22 @@ RECURSIVE ZxidToIndexHepler(_,_,_,_)
 ZxidToIndexHepler(his, zxid, cur, appeared) == 
         IF cur > Len(his) THEN cur  
         ELSE IF TxnZxidEqual(his[cur], zxid) 
-             THEN CASE appeared = TRUE -> -1
-                  []   OTHER           -> Minimum( { cur, 
-                            ZxidToIndexHepler(his, zxid, cur + 1, TRUE) } ) 
+             THEN (IF appeared = TRUE 
+                    THEN -1 
+                    ELSE Minimum( { cur, ZxidToIndexHepler(his, zxid, cur + 1, TRUE) } ))
              ELSE ZxidToIndexHepler(his, zxid, cur + 1, appeared)
 
-\* return -1: this zxid appears at least twice. Len(his) + 1: does not exist.
+\* return -1: this zxid appears at least twice. 
+\* Len(his) + 1: does not exist.
 \* 1 - Len(his): exists and appears just once.
-ZxidToIndex(his, zxid) == IF ZxidEqual( zxid, <<0, 0>> ) THEN 0
-                          ELSE IF Len(his) = 0 THEN 1
-                               ELSE LET len == Len(his) IN
-                                    IF \E idx \in 1..len: TxnZxidEqual(his[idx], zxid)
-                                    THEN ZxidToIndexHepler(his, zxid, 1, FALSE)
-                                    ELSE len + 1
+ZxidToIndex(his, zxid) == 
+    IF ZxidEqual( zxid, <<0, 0>> ) THEN 0
+        ELSE 
+            IF Len(his) = 0 THEN 1
+            ELSE LET len == Len(his) IN
+                IF \E idx \in 1..len: TxnZxidEqual(his[idx], zxid)
+                    THEN ZxidToIndexHepler(his, zxid, 1, FALSE)
+                    ELSE len + 1
 
 (* Follower receives COMMITLD. Commit all txns. *)
 FollowerProcessCOMMITLD(i, j) ==
