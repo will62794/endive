@@ -1120,37 +1120,62 @@ FilterNonexistentMessage(i) ==
                                   /\ Discard(j, i)
         /\ violatedInvariants' = violatedInvariants
         \* /\ violatedInvariants' = [violatedInvariants EXCEPT !.messageIllegal = TRUE]
-        /\ UNCHANGED <<serverVars, leaderVars, followerVars, electionVars,
-                    proposalMsgsLog, epochLeader>>
+        /\ UNCHANGED <<serverVars, leaderVars, followerVars, electionVars, proposalMsgsLog, epochLeader>>
         /\ UnchangeRecorder
 ----------------------------------------------------------------------------
-\* Defines how the variables may transition.
-Next ==
-        (* Election *)
-        \/ \E i \in Server:    UpdateLeader(i)
-        \/ \E i \in Server:    FollowLeader(i)
-        (* Abnormal situations like failure, network disconnection *)
-        \/ \E i, j \in Server: Timeout(i, j)
-        \/ \E i \in Server:    Restart(i)
-        (* Zab module - Discovery part *)
-        \/ \E i, j \in Server: ConnectAndFollowerSendCEPOCH(i, j)
-        \/ \E i, j \in Server: LeaderProcessCEPOCH(i, j)
-        \/ \E i, j \in Server: FollowerProcessNEWEPOCH(i, j)
-        (* Zab module - Synchronization *)
-        \/ \E i, j \in Server: LeaderProcessACKEPOCH(i, j)
-        \/ \E i, j \in Server: FollowerProcessNEWLEADER(i, j)
-        \/ \E i, j \in Server: LeaderProcessACKLD(i, j)
-        \/ \E i, j \in Server: FollowerProcessCOMMITLD(i, j)
-        (* Zab module - Broadcast part *)
-        \/ \E i \in Server:    LeaderProcessRequest(i)
-        \/ \E i \in Server:    LeaderBroadcastPROPOSE(i)
-        \/ \E i, j \in Server: FollowerProcessPROPOSE(i, j)
-        \/ \E i, j \in Server: LeaderProcessACK(i, j)
-        \/ \E i, j \in Server: FollowerProcessCOMMIT(i, j)
-        (* An action used to judge whether there are redundant messages in network *)
-        \/ \E i \in Server:    FilterNonexistentMessage(i)
 
+(* Election *)
+UpdateLeaderAction == TRUE /\ \E i \in Server:    UpdateLeader(i)
+FollowLeaderAction == TRUE /\ \E i \in Server:    FollowLeader(i)
+
+(* Abnormal situations like failure, network disconnection *)
+TimeoutAction == TRUE /\ \E i, j \in Server: Timeout(i, j)
+RestartAction == TRUE /\ \E i \in Server:    Restart(i)
+
+(* Zab module - Discovery part *)
+ConnectAndFollowerSendCEPOCHAction == TRUE /\ \E i, j \in Server: ConnectAndFollowerSendCEPOCH(i, j)
+LeaderProcessCEPOCHAction == TRUE /\ \E i, j \in Server: LeaderProcessCEPOCH(i, j)
+FollowerProcessNEWEPOCHAction == TRUE /\ \E i, j \in Server: FollowerProcessNEWEPOCH(i, j)
+
+(* Zab module - Synchronization *)
+LeaderProcessACKEPOCHAction == TRUE /\ \E i, j \in Server: LeaderProcessACKEPOCH(i, j)
+FollowerProcessNEWLEADERAction == TRUE /\ \E i, j \in Server: FollowerProcessNEWLEADER(i, j)
+LeaderProcessACKLDAction == TRUE /\ \E i, j \in Server: LeaderProcessACKLD(i, j)
+FollowerProcessCOMMITLDAction == TRUE /\ \E i, j \in Server: FollowerProcessCOMMITLD(i, j)
+
+(* Zab module - Broadcast part *)
+LeaderProcessRequestAction == TRUE /\ \E i \in Server:    LeaderProcessRequest(i)
+LeaderBroadcastPROPOSEAction == TRUE /\ \E i \in Server:    LeaderBroadcastPROPOSE(i)
+FollowerProcessPROPOSEAction == TRUE /\ \E i, j \in Server: FollowerProcessPROPOSE(i, j)
+LeaderProcessACKAction == TRUE /\ \E i, j \in Server: LeaderProcessACK(i, j)
+FollowerProcessCOMMITAction == TRUE /\ \E i, j \in Server: FollowerProcessCOMMIT(i, j)
+
+(* An action used to judge whether there are redundant messages in network *)
+FilterNonexistentMessageAction == TRUE /\ \E i \in Server:    FilterNonexistentMessage(i)
+
+\* Complete transition relation.
+Next == 
+    \/ UpdateLeaderAction
+    \/ FollowLeaderAction
+    \/ TimeoutAction
+    \/ RestartAction
+    \/ ConnectAndFollowerSendCEPOCHAction
+    \/ LeaderProcessCEPOCHAction
+    \/ FollowerProcessNEWEPOCHAction
+    \/ LeaderProcessACKEPOCHAction
+    \/ FollowerProcessNEWLEADERAction
+    \/ LeaderProcessACKLDAction
+    \/ FollowerProcessCOMMITLDAction
+    \/ LeaderProcessRequestAction
+    \/ LeaderBroadcastPROPOSEAction
+    \/ FollowerProcessPROPOSEAction
+    \/ LeaderProcessACKAction
+    \/ FollowerProcessCOMMITAction
+    \/ FilterNonexistentMessageAction
+
+\* The complete specification.
 Spec == Init /\ [][Next]_vars
+
 ----------------------------------------------------------------------------
 \* Define safety properties of Zab.
 
