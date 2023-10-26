@@ -1274,7 +1274,7 @@ Inv1 == ~(\E s \in Server : state[s] = LEADING /\ Len(history[s]) > 0)
 ShouldNotBeTriggered == \A p \in DOMAIN violatedInvariants: violatedInvariants[p] = FALSE
 
 \* There is most one established leader for a certain epoch.
-Leadership1 == \A i, j \in Server:
+H_Leadership1 == \A i, j \in Server:
                    /\ IsLeader(i) /\ zabState[i] \in {SYNCHRONIZATION, BROADCAST}
                    /\ IsLeader(j) /\ zabState[j] \in {SYNCHRONIZATION, BROADCAST}
                    /\ currentEpoch[i] = currentEpoch[j]
