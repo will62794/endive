@@ -2238,6 +2238,10 @@ class InductiveInvGen():
             root = proof_EPaxos.root
             actions = proof_EPaxos.actions
             nodes = proof_EPaxos.nodes
+        elif self.specname == "Zab":
+            root = proof_Zab.root
+            actions = proof_Zab.actions
+            nodes = proof_Zab.nodes
         elif self.specname == "basic_consensus":
             root = proof_basic_consensus.root
             actions = proof_basic_consensus.actions
