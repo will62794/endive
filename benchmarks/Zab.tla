@@ -143,6 +143,9 @@ HistTypeBounded == BoundedSeq([zxid: ZxidType, value: Nat, ackSid: Nat, epoch: E
 
 AckeRecvTypeBounded == RandomSetOfSubsets(2, 2, [sid: Server, connected: BOOLEAN, peerLastEpoch: Nat, peerHistory: HistTypeBounded])
 
+MsgType == [mtype: {CEPOCH, NEWEPOCH, ACKEPOCH, NEWLEADER, ACKLD, COMMITLD, PROPOSE, ACK, COMMIT}, mepoch: Epoch, mzxid: ZxidType]
+
+MaxMsgChanLen == 1
 
 TypeOKRandom == 
     /\ state \in [Server -> {LOOKING, FOLLOWING, LEADING}]
@@ -158,9 +161,7 @@ TypeOKRandom ==
     /\ sendCounter \in [Server -> Nat]
     /\ connectInfo \in [Server -> Server]
     /\ leaderOracle \in Server
-    /\ msgs = [s \in Server |-> [v \in Server |-> << >>] ]
-    \* /\ msgs \in [Server -> [Server -> Seq([mtype: {CEPOCH, NEWEPOCH, ACKEPOCH, NEWLEADER, ACKLD, COMMITLD, PROPOSE, ACK, COMMIT}, 
-                                            \* mepoch: Nat, 
+    /\ msgs \in [Server -> [Server -> BoundedSeq(MsgType, MaxMsgChanLen)]]
     /\ proposalMsgsLog    = {}
     /\ epochLeader        = [i \in 1..MaxEpoch |-> {} ]
     /\ violatedInvariants = {}
@@ -800,13 +801,13 @@ FollowerProcessNEWLEADER(i, j) ==
                     /\ UNCHANGED <<violatedInvariants, currentEpoch, history>>
                  \/ \* 2. f.p equals e'.
                     /\ epochOk
-                    /\ \/ /\ stateOk
-                          /\ UNCHANGED violatedInvariants
-                       \/ /\ ~stateOk
-                          /\ PrintT("Exception: Follower receives NEWLEADER," \o
-                             " whileZabState not SYNCHRONIZATION.")
-                          /\ violatedInvariants' = [violatedInvariants 
-                                    EXCEPT !.stateInconsistent = TRUE]
+                    /\ stateOk
+                    /\ UNCHANGED violatedInvariants
+                    \*    \/ /\ ~stateOk
+                    \*       /\ PrintT("Exception: Follower receives NEWLEADER," \o
+                    \*          " whileZabState not SYNCHRONIZATION.")
+                    \*       /\ violatedInvariants' = violatedInvariants
+                        \*   /\ violatedInvariants' = [violatedInvariants EXCEPT !.stateInconsistent = TRUE]
                     /\ currentEpoch' = [currentEpoch EXCEPT ![i] = acceptedEpoch[i]]
                     /\ history' = [history EXCEPT ![i] = msg.mhistory] \* no need to care ackSid
                     /\ LET m == [ mtype |-> ACKLD,
@@ -1131,12 +1132,12 @@ FollowerProcessCOMMIT(i, j) ==
                     /\ LET firstElement == history[i][lastCommitted[i].index + 1]
                            match == ZxidEqual(firstElement.zxid, msg.mzxid)
                        IN
-                       \/ /\ ~match
-                          /\ PrintT("Exception: Committing zxid not equals" \o
-                                     " next pending txn zxid.")
-                          /\ violatedInvariants' = violatedInvariants
-                        \*   /\ violatedInvariants' = [violatedInvariants EXCEPT !.commitInconsistent = TRUE]
-                          /\ UNCHANGED lastCommitted
+                    \*    \/ /\ ~match
+                    \*       /\ PrintT("Exception: Committing zxid not equals" \o
+                    \*                  " next pending txn zxid.")
+                    \*       /\ violatedInvariants' = violatedInvariants
+                    \*     \*   /\ violatedInvariants' = [violatedInvariants EXCEPT !.commitInconsistent = TRUE]
+                    \*       /\ UNCHANGED lastCommitted
                        \/ /\ match
                           /\ lastCommitted' = [lastCommitted EXCEPT ![i] = 
                                             [ index |-> lastCommitted[i].index + 1,
