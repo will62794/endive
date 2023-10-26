@@ -188,39 +188,43 @@ EpochPrecedeInTxn(txn1, txn2) == txn1.zxid[1] < txn2.zxid[1]
 GetParameter(p) == IF p \in DOMAIN Parameters THEN Parameters[p] ELSE 0
 GetRecorder(p)  == IF p \in DOMAIN recorder   THEN recorder[p]   ELSE 0
 
-RecorderGetHelper(m) == (m :> recorder[m])
-RecorderIncHelper(m) == (m :> recorder[m] + 1)
+\* RecorderGetHelper(m) == (m :> recorder[m])
+\* RecorderIncHelper(m) == (m :> recorder[m] + 1)
 
-RecorderIncTimeout == RecorderIncHelper("nTimeout")
-RecorderGetTimeout == RecorderGetHelper("nTimeout")
-RecorderIncRestart == RecorderIncHelper("nRestart")
-RecorderGetRestart == RecorderGetHelper("nRestart")
-RecorderSetTransactionNum(pc) == ("nTransaction" :> 
-                                IF pc[1] = "LeaderProcessRequest" THEN
-                                    LET s == CHOOSE i \in Server: 
-                                        \A j \in Server: Len(history'[i]) >= Len(history'[j])                       
-                                    IN Len(history'[s])
-                                ELSE recorder["nTransaction"])
-RecorderSetMaxEpoch(pc)       == ("maxEpoch" :> 
-                                IF pc[1] = "LeaderProcessCEPOCH" THEN
-                                    LET s == CHOOSE i \in Server:
-                                        \A j \in Server: acceptedEpoch'[i] >= acceptedEpoch'[j]
-                                    IN acceptedEpoch'[s]
-                                ELSE recorder["maxEpoch"])
-RecorderSetRequests(pc)       == ("nClientRequest" :>
-                                IF pc[1] = "LeaderProcessRequest" THEN
-                                    recorder["nClientRequest"] + 1
-                                ELSE recorder["nClientRequest"] )
-RecorderSetPc(pc)      == ("pc" :> pc)
-RecorderSetFailure(pc) == CASE pc[1] = "Timeout"         -> RecorderIncTimeout @@ RecorderGetRestart
-                          []   pc[1] = "LeaderTimeout"   -> RecorderIncTimeout @@ RecorderGetRestart
-                          []   pc[1] = "FollowerTimeout" -> RecorderIncTimeout @@ RecorderGetRestart
-                          []   pc[1] = "Restart"         -> RecorderIncTimeout @@ RecorderIncRestart
-                          []   OTHER                     -> RecorderGetTimeout @@ RecorderGetRestart
+\* RecorderIncTimeout == RecorderIncHelper("nTimeout")
+\* RecorderGetTimeout == RecorderGetHelper("nTimeout")
+\* RecorderIncRestart == RecorderIncHelper("nRestart")
+\* RecorderGetRestart == RecorderGetHelper("nRestart")
+\* RecorderSetTransactionNum(pc) == ("nTransaction" :> 
+\*                                 IF pc[1] = "LeaderProcessRequest" THEN
+\*                                     LET s == CHOOSE i \in Server: 
+\*                                         \A j \in Server: Len(history'[i]) >= Len(history'[j])                       
+\*                                     IN Len(history'[s])
+\*                                 ELSE recorder["nTransaction"])
+\* RecorderSetMaxEpoch(pc)       == ("maxEpoch" :> 
+\*                                 IF pc[1] = "LeaderProcessCEPOCH" THEN
+\*                                     LET s == CHOOSE i \in Server:
+\*                                         \A j \in Server: acceptedEpoch'[i] >= acceptedEpoch'[j]
+\*                                     IN acceptedEpoch'[s]
+\*                                 ELSE recorder["maxEpoch"])
+\* RecorderSetRequests(pc)       == ("nClientRequest" :>
+\*                                 IF pc[1] = "LeaderProcessRequest" THEN
+\*                                     recorder["nClientRequest"] + 1
+\*                                 ELSE recorder["nClientRequest"] )
+\* RecorderSetPc(pc)      == ("pc" :> pc)
+\* RecorderSetFailure(pc) == (m :> 0)
+    
+    \* CASE pc[1] = "Timeout"         -> RecorderIncTimeout @@ RecorderGetRestart
+    \*                       []   pc[1] = "LeaderTimeout"   -> RecorderIncTimeout @@ RecorderGetRestart
+    \*                       []   pc[1] = "FollowerTimeout" -> RecorderIncTimeout @@ RecorderGetRestart
+    \*                       []   pc[1] = "Restart"         -> RecorderIncTimeout @@ RecorderIncRestart
+    \*                       []   OTHER                     -> RecorderGetTimeout @@ RecorderGetRestart
 
-UpdateRecorder(pc) == recorder' = RecorderSetFailure(pc)      @@ RecorderSetTransactionNum(pc)
-                                  @@ RecorderSetMaxEpoch(pc)  @@ RecorderSetPc(pc) 
-                                  @@ RecorderSetRequests(pc)  @@ recorder
+UpdateRecorder(pc) == recorder' = recorder 
+\* RecorderSetFailure(pc)      @@ RecorderSetTransactionNum(pc)
+\*                                   @@ RecorderSetMaxEpoch(pc)  @@ RecorderSetPc(pc) 
+\*                                   @@ RecorderSetRequests(pc)  @@ recorder
+
 UnchangeRecorder   == UNCHANGED recorder
 
 CheckParameterHelper(n, p, Comp(_,_)) == IF p \in DOMAIN Parameters 
