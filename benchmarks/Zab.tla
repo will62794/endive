@@ -108,8 +108,47 @@ msgVars == msgs
 
 verifyVars == <<proposalMsgsLog, epochLeader, violatedInvariants>>
 
-vars == <<serverVars, leaderVars, followerVars, electionVars, 
-          msgVars, verifyVars, recorder>>
+vars == <<serverVars, leaderVars, followerVars, electionVars, msgVars, verifyVars, recorder>>
+
+\* Gives a candidate TypeOK definition for all variables in the spec.
+TypeOK == 
+    /\ state \in [Server -> {LOOKING, FOLLOWING, LEADING}]
+    /\ zabState \in [Server -> {ELECTION, DISCOVERY, SYNCHRONIZATION, BROADCAST}]
+    /\ acceptedEpoch \in [Server -> Nat]
+    /\ currentEpoch \in [Server -> Nat]
+    /\ history \in [Server -> Seq([zxid: Nat, value: Nat, ackSid: Nat, epoch: Nat])]
+    /\ lastCommitted \in [Server -> [index: Nat, zxid: Nat \X Nat]]
+    /\ learners \in [Server -> SUBSET Server]
+    /\ cepochRecv \in [Server -> SUBSET [sid: Server, connected: BOOLEAN, epoch: Nat]]
+    /\ ackeRecv \in [Server -> SUBSET [sid: Server, connected: BOOLEAN, peerLastEpoch: Nat, peerHistory: Seq([zxid: Nat, value: Nat, ackSid: Nat, epoch: Nat])]]
+    /\ ackldRecv \in [Server -> SUBSET [sid: Server, connected: BOOLEAN]]
+    /\ sendCounter \in [Server -> Nat]
+    /\ connectInfo \in [Server -> Server]
+    /\ leaderOracle \in Server
+    /\ msgs = {}
+    \* /\ msgs \in [Server -> [Server -> Seq([mtype: {CEPOCH, NEWEPOCH, ACKEPOCH, NEWLEADER, ACKLD, COMMITLD, PROPOSE, ACK, COMMIT}, 
+                                            \* mepoch: Nat, 
+
+TypeOKRandom == 
+    /\ state \in [Server -> {LOOKING, FOLLOWING, LEADING}]
+    /\ zabState \in [Server -> {ELECTION, DISCOVERY, SYNCHRONIZATION, BROADCAST}]
+    /\ acceptedEpoch \in [Server -> Nat]
+    /\ currentEpoch \in [Server -> Nat]
+    /\ history \in [Server -> Seq([zxid: Nat, value: Nat, ackSid: Nat, epoch: Nat])]
+    /\ lastCommitted \in [Server -> [index: Nat, zxid: Nat \X Nat]]
+    /\ learners \in [Server -> SUBSET Server]
+    /\ cepochRecv \in [Server -> SUBSET [sid: Server, connected: BOOLEAN, epoch: Nat]]
+    /\ ackeRecv \in [Server -> SUBSET [sid: Server, connected: BOOLEAN, peerLastEpoch: Nat, peerHistory: Seq([zxid: Nat, value: Nat, ackSid: Nat, epoch: Nat])]]
+    /\ ackldRecv \in [Server -> SUBSET [sid: Server, connected: BOOLEAN]]
+    /\ sendCounter \in [Server -> Nat]
+    /\ connectInfo \in [Server -> Server]
+    /\ leaderOracle \in Server
+    /\ msgs = {}
+    \* /\ msgs \in [Server -> [Server -> Seq([mtype: {CEPOCH, NEWEPOCH, ACKEPOCH, NEWLEADER, ACKLD, COMMITLD, PROPOSE, ACK, COMMIT}, 
+                                            \* mepoch: Nat, 
+
+
+
 -----------------------------------------------------------------------------
 \* Return the maximum value from the set S
 Maximum(S) == IF S = {} THEN -1
