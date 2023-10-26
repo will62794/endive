@@ -24,7 +24,10 @@
         "ACK": "ACK",
         "COMMIT": "COMMIT",
         "Parameters": "Params1",
-        "NullPoint": "Null"
+        "NullPoint": "Null",
+        "s1": "s1",
+        "s2": "s2",
+        "s3": "s3"
     },
     "actions": [
         "UpdateLeaderAction",
@@ -46,7 +49,7 @@
         "FilterNonexistentMessageAction"
     ],
     "constraint"  :  "",
-    "quant_inv"  :  "\\A rmi \\in RM : \\A rmj \\in RM : ",
+    "quant_inv"  :  "",
     "quant_inv_alt"  :  null,
     "model_consts"  :  "CONSTANT s1,s2,s3",
     "symmetry" : true,

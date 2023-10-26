@@ -1379,6 +1379,11 @@ PrimaryIntegrity == \A i, j \in Server: /\ IsLeader(i)   /\ IsMyLearner(i, j)
 
 Symmetry == Permutations(Server)
 
+NextUnchanged == UNCHANGED vars
+
+CTICost == 0
+
+
 =============================================================================
 \* Modification History
 \* Last modified Tue Jan 31 20:40:11 CST 2023 by huangbinyu
