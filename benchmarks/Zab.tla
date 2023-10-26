@@ -1195,7 +1195,7 @@ Leadership2 == \A epoch \in 1..MAXEPOCH: Cardinality(epochLeader[epoch]) <= 1
 
 \* PrefixConsistency: The prefix that have been committed 
 \* in history in any process is the same.
-PrefixConsistency == \A i, j \in Server:
+H_PrefixConsistency == \A i, j \in Server:
                         LET smaller == Minimum({lastCommitted[i].index, lastCommitted[j].index})
                         IN \/ smaller = 0
                            \/ /\ smaller > 0
