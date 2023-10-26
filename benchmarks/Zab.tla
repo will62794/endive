@@ -16,6 +16,11 @@
  * limitations under the License.
  *)
 
+\* 
+\*  Original source: https://github.com/apache/zookeeper/blob/master/zookeeper-specifications/protocol-spec/Zab.tla
+\*  Modifications by Will Schultz, Oct. 2023.
+\* 
+
 -------------------------------- MODULE Zab ---------------------------------
 (* This is the formal specification for the Zab consensus algorithm,
    in DSN'2011, which represents protocol specification in our work.*)
@@ -306,11 +311,12 @@ InitMsgVars == msgs = [s \in Server |-> [v \in Server |-> << >>] ]
 
 InitVerifyVars == /\ proposalMsgsLog    = {}
                   /\ epochLeader        = [i \in 1..MAXEPOCH |-> {} ]
-                  /\ violatedInvariants = [stateInconsistent    |-> FALSE,
-                                           proposalInconsistent |-> FALSE,
-                                           commitInconsistent   |-> FALSE,
-                                           ackInconsistent      |-> FALSE,
-                                           messageIllegal       |-> FALSE ]
+                  /\ violatedInvariants = {}
+                \*   [stateInconsistent    |-> FALSE,
+                \*                            proposalInconsistent |-> FALSE,
+                \*                            commitInconsistent   |-> FALSE,
+                \*                            ackInconsistent      |-> FALSE,
+                \*                            messageIllegal       |-> FALSE ]
 
 InitRecorder == recorder = [nTimeout       |-> 0,
                             nTransaction   |-> 0,
@@ -427,7 +433,7 @@ FollowLeader(i) ==
 
 \* Timeout between leader and follower.   
 Timeout(i, j) ==
-        /\ CheckTimeout \* test restrictions of timeout
+        \* /\ CheckTimeout \* test restrictions of timeout
         /\ IsLeader(i)   /\ IsMyLearner(i, j)
         /\ IsFollower(j) /\ IsMyLeader(j, i)
         /\ LET newLearners == learners[i] \ {j}
@@ -443,7 +449,7 @@ Timeout(i, j) ==
         /\ UpdateRecorder(<<"Timeout", i, j>>)
 
 Restart(i) ==
-        /\ CheckRestart \* test restrictions of restart
+        \* /\ CheckRestart \* test restrictions of restart
         /\ \/ /\ IsLooking(i)
               /\ UNCHANGED <<state, zabState, learners, followerVars, msgVars,
                     cepochRecv, ackeRecv, ackldRecv>>
@@ -511,7 +517,7 @@ DetermineNewEpoch(i) ==
 (* Leader waits for receiving FOLLOWERINFO from a quorum including itself,
    and chooses a new epoch e' as its own epoch and broadcasts NEWEPOCH. *)
 LeaderProcessCEPOCH(i, j) ==
-        /\ CheckEpoch  \* test restrictions of max epoch
+        \* /\ CheckEpoch  \* test restrictions of max epoch
         /\ IsLeader(i)
         /\ PendingCEPOCH(i, j)
         /\ LET msg == msgs[j][i][1]
@@ -524,8 +530,8 @@ LeaderProcessCEPOCH(i, j) ==
                        \/ /\ zabState[i] /= DISCOVERY
                           /\ PrintT("Exception: CepochRecvQuorumFormed false," \o
                                " while zabState not DISCOVERY.")
-                          /\ violatedInvariants' = [violatedInvariants 
-                                    EXCEPT !.stateInconsistent = TRUE]
+                          /\ violatedInvariants' = violatedInvariants
+                        \*   [violatedInvariants EXCEPT !.stateInconsistent = TRUE]
                     /\ cepochRecv' = [cepochRecv EXCEPT ![i] = UpdateCepochRecv(@, j, msg.mepoch) ]
                     /\ \/ \* 1.1. cepochRecv becomes quorum, 
                           \* then determine e' and broadcasts NEWEPOCH in Q. 
@@ -573,8 +579,8 @@ FollowerProcessNEWEPOCH(i, j) ==
                        \/ /\ ~stateOk
                           /\ PrintT("Exception: Follower receives NEWEPOCH," \o
                              " whileZabState not DISCOVERY.")
-                          /\ violatedInvariants' = [violatedInvariants 
-                                        EXCEPT !.stateInconsistent = TRUE]
+                          /\ violatedInvariants' = violatedInvariants
+                        \*   [violatedInvariants EXCEPT !.stateInconsistent = TRUE]
                           /\ Discard(j, i)
                           /\ UNCHANGED <<acceptedEpoch, zabState>>
                     /\ UNCHANGED <<followerVars, learners, cepochRecv, ackeRecv,
@@ -886,7 +892,7 @@ IncZxid(s, zxid) == IF currentEpoch[s] = zxid[1] THEN <<zxid[1], zxid[2] + 1>>
          the sole one who can receive write requests, to simplify spec 
          and keep correctness at the same time. *)
 LeaderProcessRequest(i) ==
-        /\ CheckTransactionNum \* test restrictions of transaction num
+        \* /\ CheckTransactionNum \* test restrictions of transaction num
         /\ IsLeader(i)
         /\ zabState[i] = BROADCAST
         /\ LET request_value == GetRecorder("nClientRequest") \* unique value
@@ -987,8 +993,8 @@ LeaderTryToCommit(s, index, zxid, newTxn, follower) ==
               /\ hasAllQuorums
               /\ \/ /\ ~ordered
                     /\ PrintT("Warn: Committing zxid " \o ToString(zxid) \o " not first.")
-                    /\ violatedInvariants' = [violatedInvariants EXCEPT 
-                            !.commitInconsistent = TRUE]
+                    /\ violatedInvariants' = violatedInvariants
+                    \* /\ violatedInvariants' = [violatedInvariants EXCEPT !.commitInconsistent = TRUE]
                  \/ /\ ordered
                     /\ UNCHANGED violatedInvariants
               /\ lastCommitted' = [lastCommitted EXCEPT ![s] = [ index |-> index,
@@ -1039,8 +1045,8 @@ LeaderProcessACK(i, j) ==
                        \/ ~monotonicallyInc
                     /\ PrintT("Exception: No such zxid. " \o 
                            " / ackIndex doesn't inc monotonically.")
-                    /\ violatedInvariants' = [violatedInvariants 
-                            EXCEPT !.ackInconsistent = TRUE]
+                    \* /\ violatedInvariants' = [violatedInvariants EXCEPT !.ackInconsistent = TRUE]
+                    /\ violatedInvariants' = violatedInvariants
                     /\ Discard(j, i)
                     /\ UNCHANGED <<history, lastCommitted>>
         /\ UNCHANGED <<state, zabState, acceptedEpoch, currentEpoch, leaderVars,
@@ -1065,8 +1071,8 @@ FollowerProcessCOMMIT(i, j) ==
                        \/ /\ ~match
                           /\ PrintT("Exception: Committing zxid not equals" \o
                                      " next pending txn zxid.")
-                          /\ violatedInvariants' = [violatedInvariants EXCEPT 
-                                    !.commitInconsistent = TRUE]
+                          /\ violatedInvariants' = violatedInvariants
+                        \*   /\ violatedInvariants' = [violatedInvariants EXCEPT !.commitInconsistent = TRUE]
                           /\ UNCHANGED lastCommitted
                        \/ /\ match
                           /\ lastCommitted' = [lastCommitted EXCEPT ![i] = 
@@ -1112,7 +1118,8 @@ FilterNonexistentMessage(i) ==
                                                     \/ msg.mtype = COMMIT   
                                         \/ IsLooking(i)
                                   /\ Discard(j, i)
-        /\ violatedInvariants' = [violatedInvariants EXCEPT !.messageIllegal = TRUE]
+        /\ violatedInvariants' = violatedInvariants
+        \* /\ violatedInvariants' = [violatedInvariants EXCEPT !.messageIllegal = TRUE]
         /\ UNCHANGED <<serverVars, leaderVars, followerVars, electionVars,
                     proposalMsgsLog, epochLeader>>
         /\ UnchangeRecorder
@@ -1125,10 +1132,11 @@ Next ==
         (* Abnormal situations like failure, network disconnection *)
         \/ \E i, j \in Server: Timeout(i, j)
         \/ \E i \in Server:    Restart(i)
-        (* Zab module - Discovery and Synchronization part *)
+        (* Zab module - Discovery part *)
         \/ \E i, j \in Server: ConnectAndFollowerSendCEPOCH(i, j)
         \/ \E i, j \in Server: LeaderProcessCEPOCH(i, j)
         \/ \E i, j \in Server: FollowerProcessNEWEPOCH(i, j)
+        (* Zab module - Synchronization *)
         \/ \E i, j \in Server: LeaderProcessACKEPOCH(i, j)
         \/ \E i, j \in Server: FollowerProcessNEWLEADER(i, j)
         \/ \E i, j \in Server: LeaderProcessACKLD(i, j)
@@ -1145,6 +1153,9 @@ Next ==
 Spec == Init /\ [][Next]_vars
 ----------------------------------------------------------------------------
 \* Define safety properties of Zab.
+
+\* Inv1 == ~(\E s \in Server : state[s] = LEADING)
+Inv1 == ~(\E s \in Server : state[s] = LEADING /\ Len(history[s]) > 0)
 
 ShouldNotBeTriggered == \A p \in DOMAIN violatedInvariants: violatedInvariants[p] = FALSE
 
@@ -1246,6 +1257,12 @@ PrimaryIntegrity == \A i, j \in Server: /\ IsLeader(i)   /\ IsMyLearner(i, j)
                                 \/ /\ history[j][idx_j].zxid[1] < currentEpoch[i]
                                    /\ \E idx_i \in 1..lastCommitted[i].index: 
                                         TxnEqual(history[i][idx_i], history[j][idx_j])
+
+
+----------------------
+
+Symmetry == Permutations(Server)
+
 =============================================================================
 \* Modification History
 \* Last modified Tue Jan 31 20:40:11 CST 2023 by huangbinyu
