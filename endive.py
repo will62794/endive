@@ -2797,9 +2797,13 @@ class InductiveInvGen():
         # Parse and save AST of spec if needed.
         if self.load_parse_tree:
             logging.info(f"Parsing spec '{self.specname}' into parse tree.")
-            tla_spec_obj = tlaparse.parse_tla_file(self.specdir, f"{self.specname}")
-            self.spec_defs = tla_spec_obj.get_all_user_defs(level="1")
-            self.tla_spec_obj = tla_spec_obj
+            try:
+                tla_spec_obj = tlaparse.parse_tla_file(self.specdir, f"{self.specname}")
+                self.spec_defs = tla_spec_obj.get_all_user_defs(level="1")
+                self.tla_spec_obj = tla_spec_obj
+            except Exception as e:
+                print("ERROR: error parsing TLA+ spec:", e)
+                self.tla_spec_obj = None
 
         if self.proof_tree_mode:
 
