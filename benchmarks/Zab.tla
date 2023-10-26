@@ -24,7 +24,7 @@
 -------------------------------- MODULE Zab ---------------------------------
 (* This is the formal specification for the Zab consensus algorithm,
    in DSN'2011, which represents protocol specification in our work.*)
-EXTENDS Integers, FiniteSets, Sequences, Naturals, TLC
+EXTENDS Integers, FiniteSets, Sequences, Naturals, TLC, Randomization
 -----------------------------------------------------------------------------
 \* The set of servers
 CONSTANT Server
@@ -137,7 +137,9 @@ Epoch == 1..MaxEpoch
 SeqOf(S, n) == UNION {[1..m -> S] : m \in 0..n}
 BoundedSeq(S, n) == SeqOf(S, n)
 
-HistTypeBounded == BoundedSeq([zxid: Nat, value: Nat, ackSid: Nat, epoch: Epoch], MaxHistLen)
+ZxidType == Epoch \X Nat
+
+HistTypeBounded == BoundedSeq([zxid: ZxidType, value: Nat, ackSid: Nat, epoch: Epoch], MaxHistLen)
 
 AckeRecvTypeBounded == RandomSetOfSubsets(2, 2, [sid: Server, connected: BOOLEAN, peerLastEpoch: Nat, peerHistory: HistTypeBounded])
 
@@ -148,7 +150,7 @@ TypeOKRandom ==
     /\ acceptedEpoch \in [Server -> Epoch]
     /\ currentEpoch \in [Server -> Epoch]
     /\ history \in [Server -> HistTypeBounded]
-    /\ lastCommitted \in [Server -> [index: Nat, zxid: Nat \X Nat]]
+    /\ lastCommitted \in [Server -> [index: Nat, zxid: ZxidType]]
     /\ learners \in [Server -> SUBSET Server]
     /\ cepochRecv \in [Server -> SUBSET [sid: Server, connected: BOOLEAN, epoch: Epoch]]
     /\ ackeRecv \in [Server -> AckeRecvTypeBounded]
@@ -1256,12 +1258,14 @@ Leadership2 == \A epoch \in 1..MAXEPOCH: Cardinality(epochLeader[epoch]) <= 1
 
 \* PrefixConsistency: The prefix that have been committed 
 \* in history in any process is the same.
-H_PrefixConsistency == \A i, j \in Server:
-                        LET smaller == Minimum({lastCommitted[i].index, lastCommitted[j].index})
-                        IN \/ smaller = 0
-                           \/ /\ smaller > 0
-                              /\ \A index \in 1..smaller:
-                                   TxnEqual(history[i][index], history[j][index])
+H_PrefixConsistency == 
+    \A i, j \in Server:
+        LET smaller == Minimum({lastCommitted[i].index, lastCommitted[j].index}) IN
+        (smaller > 0) =>
+            \A index \in 1..smaller: 
+                /\ index \in DOMAIN history[i]
+                /\ index \in DOMAIN history[j]
+                /\ TxnEqual(history[i][index], history[j][index])
 
 \* Integrity: If some follower delivers one transaction, then some primary has broadcast it.
 Integrity == \A i \in Server:

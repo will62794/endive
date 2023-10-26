@@ -2190,6 +2190,7 @@ class InductiveInvGen():
         import proof_async_raft_no_truncate
         import proof_Paxos
         import proof_EPaxos
+        import proof_Zab
 
         #
         # Set the specified spec appropriately.
