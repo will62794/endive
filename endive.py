@@ -2297,8 +2297,12 @@ class InductiveInvGen():
             # Getting all level 1 definitions should be sufficient here.
             # Invariants (i.e. state predicates) should all be at level 1.
             # if udef.startswith("H_"):
-            vars_in_lemma_defs[udef] = self.tla_spec_obj.get_vars_in_def(udef)[0]
-            print(udef, vars_in_lemma_defs[udef])
+            try:
+                vars_in_lemma_defs[udef] = self.tla_spec_obj.get_vars_in_def(udef)[0]
+                print(udef, vars_in_lemma_defs[udef])
+            except:
+                print(f"Def '{udef}': failed to get variables for. Using all state variables.")
+                vars_in_action[action] = all_state_vars
 
 
         # Compute COI for each action-lemma pair
