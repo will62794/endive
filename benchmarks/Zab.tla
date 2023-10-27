@@ -188,6 +188,7 @@ TypeOKRandom ==
     /\ connectInfo \in [Server -> Server]
     /\ leaderOracle \in Server
     /\ msgs \in [Server -> [Server -> BoundedSeq(RandomSubset(5,MsgType), MaxMsgChanLen)]]
+    /\ msgsCEPOCH \in [Server -> [Server -> {<<>>}]]
     /\ proposalMsgsLog    = {}
     /\ epochLeader        = [i \in 1..MaxEpoch |-> {} ]
     /\ violatedInvariants = {}
@@ -659,7 +660,7 @@ FollowerProcessNEWEPOCH(i, j) ==
                           /\ zabState' = [zabState EXCEPT ![i] = SYNCHRONIZATION]
                           /\ UNCHANGED violatedInvariants
                     /\ UNCHANGED <<followerVars, learners, cepochRecv, ackeRecv,
-                            ackldRecv, state>>
+                            ackldRecv, state, msgsCEPOCH>>
                  \/ \* 2. Abnormal case - go back to election
                     /\ ~epochOk
                     /\ FollowerShutdown(i)
@@ -950,7 +951,7 @@ LeaderProcessRequest(i) ==
                            epoch  |-> currentEpoch[i] ]
            IN history' = [history EXCEPT ![i] = Append(@, newTxn) ]
         /\ UNCHANGED <<state, zabState, acceptedEpoch, currentEpoch, lastCommitted,
-                    leaderVars, followerVars, electionVars, msgVars, verifyVars>>
+                    leaderVars, followerVars, electionVars, msgVars, verifyVars, msgsCEPOCH>>
         /\ UpdateRecorder(<<"LeaderProcessRequest", i>>)
 
 \* Latest counter existing in history.
@@ -1142,7 +1143,7 @@ FilterNonexistentMessage(i) ==
                                   /\ Discard(j, i)
         /\ violatedInvariants' = violatedInvariants
         \* /\ violatedInvariants' = [violatedInvariants EXCEPT !.messageIllegal = TRUE]
-        /\ UNCHANGED <<serverVars, leaderVars, followerVars, electionVars, proposalMsgsLog, epochLeader>>
+        /\ UNCHANGED <<serverVars, leaderVars, followerVars, electionVars, proposalMsgsLog, epochLeader, msgsCEPOCH>>
         /\ UnchangeRecorder
 ----------------------------------------------------------------------------
 
