@@ -1358,9 +1358,12 @@ TxnHistory(h) == [i \in DOMAIN h |-> [zxid |-> h[i].zxid, value |-> h[i].value] 
 \* If a NEWLEADER message has been sent from a leader N in epoch E, then 
 \* that message's history must be a prefix of the leader's history in epoch E, w.r.t the txns
 \* that appear in that history i.e. (zxid, value) pairs.
-H_NEWLEADERMsgIsPrefixOfSenderLeader == \A i,j \in Server : 
-        (/\ PendingNEWLEADER(i,j)
-         ) => IsPrefix(TxnHistory(msgs[j][i][1].mhistory), TxnHistory(history[j]))
+H_NEWLEADERMsgIsPrefixOfSenderLeader == 
+    \A i,j \in Server : 
+        PendingNEWLEADER(i,j) => 
+            (/\ IsPrefix(TxnHistory(msgs[j][i][1].mhistory), TxnHistory(history[j]))
+                \* lastCommitted on node is <= length of incoming history.
+                /\ lastCommitted[i].index <= Len(msgs[j][i][1].mhistory))
 
 ----------------------------------------------------------
 
