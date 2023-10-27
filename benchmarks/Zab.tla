@@ -1122,13 +1122,12 @@ FollowerProcessCOMMIT(i, j) ==
                            match == ZxidEqual(firstElement.zxid, msg.mzxid) IN
                     /\ match
                     /\ lastCommitted' = [lastCommitted EXCEPT ![i] = 
-                                        [ index |-> lastCommitted[i].index + 1,
-                                            zxid  |-> firstElement.zxid ] ]
+                                            [   index |-> lastCommitted[i].index + 1,
+                                                zxid  |-> firstElement.zxid ] ]
                     /\ UNCHANGED violatedInvariants
         /\ Discard(j, i)
-        /\ UNCHANGED <<state, zabState, acceptedEpoch, currentEpoch, history,
+        /\ UNCHANGED <<recorder,state, zabState, acceptedEpoch, currentEpoch, history,
                     leaderVars, followerVars, electionVars, proposalMsgsLog, epochLeader>>
-        /\ UpdateRecorder(<<"FollowerProcessCOMMIT", i, j>>)
 ----------------------------------------------------------------------------     
 (* Used to discard some messages which should not exist in network channel.
    This action should not be triggered. *)
@@ -1364,6 +1363,15 @@ H_NEWLEADERMsgIsPrefixOfSenderLeader ==
             (/\ IsPrefix(TxnHistory(msgs[j][i][1].mhistory), TxnHistory(history[j]))
                 \* lastCommitted on node is <= length of incoming history.
                 /\ lastCommitted[i].index <= Len(msgs[j][i][1].mhistory))
+
+\* If a COMMIT message has been sent by a node, then the zxid referred to by that COMMIT
+\* must be present in the sender's history, and its lastCommitted must cover that zxid in its history.
+H_COMMITSentByNodeImpliesZxidInLog == 
+    \A i,j \in Server : 
+        PendingCOMMIT(i,j) =>   
+            \E idx \in DOMAIN history[j] : 
+                /\ history[j][idx].zxid = msgs[j][i][1].mzxid  
+                /\ lastCommitted[j].index >= idx
 
 ----------------------------------------------------------
 

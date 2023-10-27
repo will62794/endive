@@ -11,13 +11,23 @@ def make_node(expr):
 lemmaTRUE = StructuredProofNode("LemmaTrue", "TRUE")
 lemmaTRUEShim = StructuredProofNode("LemmaTrueShim", "1=1")
 
+COMMITSentByNodeImpliesZxidInLog = make_node("H_COMMITSentByNodeImpliesZxidInLog")
 
 NEWLEADERMsgIsPrefixOfSenderLeader = make_node("H_NEWLEADERMsgIsPrefixOfSenderLeader")
-
 safety = make_node("H_PrefixConsistency")
+
+NEWLEADERMsgIsPrefixOfSenderLeader.children = {
+    "FollowerProcessNEWLEADERAction": [
+        safety
+    ]
+}
+
 safety.children = {
     "FollowerProcessNEWLEADERAction": [
         NEWLEADERMsgIsPrefixOfSenderLeader
+    ],
+    "FollowerProcessCOMMITAction": [
+        COMMITSentByNodeImpliesZxidInLog
     ]
 }
 
