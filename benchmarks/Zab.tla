@@ -1342,6 +1342,31 @@ PrimaryIntegrity == \A i, j \in Server: /\ IsLeader(i)   /\ IsMyLearner(i, j)
 
 ----------------------
 
+\* 
+\* Helper lemma invariants
+\* 
+
+\* Is log li a prefix of log lj.
+IsPrefix(li,lj) == 
+    /\ Len(li) <= Len(lj)
+    /\ SubSeq(li, 1, Len(li)) = SubSeq(lj, 1, Len(li))
+
+\* Extract only zxid and value from a given history.
+TxnHistory(h) == [i \in DOMAIN h |-> [zxid |-> h[i].zxid, value |-> h[i].value] ]
+
+\* If a NEWLEADER message has been sent from a leader N in epoch E, then 
+\* that message's history must be a prefix of the leader's history in epoch E, w.r.t the txns
+\* that appear in that history i.e. (zxid, value) pairs.
+H_NEWLEADERMsgIsPrefixOfSenderLeader == \A i,j \in Server : 
+        (/\ PendingNEWLEADER(i,j)
+         /\ msgs[j][i][1].mepoch = currentEpoch[j]
+         /\ state[j] = LEADING) => IsPrefix(TxnHistory(msgs[j][i][1].mhistory), TxnHistory(history[j]))
+
+
+----------------------------------------------------------
+
+\* Model checking stuff.
+
 Symmetry == Permutations(Server)
 
 NextUnchanged == UNCHANGED vars
