@@ -2285,16 +2285,31 @@ class InductiveInvGen():
         lemma_action_coi = {}
         action_updated_vars = {}
 
+        # Override above and try to just extract all actions directly from the spec, based on
+        # the 'Action' suffix naming convention.
+        actions_from_spec = []
+        for udef in self.tla_spec_obj.get_all_user_defs(level="2"):
+            if udef.endswith("Action"):
+                # print("ACTION:", udef)
+                actions_from_spec.append(udef)
+        if len(actions_from_spec):
+            actions = actions_from_spec
+
+
+
+
         # Extract variables per action.
         all_state_vars = self.tla_spec_obj.get_all_vars()
         for action in actions:
+            print(f"{action} action: extracting vars")
             try:
                 vars_in_action[action] = self.tla_spec_obj.get_vars_in_def(action)[0]
                 # vars_in_action_non_updated[action] = self.tla_spec_obj.get_vars_in_def(action, ignore_update_expressions=)[0]
-                print(f"Vars in action '{action}':", vars_in_action[action])
-            except:
+                print(f"Vars in action '{action}' ({len(vars_in_action[action])}):", vars_in_action[action])
+            except Exception as e:
                 # Fall back to just adding all variables for now.
-                print(f"Action '{action}': failed to get variables in action. Using all state variables.")
+                # raise e
+                print(f"Action '{action}': failed to get variables in action. Using all state variables ({len(all_state_vars)}).")
                 vars_in_action[action] = all_state_vars
 
         # Extract variables per lemma.
