@@ -12,8 +12,14 @@ lemmaTRUE = StructuredProofNode("LemmaTrue", "TRUE")
 lemmaTRUEShim = StructuredProofNode("LemmaTrueShim", "1=1")
 
 
+NEWLEADERMsgIsPrefixOfSenderLeader = make_node("H_NEWLEADERMsgIsPrefixOfSenderLeader")
+
 safety = make_node("H_PrefixConsistency")
-safety.children = {}
+safety.children = {
+    "FollowerProcessNEWLEADERAction": [
+        NEWLEADERMsgIsPrefixOfSenderLeader
+    ]
+}
 
 root = safety
 nodes = [

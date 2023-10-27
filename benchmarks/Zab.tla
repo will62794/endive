@@ -408,12 +408,13 @@ InitVerifyVars == /\ proposalMsgsLog    = {}
                 \*                            ackInconsistent      |-> FALSE,
                 \*                            messageIllegal       |-> FALSE ]
 
-InitRecorder == recorder = [nTimeout       |-> 0,
-                            nTransaction   |-> 0,
-                            maxEpoch       |-> 0,
-                            nRestart       |-> 0,
-                            pc             |-> <<"Init">>,
-                            nClientRequest |-> 0]
+InitRecorder == recorder = <<>>
+\* [nTimeout       |-> 0,
+                            \* nTransaction   |-> 0,
+                            \* maxEpoch       |-> 0,
+                            \* nRestart       |-> 0,
+                            \* pc             |-> <<"Init">>,
+                            \* nClientRequest |-> 0]
 
 Init == /\ InitServerVars
         /\ InitLeaderVars
@@ -1234,7 +1235,7 @@ Spec == Init /\ [][Next]_vars
 \* Define safety properties of Zab.
 
 \* Inv1 == ~(\E s \in Server : state[s] = LEADING)
-Inv1 == ~(\E s \in Server : state[s] = LEADING /\ Len(history[s]) > 0)
+DebugInv1 == ~(\E s \in Server : state[s] = LEADING /\ Len(history[s]) > 0)
 
 ShouldNotBeTriggered == \A p \in DOMAIN violatedInvariants: violatedInvariants[p] = FALSE
 
@@ -1252,11 +1253,11 @@ Leadership2 == \A epoch \in 1..MAXEPOCH: Cardinality(epochLeader[epoch]) <= 1
 H_PrefixConsistency == 
     \A i, j \in Server:
         LET smaller == Minimum({lastCommitted[i].index, lastCommitted[j].index}) IN
-        (smaller > 0) =>
-            \A index \in 1..smaller: 
-                /\ index \in DOMAIN history[i]
-                /\ index \in DOMAIN history[j]
-                /\ TxnEqual(history[i][index], history[j][index])
+            (smaller > 0) =>
+                (\A index \in 1..smaller: 
+                    /\ index \in DOMAIN history[i]
+                    /\ index \in DOMAIN history[j]
+                    /\ TxnEqual(history[i][index], history[j][index]))
 
 \* Integrity: If some follower delivers one transaction, then some primary has broadcast it.
 Integrity == \A i \in Server:
@@ -1359,9 +1360,7 @@ TxnHistory(h) == [i \in DOMAIN h |-> [zxid |-> h[i].zxid, value |-> h[i].value] 
 \* that appear in that history i.e. (zxid, value) pairs.
 H_NEWLEADERMsgIsPrefixOfSenderLeader == \A i,j \in Server : 
         (/\ PendingNEWLEADER(i,j)
-         /\ msgs[j][i][1].mepoch = currentEpoch[j]
-         /\ state[j] = LEADING) => IsPrefix(TxnHistory(msgs[j][i][1].mhistory), TxnHistory(history[j]))
-
+         ) => IsPrefix(TxnHistory(msgs[j][i][1].mhistory), TxnHistory(history[j]))
 
 ----------------------------------------------------------
 
