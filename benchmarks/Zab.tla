@@ -747,28 +747,34 @@ InitAcksid(i, his) == InitAcksidHelper(his, i)
 (* Leader waits for receiving ACKEPOPCH from a quorum, and determines initialHistory
    according to history of whom has most recent state summary from them. After this,
    leader's zabState turns to SYNCHRONIZATION. *)
-LeaderProcessACKEPOCH(i, j) ==
+LeaderProcessACKEPOCHSentNewLeader(i, j) ==
+        /\ IsLeader(i)
+        /\ PendingACKEPOCH(i, j)
+        /\ IsMyLearner(i, j)
+        /\ LET msg == msgs[j][i][1]
+           IN \* 1. has broadcast NEWLEADER 
+              /\ IsQuorum({a.sid: a \in ackeRecv[i]})
+              /\ ackeRecv' = [ackeRecv EXCEPT ![i] = UpdateAckeRecv(ackeRecv[i], j,msg.mepoch, msg.mhistory) ]
+              /\ LET toSend == history[i] \* contains (Ie', Be')
+                     m == [ mtype    |-> NEWLEADER,
+                            mepoch   |-> acceptedEpoch[i],
+                            mhistory |-> toSend ] IN Reply(i, j, m) 
+                    \* Ignore 'proposalMsgs' updates for now and safety properties that depend on it.
+                    \*  set_forChecking == SetPacketsForChecking({ }, i, acceptedEpoch[i], toSend, 1, Len(toSend)) IN 
+                    \*  /\ Reply(i, j, m) 
+                    \*  /\ proposalMsgsLog' = proposalMsgsLog \*\union set_forChecking
+              /\ UNCHANGED <<proposalMsgsLog, violatedInvariants, currentEpoch, history, zabState, epochLeader, recorder, state, acceptedEpoch, lastCommitted, learners, cepochRecv, ackldRecv, sendCounter, followerVars, electionVars, msgsCEPOCH>>
+
+(* Leader waits for receiving ACKEPOPCH from a quorum, and determines initialHistory
+   according to history of whom has most recent state summary from them. After this,
+   leader's zabState turns to SYNCHRONIZATION. *)
+LeaderProcessACKEPOCHNoNewLeader(i, j) ==
         /\ IsLeader(i)
         /\ PendingACKEPOCH(i, j)
         /\ LET msg == msgs[j][i][1]
                infoOk == IsMyLearner(i, j)
            IN /\ infoOk
-              /\ \/ \* 1. has broadcast NEWLEADER 
-                    /\ AckeRecvQuorumFormed(i)
-                    /\ ackeRecv' = [ackeRecv EXCEPT ![i] = UpdateAckeRecv(@, j, 
-                                            msg.mepoch, msg.mhistory) ]
-                    /\ LET toSend == history[i] \* contains (Ie', Be')
-                           m == [ mtype    |-> NEWLEADER,
-                                  mepoch   |-> acceptedEpoch[i],
-                                  mhistory |-> toSend ]
-                           set_forChecking == SetPacketsForChecking({ }, i, 
-                                        acceptedEpoch[i], toSend, 1, Len(toSend))
-                       IN 
-                       /\ Reply(i, j, m) 
-                       /\ proposalMsgsLog' = proposalMsgsLog \union set_forChecking
-                    /\ UNCHANGED <<violatedInvariants, currentEpoch, history, 
-                                   zabState, epochLeader>>
-                 \/ \* 2. has not broadcast NEWLEADER
+              /\ \/ \* 2. has not broadcast NEWLEADER
                     /\ ~AckeRecvQuorumFormed(i)
                     /\ zabState[i] = DISCOVERY
                     /\ UNCHANGED violatedInvariants
@@ -802,8 +808,7 @@ LeaderProcessACKEPOCH(i, j) ==
                           /\ Discard(j, i)
                           /\ UNCHANGED <<currentEpoch, history, zabState, 
                                      proposalMsgsLog, epochLeader>>
-        /\ UNCHANGED <<state, acceptedEpoch, lastCommitted, learners, cepochRecv, ackldRecv, sendCounter, followerVars, electionVars, msgsCEPOCH>>
-        /\ UpdateRecorder(<<"LeaderProcessACKEPOCH", i, j>>)
+        /\ UNCHANGED <<recorder, state, acceptedEpoch, lastCommitted, learners, cepochRecv, ackldRecv, sendCounter, followerVars, electionVars, msgsCEPOCH>>
 -----------------------------------------------------------------------------    
 (* Follower receives NEWLEADER. Update f.a and history. *)
 FollowerProcessNEWLEADER(i, j) ==
@@ -1186,7 +1191,8 @@ LeaderProcessCEPOCHAction == TRUE /\ \E i, j \in Server: LeaderProcessCEPOCH(i, 
 FollowerProcessNEWEPOCHAction == TRUE /\ \E i, j \in Server: FollowerProcessNEWEPOCH(i, j)
 
 (* Zab module - Synchronization *)
-LeaderProcessACKEPOCHAction == TRUE /\ \E i, j \in Server: LeaderProcessACKEPOCH(i, j)
+LeaderProcessACKEPOCHSentNewLeaderAction == TRUE /\ \E i, j \in Server: LeaderProcessACKEPOCHSentNewLeader(i, j)
+LeaderProcessACKEPOCHNoNewLeaderAction == TRUE /\ \E i, j \in Server: LeaderProcessACKEPOCHNoNewLeader(i, j)
 FollowerProcessNEWLEADERAction == TRUE /\ \E i, j \in Server: FollowerProcessNEWLEADER(i, j)
 FollowerProcessNEWLEADERNewIterationAction == TRUE /\ \E i, j \in Server: FollowerProcessNEWLEADERNewIteration(i, j)
 LeaderProcessACKLDAction == TRUE /\ \E i, j \in Server: LeaderProcessACKLD(i, j)
@@ -1213,7 +1219,8 @@ Next ==
     \/ ConnectAndFollowerSendCEPOCHAction
     \/ LeaderProcessCEPOCHAction
     \/ FollowerProcessNEWEPOCHAction
-    \/ LeaderProcessACKEPOCHAction
+    \/ LeaderProcessACKEPOCHSentNewLeaderAction
+    \/ LeaderProcessACKEPOCHNoNewLeaderAction
     \/ FollowerProcessNEWLEADERAction
     \/ FollowerProcessNEWLEADERNewIterationAction
     \/ LeaderProcessACKLDAction
