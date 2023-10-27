@@ -939,21 +939,21 @@ ZxidToIndex(his, zxid) ==
 FollowerProcessCOMMITLD(i, j) ==
         /\ IsFollower(i)
         /\ PendingCOMMITLD(i, j)
+        /\ IsMyLeader(i, j)
         /\ LET msg == msgs[j][i][1]
                infoOk == IsMyLeader(i, j)
-               index == IF ZxidEqual(msg.mzxid, <<0, 0>>) THEN 0
-                        ELSE ZxidToIndex(history[i], msg.mzxid)
+               index == IF ZxidEqual(msg.mzxid, <<0, 0>>) 
+                            THEN 0
+                            ELSE ZxidToIndex(history[i], msg.mzxid)
                logOk == index >= 0 /\ index <= Len(history[i])
            IN /\ infoOk
-              /\ \/ /\ logOk
-                    /\ UNCHANGED violatedInvariants
+              /\ logOk
               /\ lastCommitted' = [lastCommitted EXCEPT ![i] = [ index |-> index,
                                                                  zxid  |-> msg.mzxid ] ]
               /\ zabState' = [zabState EXCEPT ![i] = BROADCAST]
-              /\ Discard(j, i)
-        /\ UNCHANGED <<state, acceptedEpoch, currentEpoch, history, leaderVars, 
-                    followerVars, electionVars, proposalMsgsLog, epochLeader>>
-        /\ UpdateRecorder(<<"FollowerProcessCOMMITLD", i, j>>)
+              \* Discard the message. (Will S. 10/26/23)
+              /\ msgs' = [msgs EXCEPT ![j][i] = Tail(msgs[j][i])]
+              /\ UNCHANGED <<state, acceptedEpoch, currentEpoch, history, leaderVars, followerVars, electionVars, proposalMsgsLog, epochLeader, violatedInvariants, recorder>>
 ----------------------------------------------------------------------------
 IncZxid(s, zxid) == IF currentEpoch[s] = zxid[1] THEN <<zxid[1], zxid[2] + 1>>
                     ELSE <<currentEpoch[s], 1>>
