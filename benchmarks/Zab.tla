@@ -587,13 +587,15 @@ Restart(i) ==
 -----------------------------------------------------------------------------
 (* Establish connection between leader and follower. *)
 ConnectAndFollowerSendCEPOCH(i, j) ==
-        /\ IsLeader(i) /\ \lnot IsMyLearner(i, j)
-        /\ IsFollower(j) /\ HasNoLeader(j) /\ leaderOracle = i
-        /\ learners'   = [learners   EXCEPT ![i] = @ \union {j}]
-        /\ connectInfo' = [connectInfo EXCEPT ![j] = i]
-        /\ SendIn(msgs, j, i, [ mtype  |-> CEPOCH, mepoch |-> acceptedEpoch[j] ]) \* contains f.p
-        /\ UNCHANGED <<serverVars, electionVars, verifyVars, cepochRecv, ackeRecv, ackldRecv, sendCounter, msgsCEPOCH>>
-        /\ UpdateRecorder(<<"ConnectAndFollowerSendCEPOCH", i, j>>)
+    /\ IsLeader(i) 
+    /\ ~IsMyLearner(i, j)
+    /\ IsFollower(j) 
+    /\ HasNoLeader(j) 
+    /\ leaderOracle = i
+    /\ learners'   = [learners   EXCEPT ![i] = learners[i] \cup {j}]
+    /\ connectInfo' = [connectInfo EXCEPT ![j] = i]
+    /\ Send(j, i, [ mtype  |-> CEPOCH, mepoch |-> acceptedEpoch[j] ]) \* contains f.p
+    /\ UNCHANGED <<recorder, serverVars, electionVars, verifyVars, cepochRecv, ackeRecv, ackldRecv, sendCounter, msgsCEPOCH>>
 
 CepochRecvQuorumFormed(i) == LET sid_cepochRecv == {c.sid: c \in cepochRecv[i]} IN IsQuorum(sid_cepochRecv)
 CepochRecvBecomeQuorum(i) == LET sid_cepochRecv == {c.sid: c \in cepochRecv'[i]} IN IsQuorum(sid_cepochRecv)
