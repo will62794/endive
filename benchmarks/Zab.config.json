@@ -31,7 +31,8 @@
     },
     "actions": [
         "UpdateLeaderAction",
-        "FollowLeaderAction",
+        "FollowLeaderMyselfAction",
+        "FollowLeaderOtherAction",
         "TimeoutAction",
         "RestartAction",
         "ConnectAndFollowerSendCEPOCHAction",
@@ -39,6 +40,7 @@
         "FollowerProcessNEWEPOCHAction",
         "LeaderProcessACKEPOCHAction",
         "FollowerProcessNEWLEADERAction",
+        "FollowerProcessNEWLEADERNewIterationAction",
         "LeaderProcessACKLDAction",
         "FollowerProcessCOMMITLDAction",
         "LeaderProcessRequestAction",

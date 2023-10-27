@@ -311,8 +311,7 @@ SendIn(ms, i, j, m) == ms' = [ms EXCEPT ![i][j] = Append(ms[i][j], m)]
 Discard(i, j) == msgs' = IF msgs[i][j] /= << >> THEN [msgs EXCEPT ![i][j] = Tail(msgs[i][j])] ELSE msgs
 DiscardIn(ms, i, j) == ms' = IF ms[i][j] /= << >> THEN [ms EXCEPT ![i][j] = Tail(ms[i][j])] ELSE ms
 \* Combination of Send and Discard - discard head of msgs[j][i] and add m into msgs.
-Reply(i, j, m) == msgs' = [msgs EXCEPT ![j][i] = Tail(msgs[j][i]),
-                                       ![i][j] = Append(msgs[i][j], m)]
+Reply(i, j, m) == msgs' = [msgs EXCEPT ![j][i] = Tail(msgs[j][i]), ![i][j] = Append(msgs[i][j], m)]
 ReplyIn(ms, i, j, m) == ms' = [ms EXCEPT ![j][i] = Tail(ms[j][i]),
                                        ![i][j] = Append(ms[i][j], m)]
 \* Shuffle input buffer.
@@ -504,16 +503,20 @@ UpdateLeader(i) ==
         /\ UNCHANGED <<acceptedEpoch, currentEpoch, history, lastCommitted, followerVars, verifyVars, msgVars>>
         /\ UpdateRecorder(<<"UpdateLeader", i>>)
 
-FollowLeader(i) ==
+
+FollowLeaderMyself(i) ==
         /\ IsLooking(i)
         /\ leaderOracle /= NullPoint
-        /\ \/ /\ leaderOracle = i
-              /\ SwitchToLeader(i)
-           \/ /\ leaderOracle /= i
-              /\ SwitchToFollower(i)
-              /\ UNCHANGED leaderVars
-        /\ UNCHANGED <<acceptedEpoch, currentEpoch, history, lastCommitted, electionVars, followerVars, verifyVars, msgVars>>
-        /\ UpdateRecorder(<<"FollowLeader", i>>)
+        /\ leaderOracle = i
+        /\ SwitchToLeader(i)
+        /\ UNCHANGED <<recorder, acceptedEpoch, currentEpoch, history, lastCommitted, electionVars, followerVars, verifyVars, msgVars>>
+
+FollowLeaderOther(i) ==
+        /\ IsLooking(i)
+        /\ leaderOracle /= NullPoint
+        /\ leaderOracle /= i
+        /\ SwitchToFollower(i)
+        /\ UNCHANGED <<recorder, leaderVars, acceptedEpoch, currentEpoch, history, lastCommitted, electionVars, followerVars, verifyVars, msgVars>>
 
 -----------------------------------------------------------------------------
 (* Actions of situation error. Situation error in protocol spec is different
@@ -525,21 +528,32 @@ FollowLeader(i) ==
    this is equivalent to executing a crash.
 *)
 
-\* Timeout between leader and follower.   
-Timeout(i, j) ==
+\* Timeout between leader and follower.  
+TimeoutWithQuorum(i, j) ==
         \* /\ CheckTimeout \* test restrictions of timeout
-        /\ IsLeader(i)   /\ IsMyLearner(i, j)
-        /\ IsFollower(j) /\ IsMyLeader(j, i)
-        /\ LET newLearners == learners[i] \ {j}
-           IN \/ /\ IsQuorum(newLearners)  \* just remove this learner
-                 /\ RemoveLearner(i, j)
-                 /\ FollowerShutdown(j)
-                 /\ Clean(i, j)
-              \/ /\ ~IsQuorum(newLearners) \* leader switches to looking
-                 /\ LeaderShutdown(i)
-                 /\ UNCHANGED <<cepochRecv, ackeRecv, ackldRecv>>
-        /\ UNCHANGED <<acceptedEpoch, currentEpoch, history, lastCommitted, sendCounter, electionVars, verifyVars>>
-        /\ UpdateRecorder(<<"Timeout", i, j>>)
+        /\ IsLeader(i)   
+        /\ IsMyLearner(i, j)
+        /\ IsFollower(j) 
+        /\ IsMyLeader(j, i)
+        /\ (learners[i] \ {j}) \in Quorums  \* just remove this learner
+        /\ RemoveLearner(i, j)
+        /\ FollowerShutdown(j)
+        /\ Clean(i, j)
+        /\ UNCHANGED <<recorder, acceptedEpoch, currentEpoch, history, lastCommitted, sendCounter, electionVars, verifyVars>>
+
+TimeoutNoQuorum(i, j) ==
+        \* /\ CheckTimeout \* test restrictions of timeout
+        /\ IsLeader(i)   
+        /\ IsMyLearner(i, j)
+        /\ IsFollower(j) 
+        /\ IsMyLeader(j, i)
+        /\ (learners[i] \ {j}) \notin Quorums \* leader switches to looking
+        /\ state' = [s \in Server |-> IF s \in learners[i] THEN LOOKING ELSE state[s] ]
+        /\ zabState' = [s \in Server |-> IF s \in learners[i] THEN ELECTION ELSE zabState[s] ]
+        /\ connectInfo' = [s \in Server |-> IF s \in learners[i] THEN NullPoint ELSE connectInfo[s] ]
+        /\ CleanInputBuffer(learners[i])
+        /\ learners'   = [learners   EXCEPT ![i] = {}]
+        /\ UNCHANGED <<cepochRecv, ackeRecv, ackldRecv, recorder, acceptedEpoch, currentEpoch, history, lastCommitted, sendCounter, electionVars, verifyVars>>
 
 Restart(i) ==
         \* /\ CheckRestart \* test restrictions of restart
@@ -798,27 +812,33 @@ FollowerProcessNEWLEADER(i, j) ==
                epochOk == acceptedEpoch[i] = msg.mepoch
                stateOk == zabState[i] = SYNCHRONIZATION
            IN /\ infoOk
-              /\ \/ \* 1. f.p not equals e', starts a new iteration.
-                    /\ ~epochOk
-                    /\ FollowerShutdown(i)
-                    /\ LET leader == connectInfo[i]
-                       IN /\ Clean(i, leader)
-                          /\ RemoveLearner(leader, i)
-                    /\ UNCHANGED <<violatedInvariants, currentEpoch, history>>
-                 \/ \* 2. f.p equals e'.
-                    /\ epochOk
-                    /\ stateOk
-                    /\ UNCHANGED violatedInvariants
-                    /\ currentEpoch' = [currentEpoch EXCEPT ![i] = acceptedEpoch[i]]
-                    /\ history' = [history EXCEPT ![i] = msg.mhistory] \* no need to care ackSid
-                    /\ LET m == [ mtype |-> ACKLD,
-                                  mzxid |-> LastZxidOfHistory(history'[i]) ]
-                       IN Reply(i, j, m)
-                    /\ UNCHANGED <<followerVars, state, zabState, learners, cepochRecv,
-                                    ackeRecv, ackldRecv, msgsCEPOCH>>
-        /\ UNCHANGED <<acceptedEpoch, lastCommitted, sendCounter, electionVars, 
-                proposalMsgsLog, epochLeader, msgsCEPOCH>>
-        /\ UpdateRecorder(<<"FollowerProcessNEWLEADER", i, j>>)
+              \* 2. f.p equals e'.
+              /\ epochOk
+              /\ stateOk
+              /\ currentEpoch' = [currentEpoch EXCEPT ![i] = acceptedEpoch[i]]
+              /\ history' = [history EXCEPT ![i] = msg.mhistory] \* no need to care ackSid
+              /\ LET m == [ mtype |-> ACKLD,
+                              mzxid |-> LastZxidOfHistory(history'[i]) ] IN
+                        msgs' = [msgs EXCEPT ![j][i] = Tail(msgs[j][i]), ![i][j] = Append(msgs[i][j], m)]
+              /\ UNCHANGED <<recorder, followerVars, state, zabState, learners, cepochRecv, ackeRecv, ackldRecv, acceptedEpoch, lastCommitted, sendCounter, electionVars, proposalMsgsLog, epochLeader, msgsCEPOCH, violatedInvariants>>
+
+FollowerProcessNEWLEADERNewIteration(i, j) ==
+        /\ IsFollower(i)
+        /\ PendingNEWLEADER(i, j)
+        /\ LET msg == msgs[j][i][1]
+               infoOk == IsMyLeader(i, j)
+               epochOk == acceptedEpoch[i] = msg.mepoch
+               stateOk == zabState[i] = SYNCHRONIZATION
+           IN /\ infoOk
+              \* 1. f.p not equals e', starts a new iteration.
+              /\ ~epochOk
+              /\ state'    = [state      EXCEPT ![i] = LOOKING]
+              /\ zabState' = [zabState   EXCEPT ![i] = ELECTION]
+              /\ connectInfo' = [connectInfo EXCEPT ![i] = NullPoint]
+              /\ LET leader == connectInfo[i]
+                  IN /\ Clean(i, leader)
+                     /\ RemoveLearner(leader, i)
+              /\ UNCHANGED <<recorder, currentEpoch, history, acceptedEpoch, lastCommitted, sendCounter, electionVars, proposalMsgsLog, epochLeader, msgsCEPOCH, violatedInvariants>>
 
 AckldRecvQuorumFormed(i) == LET sid_ackldRecv == {a.sid: a \in ackldRecv[i]} IN IsQuorum(sid_ackldRecv)
 AckldRecvBecomeQuorum(i) == LET sid_ackldRecv == {a.sid: a \in ackldRecv'[i]} IN IsQuorum(sid_ackldRecv)
@@ -1149,10 +1169,13 @@ FilterNonexistentMessage(i) ==
 
 (* Election *)
 UpdateLeaderAction == TRUE /\ \E i \in Server:    UpdateLeader(i)
-FollowLeaderAction == TRUE /\ \E i \in Server:    FollowLeader(i)
+FollowLeaderMyselfAction == TRUE /\ \E i \in Server:    FollowLeaderMyself(i)
+FollowLeaderOtherAction == TRUE /\ \E i \in Server:    FollowLeaderOther(i)
 
 (* Abnormal situations like failure, network disconnection *)
-TimeoutAction == TRUE /\ \E i, j \in Server: Timeout(i, j)
+TimeoutWithQuorumAction == TRUE /\ \E i, j \in Server : TimeoutWithQuorum(i, j)
+TimeoutNoQuorumAction == TRUE /\ \E i, j \in Server : TimeoutNoQuorum(i, j)
+
 RestartAction == TRUE /\ \E i \in Server:    Restart(i)
 
 (* Zab module - Discovery part *)
@@ -1163,6 +1186,7 @@ FollowerProcessNEWEPOCHAction == TRUE /\ \E i, j \in Server: FollowerProcessNEWE
 (* Zab module - Synchronization *)
 LeaderProcessACKEPOCHAction == TRUE /\ \E i, j \in Server: LeaderProcessACKEPOCH(i, j)
 FollowerProcessNEWLEADERAction == TRUE /\ \E i, j \in Server: FollowerProcessNEWLEADER(i, j)
+FollowerProcessNEWLEADERNewIterationAction == TRUE /\ \E i, j \in Server: FollowerProcessNEWLEADERNewIteration(i, j)
 LeaderProcessACKLDAction == TRUE /\ \E i, j \in Server: LeaderProcessACKLD(i, j)
 FollowerProcessCOMMITLDAction == TRUE /\ \E i, j \in Server: FollowerProcessCOMMITLD(i, j)
 
@@ -1179,14 +1203,17 @@ FilterNonexistentMessageAction == TRUE /\ \E i \in Server:    FilterNonexistentM
 \* Complete transition relation.
 Next == 
     \/ UpdateLeaderAction
-    \/ FollowLeaderAction
-    \/ TimeoutAction
+    \/ FollowLeaderMyselfAction
+    \/ FollowLeaderOtherAction
+    \/ TimeoutWithQuorumAction
+    \/ TimeoutNoQuorumAction
     \/ RestartAction
     \/ ConnectAndFollowerSendCEPOCHAction
     \/ LeaderProcessCEPOCHAction
     \/ FollowerProcessNEWEPOCHAction
     \/ LeaderProcessACKEPOCHAction
     \/ FollowerProcessNEWLEADERAction
+    \/ FollowerProcessNEWLEADERNewIterationAction
     \/ LeaderProcessACKLDAction
     \/ FollowerProcessCOMMITLDAction
     \/ LeaderProcessRequestAction
