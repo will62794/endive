@@ -1146,7 +1146,7 @@ LeaderProcessACK(i, j) ==
               /\ LET txn == history[i][index]
                            txnAfterAddAck == [ zxid   |-> txn.zxid,
                                                value  |-> txn.value,
-                                               ackSid |-> txn.ackSid \union {j} ,
+                                               ackSid |-> txn.ackSid \union {j} , \* record the new ack for this entry.
                                                epoch  |-> txn.epoch ]   
                        IN
                        /\ history' = [history EXCEPT ![i][index] = txnAfterAddAck ]
@@ -1446,6 +1446,12 @@ H_CommittedEntryExistsInACKEPOCHQuorumHistory ==
                         /\ k = idx
                         /\ TxnEqual(history[s][idx], initHistory[k]))
 
+\* If an ACK message exists from S for a given zxid, then that zxid must be present in the sender's history.
+H_ACKMsgImpliesZxidInLog == 
+    \A i,j \in Server : 
+        PendingACK(i,j) => 
+            \E idx \in DOMAIN history[j] : 
+                history[j][idx].zxid = msgs[j][i][1].mzxid
 
 ----------------------------------------------------------
 
