@@ -712,9 +712,19 @@ LastZxidOfHistory(his) == IF Len(his) = 0 THEN <<0, 0>>
                           ELSE his[Len(his)].zxid
 
 \* TRUE: f1.a > f2.a or (f1.a = fa.a and f1.zxid >= f2.zxid)
-MoreResentOrEqual(ss1, ss2) == \/ ss1.currentEpoch > ss2.currentEpoch
+MoreRecentOrEqual(ss1, ss2) == \/ ss1.currentEpoch > ss2.currentEpoch
                                \/ /\ ss1.currentEpoch = ss2.currentEpoch
                                   /\ ~ZxidCompare(ss2.lastZxid, ss1.lastZxid)
+
+DetermineInitialHistoryFromArg(ackeRecvArg, i) ==
+        LET set == ackeRecvArg[i]
+            ss_set == { [ sid          |-> a.sid,
+                          currentEpoch |-> a.peerLastEpoch,
+                          lastZxid     |-> LastZxidOfHistory(a.peerHistory) ] : a \in ackeRecvArg[i] }
+            \* Choose server with most recent history.
+            selected == CHOOSE ss \in ss_set: \A ss1 \in (ss_set \ {ss}): MoreRecentOrEqual(ss, ss1)
+            info == CHOOSE f \in ackeRecvArg[i] : f.sid = selected.sid
+        IN info.peerHistory
 
 \* Determine initial history Ie' in this round from a quorum of ACKEPOCH.
 DetermineInitialHistory(i) ==
@@ -724,7 +734,7 @@ DetermineInitialHistory(i) ==
                           lastZxid     |-> LastZxidOfHistory(a.peerHistory) ]
                         : a \in set }
             selected == CHOOSE ss \in ss_set: 
-                            \A ss1 \in (ss_set \ {ss}): MoreResentOrEqual(ss, ss1)
+                            \A ss1 \in (ss_set \ {ss}): MoreRecentOrEqual(ss, ss1)
             info == CHOOSE f \in set: f.sid = selected.sid
         IN info.peerHistory
 
@@ -781,8 +791,7 @@ LeaderProcessACKEPOCHNoNewLeaderHasQuorum(i, j) ==
               /\ \* Update f.a
                     LET newLeaderEpoch == acceptedEpoch[i] IN 
                     /\ currentEpoch' = [currentEpoch EXCEPT ![i] = newLeaderEpoch]
-                    /\ epochLeader' = [epochLeader EXCEPT ![newLeaderEpoch] 
-                                    = @ \union {i} ] \* for checking invariants
+                    /\ epochLeader' = [epochLeader EXCEPT ![newLeaderEpoch] = @ \union {i} ] \* for checking invariants
               /\ \* Determine initial history Ie'
                  LET initialHistory == DetermineInitialHistory(i) IN 
                  history' = [history EXCEPT ![i] = InitAcksid(i, initialHistory) ]
@@ -1384,18 +1393,28 @@ H_COMMITSentByNodeImpliesZxidInLog ==
                 /\ history[j][idx].zxid = msgs[j][i][1].mzxid  
                 /\ lastCommitted[j].index >= idx
 
-\* If a history entry is covered by some lastCommitted, then it must be present in the initial history
-\* determined by a quorum of ACKEPOCH messages.
-\* TODO: Will need to state this correctly.
+
+\* If a history entry is covered by some lastCommitted, then it must be present in 
+\* the initial history as determined by a received quorum of ACKEPOCH messages.
 H_CommittedEntryExistsInACKEPOCHQuorumHistory ==
-    \A i,j \in Server : 
-    \A idx \in DOMAIN history[i] : 
-        /\ lastCommitted[i].index >= idx 
-        /\ AckeRecvBecomeQuorum(j) =>
-            LET initHistory == DetermineInitialHistory(j) IN
-            \E k \in DOMAIN initHistory : 
-                /\ k = idx
-                /\ TxnEqual(history[i][idx], initHistory[k])
+    \A s \in Server : \A idx \in DOMAIN history[s] : 
+        \* Entry is covered by lastCommitted on s.
+        (idx <= lastCommitted[s].index) => 
+        (\A i,j \in Server :
+            \* Server i is a leader who is about to receive an ACK-E quorum and compute the new initial history.
+            \* This initial history must contain the committed entry. 
+            LET msg == msgs[j][i][1]
+                ackeRecvUpdated == [ackeRecv EXCEPT ![i] = UpdateAckeRecv(@, j, msg.mepoch, msg.mhistory) ] IN
+                (
+                    /\ zabState[i] = DISCOVERY
+                    /\ ~AckeRecvQuorumFormed(j)
+                    /\ PendingACKEPOCH(i, j)
+                    /\ IsQuorum({a.sid: a \in ackeRecvUpdated[i]})
+                ) => 
+                    LET initHistory == DetermineInitialHistoryFromArg(ackeRecvUpdated, i) IN
+                    \E k \in DOMAIN initHistory : 
+                        /\ k = idx
+                        /\ TxnEqual(history[s][idx], initHistory[k]))
 
 
 ----------------------------------------------------------
