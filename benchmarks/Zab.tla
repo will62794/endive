@@ -172,6 +172,8 @@ MsgType ==
 
 MaxMsgChanLen == 1
 
+CEpochRecvType == [sid: Server, connected: BOOLEAN, epoch: Epoch]
+
 TypeOKRandom == 
     /\ state \in [Server -> {LOOKING, FOLLOWING, LEADING}]
     /\ zabState \in [Server -> {ELECTION, DISCOVERY, SYNCHRONIZATION, BROADCAST}]
@@ -180,13 +182,13 @@ TypeOKRandom ==
     /\ history \in [Server -> HistTypeBounded]
     /\ lastCommitted \in [Server -> [index: Nat, zxid: ZxidType]]
     /\ learners \in [Server -> SUBSET Server]
-    /\ cepochRecv \in [Server -> SUBSET [sid: Server, connected: BOOLEAN, epoch: Epoch]]
+    /\ cepochRecv \in [Server -> RandomSetOfSubsets(3, 3, CEpochRecvType)]
     /\ ackeRecv \in [Server -> AckeRecvTypeBounded]
     /\ ackldRecv \in [Server -> SUBSET [sid: Server, connected: BOOLEAN]]
     /\ sendCounter \in [Server -> Nat]
     /\ connectInfo \in [Server -> Server]
     /\ leaderOracle \in Server
-    /\ msgs \in [Server -> [Server -> BoundedSeq(RandomSubset(10,MsgType), MaxMsgChanLen)]]
+    /\ msgs \in [Server -> [Server -> BoundedSeq(RandomSubset(5, MsgType), MaxMsgChanLen)]]
     /\ proposalMsgsLog    = {}
     /\ epochLeader        = [i \in 1..MaxEpoch |-> {} ]
     /\ violatedInvariants = {}
