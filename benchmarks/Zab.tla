@@ -784,19 +784,17 @@ LeaderProcessACKEPOCHNoNewLeaderHasQuorum(i, j) ==
                     /\ epochLeader' = [epochLeader EXCEPT ![newLeaderEpoch] 
                                     = @ \union {i} ] \* for checking invariants
               /\ \* Determine initial history Ie'
-                    LET initialHistory == DetermineInitialHistory(i) IN 
-                    history' = [history EXCEPT ![i] = InitAcksid(i, initialHistory) ]
-              /\ \* Update zabState
-                    zabState' = [zabState EXCEPT ![i] = SYNCHRONIZATION]
+                 LET initialHistory == DetermineInitialHistory(i) IN 
+                 history' = [history EXCEPT ![i] = InitAcksid(i, initialHistory) ]
+              /\ zabState' = [zabState EXCEPT ![i] = SYNCHRONIZATION]
               /\ \* Broadcast NEWLEADER with (e', Ie')
-                    LET toSend == history'[i] 
-                        m == [ mtype    |-> NEWLEADER,
+                 LET toSend == history'[i] 
+                     m == [ mtype    |-> NEWLEADER,
                             mepoch   |-> acceptedEpoch[i],
                             mhistory |-> toSend ]
                         \* set_forChecking == SetPacketsForChecking({ }, i, 
                                 \* acceptedEpoch[i], toSend, 1, Len(toSend))
-                    IN 
-                    /\ DiscardAndBroadcastNEWLEADER(i, j, m)
+                    IN DiscardAndBroadcastNEWLEADER(i, j, m)
                     \* /\ proposalMsgsLog' = proposalMsgsLog \union set_forChecking
         /\ UNCHANGED <<proposalMsgsLog,recorder, state, acceptedEpoch, lastCommitted, learners, cepochRecv, ackldRecv, sendCounter, followerVars, electionVars>>
 
@@ -1222,7 +1220,7 @@ Next ==
     \/ FollowLeaderOtherAction
     \/ TimeoutWithQuorumAction
     \/ TimeoutNoQuorumAction
-    \/ RestartAction
+    \* \/ RestartAction
     \/ ConnectAndFollowerSendCEPOCHAction
     \/ LeaderProcessCEPOCHAction
     \/ FollowerProcessNEWEPOCHAction
@@ -1385,6 +1383,20 @@ H_COMMITSentByNodeImpliesZxidInLog ==
             \E idx \in DOMAIN history[j] : 
                 /\ history[j][idx].zxid = msgs[j][i][1].mzxid  
                 /\ lastCommitted[j].index >= idx
+
+\* If a history entry is covered by some lastCommitted, then it must be present in the initial history
+\* determined by a quorum of ACKEPOCH messages.
+\* TODO: Will need to state this correctly.
+H_CommittedEntryExistsInACKEPOCHQuorumHistory ==
+    \A i,j \in Server : 
+    \A idx \in DOMAIN history[i] : 
+        /\ lastCommitted[i].index >= idx 
+        /\ AckeRecvBecomeQuorum(j) =>
+            LET initHistory == DetermineInitialHistory(j) IN
+            \E k \in DOMAIN initHistory : 
+                /\ k = idx
+                /\ TxnEqual(history[i][idx], initHistory[k])
+
 
 ----------------------------------------------------------
 
