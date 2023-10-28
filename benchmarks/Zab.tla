@@ -774,8 +774,7 @@ LeaderProcessACKEPOCHNoNewLeaderHasQuorum(i, j) ==
               /\ ~AckeRecvQuorumFormed(i)
               /\ zabState[i] = DISCOVERY
               /\ UNCHANGED violatedInvariants
-              /\ ackeRecv' = [ackeRecv EXCEPT ![i] = UpdateAckeRecv(@, j, 
-                                        msg.mepoch, msg.mhistory) ]
+              /\ ackeRecv' = [ackeRecv EXCEPT ![i] = UpdateAckeRecv(@, j,msg.mepoch, msg.mhistory) ]
               \* 2.1. ackeRecv becomes quorum, determine Ie'
               \* and broacasts NEWLEADER in Q. (l.1.2 + l.2.1)
               /\ AckeRecvBecomeQuorum(i)
@@ -794,12 +793,12 @@ LeaderProcessACKEPOCHNoNewLeaderHasQuorum(i, j) ==
                         m == [ mtype    |-> NEWLEADER,
                             mepoch   |-> acceptedEpoch[i],
                             mhistory |-> toSend ]
-                        set_forChecking == SetPacketsForChecking({ }, i, 
-                                acceptedEpoch[i], toSend, 1, Len(toSend))
+                        \* set_forChecking == SetPacketsForChecking({ }, i, 
+                                \* acceptedEpoch[i], toSend, 1, Len(toSend))
                     IN 
                     /\ DiscardAndBroadcastNEWLEADER(i, j, m)
-                    /\ proposalMsgsLog' = proposalMsgsLog \union set_forChecking
-        /\ UNCHANGED <<recorder, state, acceptedEpoch, lastCommitted, learners, cepochRecv, ackldRecv, sendCounter, followerVars, electionVars>>
+                    \* /\ proposalMsgsLog' = proposalMsgsLog \union set_forChecking
+        /\ UNCHANGED <<proposalMsgsLog,recorder, state, acceptedEpoch, lastCommitted, learners, cepochRecv, ackldRecv, sendCounter, followerVars, electionVars>>
 
 LeaderProcessACKEPOCHNoNewLeaderNoQuorum(i, j) ==
         /\ IsLeader(i)
