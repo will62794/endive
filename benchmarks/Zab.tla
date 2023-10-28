@@ -1093,6 +1093,39 @@ LastAckIndexFromFollower(i, j) ==
         LET set_index == {idx \in 1..Len(history[i]): j \in history[i][idx].ackSid }
         IN Maximum(set_index)
 
+
+(* Leader Keeps a count of acks for a particular proposal, and try to
+   commit the proposal. If committed, COMMIT of proposal will be broadcast. *)
+LeaderProcessACKAlreadyCommitted(i, j) ==
+        /\ IsLeader(i)
+        /\ PendingACK(i, j)
+        /\ LET msg == msgs[j][i][1]
+               infoOk == IsMyLearner(i, j)
+               index == ZxidToIndex(history[i], msg.mzxid)
+               exist == index >= 1 /\ index <= Len(history[i]) \* proposal exists in history
+               outstanding == lastCommitted[i].index < Len(history[i]) \* outstanding not null
+               hasCommitted == ~ZxidCompare(msg.mzxid, lastCommitted[i].zxid)
+               ackIndex == LastAckIndexFromFollower(i, j)
+               monotonicallyInc == \/ ackIndex = -1
+                                   \/ ackIndex + 1 = index
+           IN /\ infoOk
+              /\ exist
+              /\ monotonicallyInc
+              /\ LET txn == history[i][index]
+                     txnAfterAddAck == [ zxid   |-> txn.zxid,
+                                               value  |-> txn.value,
+                                               ackSid |-> txn.ackSid \union {j} ,
+                                               epoch  |-> txn.epoch ] IN
+                       /\ history' = [history EXCEPT ![i][index] = txnAfterAddAck ]
+                       /\ \* Note: outstanding is 0. 
+                            \* / proposal has already been committed.
+                            \/ ~outstanding
+                            \/ hasCommitted
+                       /\ Discard(j, i)
+                       /\ UNCHANGED <<violatedInvariants, lastCommitted>>
+        /\ UNCHANGED <<recorder, state, zabState, acceptedEpoch, currentEpoch, leaderVars, followerVars, electionVars, proposalMsgsLog, epochLeader>>
+        /\ UpdateRecorder(<<"LeaderProcessACK", i, j>>)
+
 (* Leader Keeps a count of acks for a particular proposal, and try to
    commit the proposal. If committed, COMMIT of proposal will be broadcast. *)
 LeaderProcessACK(i, j) ==
@@ -1108,26 +1141,19 @@ LeaderProcessACK(i, j) ==
                monotonicallyInc == \/ ackIndex = -1
                                    \/ ackIndex + 1 = index
            IN /\ infoOk
-              /\ \/ /\ exist
-                    /\ monotonicallyInc
-                    /\ LET txn == history[i][index]
+              /\ exist
+              /\ monotonicallyInc
+              /\ LET txn == history[i][index]
                            txnAfterAddAck == [ zxid   |-> txn.zxid,
                                                value  |-> txn.value,
                                                ackSid |-> txn.ackSid \union {j} ,
                                                epoch  |-> txn.epoch ]   
                        IN
                        /\ history' = [history EXCEPT ![i][index] = txnAfterAddAck ]
-                       /\ \/ /\ \* Note: outstanding is 0. 
-                                \* / proposal has already been committed.
-                                \/ ~outstanding
-                                \/ hasCommitted
-                             /\ Discard(j, i)
-                             /\ UNCHANGED <<violatedInvariants, lastCommitted>>
-                          \/ /\ outstanding
-                             /\ ~hasCommitted
-                             /\ LeaderTryToCommit(i, index, msg.mzxid, txnAfterAddAck, j)
-        /\ UNCHANGED <<state, zabState, acceptedEpoch, currentEpoch, leaderVars, followerVars, electionVars, proposalMsgsLog, epochLeader>>
-        /\ UpdateRecorder(<<"LeaderProcessACK", i, j>>)
+                       /\ /\ outstanding
+                          /\ ~hasCommitted
+                          /\ LeaderTryToCommit(i, index, msg.mzxid, txnAfterAddAck, j)
+        /\ UNCHANGED <<recorder, state, zabState, acceptedEpoch, currentEpoch, leaderVars, followerVars, electionVars, proposalMsgsLog, epochLeader>>
 
 (* Follower processes COMMIT. *)
 FollowerProcessCOMMIT(i, j) ==
@@ -1219,6 +1245,7 @@ LeaderProcessRequestAction == TRUE /\ \E i \in Server:    LeaderProcessRequest(i
 LeaderBroadcastPROPOSEAction == TRUE /\ \E i \in Server:    LeaderBroadcastPROPOSE(i)
 FollowerProcessPROPOSEAction == TRUE /\ \E i, j \in Server: FollowerProcessPROPOSE(i, j)
 LeaderProcessACKAction == TRUE /\ \E i, j \in Server: LeaderProcessACK(i, j)
+LeaderProcessACKAlreadyCommittedAction == TRUE /\ \E i, j \in Server: LeaderProcessACKAlreadyCommitted(i, j)
 FollowerProcessCOMMITAction == TRUE /\ \E i, j \in Server: FollowerProcessCOMMIT(i, j)
 
 (* An action used to judge whether there are redundant messages in network *)
@@ -1246,6 +1273,7 @@ Next ==
     \/ LeaderBroadcastPROPOSEAction
     \/ FollowerProcessPROPOSEAction
     \/ LeaderProcessACKAction
+    \/ LeaderProcessACKAlreadyCommittedAction
     \/ FollowerProcessCOMMITAction
     \/ FilterNonexistentMessageAction
 
