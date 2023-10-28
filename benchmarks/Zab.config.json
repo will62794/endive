@@ -3,7 +3,7 @@
     "preds_alt" : [],
     "safety"  :  "H_PrefixConsistency",
     "constants"  :  {
-        "Server": ["{s1,s2}"],
+        "Server": ["{s1,s2}", "{s1,s2,s3}"],
         "MaxEpoch": ["2"],
         "Nat": ["{0,1,2}"],
         "MaxHistLen": ["1"],
@@ -38,7 +38,8 @@
         "ConnectAndFollowerSendCEPOCHAction",
         "LeaderProcessCEPOCHAction",
         "FollowerProcessNEWEPOCHAction",
-        "LeaderProcessACKEPOCHAction",
+        "LeaderProcessACKEPOCHNoNewLeaderHasQuorumAction",
+        "LeaderProcessACKEPOCHNoNewLeaderNoQuorumAction",
         "FollowerProcessNEWLEADERAction",
         "FollowerProcessNEWLEADERNewIterationAction",
         "LeaderProcessACKLDAction",
