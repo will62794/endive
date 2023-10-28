@@ -1219,7 +1219,7 @@ Next ==
     \/ FollowerProcessNEWLEADERAction
     \/ FollowerProcessNEWLEADERNewIterationAction
     \/ LeaderProcessACKLDAction
-    \/ FollowerProcessCOMMITLDAction
+    \* \/ FollowerProcessCOMMITLDAction \* disable LD commits for now.
     \/ LeaderProcessRequestAction
     \/ LeaderBroadcastPROPOSEAction
     \/ FollowerProcessPROPOSEAction
