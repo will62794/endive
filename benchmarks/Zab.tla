@@ -939,17 +939,17 @@ LeaderProcessACKLDHasBroadcastNoQuorum(i, j) ==
 LeaderProcessACKLDHasntBroadcast(i, j) ==
         /\ IsLeader(i)
         /\ PendingACKLD(i, j)
-        /\ LET msg == msgs[j][i][1]
-               infoOk == IsMyLearner(i, j)
-           IN /\ infoOk
+        /\ AckldRecvQuorumFormed(i)
+        /\ IsMyLearner(i, j)
+        /\ LET msg == msgs[j][i][1] IN
               \* 2. has broadcast COMMITLD
-              /\ AckldRecvQuorumFormed(i)
-              /\ zabState[i] = BROADCAST /\ UNCHANGED violatedInvariants
+              /\ zabState[i] = BROADCAST 
               /\ ackldRecv' = [ackldRecv EXCEPT ![i] = UpdateAckldRecv(@, j) ]
               /\ history' = [history EXCEPT ![i] = UpdateAcksid(@, j, msg.mzxid)]
-              /\ Reply(i, j, [ mtype |-> COMMITLD, mzxid |-> lastCommitted[i].zxid ])
-              /\ UNCHANGED <<zabState, lastCommitted>>
-        /\ UNCHANGED <<recorder, state, acceptedEpoch, currentEpoch, learners, cepochRecv, ackeRecv, sendCounter, followerVars, electionVars, proposalMsgsLog, epochLeader>>
+              /\ msgs' = [msgs EXCEPT 
+                            ![j][i] = Tail(msgs[j][i]), 
+                            ![i][j] = Append(msgs[i][j], [ mtype |-> COMMITLD, mzxid |-> lastCommitted[i].zxid ])]
+        /\ UNCHANGED <<zabState, lastCommitted, violatedInvariants, recorder, state, acceptedEpoch, currentEpoch, learners, cepochRecv, ackeRecv, sendCounter, followerVars, electionVars, proposalMsgsLog, epochLeader>>
 
 RECURSIVE ZxidToIndexHepler(_,_,_,_)
 ZxidToIndexHepler(his, zxid, cur, appeared) == 
