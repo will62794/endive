@@ -899,24 +899,21 @@ UpdateAcksid(his, target, endZxid) == UpdateAcksidHelper(his, target, endZxid)
 LeaderProcessACKLDHasBroadcastHasQuorum(i, j) ==
         /\ IsLeader(i)
         /\ PendingACKLD(i, j)
-        /\ LET msg == msgs[j][i][1]
-               infoOk == IsMyLearner(i, j)
-           IN /\ infoOk
+        /\ LET msg == msgs[j][i][1] IN
+              /\ IsMyLearner(i, j)
               \* 1. has not broadcast COMMITLD
               /\ ~AckldRecvQuorumFormed(i)
               /\ zabState[i] = SYNCHRONIZATION 
-              /\ UNCHANGED violatedInvariants
-              /\ ackldRecv' = [ackldRecv EXCEPT ![i] = UpdateAckldRecv(@, j) ]
-              /\ history' = [history EXCEPT ![i] = UpdateAcksid(@, j, msg.mzxid)]
+              /\ ackldRecv' = [ackldRecv EXCEPT ![i] = UpdateAckldRecv(ackldRecv[i], j) ]
+              /\ history' = [history EXCEPT ![i] = UpdateAcksid(history[i], j, msg.mzxid)]
               \* 1.1. ackldRecv becomes quorum,
               \* then broadcasts COMMITLD and turns to BROADCAST.
               /\ AckldRecvBecomeQuorum(i)
               /\ lastCommitted' = [lastCommitted EXCEPT 
                                     ![i] = [ index |-> Len(history[i]), zxid  |-> LastZxid(i) ] ]
               /\ zabState' = [zabState EXCEPT ![i] = BROADCAST]
-              /\ LET m == [ mtype |-> COMMITLD, mzxid |-> LastZxid(i) ]
-                IN DiscardAndBroadcastCOMMITLD(i, j, m)
-        /\ UNCHANGED <<recorder, state, acceptedEpoch, currentEpoch, learners, cepochRecv, ackeRecv, sendCounter, followerVars, electionVars, proposalMsgsLog, epochLeader>>
+              /\ LET m == [ mtype |-> COMMITLD, mzxid |-> LastZxid(i) ] IN DiscardAndBroadcastCOMMITLD(i, j, m)
+        /\ UNCHANGED <<violatedInvariants, recorder, state, acceptedEpoch, currentEpoch, learners, cepochRecv, ackeRecv, sendCounter, followerVars, electionVars, proposalMsgsLog, epochLeader>>
 
 LeaderProcessACKLDHasBroadcastNoQuorum(i, j) ==
         /\ IsLeader(i)
