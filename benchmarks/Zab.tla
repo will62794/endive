@@ -1455,7 +1455,6 @@ H_CommittedEntryExistsInACKEPOCHQuorumHistory ==
                 ackeRecvUpdated == [ackeRecv EXCEPT ![i] = UpdateAckeRecv(@, j, msg.mepoch, msg.mhistory) ] IN
                 (
                     /\ zabState[i] = DISCOVERY
-                    /\ ~AckeRecvQuorumFormed(j)
                     /\ PendingACKEPOCH(i, j)
                     /\ IsQuorum({a.sid: a \in ackeRecvUpdated[i]})
                 ) => 
