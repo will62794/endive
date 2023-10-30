@@ -830,18 +830,14 @@ LeaderProcessACKEPOCHNoNewLeaderNoQuorum(i, j) ==
 FollowerProcessNEWLEADER(i, j) ==
         /\ IsFollower(i)
         /\ PendingNEWLEADER(i, j)
-        /\ LET msg == msgs[j][i][1]
-               infoOk == IsMyLeader(i, j)
-               epochOk == acceptedEpoch[i] = msg.mepoch
-               stateOk == zabState[i] = SYNCHRONIZATION
-           IN /\ infoOk
+        /\ LET msg == msgs[j][i][1] IN
               \* 2. f.p equals e'.
-              /\ epochOk
-              /\ stateOk
+              /\ IsMyLeader(i, j)
+              /\ acceptedEpoch[i] = msg.mepoch
+              /\ zabState[i] = SYNCHRONIZATION
               /\ currentEpoch' = [currentEpoch EXCEPT ![i] = acceptedEpoch[i]]
               /\ history' = [history EXCEPT ![i] = msg.mhistory] \* no need to care ackSid
-              /\ LET m == [ mtype |-> ACKLD,
-                              mzxid |-> LastZxidOfHistory(history'[i]) ] IN
+              /\ LET m == [ mtype |-> ACKLD, mzxid |-> LastZxidOfHistory(history'[i]) ] IN
                         msgs' = [msgs EXCEPT ![j][i] = Tail(msgs[j][i]), ![i][j] = Append(msgs[i][j], m)]
               /\ UNCHANGED <<recorder, followerVars, state, zabState, learners, cepochRecv, ackeRecv, ackldRecv, acceptedEpoch, lastCommitted, sendCounter, electionVars, proposalMsgsLog, epochLeader, violatedInvariants>>
 
