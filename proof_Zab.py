@@ -17,7 +17,14 @@ committedEntryExistsInACKEPOCHQuorumHistory = make_node("H_CommittedEntryExistsI
 
 txnWithSameZxidEqual = make_node("H_TxnWithSameZxidEqual")
 
+nodeHistoryBoundByLastCommittedIndex = make_node("H_NodeHistoryBoundByLastCommittedIndex")
+
 COMMITLDSentByNodeImpliesZxidCommittedInLog = make_node("H_COMMITLDSentByNodeImpliesZxidCommittedInLog")
+COMMITLDSentByNodeImpliesZxidCommittedInLog.children = {
+    "LeaderProcessACKLDHasntBroadcastAction" : [
+        nodeHistoryBoundByLastCommittedIndex
+    ]
+}
 
 COMMITSentByNodeImpliesZxidInLog = make_node("H_COMMITSentByNodeImpliesZxidInLog")
 

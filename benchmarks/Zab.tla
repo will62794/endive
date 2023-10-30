@@ -1510,6 +1510,10 @@ H_ACKMsgImpliesZxidInLog ==
             \E idx \in DOMAIN history[j] : 
                 history[j][idx].zxid = msgs[j][i][1].mzxid
 
+\* A node's lastCommitted index must always be <= its history length.
+H_NodeHistoryBoundByLastCommittedIndex == 
+    \A s \in Server : lastCommitted[s].index <= Len(history[s])
+
 ----------------------------------------------------------
 
 \* Model checking stuff.
