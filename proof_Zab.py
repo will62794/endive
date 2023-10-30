@@ -15,6 +15,10 @@ aCKMsgImpliesZxidInLog = make_node("H_ACKMsgImpliesZxidInLog")
 
 committedEntryExistsInACKEPOCHQuorumHistory = make_node("H_CommittedEntryExistsInACKEPOCHQuorumHistory")
 
+txnWithSameZxidEqual = make_node("H_TxnWithSameZxidEqual")
+
+COMMITLDSentByNodeImpliesZxidCommittedInLog = make_node("H_COMMITLDSentByNodeImpliesZxidCommittedInLog")
+
 COMMITSentByNodeImpliesZxidInLog = make_node("H_COMMITSentByNodeImpliesZxidInLog")
 
 NEWLEADERMsgIsPrefixOfSenderLeader = make_node("H_NEWLEADERMsgIsPrefixOfSenderLeader")
@@ -32,6 +36,10 @@ safety.children = {
     ],
     "FollowerProcessCOMMITAction": [
         COMMITSentByNodeImpliesZxidInLog
+    ],
+    "FollowerProcessCOMMITLDAction": [
+        COMMITLDSentByNodeImpliesZxidCommittedInLog,
+        txnWithSameZxidEqual
     ],
     "LeaderProcessACKEPOCHNoNewLeaderHasQuorumAction": [
         committedEntryExistsInACKEPOCHQuorumHistory

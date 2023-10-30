@@ -1423,6 +1423,24 @@ H_COMMITSentByNodeImpliesZxidInLog ==
                 /\ history[j][idx].zxid = msgs[j][i][1].mzxid  
                 /\ lastCommitted[j].index >= idx
 
+\* Any two transactions with the same zxid must be equal.
+H_TxnWithSameZxidEqual == 
+    \A i,j \in Server : 
+        \A idxi \in (DOMAIN history[i]) :
+        \A idxj \in (DOMAIN history[j]) : 
+            ZxidEqual(history[i][idxi].zxid, history[j][idxj].zxid) =>
+                TxnEqual(history[i][idxi], history[j][idxj])
+
+\* If a COMMITLD message has been sent by a node, then the zxid in this message must be committed 
+\* in the sender's history.
+H_COMMITLDSentByNodeImpliesZxidCommittedInLog == 
+    \A i,j \in Server : 
+        (/\ PendingCOMMITLD(i,j)
+         /\ ~ZxidEqual(msgs[j][i][1].mzxid, <<0,0>>)) => 
+            \E idx \in DOMAIN history[j] : 
+                /\ history[j][idx].zxid = msgs[j][i][1].mzxid  
+                /\ lastCommitted[j].index >= idx
+
 
 \* If a history entry is covered by some lastCommitted, then it must be present in 
 \* the initial history as determined by a received quorum of ACKEPOCH messages.
