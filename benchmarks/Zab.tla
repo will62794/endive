@@ -893,6 +893,24 @@ UpdateAcksidHelper(txns, target, endZxid) ==
 \* Atomically add ackSid of one learner according to zxid in ACKLD.
 UpdateAcksid(his, target, endZxid) == UpdateAcksidHelper(his, target, endZxid)
 
+UpdateAcksidExpr(his, target, endZxid) == 
+    LET zxidIndicesLessThanEnd == {i \in DOMAIN his : ~ZxidCompare(his[i].zxid, endZxid)}
+        firstZxidIndex == IF zxidIndicesLessThanEnd # {} 
+                            THEN Maximum(zxidIndicesLessThanEnd)
+                            ELSE 100 IN
+    [idx \in DOMAIN his |-> 
+        IF firstZxidIndex >= 0 /\ idx <= firstZxidIndex 
+            THEN [his[idx] EXCEPT !.ackSid = his[idx].ackSid \cup {target}]
+            ELSE his[idx]
+    ]
+
+\* TODO: Get this working properly.
+UpdateAcksAreEquiv == \A s,t \in Server : \A zxid \in (1..MaxEpoch) \X (1..MaxEpoch) : 
+    /\ PrintT(zxid)
+    /\ PrintT(t)
+    /\ PrintT(UpdateAcksid(history[s], t, zxid))
+    /\ PrintT(UpdateAcksidExpr(history[s], t, zxid))
+    /\ UpdateAcksid(history[s], t, zxid) = UpdateAcksidExpr(history[s], t, zxid) 
 
 (* Leader waits for receiving ACKLD from a quorum including itself,
    and broadcasts COMMITLD and turns to BROADCAST. *)
@@ -946,6 +964,7 @@ LeaderProcessACKLDHasntBroadcast(i, j) ==
               /\ zabState[i] = BROADCAST 
               /\ ackldRecv' = [ackldRecv EXCEPT ![i] = UpdateAckldRecv(@, j) ]
               /\ history' = [history EXCEPT ![i] = UpdateAcksid(@, j, msg.mzxid)]
+            \*   /\ history' = [history EXCEPT ![i] = UpdateAcksidExpr(@, j, msg.mzxid)] \* TODO: Eventually switch to this.
               /\ msgs' = [msgs EXCEPT 
                             ![j][i] = Tail(msgs[j][i]), 
                             ![i][j] = Append(msgs[i][j], [ mtype |-> COMMITLD, mzxid |-> lastCommitted[i].zxid ])]
