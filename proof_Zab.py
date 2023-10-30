@@ -11,7 +11,14 @@ def make_node(expr):
 lemmaTRUE = StructuredProofNode("LemmaTrue", "TRUE")
 lemmaTRUEShim = StructuredProofNode("LemmaTrueShim", "1=1")
 
+NEWLEADERMsgIsPrefixOfSenderLeader = make_node("H_NEWLEADERMsgIsPrefixOfSenderLeader")
+
 aCKMsgImpliesZxidInLog = make_node("H_ACKMsgImpliesZxidInLog")
+aCKMsgImpliesZxidInLog.children = {
+    "FollowerProcessNEWLEADERAction": [
+        NEWLEADERMsgIsPrefixOfSenderLeader
+    ]
+}
 
 committedEntryExistsInACKEPOCHQuorumHistory = make_node("H_CommittedEntryExistsInACKEPOCHQuorumHistory")
 
@@ -28,7 +35,6 @@ COMMITLDSentByNodeImpliesZxidCommittedInLog.children = {
 
 COMMITSentByNodeImpliesZxidInLog = make_node("H_COMMITSentByNodeImpliesZxidInLog")
 
-NEWLEADERMsgIsPrefixOfSenderLeader = make_node("H_NEWLEADERMsgIsPrefixOfSenderLeader")
 safety = make_node("H_PrefixConsistency")
 
 NEWLEADERMsgIsPrefixOfSenderLeader.children = {
