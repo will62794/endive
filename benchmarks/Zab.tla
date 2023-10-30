@@ -893,9 +893,32 @@ UpdateAcksidHelper(txns, target, endZxid) ==
 \* Atomically add ackSid of one learner according to zxid in ACKLD.
 UpdateAcksid(his, target, endZxid) == UpdateAcksidHelper(his, target, endZxid)
 
+
 (* Leader waits for receiving ACKLD from a quorum including itself,
    and broadcasts COMMITLD and turns to BROADCAST. *)
-LeaderProcessACKLD(i, j) ==
+LeaderProcessACKLDHasBroadcastHasQuorum(i, j) ==
+        /\ IsLeader(i)
+        /\ PendingACKLD(i, j)
+        /\ LET msg == msgs[j][i][1]
+               infoOk == IsMyLearner(i, j)
+           IN /\ infoOk
+              \* 1. has not broadcast COMMITLD
+              /\ ~AckldRecvQuorumFormed(i)
+              /\ zabState[i] = SYNCHRONIZATION 
+              /\ UNCHANGED violatedInvariants
+              /\ ackldRecv' = [ackldRecv EXCEPT ![i] = UpdateAckldRecv(@, j) ]
+              /\ history' = [history EXCEPT ![i] = UpdateAcksid(@, j, msg.mzxid)]
+              \* 1.1. ackldRecv becomes quorum,
+              \* then broadcasts COMMITLD and turns to BROADCAST.
+              /\ AckldRecvBecomeQuorum(i)
+              /\ lastCommitted' = [lastCommitted EXCEPT 
+                                    ![i] = [ index |-> Len(history[i]), zxid  |-> LastZxid(i) ] ]
+              /\ zabState' = [zabState EXCEPT ![i] = BROADCAST]
+              /\ LET m == [ mtype |-> COMMITLD, mzxid |-> LastZxid(i) ]
+                IN DiscardAndBroadcastCOMMITLD(i, j, m)
+        /\ UNCHANGED <<recorder, state, acceptedEpoch, currentEpoch, learners, cepochRecv, ackeRecv, sendCounter, followerVars, electionVars, proposalMsgsLog, epochLeader>>
+
+LeaderProcessACKLDHasBroadcastNoQuorum(i, j) ==
         /\ IsLeader(i)
         /\ PendingACKLD(i, j)
         /\ LET msg == msgs[j][i][1]
@@ -907,32 +930,29 @@ LeaderProcessACKLD(i, j) ==
                           /\ UNCHANGED violatedInvariants
                     /\ ackldRecv' = [ackldRecv EXCEPT ![i] = UpdateAckldRecv(@, j) ]
                     /\ history' = [history EXCEPT ![i] = UpdateAcksid(@, j, msg.mzxid)]
-                    /\ \/ \* 1.1. ackldRecv becomes quorum,
-                          \* then broadcasts COMMITLD and turns to BROADCAST.
-                          /\ AckldRecvBecomeQuorum(i)
-                          /\ lastCommitted' = [lastCommitted EXCEPT 
-                                                    ![i] = [ index |-> Len(history[i]),
-                                                             zxid  |-> LastZxid(i) ] ]
-                          /\ zabState' = [zabState EXCEPT ![i] = BROADCAST]
-                          /\ LET m == [ mtype |-> COMMITLD,
-                                        mzxid |-> LastZxid(i) ]
-                             IN DiscardAndBroadcastCOMMITLD(i, j, m)
-                       \/ \* 1.2. ackldRecv still not quorum.
-                          /\ ~AckldRecvBecomeQuorum(i)
-                          /\ Discard(j, i)
-                          /\ UNCHANGED <<zabState, lastCommitted>>
-                 \/ \* 2. has broadcast COMMITLD
-                    /\ AckldRecvQuorumFormed(i)
-                    /\ \/ /\ zabState[i] = BROADCAST
-                          /\ UNCHANGED violatedInvariants
-                    /\ ackldRecv' = [ackldRecv EXCEPT ![i] = UpdateAckldRecv(@, j) ]
-                    /\ history' = [history EXCEPT ![i] = UpdateAcksid(@, j, msg.mzxid)]
-                    /\ Reply(i, j, [ mtype |-> COMMITLD,
-                                     mzxid |-> lastCommitted[i].zxid ])
+                    \* 1.2. ackldRecv still not quorum.
+                    /\ ~AckldRecvBecomeQuorum(i)
+                    /\ Discard(j, i)
                     /\ UNCHANGED <<zabState, lastCommitted>>
-        /\ UNCHANGED <<state, acceptedEpoch, currentEpoch, learners, cepochRecv, ackeRecv, 
-                    sendCounter, followerVars, electionVars, proposalMsgsLog, epochLeader>>
-        /\ UpdateRecorder(<<"LeaderProcessACKLD", i, j>>)
+        /\ UNCHANGED <<recorder, state, acceptedEpoch, currentEpoch, learners, cepochRecv, ackeRecv, sendCounter, followerVars, electionVars, proposalMsgsLog, epochLeader>>
+
+
+(* Leader waits for receiving ACKLD from a quorum including itself,
+   and broadcasts COMMITLD and turns to BROADCAST. *)
+LeaderProcessACKLDHasntBroadcast(i, j) ==
+        /\ IsLeader(i)
+        /\ PendingACKLD(i, j)
+        /\ LET msg == msgs[j][i][1]
+               infoOk == IsMyLearner(i, j)
+           IN /\ infoOk
+              \* 2. has broadcast COMMITLD
+              /\ AckldRecvQuorumFormed(i)
+              /\ zabState[i] = BROADCAST /\ UNCHANGED violatedInvariants
+              /\ ackldRecv' = [ackldRecv EXCEPT ![i] = UpdateAckldRecv(@, j) ]
+              /\ history' = [history EXCEPT ![i] = UpdateAcksid(@, j, msg.mzxid)]
+              /\ Reply(i, j, [ mtype |-> COMMITLD, mzxid |-> lastCommitted[i].zxid ])
+              /\ UNCHANGED <<zabState, lastCommitted>>
+        /\ UNCHANGED <<recorder, state, acceptedEpoch, currentEpoch, learners, cepochRecv, ackeRecv, sendCounter, followerVars, electionVars, proposalMsgsLog, epochLeader>>
 
 RECURSIVE ZxidToIndexHepler(_,_,_,_)
 ZxidToIndexHepler(his, zxid, cur, appeared) == 
@@ -1237,7 +1257,9 @@ LeaderProcessACKEPOCHNoNewLeaderHasQuorumAction == TRUE /\ \E i, j \in Server: L
 LeaderProcessACKEPOCHNoNewLeaderNoQuorumAction == TRUE /\ \E i, j \in Server: LeaderProcessACKEPOCHNoNewLeaderNoQuorum(i, j)
 FollowerProcessNEWLEADERAction == TRUE /\ \E i, j \in Server: FollowerProcessNEWLEADER(i, j)
 FollowerProcessNEWLEADERNewIterationAction == TRUE /\ \E i, j \in Server: FollowerProcessNEWLEADERNewIteration(i, j)
-LeaderProcessACKLDAction == TRUE /\ \E i, j \in Server: LeaderProcessACKLD(i, j)
+LeaderProcessACKLDHasntBroadcastAction == TRUE /\ \E i, j \in Server: LeaderProcessACKLDHasntBroadcast(i, j)
+LeaderProcessACKLDHasBroadcastHasQuorumAction == TRUE /\ \E i, j \in Server: LeaderProcessACKLDHasBroadcastHasQuorum(i, j)
+LeaderProcessACKLDHasBroadcastNoQuorumAction == TRUE /\ \E i, j \in Server: LeaderProcessACKLDHasBroadcastNoQuorum(i, j)
 FollowerProcessCOMMITLDAction == TRUE /\ \E i, j \in Server: FollowerProcessCOMMITLD(i, j)
 
 (* Zab module - Broadcast part *)
@@ -1267,7 +1289,9 @@ Next ==
     \/ LeaderProcessACKEPOCHNoNewLeaderNoQuorumAction
     \/ FollowerProcessNEWLEADERAction
     \/ FollowerProcessNEWLEADERNewIterationAction
-    \/ LeaderProcessACKLDAction
+    \/ LeaderProcessACKLDHasBroadcastHasQuorumAction
+    \/ LeaderProcessACKLDHasBroadcastNoQuorumAction
+    \/ LeaderProcessACKLDHasntBroadcastAction
     \/ FollowerProcessCOMMITLDAction
     \/ LeaderProcessRequestAction
     \/ LeaderBroadcastPROPOSEAction
