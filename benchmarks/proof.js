@@ -458,7 +458,16 @@ function focusOnNode(nodeId, nodeData){
                         // let escapedLine = line.trim().replaceAll("<", "&lt;").replaceAll(">", "&gt;");
                         let escapedLine = line.replaceAll("<", "&lt;").replaceAll(">", "&gt;");
                         // Replace excessive whitespace.
-                        escapedLine = escapedLine.replaceAll("    ", " ");
+                        
+
+                        escapedLine = escapedLine.replaceAll("                       ", "\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;");
+                        escapedLine = escapedLine.replaceAll("                      ", "\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ");
+                        escapedLine = escapedLine.replaceAll("                     ", "\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ");
+                        escapedLine = escapedLine.replaceAll("                  ", "\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ");
+                        escapedLine = escapedLine.replaceAll("             ", "\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ");
+                        escapedLine = escapedLine.replaceAll("       ", "\n&nbsp;&nbsp;&nbsp; ");
+                        // escapedLine = escapedLine.replaceAll("    ", "\n&nbsp;&nbsp;&nbsp; ");
+
                         let maxLineLen = 100;
                         let added = 0;
                         // if(escapedLine.length > maxLineLen){
