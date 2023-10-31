@@ -22,6 +22,10 @@ aCKMsgImpliesZxidInLog.children = {
     ]
 }
 
+txnWithSameZxidEqualInPROPOSEMessages = make_node("H_TxnWithSameZxidEqualInPROPOSEMessages")
+
+txnWithSameZxidEqualBetweenLocalHistoryAndPROPOSEMessages = make_node("H_TxnWithSameZxidEqualBetweenLocalHistoryAndPROPOSEMessages")
+
 leaderInBroadcastImpliesAllHistoryEntriesInEpoch = make_node("H_LeaderInBroadcastImpliesAllHistoryEntriesInEpoch")
 
 committedEntryExistsInACKEPOCHQuorumHistory = make_node("H_CommittedEntryExistsInACKEPOCHQuorumHistory")
@@ -29,6 +33,10 @@ committedEntryExistsInACKEPOCHQuorumHistory = make_node("H_CommittedEntryExistsI
 txnWithSameZxidEqualBetweenLocalHistoryAndMessages = make_node("H_TxnWithSameZxidEqualBetweenLocalHistoryAndMessages")
 
 txnWithSameZxidEqualInMessages = make_node("H_TxnWithSameZxidEqualInMessages")
+
+txnWithSameZxidEqualInPeerHistory = make_node("H_TxnWithSameZxidEqualInPeerHistory")
+
+txnWithSameZxidEqualLocalToPeerHistory = make_node("H_TxnWithSameZxidEqualLocalToPeerHistory")
 
 txnWithSameZxidEqual = make_node("H_TxnWithSameZxidEqual")
 txnWithSameZxidEqual.children = {
@@ -38,6 +46,15 @@ txnWithSameZxidEqual.children = {
     ],
     "LeaderProcessRequestAction": [
         leaderInBroadcastImpliesAllHistoryEntriesInEpoch
+    ],
+    "FollowerProcessPROPOSEAction": [
+        # txnWithSameZxidEqualInPROPOSEMessages,
+        txnWithSameZxidEqualBetweenLocalHistoryAndPROPOSEMessages
+    ],
+    "LeaderProcessACKEPOCHNoNewLeaderHasQuorumAction": [
+        txnWithSameZxidEqualInPeerHistory,
+        txnWithSameZxidEqualLocalToPeerHistory,
+        txnWithSameZxidEqualBetweenLocalHistoryAndMessages
     ]
 }
 

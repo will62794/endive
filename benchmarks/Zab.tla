@@ -1463,6 +1463,23 @@ H_TxnWithSameZxidEqual ==
             ZxidEqual(history[i][idxi].zxid, history[j][idxj].zxid) =>
                 TxnEqual(history[i][idxi], history[j][idxj])
 
+H_TxnWithSameZxidEqualInPeerHistory == 
+    \A s \in Server :
+    \A x,y \in ackeRecv[s] :
+        \A ix \in DOMAIN x.peerHistory :
+        \A iy \in DOMAIN y.peerHistory :
+            ZxidEqual(x.peerHistory[ix].zxid, y.peerHistory[iy].zxid) =>
+                TxnEqual(x.peerHistory[ix], y.peerHistory[iy])
+
+H_TxnWithSameZxidEqualLocalToPeerHistory == 
+    \A s \in Server :
+    \A x \in ackeRecv[s] :
+    \A i \in Server : 
+    \A idxi \in (DOMAIN history[i]) :
+        \A ix \in DOMAIN x.peerHistory :
+            ZxidEqual(x.peerHistory[ix].zxid, history[i][idxi].zxid) =>
+                TxnEqual(x.peerHistory[ix], history[i][idxi])
+
 \* If zxid matches between any two histories in messages in network, 
 \* then the transactions must be equal.
 H_TxnWithSameZxidEqualInMessages == 
@@ -1476,6 +1493,15 @@ H_TxnWithSameZxidEqualInMessages ==
                     ZxidEqual(msgs[i][j][idx].mhistory[h1].zxid, msgs[i2][j2][idx2].mhistory[h2].zxid) =>
                     TxnEqual(msgs[i][j][idx].mhistory[h1], msgs[i2][j2][idx2].mhistory[h2])
 
+H_TxnWithSameZxidEqualInPROPOSEMessages == 
+    \A i,j,i2,j2 \in Server :
+    \A idx \in (DOMAIN msgs[i][j]) : 
+    \A idx2 \in (DOMAIN msgs[i2][j2]) : 
+        (/\ msgs[i][j][idx].mtype = PROPOSE 
+         /\ msgs[i2][j2][idx2].mtype = PROPOSE) =>
+            (ZxidEqual(msgs[i][j][idx].mzxid, msgs[i2][j2][idx2].mzxid) => 
+                (msgs[i][j][idx].mdata = msgs[i2][j2][idx2].mdata))
+
 H_TxnWithSameZxidEqualBetweenLocalHistoryAndMessages == 
     \A i,j,i1 \in Server :
         \A idx \in DOMAIN msgs[i][j] : 
@@ -1485,6 +1511,15 @@ H_TxnWithSameZxidEqualBetweenLocalHistoryAndMessages ==
                 \A h2 \in DOMAIN history[i1]: 
                     ZxidEqual(msgs[i][j][idx].mhistory[h1].zxid, history[i1][h2].zxid) =>
                     TxnEqual(msgs[i][j][idx].mhistory[h1], history[i1][h2])
+
+H_TxnWithSameZxidEqualBetweenLocalHistoryAndPROPOSEMessages == 
+    \A i,j,i1 \in Server :
+        \A idx \in DOMAIN msgs[i][j] : 
+        \A idx2 \in DOMAIN history[i1] : 
+            (msgs[i][j][idx].mtype = PROPOSE) =>
+                \A h2 \in DOMAIN history[i1] : 
+                    ZxidEqual(msgs[i][j][idx].mzxid, history[i1][h2].zxid) =>
+                    msgs[i][j][idx].mdata = history[i1][h2].value
 
 \* If a COMMITLD message has been sent by a node, then the zxid in this message must be committed 
 \* in the sender's history.
