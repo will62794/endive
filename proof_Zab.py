@@ -11,6 +11,8 @@ def make_node(expr):
 lemmaTRUE = StructuredProofNode("LemmaTrue", "TRUE")
 lemmaTRUEShim = StructuredProofNode("LemmaTrueShim", "1=1")
 
+leaderInDiscoveryImpliesNoNEWLEADERMsgs = make_node("H_LeaderInDiscoveryImpliesNoNEWLEADERMsgs")
+
 NEWLEADERMsgIsPrefixOfSenderLeader = make_node("H_NEWLEADERMsgIsPrefixOfSenderLeader")
 
 aCKMsgImpliesZxidInLog = make_node("H_ACKMsgImpliesZxidInLog")
@@ -20,9 +22,24 @@ aCKMsgImpliesZxidInLog.children = {
     ]
 }
 
+leaderInBroadcastImpliesAllHistoryEntriesInEpoch = make_node("H_LeaderInBroadcastImpliesAllHistoryEntriesInEpoch")
+
 committedEntryExistsInACKEPOCHQuorumHistory = make_node("H_CommittedEntryExistsInACKEPOCHQuorumHistory")
 
+txnWithSameZxidEqualBetweenLocalHistoryAndMessages = make_node("H_TxnWithSameZxidEqualBetweenLocalHistoryAndMessages")
+
+txnWithSameZxidEqualInMessages = make_node("H_TxnWithSameZxidEqualInMessages")
+
 txnWithSameZxidEqual = make_node("H_TxnWithSameZxidEqual")
+txnWithSameZxidEqual.children = {
+    "FollowerProcessNEWLEADERAction": [
+        txnWithSameZxidEqualInMessages,
+        txnWithSameZxidEqualBetweenLocalHistoryAndMessages
+    ],
+    "LeaderProcessRequestAction": [
+        leaderInBroadcastImpliesAllHistoryEntriesInEpoch
+    ]
+}
 
 nodeHistoryBoundByLastCommittedIndex = make_node("H_NodeHistoryBoundByLastCommittedIndex")
 
@@ -40,6 +57,9 @@ safety = make_node("H_PrefixConsistency")
 NEWLEADERMsgIsPrefixOfSenderLeader.children = {
     "FollowerProcessNEWLEADERAction": [
         safety
+    ],
+    "LeaderProcessACKEPOCHNoNewLeaderHasQuorumAction": [
+        leaderInDiscoveryImpliesNoNEWLEADERMsgs
     ]
 }
 

@@ -146,7 +146,9 @@ HistTypeBounded == BoundedSeq(HistEntryType, MaxHistLen)
 
 SetOfHistsTypeBounded == RandomSetOfSubsets(5, 5, HistTypeBounded)
 
-AckeRecvTypeBounded == RandomSetOfSubsets(2, 2, [sid: Server, connected: BOOLEAN, peerLastEpoch: Nat, peerHistory: HistTypeBounded])
+AckeRecvTypeBounded == 
+    RandomSetOfSubsets(1, 1, [sid: Server, connected: BOOLEAN, peerLastEpoch: Nat, peerHistory: HistTypeBounded]) \cup
+    RandomSetOfSubsets(2, 2, [sid: Server, connected: BOOLEAN, peerLastEpoch: Nat, peerHistory: HistTypeBounded])
 
 MsgCEPOCHType == [mtype: {CEPOCH}, mepoch: Epoch]
 MsgNEWEPOCHType == [mtype: {NEWEPOCH}, mepoch: Epoch]
@@ -187,7 +189,7 @@ TypeOKRandom ==
     /\ sendCounter \in [Server -> Nat]
     /\ connectInfo \in [Server -> Server]
     /\ leaderOracle \in Server
-    /\ msgs \in [Server -> [Server -> BoundedSeq(RandomSubset(5, MsgType), MaxMsgChanLen)]]
+    /\ msgs \in [Server -> [Server -> BoundedSeq(RandomSubset(7, MsgType), MaxMsgChanLen)]]
     /\ proposalMsgsLog    = {}
     /\ epochLeader        = [i \in 1..MaxEpoch |-> {} ]
     \* /\ violatedInvariants = {}
@@ -1464,6 +1466,29 @@ H_TxnWithSameZxidEqual ==
             ZxidEqual(history[i][idxi].zxid, history[j][idxj].zxid) =>
                 TxnEqual(history[i][idxi], history[j][idxj])
 
+\* If zxid matches between any two histories in messages in network, 
+\* then the transactions must be equal.
+H_TxnWithSameZxidEqualInMessages == 
+    \A i,j,i2,j2 \in Server :
+        \A idx \in DOMAIN msgs[i][j] : 
+        \A idx2 \in DOMAIN msgs[i2][j2] : 
+            (/\ "mhistory" \in DOMAIN msgs[i][j][idx]
+             /\ "mhistory" \in DOMAIN msgs[i2][j2][idx2]) =>
+                \A h1 \in DOMAIN msgs[i][j][idx].mhistory :
+                \A h2 \in DOMAIN msgs[i2][j2][idx2].mhistory : 
+                    ZxidEqual(msgs[i][j][idx].mhistory[h1].zxid, msgs[i2][j2][idx2].mhistory[h2].zxid) =>
+                    TxnEqual(msgs[i][j][idx].mhistory[h1], msgs[i2][j2][idx2].mhistory[h2])
+
+H_TxnWithSameZxidEqualBetweenLocalHistoryAndMessages == 
+    \A i,j,i1 \in Server :
+        \A idx \in DOMAIN msgs[i][j] : 
+        \A idx2 \in DOMAIN history[i1] : 
+            (/\ "mhistory" \in DOMAIN msgs[i][j][idx]) =>
+                \A h1 \in DOMAIN msgs[i][j][idx].mhistory :
+                \A h2 \in DOMAIN history[i1]: 
+                    ZxidEqual(msgs[i][j][idx].mhistory[h1].zxid, history[i1][h2].zxid) =>
+                    TxnEqual(msgs[i][j][idx].mhistory[h1], history[i1][h2])
+
 \* If a COMMITLD message has been sent by a node, then the zxid in this message must be committed 
 \* in the sender's history.
 H_COMMITLDSentByNodeImpliesZxidCommittedInLog == 
@@ -1526,6 +1551,24 @@ H_CommittedEntryExistsInLeaderHistory ==
                     /\ idx2 = idx
                     /\ history[j][idx2].zxid = history[i][idx].zxid
 
+\* If a leader is in DISCOVERY in epoch E, then no NEWLEADER messages could have been sent
+\* from this leader in epoch E.
+H_LeaderInDiscoveryImpliesNoNEWLEADERMsgs == 
+    \A i,j \in Server : 
+        (/\ IsLeader(j)
+         /\ zabState[j] = DISCOVERY) =>
+             ~PendingNEWLEADER(i,j)
+
+\* Leader in BROADCAST phase must contain all history entries created in its epoch.
+H_LeaderInBroadcastImpliesAllHistoryEntriesInEpoch == 
+    \A i,j \in Server : 
+    \A idx \in DOMAIN history[j] :
+        (/\ IsLeader(i)
+         /\ zabState[i] = BROADCAST
+         /\ history[j][idx].zxid[1] = currentEpoch[i]) => 
+            \* Entry is in leader's history.
+            \E idx2 \in DOMAIN history[i] : ZxidEqual(history[i][idx2].zxid, history[j][idx].zxid)
+
 ----------------------------------------------------------
 
 \* Model checking stuff.
@@ -1550,9 +1593,10 @@ SetSum(set) == IF set = {} THEN 0 ELSE
     IN x + SetSum(set \ {x})
 
 CTICost == 
-    SetSum({Len(history[s]) : s \in DOMAIN history}) +
-    SetSum(UNION {{Len(msgs[s][t]) : s \in Server} : t \in Server})
-
+    SumFnRange([s \in Server |-> Len(history[s])]) +
+    SumFnRange(currentEpoch) +
+    SumFnRange([s \in Server |-> Cardinality(ackeRecv[s])]) +
+    SumFnRange([<<s,t>> \in Server \X Server |-> Len(msgs[s][t])])
 
 =============================================================================
 \* Modification History
