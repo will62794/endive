@@ -1545,6 +1545,7 @@ H_CommittedEntryExistsInACKEPOCHQuorumHistory ==
                 ackeRecvUpdated == [ackeRecv EXCEPT ![i] = UpdateAckeRecv(@, j, msg.mepoch, msg.mhistory) ] IN
                 (
                     /\ zabState[i] = DISCOVERY
+                    /\ state[i] = LEADING
                     /\ PendingACKEPOCH(i, j)
                     /\ IsQuorum({a.sid: a \in ackeRecvUpdated[i]})
                 ) => 
@@ -1628,6 +1629,7 @@ CTICost ==
     SumFnRange([s \in Server |-> Len(history[s])]) +
     SumFnRange(currentEpoch) +
     SumFnRange([s \in Server |-> Cardinality(ackeRecv[s])]) +
+    SumFnRange([s \in Server |-> Cardinality(cepochRecv[s])]) +
     SumFnRange([<<s,t>> \in Server \X Server |-> Len(msgs[s][t])])
 
 =============================================================================
