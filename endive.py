@@ -2301,7 +2301,7 @@ class InductiveInvGen():
         # Extract variables per action.
         all_state_vars = self.tla_spec_obj.get_all_vars()
         for action in actions:
-            print(f"{action} action: extracting vars")
+            # print(f"{action} action: extracting vars")
             try:
                 vars_in_action[action] = self.tla_spec_obj.get_vars_in_def(action)[0]
                 # vars_in_action_non_updated[action] = self.tla_spec_obj.get_vars_in_def(action, ignore_update_expressions=)[0]
