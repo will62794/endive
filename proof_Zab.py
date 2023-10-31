@@ -11,9 +11,16 @@ def make_node(expr):
 lemmaTRUE = StructuredProofNode("LemmaTrue", "TRUE")
 lemmaTRUEShim = StructuredProofNode("LemmaTrueShim", "1=1")
 
+leaderInLearnerSet = make_node("H_LeaderInLearnerSet")
+
 ACKEPOCHQuorumImpliesLeaderInSYNCHRONIZATIONorBROADCAST = make_node("H_ACKEPOCHQuorumImpliesLeaderInSYNCHRONIZATIONorBROADCAST")
 
 nEWLEADERMsgSentByLeader = make_node("H_NEWLEADERMsgSentByLeader")
+nEWLEADERMsgSentByLeader.children = {
+    "TimeoutNoQuorumAction": [
+        leaderInLearnerSet
+    ]
+}
 
 leaderInDiscoveryImpliesNoNEWLEADERMsgs = make_node("H_LeaderInDiscoveryImpliesNoNEWLEADERMsgs")
 leaderInDiscoveryImpliesNoNEWLEADERMsgs.children = {

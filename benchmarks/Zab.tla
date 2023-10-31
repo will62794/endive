@@ -1432,12 +1432,17 @@ IsPrefix(li,lj) ==
 \* Extract only zxid and value from a given history.
 TxnHistory(h) == [i \in DOMAIN h |-> [zxid |-> h[i].zxid, value |-> h[i].value] ]
 
+\* A leader is always a part of its own learner set.
+H_LeaderInLearnerSet == \A i \in Server : IsLeader(i) => i \in learners[i]
+
 \* If a NEWLEADER message has been sent from node N in epoch E, then N
-\* must be LEADING in epoch E.
+\* must be LEADING in epoch E. Also, the receiver must be in learners[N].
 H_NEWLEADERMsgSentByLeader == 
     \A i,j \in Server : 
         (PendingNEWLEADER(i,j)) => 
-            IsLeader(j) /\ msgs[j][i][1].mepoch = currentEpoch[j]
+            /\ IsLeader(j) 
+            /\ msgs[j][i][1].mepoch = currentEpoch[j]
+            /\ i \in learners[j]
 
 \* If a NEWLEADER message has been sent from a leader N in epoch E, then 
 \* that message's history must be a prefix of the leader's history in epoch E, w.r.t the txns
