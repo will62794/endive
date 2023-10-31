@@ -43,6 +43,8 @@ NEWLEADERMsgIsPrefixOfSenderLeader.children = {
     ]
 }
 
+committedEntryExistsInLeaderHistory = make_node("H_CommittedEntryExistsInLeaderHistory")
+
 safety.children = {
     "FollowerProcessNEWLEADERAction": [
         NEWLEADERMsgIsPrefixOfSenderLeader
@@ -59,6 +61,9 @@ safety.children = {
     ],
     "LeaderProcessACKAction": [
         aCKMsgImpliesZxidInLog
+    ],
+    "LeaderProcessACKLDHasBroadcastHasQuorumAction": [
+        committedEntryExistsInLeaderHistory
     ]
 }
 

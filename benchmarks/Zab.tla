@@ -1510,6 +1510,25 @@ H_ACKMsgImpliesZxidInLog ==
 H_NodeHistoryBoundByLastCommittedIndex == 
     \A s \in Server : lastCommitted[s].index <= Len(history[s])
 
+\* If a follower has sent ACKLD to a leader, then its log must match the leader's log.
+H_ACKLDSentByFollowerImpliesLogMatch == 
+    \A i,j \in Server : 
+        (/\ PendingACKLD(i,j)
+         /\ IsLeader(i)) => 
+            IsPrefix(TxnHistory(history[j]), TxnHistory(history[i]))
+
+\* If an entry is committed, then it should be contained in a leader's history.
+H_CommittedEntryExistsInLeaderHistory == 
+    \A i,j \in Server : 
+        \A idx \in DOMAIN history[i] : 
+            (/\ idx <= lastCommitted[i].index
+             /\ IsLeader(j)
+             /\ zabState[j] = SYNCHRONIZATION) => 
+                \* Committed entry exists in leader's history.
+                \E idx2 \in DOMAIN history[j] : 
+                    /\ idx2 = idx
+                    /\ history[j][idx2].zxid = history[i][idx].zxid
+
 ----------------------------------------------------------
 
 \* Model checking stuff.
