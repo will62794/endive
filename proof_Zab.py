@@ -11,7 +11,22 @@ def make_node(expr):
 lemmaTRUE = StructuredProofNode("LemmaTrue", "TRUE")
 lemmaTRUEShim = StructuredProofNode("LemmaTrueShim", "1=1")
 
+ACKEPOCHQuorumImpliesLeaderInSYNCHRONIZATIONorBROADCAST = make_node("H_ACKEPOCHQuorumImpliesLeaderInSYNCHRONIZATIONorBROADCAST")
+
+nEWLEADERMsgSentByLeader = make_node("H_NEWLEADERMsgSentByLeader")
+
 leaderInDiscoveryImpliesNoNEWLEADERMsgs = make_node("H_LeaderInDiscoveryImpliesNoNEWLEADERMsgs")
+leaderInDiscoveryImpliesNoNEWLEADERMsgs.children = {
+    "UpdateLeaderAction": [
+        nEWLEADERMsgSentByLeader
+    ],
+    "FollowLeaderMyselfAction": [
+        nEWLEADERMsgSentByLeader
+    ],
+    "LeaderProcessACKEPOCHSentNewLeaderAction": [
+        ACKEPOCHQuorumImpliesLeaderInSYNCHRONIZATIONorBROADCAST
+    ]
+}
 
 NEWLEADERMsgIsPrefixOfSenderLeader = make_node("H_NEWLEADERMsgIsPrefixOfSenderLeader")
 
@@ -22,7 +37,15 @@ aCKMsgImpliesZxidInLog.children = {
     ]
 }
 
+
+NEWLEADERIncomingImpliesLastCommittedBound = make_node("H_NEWLEADERIncomingImpliesLastCommittedBound")
+
 nodeHistoryBoundByLastCommittedIndex = make_node("H_NodeHistoryBoundByLastCommittedIndex")
+nodeHistoryBoundByLastCommittedIndex.children = {
+    "FollowerProcessNEWLEADERAction": [
+        NEWLEADERIncomingImpliesLastCommittedBound
+    ]
+}
 
 txnWithSameZxidEqualInPROPOSEMessages = make_node("H_TxnWithSameZxidEqualInPROPOSEMessages")
 
@@ -39,8 +62,11 @@ committedEntryExistsInACKEPOCHQuorumHistory.children = {
     ],
     "FollowerProcessCOMMITLDAction": [
         COMMITLDSentByNodeImpliesZxidCommittedInLog
+    ],
+    "FollowerProcessNEWLEADERAction": [
+        nodeHistoryBoundByLastCommittedIndex
     ]
-}
+}   
 
 txnWithSameZxidEqualBetweenLocalHistoryAndMessages = make_node("H_TxnWithSameZxidEqualBetweenLocalHistoryAndMessages")
 
@@ -83,14 +109,15 @@ safety = make_node("H_PrefixConsistency")
 
 NEWLEADERMsgIsPrefixOfSenderLeader.children = {
     "FollowerProcessNEWLEADERAction": [
-        safety
+        safety,
+        nEWLEADERMsgSentByLeader
     ],
     "LeaderProcessACKEPOCHNoNewLeaderHasQuorumAction": [
-        leaderInDiscoveryImpliesNoNEWLEADERMsgs
+        leaderInDiscoveryImpliesNoNEWLEADERMsgs,
+        nEWLEADERMsgSentByLeader
     ]
 }
 
-NEWLEADERIncomingImpliesLastCommittedBound = make_node("H_NEWLEADERIncomingImpliesLastCommittedBound")
 
 committedEntryExistsInLeaderHistory = make_node("H_CommittedEntryExistsInLeaderHistory")
 committedEntryExistsInLeaderHistory.children = {
@@ -98,7 +125,8 @@ committedEntryExistsInLeaderHistory.children = {
         COMMITSentByNodeImpliesZxidInLog
     ],
     "FollowerProcessNEWLEADERAction": [
-        NEWLEADERMsgIsPrefixOfSenderLeader
+        NEWLEADERMsgIsPrefixOfSenderLeader,
+        nEWLEADERMsgSentByLeader
     ],
     "LeaderProcessRequestAction": [
         nodeHistoryBoundByLastCommittedIndex
@@ -110,8 +138,9 @@ committedEntryExistsInLeaderHistory.children = {
 
 safety.children = {
     "FollowerProcessNEWLEADERAction": [
-        NEWLEADERMsgIsPrefixOfSenderLeader,
-        NEWLEADERIncomingImpliesLastCommittedBound
+        # NEWLEADERMsgIsPrefixOfSenderLeader,
+        NEWLEADERIncomingImpliesLastCommittedBound,
+        nEWLEADERMsgSentByLeader
     ],
     "FollowerProcessCOMMITAction": [
         COMMITSentByNodeImpliesZxidInLog

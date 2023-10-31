@@ -1432,12 +1432,20 @@ IsPrefix(li,lj) ==
 \* Extract only zxid and value from a given history.
 TxnHistory(h) == [i \in DOMAIN h |-> [zxid |-> h[i].zxid, value |-> h[i].value] ]
 
+\* If a NEWLEADER message has been sent from node N in epoch E, then N
+\* must be LEADING in epoch E.
+H_NEWLEADERMsgSentByLeader == 
+    \A i,j \in Server : 
+        (PendingNEWLEADER(i,j)) => 
+            IsLeader(j) /\ msgs[j][i][1].mepoch = currentEpoch[j]
+
 \* If a NEWLEADER message has been sent from a leader N in epoch E, then 
 \* that message's history must be a prefix of the leader's history in epoch E, w.r.t the txns
 \* that appear in that history i.e. (zxid, value) pairs.
 H_NEWLEADERMsgIsPrefixOfSenderLeader == 
     \A i,j \in Server : 
-        PendingNEWLEADER(i,j) => 
+        (/\ PendingNEWLEADER(i,j)
+         /\ msgs[j][i][1].mepoch = currentEpoch[j]) => 
             (/\ IsPrefix(TxnHistory(msgs[j][i][1].mhistory), TxnHistory(history[j])))
 
 H_NEWLEADERIncomingImpliesLastCommittedBound == 
@@ -1588,9 +1596,17 @@ H_CommittedEntryExistsInLeaderHistory ==
 \* from this leader in epoch E.
 H_LeaderInDiscoveryImpliesNoNEWLEADERMsgs == 
     \A i,j \in Server : 
-        (/\ IsLeader(j)
-         /\ zabState[j] = DISCOVERY) =>
-             ~PendingNEWLEADER(i,j)
+        (/\ (IsLeader(j) \/ IsLooking(j))
+         /\ zabState[j] \in {DISCOVERY}) =>
+             ~(PendingNEWLEADER(i,j) /\ msgs[j][i][1].mepoch = currentEpoch[j])
+
+\* If an ACK-EPOCH quorum has been collected by a leader, then it must be in SYNCHRONIZATION.
+H_ACKEPOCHQuorumImpliesLeaderInSYNCHRONIZATIONorBROADCAST == 
+    \A i \in Server : 
+        (/\ IsLeader(i)
+         /\ IsQuorum({a.sid: a \in ackeRecv[i]})) => 
+            zabState[i] \in {SYNCHRONIZATION, BROADCAST}
+
 
 \* Leader in BROADCAST phase must contain all history entries created in its epoch.
 H_LeaderInBroadcastImpliesAllHistoryEntriesInEpoch == 
