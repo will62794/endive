@@ -22,13 +22,25 @@ aCKMsgImpliesZxidInLog.children = {
     ]
 }
 
+nodeHistoryBoundByLastCommittedIndex = make_node("H_NodeHistoryBoundByLastCommittedIndex")
+
 txnWithSameZxidEqualInPROPOSEMessages = make_node("H_TxnWithSameZxidEqualInPROPOSEMessages")
 
 txnWithSameZxidEqualBetweenLocalHistoryAndPROPOSEMessages = make_node("H_TxnWithSameZxidEqualBetweenLocalHistoryAndPROPOSEMessages")
 
 leaderInBroadcastImpliesAllHistoryEntriesInEpoch = make_node("H_LeaderInBroadcastImpliesAllHistoryEntriesInEpoch")
 
+COMMITLDSentByNodeImpliesZxidCommittedInLog = make_node("H_COMMITLDSentByNodeImpliesZxidCommittedInLog")
+
 committedEntryExistsInACKEPOCHQuorumHistory = make_node("H_CommittedEntryExistsInACKEPOCHQuorumHistory")
+committedEntryExistsInACKEPOCHQuorumHistory.children = {
+    "LeaderProcessRequestAction": [
+        nodeHistoryBoundByLastCommittedIndex
+    ],
+    "FollowerProcessCOMMITLDAction": [
+        COMMITLDSentByNodeImpliesZxidCommittedInLog
+    ]
+}
 
 txnWithSameZxidEqualBetweenLocalHistoryAndMessages = make_node("H_TxnWithSameZxidEqualBetweenLocalHistoryAndMessages")
 
@@ -58,9 +70,7 @@ txnWithSameZxidEqual.children = {
     ]
 }
 
-nodeHistoryBoundByLastCommittedIndex = make_node("H_NodeHistoryBoundByLastCommittedIndex")
 
-COMMITLDSentByNodeImpliesZxidCommittedInLog = make_node("H_COMMITLDSentByNodeImpliesZxidCommittedInLog")
 COMMITLDSentByNodeImpliesZxidCommittedInLog.children = {
     "LeaderProcessACKLDHasntBroadcastAction" : [
         nodeHistoryBoundByLastCommittedIndex
