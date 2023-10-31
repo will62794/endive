@@ -1445,6 +1445,7 @@ H_NEWLEADERMsgSentByLeader ==
             /\ IsLeader(j) 
             /\ msgs[j][i][1].mepoch = currentEpoch[j]
             /\ i \in learners[j]
+            /\ zabState[j] \in {SYNCHRONIZATION, BROADCAST}
 
 \* If a NEWLEADER message has been sent from a leader N in epoch E, then 
 \* that message's history must be a prefix of the leader's history in epoch E, w.r.t the txns
@@ -1614,6 +1615,11 @@ H_ACKEPOCHQuorumImpliesLeaderInSYNCHRONIZATIONorBROADCAST ==
          /\ IsQuorum({a.sid: a \in ackeRecv[i]})) => 
             zabState[i] \in {SYNCHRONIZATION, BROADCAST}
 
+H_ACKEPOCHQuorumImpliesAcceptedEpochCorrect == 
+    \A i \in Server : 
+        (/\ IsLeader(i)
+         /\ IsQuorum({a.sid: a \in ackeRecv[i]})) => 
+            acceptedEpoch[i] = currentEpoch[i]
 
 \* Leader in BROADCAST phase must contain all history entries created in its epoch.
 H_LeaderInBroadcastImpliesAllHistoryEntriesInEpoch == 

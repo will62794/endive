@@ -15,10 +15,16 @@ leaderInLearnerSet = make_node("H_LeaderInLearnerSet")
 
 ACKEPOCHQuorumImpliesLeaderInSYNCHRONIZATIONorBROADCAST = make_node("H_ACKEPOCHQuorumImpliesLeaderInSYNCHRONIZATIONorBROADCAST")
 
+ACKEPOCHQuorumImpliesAcceptedEpochCorrect = make_node("H_ACKEPOCHQuorumImpliesAcceptedEpochCorrect")
+
 nEWLEADERMsgSentByLeader = make_node("H_NEWLEADERMsgSentByLeader")
 nEWLEADERMsgSentByLeader.children = {
     "TimeoutNoQuorumAction": [
         leaderInLearnerSet
+    ],
+    "LeaderProcessACKEPOCHSentNewLeaderAction": [   
+        ACKEPOCHQuorumImpliesAcceptedEpochCorrect,
+        ACKEPOCHQuorumImpliesLeaderInSYNCHRONIZATIONorBROADCAST
     ]
 }
 
