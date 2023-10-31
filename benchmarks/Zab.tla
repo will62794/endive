@@ -645,8 +645,10 @@ LeaderProcessCEPOCH(i, j) ==
                  \/ \* 2. has broadcast NEWEPOCH
                     /\ CepochRecvQuorumFormed(i)
                     /\ cepochRecv' = [cepochRecv EXCEPT ![i] = UpdateCepochRecv(@, j, msg.mepoch) ]
-                    /\ Reply(i, j, [ mtype  |-> NEWEPOCH,
-                                     mepoch |-> acceptedEpoch[i] ])
+                    /\ msgs' = [msgs EXCEPT ![j][i] = Tail(msgs[j][i]), 
+                                            ![i][j] = Append(msgs[i][j], 
+                                                [ mtype  |-> NEWEPOCH,
+                                                  mepoch |-> acceptedEpoch[i] ])]
                     /\ UNCHANGED <<acceptedEpoch>>
         /\ UNCHANGED <<state, zabState, currentEpoch, history, lastCommitted, learners, 
                        ackeRecv, ackldRecv, sendCounter, followerVars,
