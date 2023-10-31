@@ -1084,16 +1084,13 @@ FollowerProcessPROPOSE(i, j) ==
            IN /\ infoOk
               /\ \/ /\ isNext
                     /\ history' = [history EXCEPT ![i] = Append(@, newTxn)]
-                    /\ Reply(i, j, m_ack)
+                    /\ msgs' = [msgs EXCEPT ![j][i] = Tail(msgs[j][i]), ![i][j] = Append(msgs[i][j], m_ack)]
                  \/ /\ ~isNext
                     /\ LET index == ZxidToIndex(history[i], msg.mzxid)
-                           exist == index > 0 /\ index <= Len(history[i])
-                       IN /\ exist
+                           exist == index > 0 /\ index <= Len(history[i]) IN exist
                     /\ Discard(j, i)
                     /\ UNCHANGED history
-        /\ UNCHANGED <<state, zabState, acceptedEpoch, currentEpoch, lastCommitted,
-                    leaderVars, followerVars, electionVars, proposalMsgsLog, epochLeader>>
-        /\ UpdateRecorder(<<"FollowerProcessPROPOSE", i, j>>)
+        /\ UNCHANGED <<state, zabState, acceptedEpoch, currentEpoch, lastCommitted, leaderVars, followerVars, electionVars, proposalMsgsLog, epochLeader>>
 
 LeaderTryToCommit(s, index, zxid, newTxn, follower) ==
         LET allTxnsBeforeCommitted == lastCommitted[s].index >= index - 1
