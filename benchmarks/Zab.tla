@@ -766,7 +766,8 @@ LeaderProcessACKEPOCHSentNewLeader(i, j) ==
               /\ LET toSend == history[i] \* contains (Ie', Be')
                      m == [ mtype    |-> NEWLEADER,
                             mepoch   |-> acceptedEpoch[i],
-                            mhistory |-> toSend ] IN Reply(i, j, m) 
+                            mhistory |-> toSend ] IN 
+                            msgs' = [msgs EXCEPT ![j][i] = Tail(msgs[j][i]), ![i][j] = Append(msgs[i][j], m)]
                     \* Ignore 'proposalMsgs' updates for now and safety properties that depend on it.
                     \*  set_forChecking == SetPacketsForChecking({ }, i, acceptedEpoch[i], toSend, 1, Len(toSend)) IN 
                     \*  /\ Reply(i, j, m) 
@@ -1446,9 +1447,13 @@ TxnHistory(h) == [i \in DOMAIN h |-> [zxid |-> h[i].zxid, value |-> h[i].value] 
 H_NEWLEADERMsgIsPrefixOfSenderLeader == 
     \A i,j \in Server : 
         PendingNEWLEADER(i,j) => 
-            (/\ IsPrefix(TxnHistory(msgs[j][i][1].mhistory), TxnHistory(history[j]))
-                \* lastCommitted on node is <= length of incoming history.
-                /\ lastCommitted[i].index <= Len(msgs[j][i][1].mhistory))
+            (/\ IsPrefix(TxnHistory(msgs[j][i][1].mhistory), TxnHistory(history[j])))
+
+H_NEWLEADERIncomingImpliesLastCommittedBound == 
+    \A i,j \in Server : 
+        PendingNEWLEADER(i,j) => 
+            (\* lastCommitted on node is <= length of incoming history.
+             lastCommitted[i].index <= Len(msgs[j][i][1].mhistory))
 
 \* If a COMMIT message has been sent by a node, then the zxid referred to by that COMMIT
 \* must be present in the sender's history, and its lastCommitted must cover that zxid in its history.
