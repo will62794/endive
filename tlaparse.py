@@ -226,10 +226,13 @@ class TLASpec:
                 def_elem = self.spec_obj["defs"][uid]["elem"]
                 (new_vars,new_updated_vars) = self.get_vars_in_def_rec(def_elem)
                 # if len(new_vars) or len(new_updated_vars.keys()):
-                #     print(new_vars, new_updated_vars)
+                # print("new updated vars:", new_updated_vars)
                 all_vars.update(new_vars)
                 for v in new_updated_vars:
                     if v in all_updated_vars:
+                        # print("all updated:", all_updated_vars)
+                        # print("all updated:", all_updated_vars[v])
+                        # print("new updated:", new_updated_vars[v])
                         all_updated_vars[v].update(new_updated_vars[v])
                     else:
                         all_updated_vars[v] = new_updated_vars
@@ -241,6 +244,8 @@ class TLASpec:
                 all_vars.update(new_vars)
                 for v in new_updated_vars:
                     if v in all_updated_vars:
+                        # print("all updated:", all_updated_vars[v])
+                        # print("new updated:", new_updated_vars[v])
                         all_updated_vars[v].update(new_updated_vars[v])
                     else:
                         all_updated_vars[v] = new_updated_vars[v]
@@ -577,7 +582,7 @@ class TLASpec:
         for action in actions:
             try:
                 vars_in_action[action],action_updated_vars[action] = self.get_vars_in_def(action)
-                print(action_updated_vars[action])
+                # print(action_updated_vars[action])
                 vars_in_action_non_updated[action],_ = self.get_vars_in_def(action, ignore_update_expressions=True)
             # print(f"Vars in action '{action}':", vars_in_action[action])
             except:
@@ -594,7 +599,7 @@ class TLASpec:
             # Invariants (i.e. state predicates) should all be at level 1.
             # if udef.startswith("H_"):
             vars_in_lemma_defs[udef] = self.get_vars_in_def(udef)[0]
-            print(udef, vars_in_lemma_defs[udef])
+            # print(udef, vars_in_lemma_defs[udef])
 
         # Compute COI for each action-lemma pair
         for action in vars_in_action:
