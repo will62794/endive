@@ -83,6 +83,20 @@ NEWLEADERMsgIsPrefixOfSenderLeader.children = {
 NEWLEADERIncomingImpliesLastCommittedBound = make_node("H_NEWLEADERIncomingImpliesLastCommittedBound")
 
 committedEntryExistsInLeaderHistory = make_node("H_CommittedEntryExistsInLeaderHistory")
+committedEntryExistsInLeaderHistory.children = {
+    "FollowerProcessCOMMITAction": [
+        COMMITSentByNodeImpliesZxidInLog
+    ],
+    "FollowerProcessNEWLEADERAction": [
+        NEWLEADERMsgIsPrefixOfSenderLeader
+    ],
+    "LeaderProcessRequestAction": [
+        nodeHistoryBoundByLastCommittedIndex
+    ],
+    "LeaderProcessACKEPOCHNoNewLeaderHasQuorumAction": [
+        committedEntryExistsInACKEPOCHQuorumHistory
+    ]
+}
 
 safety.children = {
     "FollowerProcessNEWLEADERAction": [
