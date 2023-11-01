@@ -103,7 +103,8 @@ committedEntryExistsOnQuorum.children = {
     ],
     "FollowerProcessNEWLEADERAction": [
         committedEntryExistsInNEWLEADERHistory,
-        nEWLEADERMsgSentByLeader
+        NEWLEADERMsgIsPrefixOfSenderLeader
+        # nEWLEADERMsgSentByLeader
     ]
 }
 
