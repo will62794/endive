@@ -62,6 +62,8 @@ nodeHistoryBoundByLastCommittedIndex.children = {
     ]
 }
 
+COMMITSentByNodeImpliesZxidInLog = make_node("H_COMMITSentByNodeImpliesZxidInLog")
+
 txnWithSameZxidEqualInPROPOSEMessages = make_node("H_TxnWithSameZxidEqualInPROPOSEMessages")
 
 txnWithSameZxidEqualBetweenLocalHistoryAndPROPOSEMessages = make_node("H_TxnWithSameZxidEqualBetweenLocalHistoryAndPROPOSEMessages")
@@ -70,6 +72,8 @@ leaderInBroadcastImpliesAllHistoryEntriesInEpoch = make_node("H_LeaderInBroadcas
 
 COMMITLDSentByNodeImpliesZxidCommittedInLog = make_node("H_COMMITLDSentByNodeImpliesZxidCommittedInLog")
 
+PROPOSEMsgSentByNodeImpliesZxidInLog = make_node("H_PROPOSEMsgSentByNodeImpliesZxidInLog")
+
 committedEntryExistsOnQuorum = make_node("H_CommittedEntryExistsOnQuorum")
 committedEntryExistsOnQuorum.children = {
     "LeaderProcessACKAction": [
@@ -77,6 +81,15 @@ committedEntryExistsOnQuorum.children = {
     ],
     "LeaderProcessRequestAction": [ 
         nodeHistoryBoundByLastCommittedIndex
+    ],
+    "FollowerProcessCOMMITAction": [
+        COMMITSentByNodeImpliesZxidInLog
+    ],
+    "FollowerProcessCOMMITLDAction": [
+        COMMITLDSentByNodeImpliesZxidCommittedInLog
+    ],
+    "FollowerProcessPROPOSEAction": [
+        PROPOSEMsgSentByNodeImpliesZxidInLog
     ]
 }
 
@@ -137,7 +150,6 @@ COMMITLDSentByNodeImpliesZxidCommittedInLog.children = {
     ]
 }
 
-COMMITSentByNodeImpliesZxidInLog = make_node("H_COMMITSentByNodeImpliesZxidInLog")
 
 safety = make_node("H_PrefixConsistency")
 

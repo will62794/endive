@@ -1537,6 +1537,14 @@ H_TxnWithSameZxidEqualBetweenLocalHistoryAndPROPOSEMessages ==
                     ZxidEqual(msgs[i][j][idx].mzxid, history[i1][h2].zxid) =>
                     msgs[i][j][idx].mdata = history[i1][h2].value
 
+\* If a PROPOSE message has been sent with a particular zxid, then this zxid must be present
+\* in the sender's log.
+H_PROPOSEMsgSentByNodeImpliesZxidInLog == 
+    \A i,j \in Server : 
+        PendingPROPOSE(i,j) => 
+            \E idx \in DOMAIN history[j] : 
+                history[j][idx].zxid = msgs[j][i][1].mzxid
+
 \* If a COMMITLD message has been sent by a node, then the zxid in this message must be committed 
 \* in the sender's history.
 H_COMMITLDSentByNodeImpliesZxidCommittedInLog == 
