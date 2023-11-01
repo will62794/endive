@@ -1272,8 +1272,9 @@ Next ==
     \/ UpdateLeaderAction
     \/ FollowLeaderMyselfAction
     \/ FollowLeaderOtherAction
-    \/ TimeoutWithQuorumAction
-    \/ TimeoutNoQuorumAction
+    \* Disable these actions for now.
+    \* \/ TimeoutWithQuorumAction
+    \* \/ TimeoutNoQuorumAction
     \* \/ RestartAction
     \/ ConnectAndFollowerSendCEPOCHAction
     \/ LeaderProcessCEPOCHAction
