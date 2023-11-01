@@ -13,6 +13,8 @@ lemmaTRUEShim = StructuredProofNode("LemmaTrueShim", "1=1")
 
 leaderInLearnerSet = make_node("H_LeaderInLearnerSet")
 
+NodeLOOKINGImpliesInDISCOVERY = make_node("H_NodeLOOKINGImpliesInDISCOVERY")
+
 ACKEPOCHQuorumImpliesLeaderInSYNCHRONIZATIONorBROADCAST = make_node("H_ACKEPOCHQuorumImpliesLeaderInSYNCHRONIZATIONorBROADCAST")
 
 ACKEPOCHQuorumImpliesAcceptedEpochCorrect = make_node("H_ACKEPOCHQuorumImpliesAcceptedEpochCorrect")
@@ -68,6 +70,16 @@ leaderInBroadcastImpliesAllHistoryEntriesInEpoch = make_node("H_LeaderInBroadcas
 
 COMMITLDSentByNodeImpliesZxidCommittedInLog = make_node("H_COMMITLDSentByNodeImpliesZxidCommittedInLog")
 
+committedEntryExistsOnQuorum = make_node("H_CommittedEntryExistsOnQuorum")
+committedEntryExistsOnQuorum.children = {
+    "LeaderProcessACKAction": [
+        aCKMsgImpliesZxidInLog
+    ],
+    "LeaderProcessRequestAction": [ 
+        nodeHistoryBoundByLastCommittedIndex
+    ]
+}
+
 committedEntryExistsInACKEPOCHQuorumHistory = make_node("H_CommittedEntryExistsInACKEPOCHQuorumHistory")
 committedEntryExistsInACKEPOCHQuorumHistory.children = {
     "LeaderProcessRequestAction": [
@@ -78,6 +90,15 @@ committedEntryExistsInACKEPOCHQuorumHistory.children = {
     ],
     "FollowerProcessNEWLEADERAction": [
         nodeHistoryBoundByLastCommittedIndex
+    ],
+    "UpdateLeaderAction":[
+        NodeLOOKINGImpliesInDISCOVERY
+    ],
+    "LeaderProcessACKEPOCHNoNewLeaderNoQuorumAction": [
+        committedEntryExistsOnQuorum
+    ],
+    "LeaderProcessACKEPOCHSentNewLeaderAction": [
+        committedEntryExistsOnQuorum
     ]
 }   
 
@@ -149,6 +170,7 @@ committedEntryExistsInLeaderHistory.children = {
     ]
 }
 
+
 safety.children = {
     "FollowerProcessNEWLEADERAction": [
         # NEWLEADERMsgIsPrefixOfSenderLeader,
@@ -163,7 +185,7 @@ safety.children = {
         txnWithSameZxidEqual
     ],
     "LeaderProcessACKEPOCHNoNewLeaderHasQuorumAction": [
-        committedEntryExistsInACKEPOCHQuorumHistory
+        committedEntryExistsInACKEPOCHQuorumHistory,        
     ],
     "LeaderProcessACKAction": [
         aCKMsgImpliesZxidInLog

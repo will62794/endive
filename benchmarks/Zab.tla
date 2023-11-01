@@ -1547,22 +1547,40 @@ H_COMMITLDSentByNodeImpliesZxidCommittedInLog ==
                 /\ history[j][idx].zxid = msgs[j][i][1].mzxid  
                 /\ lastCommitted[j].index >= idx
 
+\* If a node is LOOKING, then it must be in DISCOVERY.
+H_NodeLOOKINGImpliesInDISCOVERY == 
+    \A i \in Server : 
+        (state[i] = LOOKING) => 
+            (zabState[i] \in {ELECTION, DISCOVERY})
+
+\* Any committed entry exists in the history of some quorum of servers.
+H_CommittedEntryExistsOnQuorum ==
+    \A s \in Server : 
+    \A idx \in DOMAIN history[s] : 
+        \* An entry is covered by lastCommitted on s.
+        (idx <= lastCommitted[s].index) =>
+            \E Q \in Quorums : 
+            \A n \in Q : 
+                \E ic \in DOMAIN history[n] : 
+                    /\ ic = idx
+                    /\ TxnEqual(history[s][idx], history[n][ic])
 
 \* If a history entry is covered by some lastCommitted, then it must be present in 
 \* the initial history as determined by a received quorum of ACKEPOCH messages.
 H_CommittedEntryExistsInACKEPOCHQuorumHistory ==
-    \A s \in Server : \A idx \in DOMAIN history[s] : 
+    \A s \in Server : 
+    \A idx \in DOMAIN history[s] : 
+    \A i,j \in Server :
         \* Entry is covered by lastCommitted on s.
-        (idx <= lastCommitted[s].index) => 
-        (\A i,j \in Server :
+        (/\ idx <= lastCommitted[s].index
+         /\ PendingACKEPOCH(i, j)) => 
             \* Server i is a leader who is about to receive an ACK-E quorum and compute the new initial history.
             \* This initial history must contain the committed entry. 
-            LET msg == msgs[j][i][1]
+            (LET msg == msgs[j][i][1]
                 ackeRecvUpdated == [ackeRecv EXCEPT ![i] = UpdateAckeRecv(@, j, msg.mepoch, msg.mhistory) ] IN
                 (
                     /\ zabState[i] = DISCOVERY
-                    /\ state[i] = LEADING
-                    /\ PendingACKEPOCH(i, j)
+                    \* /\ state[i] = LEADING
                     /\ IsQuorum({a.sid: a \in ackeRecvUpdated[i]})
                 ) => 
                     LET initHistory == DetermineInitialHistoryFromArg(ackeRecvUpdated, i) IN
