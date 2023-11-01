@@ -108,6 +108,11 @@ committedEntryExistsOnQuorum.children = {
 }
 
 NodeLOOKINGImpliesEmptyInputBuffer = make_node("H_NodeLOOKINGImpliesEmptyInputBuffer")
+NodeLOOKINGImpliesEmptyInputBuffer.children = {
+    "FollowerProcessNEWLEADERAction": [
+        nEWLEADERMsgSentByLeader
+    ]
+}
 
 committedEntryExistsInACKEPOCHQuorumHistory = make_node("H_CommittedEntryExistsInACKEPOCHQuorumHistory")
 committedEntryExistsInACKEPOCHQuorumHistory.children = {
