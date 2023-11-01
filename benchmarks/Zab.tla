@@ -1561,6 +1561,17 @@ H_NodeLOOKINGImpliesInDISCOVERY ==
         (state[i] = LOOKING) => 
             (zabState[i] \in {ELECTION, DISCOVERY})
 
+H_CommittedEntryExistsInNEWLEADERHistory ==
+    \A s \in Server : 
+    \A idx \in DOMAIN history[s] : 
+        (idx <= lastCommitted[s].index) =>
+            (\A i,j \in Server : 
+                (/\ PendingNEWLEADER(i,j)
+                 /\ zabState[j] \in {DISCOVERY, SYNCHRONIZATION} ) =>
+                    (\E idx2 \in DOMAIN msgs[j][i][1].mhistory : 
+                        /\ idx2 = idx
+                        /\ TxnEqual(history[s][idx], msgs[j][i][1].mhistory[idx2])))
+
 \* Any committed entry exists in the history of some quorum of servers.
 H_CommittedEntryExistsOnQuorum ==
     \A s \in Server : 

@@ -74,6 +74,8 @@ COMMITLDSentByNodeImpliesZxidCommittedInLog = make_node("H_COMMITLDSentByNodeImp
 
 PROPOSEMsgSentByNodeImpliesZxidInLog = make_node("H_PROPOSEMsgSentByNodeImpliesZxidInLog")
 
+committedEntryExistsInNEWLEADERHistory = make_node("H_CommittedEntryExistsInNEWLEADERHistory")
+
 committedEntryExistsOnQuorum = make_node("H_CommittedEntryExistsOnQuorum")
 committedEntryExistsOnQuorum.children = {
     "LeaderProcessACKAction": [
@@ -90,6 +92,10 @@ committedEntryExistsOnQuorum.children = {
     ],
     "FollowerProcessPROPOSEAction": [
         PROPOSEMsgSentByNodeImpliesZxidInLog
+    ],
+    "FollowerProcessNEWLEADERAction": [
+        committedEntryExistsInNEWLEADERHistory,
+        nEWLEADERMsgSentByLeader
     ]
 }
 
