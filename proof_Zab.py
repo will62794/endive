@@ -24,7 +24,7 @@ nEWLEADERMsgSentByLeader.children = {
     "TimeoutNoQuorumAction": [
         leaderInLearnerSet
     ],
-    "LeaderProcessACKEPOCHSentNewLeaderAction": [   
+    "LeaderProcessACKEPOCHHasBroadcastAction": [   
         ACKEPOCHQuorumImpliesAcceptedEpochCorrect,
         ACKEPOCHQuorumImpliesLeaderInSYNCHRONIZATIONorBROADCAST
     ]
@@ -38,7 +38,7 @@ leaderInDiscoveryImpliesNoNEWLEADERMsgs.children = {
     "FollowLeaderMyselfAction": [
         nEWLEADERMsgSentByLeader
     ],
-    "LeaderProcessACKEPOCHSentNewLeaderAction": [
+    "LeaderProcessACKEPOCHHasBroadcastAction": [
         ACKEPOCHQuorumImpliesLeaderInSYNCHRONIZATIONorBROADCAST
     ]
 }
@@ -121,10 +121,10 @@ committedEntryExistsInACKEPOCHQuorumHistory.children = {
     "UpdateLeaderAction":[
         NodeLOOKINGImpliesInDISCOVERY
     ],
-    "LeaderProcessACKEPOCHNoNewLeaderNoQuorumAction": [
+    "LeaderProcessACKEPOCHHasntBroadcastAction": [
         committedEntryExistsOnQuorum
     ],
-    "LeaderProcessACKEPOCHSentNewLeaderAction": [
+    "LeaderProcessACKEPOCHHasBroadcastAction": [
         committedEntryExistsOnQuorum
     ]
 }   
@@ -150,7 +150,7 @@ txnWithSameZxidEqual.children = {
         # txnWithSameZxidEqualInPROPOSEMessages,
         txnWithSameZxidEqualBetweenLocalHistoryAndPROPOSEMessages
     ],
-    "LeaderProcessACKEPOCHNoNewLeaderHasQuorumAction": [
+    "LeaderProcessACKEPOCHHasntBroadcastAction": [
         txnWithSameZxidEqualInPeerHistory,
         txnWithSameZxidEqualLocalToPeerHistory,
         txnWithSameZxidEqualBetweenLocalHistoryAndMessages
@@ -172,7 +172,7 @@ NEWLEADERMsgIsPrefixOfSenderLeader.children = {
         safety,
         nEWLEADERMsgSentByLeader
     ],
-    "LeaderProcessACKEPOCHNoNewLeaderHasQuorumAction": [
+    "LeaderProcessACKEPOCHHasntBroadcastAction": [
         leaderInDiscoveryImpliesNoNEWLEADERMsgs,
         nEWLEADERMsgSentByLeader
     ]
@@ -191,7 +191,7 @@ committedEntryExistsInLeaderHistory.children = {
     "LeaderProcessRequestAction": [
         nodeHistoryBoundByLastCommittedIndex
     ],
-    "LeaderProcessACKEPOCHNoNewLeaderHasQuorumAction": [
+    "LeaderProcessACKEPOCHHasntBroadcastAction": [
         committedEntryExistsInACKEPOCHQuorumHistory
     ]
 }
@@ -210,13 +210,13 @@ safety.children = {
         COMMITLDSentByNodeImpliesZxidCommittedInLog,
         txnWithSameZxidEqual
     ],
-    "LeaderProcessACKEPOCHNoNewLeaderHasQuorumAction": [
+    "LeaderProcessACKEPOCHHasntBroadcastAction": [
         committedEntryExistsInACKEPOCHQuorumHistory,        
     ],
     "LeaderProcessACKAction": [
         aCKMsgImpliesZxidInLog
     ],
-    "LeaderProcessACKLDHasBroadcastHasQuorumAction": [
+    "LeaderProcessACKLDHasntBroadcastAction": [
         committedEntryExistsInLeaderHistory
     ]
 }
