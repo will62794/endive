@@ -13,7 +13,7 @@ lemmaTRUEShim = StructuredProofNode("LemmaTrueShim", "1=1")
 
 leaderInLearnerSet = make_node("H_LeaderInLearnerSet")
 
-NodeLOOKINGImpliesNodeIdleState = make_node("H_NodeLOOKINGImpliesNodeIdleState")
+NodeLOOKINGImpliesELECTIONorDISCOVERY = make_node("H_NodeLOOKINGImpliesELECTIONorDISCOVERY")
 
 ACKEPOCHQuorumImpliesLeaderInSYNCHRONIZATIONorBROADCAST = make_node("H_ACKEPOCHQuorumImpliesLeaderInSYNCHRONIZATIONorBROADCAST")
 
@@ -107,6 +107,8 @@ committedEntryExistsOnQuorum.children = {
     ]
 }
 
+NodeLOOKINGImpliesEmptyInputBuffer = make_node("H_NodeLOOKINGImpliesEmptyInputBuffer")
+
 committedEntryExistsInACKEPOCHQuorumHistory = make_node("H_CommittedEntryExistsInACKEPOCHQuorumHistory")
 committedEntryExistsInACKEPOCHQuorumHistory.children = {
     "LeaderProcessRequestAction": [
@@ -119,10 +121,12 @@ committedEntryExistsInACKEPOCHQuorumHistory.children = {
         nodeHistoryBoundByLastCommittedIndex
     ],
     "UpdateLeaderAction":[
-        NodeLOOKINGImpliesNodeIdleState
+        # NodeLOOKINGImpliesELECTIONorDISCOVERY,
+        NodeLOOKINGImpliesEmptyInputBuffer
     ],
     "FollowLeaderMyselfAction":[
-        NodeLOOKINGImpliesNodeIdleState
+        # NodeLOOKINGImpliesELECTIONorDISCOVERY,
+        NodeLOOKINGImpliesEmptyInputBuffer
     ],
     "LeaderProcessACKEPOCHHasntBroadcastAction": [
         committedEntryExistsOnQuorum
@@ -162,7 +166,7 @@ txnWithSameZxidEqual.children = {
 
 
 COMMITLDSentByNodeImpliesZxidCommittedInLog.children = {
-    "LeaderProcessACKLDHasntBroadcastAction" : [
+    "LeaderProcessACKLDHasBroadcastAction" : [
         nodeHistoryBoundByLastCommittedIndex
     ]
 }

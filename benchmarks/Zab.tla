@@ -676,8 +676,7 @@ FollowerProcessNEWEPOCH(i, j) ==
                              IN Reply(i, j, m)
                           /\ zabState' = [zabState EXCEPT ![i] = SYNCHRONIZATION]
                         \*   /\ UNCHANGED violatedInvariants
-                    /\ UNCHANGED <<followerVars, learners, cepochRecv, ackeRecv,
-                            ackldRecv, state>>
+                    /\ UNCHANGED <<followerVars, learners, cepochRecv, ackeRecv, ackldRecv, state>>
                  \/ \* 2. Abnormal case - go back to election
                     /\ ~epochOk
                     /\ FollowerShutdown(i)
@@ -1525,12 +1524,13 @@ H_TxnWithSameZxidEqualBetweenLocalHistoryAndPROPOSEMessages ==
                     msgs[i][j][idx].mdata = history[i1][h2].value
 
 \* If a PROPOSE message has been sent with a particular zxid, then this zxid must be present
-\* in the sender's log.
+\* in the sender's log, and the sender must be a leader.
 H_PROPOSEMsgSentByNodeImpliesZxidInLog == 
     \A i,j \in Server : 
-        PendingPROPOSE(i,j) => 
-            \E idx \in DOMAIN history[j] : 
-                history[j][idx].zxid = msgs[j][i][1].mzxid
+        (PendingPROPOSE(i,j)) => 
+            /\ IsLeader(j)
+            /\ zabState[j] = BROADCAST
+            /\ \E idx \in DOMAIN history[j] : history[j][idx].zxid = msgs[j][i][1].mzxid
 
 \* If a COMMITLD message has been sent by a node, then the zxid in this message must be committed 
 \* in the sender's history.
@@ -1543,17 +1543,14 @@ H_COMMITLDSentByNodeImpliesZxidCommittedInLog ==
                 /\ lastCommitted[j].index >= idx
 
 \* If a node is LOOKING, then it must have an empty input buffer.
-NodeLOOKINGImpliesEmptyInputBuffer == 
+H_NodeLOOKINGImpliesEmptyInputBuffer == 
     \A i \in Server : 
         (state[i] = LOOKING) => 
             \A j \in Server : msgs[j][i] = << >>
 
 \* If a node is LOOKING, then it must be in DISCOVERY or ELECTION and have an empty input buffer.
-H_NodeLOOKINGImpliesNodeIdleState == 
-    /\ \A i \in Server : 
-        (state[i] = LOOKING) => 
-            (zabState[i] \in {ELECTION, DISCOVERY})
-    /\ NodeLOOKINGImpliesEmptyInputBuffer
+H_NodeLOOKINGImpliesELECTIONorDISCOVERY == 
+    \A i \in Server : (state[i] = LOOKING) => (zabState[i] \in {ELECTION, DISCOVERY})
 
 H_CommittedEntryExistsInNEWLEADERHistory ==
     \A s \in Server : 
