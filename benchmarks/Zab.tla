@@ -1541,11 +1541,18 @@ H_COMMITLDSentByNodeImpliesZxidCommittedInLog ==
                 /\ history[j][idx].zxid = msgs[j][i][1].mzxid  
                 /\ lastCommitted[j].index >= idx
 
-\* If a node is LOOKING, then it must be in DISCOVERY.
-H_NodeLOOKINGImpliesInDISCOVERY == 
+\* If a node is LOOKING, then it must have an empty input buffer.
+NodeLOOKINGImpliesEmptyInputBuffer == 
     \A i \in Server : 
         (state[i] = LOOKING) => 
+            \A j \in Server : msgs[j][i] = << >>
+
+\* If a node is LOOKING, then it must be in DISCOVERY or ELECTION and have an empty input buffer.
+H_NodeLOOKINGImpliesNodeIdleState == 
+    /\ \A i \in Server : 
+        (state[i] = LOOKING) => 
             (zabState[i] \in {ELECTION, DISCOVERY})
+    /\ NodeLOOKINGImpliesEmptyInputBuffer
 
 H_CommittedEntryExistsInNEWLEADERHistory ==
     \A s \in Server : 
@@ -1584,8 +1591,8 @@ H_CommittedEntryExistsInACKEPOCHQuorumHistory ==
             (LET msg == msgs[j][i][1]
                 ackeRecvUpdated == [ackeRecv EXCEPT ![i] = UpdateAckeRecv(@, j, msg.mepoch, msg.mhistory) ] IN
                 (
-                    /\ zabState[i] = DISCOVERY
-                    \* /\ state[i] = LEADING
+                    /\ zabState[i] \in {ELECTION, DISCOVERY}
+                    /\ state[i] = LEADING
                     /\ IsQuorum({a.sid: a \in ackeRecvUpdated[i]})
                 ) => 
                     LET initHistory == DetermineInitialHistoryFromArg(ackeRecvUpdated, i) IN

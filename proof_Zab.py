@@ -13,7 +13,7 @@ lemmaTRUEShim = StructuredProofNode("LemmaTrueShim", "1=1")
 
 leaderInLearnerSet = make_node("H_LeaderInLearnerSet")
 
-NodeLOOKINGImpliesInDISCOVERY = make_node("H_NodeLOOKINGImpliesInDISCOVERY")
+NodeLOOKINGImpliesNodeIdleState = make_node("H_NodeLOOKINGImpliesNodeIdleState")
 
 ACKEPOCHQuorumImpliesLeaderInSYNCHRONIZATIONorBROADCAST = make_node("H_ACKEPOCHQuorumImpliesLeaderInSYNCHRONIZATIONorBROADCAST")
 
@@ -119,7 +119,10 @@ committedEntryExistsInACKEPOCHQuorumHistory.children = {
         nodeHistoryBoundByLastCommittedIndex
     ],
     "UpdateLeaderAction":[
-        NodeLOOKINGImpliesInDISCOVERY
+        NodeLOOKINGImpliesNodeIdleState
+    ],
+    "FollowLeaderMyselfAction":[
+        NodeLOOKINGImpliesNodeIdleState
     ],
     "LeaderProcessACKEPOCHHasntBroadcastAction": [
         committedEntryExistsOnQuorum
