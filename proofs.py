@@ -448,11 +448,15 @@ class StructuredProof():
         stats["mean_in_degree"] = mean_in_degree
         stats["all_var_slices"] = all_var_slices
 
+
         # TODO: Could compute this more simply.
         all_vars = set()
         for x in all_var_slices:
             all_vars.update(set(x))
         stats["num_state_vars"] = len(all_vars)
+
+        stats["median_slice_size"] = median([len(s) for s in all_var_slices])
+        stats["median_slice_pct"] = stats["median_slice_size"] / len(all_vars)
 
         f = open(f"benchmarks/{self.specname}_proofstats.json", 'w')
         json.dump(stats, f, indent=2)
@@ -460,8 +464,10 @@ class StructuredProof():
 
         # Save proof graph stats in LaTeX format too.
         f = open(f"benchmarks/{self.specname}_proofstats.tex", 'w')
-        f.write("\\newcommand*{\\%snumstatevars}{%d}\n" % (self.specname, stats["num_state_vars"]))
-        f.write("\\newcommand*{\\%smeanindegree}{%d}\n" % (self.specname, stats["mean_in_degree"]))
+        for stat in ["num_state_vars", "mean_in_degree", "median_slice_size"]:
+            f.write("\\newcommand*{\\%s%s}{%d}\n" % (self.specname.replace("_", ""), stat.replace("_", ""), stats[stat]))
+        stat = "median_slice_pct"
+        f.write("\\newcommand*{\\%s%s}{%.2f}\n" % (self.specname.replace("_", ""), stat.replace("_", ""), stats[stat]))
         f.close()
 
 
