@@ -9,6 +9,7 @@ from mc import CTI
 import mc
 import logging
 import json
+import dot2tex
 
 def mean(S):
     return sum(S) / len(S)
@@ -636,6 +637,13 @@ class StructuredProof():
         
         # Store all nodes.
         self.add_node_to_dot_graph(dot, self.root, seen=set())
+        
+        texcode = dot2tex.dot2tex(dot.source, format='tikz', figpreamble="\Large", autosize=True, crop=False, figonly=True, texmode="math")
+        # print(texcode)
+        f = open(out_file + ".tex", 'w')
+        f.write(texcode)
+        f.close()
+
 
         # print("Final proof graph:")
         # print(dot.source)
