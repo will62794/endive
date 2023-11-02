@@ -2191,6 +2191,7 @@ class InductiveInvGen():
         import proof_Paxos
         import proof_EPaxos
         import proof_Zab
+        import proof_Boulanger
 
         #
         # Set the specified spec appropriately.
@@ -2217,6 +2218,10 @@ class InductiveInvGen():
             root = proof_adr.adr_root
             actions = proof_adr.adr_actions
             nodes = proof_adr.adr_nodes
+        elif self.specname == "Boulanger":
+            root = proof_Boulanger.root
+            actions = proof_Boulanger.actions
+            nodes = proof_Boulanger.nodes
         elif self.specname == "consensus_epr":
             if self.proof_struct_tag == "demo":
                 root = proof_consensus_epr_demo.root
