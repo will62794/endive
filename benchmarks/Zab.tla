@@ -1300,7 +1300,7 @@ Spec == Init /\ [][Next]_vars
 \* Define safety properties of Zab.
 
 \* Inv1 == ~(\E s \in Server : state[s] = LEADING)
-DebugInv1 == ~(\E s \in Server : state[s] = LEADING /\ Len(history[s]) > 0)
+DebugInv1 == ~(\E s \in Server : state[s] = LEADING /\ Len(history[s]) > 0 /\ lastCommitted[s].index > 0)
 
 \* ShouldNotBeTriggered == \A p \in DOMAIN violatedInvariants: violatedInvariants[p] = FALSE
 
