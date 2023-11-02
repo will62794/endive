@@ -421,7 +421,7 @@ H_QuorumsSafeAtTerms ==
     \A s \in Server : (state[s] = Primary) =>
         (\E Q \in Quorums(Server) : \A n \in Q : currentTerm[n] >= currentTerm[s])
 
-H_TermsOfEntriesGrowMonotonically ==
+H_TermsGrowMonotonically ==
     \A s \in Server : \A i,j \in DOMAIN log[s] : (i <= j) => (log[s][i] <= log[s][j])
 
 H_PrimaryTermAtLeastAsLargeAsLogTerms == 
@@ -565,7 +565,7 @@ H_ConfigsNonempty ==
 \*     /\ H_OnePrimaryPerTerm
 \*     /\ H_PrimaryHasEntriesItCreated
 \*     /\ H_QuorumsSafeAtTerms
-\*     /\ H_TermsOfEntriesGrowMonotonically
+\*     /\ H_TermsGrowMonotonically
 \*     /\ LogMatching
 \*     /\ H_UniformLogEntriesInTerm
 

@@ -44,7 +44,7 @@ currentTermsAtLeastLargeAsLogTermsForPrimary.children = {
     ]
 }
 
-termsGrowMonotonically = StructuredProofNode("TermsOfEntriesGrowMonotonically", "H_TermsOfEntriesGrowMonotonically")
+termsGrowMonotonically = StructuredProofNode("TermsGrowMonotonically", "H_TermsGrowMonotonically")
 termsGrowMonotonically.children = {
     "ClientRequestAction": [
         currentTermsAtLeastLargeAsLogTermsForPrimary

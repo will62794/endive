@@ -44,7 +44,7 @@ currentTermsAtLeastLargeAsLogTermsForPrimary.children = {
     ]
 }
 
-termsGrowMonotonically = StructuredProofNode("TermsOfEntriesGrowMonotonically", "H_TermsOfEntriesGrowMonotonically")
+termsGrowMonotonically = StructuredProofNode("TermsGrowMonotonically", "H_TermsGrowMonotonically")
 termsGrowMonotonically.children = {
     "ClientRequestAction": [
         currentTermsAtLeastLargeAsLogTermsForPrimary
@@ -100,7 +100,7 @@ committedEntryExistsOnQuorum.children = {
 }
 committedEntryExistsOnQuorum.ctigen_typeok = "TypeOKSmallCommitted"
 
-coreLogInv = StructuredProofNode("CoreLogInv", "H_UniformLogEntriesInTerm_AND_TermsOfEntriesGrowMonotonically")
+coreLogInv = StructuredProofNode("CoreLogInv", "H_UniformLogEntriesInTerm_AND_TermsGrowMonotonically")
 coreLogInv.children = {
     "ClientRequestAction": [
         logMatching,

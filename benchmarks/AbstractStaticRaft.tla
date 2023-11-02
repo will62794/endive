@@ -292,7 +292,7 @@ H_QuorumsSafeAtTerms ==
     \A s \in Server : (state[s] = Primary) =>
         (\E Q \in Quorums(Server) : \A n \in Q : currentTerm[n] >= currentTerm[s])
 
-H_TermsOfEntriesGrowMonotonically ==
+H_TermsGrowMonotonically ==
     \A s \in Server : \A i,j \in DOMAIN log[s] : (i <= j) => (log[s][i] <= log[s][j])
 
 H_PrimaryTermAtLeastAsLargeAsLogTerms == 
@@ -386,11 +386,11 @@ H_UniformLogEntriesInTerm ==
 \*     /\ H_CommittedEntryExistsOnQuorum
 \*     /\ H_LogsLaterThanCommittedMustHaveCommitted
 
-H_UniformLogEntriesInTerm_AND_TermsOfEntriesGrowMonotonically == 
+H_UniformLogEntriesInTerm_AND_TermsGrowMonotonically == 
     /\ H_UniformLogEntriesInTerm
-    /\ H_TermsOfEntriesGrowMonotonically
+    /\ H_TermsGrowMonotonically
 
-H_CoreLogInv == H_UniformLogEntriesInTerm_AND_TermsOfEntriesGrowMonotonically
+H_CoreLogInv == H_UniformLogEntriesInTerm_AND_TermsGrowMonotonically
 
 \* Invariant developed during inductive proof decomposition experimenting.
 \* 08/19/2023
@@ -406,7 +406,7 @@ HumanDecompInd ==
     /\ H_OnePrimaryPerTerm
     /\ H_PrimaryHasEntriesItCreated
     /\ H_QuorumsSafeAtTerms
-    /\ H_TermsOfEntriesGrowMonotonically
+    /\ H_TermsGrowMonotonically
     /\ H_LogMatching
     /\ H_UniformLogEntriesInTerm
 

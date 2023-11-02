@@ -603,7 +603,7 @@ class StructuredProof():
     def add_node_to_dot_graph(self, dot, node, seen=set()):
         """ Add this node and its children, recursively, to DOT graph."""
         color = "black"
-        penwidth="3"
+        penwidth="2"
         if node.expr == self.safety_goal:
             color="green"
             penwidth="5"
@@ -611,7 +611,7 @@ class StructuredProof():
         if node.expr in seen:
             return
         
-        dot.node(node.expr, color=color, shape="ellipse", penwidth=penwidth, label=node.expr.replace("H_", ""))
+        dot.node(node.expr, color=color, shape="box", style="rounded corners", penwidth=penwidth, label=node.expr.replace("H_", ""))
         seen.add(node.expr)
 
         # Add sub-nodes for each action child.
