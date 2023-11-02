@@ -168,7 +168,13 @@ a \prec b == \/ a[1] < b[1]
 *************)
 
 \* BEGIN TRANSLATION  (this begins the translation of the PlusCal code)
-VARIABLES num, flag, pc, unchecked, max, nxt, previous
+VARIABLES num
+VARIABLE flag
+VARIABLE pc
+VARIABLE unchecked
+VARIABLE max
+VARIABLE nxt
+VARIABLE previous
 
 vars == << num, flag, pc, unchecked, max, nxt, previous >>
 
@@ -199,25 +205,34 @@ e1(self) == /\ pc[self] = "e1"
             /\ UNCHANGED << num, nxt, previous >>
 
 e2(self) == /\ pc[self] = "e2"
-            /\ IF unchecked[self] # {}
-                  THEN /\ \E i \in unchecked[self]:
-                            /\ unchecked' = [unchecked EXCEPT ![self] = unchecked[self] \ {i}]
-                            /\ IF num[i] > max[self]
-                                  THEN /\ max' = [max EXCEPT ![self] = num[i]]
-                                  ELSE /\ TRUE
-                                       /\ max' = max
-                       /\ pc' = [pc EXCEPT ![self] = "e2"]
-                  ELSE /\ pc' = [pc EXCEPT ![self] = "e3"]
-                       /\ UNCHANGED << unchecked, max >>
+            /\ unchecked[self] # {}
+            /\ \E i \in unchecked[self]:
+                /\ unchecked' = [unchecked EXCEPT ![self] = unchecked[self] \ {i}]
+                /\ IF num[i] > max[self]
+                        THEN /\ max' = [max EXCEPT ![self] = num[i]]
+                        ELSE /\ TRUE
+                            /\ max' = max
+            /\ pc' = [pc EXCEPT ![self] = "e2"]
             /\ UNCHANGED << num, flag, nxt, previous >>
 
-e3(self) == /\ pc[self] = "e3"
-            /\ \/ /\ \E k \in Nats:
-                       num' = [num EXCEPT ![self] = k]
-                  /\ pc' = [pc EXCEPT ![self] = "e3"]
-               \/ /\ num' = [num EXCEPT ![self] = max[self] + 1]
-                  /\ pc' = [pc EXCEPT ![self] = "e4"]
-            /\ UNCHANGED << flag, unchecked, max, nxt, previous >>
+e2_unchecked_empty(self) == 
+            /\ pc[self] = "e2"
+            /\ unchecked[self] = {}
+            /\ pc' = [pc EXCEPT ![self] = "e3"]
+            /\ UNCHANGED << unchecked, max >>
+            /\ UNCHANGED << num, flag, nxt, previous >>
+
+e3(self) == 
+    /\ pc[self] = "e3"
+    /\ \E k \in Nats : num' = [num EXCEPT ![self] = k]
+    /\ pc' = [pc EXCEPT ![self] = "e3"]
+    /\ UNCHANGED << flag, unchecked, max, nxt, previous >>
+
+e3Max(self) == 
+        /\ pc[self] = "e3"
+        /\ num' = [num EXCEPT ![self] = max[self] + 1]
+        /\ pc' = [pc EXCEPT ![self] = "e4"]
+        /\ UNCHANGED << flag, unchecked, max, nxt, previous >>
 
 e4(self) == /\ pc[self] = "e4"
             /\ \/ /\ flag' = [flag EXCEPT ![self] = ~ flag[self]]
@@ -232,8 +247,7 @@ e4(self) == /\ pc[self] = "e4"
 
 w1(self) == /\ pc[self] = "w1"
             /\ IF unchecked[self] # {}
-                  THEN /\ \E i \in unchecked[self]:
-                            nxt' = [nxt EXCEPT ![self] = i]
+                  THEN /\ \E i \in unchecked[self] : nxt' = [nxt EXCEPT ![self] = i]
                        /\ ~ flag[nxt'[self]]
                        /\ previous' = [previous EXCEPT ![self] = -1]
                        /\ pc' = [pc EXCEPT ![self] = "w2"]
@@ -262,8 +276,7 @@ cs(self) == /\ pc[self] = "cs"
             /\ UNCHANGED << num, flag, unchecked, max, nxt, previous >>
 
 exit(self) == /\ pc[self] = "exit"
-              /\ \/ /\ \E k \in Nats:
-                         num' = [num EXCEPT ![self] = k]
+              /\ \/ /\ \E k \in Nats: num' = [num EXCEPT ![self] = k]
                     /\ pc' = [pc EXCEPT ![self] = "exit"]
                  \/ /\ num' = [num EXCEPT ![self] = 0]
                     /\ pc' = [pc EXCEPT ![self] = "ncs"]
@@ -275,7 +288,9 @@ p(self) == ncs(self) \/ e1(self) \/ e2(self) \/ e3(self) \/ e4(self)
 ncsAction ==  TRUE /\ \E self \in Procs : ncs(self) 
 e1Action ==   TRUE /\ \E self \in Procs : e1(self) 
 e2Action ==   TRUE /\ \E self \in Procs : e2(self) 
+e2UncheckedEmptyAction ==   TRUE /\ \E self \in Procs : e2_unchecked_empty(self) 
 e3Action ==   TRUE /\ \E self \in Procs : e3(self) 
+e3MaxAction ==   TRUE /\ \E self \in Procs : e3Max(self) 
 e4Action ==   TRUE /\ \E self \in Procs : e4(self)
 w1Action ==   TRUE /\ \E self \in Procs : w1(self) 
 w2Action ==   TRUE /\ \E self \in Procs : w2(self) 
@@ -317,6 +332,52 @@ TypeOK == /\ num \in [Procs -> Nats]
           /\ previous \in [Procs -> Nats \cup {-1}]             
 
 DebugInv == ~(\E pi \in Procs : pc[pi] = "cs")
+
+(***************************************************************************)
+(* Before(i, j) is a condition that implies that num[i] > 0 and, if j is   *)
+(* trying to enter its critical section and i does not change num[i], then *)
+(* j either has or will choose a value of num[j] for which                 *)
+(*                                                                         *)
+(*     <<num[i],i>> \prec <<num[j],j>>                                     *)
+(*                                                                         *)
+(* is true.                                                                *)
+(***************************************************************************)
+Before(i,j) == /\ num[i] > 0
+               /\ \/ pc[j] \in {"ncs", "e1", "exit"}
+                  \/ /\ pc[j] = "e2"
+                     /\ \/ i \in unchecked[j]
+                        \/ max[j] >= num[i]
+                        \/ (j > i) /\ (max[j] + 1 = num[i])
+                  \/ /\ pc[j] = "e3"
+                     /\ \/ max[j] >= num[i]
+                        \/ (j > i) /\ (max[j] + 1 = num[i])
+                  \/ /\ pc[j] \in {"e4", "w1", "w2"}
+                     /\ <<num[i],i>> \prec <<num[j],j>>
+                     /\ (pc[j] \in {"w1", "w2"}) => (i \in unchecked[j])
+                  \/ /\ num[i] = 1
+                     /\ i < j
+
+(***************************************************************************)
+(* Inv is the complete inductive invariant.                                *)
+(***************************************************************************)  
+Inv == 
+    /\ TypeOK 
+
+H_L1 == \A i \in Procs : (pc[i] \in {"ncs", "e1", "e2"}) => (num[i] = 0)
+H_L2 == \A i \in Procs : (pc[i] \in {"e4", "w1", "w2", "cs"}) => (num[i] # 0)
+H_L3 == \A i \in Procs : (pc[i] \in {"e2", "e3"}) => flag[i] 
+H_L4 == \A i \in Procs : (pc[i] = "w2") => (nxt[i] # i)
+H_L5 == \A i \in Procs : (pc[i] \in {"e2", "w1", "w2"}) => i \notin unchecked[i]
+H_L6 == \A i \in Procs : (pc[i] \in {"w1", "w2"}) => \A j \in (Procs \ unchecked[i]) \ {i} : Before(i, j)
+H_L7 == \A i \in Procs : 
+        (/\ pc[i] = "w2"
+         /\ \/ (pc[nxt[i]] = "e2") /\ (i \notin unchecked[nxt[i]])
+            \/ pc[nxt[i]] = "e3") => max[nxt[i]] >= num[i]
+H_L8 == \A i \in Procs : (   /\ pc[i] = "w2"
+                            /\ previous[i] # -1 
+                            /\ previous[i] # num[nxt[i]]
+                            /\ pc[nxt[i]] \in {"e4", "w1", "w2", "cs"}) => Before(i, nxt[i])             
+H_L9 == \A i \in Procs : (pc[i] = "cs") => \A j \in Procs \ {i} : Before(i, j)
 
 
 \* Sum the elements in the range of a function.
