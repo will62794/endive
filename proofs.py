@@ -14,6 +14,10 @@ import dot2tex
 def mean(S):
     return sum(S) / len(S)
 
+def median(S):
+    S.sort()
+    return S[len(S)//2]
+
 class StructuredProofNode():
     """ Single node (i.e. lemma) of a structured proof tree. """
     def __init__(self, name="", expr="", children=None, parent=None, load_from_obj = None):
@@ -405,6 +409,7 @@ class StructuredProof():
         spec_lines += f"\* num proof graph nodes: {len(nodes)}\n"
         in_degrees = list(map(lambda n : n.num_children(), nodes))
         mean_in_degree = sum(in_degrees)/len(nodes)
+        median_in_degree = median(in_degrees)
         sorted_in_degrees = list(sorted(in_degrees))
         median_in_degree = sorted_in_degrees[len(sorted_in_degrees)//2]
         spec_lines += f"\* mean in-degree: {mean_in_degree}\n"
@@ -661,11 +666,10 @@ class StructuredProof():
         self.add_node_to_dot_graph(dot, self.root, seen=set())
 
         # Convert to TeX.
-        texcode = dot2tex.dot2tex(dot.source, format='tikz', figpreamble="\Large", autosize=True, crop=False, figonly=True, texmode="math")
-        # print(texcode)
-        f = open(out_file + ".tex", 'w')
-        f.write(texcode)
-        f.close()
+        # texcode = dot2tex.dot2tex(dot.source, output="dot2tex.log", format='tikz', figpreamble="\Large", autosize=True, crop=False, figonly=True, texmode="math")
+        # f = open(out_file + ".tex", 'w')
+        # f.write(texcode)
+        # f.close()
 
 
         # print("Final proof graph:")
