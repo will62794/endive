@@ -600,7 +600,7 @@ class StructuredProof():
 
         return html
 
-    def add_node_to_dot_graph(self, dot, node, seen=set()):
+    def add_node_to_dot_graph(self, dot, node, seen=set(), omit_labels=False):
         """ Add this node and its children, recursively, to DOT graph."""
         color = "black"
         penwidth="2"
@@ -611,13 +611,22 @@ class StructuredProof():
         if node.expr in seen:
             return
         
-        dot.node(node.expr, color=color, shape="box", style="rounded corners", penwidth=penwidth, label=node.expr.replace("H_", ""))
+        if omit_labels:
+            label = "L"
+        else:
+            label = node.expr.replace("H_", "")
+
+        dot.node(node.expr, color=color, shape="box", style="rounded corners", penwidth=penwidth, label=label)
         seen.add(node.expr)
 
         # Add sub-nodes for each action child.
         for action in node.children:
             action_node_id = node.expr + "_" + action
-            dot.node(action_node_id, label=action.replace("Action", ""), style="filled", fillcolor="lightgray")
+            if omit_labels:
+                label = "A"
+            else:
+                label = action.replace("Action", "")
+            dot.node(action_node_id, label=label, style="filled", fillcolor="lightgray")
             dot.edge(action_node_id, node.expr)
 
         for action in node.children:
@@ -625,7 +634,7 @@ class StructuredProof():
                 action_node_id = node.expr + "_" + action
                 # dot.edge(c.expr, node.expr)
                 dot.edge(c.expr, action_node_id)
-                self.add_node_to_dot_graph(dot, c, seen=seen)
+                self.add_node_to_dot_graph(dot, c, seen=seen, omit_labels=omit_labels)
 
 
     def save_as_dot(self, out_file):
@@ -637,7 +646,8 @@ class StructuredProof():
         
         # Store all nodes.
         self.add_node_to_dot_graph(dot, self.root, seen=set())
-        
+
+        # Convert to TeX.
         texcode = dot2tex.dot2tex(dot.source, format='tikz', figpreamble="\Large", autosize=True, crop=False, figonly=True, texmode="math")
         # print(texcode)
         f = open(out_file + ".tex", 'w')
