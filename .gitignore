@@ -68,4 +68,4 @@ apacheck_*.sh
 *.aux
 *IndDecompProof*
 *ApaIndProofCheck*
-*_proofstats.json
+*_proofstats.*

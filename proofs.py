@@ -458,6 +458,12 @@ class StructuredProof():
         json.dump(stats, f, indent=2)
         f.close()
 
+        # Save proof graph stats in LaTeX format too.
+        f = open(f"benchmarks/{self.specname}_proofstats.tex", 'w')
+        f.write("\\newcommand*{\\%snumstatevars}{%d}\n" % (self.specname, stats["num_state_vars"]))
+        f.write("\\newcommand*{\\%smeanindegree}{%d}\n" % (self.specname, stats["mean_in_degree"]))
+        f.close()
+
 
     def serialize(self, include_ctis=True, cti_hashes_only=False):
         return {
