@@ -21,13 +21,13 @@ ACKEPOCHQuorumImpliesAcceptedEpochCorrect = make_node("H_ACKEPOCHQuorumImpliesAc
 
 nEWLEADERMsgSentByLeader = make_node("H_NEWLEADERMsgSentByLeader")
 nEWLEADERMsgSentByLeader.children = {
-    "TimeoutNoQuorumAction": [
-        leaderInLearnerSet
-    ],
-    "LeaderProcessACKEPOCHHasBroadcastAction": [   
-        ACKEPOCHQuorumImpliesAcceptedEpochCorrect,
-        ACKEPOCHQuorumImpliesLeaderInSYNCHRONIZATIONorBROADCAST
-    ]
+    # "TimeoutNoQuorumAction": [
+    #     leaderInLearnerSet
+    # ],
+    # "LeaderProcessACKEPOCHHasBroadcastAction": [   
+    #     ACKEPOCHQuorumImpliesAcceptedEpochCorrect,
+    #     ACKEPOCHQuorumImpliesLeaderInSYNCHRONIZATIONorBROADCAST
+    # ]
 }
 
 leaderInDiscoveryImpliesNoNEWLEADERMsgs = make_node("H_LeaderInDiscoveryImpliesNoNEWLEADERMsgs")
@@ -38,9 +38,9 @@ leaderInDiscoveryImpliesNoNEWLEADERMsgs.children = {
     "FollowLeaderMyselfAction": [
         nEWLEADERMsgSentByLeader
     ],
-    "LeaderProcessACKEPOCHHasBroadcastAction": [
-        ACKEPOCHQuorumImpliesLeaderInSYNCHRONIZATIONorBROADCAST
-    ]
+    # "LeaderProcessACKEPOCHHasBroadcastAction": [
+    #     ACKEPOCHQuorumImpliesLeaderInSYNCHRONIZATIONorBROADCAST
+    # ]
 }
 
 NEWLEADERMsgIsPrefixOfSenderLeader = make_node("H_NEWLEADERMsgIsPrefixOfSenderLeader")
@@ -137,9 +137,9 @@ committedEntryExistsInACKEPOCHQuorumHistory.children = {
     "LeaderProcessACKEPOCHHasntBroadcastAction": [
         committedEntryExistsOnQuorum
     ],
-    "LeaderProcessACKEPOCHHasBroadcastAction": [
-        committedEntryExistsOnQuorum
-    ]
+    # "LeaderProcessACKEPOCHHasBroadcastAction": [
+    #     committedEntryExistsOnQuorum
+    # ]
 }   
 
 txnWithSameZxidEqualBetweenLocalHistoryAndMessages = make_node("H_TxnWithSameZxidEqualBetweenLocalHistoryAndMessages")
@@ -172,9 +172,9 @@ txnWithSameZxidEqual.children = {
 
 
 COMMITLDSentByNodeImpliesZxidCommittedInLog.children = {
-    "LeaderProcessACKLDHasBroadcastAction" : [
-        nodeHistoryBoundByLastCommittedIndex
-    ]
+    # "LeaderProcessACKLDHasBroadcastAction" : [
+    #     nodeHistoryBoundByLastCommittedIndex
+    # ]
 }
 
 
