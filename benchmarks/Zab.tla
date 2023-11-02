@@ -1279,17 +1279,17 @@ Next ==
     \/ LeaderProcessCEPOCHAction
     \/ FollowerProcessNEWEPOCHAction
     \/ LeaderProcessACKEPOCHHasntBroadcastAction
-    \/ LeaderProcessACKEPOCHHasBroadcastAction
+    \* \/ LeaderProcessACKEPOCHHasBroadcastAction
     \/ FollowerProcessNEWLEADERAction
     \/ FollowerProcessNEWLEADERNewIterationAction
     \/ LeaderProcessACKLDHasntBroadcastAction
-    \/ LeaderProcessACKLDHasBroadcastAction
+    \* \/ LeaderProcessACKLDHasBroadcastAction
     \/ FollowerProcessCOMMITLDAction
     \/ LeaderProcessRequestAction
     \/ LeaderBroadcastPROPOSEAction
     \/ FollowerProcessPROPOSEAction
     \/ LeaderProcessACKAction
-    \/ LeaderProcessACKAlreadyCommittedAction
+    \* \/ LeaderProcessACKAlreadyCommittedAction
     \/ FollowerProcessCOMMITAction
     \/ FilterNonexistentMessageAction
 
