@@ -515,6 +515,7 @@ class StructuredProof():
         if include_dot:
             print(f"Saving latest proof as DOT to '{dot_filename}'")
             self.save_as_dot(dot_filename)
+            self.save_as_dot(dot_filename, omit_labels=True)
 
         print(f"Finished saving proof objects.")
 
@@ -655,7 +656,7 @@ class StructuredProof():
                 self.add_node_to_dot_graph(dot, c, seen=seen, omit_labels=omit_labels)
 
 
-    def save_as_dot(self, out_file):
+    def save_as_dot(self, out_file, omit_labels=False):
         """ Generate DOT graph representation of this structured proof. """
         dot = graphviz.Digraph('proof-graph', strict=True, comment='Proof Structure')  
         # dot.graph_attr["rankdir"] = "LR"
@@ -663,18 +664,24 @@ class StructuredProof():
         dot.node_attr["shape"] = "box"
         
         # Store all nodes.
-        self.add_node_to_dot_graph(dot, self.root, seen=set())
-
-        # Convert to TeX.
-        # texcode = dot2tex.dot2tex(dot.source, output="dot2tex.log", format='tikz', figpreamble="\Large", autosize=True, crop=False, figonly=True, texmode="math")
-        # f = open(out_file + ".tex", 'w')
-        # f.write(texcode)
-        # f.close()
+        self.add_node_to_dot_graph(dot, self.root, seen=set(), omit_labels=omit_labels)
 
 
         # print("Final proof graph:")
         # print(dot.source)
-        dot.render(out_file)
+        if omit_labels:
+            dot.render(out_file + "_nolabels")
+            tex_out_file = out_file + "_nolabels.tex"
+        else:
+            dot.render(out_file)
+            tex_out_file = out_file + ".tex"
+
+        # Convert to TeX.
+        texcode = dot2tex.dot2tex(dot.source, output="dot2tex.log", format='tikz', figpreamble="\Large", autosize=True, crop=False, figonly=True, texmode="math")
+        f = open(tex_out_file, 'w')
+        f.write(texcode)
+        f.close()
+
         return dot.source
 
     def get_node_by_name_rec(self, start_node, name, seen=set()):
