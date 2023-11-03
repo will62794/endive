@@ -176,6 +176,9 @@ committedEntryExistsInACKEPOCHQuorumHistory.children = {
     "LeaderProcessACKEPOCHHasntBroadcastAction": [
         committedEntryExistsOnQuorum
     ],
+    "FollowerProcessCOMMITAction": [
+        COMMITSentByNodeImpliesZxidInLog
+    ]
     # "LeaderProcessACKEPOCHHasBroadcastAction": [
     #     committedEntryExistsOnQuorum
     # ]
