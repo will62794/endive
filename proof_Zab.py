@@ -82,6 +82,8 @@ ACKMsgInFlightImpliesLeaderInBROADCAST = make_node("H_ACKMsgInFlightImpliesLeade
 
 LeaderinBROADCASTImpliesNoNEWLEADERInFlight = make_node("H_LeaderinBROADCASTImpliesNoNEWLEADERInFlight")
 
+ACKLDMsgImpliesZxidInLog = make_node("H_ACKLDMsgImpliesZxidInLog")
+
 committedEntryExistsInNEWLEADERHistory = make_node("H_CommittedEntryExistsInNEWLEADERHistory")
 committedEntryExistsInNEWLEADERHistory.children = {
     "FollowerProcessCOMMITLDAction": [
@@ -104,10 +106,12 @@ committedEntryExistsInNEWLEADERHistory.children = {
     "LeaderProcessACKEPOCHHasntBroadcastAction": [
         committedEntryExistsInACKEPOCHQuorumHistory,
         nodeHistoryBoundByLastCommittedIndex
+    ],
+    "LeaderProcessACKLDHasntBroadcastAction": [
+        ACKLDMsgImpliesZxidInLog
     ]
 }
 
-ACKLDMsgImpliesZxidInLog = make_node("H_ACKLDMsgImpliesZxidInLog")
 
 txnWithSameZxidEqual = make_node("H_TxnWithSameZxidEqual")
 
