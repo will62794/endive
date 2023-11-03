@@ -677,10 +677,12 @@ class StructuredProof():
             tex_out_file = out_file + ".tex"
 
         # Convert to TeX.
-        texcode = dot2tex.dot2tex(dot.source, output="dot2tex.log", format='tikz', figpreamble="\Large", autosize=True, crop=False, figonly=True, texmode="math")
-        f = open(tex_out_file, 'w')
-        f.write(texcode)
-        f.close()
+        save_as_tex = True
+        if save_as_tex:
+            texcode = dot2tex.dot2tex(dot.source, output="dot2tex.log", format='tikz', figpreamble="\Large", autosize=True, crop=False, figonly=True, texmode="math")
+            f = open(tex_out_file, 'w')
+            f.write(texcode)
+            f.close()
 
         return dot.source
 
