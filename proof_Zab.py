@@ -74,12 +74,35 @@ COMMITLDSentByNodeImpliesZxidCommittedInLog = make_node("H_COMMITLDSentByNodeImp
 
 PROPOSEMsgSentByNodeImpliesZxidInLog = make_node("H_PROPOSEMsgSentByNodeImpliesZxidInLog")
 
+committedEntryExistsInACKEPOCHQuorumHistory = make_node("H_CommittedEntryExistsInACKEPOCHQuorumHistory")
+
+ServerInEntryAckSidImpliesHasEntry = make_node("H_ServerInEntryAckSidImpliesHasEntry")
+
+ACKMsgInFlightImpliesLeaderInBROADCAST = make_node("H_ACKMsgInFlightImpliesLeaderInBROADCAST")
+
+LeaderinBROADCASTImpliesNoNEWLEADERInFlight = make_node("H_LeaderinBROADCASTImpliesNoNEWLEADERInFlight")
+
 committedEntryExistsInNEWLEADERHistory = make_node("H_CommittedEntryExistsInNEWLEADERHistory")
 committedEntryExistsInNEWLEADERHistory.children = {
     "FollowerProcessCOMMITLDAction": [
         COMMITLDSentByNodeImpliesZxidCommittedInLog
     ],
     "LeaderProcessRequestAction": [
+        nodeHistoryBoundByLastCommittedIndex
+    ],
+    "FollowerProcessCOMMITAction": [
+        COMMITSentByNodeImpliesZxidInLog
+    ],
+    "FollowerProcessNEWLEADERAction": [
+        NEWLEADERMsgIsPrefixOfSenderLeader,
+    ],
+    "LeaderProcessACKAction": [
+        # ServerInEntryAckSidImpliesHasEntry,
+        # LeaderinBROADCASTImpliesNoNEWLEADERInFlight,
+        ACKMsgInFlightImpliesLeaderInBROADCAST
+    ],
+    "LeaderProcessACKEPOCHHasntBroadcastAction": [
+        committedEntryExistsInACKEPOCHQuorumHistory,
         nodeHistoryBoundByLastCommittedIndex
     ]
 }
@@ -88,7 +111,6 @@ ACKLDMsgImpliesZxidInLog = make_node("H_ACKLDMsgImpliesZxidInLog")
 
 txnWithSameZxidEqual = make_node("H_TxnWithSameZxidEqual")
 
-committedEntryExistsInACKEPOCHQuorumHistory = make_node("H_CommittedEntryExistsInACKEPOCHQuorumHistory")
 
 committedEntryExistsOnQuorum = make_node("H_CommittedEntryExistsOnQuorum")
 committedEntryExistsOnQuorum.children = {

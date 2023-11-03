@@ -1611,6 +1611,24 @@ H_CommittedEntryExistsInACKEPOCHQuorumHistory ==
                         /\ k = idx
                         /\ TxnEqual(history[s][idx], initHistory[k]))
 
+H_ServerInEntryAckSidImpliesHasEntry == 
+    \A s,t \in Server : 
+    \A ind \in DOMAIN history[s]:
+        (state[s] = LEADING /\ t \in history[s][ind].ackSid) =>
+            \E indt \in DOMAIN history[t] : 
+                TxnEqual(history[t][indt], history[s][ind])
+
+\* If an ACK message is in flight, the receiver must be a leader in BROADCAST.
+H_ACKMsgInFlightImpliesLeaderInBROADCAST == 
+    \A i,j \in Server : 
+        (PendingACK(i,j) /\ IsLeader(j)) => 
+            zabState[j] = BROADCAST
+
+\* If a leader is in BROADCAST, no NEWLEADER messages should be in-flight
+H_LeaderinBROADCASTImpliesNoNEWLEADERInFlight == 
+  (\E s \in Server : state[s] = LEADING /\ zabState = BROADCAST) =>
+    (\A i,j \in Server :  ~PendingNEWLEADER(i,j))
+
 \* If an ACK message exists from S for a given zxid, then that zxid must be present in the sender's history.
 H_ACKMsgImpliesZxidInLog == 
     \A i,j \in Server : 
