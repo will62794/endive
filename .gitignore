@@ -69,4 +69,4 @@ apacheck_*.sh
 *IndDecompProof*
 *ApaIndProofCheck*
 *_proofstats.*
-*.dot.tex
+*.dot*.tex
