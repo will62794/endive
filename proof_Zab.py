@@ -78,7 +78,21 @@ committedEntryExistsInACKEPOCHQuorumHistory = make_node("H_CommittedEntryExistsI
 
 ServerInEntryAckSidImpliesHasEntry = make_node("H_ServerInEntryAckSidImpliesHasEntry")
 
-ACKMsgInFlightImpliesLeaderInBROADCAST = make_node("H_ACKMsgInFlightImpliesLeaderInBROADCAST")
+LeaderInBROADCASTImpliesLearnerInBROADCAST = make_node("H_LeaderInBROADCASTImpliesLearnerInBROADCAST")
+
+PROPOSEMsgInFlightImpliesNodesInBROADCAST = make_node("H_PROPOSEMsgInFlightImpliesNodesInBROADCAST")
+PROPOSEMsgInFlightImpliesNodesInBROADCAST.children = {
+    "LeaderBroadcastPROPOSEAction": [
+        LeaderInBROADCASTImpliesLearnerInBROADCAST
+    ]
+}
+
+ACKMsgInFlightImpliesNodesInBROADCAST = make_node("H_ACKMsgInFlightImpliesNodesInBROADCAST")
+ACKMsgInFlightImpliesNodesInBROADCAST.children = {
+    "FollowerProcessPROPOSEAction": [
+        PROPOSEMsgInFlightImpliesNodesInBROADCAST
+    ]
+}
 
 LeaderinBROADCASTImpliesNoNEWLEADERInFlight = make_node("H_LeaderinBROADCASTImpliesNoNEWLEADERInFlight")
 
@@ -101,7 +115,7 @@ committedEntryExistsInNEWLEADERHistory.children = {
     "LeaderProcessACKAction": [
         # ServerInEntryAckSidImpliesHasEntry,
         # LeaderinBROADCASTImpliesNoNEWLEADERInFlight,
-        ACKMsgInFlightImpliesLeaderInBROADCAST
+        ACKMsgInFlightImpliesNodesInBROADCAST
     ],
     "LeaderProcessACKEPOCHHasntBroadcastAction": [
         committedEntryExistsInACKEPOCHQuorumHistory,

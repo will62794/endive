@@ -1618,11 +1618,36 @@ H_ServerInEntryAckSidImpliesHasEntry ==
             \E indt \in DOMAIN history[t] : 
                 TxnEqual(history[t][indt], history[s][ind])
 
-\* If an ACK message is in flight, the receiver must be a leader in BROADCAST.
-H_ACKMsgInFlightImpliesLeaderInBROADCAST == 
+\* The learner of a leader in BROADCAST must also be in BROADCAST and a follower.
+H_LeaderInBROADCASTImpliesLearnerInBROADCAST == 
     \A i,j \in Server : 
-        (PendingACK(i,j) /\ IsLeader(j)) => 
-            zabState[j] = BROADCAST
+        (/\ IsLeader(i) 
+         /\ zabState[i] = BROADCAST
+         /\ j \in learners[i] 
+         /\ j # i ) => 
+            \* TODO: Think about this condition more.
+            \* /\ (zabState[j] # BROADCAST) => msgs[j][i] # <<>>
+            /\ IsFollower(j)
+
+H_PROPOSEMsgInFlightImpliesNodesInBROADCAST == 
+    \A i,j \in Server : 
+        (PendingPROPOSE(j,i)) =>
+            /\ zabState[i] = BROADCAST
+            /\ zabState[j] = BROADCAST
+            /\ IsFollower(j)
+            /\ IsLeader(i)
+
+\* If an ACK message is in flight, there must be a leader and they
+\* are in BROADCAST.
+H_ACKMsgInFlightImpliesNodesInBROADCAST == 
+    \A i,j \in Server : 
+        (PendingACK(i,j)) =>
+            /\ zabState[i] = BROADCAST
+            /\ zabState[j] = BROADCAST
+            /\ IsFollower(j)
+            /\ IsLeader(i)
+
+
 
 \* If a leader is in BROADCAST, no NEWLEADER messages should be in-flight
 H_LeaderinBROADCASTImpliesNoNEWLEADERInFlight == 
