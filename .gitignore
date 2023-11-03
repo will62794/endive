@@ -45,8 +45,8 @@ _apalache-out/
 apalache/
 apalache-*/
 apa_indcheck
-*.proof.dot
-*.proof.dot.pdf
+*.proof.dot*
+*.proof.dot*.pdf
 *.proof.json
 *.proof.pickle
 *.svg
