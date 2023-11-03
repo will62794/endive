@@ -1570,7 +1570,8 @@ H_CommittedEntryExistsInNEWLEADERHistory ==
         (idx <= lastCommitted[s].index) =>
             (\A i,j \in Server : 
                 (/\ PendingNEWLEADER(i,j)
-                 /\ zabState[j] \in {DISCOVERY, SYNCHRONIZATION} ) =>
+                \*  /\ zabState[j] \in {DISCOVERY, SYNCHRONIZATION} 
+                 ) =>
                     (\E idx2 \in DOMAIN msgs[j][i][1].mhistory : 
                         /\ idx2 = idx
                         /\ TxnEqual(history[s][idx], msgs[j][i][1].mhistory[idx2])))

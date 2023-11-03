@@ -84,10 +84,13 @@ committedEntryExistsInNEWLEADERHistory.children = {
     ]
 }
 
+txnWithSameZxidEqual = make_node("H_TxnWithSameZxidEqual")
+
 committedEntryExistsOnQuorum = make_node("H_CommittedEntryExistsOnQuorum")
 committedEntryExistsOnQuorum.children = {
     "LeaderProcessACKAction": [
-        aCKMsgImpliesZxidInLog
+        aCKMsgImpliesZxidInLog,
+        txnWithSameZxidEqual
     ],
     "LeaderProcessRequestAction": [ 
         nodeHistoryBoundByLastCommittedIndex
@@ -103,8 +106,8 @@ committedEntryExistsOnQuorum.children = {
     ],
     "FollowerProcessNEWLEADERAction": [
         committedEntryExistsInNEWLEADERHistory,
-        NEWLEADERMsgIsPrefixOfSenderLeader
-        # nEWLEADERMsgSentByLeader
+        NEWLEADERMsgIsPrefixOfSenderLeader,
+        nodeHistoryBoundByLastCommittedIndex
     ]
 }
 
@@ -150,7 +153,6 @@ txnWithSameZxidEqualInPeerHistory = make_node("H_TxnWithSameZxidEqualInPeerHisto
 
 txnWithSameZxidEqualLocalToPeerHistory = make_node("H_TxnWithSameZxidEqualLocalToPeerHistory")
 
-txnWithSameZxidEqual = make_node("H_TxnWithSameZxidEqual")
 txnWithSameZxidEqual.children = {
     "FollowerProcessNEWLEADERAction": [
         txnWithSameZxidEqualInMessages,
