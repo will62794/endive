@@ -1618,6 +1618,18 @@ H_ACKMsgImpliesZxidInLog ==
             \E idx \in DOMAIN history[j] : 
                 history[j][idx].zxid = msgs[j][i][1].mzxid
 
+\* If an ACKLD message exists from S for a given zxid, then that zxid must be present in the sender's history.
+\* Also, this zxid should exist on a quorum (?), since it must be committed?
+H_ACKLDMsgImpliesZxidInLog == 
+    \A i,j \in Server : 
+        (PendingACKLD(i,j) /\ ZxidCompare(msgs[j][i][1].mzxid, <<0,0>>)) => 
+            /\ \E idx \in DOMAIN history[j] : history[j][idx].zxid = msgs[j][i][1].mzxid
+            \* Entry exists on a quorum, since it must be committed.
+            /\ \E Q \in Quorums : 
+               \A n \in Q : 
+               \E ic \in DOMAIN history[n] : 
+                    msgs[j][i][1].mzxid = history[n][ic].zxid
+
 \* A node's lastCommitted index must always be <= its history length.
 H_NodeHistoryBoundByLastCommittedIndex == 
     \A s \in Server : lastCommitted[s].index <= Len(history[s])

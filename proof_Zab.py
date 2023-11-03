@@ -84,7 +84,11 @@ committedEntryExistsInNEWLEADERHistory.children = {
     ]
 }
 
+ACKLDMsgImpliesZxidInLog = make_node("H_ACKLDMsgImpliesZxidInLog")
+
 txnWithSameZxidEqual = make_node("H_TxnWithSameZxidEqual")
+
+committedEntryExistsInACKEPOCHQuorumHistory = make_node("H_CommittedEntryExistsInACKEPOCHQuorumHistory")
 
 committedEntryExistsOnQuorum = make_node("H_CommittedEntryExistsOnQuorum")
 committedEntryExistsOnQuorum.children = {
@@ -108,6 +112,13 @@ committedEntryExistsOnQuorum.children = {
         committedEntryExistsInNEWLEADERHistory,
         NEWLEADERMsgIsPrefixOfSenderLeader,
         nodeHistoryBoundByLastCommittedIndex
+    ],
+    "LeaderProcessACKEPOCHHasntBroadcastAction": [
+        committedEntryExistsInACKEPOCHQuorumHistory,
+        nodeHistoryBoundByLastCommittedIndex
+    ],
+    "LeaderProcessACKLDHasntBroadcastAction": [
+        ACKLDMsgImpliesZxidInLog
     ]
 }
 
@@ -118,7 +129,6 @@ NodeLOOKINGImpliesEmptyInputBuffer.children = {
     ]
 }
 
-committedEntryExistsInACKEPOCHQuorumHistory = make_node("H_CommittedEntryExistsInACKEPOCHQuorumHistory")
 committedEntryExistsInACKEPOCHQuorumHistory.children = {
     "LeaderProcessRequestAction": [
         nodeHistoryBoundByLastCommittedIndex
