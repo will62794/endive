@@ -1457,7 +1457,19 @@ H_COMMITSentByNodeImpliesZxidInLog ==
                 /\ history[j][idx].zxid = msgs[j][i][1].mzxid  
                 /\ lastCommitted[j].index >= idx
 
+\* TODO: Work on this further to develop a more unified lemma for establishing zxid uniqueness throughout the whole system.
+\* All messages currently in the system
+\* AllMsgs == {UNION {m : m \in DOMAIN msgs[i][j]} : i,j \in Server \X Server}
+
+\* AllACKs == {m \in AllMsgs : m.mtype = "ACK"}
+
+\* \* Set of all [zxid: zxid, value: value) records/pairs that exist in the system. 
+\* AllSystemsZxids == 
+\*     UNION { TxnHistory(history[i]) : i \in Server } \cup
+\*     {m.mzxid}
+
 \* Any two transactions with the same zxid must be equal.
+\* Note: this must hold no matter where a zxid appears i.e. in a message or on a local node.
 H_TxnWithSameZxidEqual == 
     \A i,j \in Server : 
         \A idxi \in (DOMAIN history[i]) :
