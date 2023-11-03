@@ -243,6 +243,9 @@ committedEntryExistsInLeaderHistory.children = {
     ],
     "LeaderProcessACKAction": [
         nodeHistoryBoundByLastCommittedIndex
+    ],
+    "FollowerProcessCOMMITLDAction": [
+        COMMITLDSentByNodeImpliesZxidCommittedInLog
     ]
 }
 
