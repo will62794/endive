@@ -1678,15 +1678,19 @@ H_ACKMsgImpliesZxidInLog ==
             \E idx \in DOMAIN history[j] : 
                 history[j][idx].zxid = msgs[j][i][1].mzxid
 
+ZxidExistsOnQuorum(zxid) == 
+  \E Q \in Quorums : 
+    \A n \in Q : 
+    \E ic \in DOMAIN history[n] : 
+        history[n][ic].zxid = zxid 
+
 \* NEWLEADER history exists on a quorum.
 \* TODO: May need to revise this to a correct version.
 H_NEWLEADERHistoryExistsOnQuorum == 
     \A i,j \in Server : 
         (PendingNEWLEADER(i,j)) =>
-            \A ih \in msgs[j][i][1].mhistory :
-            \E Q \in Quorums :
-            \A n \in Q :
-            \E ic \in DOMAIN history[n] : msgs[j][i][1].mhistory[ih].zxid = history[n][ic].zxid
+            \A ih \in DOMAIN msgs[j][i][1].mhistory : 
+                ZxidExistsOnQuorum(msgs[j][i][1].mhistory[ih].zxid)
 
 \* If an ACKLD message exists from S for a given zxid, then that zxid must be present in the sender's history.
 \* Also, this zxid should exist on a quorum (?), since it must be committed?
@@ -1695,10 +1699,7 @@ H_ACKLDMsgImpliesZxidInLog ==
         (PendingACKLD(i,j) /\ ZxidCompare(msgs[j][i][1].mzxid, <<0,0>>)) => 
             /\ \E idx \in DOMAIN history[j] : history[j][idx].zxid = msgs[j][i][1].mzxid
             \* Entry exists on a quorum, since it must be committed.
-            /\ \E Q \in Quorums : 
-               \A n \in Q : 
-               \E ic \in DOMAIN history[n] : 
-                    msgs[j][i][1].mzxid = history[n][ic].zxid
+            /\ ZxidExistsOnQuorum(msgs[j][i][1].mzxid)
 
 \* A node's lastCommitted index must always be <= its history length.
 H_NodeHistoryBoundByLastCommittedIndex == 

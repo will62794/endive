@@ -108,8 +108,14 @@ ACKMsgInFlightImpliesNodesInBROADCAST.children = {
     ]
 }
 
+NEWLEADERHistoryExistsOnQuorum = make_node("H_NEWLEADERHistoryExistsOnQuorum")
 
 ACKLDMsgImpliesZxidInLog = make_node("H_ACKLDMsgImpliesZxidInLog")
+ACKLDMsgImpliesZxidInLog.children = {
+    "FollowerProcessNEWLEADERAction": [
+        NEWLEADERHistoryExistsOnQuorum
+    ]
+}
 
 committedEntryExistsInNEWLEADERHistory = make_node("H_CommittedEntryExistsInNEWLEADERHistory")
 committedEntryExistsInNEWLEADERHistory.children = {
