@@ -1618,24 +1618,41 @@ H_ServerInEntryAckSidImpliesHasEntry ==
             \E indt \in DOMAIN history[t] : 
                 TxnEqual(history[t][indt], history[s][ind])
 
-\* The learner of a leader in BROADCAST must also be in BROADCAST and a follower.
+AckLDRecvServers(i) == {v.sid : v \in {a \in ackldRecv[i]: a.connected = TRUE }}
+
+H_LeaderInBROADCASTImpliesAckLDQuorum == 
+    \A i,j \in Server : 
+        (/\ IsLeader(i) 
+         /\ zabState[i] = BROADCAST) => 
+            AckLDRecvServers(i) \in Quorums
+
 H_LeaderInBROADCASTImpliesLearnerInBROADCAST == 
     \A i,j \in Server : 
         (/\ IsLeader(i) 
          /\ zabState[i] = BROADCAST
-         /\ j \in learners[i] 
-         /\ j # i ) => 
-            \* TODO: Think about this condition more.
-            \* /\ (zabState[j] # BROADCAST) => msgs[j][i] # <<>>
-            /\ IsFollower(j)
+         /\ j \in AckLDRecvServers(i)) => 
+            /\ ((zabState[j] # BROADCAST) => (msgs[i][j] # <<>>))
+            /\ (i # j) => IsFollower(j)
+
+\* The learner of a leader in BROADCAST must also be in BROADCAST and a follower.
+\* H_LeaderInBROADCASTImpliesLearnerInBROADCAST == 
+\*     \A i,j \in Server : 
+\*         (/\ IsLeader(i) 
+\*          /\ zabState[i] = BROADCAST
+\*          /\ j \in learners[i] 
+\*          /\ j # i ) => 
+\*             \* /\ {a \in ackldRecv[i]: a.connected = TRUE } \in Quorums
+\*             \* TODO: Think about this condition more.
+\*             \* /\ (zabState[j] # BROADCAST) => msgs[i][j] # <<>>
+\*             /\ IsFollower(j)
 
 H_PROPOSEMsgInFlightImpliesNodesInBROADCAST == 
     \A i,j \in Server : 
-        (PendingPROPOSE(j,i)) =>
+        (PendingPROPOSE(i,j)) =>
             /\ zabState[i] = BROADCAST
             /\ zabState[j] = BROADCAST
-            /\ IsFollower(j)
-            /\ IsLeader(i)
+            /\ IsFollower(i)
+            /\ IsLeader(j)
 
 \* If an ACK message is in flight, there must be a leader and they
 \* are in BROADCAST.

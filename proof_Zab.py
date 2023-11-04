@@ -78,11 +78,15 @@ committedEntryExistsInACKEPOCHQuorumHistory = make_node("H_CommittedEntryExistsI
 
 ServerInEntryAckSidImpliesHasEntry = make_node("H_ServerInEntryAckSidImpliesHasEntry")
 
+
+LeaderInBROADCASTImpliesAckLDQuorum = make_node("H_LeaderInBROADCASTImpliesAckLDQuorum")
 LeaderInBROADCASTImpliesLearnerInBROADCAST = make_node("H_LeaderInBROADCASTImpliesLearnerInBROADCAST")
+ 
 
 PROPOSEMsgInFlightImpliesNodesInBROADCAST = make_node("H_PROPOSEMsgInFlightImpliesNodesInBROADCAST")
 PROPOSEMsgInFlightImpliesNodesInBROADCAST.children = {
     "LeaderBroadcastPROPOSEAction": [
+        LeaderInBROADCASTImpliesAckLDQuorum,
         LeaderInBROADCASTImpliesLearnerInBROADCAST
     ]
 }
