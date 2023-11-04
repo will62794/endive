@@ -1678,6 +1678,16 @@ H_ACKMsgImpliesZxidInLog ==
             \E idx \in DOMAIN history[j] : 
                 history[j][idx].zxid = msgs[j][i][1].mzxid
 
+\* NEWLEADER history exists on a quorum.
+\* TODO: May need to revise this to a correct version.
+H_NEWLEADERHistoryExistsOnQuorum == 
+    \A i,j \in Server : 
+        (PendingNEWLEADER(i,j)) =>
+            \A ih \in msgs[j][i][1].mhistory :
+            \E Q \in Quorums :
+            \A n \in Q :
+            \E ic \in DOMAIN history[n] : msgs[j][i][1].mhistory[ih].zxid = history[n][ic].zxid
+
 \* If an ACKLD message exists from S for a given zxid, then that zxid must be present in the sender's history.
 \* Also, this zxid should exist on a quorum (?), since it must be committed?
 H_ACKLDMsgImpliesZxidInLog == 
