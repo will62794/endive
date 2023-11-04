@@ -1281,7 +1281,7 @@ Next ==
     \/ LeaderProcessACKEPOCHHasntBroadcastAction
     \* \/ LeaderProcessACKEPOCHHasBroadcastAction
     \/ FollowerProcessNEWLEADERAction
-    \/ FollowerProcessNEWLEADERNewIterationAction
+    \* \/ FollowerProcessNEWLEADERNewIterationAction
     \/ LeaderProcessACKLDHasntBroadcastAction
     \* \/ LeaderProcessACKLDHasBroadcastAction
     \/ FollowerProcessCOMMITLDAction
