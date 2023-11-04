@@ -1291,7 +1291,7 @@ Next ==
     \/ LeaderProcessACKAction
     \* \/ LeaderProcessACKAlreadyCommittedAction
     \/ FollowerProcessCOMMITAction
-    \/ FilterNonexistentMessageAction
+    \* \/ FilterNonexistentMessageAction
 
 \* The complete specification.
 Spec == Init /\ [][Next]_vars
