@@ -57,6 +57,20 @@
     "model_consts"  :  "CONSTANT s1,s2,s3",
     "symmetry" : true,
     "typeok"  :  "TypeOKRandom",
-    "simulate"  :  true      
+    "simulate"  :  true,
+    "local_grammars": {
+        "LeaderProcessACKEPOCHHasntBroadcastAction": {
+            "H_NEWLEADERHistoryExistsOnQuorum": {
+                "quant_inv": "\\A VARI \\in Server : \\A VARJ \\in Server : ",
+                "quant_vars": ["VARI", "VARJ"],
+                "preds":[
+                    "PendingNEWLEADER(i,j)",
+                    "PendingNEWLEADER(j,i)"
+
+                ],
+                "max_depth": 21
+            }
+        } 
+    }
 }
 
