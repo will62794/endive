@@ -195,7 +195,7 @@ NodeLOOKINGImpliesEmptyInputBuffer.children = {
     ]
 }
 
-ACKEPOCHHistoryContainedInSenderHistory = make_node("H_ACKEPOCHHistoryContainedInSenderHistory")
+ACKEPOCHHistoryContainedInFOLLOWINGSender = make_node("H_ACKEPOCHHistoryContainedInFOLLOWINGSender")
 
 committedEntryExistsInACKEPOCHQuorumHistory.children = {
     "LeaderProcessRequestAction": [
@@ -217,7 +217,7 @@ committedEntryExistsInACKEPOCHQuorumHistory.children = {
     ],
     "LeaderProcessACKEPOCHHasntBroadcastAction": [
         # committedEntryExistsOnQuorum,
-        ACKEPOCHHistoryContainedInSenderHistory
+        ACKEPOCHHistoryContainedInFOLLOWINGSender
     ],
     "FollowerProcessCOMMITAction": [
         COMMITSentByNodeImpliesZxidInLog
