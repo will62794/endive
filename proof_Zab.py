@@ -55,6 +55,7 @@ aCKMsgImpliesZxidInLog.children = {
 
 NEWLEADERIncomingImpliesLastCommittedBound = make_node("H_NEWLEADERIncomingImpliesLastCommittedBound")
 
+
 nodeHistoryBoundByLastCommittedIndex = make_node("H_NodeHistoryBoundByLastCommittedIndex")
 nodeHistoryBoundByLastCommittedIndex.children = {
     "FollowerProcessNEWLEADERAction": [
@@ -145,6 +146,12 @@ committedEntryExistsInNEWLEADERHistory.children = {
     ]
 }
 
+NEWLEADERIncomingImpliesLastCommittedBound.children = {
+    "LeaderProcessACKEPOCHHasntBroadcastAction": [
+        committedEntryExistsInNEWLEADERHistory,
+        nodeHistoryBoundByLastCommittedIndex
+    ]
+}
 
 txnWithSameZxidEqual = make_node("H_TxnWithSameZxidEqual")
 
@@ -188,6 +195,8 @@ NodeLOOKINGImpliesEmptyInputBuffer.children = {
     ]
 }
 
+ACKEPOCHHistoryContainedInSenderHistory = make_node("H_ACKEPOCHHistoryContainedInSenderHistory")
+
 committedEntryExistsInACKEPOCHQuorumHistory.children = {
     "LeaderProcessRequestAction": [
         nodeHistoryBoundByLastCommittedIndex
@@ -207,7 +216,8 @@ committedEntryExistsInACKEPOCHQuorumHistory.children = {
         NodeLOOKINGImpliesEmptyInputBuffer
     ],
     "LeaderProcessACKEPOCHHasntBroadcastAction": [
-        committedEntryExistsOnQuorum
+        # committedEntryExistsOnQuorum,
+        ACKEPOCHHistoryContainedInSenderHistory
     ],
     "FollowerProcessCOMMITAction": [
         COMMITSentByNodeImpliesZxidInLog

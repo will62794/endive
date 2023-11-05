@@ -1588,6 +1588,13 @@ H_CommittedEntryExistsOnQuorum ==
                     /\ ic = idx
                     /\ TxnEqual(history[s][idx], history[n][ic])
 
+\* ACKEPOCH response history must be contained in the sender's history.
+H_ACKEPOCHHistoryContainedInSenderHistory == 
+    \A i,j \in Server : 
+    \A mind \in DOMAIN msgs[j][i] :
+        msgs[j][i][mind].mtype = ACKEPOCH => 
+            TxnHistory(msgs[j][i][mind].mhistory) = TxnHistory(history[j])
+
 \* If a history entry is covered by some lastCommitted, then it must be present in 
 \* the initial history as determined by a received quorum of ACKEPOCH messages.
 H_CommittedEntryExistsInACKEPOCHQuorumHistory ==
