@@ -1305,11 +1305,11 @@ DebugInv1 == ~(\E s \in Server : state[s] = LEADING /\ Len(history[s]) > 0 /\ la
 \* ShouldNotBeTriggered == \A p \in DOMAIN violatedInvariants: violatedInvariants[p] = FALSE
 
 \* There is most one established leader for a certain epoch.
-H_Leadership1 == \A i, j \in Server:
+H_UniqueLeadership == \A i, j \in Server:
                    /\ IsLeader(i) /\ zabState[i] \in {SYNCHRONIZATION, BROADCAST}
                    /\ IsLeader(j) /\ zabState[j] \in {SYNCHRONIZATION, BROADCAST}
                    /\ currentEpoch[i] = currentEpoch[j]
-                  => i = j
+                        => i = j
 
 Leadership2 == \A epoch \in 1..MAXEPOCH: Cardinality(epochLeader[epoch]) <= 1
 
@@ -1745,7 +1745,7 @@ H_LeaderinBROADCASTImpliesNoNEWLEADERorACKEInFlight ==
     (state[s] = LEADING /\ zabState[s] = BROADCAST) => 
         (\A i,j \in Server :
             \A mi \in DOMAIN msgs[i][j] : 
-                /\ msgs[i][j][mi].mtype # NEWLEADER
+                /\ msgs[i][j][mi].mtype \notin {ACKLD, NEWLEADER}
                 /\ (msgs[i][j][mi].mtype = ACKEPOCH) => 
                     \A idx \in DOMAIN msgs[i][j][mi].mhistory : msgs[i][j][mi].mhistory[idx].zxid[1] # currentEpoch[s])
 

@@ -67,18 +67,35 @@ nodeHistoryBoundByLastCommittedIndex.children = {
     ],
 }
 
+ACKEPOCHHistoryContainedInFOLLOWINGSender = make_node("H_ACKEPOCHHistoryContainedInFOLLOWINGSender")
+
+PROPOSEMsgSentByNodeImpliesZxidInLog = make_node("H_PROPOSEMsgSentByNodeImpliesZxidInLog")
+
 COMMITSentByNodeImpliesZxidInLog = make_node("H_COMMITSentByNodeImpliesZxidInLog")
 
 txnZxidsUniqueHistoriesAndMessagesInPROPOSEMessages = make_node("H_txnZxidsUniqueHistoriesAndMessagesInPROPOSEMessages")
 
 txnZxidsUniqueHistoriesAndMessagesBetweenLocalHistoryAndPROPOSEMessages = make_node("H_txnZxidsUniqueHistoriesAndMessagesBetweenLocalHistoryAndPROPOSEMessages")
 
+uniqueLeadership = make_node("H_UniqueLeadership")
+
 leaderInBroadcastImpliesAllHistoryEntriesInEpoch = make_node("H_LeaderInBroadcastImpliesAllHistoryEntriesInEpoch")
+leaderInBroadcastImpliesAllHistoryEntriesInEpoch.children = {
+    "FollowerProcessPROPOSEAction": [
+        PROPOSEMsgSentByNodeImpliesZxidInLog
+    ],
+    "LeaderProcessRequestAction": [
+        uniqueLeadership
+    ],
+    "FollowerProcessNEWLEADERAction": [ 
+        NEWLEADERMsgHistAndStateInv
+    ],
+    "LeaderProcessACKEPOCHHasntBroadcastAction": [
+        ACKEPOCHHistoryContainedInFOLLOWINGSender
+    ]
+}
 
 COMMITLDSentByNodeImpliesZxidCommittedInLog = make_node("H_COMMITLDSentByNodeImpliesZxidCommittedInLog")
-
-PROPOSEMsgSentByNodeImpliesZxidInLog = make_node("H_PROPOSEMsgSentByNodeImpliesZxidInLog")
-
 
 ServerInEntryAckSidImpliesHasEntry = make_node("H_ServerInEntryAckSidImpliesHasEntry")
 
@@ -114,7 +131,6 @@ ACKMsgInFlightImpliesNodesInBROADCAST.children = {
     ]
 }
 
-ACKEPOCHHistoryContainedInFOLLOWINGSender = make_node("H_ACKEPOCHHistoryContainedInFOLLOWINGSender")
 
 NEWLEADERUniquePerEpoch = make_node("H_NEWLEADERUniquePerEpoch")
 
@@ -252,17 +268,27 @@ committedEntryExistsInACKEPOCHQuorumHistory.children = {
 }   
 
 # txnZxidsUniqueHistoriesAndMessagesBetweenLocalHistoryAndMessages = make_node("H_txnZxidsUniqueHistoriesAndMessagesBetweenLocalHistoryAndMessages")
-txnZxidUniqueBetweenLocalHistoriesAndAllMessages = make_node("H_TxnZxidUniqueBetweenLocalHistoriesAndAllMessages")
-
-txnZxidsUniqueHistoriesAndMessagesBetweenAllMessages = make_node("H_txnZxidsUniqueHistoriesAndMessagesBetweenAllMessages")
+# txnZxidUniqueBetweenLocalHistoriesAndAllMessages = make_node("H_TxnZxidUniqueBetweenLocalHistoriesAndAllMessages")
+# txnZxidsUniqueHistoriesAndMessagesBetweenAllMessages = make_node("H_txnZxidsUniqueHistoriesAndMessagesBetweenAllMessages")
 
 # txnZxidsUniqueHistoriesAndMessagesInPeerHistory = make_node("H_txnZxidsUniqueHistoriesAndMessagesInPeerHistory")
 # txnZxidsUniqueHistoriesAndMessagesLocalToPeerHistory = make_node("H_txnZxidsUniqueHistoriesAndMessagesLocalToPeerHistory")
 
-txnZxidsUniqueHistoriesAndMessagesPeerHistory = make_node("H_TxnWithSameZxidEqualPeerHistory")
-txnZxidsUniqueHistoriesAndMessagesPeerHistory.children = {
-    "FollowerProcessPROPOSEAction": [
-        
+TxnWithSameZxidEqualPeerHistory = make_node("H_TxnWithSameZxidEqualPeerHistory")
+TxnWithSameZxidEqualPeerHistory.children = {
+    "FollowLeaderMyselfAction": [
+        txnZxidsUniqueHistoriesAndMessages
+    ],
+    "UpdateLeaderAction": [
+        txnZxidsUniqueHistoriesAndMessages
+    ],
+    "LeaderProcessRequestAction": [
+        LeaderinBROADCASTImpliesNoNEWLEADERorACKEInFlight,
+        txnZxidsUniqueHistoriesAndMessages
+    ],
+    "LeaderProcessACKEPOCHHasntBroadcastAction": [
+        # committedEntryExistsInACKEPOCHQuorumHistory
+        txnZxidsUniqueHistoriesAndMessages
     ]
 }
 
@@ -283,25 +309,25 @@ txnZxidsUniqueHistoriesAndMessages.children = {
     "LeaderProcessACKEPOCHHasntBroadcastAction": [
         # txnZxidsUniqueHistoriesAndMessagesInPeerHistory,
         # txnZxidsUniqueHistoriesAndMessagesLocalToPeerHistory,
-        txnZxidsUniqueHistoriesAndMessagesPeerHistory,
+        TxnWithSameZxidEqualPeerHistory,
         # txnZxidUniqueBetweenLocalHistoriesAndAllMessages
     ]
 }
 
-txnZxidUniqueBetweenLocalHistoriesAndAllMessages.children = {
-    "FollowerProcessNEWEPOCHAction": [
-        txnZxidsUniqueHistoriesAndMessages
-    ],
-    "LeaderBroadcastPROPOSEAction": [
-        txnZxidsUniqueHistoriesAndMessages
-    ],
-    "LeaderProcessACKEPOCHHasntBroadcastAction": [
+# txnZxidUniqueBetweenLocalHistoriesAndAllMessages.children = {
+#     "FollowerProcessNEWEPOCHAction": [
+#         txnZxidsUniqueHistoriesAndMessages
+#     ],
+#     "LeaderBroadcastPROPOSEAction": [
+#         txnZxidsUniqueHistoriesAndMessages
+#     ],
+#     "LeaderProcessACKEPOCHHasntBroadcastAction": [
 
-    ],
-    "LeaderProcessRequestAction": [
+#     ],
+#     "LeaderProcessRequestAction": [
 
-    ]
-}
+#     ]
+# }
 
 
 COMMITLDSentByNodeImpliesZxidCommittedInLog.children = {
