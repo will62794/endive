@@ -399,7 +399,8 @@ safety.children = {
         aCKMsgImpliesZxidInLog
     ],
     "LeaderProcessACKLDHasntBroadcastAction": [
-        committedEntryExistsInLeaderHistory
+        committedEntryExistsInLeaderHistory,
+        txnZxidsUniqueHistoriesAndMessages
     ]
 }
 

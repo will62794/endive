@@ -702,14 +702,14 @@ UpdateAckeRecv(oldSet, sid, peerEpoch, peerHistory) ==
            ELSE oldSet \union {follower_info}
 
 \* for checking invariants
-RECURSIVE SetPacketsForChecking(_,_,_,_,_,_)
-SetPacketsForChecking(set, src, ep, his, cur, end) ==
-        IF cur > end THEN set
-        ELSE LET m_proposal == [ source |-> src,
-                                 epoch  |-> ep,
-                                 zxid   |-> his[cur].zxid,
-                                 data   |-> his[cur].value ]
-             IN SetPacketsForChecking((set \union {m_proposal}), src, ep, his, cur + 1, end)
+\* RECURSIVE SetPacketsForChecking(_,_,_,_,_,_)
+\* SetPacketsForChecking(set, src, ep, his, cur, end) ==
+\*         IF cur > end THEN set
+\*         ELSE LET m_proposal == [ source |-> src,
+\*                                  epoch  |-> ep,
+\*                                  zxid   |-> his[cur].zxid,
+\*                                  data   |-> his[cur].value ]
+\*              IN SetPacketsForChecking((set \union {m_proposal}), src, ep, his, cur + 1, end)
     
 
 LastZxidOfHistory(his) == IF Len(his) = 0 THEN <<0, 0>>
