@@ -55,12 +55,16 @@ aCKMsgImpliesZxidInLog.children = {
 
 NEWLEADERIncomingImpliesLastCommittedBound = make_node("H_NEWLEADERIncomingImpliesLastCommittedBound")
 
+committedEntryExistsInACKEPOCHQuorumHistory = make_node("H_CommittedEntryExistsInACKEPOCHQuorumHistory")
 
 nodeHistoryBoundByLastCommittedIndex = make_node("H_NodeHistoryBoundByLastCommittedIndex")
 nodeHistoryBoundByLastCommittedIndex.children = {
     "FollowerProcessNEWLEADERAction": [
         NEWLEADERIncomingImpliesLastCommittedBound
-    ]
+    ],
+    "LeaderProcessACKEPOCHHasntBroadcastAction": [
+        committedEntryExistsInACKEPOCHQuorumHistory
+    ],
 }
 
 COMMITSentByNodeImpliesZxidInLog = make_node("H_COMMITSentByNodeImpliesZxidInLog")
@@ -75,7 +79,6 @@ COMMITLDSentByNodeImpliesZxidCommittedInLog = make_node("H_COMMITLDSentByNodeImp
 
 PROPOSEMsgSentByNodeImpliesZxidInLog = make_node("H_PROPOSEMsgSentByNodeImpliesZxidInLog")
 
-committedEntryExistsInACKEPOCHQuorumHistory = make_node("H_CommittedEntryExistsInACKEPOCHQuorumHistory")
 
 ServerInEntryAckSidImpliesHasEntry = make_node("H_ServerInEntryAckSidImpliesHasEntry")
 
