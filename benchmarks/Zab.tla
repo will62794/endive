@@ -866,23 +866,21 @@ UpdateAckldRecv(oldSet, sid) ==
 
 LastZxid(i) == LastZxidOfHistory(history[i])
 
-RECURSIVE UpdateAcksidHelper(_,_,_)
-UpdateAcksidHelper(txns, target, endZxid) ==
-        IF Len(txns) = 0 THEN << >>
-        ELSE LET oldTxn == txns[1]
-             IN IF ZxidCompare(oldTxn.zxid, endZxid) THEN txns
-                ELSE LET newTxn == [ zxid   |-> oldTxn.zxid,
-                                     value  |-> oldTxn.value,
-                                     ackSid |-> IF target \in oldTxn.ackSid
-                                                THEN oldTxn.ackSid
-                                                ELSE oldTxn.ackSid \union {target},
-                                     epoch  |-> oldTxn.epoch ]
-                     IN <<newTxn>> \o UpdateAcksidHelper( Tail(txns), target, endZxid)
+\* RECURSIVE UpdateAcksidHelper(_,_,_)
+\* UpdateAcksidHelper(txns, target, endZxid) ==
+\*         IF Len(txns) = 0 THEN << >>
+\*         ELSE LET oldTxn == txns[1]
+\*              IN IF ZxidCompare(oldTxn.zxid, endZxid) THEN txns
+\*                 ELSE LET newTxn == [ zxid   |-> oldTxn.zxid,
+\*                                      value  |-> oldTxn.value,
+\*                                      ackSid |-> IF target \in oldTxn.ackSid
+\*                                                 THEN oldTxn.ackSid
+\*                                                 ELSE oldTxn.ackSid \union {target},
+\*                                      epoch  |-> oldTxn.epoch ]
+\*                      IN <<newTxn>> \o UpdateAcksidHelper( Tail(txns), target, endZxid)
     
-\* Atomically add ackSid of one learner according to zxid in ACKLD.
-UpdateAcksid(his, target, endZxid) == UpdateAcksidHelper(his, target, endZxid)
 
-UpdateAcksidExpr(his, target, endZxid) == 
+UpdateAcksidIter(his, target, endZxid) == 
     LET zxidIndicesLessThanEnd == {i \in DOMAIN his : ~ZxidCompare(his[i].zxid, endZxid)}
         firstZxidIndex == IF zxidIndicesLessThanEnd # {} 
                             THEN Maximum(zxidIndicesLessThanEnd)
@@ -893,13 +891,17 @@ UpdateAcksidExpr(his, target, endZxid) ==
             ELSE his[idx]
     ]
 
+\* Atomically add ackSid of one learner according to zxid in ACKLD.
+UpdateAcksid(his, target, endZxid) == UpdateAcksidIter(his, target, endZxid)
+
 \* TODO: Get this working properly.
-UpdateAcksAreEquiv == \A s,t \in Server : \A zxid \in (1..MaxEpoch) \X (1..MaxEpoch) : 
-    /\ PrintT(zxid)
-    /\ PrintT(t)
-    /\ PrintT(UpdateAcksid(history[s], t, zxid))
-    /\ PrintT(UpdateAcksidExpr(history[s], t, zxid))
-    /\ UpdateAcksid(history[s], t, zxid) = UpdateAcksidExpr(history[s], t, zxid) 
+\* UpdateAcksAreEquiv == 
+    \* \A s,t \in Server : \A zxid \in (1..MaxEpoch) \X (1..MaxEpoch) : 
+    \* /\ PrintT(zxid)
+    \* /\ PrintT(t)
+    \* /\ PrintT(UpdateAcksid(history[s], t, zxid))
+    \* /\ PrintT(UpdateAcksidExpr(history[s], t, zxid))
+    \* /\ UpdateAcksidHelper(history[s], t, zxid) = UpdateAcksidIter(history[s], t, zxid) 
 
 (* Leader waits for receiving ACKLD from a quorum including itself,
    and broadcasts COMMITLD and turns to BROADCAST. *)
@@ -961,26 +963,53 @@ LeaderProcessACKLDHasBroadcast(i, j) ==
                             ![i][j] = Append(msgs[i][j], [ mtype |-> COMMITLD, mzxid |-> lastCommitted[i].zxid ])]
         /\ UNCHANGED <<zabState, lastCommitted, state, acceptedEpoch, currentEpoch, learners, cepochRecv, ackeRecv, sendCounter, followerVars, electionVars, proposalMsgsLog, epochLeader>>
 
-RECURSIVE ZxidToIndexHepler(_,_,_,_)
-ZxidToIndexHepler(his, zxid, cur, appeared) == 
-        IF cur > Len(his) THEN cur  
-        ELSE IF TxnZxidEqual(his[cur], zxid) 
-             THEN (IF appeared = TRUE 
-                    THEN -1 
-                    ELSE Minimum( { cur, ZxidToIndexHepler(his, zxid, cur + 1, TRUE) } ))
-             ELSE ZxidToIndexHepler(his, zxid, cur + 1, appeared)
+\* RECURSIVE ZxidToIndexHepler(_,_,_,_)
+\* ZxidToIndexHepler(his, zxid, cur, appeared) == 
+\*         IF cur > Len(his) THEN cur  
+\*         ELSE IF TxnZxidEqual(his[cur], zxid) 
+\*              THEN (IF appeared = TRUE 
+\*                     THEN -1 
+\*                     ELSE Minimum( { cur, ZxidToIndexHepler(his, zxid, cur + 1, TRUE) } ))
+\*              ELSE ZxidToIndexHepler(his, zxid, cur + 1, appeared)
 
-\* return -1: this zxid appears at least twice. 
-\* Len(his) + 1: does not exist.
-\* 1 - Len(his): exists and appears just once.
-ZxidToIndex(his, zxid) == 
-    IF ZxidEqual( zxid, <<0, 0>> ) THEN 0
-        ELSE 
-            IF Len(his) = 0 THEN 1
-            ELSE LET len == Len(his) IN
-                IF \E idx \in 1..len: TxnZxidEqual(his[idx], zxid)
-                    THEN ZxidToIndexHepler(his, zxid, 1, FALSE)
-                    ELSE len + 1
+\* \* return -1: this zxid appears at least twice. 
+\* \* Len(his) + 1: does not exist.
+\* \* 1 - Len(his): exists and appears just once.
+\* ZxidToIndexRec(his, zxid) == 
+\*     IF ZxidEqual( zxid, <<0, 0>> ) THEN 0
+\*         ELSE 
+\*             IF Len(his) = 0 THEN 1
+\*             ELSE LET len == Len(his) IN
+\*                 IF \E idx \in 1..len: TxnZxidEqual(his[idx], zxid)
+\*                     THEN ZxidToIndexHepler(his, zxid, 1, FALSE)
+\*                     ELSE len + 1
+
+\* Non-recursive version.
+ZxidToIndexIter(his, zxid) == 
+    IF ZxidEqual(zxid, <<0, 0>>) THEN 0
+        ELSE IF Len(his) = 0 THEN 1
+
+        ELSE LET inds == {ind \in DOMAIN his : TxnZxidEqual(his[ind], zxid)} IN
+                IF Cardinality(inds) = 1 \* zxid appears exactly once.
+                THEN CHOOSE v \in inds : TRUE
+            ELSE 
+                IF Cardinality(inds) >= 2 THEN -1 \* zxid appears at least twice.
+                ELSE Len(his) + 1
+
+ZxidToIndex(his, zxid) == ZxidToIndexIter(his, zxid)
+
+\* Checking equivalence of iterative and recursive versions of this operator.
+\* ZxidToIndexEquiv == 
+    \* \A s \in Server :
+    \* \A x,y,z \in {1,2,3} : 
+        \* /\ PrintT("history:")
+        \* /\ PrintT(history[s])
+        \* /\ PrintT(<<x,y>>)
+        \* /\ PrintT(ZxidToIndexExpr(history[s], <<x,y>>))
+        \* /\ PrintT(ZxidToIndex(history[s], <<x,y>>))
+        \* /\ PrintT("custom val:")
+        \* /\ PrintT(ZxidToIndex(<<[zxid |-> <<1, 1>>, value |-> 0], [zxid |-> <<2, 1>>, value |-> 0]>>, <<1,1>>))
+        \* /\ ZxidToIndexIter(history[s], <<x,y>>) = ZxidToIndexRec(history[s], <<x,y>>)
 
 (* Follower receives COMMITLD. Commit all txns. *)
 FollowerProcessCOMMITLD(i, j) ==
