@@ -58,6 +58,7 @@
     "symmetry" : true,
     "typeok"  :  "TypeOKRandom",
     "simulate"  :  true,
+    "tlc_specific_spec": true,
     "local_grammars": {
         "LeaderProcessACKEPOCHHasntBroadcastAction": {
             "H_NEWLEADERHistoryExistsOnQuorum": {
