@@ -1693,6 +1693,13 @@ H_ServerInEntryAckSidImpliesHasEntry ==
 
 AckLDRecvServers(i) == {v.sid : v \in {a \in ackldRecv[i]: a.connected = TRUE }}
 
+
+\* TODO.
+\* \* Leader implies all followers have no pending NEWEPOCH msgs.
+\* H_LeaderImpliesNoPendingNEWEPOCHMsgs == 
+\*     \A i,j \in Server : 
+\*         (IsLeader(j) /\ zabState[j] = BROADCAST /\ j \in AckLDRecvServers(j)) => ~PendingNEWEPOCH(i,j)
+
 H_AckLDRecvsAreConnected == 
     \A s \in Server : IsLeader(s) => (\A a \in ackldRecv[s] : a.connected = TRUE)
 
