@@ -307,7 +307,8 @@ safety.children = {
         nEWLEADERMsgSentByLeader
     ],
     "FollowerProcessCOMMITAction": [
-        COMMITSentByNodeImpliesZxidInLog
+        COMMITSentByNodeImpliesZxidInLog,
+        txnWithSameZxidEqual
     ],
     "FollowerProcessCOMMITLDAction": [
         COMMITLDSentByNodeImpliesZxidCommittedInLog,
