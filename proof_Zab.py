@@ -85,13 +85,15 @@ LeaderInBROADCASTImpliesAckLDQuorum = make_node("H_LeaderInBROADCASTImpliesAckLD
 
 LeaderinBROADCASTImpliesNoNEWLEADERInFlight = make_node("H_LeaderinBROADCASTImpliesNoNEWLEADERInFlight")
 
+ACKLDMsgSentByFollower = make_node("H_ACKLDMsgSentByFollower")
+
 LeaderInBROADCASTImpliesLearnerInBROADCAST = make_node("H_LeaderInBROADCASTImpliesLearnerInBROADCAST")
 LeaderInBROADCASTImpliesLearnerInBROADCAST.children = {
     "FollowerProcessPROPOSEAction": [
         PROPOSEMsgInFlightImpliesNodesInBROADCAST
     ],
-    "FollowerProcessNEWLEADERAction": [
-        # LeaderinBROADCASTImpliesNoNEWLEADERInFlight
+    "LeaderProcessACKLDHasntBroadcastAction": [
+        ACKLDMsgSentByFollower
     ]
 }
 
@@ -109,7 +111,16 @@ ACKMsgInFlightImpliesNodesInBROADCAST.children = {
     ]
 }
 
+ACKEPOCHHistoryContainedInFOLLOWINGSender = make_node("H_ACKEPOCHHistoryContainedInFOLLOWINGSender")
+
+NEWLEADERUniquePerEpoch = make_node("H_NEWLEADERUniquePerEpoch")
+
 NEWLEADERHistoryExistsOnQuorum = make_node("H_NEWLEADERHistoryExistsOnQuorum")
+NEWLEADERHistoryExistsOnQuorum.children = {
+    "LeaderProcessACKEPOCHHasntBroadcastAction": [
+        ACKEPOCHHistoryContainedInFOLLOWINGSender
+    ]
+}
 
 ACKLDMsgImpliesZxidInLog = make_node("H_ACKLDMsgImpliesZxidInLog")
 ACKLDMsgImpliesZxidInLog.children = {
@@ -197,7 +208,6 @@ NodeLOOKINGImpliesEmptyInputBuffer.children = {
     ]
 }
 
-ACKEPOCHHistoryContainedInFOLLOWINGSender = make_node("H_ACKEPOCHHistoryContainedInFOLLOWINGSender")
 
 committedEntryExistsInACKEPOCHQuorumHistory.children = {
     "LeaderProcessRequestAction": [

@@ -1637,12 +1637,22 @@ H_LeaderInBROADCASTImpliesAckLDQuorum ==
          /\ zabState[i] = BROADCAST) => 
             AckLDRecvServers(i) \in Quorums
 
+\* If an ACKLD is pending from a follower to a leader, then
+\* that follower must have no other outstanding messages.
+H_ACKLDMsgSentByFollower == 
+    \A i,j \in Server : 
+        (PendingACKLD(i,j)) => 
+            /\ msgs[i][j] = <<>>
+            /\ state[j] = FOLLOWING
+
 H_LeaderInBROADCASTImpliesLearnerInBROADCAST == 
     \A i,j \in Server : 
         (/\ IsLeader(i) 
          /\ zabState[i] = BROADCAST
          /\ j \in AckLDRecvServers(i)) => 
-            /\ ((zabState[j] # BROADCAST) => (msgs[i][j] # <<>>))
+            /\ ((zabState[j] # BROADCAST) => (msgs[i][j] # <<>>) /\ msgs[i][j][1].mtype = COMMITLD)
+            \* Shouldn't be any pending NEWEPOCH messages while in BROADCAST.
+            /\ ((zabState[j] = BROADCAST) => \A mind \in DOMAIN msgs[i][j] : msgs[i][j][mind].mtype \notin {CEPOCH,NEWEPOCH})
             /\ (i # j) => IsFollower(j)
 
 \* The learner of a leader in BROADCAST must also be in BROADCAST and a follower.
@@ -1695,13 +1705,27 @@ ZxidExistsOnQuorum(zxid) ==
     \E ic \in DOMAIN history[n] : 
         history[n][ic].zxid = zxid 
 
+\* There must be a unique NEWLEADER message sent per epoch.
+H_NEWLEADERUniquePerEpoch == 
+    \A i,j \in Server : 
+    \A i2,j2 \in Server :
+        \A ind1 \in DOMAIN msgs[i][j] :
+        \A ind2 \in DOMAIN msgs[i2][j2] :   
+            (/\ msgs[i][j][ind1].mtype = NEWLEADER 
+             /\ msgs[i2][j2][ind2].mtype = NEWLEADER
+             /\ msgs[i2][j2][ind2].mepoch = msgs[i][j][ind1].mepoch) => 
+                msgs[i][j][ind1] = msgs[i2][j2][ind2]
+
 \* NEWLEADER history exists on a quorum.
-\* TODO: May need to revise this to a correct version.
 H_NEWLEADERHistoryExistsOnQuorum == 
     \A i,j \in Server : 
         (PendingNEWLEADER(i,j)) =>
             \A ih \in DOMAIN msgs[j][i][1].mhistory : 
-                ZxidExistsOnQuorum(msgs[j][i][1].mhistory[ih].zxid)
+              \E Q \in Quorums : 
+              \A n \in Q : 
+              \E ic \in DOMAIN history[n] : 
+                    /\ history[n][ic].zxid = msgs[j][i][1].mhistory[ih].zxid 
+                    /\ acceptedEpoch[n] >= msgs[j][i][1].mepoch
 
 \* If an ACKLD message exists from S for a given zxid, then that zxid must be present in the sender's history.
 \* Also, this zxid should exist on a quorum (?), since it must be committed?
