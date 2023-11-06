@@ -1436,11 +1436,14 @@ H_NEWLEADERMsgSentByLeader ==
 \* If a NEWLEADER message has been sent from a leader N in epoch E, then 
 \* that message's history must be a prefix of the leader's history in epoch E, w.r.t the txns
 \* that appear in that history i.e. (zxid, value) pairs.
-H_NEWLEADERMsgIsPrefixOfSenderLeader == 
+H_NEWLEADERMsgHistAndStateInv == 
     \A i,j \in Server : 
-        (/\ PendingNEWLEADER(i,j)
-         /\ msgs[j][i][1].mepoch = currentEpoch[j]) => 
+        (PendingNEWLEADER(i,j)) => 
             (/\ IsPrefix(TxnHistory(msgs[j][i][1].mhistory), TxnHistory(history[j])))
+             /\ IsLeader(j) 
+             /\ msgs[j][i][1].mepoch = currentEpoch[j]
+             /\ i \in learners[j]
+             /\ zabState[j] \in {SYNCHRONIZATION, BROADCAST}
 
 H_NEWLEADERIncomingImpliesLastCommittedBound == 
     \A i,j \in Server : 

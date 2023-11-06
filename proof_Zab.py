@@ -33,7 +33,7 @@ nEWLEADERMsgSentByLeader.children = {
 leaderInDiscoveryImpliesNoNEWLEADERMsgs = make_node("H_LeaderInDiscoveryImpliesNoNEWLEADERMsgs")
 leaderInDiscoveryImpliesNoNEWLEADERMsgs.children = {
     "UpdateLeaderAction": [
-        nEWLEADERMsgSentByLeader
+        nEWLEADERMsgSentByLeader,
     ],
     "FollowLeaderMyselfAction": [
         nEWLEADERMsgSentByLeader
@@ -43,12 +43,12 @@ leaderInDiscoveryImpliesNoNEWLEADERMsgs.children = {
     # ]
 }
 
-NEWLEADERMsgIsPrefixOfSenderLeader = make_node("H_NEWLEADERMsgIsPrefixOfSenderLeader")
+NEWLEADERMsgHistAndStateInv = make_node("H_NEWLEADERMsgHistAndStateInv")
 
 aCKMsgImpliesZxidInLog = make_node("H_ACKMsgImpliesZxidInLog")
 aCKMsgImpliesZxidInLog.children = {
     "FollowerProcessNEWLEADERAction": [
-        NEWLEADERMsgIsPrefixOfSenderLeader
+        NEWLEADERMsgHistAndStateInv
     ]
 }
 
@@ -141,7 +141,7 @@ committedEntryExistsInNEWLEADERHistory.children = {
         COMMITSentByNodeImpliesZxidInLog
     ],
     "FollowerProcessNEWLEADERAction": [
-        NEWLEADERMsgIsPrefixOfSenderLeader,
+        NEWLEADERMsgHistAndStateInv,
     ],
     "LeaderProcessACKAction": [
         aCKMsgImpliesZxidInLog,
@@ -189,7 +189,7 @@ committedEntryExistsOnQuorum.children = {
     ],
     "FollowerProcessNEWLEADERAction": [
         committedEntryExistsInNEWLEADERHistory,
-        NEWLEADERMsgIsPrefixOfSenderLeader,
+        NEWLEADERMsgHistAndStateInv,
         nodeHistoryBoundByLastCommittedIndex
     ],
     "LeaderProcessACKEPOCHHasntBroadcastAction": [
@@ -204,7 +204,8 @@ committedEntryExistsOnQuorum.children = {
 NodeLOOKINGImpliesEmptyInputBuffer = make_node("H_NodeLOOKINGImpliesEmptyInputBuffer")
 NodeLOOKINGImpliesEmptyInputBuffer.children = {
     "FollowerProcessNEWLEADERAction": [
-        nEWLEADERMsgSentByLeader
+        # nEWLEADERMsgSentByLeader,
+        NEWLEADERMsgHistAndStateInv
     ]
 }
 
@@ -277,15 +278,15 @@ COMMITLDSentByNodeImpliesZxidCommittedInLog.children = {
 
 safety = make_node("H_PrefixConsistency")
 
-NEWLEADERMsgIsPrefixOfSenderLeader.children = {
-    "FollowerProcessNEWLEADERAction": [
-        safety,
-        nEWLEADERMsgSentByLeader
-    ],
-    "LeaderProcessACKEPOCHHasntBroadcastAction": [
-        leaderInDiscoveryImpliesNoNEWLEADERMsgs,
-        nEWLEADERMsgSentByLeader
-    ]
+NEWLEADERMsgHistAndStateInv.children = {
+    # "FollowerProcessNEWLEADERAction": [
+    #     # safety,
+    #     # nEWLEADERMsgSentByLeader
+    # ],
+    # "LeaderProcessACKEPOCHHasntBroadcastAction": [
+    #     # leaderInDiscoveryImpliesNoNEWLEADERMsgs,
+    #     # nEWLEADERMsgSentByLeader
+    # ]
 }
 
 
@@ -295,8 +296,8 @@ committedEntryExistsInLeaderHistory.children = {
         COMMITSentByNodeImpliesZxidInLog
     ],
     "FollowerProcessNEWLEADERAction": [
-        NEWLEADERMsgIsPrefixOfSenderLeader,
-        nEWLEADERMsgSentByLeader
+        NEWLEADERMsgHistAndStateInv,
+        # nEWLEADERMsgSentByLeader
     ],
     "LeaderProcessRequestAction": [
         nodeHistoryBoundByLastCommittedIndex
@@ -318,9 +319,9 @@ committedEntryExistsInLeaderHistory.children = {
 
 safety.children = {
     "FollowerProcessNEWLEADERAction": [
-        # NEWLEADERMsgIsPrefixOfSenderLeader,
+        NEWLEADERMsgHistAndStateInv,
         NEWLEADERIncomingImpliesLastCommittedBound,
-        nEWLEADERMsgSentByLeader
+        # nEWLEADERMsgSentByLeader
     ],
     "FollowerProcessCOMMITAction": [
         COMMITSentByNodeImpliesZxidInLog,
