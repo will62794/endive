@@ -1686,8 +1686,8 @@ H_LeaderinBROADCASTImpliesNoNEWLEADERInFlight ==
 H_ACKMsgImpliesZxidInLog == 
     \A i,j \in Server : 
         PendingACK(i,j) => 
-            \E idx \in DOMAIN history[j] : 
-                history[j][idx].zxid = msgs[j][i][1].mzxid
+            /\ state[j] = FOLLOWING
+            /\ \E idx \in DOMAIN history[j] :  history[j][idx].zxid = msgs[j][i][1].mzxid
 
 ZxidExistsOnQuorum(zxid) == 
   \E Q \in Quorums : 
