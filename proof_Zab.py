@@ -86,7 +86,7 @@ PROPOSEMsgInFlightImpliesNodesInBROADCAST = make_node("H_PROPOSEMsgInFlightImpli
 
 LeaderInBROADCASTImpliesAckLDQuorum = make_node("H_LeaderInBROADCASTImpliesAckLDQuorum")
 
-LeaderinBROADCASTImpliesNoNEWLEADERInFlight = make_node("H_LeaderinBROADCASTImpliesNoNEWLEADERInFlight")
+LeaderinBROADCASTImpliesNoNEWLEADERorACKEInFlight = make_node("H_LeaderinBROADCASTImpliesNoNEWLEADERorACKEInFlight")
 
 ACKLDMsgSentByFollowerImpliesEmptyBuffer = make_node("H_ACKLDMsgSentByFollowerImpliesEmptyBuffer")
 
@@ -262,7 +262,7 @@ txnZxidsUniqueHistoriesAndMessagesBetweenAllMessages = make_node("H_txnZxidsUniq
 txnZxidsUniqueHistoriesAndMessagesPeerHistory = make_node("H_TxnWithSameZxidEqualPeerHistory")
 txnZxidsUniqueHistoriesAndMessagesPeerHistory.children = {
     "FollowerProcessPROPOSEAction": [
-
+        
     ]
 }
 
@@ -272,7 +272,8 @@ txnZxidsUniqueHistoriesAndMessages.children = {
     #     # txnZxidUniqueBetweenLocalHistoriesAndAllMessages
     # ],
     "LeaderProcessRequestAction": [
-        leaderInBroadcastImpliesAllHistoryEntriesInEpoch
+        leaderInBroadcastImpliesAllHistoryEntriesInEpoch,
+        LeaderinBROADCASTImpliesNoNEWLEADERorACKEInFlight
     ],
     # "FollowerProcessPROPOSEAction": [
     #     # txnZxidsUniqueHistoriesAndMessagesInPROPOSEMessages,

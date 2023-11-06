@@ -1471,6 +1471,15 @@ AllMsgs == UNION {{msgs[i][j][mi] : mi \in DOMAIN msgs[i][j]} : <<i,j>> \in Serv
 \*     UNION { TxnHistory(history[i]) : i \in Server } \cup
 \*     {m.mzxid}
 
+MsgsWithHistoryZxids == 
+    {m \in AllMsgs : (m.mtype = PROPOSE) \/ ("mhistory" \in DOMAIN m)}
+
+MsgZxids == 
+    UNION {IF m.mtype = PROPOSE
+                            THEN {[zxid |-> m.mzxid, value |-> m.mdata]}
+                            ELSE {[zxid |-> m.mhistory[i].zxid, value |-> m.mhistory[i].value] : i \in DOMAIN m.mhistory} : 
+                            m \in MsgsWithHistoryZxids}
+
 TxnWithSameZxidEqualInPeerHistory == 
     \A s \in Server :
     \A x,y \in ackeRecv[s] :
@@ -1488,21 +1497,20 @@ TxnWithSameZxidEqualLocalToPeerHistory ==
             ZxidEqual(x.peerHistory[ix].zxid, history[i][idxi].zxid) =>
                 TxnEqual(x.peerHistory[ix], history[i][idxi])
 
+TxnWithSameZxidEqualMsgsToPeerHistory == 
+    \A s \in Server :
+    \A x \in ackeRecv[s] :
+    \A txn \in MsgZxids :
+        \A ix \in DOMAIN x.peerHistory :
+            ZxidEqual(x.peerHistory[ix].zxid, txn.zxid) =>
+                TxnEqual(x.peerHistory[ix], txn)
+
 \* Covering zxid equality within peer history and local history.
 H_TxnWithSameZxidEqualPeerHistory == 
     /\ TxnWithSameZxidEqualInPeerHistory
     /\ TxnWithSameZxidEqualLocalToPeerHistory
+    /\ TxnWithSameZxidEqualMsgsToPeerHistory
 
-
-MsgsWithHistoryZxids == 
-    {m \in AllMsgs : (m.mtype = PROPOSE) \/ ("mhistory" \in DOMAIN m)}
-
-MsgZxids == 
-    UNION {IF m.mtype = PROPOSE
-                            THEN {[zxid |-> m.mzxid, value |-> m.mdata]}
-                            ELSE {[zxid |-> m.mhistory[i].zxid, value |-> m.mhistory[i].value] : i \in DOMAIN m.mhistory} : 
-                            m \in MsgsWithHistoryZxids}
-        
 
 \* If zxid matches between any two histories in messages in network, 
 \* then the transactions must be equal.
@@ -1731,11 +1739,15 @@ H_ACKMsgInFlightImpliesNodesInBROADCAST ==
             /\ IsLeader(i)
 
 
-
 \* If a leader is in BROADCAST, no NEWLEADER messages should be in-flight
-H_LeaderinBROADCASTImpliesNoNEWLEADERInFlight == 
-  (\E s \in Server : state[s] = LEADING /\ zabState = BROADCAST) =>
-    (\A i,j \in Server :  ~PendingNEWLEADER(i,j))
+H_LeaderinBROADCASTImpliesNoNEWLEADERorACKEInFlight == 
+    \A s \in Server : 
+    (state[s] = LEADING /\ zabState[s] = BROADCAST) => 
+        (\A i,j \in Server :
+            \A mi \in DOMAIN msgs[i][j] : 
+                /\ msgs[i][j][mi].mtype # NEWLEADER
+                /\ (msgs[i][j][mi].mtype = ACKEPOCH) => 
+                    \A idx \in DOMAIN msgs[i][j][mi].mhistory : msgs[i][j][mi].mhistory[idx].zxid[1] # currentEpoch[s])
 
 \* If an ACK message exists from S for a given zxid, then that zxid must be present in the sender's history.
 H_ACKMsgImpliesZxidInLog == 
@@ -1834,6 +1846,14 @@ H_LeaderInBroadcastImpliesAllHistoryEntriesInEpoch ==
          /\ history[j][idx].zxid[1] = currentEpoch[i]) => 
             \* Entry is in leader's history.
             \E idx2 \in DOMAIN history[i] : ZxidEqual(history[i][idx2].zxid, history[j][idx].zxid)
+
+\* If a leader is in BROADCAST in epoch E, then there cannot be any NEWLEADER or ACKEPOCH messages in flight.
+\* H_LeaderInBroadcastImpliesNoNEWLEADER == 
+\*     \A s \in Server : 
+\*         (state[s] = LEADING /\ zabState[s] = BROADCAST) => 
+\*             (\A i,j \in Server :
+\*              \A mi \in DOMAIN msgs[i][j] : 
+\*                 msgs[i][j][mi].mtype \notin {NEWLEADER})
 
 ----------------------------------------------------------
 
