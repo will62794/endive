@@ -1639,7 +1639,7 @@ H_LeaderInBROADCASTImpliesAckLDQuorum ==
 
 \* If an ACKLD is pending from a follower to a leader, then
 \* that follower must have no other outstanding messages.
-H_ACKLDMsgSentByFollower == 
+H_ACKLDMsgSentByFollowerImpliesEmptyBuffer == 
     \A i,j \in Server : 
         (PendingACKLD(i,j)) => 
             /\ msgs[i][j] = <<>>

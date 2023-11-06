@@ -85,7 +85,7 @@ LeaderInBROADCASTImpliesAckLDQuorum = make_node("H_LeaderInBROADCASTImpliesAckLD
 
 LeaderinBROADCASTImpliesNoNEWLEADERInFlight = make_node("H_LeaderinBROADCASTImpliesNoNEWLEADERInFlight")
 
-ACKLDMsgSentByFollower = make_node("H_ACKLDMsgSentByFollower")
+ACKLDMsgSentByFollowerImpliesEmptyBuffer = make_node("H_ACKLDMsgSentByFollowerImpliesEmptyBuffer")
 
 LeaderInBROADCASTImpliesLearnerInBROADCAST = make_node("H_LeaderInBROADCASTImpliesLearnerInBROADCAST")
 LeaderInBROADCASTImpliesLearnerInBROADCAST.children = {
@@ -93,7 +93,7 @@ LeaderInBROADCASTImpliesLearnerInBROADCAST.children = {
         PROPOSEMsgInFlightImpliesNodesInBROADCAST
     ],
     "LeaderProcessACKLDHasntBroadcastAction": [
-        ACKLDMsgSentByFollower
+        ACKLDMsgSentByFollowerImpliesEmptyBuffer
     ]
 }
 
@@ -217,7 +217,8 @@ committedEntryExistsInACKEPOCHQuorumHistory.children = {
         COMMITLDSentByNodeImpliesZxidCommittedInLog
     ],
     "FollowerProcessNEWLEADERAction": [
-        nodeHistoryBoundByLastCommittedIndex
+        nodeHistoryBoundByLastCommittedIndex,
+        committedEntryExistsInNEWLEADERHistory
     ],
     "UpdateLeaderAction":[
         # NodeLOOKINGImpliesELECTIONorDISCOVERY,
@@ -308,7 +309,10 @@ committedEntryExistsInLeaderHistory.children = {
     ],
     "FollowerProcessCOMMITLDAction": [
         COMMITLDSentByNodeImpliesZxidCommittedInLog
-    ]
+    ],
+    "FollowerProcessPROPOSEAction": [
+        PROPOSEMsgSentByNodeImpliesZxidInLog
+    ],
 }
 
 
