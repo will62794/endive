@@ -742,17 +742,22 @@ DetermineInitialHistory(i) ==
             info == CHOOSE f \in set: f.sid = selected.sid
         IN info.peerHistory
 
-RECURSIVE InitAcksidHelper(_,_)
-InitAcksidHelper(txns, src) == IF Len(txns) = 0 THEN << >>
-                               ELSE LET oldTxn == txns[1]
-                                        newTxn == [ zxid   |-> oldTxn.zxid,
-                                                    value  |-> oldTxn.value,
-                                                    ackSid |-> {src},
-                                                    epoch  |-> oldTxn.epoch ]
-                                    IN <<newTxn>> \o InitAcksidHelper( Tail(txns), src)
+\* RECURSIVE InitAcksidHelper(_,_)
+\* InitAcksidHelper(txns, src) == IF Len(txns) = 0 THEN << >>
+\*                                ELSE LET oldTxn == txns[1]
+\*                                         newTxn == [ zxid   |-> oldTxn.zxid,
+\*                                                     value  |-> oldTxn.value,
+\*                                                     ackSid |-> {src},
+\*                                                     epoch  |-> oldTxn.epoch ]
+\*                                     IN <<newTxn>> \o InitAcksidHelper( Tail(txns), src)
 
-\* Atomically let all txns in initial history contain self's acks.
-InitAcksid(i, his) == InitAcksidHelper(his, i)
+\* \* Atomically let all txns in initial history contain self's acks.
+\* InitAcksid(i, his) == InitAcksidHelper(his, i)
+
+\* Atomically let all txns in initial history contain self's acks. (declarative version)
+InitAcksid(i, his) == [ind \in DOMAIN his |-> [his[ind] EXCEPT !.ackSid = {i}]]
+
+\* Eq1 == \A i \in Server : \A j \in Server : InitAcksidAlt(i,history[j]) = InitAcksid(i,history[j])
 
 (* Leader waits for receiving ACKEPOPCH from a quorum, and determines initialHistory
    according to history of whom has most recent state summary from them. After this,
