@@ -1555,18 +1555,24 @@ TxnZxidUniqueBetweenLocalHistoryAndMessages ==
 \*                     ZxidEqual(msgs[i][j][idx].mzxid, history[i1][h2].zxid) =>
 \*                     msgs[i][j][idx].mdata = history[i1][h2].value
 
-H_TxnZxidUniqueBetweenLocalHistoriesAndAllMessages == 
+TxnZxidUniqueBetweenLocalHistoriesAndAllMessages == 
     /\ TxnWithSameZxidEqualBetweenAllMessages
     /\ TxnZxidUniqueBetweenLocalHistoryAndMessages
 
 \* Any two transactions with the same zxid must be equal.
 \* Note: this must hold no matter where a zxid appears i.e. in a message or on a local node.
-H_TxnWithSameZxidEqual == 
+TxnWithSameZxidEqual == 
     \A i,j \in Server : 
         \A idxi \in (DOMAIN history[i]) :
         \A idxj \in (DOMAIN history[j]) : 
             ZxidEqual(history[i][idxi].zxid, history[j][idxj].zxid) =>
                 TxnEqual(history[i][idxi], history[j][idxj])
+
+\* Transaction zxids are unique throughout local histories and all messages.
+H_TxnZxidsUniqueHistoriesAndMessages == 
+    /\ TxnWithSameZxidEqual
+    /\ TxnWithSameZxidEqualBetweenAllMessages
+    /\ TxnZxidUniqueBetweenLocalHistoryAndMessages
 
 \* If a PROPOSE message has been sent with a particular zxid, then this zxid must be present
 \* in the sender's log, and the sender must be a leader.
