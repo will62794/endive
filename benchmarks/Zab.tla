@@ -1464,6 +1464,8 @@ H_COMMITSentByNodeImpliesZxidInLog ==
             \E idx \in DOMAIN history[j] : 
                 /\ history[j][idx].zxid = msgs[j][i][1].mzxid  
                 /\ lastCommitted[j].index >= idx
+                /\ state[i] = FOLLOWING
+                /\ state[j] = LEADING
 
 \* TODO: Work on this further to develop a more unified lemma for establishing zxid uniqueness throughout the whole system.
 \* All messages currently in the system
