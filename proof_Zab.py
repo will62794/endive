@@ -101,7 +101,14 @@ ServerInEntryAckSidImpliesHasEntry = make_node("H_ServerInEntryAckSidImpliesHasE
 
 PROPOSEMsgInFlightImpliesNodesInBROADCAST = make_node("H_PROPOSEMsgInFlightImpliesNodesInBROADCAST")
 
+AckLDRecvsAreConnected = make_node("H_AckLDRecvsAreConnected")
+
 LeaderInBROADCASTImpliesAckLDQuorum = make_node("H_LeaderInBROADCASTImpliesAckLDQuorum")
+LeaderInBROADCASTImpliesAckLDQuorum.children = {
+    "LeaderProcessACKLDHasntBroadcastAction": [
+        AckLDRecvsAreConnected
+    ]
+}
 
 LeaderinBROADCASTImpliesNoNEWLEADERorACKEInFlight = make_node("H_LeaderinBROADCASTImpliesNoNEWLEADERorACKEInFlight")
 

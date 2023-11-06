@@ -1487,9 +1487,11 @@ MsgZxids ==
                             ELSE {[zxid |-> m.mhistory[i].zxid, value |-> m.mhistory[i].value] : i \in DOMAIN m.mhistory} : 
                             m \in MsgsWithHistoryZxids}
 
+\* Zxids across peer history at all nodes.
 TxnWithSameZxidEqualInPeerHistory == 
-    \A s \in Server :
-    \A x,y \in ackeRecv[s] :
+    \A s,t \in Server :
+    \A x \in ackeRecv[s] :
+    \A y \in ackeRecv[t] :
         \A ix \in DOMAIN x.peerHistory :
         \A iy \in DOMAIN y.peerHistory :
             ZxidEqual(x.peerHistory[ix].zxid, y.peerHistory[iy].zxid) =>
@@ -1690,6 +1692,9 @@ H_ServerInEntryAckSidImpliesHasEntry ==
                 TxnEqual(history[t][indt], history[s][ind])
 
 AckLDRecvServers(i) == {v.sid : v \in {a \in ackldRecv[i]: a.connected = TRUE }}
+
+H_AckLDRecvsAreConnected == 
+    \A s \in Server : IsLeader(s) => (\A a \in ackldRecv[s] : a.connected = TRUE)
 
 H_LeaderInBROADCASTImpliesAckLDQuorum == 
     \A i,j \in Server : 
