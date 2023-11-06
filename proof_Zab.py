@@ -133,8 +133,7 @@ committedEntryExistsInNEWLEADERHistory.children = {
         NEWLEADERMsgIsPrefixOfSenderLeader,
     ],
     "LeaderProcessACKAction": [
-        # ServerInEntryAckSidImpliesHasEntry,
-        # LeaderinBROADCASTImpliesNoNEWLEADERInFlight,
+        aCKMsgImpliesZxidInLog,
         ACKMsgInFlightImpliesNodesInBROADCAST
     ],
     "LeaderProcessACKEPOCHHasntBroadcastAction": [
@@ -143,6 +142,9 @@ committedEntryExistsInNEWLEADERHistory.children = {
     ],
     "LeaderProcessACKLDHasntBroadcastAction": [
         ACKLDMsgImpliesZxidInLog
+    ],
+    "FollowerProcessPROPOSEAction": [
+        nodeHistoryBoundByLastCommittedIndex
     ]
 }
 
