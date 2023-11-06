@@ -201,12 +201,19 @@ committedEntryExistsOnQuorum.children = {
     ]
 }
 
+FollowersHaveNoMessagesSentToSelf = make_node("H_FollowersHaveNoMessagesSentToSelf")
+
 NodeLOOKINGImpliesEmptyInputBuffer = make_node("H_NodeLOOKINGImpliesEmptyInputBuffer")
 NodeLOOKINGImpliesEmptyInputBuffer.children = {
     "FollowerProcessNEWLEADERAction": [
-        # nEWLEADERMsgSentByLeader,
         NEWLEADERMsgHistAndStateInv
-    ]
+    ],
+    "FollowerProcessNEWEPOCHAction": [
+        FollowersHaveNoMessagesSentToSelf
+    ],
+    # "LeaderProcessACKLDHasntBroadcastAction": [
+    #     NodeLOOKINGImpliesELECTIONorDISCOVERY
+    # ]
 }
 
 

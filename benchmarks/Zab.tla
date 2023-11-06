@@ -1557,11 +1557,17 @@ H_COMMITLDSentByNodeImpliesZxidCommittedInLog ==
                 /\ history[j][idx].zxid = msgs[j][i][1].mzxid  
                 /\ lastCommitted[j].index >= idx
 
+H_FollowersHaveNoMessagesSentToSelf == 
+    \A s \in Server : (IsFollower(s) \/ IsLooking(s)) => msgs[s][s] = <<>>
+
 \* If a node is LOOKING, then it must have an empty input buffer.
 H_NodeLOOKINGImpliesEmptyInputBuffer == 
     \A i \in Server : 
         (state[i] = LOOKING) => 
-            \A j \in Server : msgs[j][i] = << >>
+            /\ \A j \in Server : msgs[j][i] = << >>
+            /\ (zabState[i] \in {ELECTION, DISCOVERY})
+            \* a node in LOOKING shouldn't exist as a learner of any leader.
+            /\ ~\E j \in Server : IsLeader(j) /\ i \in learners[j]
 
 \* If a node is LOOKING, then it must be in DISCOVERY or ELECTION and have an empty input buffer.
 H_NodeLOOKINGImpliesELECTIONorDISCOVERY == 
