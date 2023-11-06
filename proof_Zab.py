@@ -251,30 +251,55 @@ committedEntryExistsInACKEPOCHQuorumHistory.children = {
     # ]
 }   
 
-txnWithSameZxidEqualBetweenLocalHistoryAndMessages = make_node("H_TxnWithSameZxidEqualBetweenLocalHistoryAndMessages")
+# txnWithSameZxidEqualBetweenLocalHistoryAndMessages = make_node("H_TxnWithSameZxidEqualBetweenLocalHistoryAndMessages")
+txnZxidUniqueBetweenLocalHistoriesAndAllMessages = make_node("H_TxnZxidUniqueBetweenLocalHistoriesAndAllMessages")
 
-txnWithSameZxidEqualInMessages = make_node("H_TxnWithSameZxidEqualInMessages")
+txnWithSameZxidEqualBetweenAllMessages = make_node("H_TxnWithSameZxidEqualBetweenAllMessages")
 
 txnWithSameZxidEqualInPeerHistory = make_node("H_TxnWithSameZxidEqualInPeerHistory")
 
 txnWithSameZxidEqualLocalToPeerHistory = make_node("H_TxnWithSameZxidEqualLocalToPeerHistory")
 
+txnWithSameZxidEqualPeerHistory = make_node("H_TxnWithSameZxidEqualPeerHistory")
+txnWithSameZxidEqualPeerHistory.children = {
+    "FollowerProcessPROPOSEAction": [
+
+    ]
+}
+
 txnWithSameZxidEqual.children = {
     "FollowerProcessNEWLEADERAction": [
-        txnWithSameZxidEqualInMessages,
-        txnWithSameZxidEqualBetweenLocalHistoryAndMessages
+        # txnWithSameZxidEqualBetweenAllMessages,
+        txnZxidUniqueBetweenLocalHistoriesAndAllMessages
     ],
     "LeaderProcessRequestAction": [
         leaderInBroadcastImpliesAllHistoryEntriesInEpoch
     ],
     "FollowerProcessPROPOSEAction": [
         # txnWithSameZxidEqualInPROPOSEMessages,
-        txnWithSameZxidEqualBetweenLocalHistoryAndPROPOSEMessages
+        # txnWithSameZxidEqualBetweenLocalHistoryAndPROPOSEMessages,
+        txnZxidUniqueBetweenLocalHistoriesAndAllMessages
     ],
     "LeaderProcessACKEPOCHHasntBroadcastAction": [
-        txnWithSameZxidEqualInPeerHistory,
-        txnWithSameZxidEqualLocalToPeerHistory,
-        txnWithSameZxidEqualBetweenLocalHistoryAndMessages
+        # txnWithSameZxidEqualInPeerHistory,
+        # txnWithSameZxidEqualLocalToPeerHistory,
+        txnWithSameZxidEqualPeerHistory,
+        txnZxidUniqueBetweenLocalHistoriesAndAllMessages
+    ]
+}
+
+txnZxidUniqueBetweenLocalHistoriesAndAllMessages.children = {
+    "FollowerProcessNEWEPOCHAction": [
+        txnWithSameZxidEqual
+    ],
+    "LeaderBroadcastPROPOSEAction": [
+        txnWithSameZxidEqual
+    ],
+    "LeaderProcessACKEPOCHHasntBroadcastAction": [
+
+    ],
+    "LeaderProcessRequestAction": [
+
     ]
 }
 

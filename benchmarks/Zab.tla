@@ -1462,7 +1462,7 @@ H_COMMITSentByNodeImpliesZxidInLog ==
 
 \* TODO: Work on this further to develop a more unified lemma for establishing zxid uniqueness throughout the whole system.
 \* All messages currently in the system
-\* AllMsgs == {UNION {m : m \in DOMAIN msgs[i][j]} : i,j \in Server \X Server}
+AllMsgs == UNION {{msgs[i][j][mi] : mi \in DOMAIN msgs[i][j]} : <<i,j>> \in Server \X Server}
 
 \* AllACKs == {m \in AllMsgs : m.mtype = "ACK"}
 
@@ -1470,6 +1470,94 @@ H_COMMITSentByNodeImpliesZxidInLog ==
 \* AllSystemsZxids == 
 \*     UNION { TxnHistory(history[i]) : i \in Server } \cup
 \*     {m.mzxid}
+
+TxnWithSameZxidEqualInPeerHistory == 
+    \A s \in Server :
+    \A x,y \in ackeRecv[s] :
+        \A ix \in DOMAIN x.peerHistory :
+        \A iy \in DOMAIN y.peerHistory :
+            ZxidEqual(x.peerHistory[ix].zxid, y.peerHistory[iy].zxid) =>
+                TxnEqual(x.peerHistory[ix], y.peerHistory[iy])
+
+TxnWithSameZxidEqualLocalToPeerHistory == 
+    \A s \in Server :
+    \A x \in ackeRecv[s] :
+    \A i \in Server : 
+    \A idxi \in (DOMAIN history[i]) :
+        \A ix \in DOMAIN x.peerHistory :
+            ZxidEqual(x.peerHistory[ix].zxid, history[i][idxi].zxid) =>
+                TxnEqual(x.peerHistory[ix], history[i][idxi])
+
+\* Covering zxid equality within peer history and local history.
+H_TxnWithSameZxidEqualPeerHistory == 
+    /\ TxnWithSameZxidEqualInPeerHistory
+    /\ TxnWithSameZxidEqualLocalToPeerHistory
+
+
+MsgsWithHistoryZxids == 
+    {m \in AllMsgs : (m.mtype = PROPOSE) \/ ("mhistory" \in DOMAIN m)}
+
+MsgZxids == 
+    UNION {IF m.mtype = PROPOSE
+                            THEN {[zxid |-> m.mzxid, value |-> m.mdata]}
+                            ELSE {[zxid |-> m.mhistory[i].zxid, value |-> m.mhistory[i].value] : i \in DOMAIN m.mhistory} : 
+                            m \in MsgsWithHistoryZxids}
+        
+
+\* If zxid matches between any two histories in messages in network, 
+\* then the transactions must be equal.
+\* H_TxnWithSameZxidEqualInMessages == 
+\*     \A i,j,i2,j2 \in Server :
+\*         \A idx \in DOMAIN msgs[i][j] : 
+\*         \A idx2 \in DOMAIN msgs[i2][j2] : 
+\*             (/\ "mhistory" \in DOMAIN msgs[i][j][idx]
+\*              /\ "mhistory" \in DOMAIN msgs[i2][j2][idx2]) =>
+\*                 \A h1 \in DOMAIN msgs[i][j][idx].mhistory :
+\*                 \A h2 \in DOMAIN msgs[i2][j2][idx2].mhistory : 
+\*                     ZxidEqual(msgs[i][j][idx].mhistory[h1].zxid, msgs[i2][j2][idx2].mhistory[h2].zxid) =>
+\*                     TxnEqual(msgs[i][j][idx].mhistory[h1], msgs[i2][j2][idx2].mhistory[h2])
+
+\* H_TxnWithSameZxidEqualInPROPOSEMessages == 
+\*     \A i,j,i2,j2 \in Server :
+\*     \A idx \in (DOMAIN msgs[i][j]) : 
+\*     \A idx2 \in (DOMAIN msgs[i2][j2]) : 
+\*         (/\ msgs[i][j][idx].mtype = PROPOSE 
+\*          /\ msgs[i2][j2][idx2].mtype = PROPOSE) =>
+\*             (ZxidEqual(msgs[i][j][idx].mzxid, msgs[i2][j2][idx2].mzxid) => 
+\*                 (msgs[i][j][idx].mdata = msgs[i2][j2][idx2].mdata))
+
+TxnWithSameZxidEqualBetweenAllMessages == 
+     \A txn,txn2 \in MsgZxids : 
+        ZxidEqual(txn.zxid, txn2.zxid) => txn.value = txn2.value   
+
+TxnZxidUniqueBetweenLocalHistoryAndMessages ==
+    \A s \in Server :
+    \A ind \in DOMAIN history[s] :
+    \A txn \in MsgZxids : 
+        ZxidEqual(txn.zxid, history[s][ind].zxid) => txn.value = history[s][ind].value
+
+\* H_TxnWithSameZxidEqualBetweenLocalHistoryAndMessages == 
+\*     \A i,j,i1 \in Server :
+\*         \A idx \in DOMAIN msgs[i][j] : 
+\*         \A idx2 \in DOMAIN history[i1] : 
+\*             (/\ "mhistory" \in DOMAIN msgs[i][j][idx]) =>
+\*                 \A h1 \in DOMAIN msgs[i][j][idx].mhistory :
+\*                 \A h2 \in DOMAIN history[i1]: 
+\*                     ZxidEqual(msgs[i][j][idx].mhistory[h1].zxid, history[i1][h2].zxid) =>
+\*                     TxnEqual(msgs[i][j][idx].mhistory[h1], history[i1][h2])
+
+\* H_TxnWithSameZxidEqualBetweenLocalHistoryAndPROPOSEMessages == 
+\*     \A i,j,i1 \in Server :
+\*         \A idx \in DOMAIN msgs[i][j] : 
+\*         \A idx2 \in DOMAIN history[i1] : 
+\*             (msgs[i][j][idx].mtype = PROPOSE) =>
+\*                 \A h2 \in DOMAIN history[i1] : 
+\*                     ZxidEqual(msgs[i][j][idx].mzxid, history[i1][h2].zxid) =>
+\*                     msgs[i][j][idx].mdata = history[i1][h2].value
+
+H_TxnZxidUniqueBetweenLocalHistoriesAndAllMessages == 
+    /\ TxnWithSameZxidEqualBetweenAllMessages
+    /\ TxnZxidUniqueBetweenLocalHistoryAndMessages
 
 \* Any two transactions with the same zxid must be equal.
 \* Note: this must hold no matter where a zxid appears i.e. in a message or on a local node.
@@ -1479,64 +1567,6 @@ H_TxnWithSameZxidEqual ==
         \A idxj \in (DOMAIN history[j]) : 
             ZxidEqual(history[i][idxi].zxid, history[j][idxj].zxid) =>
                 TxnEqual(history[i][idxi], history[j][idxj])
-
-H_TxnWithSameZxidEqualInPeerHistory == 
-    \A s \in Server :
-    \A x,y \in ackeRecv[s] :
-        \A ix \in DOMAIN x.peerHistory :
-        \A iy \in DOMAIN y.peerHistory :
-            ZxidEqual(x.peerHistory[ix].zxid, y.peerHistory[iy].zxid) =>
-                TxnEqual(x.peerHistory[ix], y.peerHistory[iy])
-
-H_TxnWithSameZxidEqualLocalToPeerHistory == 
-    \A s \in Server :
-    \A x \in ackeRecv[s] :
-    \A i \in Server : 
-    \A idxi \in (DOMAIN history[i]) :
-        \A ix \in DOMAIN x.peerHistory :
-            ZxidEqual(x.peerHistory[ix].zxid, history[i][idxi].zxid) =>
-                TxnEqual(x.peerHistory[ix], history[i][idxi])
-
-\* If zxid matches between any two histories in messages in network, 
-\* then the transactions must be equal.
-H_TxnWithSameZxidEqualInMessages == 
-    \A i,j,i2,j2 \in Server :
-        \A idx \in DOMAIN msgs[i][j] : 
-        \A idx2 \in DOMAIN msgs[i2][j2] : 
-            (/\ "mhistory" \in DOMAIN msgs[i][j][idx]
-             /\ "mhistory" \in DOMAIN msgs[i2][j2][idx2]) =>
-                \A h1 \in DOMAIN msgs[i][j][idx].mhistory :
-                \A h2 \in DOMAIN msgs[i2][j2][idx2].mhistory : 
-                    ZxidEqual(msgs[i][j][idx].mhistory[h1].zxid, msgs[i2][j2][idx2].mhistory[h2].zxid) =>
-                    TxnEqual(msgs[i][j][idx].mhistory[h1], msgs[i2][j2][idx2].mhistory[h2])
-
-H_TxnWithSameZxidEqualInPROPOSEMessages == 
-    \A i,j,i2,j2 \in Server :
-    \A idx \in (DOMAIN msgs[i][j]) : 
-    \A idx2 \in (DOMAIN msgs[i2][j2]) : 
-        (/\ msgs[i][j][idx].mtype = PROPOSE 
-         /\ msgs[i2][j2][idx2].mtype = PROPOSE) =>
-            (ZxidEqual(msgs[i][j][idx].mzxid, msgs[i2][j2][idx2].mzxid) => 
-                (msgs[i][j][idx].mdata = msgs[i2][j2][idx2].mdata))
-
-H_TxnWithSameZxidEqualBetweenLocalHistoryAndMessages == 
-    \A i,j,i1 \in Server :
-        \A idx \in DOMAIN msgs[i][j] : 
-        \A idx2 \in DOMAIN history[i1] : 
-            (/\ "mhistory" \in DOMAIN msgs[i][j][idx]) =>
-                \A h1 \in DOMAIN msgs[i][j][idx].mhistory :
-                \A h2 \in DOMAIN history[i1]: 
-                    ZxidEqual(msgs[i][j][idx].mhistory[h1].zxid, history[i1][h2].zxid) =>
-                    TxnEqual(msgs[i][j][idx].mhistory[h1], history[i1][h2])
-
-H_TxnWithSameZxidEqualBetweenLocalHistoryAndPROPOSEMessages == 
-    \A i,j,i1 \in Server :
-        \A idx \in DOMAIN msgs[i][j] : 
-        \A idx2 \in DOMAIN history[i1] : 
-            (msgs[i][j][idx].mtype = PROPOSE) =>
-                \A h2 \in DOMAIN history[i1] : 
-                    ZxidEqual(msgs[i][j][idx].mzxid, history[i1][h2].zxid) =>
-                    msgs[i][j][idx].mdata = history[i1][h2].value
 
 \* If a PROPOSE message has been sent with a particular zxid, then this zxid must be present
 \* in the sender's log, and the sender must be a leader.
