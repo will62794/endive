@@ -73,15 +73,6 @@ CONSTANTS
     \* @type: Str;
     COMMIT
 
-\* [MaxTimeoutFailures, MaxTransactionNum, MaxEpoch, MaxRestarts]
-\* CONSTANT Parameters
-
-\* Params1 == [MaxTimeoutFailures |-> 3, MaxTransactionNum |-> 5, MaxEpoch |-> 3, MaxRestarts |-> 2]
-
-MAXEPOCH == 10
-NullPoint == CHOOSE p: p \notin Server
-Quorums == {Q \in SUBSET Server: Cardinality(Q)*2 > Cardinality(Server)}
------------------------------------------------------------------------------
 \* Variables that all servers use.
 VARIABLES 
     \* @type: SERVER -> Str; 
@@ -138,7 +129,8 @@ VARIABLE
 \* msgs[i][j] means the input buffer of server j from server i.
 VARIABLE  msgs
 
-
+NullPoint == CHOOSE p: p \notin Server
+Quorums == {Q \in SUBSET Server: Cardinality(Q)*2 > Cardinality(Server)}
 
 \* UNUSED old state vars.
 
