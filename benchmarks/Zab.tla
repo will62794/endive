@@ -732,7 +732,7 @@ ConnectAndFollowerSendCEPOCH(i, j) ==
     /\ leaderOracle = i
     /\ learners'   = [learners   EXCEPT ![i] = learners[i] \cup {j}]
     /\ connectInfo' = [connectInfo EXCEPT ![j] = i]
-    /\ Send(j, i, [ mtype  |-> CEPOCH, mepoch |-> acceptedEpoch[j] ]) \* contains f.p
+    /\ msgs' = msgs \* Send(j, i, [ mtype  |-> CEPOCH, mepoch |-> acceptedEpoch[j] ]) \* contains f.p
     /\ CEPOCHmsgs' = CEPOCHmsgs \cup {[ mtype  |-> CEPOCH, mepoch |-> acceptedEpoch[j], msrc |-> j, mdst |-> i, morder |-> NextMsgOrder(j,i) ]}
     /\ UNCHANGED <<serverVars, electionVars, cepochRecv, ackeRecv, ackldRecv, sendCounter, NEWEPOCHmsgs, ACKEPOCHmsgs, NEWLEADERmsgs, ACKLDmsgs, COMMITLDmsgs, PROPOSEmsgs, ACKmsgs, COMMITmsgs>>
 
@@ -995,10 +995,11 @@ FollowerProcessNEWLEADER(i, j, newLeaderMsg) ==
               /\ history' = [history EXCEPT ![i] = newLeaderMsg.mhistory] \* no need to care ackSid
               /\ LET m == [ mtype |-> ACKLD, mzxid |-> LastZxidOfHistory(history'[i]) ] IN
                         /\ msgs' = msgs \* [msgs EXCEPT ![j][i] = Tail(msgs[j][i]), ![i][j] = Append(msgs[i][j], m)]
+                        /\ NEWLEADERmsgs' = NEWLEADERmsgs \ {newLeaderMsg}
                         /\ ACKLDmsgs' = ACKLDmsgs \cup {[ mtype |-> ACKLD, 
                                                           mzxid |-> LastZxidOfHistory(history'[i]), 
                                                           msrc |-> i, mdst |-> j, morder |-> NextMsgOrder(i,j) ]}
-              /\ UNCHANGED <<followerVars, state, zabState, learners, cepochRecv, ackeRecv, ackldRecv, acceptedEpoch, lastCommitted, sendCounter, electionVars, CEPOCHmsgs, NEWEPOCHmsgs, NEWLEADERmsgs, ACKEPOCHmsgs, COMMITLDmsgs, PROPOSEmsgs, ACKmsgs, COMMITmsgs>>
+              /\ UNCHANGED <<followerVars, state, zabState, learners, cepochRecv, ackeRecv, ackldRecv, acceptedEpoch, lastCommitted, sendCounter, electionVars, CEPOCHmsgs, NEWEPOCHmsgs, ACKEPOCHmsgs, COMMITLDmsgs, PROPOSEmsgs, ACKmsgs, COMMITmsgs>>
 
 \* FollowerProcessNEWLEADERNewIteration(i, j) ==
 \*         /\ IsFollower(i)
@@ -1245,22 +1246,21 @@ LeaderBroadcastPROPOSE(i) ==
                m_proposal == [ mtype |-> PROPOSE,
                                mzxid |-> toSendTxn.zxid,
                                mdata |-> toSendTxn.value ]
-               m_proposal_forChecking == [ source |-> i,
-                                           epoch  |-> currentEpoch[i],
-                                           zxid   |-> toSendTxn.zxid,
-                                           data   |-> toSendTxn.value ]
+            \*    m_proposal_forChecking == [ source |-> i,
+            \*                                epoch  |-> currentEpoch[i],
+            \*                                zxid   |-> toSendTxn.zxid,
+            \*                                data   |-> toSendTxn.value ]
            IN /\ sendCounter' = [sendCounter EXCEPT ![i] = toSendCounter]
-              /\ Broadcast(i, m_proposal)
+              /\ msgs' = msgs \* Broadcast(i, m_proposal)
               /\ LET ackeRecv_quorum == {a \in ackeRecv[i]: a.connected = TRUE }
                      sid_ackeRecv == { a.sid: a \in ackeRecv_quorum } IN
                     PROPOSEmsgs' = PROPOSEmsgs \cup {
-                                        [ source |-> i,
-                                           epoch  |-> currentEpoch[i],
-                                           zxid   |-> toSendTxn.zxid,
-                                           data   |-> toSendTxn.value,
+                                        [ mtype |-> PROPOSE,
+                                          mzxid |-> toSendTxn.zxid,
+                                          mdata |-> toSendTxn.value,
                                            msrc |-> i,
                                            mdst |-> to ] : to \in (sid_ackeRecv \cap learners[i]) \ {i}}
-        /\ UNCHANGED <<serverVars, learners, cepochRecv, ackeRecv, ackldRecv, followerVars, electionVars, CEPOCHmsgs, ACKLDmsgs, NEWLEADERmsgs, ACKEPOCHmsgs, NEWEPOCHmsgs, NEWLEADERmsgs, ACKEPOCHmsgs, ACKmsgs, COMMITmsgs>>
+        /\ UNCHANGED <<serverVars, learners, cepochRecv, ackeRecv, ackldRecv, followerVars, electionVars, CEPOCHmsgs, COMMITLDmsgs, ACKLDmsgs, NEWLEADERmsgs, ACKEPOCHmsgs, NEWEPOCHmsgs, NEWLEADERmsgs, ACKEPOCHmsgs, ACKmsgs, COMMITmsgs>>
 
 IsNextZxid(curZxid, nextZxid) ==
             \/ \* first PROPOSAL in this epoch
@@ -1277,7 +1277,7 @@ FollowerProcessPROPOSE(i, j, proposeMsg) ==
         \* /\ PendingPROPOSE(i, j)
         /\ proposeMsg.mdst = i
         /\ proposeMsg.msrc = j
-        /\ LET msg == msgs[j][i][1]
+        /\ LET \*msg == msgs[j][i][1]
                infoOk == IsMyLeader(i, j)
                isNext == IsNextZxid(LastZxid(i), proposeMsg.mzxid)
                newTxn == [ zxid   |-> proposeMsg.mzxid,
@@ -1285,20 +1285,24 @@ FollowerProcessPROPOSE(i, j, proposeMsg) ==
                            ackSid |-> {},
                            epoch  |-> currentEpoch[i] ]
                m_ack == [ mtype |-> ACK,
-                          mzxid |-> proposeMsg.mzxid ]
-           IN /\ infoOk
+                          mzxid |-> proposeMsg.mzxid,
+                          msrc |-> i, 
+                          mdst |-> j] IN
+              /\ infoOk
               /\ \/ /\ isNext
                     /\ history' = [history EXCEPT ![i] = Append(@, newTxn)]
-                    /\ msgs' = [msgs EXCEPT ![j][i] = Tail(msgs[j][i]), ![i][j] = Append(msgs[i][j], m_ack)]
+                    /\ msgs' = msgs \* [msgs EXCEPT ![j][i] = Tail(msgs[j][i]), ![i][j] = Append(msgs[i][j], m_ack)]
+                    /\ ACKmsgs' = ACKmsgs \cup {m_ack}
+                    /\ UNCHANGED PROPOSEmsgs
                  \/ /\ ~isNext
-                    /\ LET index == ZxidToIndex(history[i], msg.mzxid)
+                    /\ LET index == ZxidToIndex(history[i], proposeMsg.mzxid)
                            exist == index > 0 /\ index <= Len(history[i]) IN exist
-                    /\ Discard(j, i)
+                    \* /\ Discard(j, i)
                     /\ PROPOSEmsgs' = PROPOSEmsgs \ {proposeMsg}
-                    /\ UNCHANGED history
-        /\ UNCHANGED <<state, zabState, acceptedEpoch, currentEpoch, lastCommitted, leaderVars, followerVars, electionVars, CEPOCHmsgs, ACKLDmsgs, NEWLEADERmsgs, ACKEPOCHmsgs, NEWEPOCHmsgs, NEWLEADERmsgs, ACKEPOCHmsgs, PROPOSEmsgs, ACKmsgs>>
+                    /\ UNCHANGED <<history,msgs, ACKmsgs>>
+        /\ UNCHANGED <<state, zabState, acceptedEpoch, currentEpoch, lastCommitted, leaderVars, followerVars, electionVars, COMMITLDmsgs, COMMITmsgs, CEPOCHmsgs, ACKLDmsgs, NEWLEADERmsgs, ACKEPOCHmsgs, NEWEPOCHmsgs, NEWLEADERmsgs, ACKEPOCHmsgs>>
 
-LeaderTryToCommit(s, index, zxid, newTxn, follower) ==
+LeaderTryToCommit(s, index, zxid, newTxn, follower, ackMsg) ==
         LET allTxnsBeforeCommitted == lastCommitted[s].index >= index - 1
                     \* Only when all proposals before zxid has been committed,
                     \* this proposal can be permitted to be committed.
@@ -1310,22 +1314,61 @@ LeaderTryToCommit(s, index, zxid, newTxn, follower) ==
         IN \/ /\ \* Current conditions do not satisfy committing the proposal.
                  \/ ~allTxnsBeforeCommitted
                  \/ ~hasAllQuorums
-              /\ Discard(follower, s)
-              /\ UNCHANGED <<lastCommitted>>
+              /\ msgs' = msgs \* Discard(follower, s)
+              /\ ACKmsgs' = ACKmsgs \ {ackMsg}
+              /\ UNCHANGED <<lastCommitted, COMMITmsgs>>
            \/ /\ allTxnsBeforeCommitted
               /\ hasAllQuorums
-              /\ \/ /\ ordered
+              /\ ordered
               /\ lastCommitted' = [lastCommitted EXCEPT ![s] = [ index |-> index,
                                                                  zxid  |-> zxid ] ]
               /\ LET m_commit == [ mtype |-> COMMIT,
                                    mzxid |-> zxid ]
-                 IN DiscardAndBroadcast(s, follower, m_commit)
+                     ackldRecv_quorum == {a \in ackldRecv[s]: a.connected = TRUE }
+                     sid_ackldRecv == { a.sid: a \in ackldRecv_quorum }
+                 IN /\ msgs' = msgs \* DiscardAndBroadcast(s, follower, m_commit)
+                    /\ ACKmsgs' = ACKmsgs \ {ackMsg}
+                    /\ COMMITmsgs' = COMMITmsgs \cup {[ 
+                                        mtype |-> COMMIT,
+                                        mzxid |-> zxid, 
+                                        msrc |-> s, mdst |-> to] : to \in (sid_ackldRecv \cap learners[s]) \ {s}}
 
 
 LastAckIndexFromFollower(i, j) == 
         LET set_index == {idx \in 1..Len(history[i]): j \in history[i][idx].ackSid }
         IN Maximum(set_index)
 
+
+(* Leader Keeps a count of acks for a particular proposal, and try to
+   commit the proposal. If committed, COMMIT of proposal will be broadcast. *)
+LeaderProcessACK(i, j, ackMsg) ==
+        /\ IsLeader(i)
+        \* /\ PendingACK(i, j)
+        /\ ackMsg.mdst = i
+        /\ ackMsg.msrc = j
+        /\ LET msg == msgs[j][i][1]
+               infoOk == IsMyLearner(i, j)
+               index == ZxidToIndex(history[i], ackMsg.mzxid)
+               exist == index >= 1 /\ index <= Len(history[i]) \* proposal exists in history
+               outstanding == lastCommitted[i].index < Len(history[i]) \* outstanding not null
+               hasCommitted == ~ZxidCompare(ackMsg.mzxid, lastCommitted[i].zxid)
+               ackIndex == LastAckIndexFromFollower(i, j)
+               monotonicallyInc == \/ ackIndex = -1
+                                   \/ ackIndex + 1 = index
+           IN /\ infoOk
+              /\ exist
+              /\ monotonicallyInc
+              /\ LET txn == history[i][index]
+                           txnAfterAddAck == [ zxid   |-> txn.zxid,
+                                               value  |-> txn.value,
+                                               ackSid |-> txn.ackSid \union {j} , \* record the new ack for this entry.
+                                               epoch  |-> txn.epoch ]   
+                       IN
+                       /\ history' = [history EXCEPT ![i][index] = txnAfterAddAck ]
+                       /\ /\ outstanding
+                          /\ ~hasCommitted
+                          /\ LeaderTryToCommit(i, index, ackMsg.mzxid, txnAfterAddAck, j, ackMsg)
+        /\ UNCHANGED <<state, zabState, acceptedEpoch, currentEpoch, leaderVars, followerVars, electionVars, COMMITLDmsgs, PROPOSEmsgs, CEPOCHmsgs, ACKLDmsgs, NEWLEADERmsgs, ACKEPOCHmsgs, NEWEPOCHmsgs, NEWLEADERmsgs, ACKEPOCHmsgs>>
 
 (* Leader Keeps a count of acks for a particular proposal, and try to
    commit the proposal. If committed, COMMIT of proposal will be broadcast. *)
@@ -1358,37 +1401,6 @@ LastAckIndexFromFollower(i, j) ==
 \*                        /\ UNCHANGED <<lastCommitted>>
 \*         /\ UNCHANGED <<state, zabState, acceptedEpoch, currentEpoch, leaderVars, followerVars, electionVars>>
 
-(* Leader Keeps a count of acks for a particular proposal, and try to
-   commit the proposal. If committed, COMMIT of proposal will be broadcast. *)
-LeaderProcessACK(i, j, ackMsg) ==
-        /\ IsLeader(i)
-        \* /\ PendingACK(i, j)
-        /\ ackMsg.mdst = i
-        /\ ackMsg.msrc = j
-        /\ LET msg == msgs[j][i][1]
-               infoOk == IsMyLearner(i, j)
-               index == ZxidToIndex(history[i], ackMsg.mzxid)
-               exist == index >= 1 /\ index <= Len(history[i]) \* proposal exists in history
-               outstanding == lastCommitted[i].index < Len(history[i]) \* outstanding not null
-               hasCommitted == ~ZxidCompare(ackMsg.mzxid, lastCommitted[i].zxid)
-               ackIndex == LastAckIndexFromFollower(i, j)
-               monotonicallyInc == \/ ackIndex = -1
-                                   \/ ackIndex + 1 = index
-           IN /\ infoOk
-              /\ exist
-              /\ monotonicallyInc
-              /\ LET txn == history[i][index]
-                           txnAfterAddAck == [ zxid   |-> txn.zxid,
-                                               value  |-> txn.value,
-                                               ackSid |-> txn.ackSid \union {j} , \* record the new ack for this entry.
-                                               epoch  |-> txn.epoch ]   
-                       IN
-                       /\ history' = [history EXCEPT ![i][index] = txnAfterAddAck ]
-                       /\ /\ outstanding
-                          /\ ~hasCommitted
-                          /\ LeaderTryToCommit(i, index, ackMsg.mzxid, txnAfterAddAck, j)
-        /\ UNCHANGED <<state, zabState, acceptedEpoch, currentEpoch, leaderVars, followerVars, electionVars>>
-
 (* Follower processes COMMIT. *)
 FollowerProcessCOMMIT(i, j, commitMsg) ==
         /\ IsFollower(i)
@@ -1406,47 +1418,50 @@ FollowerProcessCOMMIT(i, j, commitMsg) ==
                     /\ lastCommitted' = [lastCommitted EXCEPT ![i] = 
                                             [   index |-> lastCommitted[i].index + 1,
                                                 zxid  |-> firstElement.zxid ] ]
-        /\ Discard(j, i)
+        /\ msgs' = msgs \* Discard(j, i)
         /\ COMMITmsgs' = COMMITmsgs \ {commitMsg}
-        /\ UNCHANGED <<state, zabState, acceptedEpoch, currentEpoch, history,leaderVars, followerVars, electionVars>>
+        /\ UNCHANGED <<state, zabState, acceptedEpoch, currentEpoch, history,leaderVars, followerVars, electionVars, COMMITLDmsgs, PROPOSEmsgs, ACKmsgs, CEPOCHmsgs, ACKLDmsgs, NEWLEADERmsgs, ACKEPOCHmsgs, NEWEPOCHmsgs, NEWLEADERmsgs, ACKEPOCHmsgs>>
+
+
 ----------------------------------------------------------------------------     
+
 (* Used to discard some messages which should not exist in network channel.
    This action should not be triggered. *)
-FilterNonexistentMessage(i) ==
-        /\ \E j \in Server \ {i}: /\ msgs[j][i] /= << >>
-                                  /\ LET msg == msgs[j][i][1]
-                                     IN 
-                                        \/ /\ IsLeader(i)
-                                           /\ LET infoOk == IsMyLearner(i, j)
-                                              IN
-                                              \/ msg.mtype = NEWEPOCH
-                                              \/ msg.mtype = NEWLEADER
-                                              \/ msg.mtype = COMMITLD
-                                              \/ msg.mtype = PROPOSE
-                                              \/ msg.mtype = COMMIT
-                                              \/ /\ ~infoOk
-                                                 /\ \/ msg.mtype = CEPOCH
-                                                    \/ msg.mtype = ACKEPOCH
-                                                    \/ msg.mtype = ACKLD
-                                                    \/ msg.mtype = ACK
-                                        \/ /\ IsFollower(i)
-                                           /\ LET infoOk == IsMyLeader(i, j) 
-                                              IN
-                                              \/ msg.mtype = CEPOCH
-                                              \/ msg.mtype = ACKEPOCH
-                                              \/ msg.mtype = ACKLD
-                                              \/ msg.mtype = ACK
-                                              \/ /\ ~infoOk
-                                                 /\ \/ msg.mtype = NEWEPOCH
-                                                    \/ msg.mtype = NEWLEADER
-                                                    \/ msg.mtype = COMMITLD
-                                                    \/ msg.mtype = PROPOSE
-                                                    \/ msg.mtype = COMMIT   
-                                        \/ IsLooking(i)
-                                  /\ Discard(j, i)
-        \* /\ violatedInvariants' = violatedInvariants
-        \* /\ violatedInvariants' = [violatedInvariants EXCEPT !.messageIllegal = TRUE]
-        /\ UNCHANGED <<serverVars, leaderVars, followerVars, electionVars>>
+\* FilterNonexistentMessage(i) ==
+\*         /\ \E j \in Server \ {i}: /\ msgs[j][i] /= << >>
+\*                                   /\ LET msg == msgs[j][i][1]
+\*                                      IN 
+\*                                         \/ /\ IsLeader(i)
+\*                                            /\ LET infoOk == IsMyLearner(i, j)
+\*                                               IN
+\*                                               \/ msg.mtype = NEWEPOCH
+\*                                               \/ msg.mtype = NEWLEADER
+\*                                               \/ msg.mtype = COMMITLD
+\*                                               \/ msg.mtype = PROPOSE
+\*                                               \/ msg.mtype = COMMIT
+\*                                               \/ /\ ~infoOk
+\*                                                  /\ \/ msg.mtype = CEPOCH
+\*                                                     \/ msg.mtype = ACKEPOCH
+\*                                                     \/ msg.mtype = ACKLD
+\*                                                     \/ msg.mtype = ACK
+\*                                         \/ /\ IsFollower(i)
+\*                                            /\ LET infoOk == IsMyLeader(i, j) 
+\*                                               IN
+\*                                               \/ msg.mtype = CEPOCH
+\*                                               \/ msg.mtype = ACKEPOCH
+\*                                               \/ msg.mtype = ACKLD
+\*                                               \/ msg.mtype = ACK
+\*                                               \/ /\ ~infoOk
+\*                                                  /\ \/ msg.mtype = NEWEPOCH
+\*                                                     \/ msg.mtype = NEWLEADER
+\*                                                     \/ msg.mtype = COMMITLD
+\*                                                     \/ msg.mtype = PROPOSE
+\*                                                     \/ msg.mtype = COMMIT   
+\*                                         \/ IsLooking(i)
+\*                                   /\ Discard(j, i)
+\*         \* /\ violatedInvariants' = violatedInvariants
+\*         \* /\ violatedInvariants' = [violatedInvariants EXCEPT !.messageIllegal = TRUE]
+\*         /\ UNCHANGED <<serverVars, leaderVars, followerVars, electionVars>>
 ----------------------------------------------------------------------------
 
 (* Election *)
@@ -1522,7 +1537,7 @@ Spec == Init /\ [][Next]_vars
 DebugInv1 == ~(\E s \in Server : state[s] = LEADING /\ Len(history[s]) > 0 /\ lastCommitted[s].index > 0)
 \* DebugInv2 == CEPOCHmsgs = {}
 \* DebugInv2 == NEWEPOCHmsgs = {}
-DebugInv2 == NEWLEADERmsgs = {}
+DebugInv2 == ACKmsgs = {}
 \* DebugInv2 == \A m \in NEWLEADERmsgs : m.morder < 2
 
 \* ShouldNotBeTriggered == \A p \in DOMAIN violatedInvariants: violatedInvariants[p] = FALSE
@@ -2130,6 +2145,13 @@ Morder1 ==
     \A i,j \in Server : 
     \A mi,mj \in DOMAIN msgs[i][j] : 
         (mi < mj /\ msgs[i][j][mi].mtype = PROPOSE) => msgs[i][j][mj].mtype \notin {ACKLD, NEWEPOCH}
+
+
+\* Assume at most one outstanding message in input buffer for each process.
+\* Optional constraint to consider to simplify modeling/verification/proofs.
+StateConstraint == 
+    /\ \A s \in Server : Cardinality({m \in CEPOCHmsgs : m.mdst = s}) <= 1
+    /\ \A s \in Server : Cardinality({m \in ACKEPOCHmsgs : m.mdst = s}) <= 1
 
 =============================================================================
 \* Modification History
