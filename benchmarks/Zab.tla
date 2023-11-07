@@ -1693,6 +1693,10 @@ H_CommittedEntryExistsOnQuorum ==
                     /\ ic = idx
                     /\ TxnEqual(history[s][idx], history[n][ic])
 
+H_NEWEPOCHFromNodeImpliesLEADING ==
+    \A i,j \in Server : 
+        (PendingNEWEPOCH(i,j)) => IsLeader(j)
+
 \* ACKEPOCH response history must be contained in the sender's history, who must
 \* be a follower.
 H_ACKEPOCHHistoryContainedInFOLLOWINGSender == 

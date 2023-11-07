@@ -67,7 +67,22 @@ nodeHistoryBoundByLastCommittedIndex.children = {
     ],
 }
 
+PROPOSEMsgInFlightImpliesNodesInBROADCAST = make_node("H_PROPOSEMsgInFlightImpliesNodesInBROADCAST")
+
+NEWEPOCHFromNodeImpliesLEADING = make_node("H_NEWEPOCHFromNodeImpliesLEADING")
+
 ACKEPOCHHistoryContainedInFOLLOWINGSender = make_node("H_ACKEPOCHHistoryContainedInFOLLOWINGSender")
+ACKEPOCHHistoryContainedInFOLLOWINGSender.children = {
+    "FollowerProcessPROPOSEAction": [
+        PROPOSEMsgInFlightImpliesNodesInBROADCAST
+    ],
+    "FollowerProcessNEWLEADERAction": [
+        NEWLEADERMsgHistAndStateInv
+    ],
+    "FollowerProcessNEWEPOCHAction": [
+        NEWEPOCHFromNodeImpliesLEADING
+    ]   
+}
 
 PROPOSEMsgSentByNodeImpliesZxidInLog = make_node("H_PROPOSEMsgSentByNodeImpliesZxidInLog")
 
@@ -99,7 +114,6 @@ COMMITLDSentByNodeImpliesZxidCommittedInLog = make_node("H_COMMITLDSentByNodeImp
 
 ServerInEntryAckSidImpliesHasEntry = make_node("H_ServerInEntryAckSidImpliesHasEntry")
 
-PROPOSEMsgInFlightImpliesNodesInBROADCAST = make_node("H_PROPOSEMsgInFlightImpliesNodesInBROADCAST")
 
 AckLDRecvsAreConnected = make_node("H_AckLDRecvsAreConnected")
 
