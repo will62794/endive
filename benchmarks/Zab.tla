@@ -24,20 +24,56 @@
 -------------------------------- MODULE Zab ---------------------------------
 (* This is the formal specification for the Zab consensus algorithm,
    in DSN'2011, which represents protocol specification in our work.*)
-EXTENDS Integers, FiniteSets, Sequences, Naturals
+EXTENDS Integers, FiniteSets, Sequences, Naturals, Apalache
 -----------------------------------------------------------------------------
 \* The set of servers
-CONSTANT Server
+CONSTANT 
+    \* @typeAlias: SERVER = Str;
+    \* @type: Set(SERVER);
+    Server
 \* States of server
-CONSTANTS LOOKING, FOLLOWING, LEADING
+CONSTANTS 
+    \* @type: Str;
+    LOOKING, 
+    \* @type: Str;
+    FOLLOWING, 
+    \* @type: Str;
+    LEADING
 \* Zab states of server
-CONSTANTS ELECTION, DISCOVERY, SYNCHRONIZATION, BROADCAST
+CONSTANTS 
+    \* @type: Str;
+    ELECTION, 
+    \* @type: Str;
+    DISCOVERY, 
+    \* @type: Str;
+    SYNCHRONIZATION, 
+    \* @type: Str;
+    BROADCAST
 \* Message types
-CONSTANTS CEPOCH, NEWEPOCH, ACKEPOCH, NEWLEADER, ACKLD, COMMITLD, PROPOSE, ACK, COMMIT
-\* [MaxTimeoutFailures, MaxTransactionNum, MaxEpoch, MaxRestarts]
-CONSTANT Parameters
+CONSTANTS 
+    \* @type: Str;
+    CEPOCH, 
+    \* @type: Str;
+    NEWEPOCH, 
+    \* @type: Str;
+    ACKEPOCH, 
+    \* @type: Str;
+    NEWLEADER, 
+    \* @type: Str;  
+    ACKLD, 
+    \* @type: Str;
+    COMMITLD, 
+    \* @type: Str;
+    PROPOSE, 
+    \* @type: Str;
+    ACK, 
+    \* @type: Str;
+    COMMIT
 
-Params1 == [MaxTimeoutFailures |-> 3, MaxTransactionNum |-> 5, MaxEpoch |-> 3, MaxRestarts |-> 2]
+\* [MaxTimeoutFailures, MaxTransactionNum, MaxEpoch, MaxRestarts]
+\* CONSTANT Parameters
+
+\* Params1 == [MaxTimeoutFailures |-> 3, MaxTransactionNum |-> 5, MaxEpoch |-> 3, MaxRestarts |-> 2]
 
 MAXEPOCH == 10
 NullPoint == CHOOSE p: p \notin Server
@@ -135,6 +171,35 @@ CONSTANT MaxHistLen
 Epoch == 1..MaxEpoch
 Value == Nat
 
+ApaZxidType == Epoch \X Nat
+
+ApaHistEntryType == [zxid: ApaZxidType, value: Nat, ackSid: SUBSET Server, epoch: Epoch]
+\* HistTypeBounded == BoundedSeq(HistEntryType, MaxHistLen)
+
+\* Gives a candidate TypeOK definition for all variables in the spec.
+ApaTypeOK == 
+    /\ state \in [Server -> {LOOKING, FOLLOWING, LEADING}]
+    /\ zabState \in [Server -> {ELECTION, DISCOVERY, SYNCHRONIZATION, BROADCAST}]
+    /\ acceptedEpoch \in [Server -> Epoch]
+    /\ currentEpoch \in [Server -> Epoch]
+    \* /\ history = Gen(4)
+    \* /\ history \in [Server -> {<<>>}]
+    /\ history = Gen(3)
+    /\ \A s \in Server : \A i \in DOMAIN history[s] : history[s][i] \in ApaHistEntryType
+    /\ \A s \in Server : Len(history[s]) <= MaxHistLen
+    /\ DOMAIN history = Server
+    /\ lastCommitted \in [Server -> [index: Nat, zxid: ApaZxidType]]
+    /\ learners \in [Server -> SUBSET Server]
+    \* /\ cepochRecv \in [Server -> RandomSetOfSubsets(3, 3, CEpochRecvType)]
+    \* /\ ackeRecv \in [Server -> [sid: Server, connected: BOOLEAN, peerLastEpoch: Nat, peerHistory: HistTypeBounded]]
+    /\ ackldRecv \in [Server -> SUBSET [sid: Server, connected: BOOLEAN]]
+    /\ sendCounter \in [Server -> Nat]
+    /\ connectInfo \in [Server -> Server]
+    /\ leaderOracle \in Server
+    /\ msgs = {}
+    \* /\ msgs \in [Server -> [Server -> Seq([mtype: {CEPOCH, NEWEPOCH, ACKEPOCH, NEWLEADER, ACKLD, COMMITLD, PROPOSE, ACK, COMMIT}, 
+      
+
 -----------------------------------------------------------------------------
 \* Return the maximum value from the set S
 Maximum(S) == IF S = {} THEN -1
@@ -171,7 +236,7 @@ TxnEqual(txn1, txn2) == /\ ZxidEqual(txn1.zxid, txn2.zxid)
 EpochPrecedeInTxn(txn1, txn2) == txn1.zxid[1] < txn2.zxid[1]
 -----------------------------------------------------------------------------
 \* Actions about recorder
-GetParameter(p) == IF p \in DOMAIN Parameters THEN Parameters[p] ELSE 0
+\* GetParameter(p) == IF p \in DOMAIN Parameters THEN Parameters[p] ELSE 0
 \* GetRecorder(p)  == IF p \in DOMAIN recorder   THEN recorder[p]   ELSE 0
 
 \* RecorderGetHelper(m) == (m :> recorder[m])
@@ -213,10 +278,10 @@ UpdateRecorder(pc) == TRUE \*recorder' = recorder
 
 \* UnchangeRecorder   == UNCHANGED recorder
 
-CheckParameterHelper(n, p, Comp(_,_)) == IF p \in DOMAIN Parameters 
-                                         THEN Comp(n, Parameters[p])
-                                         ELSE TRUE
-CheckParameterLimit(n, p) == CheckParameterHelper(n, p, LAMBDA i, j: i < j)
+\* CheckParameterHelper(n, p, Comp(_,_)) == IF p \in DOMAIN Parameters 
+\*                                          THEN Comp(n, Parameters[p])
+\*                                          ELSE TRUE
+\* CheckParameterLimit(n, p) == CheckParameterHelper(n, p, LAMBDA i, j: i < j)
 
 \* CheckTimeout        == CheckParameterLimit(recorder.nTimeout,     "MaxTimeoutFailures")
 \* CheckTransactionNum == CheckParameterLimit(recorder.nTransaction, "MaxTransactionNum")
