@@ -59,8 +59,8 @@ TypeOKRandom ==
     /\ connectInfo \in [Server -> Server]
     /\ leaderOracle \in Server
     /\ msgs \in [Server -> [Server -> BoundedSeq(RandomSubset(7, MsgType), MaxMsgChanLen)]]
-    /\ proposalMsgsLog    = {}
-    /\ epochLeader        = [i \in 1..MaxEpoch |-> {} ]
+    \* /\ proposalMsgsLog    = {}
+    \* /\ epochLeader        = [i \in 1..MaxEpoch |-> {} ]
     \* /\ violatedInvariants = {}
     \* /\ recorder = <<>>
 
