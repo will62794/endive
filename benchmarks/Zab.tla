@@ -1284,10 +1284,10 @@ FollowLeaderMyselfAction == TRUE /\ \E i \in Server:    FollowLeaderMyself(i)
 FollowLeaderOtherAction == TRUE /\ \E i \in Server:    FollowLeaderOther(i)
 
 (* Abnormal situations like failure, network disconnection *)
-TimeoutWithQuorumAction == TRUE /\ \E i, j \in Server : TimeoutWithQuorum(i, j)
-TimeoutNoQuorumAction == TRUE /\ \E i, j \in Server : TimeoutNoQuorum(i, j)
+\* TimeoutWithQuorumAction == TRUE /\ \E i, j \in Server : TimeoutWithQuorum(i, j)
+\* TimeoutNoQuorumAction == TRUE /\ \E i, j \in Server : TimeoutNoQuorum(i, j)
 
-RestartAction == TRUE /\ \E i \in Server:    Restart(i)
+\* RestartAction == TRUE /\ \E i \in Server:    Restart(i)
 
 (* Zab module - Discovery part *)
 ConnectAndFollowerSendCEPOCHAction == TRUE /\ \E i, j \in Server: ConnectAndFollowerSendCEPOCH(i, j)
@@ -1296,11 +1296,11 @@ FollowerProcessNEWEPOCHAction == TRUE /\ \E i, j \in Server: FollowerProcessNEWE
 
 (* Zab module - Synchronization *)
 LeaderProcessACKEPOCHHasntBroadcastAction == TRUE /\ \E i, j \in Server: LeaderProcessACKEPOCHHasntBroadcast(i, j)
-LeaderProcessACKEPOCHHasBroadcastAction == TRUE /\ \E i, j \in Server: LeaderProcessACKEPOCHHasBroadcast(i, j)
+\* LeaderProcessACKEPOCHHasBroadcastAction == TRUE /\ \E i, j \in Server: LeaderProcessACKEPOCHHasBroadcast(i, j)
 FollowerProcessNEWLEADERAction == TRUE /\ \E i, j \in Server: FollowerProcessNEWLEADER(i, j)
-FollowerProcessNEWLEADERNewIterationAction == TRUE /\ \E i, j \in Server: FollowerProcessNEWLEADERNewIteration(i, j)
+\* FollowerProcessNEWLEADERNewIterationAction == TRUE /\ \E i, j \in Server: FollowerProcessNEWLEADERNewIteration(i, j)
 LeaderProcessACKLDHasntBroadcastAction == TRUE /\ \E i, j \in Server: LeaderProcessACKLDHasntBroadcast(i, j)
-LeaderProcessACKLDHasBroadcastAction == TRUE /\ \E i, j \in Server: LeaderProcessACKLDHasBroadcast(i, j)
+\* LeaderProcessACKLDHasBroadcastAction == TRUE /\ \E i, j \in Server: LeaderProcessACKLDHasBroadcast(i, j)
 FollowerProcessCOMMITLDAction == TRUE /\ \E i, j \in Server: FollowerProcessCOMMITLD(i, j)
 
 (* Zab module - Broadcast part *)
@@ -1308,11 +1308,11 @@ LeaderProcessRequestAction == TRUE /\ \E i \in Server:    LeaderProcessRequest(i
 LeaderBroadcastPROPOSEAction == TRUE /\ \E i \in Server:    LeaderBroadcastPROPOSE(i)
 FollowerProcessPROPOSEAction == TRUE /\ \E i, j \in Server: FollowerProcessPROPOSE(i, j)
 LeaderProcessACKAction == TRUE /\ \E i, j \in Server: LeaderProcessACK(i, j)
-LeaderProcessACKAlreadyCommittedAction == TRUE /\ \E i, j \in Server: LeaderProcessACKAlreadyCommitted(i, j)
+\* LeaderProcessACKAlreadyCommittedAction == TRUE /\ \E i, j \in Server: LeaderProcessACKAlreadyCommitted(i, j)
 FollowerProcessCOMMITAction == TRUE /\ \E i, j \in Server: FollowerProcessCOMMIT(i, j)
 
 (* An action used to judge whether there are redundant messages in network *)
-FilterNonexistentMessageAction == TRUE /\ \E i \in Server:    FilterNonexistentMessage(i)
+\* FilterNonexistentMessageAction == TRUE /\ \E i \in Server:    FilterNonexistentMessage(i)
 
 \* Complete transition relation.
 Next == 
