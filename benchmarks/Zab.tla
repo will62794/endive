@@ -25,12 +25,13 @@
 (* This is the formal specification for the Zab consensus algorithm,
    in DSN'2011, which represents protocol specification in our work.*)
 EXTENDS Integers, FiniteSets, Sequences, Naturals, Apalache
------------------------------------------------------------------------------
+
 \* The set of servers
 CONSTANT 
     \* @typeAlias: SERVER = Str;
     \* @type: Set(SERVER);
     Server
+
 \* States of server
 CONSTANTS 
     \* @type: Str;
@@ -39,6 +40,7 @@ CONSTANTS
     FOLLOWING, 
     \* @type: Str;
     LEADING
+
 \* Zab states of server
 CONSTANTS 
     \* @type: Str;
@@ -49,6 +51,7 @@ CONSTANTS
     SYNCHRONIZATION, 
     \* @type: Str;
     BROADCAST
+
 \* Message types
 CONSTANTS 
     \* @type: Str;
