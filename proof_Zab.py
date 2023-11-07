@@ -124,6 +124,11 @@ leaderInBroadcastImpliesAllHistoryEntriesInEpoch.children = {
 }
 
 COMMITLDSentByNodeImpliesZxidCommittedInLog = make_node("H_COMMITLDSentByNodeImpliesZxidCommittedInLog")
+COMMITLDSentByNodeImpliesZxidCommittedInLog.children = {
+    "FollowerProcessNEWLEADERAction": [ 
+        NEWLEADERMsgHistAndStateInv
+    ]
+}
 
 ServerInEntryAckSidImpliesHasEntry = make_node("H_ServerInEntryAckSidImpliesHasEntry")
 
@@ -295,7 +300,10 @@ committedEntryExistsInACKEPOCHQuorumHistory.children = {
     ],
     "FollowerProcessCOMMITAction": [
         COMMITSentByNodeImpliesZxidInLog
-    ]
+    ],
+    "LeaderProcessACKAction": [
+        ACKMsgInFlightImpliesNodesInBROADCAST
+    ],
     # "LeaderProcessACKEPOCHHasBroadcastAction": [
     #     committedEntryExistsOnQuorum
     # ]
@@ -318,7 +326,8 @@ TxnWithSameZxidEqualPeerHistory.children = {
     ],
     "LeaderProcessRequestAction": [
         LeaderinBROADCASTImpliesNoNEWLEADERorACKEInFlight,
-        txnZxidsUniqueHistoriesAndMessages
+        txnZxidsUniqueHistoriesAndMessages,
+        leaderInBroadcastImpliesAllHistoryEntriesInEpoch
     ],
     "LeaderProcessACKEPOCHHasntBroadcastAction": [
         # committedEntryExistsInACKEPOCHQuorumHistory
@@ -362,13 +371,6 @@ txnZxidsUniqueHistoriesAndMessages.children = {
 
 #     ]
 # }
-
-
-COMMITLDSentByNodeImpliesZxidCommittedInLog.children = {
-    # "LeaderProcessACKLDHasBroadcastAction" : [
-    #     nodeHistoryBoundByLastCommittedIndex
-    # ]
-}
 
 
 safety = make_node("H_PrefixConsistency")
