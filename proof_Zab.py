@@ -94,6 +94,16 @@ txnZxidsUniqueHistoriesAndMessagesBetweenLocalHistoryAndPROPOSEMessages = make_n
 
 uniqueLeadership = make_node("H_UniqueLeadership")
 
+NEWLEADERMsgImpliesNoLogEntriesInEpoch = make_node("H_NEWLEADERMsgImpliesNoLogEntriesInEpoch")
+NEWLEADERMsgImpliesNoLogEntriesInEpoch.children = {
+    "LeaderProcessRequestAction": [
+        uniqueLeadership
+    ],
+    "LeaderProcessACKEPOCHHasntBroadcastAction": [
+        NEWLEADERMsgHistAndStateInv
+    ]
+}
+
 leaderInBroadcastImpliesAllHistoryEntriesInEpoch = make_node("H_LeaderInBroadcastImpliesAllHistoryEntriesInEpoch")
 leaderInBroadcastImpliesAllHistoryEntriesInEpoch.children = {
     "FollowerProcessPROPOSEAction": [
@@ -107,6 +117,9 @@ leaderInBroadcastImpliesAllHistoryEntriesInEpoch.children = {
     ],
     "LeaderProcessACKEPOCHHasntBroadcastAction": [
         ACKEPOCHHistoryContainedInFOLLOWINGSender
+    ],
+    "LeaderProcessACKLDHasntBroadcastAction": [
+        NEWLEADERMsgImpliesNoLogEntriesInEpoch
     ]
 }
 

@@ -1647,11 +1647,19 @@ H_PROPOSEMsgSentByNodeImpliesZxidInLog ==
 \* in the sender's history.
 H_COMMITLDSentByNodeImpliesZxidCommittedInLog == 
     \A i,j \in Server : 
-        (/\ PendingCOMMITLD(i,j)
-         /\ ~ZxidEqual(msgs[j][i][1].mzxid, <<0,0>>)) => 
-            \E idx \in DOMAIN history[j] : 
-                /\ history[j][idx].zxid = msgs[j][i][1].mzxid  
-                /\ lastCommitted[j].index >= idx
+        (\/ (PendingCOMMITLD(i,j) /\ ~ZxidEqual(msgs[j][i][1].mzxid, <<0,0>>))
+         \/ (PendingACKLD(j,i) /\ ~ZxidEqual(msgs[i][j][1].mzxid, <<0,0>>)) ) => 
+            /\ (PendingCOMMITLD(i,j) /\ ~ZxidEqual(msgs[j][i][1].mzxid, <<0,0>>)) => 
+                \E idx \in DOMAIN history[j] : 
+                    /\ history[j][idx].zxid = msgs[j][i][1].mzxid  
+                    /\ lastCommitted[j].index >= idx
+            /\ (PendingACKLD(j,i) /\ ~ZxidEqual(msgs[i][j][1].mzxid, <<0,0>>)) => 
+                \E idx \in DOMAIN history[i] : 
+                    /\ history[i][idx].zxid = msgs[i][j][1].mzxid  
+                    /\ lastCommitted[i].index >= idx
+            /\ state[j] = LEADING
+            /\ state[i] = FOLLOWING
+            /\ zabState[j] = SYNCHRONIZATION
 
 H_FollowersHaveNoMessagesSentToSelf == 
     \A s \in Server : (IsFollower(s) \/ IsLooking(s)) => msgs[s][s] = <<>>
@@ -1903,6 +1911,20 @@ H_ACKEPOCHQuorumImpliesAcceptedEpochCorrect ==
          /\ IsQuorum({a.sid: a \in ackeRecv[i]})) => 
             acceptedEpoch[i] = currentEpoch[i]
 
+\* If a NEWLEADER message in epoch E has been sent, this must imply no log entries
+\* in epoch E exist.
+H_NEWLEADERMsgImpliesNoLogEntriesInEpoch == 
+    \A i,j \in Server : 
+    \A s \in Server :
+    \A si \in DOMAIN history[s] : 
+        PendingNEWLEADER(i,j) => 
+            /\ state[j] = LEADING
+            /\ state[i] = FOLLOWING
+            /\ zabState[j] \in {SYNCHRONIZATION}
+            /\ history[s][si].zxid[1] # msgs[j][i][1].mepoch
+
+        \* (PendingNEWLEADER(i,j) /\ msgs[j][i][1].mepoch = currentEpoch[j]) => Len(history[j]) = 0
+
 \* Leader in BROADCAST phase must contain all history entries created in its epoch.
 H_LeaderInBroadcastImpliesAllHistoryEntriesInEpoch == 
     \A i,j \in Server : 
@@ -1920,6 +1942,16 @@ H_LeaderInBroadcastImpliesAllHistoryEntriesInEpoch ==
 \*             (\A i,j \in Server :
 \*              \A mi \in DOMAIN msgs[i][j] : 
 \*                 msgs[i][j][mi].mtype \notin {NEWLEADER})
+
+NonPROPOSEMsgs(i,j) == 
+    [mi \in {x \in DOMAIN msgs[i][j] : msgs[i][j][x].mtype # PROPOSE} |-> msgs[i][j][mi]]
+
+D2 == \A i,j \in Server : Cardinality(DOMAIN NonPROPOSEMsgs(i,j)) <= 5
+
+Morder1 == 
+    \A i,j \in Server : 
+    \A mi,mj \in DOMAIN msgs[i][j] : 
+        (mi < mj /\ msgs[i][j][mi].mtype = PROPOSE) => msgs[i][j][mj].mtype \notin {ACKLD, NEWEPOCH}
 
 =============================================================================
 \* Modification History
