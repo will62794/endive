@@ -80,31 +80,40 @@ NullPoint == CHOOSE p: p \notin Server
 Quorums == {Q \in SUBSET Server: Cardinality(Q)*2 > Cardinality(Server)}
 -----------------------------------------------------------------------------
 \* Variables that all servers use.
-VARIABLES state,          \* State of server, in {LOOKING, FOLLOWING, LEADING}.
-          zabState,       \* Current phase of server, in
+VARIABLES 
+    \* @type: SERVER -> Str; 
+    state,          \* State of server, in {LOOKING, FOLLOWING, LEADING}.
+    \* @type: SERVER -> Str; 
+    zabState,       \* Current phase of server, in
                           \* {ELECTION, DISCOVERY, SYNCHRONIZATION, BROADCAST}.
-          acceptedEpoch,  \* Epoch of the last LEADERINFO packet accepted,
+    \* @type: SERVER -> Int; 
+    acceptedEpoch,  \* Epoch of the last LEADERINFO packet accepted,
                           \* namely f.p in paper.
-          currentEpoch,   \* Epoch of the last NEWLEADER packet accepted,
+    \* @type: SERVER -> Int; 
+    currentEpoch,   \* Epoch of the last NEWLEADER packet accepted,
                           \* namely f.a in paper.
-          history,        \* History of servers: sequence of transactions,
+    \* @type: SERVER -> Seq(Int);                   
+    history,        \* History of servers: sequence of transactions,
                           \* containing: [zxid, value, ackSid, epoch].
-          lastCommitted   \* Maximum index and zxid known to be committed,
+    \* @type: SERVER -> [index: Int, zxid: Int \X Int];
+    lastCommitted   \* Maximum index and zxid known to be committed,
                           \* namely 'lastCommitted' in Leader. Starts from 0,
                           \* and increases monotonically before restarting.
 
 \* Variables only used for leader.
-VARIABLES learners,       \* Set of servers leader connects.
-          cepochRecv,     \* Set of learners leader has received CEPOCH from.
-                          \* Set of record [sid, connected, epoch],
-                          \* where epoch means f.p from followers.
-          ackeRecv,       \* Set of learners leader has received ACKEPOCH from.
-                          \* Set of record 
-                          \* [sid, connected, peerLastEpoch, peerHistory],
-                          \* to record f.a and h(f) from followers.
-          ackldRecv,      \* Set of learners leader has received ACKLD from.
-                          \* Set of record [sid, connected].
-          sendCounter     \* Count of txns leader has broadcast.
+VARIABLES 
+    \* @type: SERVER -> Set(SERVER);
+    learners,       \* Set of servers leader connects.
+    cepochRecv,     \* Set of learners leader has received CEPOCH from.
+                    \* Set of record [sid, connected, epoch],
+                    \* where epoch means f.p from followers.
+    ackeRecv,       \* Set of learners leader has received ACKEPOCH from.
+                    \* Set of record 
+                    \* [sid, connected, peerLastEpoch, peerHistory],
+                    \* to record f.a and h(f) from followers.
+    ackldRecv,      \* Set of learners leader has received ACKLD from.
+                    \* Set of record [sid, connected].
+    sendCounter     \* Count of txns leader has broadcast.
 
 \* Variables only used for follower.
 VARIABLES connectInfo \* If follower has connected with leader.
