@@ -526,7 +526,6 @@ UpdateLeader(i) ==
         /\ leaderOracle' = i
         /\ SwitchToLeader(i)
         /\ UNCHANGED <<acceptedEpoch, currentEpoch, history, lastCommitted, followerVars, msgVars>>
-        /\ UpdateRecorder(<<"UpdateLeader", i>>)
 
 
 FollowLeaderMyself(i) ==
@@ -679,7 +678,6 @@ LeaderProcessCEPOCH(i, j) ==
         /\ UNCHANGED <<state, zabState, currentEpoch, history, lastCommitted, learners, 
                        ackeRecv, ackldRecv, sendCounter, followerVars,
                        electionVars>>
-        /\ UpdateRecorder(<<"LeaderProcessCEPOCH", i, j>>)
 
 (* Follower receives LEADERINFO. If newEpoch >= acceptedEpoch, then follower 
    updates acceptedEpoch and sends ACKEPOCH back, containing currentEpoch and
@@ -711,7 +709,6 @@ FollowerProcessNEWEPOCH(i, j) ==
                           /\ RemoveLearner(leader, i)
                     /\ UNCHANGED <<acceptedEpoch>>
         /\ UNCHANGED <<currentEpoch, history, lastCommitted, sendCounter, electionVars>>
-        /\ UpdateRecorder(<<"FollowerProcessNEWEPOCH", i, j>>)
 
 AckeRecvQuorumFormed(i) == LET sid_ackeRecv == {a.sid: a \in ackeRecv[i]} IN IsQuorum(sid_ackeRecv)
 AckeRecvBecomeQuorum(i) == LET sid_ackeRecv == {a.sid: a \in ackeRecv'[i]} IN IsQuorum(sid_ackeRecv)
@@ -1076,9 +1073,7 @@ LeaderProcessRequest(i) ==
                             ackSid |-> {i},
                             epoch  |-> currentEpoch[i] ]
                 IN history' = [history EXCEPT ![i] = Append(@, newTxn) ]
-            /\ UNCHANGED <<state, zabState, acceptedEpoch, currentEpoch, lastCommitted,
-                        leaderVars, followerVars, electionVars, msgVars>>
-            /\ UpdateRecorder(<<"LeaderProcessRequest", i>>)
+            /\ UNCHANGED <<state, zabState, acceptedEpoch, currentEpoch, lastCommitted, leaderVars, followerVars, electionVars, msgVars>>
 
 \* Latest counter existing in history.
 CurrentCounter(i) == IF LastZxid(i)[1] = currentEpoch[i] THEN LastZxid(i)[2]
@@ -1105,7 +1100,6 @@ LeaderBroadcastPROPOSE(i) ==
            IN /\ sendCounter' = [sendCounter EXCEPT ![i] = toSendCounter]
               /\ Broadcast(i, m_proposal)
         /\ UNCHANGED <<serverVars, learners, cepochRecv, ackeRecv, ackldRecv, followerVars, electionVars>>
-        /\ UpdateRecorder(<<"LeaderBroadcastPROPOSE", i>>)
 
 IsNextZxid(curZxid, nextZxid) ==
             \/ \* first PROPOSAL in this epoch
@@ -1199,7 +1193,6 @@ LeaderProcessACKAlreadyCommitted(i, j) ==
                        /\ Discard(j, i)
                        /\ UNCHANGED <<lastCommitted>>
         /\ UNCHANGED <<state, zabState, acceptedEpoch, currentEpoch, leaderVars, followerVars, electionVars>>
-        /\ UpdateRecorder(<<"LeaderProcessACK", i, j>>)
 
 (* Leader Keeps a count of acks for a particular proposal, and try to
    commit the proposal. If committed, COMMIT of proposal will be broadcast. *)
