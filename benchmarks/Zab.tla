@@ -553,62 +553,62 @@ FollowLeaderOther(i) ==
    this is equivalent to executing a crash.
 *)
 
-\* Timeout between leader and follower.  
-TimeoutWithQuorum(i, j) ==
-        \* /\ CheckTimeout \* test restrictions of timeout
-        /\ IsLeader(i)   
-        /\ IsMyLearner(i, j)
-        /\ IsFollower(j) 
-        /\ IsMyLeader(j, i)
-        /\ (learners[i] \ {j}) \in Quorums  \* just remove this learner
-        /\ RemoveLearner(i, j)
-        /\ FollowerShutdown(j)
-        /\ Clean(i, j)
-        /\ UNCHANGED <<acceptedEpoch, currentEpoch, history, lastCommitted, sendCounter, electionVars>>
+\* \* Timeout between leader and follower.  
+\* TimeoutWithQuorum(i, j) ==
+\*         \* /\ CheckTimeout \* test restrictions of timeout
+\*         /\ IsLeader(i)   
+\*         /\ IsMyLearner(i, j)
+\*         /\ IsFollower(j) 
+\*         /\ IsMyLeader(j, i)
+\*         /\ (learners[i] \ {j}) \in Quorums  \* just remove this learner
+\*         /\ RemoveLearner(i, j)
+\*         /\ FollowerShutdown(j)
+\*         /\ Clean(i, j)
+\*         /\ UNCHANGED <<acceptedEpoch, currentEpoch, history, lastCommitted, sendCounter, electionVars>>
 
-TimeoutNoQuorum(i, j) ==
-        \* /\ CheckTimeout \* test restrictions of timeout
-        /\ IsLeader(i)   
-        /\ IsMyLearner(i, j)
-        /\ IsFollower(j) 
-        /\ IsMyLeader(j, i)
-        /\ (learners[i] \ {j}) \notin Quorums \* leader switches to looking
-        /\ state' = [s \in Server |-> IF s \in learners[i] THEN LOOKING ELSE state[s] ]
-        /\ zabState' = [s \in Server |-> IF s \in learners[i] THEN ELECTION ELSE zabState[s] ]
-        /\ connectInfo' = [s \in Server |-> IF s \in learners[i] THEN NullPoint ELSE connectInfo[s] ]
-        /\ CleanInputBuffer(learners[i])
-        /\ learners'   = [learners   EXCEPT ![i] = {}]
-        /\ UNCHANGED <<cepochRecv, ackeRecv, ackldRecv, acceptedEpoch, currentEpoch, history, lastCommitted, sendCounter, electionVars>>
+\* TimeoutNoQuorum(i, j) ==
+\*         \* /\ CheckTimeout \* test restrictions of timeout
+\*         /\ IsLeader(i)   
+\*         /\ IsMyLearner(i, j)
+\*         /\ IsFollower(j) 
+\*         /\ IsMyLeader(j, i)
+\*         /\ (learners[i] \ {j}) \notin Quorums \* leader switches to looking
+\*         /\ state' = [s \in Server |-> IF s \in learners[i] THEN LOOKING ELSE state[s] ]
+\*         /\ zabState' = [s \in Server |-> IF s \in learners[i] THEN ELECTION ELSE zabState[s] ]
+\*         /\ connectInfo' = [s \in Server |-> IF s \in learners[i] THEN NullPoint ELSE connectInfo[s] ]
+\*         /\ CleanInputBuffer(learners[i])
+\*         /\ learners'   = [learners   EXCEPT ![i] = {}]
+\*         /\ UNCHANGED <<cepochRecv, ackeRecv, ackldRecv, acceptedEpoch, currentEpoch, history, lastCommitted, sendCounter, electionVars>>
 
-Restart(i) ==
-        \* /\ CheckRestart \* test restrictions of restart
-        /\ \/ /\ IsLooking(i)
-              /\ UNCHANGED <<state, zabState, learners, followerVars, msgVars,
-                    cepochRecv, ackeRecv, ackldRecv>>
-           \/ /\ IsFollower(i)
-              /\ LET connectedWithLeader == HasLeader(i)
-                 IN \/ /\ connectedWithLeader
-                       /\ LET leader == connectInfo[i]
-                              newLearners == learners[leader] \ {i}
-                          IN 
-                          \/ /\ IsQuorum(newLearners)  \* leader remove learner i
-                             /\ RemoveLearner(leader, i)
-                             /\ FollowerShutdown(i)
-                             /\ Clean(leader, i)
-                          \/ /\ ~IsQuorum(newLearners) \* leader switches to looking
-                             /\ LeaderShutdown(leader)
-                             /\ UNCHANGED <<cepochRecv, ackeRecv, ackldRecv>>
-                    \/ /\ ~connectedWithLeader
-                       /\ FollowerShutdown(i)
-                       /\ CleanInputBuffer({i})
-                       /\ UNCHANGED <<learners, cepochRecv, ackeRecv, ackldRecv>>
-           \/ /\ IsLeader(i)
-              /\ LeaderShutdown(i)
-              /\ UNCHANGED <<cepochRecv, ackeRecv, ackldRecv>>
-        /\ lastCommitted' = [lastCommitted EXCEPT ![i] = [ index |-> 0,
-                                                           zxid  |-> <<0, 0>> ] ]
-        /\ UNCHANGED <<acceptedEpoch, currentEpoch, history, sendCounter, leaderOracle>>
-        /\ UpdateRecorder(<<"Restart", i>>)
+\* Restart(i) ==
+\*         \* /\ CheckRestart \* test restrictions of restart
+\*         /\ \/ /\ IsLooking(i)
+\*               /\ UNCHANGED <<state, zabState, learners, followerVars, msgVars,
+\*                     cepochRecv, ackeRecv, ackldRecv>>
+\*            \/ /\ IsFollower(i)
+\*               /\ LET connectedWithLeader == HasLeader(i)
+\*                  IN \/ /\ connectedWithLeader
+\*                        /\ LET leader == connectInfo[i]
+\*                               newLearners == learners[leader] \ {i}
+\*                           IN 
+\*                           \/ /\ IsQuorum(newLearners)  \* leader remove learner i
+\*                              /\ RemoveLearner(leader, i)
+\*                              /\ FollowerShutdown(i)
+\*                              /\ Clean(leader, i)
+\*                           \/ /\ ~IsQuorum(newLearners) \* leader switches to looking
+\*                              /\ LeaderShutdown(leader)
+\*                              /\ UNCHANGED <<cepochRecv, ackeRecv, ackldRecv>>
+\*                     \/ /\ ~connectedWithLeader
+\*                        /\ FollowerShutdown(i)
+\*                        /\ CleanInputBuffer({i})
+\*                        /\ UNCHANGED <<learners, cepochRecv, ackeRecv, ackldRecv>>
+\*            \/ /\ IsLeader(i)
+\*               /\ LeaderShutdown(i)
+\*               /\ UNCHANGED <<cepochRecv, ackeRecv, ackldRecv>>
+\*         /\ lastCommitted' = [lastCommitted EXCEPT ![i] = [ index |-> 0,
+\*                                                            zxid  |-> <<0, 0>> ] ]
+\*         /\ UNCHANGED <<acceptedEpoch, currentEpoch, history, sendCounter, leaderOracle>>
+\*         /\ UpdateRecorder(<<"Restart", i>>)
 -----------------------------------------------------------------------------
 (* Establish connection between leader and follower. *)
 ConnectAndFollowerSendCEPOCH(i, j) ==
