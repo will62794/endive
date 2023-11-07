@@ -1509,6 +1509,7 @@ H_COMMITSentByNodeImpliesZxidInLog ==
                 /\ lastCommitted[j].index >= idx
                 /\ state[i] = FOLLOWING
                 /\ state[j] = LEADING
+                /\ zabState[j] = BROADCAST
 
 \* TODO: Work on this further to develop a more unified lemma for establishing zxid uniqueness throughout the whole system.
 \* All messages currently in the system
@@ -1866,6 +1867,9 @@ H_ACKLDMsgImpliesZxidInLog ==
             /\ \E idx \in DOMAIN history[j] : history[j][idx].zxid = msgs[j][i][1].mzxid
             \* Entry exists on a quorum, since it must be committed.
             /\ ZxidExistsOnQuorum(msgs[j][i][1].mzxid)
+            /\ state[i] = FOLLOWING
+            /\ state[j] = LEADING
+            /\ zabState[i] \in {SYNCHRONIZATION, BROADCAST}
 
 \* A node's lastCommitted index must always be <= its history length.
 H_NodeHistoryBoundByLastCommittedIndex == 
