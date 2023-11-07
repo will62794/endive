@@ -29,6 +29,7 @@ EXTENDS Integers, FiniteSets, Sequences, Naturals, Apalache, TLC
 \* The set of servers
 CONSTANT 
     \* @typeAlias: SERVER = Str;
+    \* @typeAlias: ZXID = <<Int,Int>>;
     \* @type: Set(SERVER);
     Server
 
@@ -75,98 +76,121 @@ CONSTANTS
 
 \* Variables that all servers use.
 VARIABLES 
+    \* State of server, in {LOOKING, FOLLOWING, LEADING}.
     \* @type: SERVER -> Str; 
-    state,          \* State of server, in {LOOKING, FOLLOWING, LEADING}.
+    state,   
+    \* Current phase of server, in
+    \* {ELECTION, DISCOVERY, SYNCHRONIZATION, BROADCAST}.      
     \* @type: SERVER -> Str; 
-    zabState,       \* Current phase of server, in
-                          \* {ELECTION, DISCOVERY, SYNCHRONIZATION, BROADCAST}.
+    zabState,   
+    \* Epoch of the last LEADERINFO packet accepted, namely f.p in paper.    
     \* @type: SERVER -> Int; 
-    acceptedEpoch,  \* Epoch of the last LEADERINFO packet accepted,
-                          \* namely f.p in paper.
+    acceptedEpoch, 
+    \* Epoch of the last NEWLEADER packet accepted, namely f.a in paper. 
     \* @type: SERVER -> Int; 
-    currentEpoch,   \* Epoch of the last NEWLEADER packet accepted,
-                          \* namely f.a in paper.
+    currentEpoch,   
+    \* History of servers: sequence of transactions, containing: [zxid, value, ackSid, epoch].
     \* @type: SERVER -> Seq(Int);                   
-    history,        \* History of servers: sequence of transactions,
-                          \* containing: [zxid, value, ackSid, epoch].
-    \* @type: SERVER -> [index: Int, zxid: Int \X Int];
-    lastCommitted   \* Maximum index and zxid known to be committed,
-                          \* namely 'lastCommitted' in Leader. Starts from 0,
-                          \* and increases monotonically before restarting.
+    history,       
+    \* Maximum index and zxid known to be committed,
+    \* namely 'lastCommitted' in Leader. Starts from 0,
+    \* and increases monotonically before restarting. 
+    \* @type: SERVER -> {index: Int, zxid: <<Int, Int>>};
+    lastCommitted   
 
 \* Variables only used for leader.
 VARIABLES 
+    \* Set of servers leader connects.
     \* @type: SERVER -> Set(SERVER);
-    learners,       \* Set of servers leader connects.
-    \* @type: SERVER -> Set({sid: SERVER, connected: BOOLEAN, epoch: Nat});
-    cepochRecv,     \* Set of learners leader has received CEPOCH from.
-                    \* Set of record [sid, connected, epoch],
-                    \* where epoch means f.p from followers.
-    \* @type: SERVER -> Set({sid: SERVER, connected: BOOLEAN, peerLastEpoch: Nat, peerHistory: HistTypeBounded});
-    ackeRecv,       \* Set of learners leader has received ACKEPOCH from.
-                    \* Set of record 
-                    \* [sid, connected, peerLastEpoch, peerHistory],
-                    \* to record f.a and h(f) from followers.
+    learners,   
+    \* Set of learners leader has received CEPOCH from.
+    \* Set of record [sid, connected, epoch],
+    \* where epoch means f.p from followers.    
+    \* @type: SERVER -> Set({sid: SERVER, connected: BOOLEAN, epoch: Int});
+    cepochRecv,  
+    \* Set of learners leader has received ACKEPOCH from.
+    \* Set of record 
+    \* [sid, connected, peerLastEpoch, peerHistory],
+    \* to record f.a and h(f) from followers.   
+    \* @type: SERVER -> Set({sid: SERVER, connected: BOOLEAN, peerLastEpoch: Int, peerHistory: Seq(Int)});
+    ackeRecv,  
+    \* Set of learners leader has received ACKLD from.
+    \* Set of record [sid, connected].     
     \* @type: SERVER -> Set({sid: SERVER, connected: BOOLEAN});
-    ackldRecv,      \* Set of learners leader has received ACKLD from.
-                    \* Set of record [sid, connected].
+    ackldRecv,   
+    \* Count of txns leader has broadcast.   
     \* @type: SERVER -> Int;
-    sendCounter     \* Count of txns leader has broadcast.
+    sendCounter     
 
 \* Variables only used for follower.
 VARIABLES 
+    \* If follower has connected with leader.
+    \* If follower lost connection, then null.
     \* @type: SERVER -> SERVER;
-    connectInfo \* If follower has connected with leader.
-                      \* If follower lost connection, then null.
+    connectInfo 
 
 \* Variable representing oracle of leader.
 VARIABLE  
+    \* Current oracle.
     \* @type: SERVER;
-    leaderOracle  \* Current oracle.
+    leaderOracle  
 
 \* Variables about network channel.
 \* Simulates network channel.
 \* msgs[i][j] means the input buffer of server j from server i.
-VARIABLE  msgs
 
-VARIABLE CEPOCHmsgs
-VARIABLE NEWEPOCHmsgs
-VARIABLE ACKEPOCHmsgs
-VARIABLE NEWLEADERmsgs
-VARIABLE ACKLDmsgs
-VARIABLE COMMITLDmsgs
-VARIABLE PROPOSEmsgs
-VARIABLE ACKmsgs
-VARIABLE COMMITmsgs
+VARIABLE 
+    \* @type: Set(Int);
+    msgs
+
+VARIABLE 
+    \* @type: Set({ mtype: Str, mepoch: Int, msrc: SERVER, mdst: SERVER, morder: Int });
+    CEPOCHmsgs
+
+VARIABLE
+    \* @type: Set ({ mtype: Str, mepoch: Int, msrc: SERVER, mdst: SERVER, morder: Int });
+    NEWEPOCHmsgs
+
+VARIABLE 
+    \* @type: Set ({ mtype: Str, mepoch: Int, msrc: SERVER, mdst: SERVER, morder: Int });
+    ACKEPOCHmsgs
+
+VARIABLE 
+    \* @type: Set ({ mtype: Str, mepoch: Int, mhistory: Seq(Int), msrc: SERVER, mdst: SERVER, morder: Int });
+    NEWLEADERmsgs
+
+VARIABLE 
+    \* @type: Set ({ mtype: Str, mzxid: <<Int, Int>>, msrc: SERVER, mdst: SERVER, morder: Int });
+    ACKLDmsgs
+
+VARIABLE 
+    \* @type: Set ({ mtype: Str, mzxid: <<Int, Int>>, msrc: SERVER, mdst: SERVER, morder: Int });
+    COMMITLDmsgs
+
+VARIABLE 
+    \* @type: Set ({ mtype: Str, mzxid: <<Int, Int>>, msrc: SERVER, mdst: SERVER, morder: Int });
+    PROPOSEmsgs
+
+VARIABLE 
+    \* @type: Set ({ mtype: Str, mzxid: <<Int, Int>>, msrc: SERVER, mdst: SERVER, morder: Int });
+    ACKmsgs
+
+VARIABLE 
+    \* @type: Set ({ mtype: Str, mzxid: <<Int, Int>>, msrc: SERVER, mdst: SERVER, morder: Int });
+    COMMITmsgs
 
 NullPoint == CHOOSE p: p \notin Server
 Quorums == {Q \in SUBSET Server: Cardinality(Q)*2 > Cardinality(Server)}
 
-\* UNUSED old state vars.
-
-\* Variables only used in verifying properties.
-\* VARIABLES epochLeader,       \* Set of leaders in every epoch.
-        \*   proposalMsgsLog    \* Set of all broadcast messages.
-        \*   violatedInvariants \* Check whether there are conditions 
-                             \* contrary to the facts.
-
-\* Variable used for recording critical data,
-\* to constrain state space or update values.
-\* VARIABLE  recorder \* Consists: members of Parameters and pc, values.
-                   \* Form is record: 
-                   \* [pc, nTransaction, maxEpoch, nTimeout, nRestart, nClientRequest]
-
 serverVars == <<state, zabState, acceptedEpoch, currentEpoch, history, lastCommitted>>
 
-leaderVars == <<learners, cepochRecv, ackeRecv, ackldRecv, 
-                sendCounter>>
+leaderVars == <<learners, cepochRecv, ackeRecv, ackldRecv, sendCounter>>
 
 followerVars == connectInfo
 
 electionVars == leaderOracle
 
-msgVars == <<msgs, CEPOCHmsgs, NEWEPOCHmsgs, ACKEPOCHmsgs, NEWLEADERmsgs, 
-             ACKLDmsgs, COMMITLDmsgs, PROPOSEmsgs, ACKmsgs, COMMITmsgs>>
+msgVars == <<msgs, CEPOCHmsgs, NEWEPOCHmsgs, ACKEPOCHmsgs, NEWLEADERmsgs, ACKLDmsgs, COMMITLDmsgs, PROPOSEmsgs, ACKmsgs, COMMITmsgs>>
 
 vars == <<serverVars, leaderVars, followerVars, electionVars, msgVars>>
 
@@ -189,8 +213,12 @@ TypeOK ==
     \* /\ msgs \in [Server -> [Server -> Seq([mtype: {CEPOCH, NEWEPOCH, ACKEPOCH, NEWLEADER, ACKLD, COMMITLD, PROPOSE, ACK, COMMIT}, 
                                             \* mepoch: Nat, 
 
-CONSTANT MaxEpoch
-CONSTANT MaxHistLen
+CONSTANT 
+    \* @type: Int;
+    MaxEpoch
+CONSTANT 
+    \* @type: Int;
+    MaxHistLen
 
 Epoch == 1..MaxEpoch
 Value == Nat
