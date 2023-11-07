@@ -1816,7 +1816,7 @@ H_ACKMsgInFlightImpliesNodesInBROADCAST ==
 \* If a leader is in BROADCAST, no NEWLEADER messages should be in-flight
 H_LeaderinBROADCASTImpliesNoNEWLEADERorACKEInFlight == 
     \A s \in Server : 
-    (state[s] = LEADING /\ zabState[s] = BROADCAST) => 
+    (state[s] = LEADING /\ zabState[s] \in {BROADCAST}) => 
         (\A i,j \in Server :
             \A mi \in DOMAIN msgs[i][j] : 
                 /\ msgs[i][j][mi].mtype \notin {ACKLD, NEWLEADER}
@@ -1930,7 +1930,7 @@ H_LeaderInBroadcastImpliesAllHistoryEntriesInEpoch ==
     \A i,j \in Server : 
     \A idx \in DOMAIN history[j] :
         (/\ IsLeader(i)
-         /\ zabState[i] = BROADCAST
+         /\ zabState[i] \in {BROADCAST, SYNCHRONIZATION}
          /\ history[j][idx].zxid[1] = currentEpoch[i]) => 
             \* Entry is in leader's history.
             \E idx2 \in DOMAIN history[i] : ZxidEqual(history[i][idx2].zxid, history[j][idx].zxid)

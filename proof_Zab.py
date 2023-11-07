@@ -117,10 +117,10 @@ leaderInBroadcastImpliesAllHistoryEntriesInEpoch.children = {
     ],
     "LeaderProcessACKEPOCHHasntBroadcastAction": [
         ACKEPOCHHistoryContainedInFOLLOWINGSender
-    ],
-    "LeaderProcessACKLDHasntBroadcastAction": [
-        NEWLEADERMsgImpliesNoLogEntriesInEpoch
     ]
+    # "LeaderProcessACKLDHasntBroadcastAction": [
+    #     # NEWLEADERMsgImpliesNoLogEntriesInEpoch
+    # ]
 }
 
 COMMITLDSentByNodeImpliesZxidCommittedInLog = make_node("H_COMMITLDSentByNodeImpliesZxidCommittedInLog")
@@ -142,9 +142,17 @@ LeaderInBROADCASTImpliesAckLDQuorum.children = {
     ]
 }
 
-LeaderinBROADCASTImpliesNoNEWLEADERorACKEInFlight = make_node("H_LeaderinBROADCASTImpliesNoNEWLEADERorACKEInFlight")
-
 ACKLDMsgSentByFollowerImpliesEmptyBuffer = make_node("H_ACKLDMsgSentByFollowerImpliesEmptyBuffer")
+
+LeaderinBROADCASTImpliesNoNEWLEADERorACKEInFlight = make_node("H_LeaderinBROADCASTImpliesNoNEWLEADERorACKEInFlight")
+LeaderinBROADCASTImpliesNoNEWLEADERorACKEInFlight.children = {
+    "LeaderProcessACKEPOCHHasntBroadcastAction": [
+        uniqueLeadership
+    ],
+    "LeaderProcessACKLDHasntBroadcastAction": [
+        ACKLDMsgSentByFollowerImpliesEmptyBuffer
+    ]
+}
 
 LeaderInBROADCASTImpliesLearnerInBROADCAST = make_node("H_LeaderInBROADCASTImpliesLearnerInBROADCAST")
 LeaderInBROADCASTImpliesLearnerInBROADCAST.children = {
