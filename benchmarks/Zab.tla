@@ -249,7 +249,7 @@ ApaTypeOK ==
     /\ sendCounter \in [Server -> Nat]
     /\ connectInfo \in [Server -> Server]
     /\ leaderOracle \in Server
-    /\ msgs = {}
+    \* /\ msgs = {}
     \* /\ msgs \in [Server -> [Server -> Seq([mtype: {CEPOCH, NEWEPOCH, ACKEPOCH, NEWLEADER, ACKLD, COMMITLD, PROPOSE, ACK, COMMIT}, 
       
 
@@ -275,17 +275,22 @@ HasNoLeader(i)    == connectInfo[i] = NullPoint
 HasLeader(i)      == connectInfo[i] /= NullPoint
 -----------------------------------------------------------------------------
 \* FALSE: zxid1 <= zxid2; TRUE: zxid1 > zxid2
+\* @type: (ZXID, ZXID) => Bool;
 ZxidCompare(zxid1, zxid2) == \/ zxid1[1] > zxid2[1]
                              \/ /\ zxid1[1] = zxid2[1]
                                 /\ zxid1[2] > zxid2[2]
 
+\* @type: (ZXID, ZXID) => Bool;
 ZxidEqual(zxid1, zxid2) == zxid1[1] = zxid2[1] /\ zxid1[2] = zxid2[2]
 
+\* @type: (TXN, ZXID) => Bool;
 TxnZxidEqual(txn, z) == txn.zxid[1] = z[1] /\ txn.zxid[2] = z[2]
 
+\* @type: (TXN, TXN) => Bool;
 TxnEqual(txn1, txn2) == /\ ZxidEqual(txn1.zxid, txn2.zxid)
                         /\ txn1.value = txn2.value
 
+\* @type: (TXN, TXN) => Bool;
 EpochPrecedeInTxn(txn1, txn2) == txn1.zxid[1] < txn2.zxid[1]
 -----------------------------------------------------------------------------
 \* Actions about recorder
