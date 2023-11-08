@@ -379,9 +379,9 @@ Reply(i, j, m) == msgs' = [msgs EXCEPT ![j][i] = Tail(msgs[j][i]), ![i][j] = App
 ReplyIn(ms, i, j, m) == ms' = [ms EXCEPT ![j][i] = Tail(ms[j][i]),
                                        ![i][j] = Append(ms[i][j], m)]
 
-
-LastZxidOfHistory(his) == IF Len(his) = 0 THEN <<0, 0>>
-                          ELSE his[Len(his)].zxid
+\* @type: Seq(TXN) => ZXID;
+LastZxidOfHistory(his) == IF Len(his) = 0 THEN <<0, 0>> ELSE his[Len(his)].zxid
+\* @type: SERVER => ZXID;
 LastZxid(i) == LastZxidOfHistory(history[i])
 
 
