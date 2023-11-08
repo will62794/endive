@@ -929,7 +929,7 @@ MoreRecentOrEqual(ss1, ss2) == \/ ss1.currentEpoch > ss2.currentEpoch
                                   /\ ~ZxidCompare(ss2.lastZxid, ss1.lastZxid)
 
 
-\* @type: (Set({ sid: SERVER, connected: Bool, peerLastEpoch: Int, peerHistory: Seq(TXN) }), SERVER) => Seq(TXN);
+\* @type: (SERVER -> Set(ACKERECVTYPE), SERVER) => Seq(TXN);
 DetermineInitialHistoryFromArg(ackeRecvArg, i) ==
         LET set == ackeRecvArg[i]
             ss_set == { [ sid          |-> a.sid,
@@ -1392,6 +1392,7 @@ LastAckIndexFromFollower(i, j) ==
    commit the proposal. If committed, COMMIT of proposal will be broadcast. *)
 \* @type: (SERVER, SERVER, { mtype: Str, mzxid: ZXID, msrc: SERVER, mdst: SERVER }) => Bool;
 LeaderProcessACK(i, j, ackMsg) ==
+        /\ ackMsg \in ACKmsgs
         /\ IsLeader(i)
         \* /\ PendingACK(i, j)
         /\ ackMsg.mdst = i
@@ -1454,6 +1455,7 @@ LeaderProcessACK(i, j, ackMsg) ==
 (* Follower processes COMMIT. *)
 \* @type: (SERVER, SERVER, { mtype: Str, mzxid: ZXID, msrc: SERVER, mdst: SERVER }) => Bool;
 FollowerProcessCOMMIT(i, j, commitMsg) ==
+        /\ commitMsg \in COMMITmsgs
         /\ IsFollower(i)
         \* /\ PendingCOMMIT(i, j)
         /\ commitMsg.mdst = i
@@ -1594,7 +1596,7 @@ DebugInv1 == ~(\E s,t \in Server :
 \* DebugInv2 == CEPOCHmsgs = {}
 \* DebugInv2 == NEWEPOCHmsgs = {}
 DebugInv2 == ~(\E s \in Server : currentEpoch[s] > 1)
-DebugInv3 == TLCGet("level") < 80
+\* DebugInv3 == TLCGet("level") < 80
 \* DebugInv2 == \A m \in NEWLEADERmsgs : m.morder < 2
 
 \* ShouldNotBeTriggered == \A p \in DOMAIN violatedInvariants: violatedInvariants[p] = FALSE
@@ -1886,31 +1888,25 @@ H_CommittedEntryExistsInLeaderHistory ==
 H_NodeHistoryBoundByLastCommittedIndex == 
     \A s \in Server : lastCommitted[s].index <= Len(history[s])
 
-(******
+\* Leader in BROADCAST phase must contain all history entries created in its epoch.
+H_LeaderInBroadcastImpliesAllHistoryEntriesInEpoch == 
+    \A i,j \in Server : 
+    \A idx \in DOMAIN history[j] :
+        (/\ IsLeader(i)
+         /\ zabState[i] \in {BROADCAST, SYNCHRONIZATION}
+         /\ history[j][idx].zxid[1] = currentEpoch[i]) => 
+            \* Entry is in leader's history.
+            \E idx2 \in DOMAIN history[i] : ZxidEqual(history[i][idx2].zxid, history[j][idx].zxid)
 
+\* If a leader is in BROADCAST, no NEWLEADER messages should be in-flight
+H_LeaderinBROADCASTImpliesNoNEWLEADERorACKEInFlight == 
+    \A s \in Server : 
+    (state[s] = LEADING /\ zabState[s] \in {BROADCAST}) => 
+        (\A i,j \in Server :
+            /\ ACKLDmsgs = {} 
+            /\ NEWLEADERmsgs = {}
+            /\ \A m \in ACKEPOCHmsgs : \A idx \in DOMAIN m.mhistory : m.mhistory[idx].zxid[1] # currentEpoch[s])
 
-
-
-
-\* TODO: Work on this further to develop a more unified lemma for establishing zxid uniqueness throughout the whole system.
-\* All messages currently in the system
-AllMsgs == UNION {{msgs[i][j][mi] : mi \in DOMAIN msgs[i][j]} : <<i,j>> \in Server \X Server}
-
-\* AllACKs == {m \in AllMsgs : m.mtype = "ACK"}
-
-\* \* Set of all [zxid: zxid, value: value) records/pairs that exist in the system. 
-\* AllSystemsZxids == 
-\*     UNION { TxnHistory(history[i]) : i \in Server } \cup
-\*     {m.mzxid}
-
-MsgsWithHistoryZxids == 
-    {m \in AllMsgs : (m.mtype = PROPOSE) \/ ("mhistory" \in DOMAIN m)}
-
-MsgZxids == 
-    UNION {IF m.mtype = PROPOSE
-                            THEN {[zxid |-> m.mzxid, value |-> m.mdata]}
-                            ELSE {[zxid |-> m.mhistory[i].zxid, value |-> m.mhistory[i].value] : i \in DOMAIN m.mhistory} : 
-                            m \in MsgsWithHistoryZxids}
 
 \* Zxids across peer history at all nodes.
 TxnWithSameZxidEqualInPeerHistory == 
@@ -1945,6 +1941,53 @@ H_TxnWithSameZxidEqualPeerHistory ==
     /\ TxnWithSameZxidEqualLocalToPeerHistory
     /\ TxnWithSameZxidEqualMsgsToPeerHistory
 
+\* If a PROPOSE message has been sent with a particular zxid, then this zxid must be present
+\* in the sender's log, and the sender must be a leader.
+H_PROPOSEMsgSentByNodeImpliesZxidInLog == 
+    \* \A i,j \in Server : 
+    \A m \in PROPOSEmsgs :
+        \* (PendingPROPOSE(i,j)) => 
+            /\ IsLeader(m.msrc)
+            /\ zabState[m.msrc] = BROADCAST
+            /\ \E idx \in DOMAIN history[m.msrc] : history[m.msrc][idx].zxid = m.mzxid
+
+\* ACKEPOCH response history must be contained in the sender's history, who must
+\* be a follower.
+H_ACKEPOCHHistoryContainedInFOLLOWINGSender == 
+    \* \A i,j \in Server : 
+    \A m \in ACKEPOCHmsgs :
+    \* \A mind \in DOMAIN msgs[j][i] :
+        \* msgs[j][i][mind].mtype = ACKEPOCH => 
+            /\ state[m.msrc] = FOLLOWING
+            /\ state[m.mdst] = LEADING
+            /\ zabState[m.msrc] \in {DISCOVERY, SYNCHRONIZATION}
+            /\ TxnHistory(m.mhistory) = TxnHistory(history[m.msrc])
+
+(******
+
+
+
+
+
+\* TODO: Work on this further to develop a more unified lemma for establishing zxid uniqueness throughout the whole system.
+\* All messages currently in the system
+AllMsgs == UNION {{msgs[i][j][mi] : mi \in DOMAIN msgs[i][j]} : <<i,j>> \in Server \X Server}
+
+\* AllACKs == {m \in AllMsgs : m.mtype = "ACK"}
+
+\* \* Set of all [zxid: zxid, value: value) records/pairs that exist in the system. 
+\* AllSystemsZxids == 
+\*     UNION { TxnHistory(history[i]) : i \in Server } \cup
+\*     {m.mzxid}
+
+MsgsWithHistoryZxids == 
+    {m \in AllMsgs : (m.mtype = PROPOSE) \/ ("mhistory" \in DOMAIN m)}
+
+MsgZxids == 
+    UNION {IF m.mtype = PROPOSE
+                            THEN {[zxid |-> m.mzxid, value |-> m.mdata]}
+                            ELSE {[zxid |-> m.mhistory[i].zxid, value |-> m.mhistory[i].value] : i \in DOMAIN m.mhistory} : 
+                            m \in MsgsWithHistoryZxids}
 
 \* If zxid matches between any two histories in messages in network, 
 \* then the transactions must be equal.
@@ -1986,15 +2029,6 @@ H_TxnWithSameZxidEqualPeerHistory ==
 \*                 \A h2 \in DOMAIN history[i1] : 
 \*                     ZxidEqual(msgs[i][j][idx].mzxid, history[i1][h2].zxid) =>
 \*                     msgs[i][j][idx].mdata = history[i1][h2].value
-
-\* If a PROPOSE message has been sent with a particular zxid, then this zxid must be present
-\* in the sender's log, and the sender must be a leader.
-H_PROPOSEMsgSentByNodeImpliesZxidInLog == 
-    \A i,j \in Server : 
-        (PendingPROPOSE(i,j)) => 
-            /\ IsLeader(j)
-            /\ zabState[j] = BROADCAST
-            /\ \E idx \in DOMAIN history[j] : history[j][idx].zxid = msgs[j][i][1].mzxid
 
 
 H_FollowersHaveNoMessagesSentToSelf == 
@@ -2041,16 +2075,6 @@ H_NEWEPOCHFromNodeImpliesLEADING ==
     \A i,j \in Server : 
         (PendingNEWEPOCH(i,j)) => IsLeader(j)
 
-\* ACKEPOCH response history must be contained in the sender's history, who must
-\* be a follower.
-H_ACKEPOCHHistoryContainedInFOLLOWINGSender == 
-    \A i,j \in Server : 
-    \A mind \in DOMAIN msgs[j][i] :
-        msgs[j][i][mind].mtype = ACKEPOCH => 
-            /\ state[j] = FOLLOWING
-            /\ state[i] = LEADING
-            /\ zabState[j] \in {DISCOVERY, SYNCHRONIZATION}
-            /\ TxnHistory(msgs[j][i][mind].mhistory) = TxnHistory(history[j])
 
 H_ServerInEntryAckSidImpliesHasEntry == 
     \A s,t \in Server : 
@@ -2125,16 +2149,6 @@ H_ACKMsgInFlightImpliesNodesInBROADCAST ==
             /\ IsFollower(j)
             /\ IsLeader(i)
 
-
-\* If a leader is in BROADCAST, no NEWLEADER messages should be in-flight
-H_LeaderinBROADCASTImpliesNoNEWLEADERorACKEInFlight == 
-    \A s \in Server : 
-    (state[s] = LEADING /\ zabState[s] \in {BROADCAST}) => 
-        (\A i,j \in Server :
-            \A mi \in DOMAIN msgs[i][j] : 
-                /\ msgs[i][j][mi].mtype \notin {ACKLD, NEWLEADER}
-                /\ (msgs[i][j][mi].mtype = ACKEPOCH) => 
-                    \A idx \in DOMAIN msgs[i][j][mi].mhistory : msgs[i][j][mi].mhistory[idx].zxid[1] # currentEpoch[s])
 
 ZxidExistsOnQuorum(zxid) == 
   \E Q \in Quorums : 
@@ -2218,16 +2232,6 @@ H_NEWLEADERMsgImpliesNoLogEntriesInEpoch ==
 
         \* (PendingNEWLEADER(i,j) /\ msgs[j][i][1].mepoch = currentEpoch[j]) => Len(history[j]) = 0
 
-\* Leader in BROADCAST phase must contain all history entries created in its epoch.
-H_LeaderInBroadcastImpliesAllHistoryEntriesInEpoch == 
-    \A i,j \in Server : 
-    \A idx \in DOMAIN history[j] :
-        (/\ IsLeader(i)
-         /\ zabState[i] \in {BROADCAST, SYNCHRONIZATION}
-         /\ history[j][idx].zxid[1] = currentEpoch[i]) => 
-            \* Entry is in leader's history.
-            \E idx2 \in DOMAIN history[i] : ZxidEqual(history[i][idx2].zxid, history[j][idx].zxid)
-
 \* If a leader is in BROADCAST in epoch E, then there cannot be any NEWLEADER or ACKEPOCH messages in flight.
 \* H_LeaderInBroadcastImpliesNoNEWLEADER == 
 \*     \A s \in Server : 
@@ -2249,17 +2253,6 @@ Morder1 ==
 
 
 *********)
-
-\* Assume at most one outstanding message in input buffer for each process.
-\* Optional constraint to consider to simplify modeling/verification/proofs.
-StateConstraint == 
-    /\ \A s \in Server : Len(history[s]) <= MaxHistLen
-    /\ \A s \in Server : currentEpoch[s] <= MaxEpoch
-    /\ \A s \in Server : acceptedEpoch[s] <= MaxEpoch
-
-    \* /\ \A s \in Server : Cardinality({m \in CEPOCHmsgs : m.mdst = s}) <= 1
-    \* /\ \A s \in Server : Cardinality({m \in NEWEPOCHmsgs : m.mdst = s}) <= 1
-    \* /\ \A s \in Server : Cardinality({m \in ACKEPOCHmsgs : m.mdst = s}) <= 1
 
 =============================================================================
 \* Modification History

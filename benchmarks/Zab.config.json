@@ -6,7 +6,7 @@
         "Server": ["{s1,s2}", "{s1,s2,s3}"],
         "MaxEpoch": ["2"],
         "Nat": ["{0,1,2}"],
-        "MaxHistLen": ["1", "2"],
+        "MaxHistLen": ["1"],
         "LOOKING": "LOOKING",
         "FOLLOWING": "FOLLOWING",
         "LEADING": "LEADING",

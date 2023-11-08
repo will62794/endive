@@ -107,4 +107,16 @@ CTICost ==
     Cardinality(COMMITmsgs)
 
 
+\* Assume at most one outstanding message in input buffer for each process.
+\* Optional constraint to consider to simplify modeling/verification/proofs.
+StateConstraint == 
+    /\ \A s \in Server : Len(history[s]) <= MaxHistLen
+    /\ \A s \in Server : currentEpoch[s] <= MaxEpoch
+    /\ \A s \in Server : acceptedEpoch[s] <= MaxEpoch
+
+    \* /\ \A s \in Server : Cardinality({m \in CEPOCHmsgs : m.mdst = s}) <= 1
+    \* /\ \A s \in Server : Cardinality({m \in NEWEPOCHmsgs : m.mdst = s}) <= 1
+    \* /\ \A s \in Server : Cardinality({m \in ACKEPOCHmsgs : m.mdst = s}) <= 1
+
+
 ====
