@@ -816,29 +816,7 @@ LeaderProcessCEPOCH(i, j, cepochMsg) ==
                     /\ CEPOCHmsgs' = CEPOCHmsgs \ {cepochMsg}
                     /\ NEWEPOCHmsgs' = NEWEPOCHmsgs \cup 
                                         {[ mtype  |-> NEWEPOCH,
-                                          mepoch |-> acceptedEpoch[i], msrc |-> i, mdst |-> j, morder |-> NextMsgOrderCEPOCH(j,i) ]}
-                                          mepoch |-> acceptedEpoch[i], msrc |-> i, mdst |-> j, morder |-> NextMsgOrderCEPOCH(j,i) ]}
-                                          mepoch |-> acceptedEpoch[i], msrc |-> i, mdst |-> j, morder |-> NextMsgOrderCEPOCH(j,i) ]}
-                                          mepoch |-> acceptedEpoch[i], msrc |-> i, mdst |-> j, morder |-> NextMsgOrderCEPOCH(j,i) ]}
-                    \* TODO: Update NEWEPOCHmsgs here?
                                            mepoch |-> acceptedEpoch[i], msrc |-> i, mdst |-> j, morder |-> NextMsgOrderCEPOCH(j,i) ]}
-                    \* TODO: Update NEWEPOCHmsgs here?
-                                           mepoch |-> acceptedEpoch[i], msrc |-> i, mdst |-> j, morder |-> NextMsgOrderCEPOCH(j,i) ]}
-                                          mepoch |-> acceptedEpoch[i], msrc |-> i, mdst |-> j, morder |-> NextMsgOrderCEPOCH(j,i) ]}
-                    \* TODO: Update NEWEPOCHmsgs here?
-                                           mepoch |-> acceptedEpoch[i], msrc |-> i, mdst |-> j, morder |-> NextMsgOrderCEPOCH(j,i) ]}
-                    \* TODO: Update NEWEPOCHmsgs here?
-                                           mepoch |-> acceptedEpoch[i], msrc |-> i, mdst |-> j, morder |-> NextMsgOrderCEPOCH(j,i) ]}
-                                          mepoch |-> acceptedEpoch[i], msrc |-> i, mdst |-> j, morder |-> NextMsgOrderCEPOCH(j,i) ]}
-                                          mepoch |-> acceptedEpoch[i], msrc |-> i, mdst |-> j, morder |-> NextMsgOrderCEPOCH(j,i) ]}
-                    \* TODO: Update NEWEPOCHmsgs here?
-                                           mepoch |-> acceptedEpoch[i], msrc |-> i, mdst |-> j, morder |-> NextMsgOrderCEPOCH(j,i) ]}
-                    \* TODO: Update NEWEPOCHmsgs here?
-                                           mepoch |-> acceptedEpoch[i], msrc |-> i, mdst |-> j, morder |-> NextMsgOrderCEPOCH(j,i) ]}
-                                          mepoch |-> acceptedEpoch[i], msrc |-> i, mdst |-> j, morder |-> NextMsgOrderCEPOCH(j,i) ]}
-                    \* TODO: Update NEWEPOCHmsgs here?
-                                           mepoch |-> acceptedEpoch[i], msrc |-> i, mdst |-> j, morder |-> NextMsgOrderCEPOCH(j,i) ]}
-                    \* TODO: Update NEWEPOCHmsgs here?
                     /\ UNCHANGED <<acceptedEpoch>>
         /\ UNCHANGED <<state, zabState, currentEpoch, history, lastCommitted, learners, 
                        ackeRecv, ackldRecv, sendCounter, followerVars,
