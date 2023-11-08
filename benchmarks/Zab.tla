@@ -938,7 +938,8 @@ DetermineInitialHistory(i) ==
 \* InitAcksid(i, his) == InitAcksidHelper(his, i)
 
 \* Atomically let all txns in initial history contain self's acks. (declarative version)
-InitAcksid(i, his) == [ind \in DOMAIN his |-> [his[ind] EXCEPT !.ackSid = {i}]]
+\* @type: (SERVER, Seq(TXN)) => Seq(TXN);
+InitAcksid(i, his) == FunAsSeq([ind \in DOMAIN his |-> [his[ind] EXCEPT !.ackSid = {i}]], Cardinality(DOMAIN his), Cardinality(DOMAIN his))
 
 \* Eq1 == \A i \in Server : \A j \in Server : InitAcksidAlt(i,history[j]) = InitAcksid(i,history[j])
 
