@@ -63,11 +63,11 @@ TypeOKRandom ==
     /\ NEWEPOCHmsgs \in RandomSetOfSubsets(1, 1, MsgNEWEPOCHType)
     /\ ACKEPOCHmsgs \in RandomSetOfSubsets(1, 1, MsgACKEPOCHType)
     /\ NEWLEADERmsgs \in RandomSetOfSubsets(1, 1, MsgNEWLEADERType)
-    /\ ACKLDmsgs \in RandomSetOfSubsets(2, 2, MsgACKLDType)
-    /\ COMMITLDmsgs \in RandomSetOfSubsets(2, 2, MsgCOMMITLDType)
-    /\ PROPOSEmsgs \in RandomSetOfSubsets(2, 2, MsgPROPOSEType)
-    /\ ACKmsgs \in  RandomSetOfSubsets(2, 2, MsgACKType)
-    /\ COMMITmsgs \in RandomSetOfSubsets(2, 2, MsgCOMMITType)
+    /\ ACKLDmsgs \in RandomSetOfSubsets(1, 1, MsgACKLDType)
+    /\ COMMITLDmsgs \in RandomSetOfSubsets(1, 1, MsgCOMMITLDType)
+    /\ PROPOSEmsgs \in RandomSetOfSubsets(1, 1, MsgPROPOSEType)
+    /\ ACKmsgs \in  RandomSetOfSubsets(1, 1, MsgACKType)
+    /\ COMMITmsgs \in RandomSetOfSubsets(1, 1, MsgCOMMITType)
 
 
 
