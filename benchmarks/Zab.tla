@@ -181,7 +181,7 @@ VARIABLE
     \* @type: Set ({ mtype: Str, mzxid: ZXID, msrc: SERVER, mdst: SERVER});
     COMMITmsgs
 
-NullPoint == CHOOSE p: p \notin Server
+NullPoint == "Null"
 Quorums == {Q \in SUBSET Server: Cardinality(Q)*2 > Cardinality(Server)}
 
 serverVars == <<state, zabState, acceptedEpoch, currentEpoch, history, lastCommitted>>
@@ -1152,7 +1152,7 @@ LeaderProcessACKLDHasntBroadcast(i, j, ackldMsg) ==
                     /\ mesgs' = mesgs \* Discard(j, i)
                     /\ ACKLDmsgs' = ACKLDmsgs \ {ackldMsg}
                     /\ UNCHANGED <<zabState, lastCommitted, COMMITLDmsgs>>
-        /\ UNCHANGED <<state, acceptedEpoch, currentEpoch, learners, cepochRecv, ackeRecv, sendCounter, followerVars, electionVars, CEPOCHmsgs, NEWLEADERmsgs, ACKEPOCHmsgs, NEWEPOCHmsgs, NEWLEADERmsgs, ACKEPOCHmsgs, PROPOSEmsgs, ACKmsgs, COMMITmsgs>>
+        /\ UNCHANGED <<state, acceptedEpoch, currentEpoch, learners, cepochRecv, ackeRecv, sendCounter, followerVars, electionVars, CEPOCHmsgs, NEWEPOCHmsgs, NEWLEADERmsgs, ACKEPOCHmsgs, PROPOSEmsgs, ACKmsgs, COMMITmsgs>>
 
 \* LeaderProcessACKLDHasBroadcastNoQuorum(i, j) ==
 \*         /\ IsLeader(i)
@@ -1261,7 +1261,7 @@ FollowerProcessCOMMITLD(i, j, commitLDmsg) ==
               \* Discard the message. (Will S. 10/26/23)
               /\ mesgs' = mesgs \* [msgs EXCEPT ![j][i] = Tail(msgs[j][i])]
               /\ COMMITLDmsgs' = COMMITLDmsgs \ {commitLDmsg}
-              /\ UNCHANGED <<state, acceptedEpoch, currentEpoch, history, leaderVars, followerVars, electionVars, CEPOCHmsgs, ACKLDmsgs, NEWLEADERmsgs, ACKEPOCHmsgs, NEWEPOCHmsgs, NEWLEADERmsgs, ACKEPOCHmsgs, PROPOSEmsgs, ACKmsgs, COMMITmsgs>>
+              /\ UNCHANGED <<state, acceptedEpoch, currentEpoch, history, leaderVars, followerVars, electionVars, CEPOCHmsgs, ACKLDmsgs, NEWEPOCHmsgs, NEWLEADERmsgs, ACKEPOCHmsgs, PROPOSEmsgs, ACKmsgs, COMMITmsgs>>
 ----------------------------------------------------------------------------
 \* @type: (SERVER, ZXID) => ZXID;
 IncZxid(s, zxid) == IF currentEpoch[s] = zxid[1] THEN <<zxid[1], zxid[2] + 1>>
@@ -1314,7 +1314,7 @@ LeaderBroadcastPROPOSE(i) ==
                                           mdata |-> toSendTxn.value,
                                           msrc |-> i,
                                           mdst |-> to ] : to \in (sid_ackeRecv \cap learners[i]) \ {i}}
-        /\ UNCHANGED <<serverVars, learners, cepochRecv, ackeRecv, ackldRecv, followerVars, electionVars, CEPOCHmsgs, COMMITLDmsgs, ACKLDmsgs, NEWLEADERmsgs, ACKEPOCHmsgs, NEWEPOCHmsgs, NEWLEADERmsgs, ACKEPOCHmsgs, ACKmsgs, COMMITmsgs>>
+        /\ UNCHANGED <<serverVars, learners, cepochRecv, ackeRecv, ackldRecv, followerVars, electionVars, CEPOCHmsgs, COMMITLDmsgs, ACKLDmsgs, NEWEPOCHmsgs, NEWLEADERmsgs, ACKEPOCHmsgs, ACKmsgs, COMMITmsgs>>
 
 \* @type: (ZXID, ZXID) => Bool;
 IsNextZxid(curZxid, nextZxid) ==
@@ -1356,7 +1356,7 @@ FollowerProcessPROPOSE(i, j, proposeMsg) ==
                     \* /\ Discard(j, i)
                     /\ PROPOSEmsgs' = PROPOSEmsgs \ {proposeMsg}
                     /\ UNCHANGED <<history,mesgs, ACKmsgs>>
-        /\ UNCHANGED <<state, zabState, acceptedEpoch, currentEpoch, lastCommitted, leaderVars, followerVars, electionVars, COMMITLDmsgs, COMMITmsgs, CEPOCHmsgs, ACKLDmsgs, NEWLEADERmsgs, ACKEPOCHmsgs, NEWEPOCHmsgs, NEWLEADERmsgs, ACKEPOCHmsgs>>
+        /\ UNCHANGED <<state, zabState, acceptedEpoch, currentEpoch, lastCommitted, leaderVars, followerVars, electionVars, COMMITLDmsgs, COMMITmsgs, CEPOCHmsgs, ACKLDmsgs, NEWLEADERmsgs, NEWEPOCHmsgs, ACKEPOCHmsgs>>
 
 \* @type: (SERVER, Int, ZXID, TXN, SERVER, { mtype: Str, mzxid: ZXID, msrc: SERVER, mdst: SERVER }) => Bool;
 LeaderTryToCommit(s, index, zxid, newTxn, follower, ackMsg) ==
@@ -1419,7 +1419,7 @@ LeaderProcessACK(i, j, ackMsg) ==
                        /\ /\ outstanding
                           /\ ~hasCommitted
                           /\ LeaderTryToCommit(i, index, ackMsg.mzxid, txnAfterAddAck, j, ackMsg)
-        /\ UNCHANGED <<state, zabState, acceptedEpoch, currentEpoch, leaderVars, followerVars, electionVars, COMMITLDmsgs, PROPOSEmsgs, CEPOCHmsgs, ACKLDmsgs, NEWLEADERmsgs, ACKEPOCHmsgs, NEWEPOCHmsgs, NEWLEADERmsgs, ACKEPOCHmsgs>>
+        /\ UNCHANGED <<state, zabState, acceptedEpoch, currentEpoch, leaderVars, followerVars, electionVars, COMMITLDmsgs, PROPOSEmsgs, CEPOCHmsgs, ACKLDmsgs, NEWEPOCHmsgs, NEWLEADERmsgs, ACKEPOCHmsgs>>
 
 (* Leader Keeps a count of acks for a particular proposal, and try to
    commit the proposal. If committed, COMMIT of proposal will be broadcast. *)
@@ -1473,7 +1473,7 @@ FollowerProcessCOMMIT(i, j, commitMsg) ==
                                                 zxid  |-> firstElement.zxid ] ]
         /\ mesgs' = mesgs \* Discard(j, i)
         /\ COMMITmsgs' = COMMITmsgs \ {commitMsg}
-        /\ UNCHANGED <<state, zabState, acceptedEpoch, currentEpoch, history,leaderVars, followerVars, electionVars, COMMITLDmsgs, PROPOSEmsgs, ACKmsgs, CEPOCHmsgs, ACKLDmsgs, NEWLEADERmsgs, ACKEPOCHmsgs, NEWEPOCHmsgs, NEWLEADERmsgs, ACKEPOCHmsgs>>
+        /\ UNCHANGED <<state, zabState, acceptedEpoch, currentEpoch, history,leaderVars, followerVars, electionVars, COMMITLDmsgs, PROPOSEmsgs, ACKmsgs, CEPOCHmsgs, ACKLDmsgs, NEWEPOCHmsgs, NEWLEADERmsgs, ACKEPOCHmsgs>>
 
 
 ----------------------------------------------------------------------------     
@@ -1810,6 +1810,8 @@ H_TxnZxidsUniqueHistoriesAndMessages ==
     /\ TxnWithSameZxidEqual
     /\ TxnWithSameZxidEqualBetweenAllMessages
     /\ TxnZxidUniqueBetweenLocalHistoryAndMessages
+    \* Added for COI computation.
+    /\ Cardinality(PROPOSEmsgs) >=0 /\ Cardinality(ACKEPOCHmsgs) >= 0 /\ Cardinality(NEWLEADERmsgs) >= 0
 
 
 \* If a history entry is covered by some lastCommitted, then it must be present in 
@@ -1963,6 +1965,7 @@ H_PROPOSEMsgInFlightImpliesNodesInBROADCAST ==
         /\ zabState[m.mdst] \in {SYNCHRONIZATION, BROADCAST}
         /\ IsFollower(m.mdst)
         /\ IsLeader(m.msrc)
+        /\ m.mdst \in learners[m.msrc]
 
 \* If an ACK message is in flight, there must be a leader and they
 \* are in BROADCAST.
