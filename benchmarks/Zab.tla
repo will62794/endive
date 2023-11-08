@@ -1882,16 +1882,6 @@ H_TxnWithSameZxidEqualPeerHistory ==
 \*             (ZxidEqual(msgs[i][j][idx].mzxid, msgs[i2][j2][idx2].mzxid) => 
 \*                 (msgs[i][j][idx].mdata = msgs[i2][j2][idx2].mdata))
 
-TxnWithSameZxidEqualBetweenAllMessages == 
-     \A txn,txn2 \in MsgZxids : 
-        ZxidEqual(txn.zxid, txn2.zxid) => txn.value = txn2.value   
-
-TxnZxidUniqueBetweenLocalHistoryAndMessages ==
-    \A s \in Server :
-    \A ind \in DOMAIN history[s] :
-    \A txn \in MsgZxids : 
-        ZxidEqual(txn.zxid, history[s][ind].zxid) => txn.value = history[s][ind].value
-
 \* H_TxnWithSameZxidEqualBetweenLocalHistoryAndMessages == 
 \*     \A i,j,i1 \in Server :
 \*         \A idx \in DOMAIN msgs[i][j] : 
@@ -1910,25 +1900,6 @@ TxnZxidUniqueBetweenLocalHistoryAndMessages ==
 \*                 \A h2 \in DOMAIN history[i1] : 
 \*                     ZxidEqual(msgs[i][j][idx].mzxid, history[i1][h2].zxid) =>
 \*                     msgs[i][j][idx].mdata = history[i1][h2].value
-
-TxnZxidUniqueBetweenLocalHistoriesAndAllMessages == 
-    /\ TxnWithSameZxidEqualBetweenAllMessages
-    /\ TxnZxidUniqueBetweenLocalHistoryAndMessages
-
-\* Any two transactions with the same zxid must be equal.
-\* Note: this must hold no matter where a zxid appears i.e. in a message or on a local node.
-TxnWithSameZxidEqual == 
-    \A i,j \in Server : 
-        \A idxi \in (DOMAIN history[i]) :
-        \A idxj \in (DOMAIN history[j]) : 
-            ZxidEqual(history[i][idxi].zxid, history[j][idxj].zxid) =>
-                TxnEqual(history[i][idxi], history[j][idxj])
-
-\* Transaction zxids are unique throughout local histories and all messages.
-H_TxnZxidsUniqueHistoriesAndMessages == 
-    /\ TxnWithSameZxidEqual
-    /\ TxnWithSameZxidEqualBetweenAllMessages
-    /\ TxnZxidUniqueBetweenLocalHistoryAndMessages
 
 \* If a PROPOSE message has been sent with a particular zxid, then this zxid must be present
 \* in the sender's log, and the sender must be a leader.
@@ -2119,13 +2090,6 @@ H_LeaderinBROADCASTImpliesNoNEWLEADERorACKEInFlight ==
                 /\ msgs[i][j][mi].mtype \notin {ACKLD, NEWLEADER}
                 /\ (msgs[i][j][mi].mtype = ACKEPOCH) => 
                     \A idx \in DOMAIN msgs[i][j][mi].mhistory : msgs[i][j][mi].mhistory[idx].zxid[1] # currentEpoch[s])
-
-\* If an ACK message exists from S for a given zxid, then that zxid must be present in the sender's history.
-H_ACKMsgImpliesZxidInLog == 
-    \A i,j \in Server : 
-        PendingACK(i,j) => 
-            /\ state[j] = FOLLOWING
-            /\ \E idx \in DOMAIN history[j] :  history[j][idx].zxid = msgs[j][i][1].mzxid
 
 ZxidExistsOnQuorum(zxid) == 
   \E Q \in Quorums : 
