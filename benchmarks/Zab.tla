@@ -818,6 +818,12 @@ LeaderProcessCEPOCH(i, j, cepochMsg) ==
                                         {[ mtype  |-> NEWEPOCH,
                                           mepoch |-> acceptedEpoch[i], msrc |-> i, mdst |-> j, morder |-> NextMsgOrderCEPOCH(j,i) ]}
                                           mepoch |-> acceptedEpoch[i], msrc |-> i, mdst |-> j, morder |-> NextMsgOrderCEPOCH(j,i) ]}
+                                          mepoch |-> acceptedEpoch[i], msrc |-> i, mdst |-> j, morder |-> NextMsgOrderCEPOCH(j,i) ]}
+                    \* TODO: Update NEWEPOCHmsgs here?
+                                           mepoch |-> acceptedEpoch[i], msrc |-> i, mdst |-> j, morder |-> NextMsgOrderCEPOCH(j,i) ]}
+                    \* TODO: Update NEWEPOCHmsgs here?
+                                           mepoch |-> acceptedEpoch[i], msrc |-> i, mdst |-> j, morder |-> NextMsgOrderCEPOCH(j,i) ]}
+                                          mepoch |-> acceptedEpoch[i], msrc |-> i, mdst |-> j, morder |-> NextMsgOrderCEPOCH(j,i) ]}
                     \* TODO: Update NEWEPOCHmsgs here?
                                            mepoch |-> acceptedEpoch[i], msrc |-> i, mdst |-> j, morder |-> NextMsgOrderCEPOCH(j,i) ]}
                     \* TODO: Update NEWEPOCHmsgs here?
