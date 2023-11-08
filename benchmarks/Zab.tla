@@ -1996,6 +1996,35 @@ H_CommittedEntryExistsOnQuorum ==
                     /\ ic = idx
                     /\ TxnEqual(history[s][idx], history[n][ic])
 
+ZxidExistsOnQuorum(zxid) == 
+  \E Q \in Quorums : 
+    \A n \in Q : 
+    \E ic \in DOMAIN history[n] : 
+        history[n][ic].zxid = zxid 
+
+\* If an ACKLD message exists from S for a given zxid, then that zxid must be present in the sender's history.
+\* Also, this zxid should exist on a quorum (?), since it must be committed?
+H_ACKLDMsgImpliesZxidInLog == 
+    \A m \in ACKLDmsgs :
+        (ZxidCompare(m.mzxid, <<0,0>>)) => 
+            /\ \E idx \in DOMAIN history[m.msrc] : history[m.msrc][idx].zxid = m.mzxid
+            \* Entry exists on a quorum, since it must be committed.
+            /\ ZxidExistsOnQuorum(m.mzxid)
+            /\ state[m.msrc] = FOLLOWING
+            /\ state[m.mdst] = LEADING
+            /\ zabState[m.msrc] \in {SYNCHRONIZATION, BROADCAST}
+
+\* NEWLEADER history exists on a quorum.
+\* WRONG!
+H_NEWLEADERHistoryExistsOnQuorum == 
+    \A m \in NEWLEADERmsgs :
+    \A ih \in DOMAIN m.mhistory : 
+        \E Q \in Quorums : 
+        \A n \in Q : 
+        \E ic \in DOMAIN history[n] : 
+            /\ history[n][ic].zxid = m.mhistory[ih].zxid 
+            \* /\ acceptedEpoch[n] >= m.mepoch
+
 (******
 
 
