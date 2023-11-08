@@ -1957,6 +1957,45 @@ H_ACKEPOCHHistoryContainedInFOLLOWINGSender ==
             /\ zabState[m.msrc] \in {DISCOVERY, SYNCHRONIZATION}
             /\ TxnHistory(m.mhistory) = TxnHistory(history[m.msrc])
 
+H_PROPOSEMsgInFlightImpliesNodesInBROADCAST == 
+    \A m \in PROPOSEmsgs :
+        /\ zabState[m.msrc] = BROADCAST
+        /\ zabState[m.mdst] \in {SYNCHRONIZATION, BROADCAST}
+        /\ IsFollower(m.mdst)
+        /\ IsLeader(m.msrc)
+
+\* If an ACK message is in flight, there must be a leader and they
+\* are in BROADCAST.
+H_ACKMsgInFlightImpliesNodesInBROADCAST == 
+    \A i,j \in Server :
+    \A m \in ACKmsgs : 
+        \* (PendingACK(i,j)) =>
+            /\ zabState[m.msrc] \in {SYNCHRONIZATION, BROADCAST}
+            /\ zabState[m.mdst] = BROADCAST
+            /\ IsFollower(m.msrc)
+            /\ IsLeader(m.mdst)
+
+H_CommittedEntryExistsInNEWLEADERHistory ==
+    \A s \in Server : 
+    \A idx \in DOMAIN history[s] : 
+    \A m \in NEWLEADERmsgs :
+        (idx <= lastCommitted[s].index) =>
+            (\E idx2 \in DOMAIN m.mhistory : 
+                /\ idx2 = idx
+                /\ TxnEqual(history[s][idx], m.mhistory[idx2]))
+
+\* Any committed entry exists in the history of some quorum of servers.
+H_CommittedEntryExistsOnQuorum ==
+    \A s \in Server : 
+    \A idx \in DOMAIN history[s] : 
+        \* An entry is covered by lastCommitted on s.
+        (idx <= lastCommitted[s].index) =>
+            \E Q \in Quorums : 
+            \A n \in Q : 
+                \E ic \in DOMAIN history[n] : 
+                    /\ ic = idx
+                    /\ TxnEqual(history[s][idx], history[n][ic])
+
 (******
 
 
