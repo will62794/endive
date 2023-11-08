@@ -2132,50 +2132,6 @@ MsgZxids ==
 \*                     msgs[i][j][idx].mdata = history[i1][h2].value
 
 
-H_FollowersHaveNoMessagesSentToSelf == 
-    \A s \in Server : (IsFollower(s) \/ IsLooking(s)) => msgs[s][s] = <<>>
-
-\* If a node is LOOKING, then it must have an empty input buffer.
-H_NodeLOOKINGImpliesEmptyInputBuffer == 
-    \A i \in Server : 
-        (state[i] = LOOKING) => 
-            /\ \A j \in Server : msgs[j][i] = << >>
-            /\ (zabState[i] \in {ELECTION, DISCOVERY})
-            \* a node in LOOKING shouldn't exist as a learner of any leader.
-            /\ ~\E j \in Server : IsLeader(j) /\ i \in learners[j]
-
-\* If a node is LOOKING, then it must be in DISCOVERY or ELECTION and have an empty input buffer.
-H_NodeLOOKINGImpliesELECTIONorDISCOVERY == 
-    \A i \in Server : (state[i] = LOOKING) => (zabState[i] \in {ELECTION, DISCOVERY})
-
-H_CommittedEntryExistsInNEWLEADERHistory ==
-    \A s \in Server : 
-    \A idx \in DOMAIN history[s] : 
-        (idx <= lastCommitted[s].index) =>
-            (\A i,j \in Server : 
-                (/\ PendingNEWLEADER(i,j)
-                \*  /\ zabState[j] \in {DISCOVERY, SYNCHRONIZATION} 
-                 ) =>
-                    (\E idx2 \in DOMAIN msgs[j][i][1].mhistory : 
-                        /\ idx2 = idx
-                        /\ TxnEqual(history[s][idx], msgs[j][i][1].mhistory[idx2])))
-
-\* Any committed entry exists in the history of some quorum of servers.
-H_CommittedEntryExistsOnQuorum ==
-    \A s \in Server : 
-    \A idx \in DOMAIN history[s] : 
-        \* An entry is covered by lastCommitted on s.
-        (idx <= lastCommitted[s].index) =>
-            \E Q \in Quorums : 
-            \A n \in Q : 
-                \E ic \in DOMAIN history[n] : 
-                    /\ ic = idx
-                    /\ TxnEqual(history[s][idx], history[n][ic])
-
-H_NEWEPOCHFromNodeImpliesLEADING ==
-    \A i,j \in Server : 
-        (PendingNEWEPOCH(i,j)) => IsLeader(j)
-
 
 H_ServerInEntryAckSidImpliesHasEntry == 
     \A s,t \in Server : 
@@ -2232,30 +2188,7 @@ H_LeaderInBROADCASTImpliesLearnerInBROADCAST ==
 \*             \* /\ (zabState[j] # BROADCAST) => msgs[i][j] # <<>>
 \*             /\ IsFollower(j)
 
-H_PROPOSEMsgInFlightImpliesNodesInBROADCAST == 
-    \A i,j \in Server : 
-        (PendingPROPOSE(i,j)) =>
-            /\ zabState[i] = BROADCAST
-            /\ zabState[j] = BROADCAST
-            /\ IsFollower(i)
-            /\ IsLeader(j)
 
-\* If an ACK message is in flight, there must be a leader and they
-\* are in BROADCAST.
-H_ACKMsgInFlightImpliesNodesInBROADCAST == 
-    \A i,j \in Server : 
-        (PendingACK(i,j)) =>
-            /\ zabState[i] = BROADCAST
-            /\ zabState[j] = BROADCAST
-            /\ IsFollower(j)
-            /\ IsLeader(i)
-
-
-ZxidExistsOnQuorum(zxid) == 
-  \E Q \in Quorums : 
-    \A n \in Q : 
-    \E ic \in DOMAIN history[n] : 
-        history[n][ic].zxid = zxid 
 
 \* There must be a unique NEWLEADER message sent per epoch.
 H_NEWLEADERUniquePerEpoch == 
@@ -2267,29 +2200,6 @@ H_NEWLEADERUniquePerEpoch ==
              /\ msgs[i2][j2][ind2].mtype = NEWLEADER
              /\ msgs[i2][j2][ind2].mepoch = msgs[i][j][ind1].mepoch) => 
                 msgs[i][j][ind1] = msgs[i2][j2][ind2]
-
-\* NEWLEADER history exists on a quorum.
-H_NEWLEADERHistoryExistsOnQuorum == 
-    \A i,j \in Server : 
-        (PendingNEWLEADER(i,j)) =>
-            \A ih \in DOMAIN msgs[j][i][1].mhistory : 
-              \E Q \in Quorums : 
-              \A n \in Q : 
-              \E ic \in DOMAIN history[n] : 
-                    /\ history[n][ic].zxid = msgs[j][i][1].mhistory[ih].zxid 
-                    /\ acceptedEpoch[n] >= msgs[j][i][1].mepoch
-
-\* If an ACKLD message exists from S for a given zxid, then that zxid must be present in the sender's history.
-\* Also, this zxid should exist on a quorum (?), since it must be committed?
-H_ACKLDMsgImpliesZxidInLog == 
-    \A i,j \in Server : 
-        (PendingACKLD(i,j) /\ ZxidCompare(msgs[j][i][1].mzxid, <<0,0>>)) => 
-            /\ \E idx \in DOMAIN history[j] : history[j][idx].zxid = msgs[j][i][1].mzxid
-            \* Entry exists on a quorum, since it must be committed.
-            /\ ZxidExistsOnQuorum(msgs[j][i][1].mzxid)
-            /\ state[i] = FOLLOWING
-            /\ state[j] = LEADING
-            /\ zabState[i] \in {SYNCHRONIZATION, BROADCAST}
 
 \* If a follower has sent ACKLD to a leader, then its log must match the leader's log.
 H_ACKLDSentByFollowerImpliesLogMatch == 
