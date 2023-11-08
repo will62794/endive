@@ -1780,10 +1780,14 @@ H_ACKMsgImpliesZxidInLog ==
 \* MsgsWithHistoryZxids == 
     \* {m \in AllMsgs : (m.mtype = PROPOSE) \/ ("mhistory" \in DOMAIN m)}
 
+\* @type: Set({zxid: ZXID, value: Int, epoch: Int, ackSid: Set(SERVER)});
 PROPOSEZxids == {[zxid |-> m.mzxid, value |-> m.mdata, epoch |-> 0, ackSid |-> {} ] : m \in PROPOSEmsgs}
+\* @type: Set({zxid: ZXID, value: Int, epoch: Int, ackSid: Set(SERVER)});
 ACKEPOCHZxids == UNION {{[zxid |-> m.mhistory[i].zxid, value |-> m.mhistory[i].value, epoch |-> 0, ackSid |-> {}] : i \in DOMAIN m.mhistory} : m \in ACKEPOCHmsgs}
+\* @type: Set({zxid: ZXID, value: Int, epoch: Int, ackSid: Set(SERVER)});
 NEWLEADERZxids == UNION {{[zxid |-> m.mhistory[i].zxid, value |-> m.mhistory[i].value, epoch |-> 0, ackSid |-> {}] : i \in DOMAIN m.mhistory} : m \in NEWLEADERmsgs}  
 
+\* @type: Set({zxid: ZXID, value: Int, epoch: Int, ackSid: Set(SERVER)});
 MsgZxids == PROPOSEZxids \cup ACKEPOCHZxids \cup NEWLEADERZxids
 
 TxnWithSameZxidEqualBetweenAllMessages == 
