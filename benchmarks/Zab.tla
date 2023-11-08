@@ -1777,20 +1777,14 @@ H_ACKMsgImpliesZxidInLog ==
 
 
 \* AllMsgs == UNION {{msgs[i][j][mi] : mi \in DOMAIN msgs[i][j]} : <<i,j>> \in Server \X Server}
-
-
 \* MsgsWithHistoryZxids == 
     \* {m \in AllMsgs : (m.mtype = PROPOSE) \/ ("mhistory" \in DOMAIN m)}
 
-MsgZxids == 
-    {[zxid |-> m.mzxid, value |-> m.mdata] : m \in PROPOSEmsgs} \cup
-    UNION {{[zxid |-> m.mhistory[i].zxid, value |-> m.mhistory[i].value] : i \in DOMAIN m.mhistory} : m \in ACKEPOCHmsgs}  \cup
-    UNION {{[zxid |-> m.mhistory[i].zxid, value |-> m.mhistory[i].value] : i \in DOMAIN m.mhistory} : m \in NEWLEADERmsgs}  
-         
-    \* UNION {IF m.mtype = PROPOSE
-    \*                         THEN {[zxid |-> m.mzxid, value |-> m.mdata]}
-    \*                         ELSE {[zxid |-> m.mhistory[i].zxid, value |-> m.mhistory[i].value] : i \in DOMAIN m.mhistory} : 
-    \*                         m \in MsgsWithHistoryZxids}
+PROPOSEZxids == {[zxid |-> m.mzxid, value |-> m.mdata, epoch |-> 0, ackSid |-> {} ] : m \in PROPOSEmsgs}
+ACKEPOCHZxids == UNION {{[zxid |-> m.mhistory[i].zxid, value |-> m.mhistory[i].value, epoch |-> 0, ackSid |-> {}] : i \in DOMAIN m.mhistory} : m \in ACKEPOCHmsgs}
+NEWLEADERZxids == UNION {{[zxid |-> m.mhistory[i].zxid, value |-> m.mhistory[i].value, epoch |-> 0, ackSid |-> {}] : i \in DOMAIN m.mhistory} : m \in NEWLEADERmsgs}  
+
+MsgZxids == PROPOSEZxids \cup ACKEPOCHZxids \cup NEWLEADERZxids
 
 TxnWithSameZxidEqualBetweenAllMessages == 
      \A txn,txn2 \in MsgZxids : 
