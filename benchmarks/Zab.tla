@@ -1050,6 +1050,7 @@ FollowerProcessNEWLEADER(i, j, newLeaderMsg) ==
 AckldRecvQuorumFormed(i) == LET sid_ackldRecv == {a.sid: a \in ackldRecv[i]} IN IsQuorum(sid_ackldRecv)
 AckldRecvBecomeQuorum(i) == LET sid_ackldRecv == {a.sid: a \in ackldRecv'[i]} IN IsQuorum(sid_ackldRecv)
 
+\* @type: (Set({ sid: SERVER, connected: Bool }), SERVER) => Set({ sid: SERVER, connected: Bool });
 UpdateAckldRecv(oldSet, sid) ==
         LET sid_set == {s.sid: s \in oldSet}
             follower_info == [ sid       |-> sid,
@@ -1073,17 +1074,17 @@ UpdateAckldRecv(oldSet, sid) ==
 \*                                      epoch  |-> oldTxn.epoch ]
 \*                      IN <<newTxn>> \o UpdateAcksidHelper( Tail(txns), target, endZxid)
     
-
+\* @type: (Seq(TXN), SERVER, ZXID) => Seq(TXN);
 UpdateAcksidIter(his, target, endZxid) == 
     LET zxidIndicesLessThanEnd == {i \in DOMAIN his : ~ZxidCompare(his[i].zxid, endZxid)}
         firstZxidIndex == IF zxidIndicesLessThanEnd # {} 
                             THEN Maximum(zxidIndicesLessThanEnd)
                             ELSE 100 IN
-    [idx \in DOMAIN his |-> 
+    FunAsSeq([idx \in DOMAIN his |-> 
         IF firstZxidIndex >= 0 /\ idx <= firstZxidIndex 
             THEN [his[idx] EXCEPT !.ackSid = his[idx].ackSid \cup {target}]
             ELSE his[idx]
-    ]
+    ], Cardinality(DOMAIN his), Cardinality(DOMAIN his))
 
 \* Atomically add ackSid of one learner according to zxid in ACKLD.
 UpdateAcksid(his, target, endZxid) == UpdateAcksidIter(his, target, endZxid)
@@ -1211,6 +1212,7 @@ ZxidToIndex(his, zxid) == ZxidToIndexIter(his, zxid)
         \* /\ ZxidToIndexIter(history[s], <<x,y>>) = ZxidToIndexRec(history[s], <<x,y>>)
 
 (* Follower receives COMMITLD. Commit all txns. *)
+\* @type: (SERVER, SERVER, { mtype: Str, mzxid: ZXID, msrc: SERVER, mdst: SERVER, morder: Int }) => Bool;
 FollowerProcessCOMMITLD(i, j, commitLDmsg) ==
         /\ IsFollower(i)
         \* /\ PendingCOMMITLD(i, j)
@@ -1234,6 +1236,7 @@ FollowerProcessCOMMITLD(i, j, commitLDmsg) ==
               /\ COMMITLDmsgs' = COMMITLDmsgs \ {commitLDmsg}
               /\ UNCHANGED <<state, acceptedEpoch, currentEpoch, history, leaderVars, followerVars, electionVars, CEPOCHmsgs, ACKLDmsgs, NEWLEADERmsgs, ACKEPOCHmsgs, NEWEPOCHmsgs, NEWLEADERmsgs, ACKEPOCHmsgs, PROPOSEmsgs, ACKmsgs, COMMITmsgs>>
 ----------------------------------------------------------------------------
+\* @type: (SERVER, ZXID) => ZXID;
 IncZxid(s, zxid) == IF currentEpoch[s] = zxid[1] THEN <<zxid[1], zxid[2] + 1>>
                     ELSE <<currentEpoch[s], 1>>
 
