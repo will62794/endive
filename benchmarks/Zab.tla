@@ -876,7 +876,7 @@ FollowerProcessNEWEPOCH(i, j, newEpochMsg) ==
                           /\ cepochRecv' = [cepochRecv EXCEPT ![leader] = RemoveCepochRecv(cepochRecv[leader], i) ]
                           /\ ackeRecv'   = [ackeRecv   EXCEPT ![leader] = RemoveAckeRecv(ackeRecv[leader], i) ]
                           /\ ackldRecv'  = [ackldRecv  EXCEPT ![leader] = RemoveAckldRecv(ackldRecv[leader], i) ]
-                    /\ UNCHANGED <<acceptedEpoch>>
+                    /\ UNCHANGED <<msgs, acceptedEpoch>>
         /\ UNCHANGED <<currentEpoch, history, lastCommitted, sendCounter, electionVars>>
 
 AckeRecvQuorumFormed(i) == LET sid_ackeRecv == {a.sid: a \in ackeRecv[i]} IN IsQuorum(sid_ackeRecv)
