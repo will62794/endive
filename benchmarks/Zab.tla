@@ -1331,24 +1331,17 @@ FollowerProcessPROPOSE(i, j, proposeMsg) ==
                     /\ UNCHANGED <<history,msgs, ACKmsgs>>
         /\ UNCHANGED <<state, zabState, acceptedEpoch, currentEpoch, lastCommitted, leaderVars, followerVars, electionVars, COMMITLDmsgs, COMMITmsgs, CEPOCHmsgs, ACKLDmsgs, NEWLEADERmsgs, ACKEPOCHmsgs, NEWEPOCHmsgs, NEWLEADERmsgs, ACKEPOCHmsgs>>
 
+\* @type: (SERVER, Int, ZXID, TXN, SERVER, { mtype: Str, mzxid: ZXID, msrc: SERVER, mdst: SERVER }) => Bool;
 LeaderTryToCommit(s, index, zxid, newTxn, follower, ackMsg) ==
-        LET allTxnsBeforeCommitted == lastCommitted[s].index >= index - 1
-                    \* Only when all proposals before zxid has been committed,
-                    \* this proposal can be permitted to be committed.
-            hasAllQuorums == IsQuorum(newTxn.ackSid)
-                    \* In order to be committed, a proposal must be accepted
-                    \* by a quorum.
-            ordered == lastCommitted[s].index + 1 = index
-                    \* Commit proposals in order.
-        IN \/ /\ \* Current conditions do not satisfy committing the proposal.
-                 \/ ~allTxnsBeforeCommitted
-                 \/ ~hasAllQuorums
+           \/ /\ \* Current conditions do not satisfy committing the proposal.
+                 \/ ~(lastCommitted[s].index >= index - 1)
+                 \/ ~IsQuorum(newTxn.ackSid)
               /\ msgs' = msgs \* Discard(follower, s)
               /\ ACKmsgs' = ACKmsgs \ {ackMsg}
               /\ UNCHANGED <<lastCommitted, COMMITmsgs>>
-           \/ /\ allTxnsBeforeCommitted
-              /\ hasAllQuorums
-              /\ ordered
+           \/ /\ (lastCommitted[s].index >= index - 1)
+              /\ IsQuorum(newTxn.ackSid)
+              /\ lastCommitted[s].index + 1 = index
               /\ lastCommitted' = [lastCommitted EXCEPT ![s] = [ index |-> index,
                                                                  zxid  |-> zxid ] ]
               /\ LET m_commit == [ mtype |-> COMMIT,
