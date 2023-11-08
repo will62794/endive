@@ -33,6 +33,7 @@ CONSTANT
     \* @typeAlias: TXN = {zxid: ZXID, value: Int, ackSid: Set(SERVER), epoch: Int};
     \* @typeAlias: CEPOCHRECVTYPE = {sid: SERVER, connected: Bool, epoch: Int};
     \* @typeAlias: ACKERECVTYPE = {sid: SERVER, connected: Bool, peerLastEpoch: Int, peerHistory: Seq(TXN)};
+    \* @typeAlias: ACKLDRECVTYPE = {sid: SERVER, connected: Bool};
     \* @type: Set(SERVER);
     Server
 
