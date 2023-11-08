@@ -2355,6 +2355,27 @@ Morder1 ==
 
 *********)
 
+CInit == 
+    /\ MaxEpoch = 2
+    /\ MaxHistLen = 2
+    /\ Server = {"s1", "s2", "s3"}
+    /\ CEPOCH = "CEPOCH"
+    /\ NEWEPOCH = "NEWEPOCH"
+    /\ NEWLEADER = "NEWLEADER"
+    /\ ACKEPOCH = "ACKEPOCH"
+    /\ ACKLD = "ACKLD"
+    /\ COMMITLD = "COMMITLD"
+    /\ PROPOSE = "PROPOSE"
+    /\ ACK = "ACK"
+    /\ COMMIT = "COMMIT"
+    /\ DISCOVERY = "DISCOVERY"
+    /\ ELECTION = "ELECTION"
+    /\ BROADCAST = "BROADCAST"
+    /\ SYNCHRONIZATION = "SYNCHRONIZATION"
+    /\ LOOKING = "LOOKING"
+    /\ FOLLOWING = "FOLLOWING"
+    /\ LEADING = "LEADING"
+
 =============================================================================
 \* Modification History
 \* Last modified Tue Jan 31 20:40:11 CST 2023 by huangbinyu
