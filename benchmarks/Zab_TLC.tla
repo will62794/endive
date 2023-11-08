@@ -58,11 +58,11 @@ TypeOKRandom ==
     /\ sendCounter \in [Server -> Nat]
     /\ connectInfo \in [Server -> Server]
     /\ leaderOracle \in Server
-    /\ msgs \in [Server -> [Server -> {<<>>}]]
-    /\ CEPOCHmsgs \in RandomSetOfSubsets(2, 2, MsgCEPOCHType)
-    /\ NEWEPOCHmsgs \in RandomSetOfSubsets(2, 2, MsgNEWEPOCHType)
-    /\ ACKEPOCHmsgs \in RandomSetOfSubsets(2, 2, MsgACKEPOCHType)
-    /\ NEWLEADERmsgs \in RandomSetOfSubsets(2, 2, MsgNEWLEADERType)
+    /\ mesgs \in [Server -> [Server -> {<<>>}]]
+    /\ CEPOCHmsgs \in RandomSetOfSubsets(1, 1, MsgCEPOCHType)
+    /\ NEWEPOCHmsgs \in RandomSetOfSubsets(1, 1, MsgNEWEPOCHType)
+    /\ ACKEPOCHmsgs \in RandomSetOfSubsets(1, 1, MsgACKEPOCHType)
+    /\ NEWLEADERmsgs \in RandomSetOfSubsets(1, 1, MsgNEWLEADERType)
     /\ ACKLDmsgs \in RandomSetOfSubsets(2, 2, MsgACKLDType)
     /\ COMMITLDmsgs \in RandomSetOfSubsets(2, 2, MsgCOMMITLDType)
     /\ PROPOSEmsgs \in RandomSetOfSubsets(2, 2, MsgPROPOSEType)
@@ -95,6 +95,16 @@ CTICost ==
     SumFnRange(currentEpoch) +
     SumFnRange([s \in Server |-> Cardinality(ackeRecv[s])]) +
     SumFnRange([s \in Server |-> Cardinality(cepochRecv[s])]) +
-    SumFnRange([<<s,t>> \in Server \X Server |-> Len(msgs[s][t])])
+    SumFnRange([<<s,t>> \in Server \X Server |-> Len(mesgs[s][t])]) + 
+    Cardinality(CEPOCHmsgs) +
+    Cardinality(NEWEPOCHmsgs) +
+    Cardinality(ACKEPOCHmsgs) +
+    Cardinality(NEWLEADERmsgs) +
+    Cardinality(ACKLDmsgs) +
+    Cardinality(COMMITLDmsgs) +
+    Cardinality(PROPOSEmsgs) +
+    Cardinality(ACKmsgs) +
+    Cardinality(COMMITmsgs)
+
 
 ====
