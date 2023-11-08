@@ -385,7 +385,6 @@ LastZxidOfHistory(his) == IF Len(his) = 0 THEN <<0, 0>> ELSE his[Len(his)].zxid
 LastZxid(i) == LastZxidOfHistory(history[i])
 
 
-
 MaxWithZero(S) == IF S = {} THEN 0 ELSE CHOOSE n \in S: \A m \in S: n >= m
 MinWithZero(S) == IF S = {} THEN 0 ELSE CHOOSE n \in S: \A m \in S: n >= m
 
@@ -396,9 +395,9 @@ NextMsgOrderACKEPOCH(i,j) == MaxWithZero({c.morder : c \in {m \in ACKEPOCHmsgs :
 NextMsgOrderNEWLEADER(i,j) == MaxWithZero({c.morder : c \in {m \in NEWLEADERmsgs : m.msrc = i /\ m.mdst = j}})
 NextMsgOrderACKLD(i,j) == MaxWithZero({c.morder : c \in {m \in ACKLDmsgs : m.msrc = i /\ m.mdst = j}})
 NextMsgOrderCOMMITLD(i,j) == MaxWithZero({c.morder : c \in {m \in COMMITLDmsgs : m.msrc = i /\ m.mdst = j}})
-NextMsgOrderPROPOSE(i,j) == MaxWithZero({c.morder : c \in {m \in PROPOSEmsgs : m.msrc = i /\ m.mdst = j}})
-NextMsgOrderACK(i,j) == MaxWithZero({c.morder : c \in {m \in ACKmsgs : m.msrc = i /\ m.mdst = j}})
-NextMsgOrderCOMMIT(i,j) == MaxWithZero({c.morder : c \in {m \in COMMITmsgs : m.msrc = i /\ m.mdst = j}})
+\* NextMsgOrderPROPOSE(i,j) == MaxWithZero({c.morder : c \in {m \in PROPOSEmsgs : m.msrc = i /\ m.mdst = j}})
+\* NextMsgOrderACK(i,j) == MaxWithZero({c.morder : c \in {m \in ACKmsgs : m.msrc = i /\ m.mdst = j}})
+\* NextMsgOrderCOMMIT(i,j) == MaxWithZero({c.morder : c \in {m \in COMMITmsgs : m.msrc = i /\ m.mdst = j}})
 
 MinMsgOrderCEPOCH(i,j) == MinWithZero({c.morder : c \in {m \in CEPOCHmsgs : m.msrc = i /\ m.mdst = j}})
 MinMsgOrderNEWEPOCH(i,j) == MinWithZero({c.morder : c \in {m \in ACKEPOCHmsgs : m.msrc = i /\ m.mdst = j}})
@@ -406,9 +405,9 @@ MinMsgOrderACKEPOCH(i,j) == MinWithZero({c.morder : c \in {m \in ACKEPOCHmsgs : 
 MinMsgOrderNEWLEADER(i,j) == MinWithZero({c.morder : c \in {m \in NEWLEADERmsgs : m.msrc = i /\ m.mdst = j}})
 MinMsgOrderACKLD(i,j) == MinWithZero({c.morder : c \in {m \in ACKLDmsgs : m.msrc = i /\ m.mdst = j}})
 MinMsgOrderCOMMITLD(i,j) == MinWithZero({c.morder : c \in {m \in COMMITLDmsgs : m.msrc = i /\ m.mdst = j}})
-MinMsgOrderPROPOSE(i,j) == MinWithZero({c.morder : c \in {m \in PROPOSEmsgs : m.msrc = i /\ m.mdst = j}})
-MinMsgOrderACK(i,j) == MinWithZero({c.morder : c \in {m \in ACKmsgs : m.msrc = i /\ m.mdst = j}})
-MinMsgOrderCOMMIT(i,j) == MinWithZero({c.morder : c \in {m \in COMMITmsgs : m.msrc = i /\ m.mdst = j}})
+\* MinMsgOrderPROPOSE(i,j) == MinWithZero({c.morder : c \in {m \in PROPOSEmsgs : m.msrc = i /\ m.mdst = j}})
+\* MinMsgOrderACK(i,j) == MinWithZero({c.morder : c \in {m \in ACKmsgs : m.msrc = i /\ m.mdst = j}})
+\* MinMsgOrderCOMMIT(i,j) == MinWithZero({c.morder : c \in {m \in COMMITmsgs : m.msrc = i /\ m.mdst = j}})
 
 \* Maximum({
 \*     NextMsgOrderCEPOCH, 
@@ -445,30 +444,31 @@ MinMsgOrder(i,j) ==
         MinMsgOrderACKEPOCH(i,j),
         MinMsgOrderNEWLEADER(i,j),
         MinMsgOrderACKLD(i,j),
-        MinMsgOrderCOMMITLD(i,j),
-        MinMsgOrderPROPOSE(i,j),
-        MinMsgOrderACK(i,j),
-        MinMsgOrderCOMMIT(i,j)
+        MinMsgOrderCOMMITLD(i,j)
+        \* MinMsgOrderPROPOSE(i,j),
+        \* MinMsgOrderACK(i,j),
+        \* MinMsgOrderCOMMIT(i,j)
     })
 
 
 
 \* Shuffle input buffer.
-Clean(i, j) == 
-    /\ msgs' = [msgs EXCEPT ![j][i] = << >>, ![i][j] = << >>]   
-    \* Remove all messages between i and j.
-    /\ CEPOCHmsgs' = {m \in CEPOCHmsgs : <<m.msrc,m.mdst>> \notin {<<i,j>>, <<j,i>>}}
-    /\ NEWEPOCHmsgs' = {m \in NEWEPOCHmsgs : <<m.msrc,m.mdst>> \notin {<<i,j>>, <<j,i>>}}
-    /\ ACKEPOCHmsgs' = {m \in ACKEPOCHmsgs : <<m.msrc,m.mdst>> \notin {<<i,j>>, <<j,i>>}}
-    /\ NEWLEADERmsgs' = {m \in NEWLEADERmsgs : <<m.msrc,m.mdst>> \notin {<<i,j>>, <<j,i>>}}
-    /\ ACKLDmsgs' = {m \in ACKLDmsgs : <<m.msrc,m.mdst>> \notin {<<i,j>>, <<j,i>>}}
-    /\ COMMITLDmsgs' = {m \in COMMITLDmsgs : <<m.msrc,m.mdst>> \notin {<<i,j>>, <<j,i>>}}
-    /\ PROPOSEmsgs' = {m \in PROPOSEmsgs : <<m.msrc,m.mdst>> \notin {<<i,j>>, <<j,i>>}}
-    /\ ACKmsgs' = {m \in ACKmsgs : <<m.msrc,m.mdst>> \notin {<<i,j>>, <<j,i>>}}
-    /\ COMMITmsgs' = {m \in COMMITmsgs : <<m.msrc,m.mdst>> \notin {<<i,j>>, <<j,i>>}}
+\* 
+\* Clean(i, j) == 
+\*     \* /\ msgs' = [msgs EXCEPT ![j][i] = << >>, ![i][j] = << >>]   
+\*     \* Remove all messages between i and j.
+\*     /\ CEPOCHmsgs' = {m \in CEPOCHmsgs : <<m.msrc,m.mdst>> \notin {<<i,j>>, <<j,i>>}}
+\*     /\ NEWEPOCHmsgs' = {m \in NEWEPOCHmsgs : <<m.msrc,m.mdst>> \notin {<<i,j>>, <<j,i>>}}
+\*     /\ ACKEPOCHmsgs' = {m \in ACKEPOCHmsgs : <<m.msrc,m.mdst>> \notin {<<i,j>>, <<j,i>>}}
+\*     /\ NEWLEADERmsgs' = {m \in NEWLEADERmsgs : <<m.msrc,m.mdst>> \notin {<<i,j>>, <<j,i>>}}
+\*     /\ ACKLDmsgs' = {m \in ACKLDmsgs : <<m.msrc,m.mdst>> \notin {<<i,j>>, <<j,i>>}}
+\*     /\ COMMITLDmsgs' = {m \in COMMITLDmsgs : <<m.msrc,m.mdst>> \notin {<<i,j>>, <<j,i>>}}
+\*     /\ PROPOSEmsgs' = {m \in PROPOSEmsgs : <<m.msrc,m.mdst>> \notin {<<i,j>>, <<j,i>>}}
+\*     /\ ACKmsgs' = {m \in ACKmsgs : <<m.msrc,m.mdst>> \notin {<<i,j>>, <<j,i>>}}
+\*     /\ COMMITmsgs' = {m \in COMMITmsgs : <<m.msrc,m.mdst>> \notin {<<i,j>>, <<j,i>>}}
 
-CleanInputBuffer(S) == 
-    /\ msgs' = [s \in Server |-> [v \in Server |-> IF v \in S THEN << >> ELSE msgs[s][v] ] ]
+\* CleanInputBuffer(S) == 
+\*     /\ msgs' = [s \in Server |-> [v \in Server |-> IF v \in S THEN << >> ELSE msgs[s][v] ] ]
 \* Leader broadcasts a message PROPOSE to all other servers in Q.
 \* Note: In paper, Q is fuzzy. We think servers who leader broadcasts NEWLEADER to
 \*       should receive every PROPOSE. So we consider ackeRecv as Q.
@@ -476,27 +476,27 @@ CleanInputBuffer(S) ==
 \* COMMITLD, and zxid in COMMIT later than zxid in COMMITLD. To avoid this situation,
 \* if f \in ackeRecv but \notin ackldRecv, f should not receive COMMIT until 
 \* f \in ackldRecv and receives COMMITLD.
-Broadcast(i, m) ==
-        LET ackeRecv_quorum == {a \in ackeRecv[i]: a.connected = TRUE }
-            sid_ackeRecv == { a.sid: a \in ackeRecv_quorum }
-        IN msgs' = [msgs EXCEPT ![i] = [v \in Server |-> IF /\ v \in sid_ackeRecv
-                                                            /\ v \in learners[i] 
-                                                            /\ v /= i
-                                                         THEN Append(msgs[i][v], m)
-                                                         ELSE msgs[i][v] ] ] 
+\* Broadcast(i, m) ==
+\*         LET ackeRecv_quorum == {a \in ackeRecv[i]: a.connected = TRUE }
+\*             sid_ackeRecv == { a.sid: a \in ackeRecv_quorum }
+\*         IN msgs' = [msgs EXCEPT ![i] = [v \in Server |-> IF /\ v \in sid_ackeRecv
+\*                                                             /\ v \in learners[i] 
+\*                                                             /\ v /= i
+\*                                                          THEN Append(msgs[i][v], m)
+\*                                                          ELSE msgs[i][v] ] ] 
 \* Since leader decides to broadcasts message COMMIT when processing ACK, so
 \* we need to discard ACK and broadcast COMMIT.
 \* Here Q is ackldRecv, because we assume that f should not receive COMMIT until
 \* f receives COMMITLD.
-DiscardAndBroadcast(i, j, m) ==
-        LET ackldRecv_quorum == {a \in ackldRecv[i]: a.connected = TRUE }
-            sid_ackldRecv == { a.sid: a \in ackldRecv_quorum }
-        IN msgs' = [msgs EXCEPT ![j][i] = Tail(msgs[j][i]),
-                                ![i] = [v \in Server |-> IF /\ v \in sid_ackldRecv
-                                                            /\ v \in learners[i] 
-                                                            /\ v /= i
-                                                         THEN Append(msgs[i][v], m)
-                                                         ELSE msgs[i][v] ] ]  
+\* DiscardAndBroadcast(i, j, m) ==
+\*         LET ackldRecv_quorum == {a \in ackldRecv[i]: a.connected = TRUE }
+\*             sid_ackldRecv == { a.sid: a \in ackldRecv_quorum }
+\*         IN msgs' = [msgs EXCEPT ![j][i] = Tail(msgs[j][i]),
+\*                                 ![i] = [v \in Server |-> IF /\ v \in sid_ackldRecv
+\*                                                             /\ v \in learners[i] 
+\*                                                             /\ v /= i
+\*                                                          THEN Append(msgs[i][v], m)
+\*                                                          ELSE msgs[i][v] ] ]  
 \* Leader broadcasts LEADERINFO to all other servers in cepochRecv.
 DiscardAndBroadcastNEWEPOCH(i, j, m) ==
         LET new_cepochRecv_quorum == {c \in cepochRecv'[i]: c.connected = TRUE }
