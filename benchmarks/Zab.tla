@@ -1363,6 +1363,7 @@ LastAckIndexFromFollower(i, j) ==
 
 (* Leader Keeps a count of acks for a particular proposal, and try to
    commit the proposal. If committed, COMMIT of proposal will be broadcast. *)
+\* @type: (SERVER, SERVER, { mtype: Str, mzxid: ZXID, msrc: SERVER, mdst: SERVER }) => Bool;
 LeaderProcessACK(i, j, ackMsg) ==
         /\ IsLeader(i)
         \* /\ PendingACK(i, j)
@@ -1424,6 +1425,7 @@ LeaderProcessACK(i, j, ackMsg) ==
 \*         /\ UNCHANGED <<state, zabState, acceptedEpoch, currentEpoch, leaderVars, followerVars, electionVars>>
 
 (* Follower processes COMMIT. *)
+\* @type: (SERVER, SERVER, { mtype: Str, mzxid: ZXID, msrc: SERVER, mdst: SERVER }) => Bool;
 FollowerProcessCOMMIT(i, j, commitMsg) ==
         /\ IsFollower(i)
         \* /\ PendingCOMMIT(i, j)
@@ -1435,7 +1437,7 @@ FollowerProcessCOMMIT(i, j, commitMsg) ==
            IN /\ infoOk
               /\ pending
               /\ LET firstElement == history[i][lastCommitted[i].index + 1]
-                           match == ZxidEqual(firstElement.zxid, commitMsg.mzxid) IN
+                     match == ZxidEqual(firstElement.zxid, commitMsg.mzxid) IN
                     /\ match
                     /\ lastCommitted' = [lastCommitted EXCEPT ![i] = 
                                             [   index |-> lastCommitted[i].index + 1,
