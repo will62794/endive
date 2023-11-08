@@ -1850,17 +1850,18 @@ COMMITLDSentByNodeImpliesZxidCommittedInLog ==
                     /\ lastCommitted[m.msrc].index >= idx
             /\ state[m.msrc] = LEADING
             /\ state[m.mdst] = FOLLOWING
-            /\ zabState[m.msrc] = SYNCHRONIZATION
+            /\ zabState[m.msrc] \in {SYNCHRONIZATION, BROADCAST}
+            /\ zabState[m.mdst] \in {SYNCHRONIZATION}
 
 ACKLDSentByNodeImpliesZxidCommittedInLog == 
     \A m \in ACKLDmsgs :
         (\/ (~ZxidEqual(m.mzxid, <<0,0>>)) ) => 
-            /\ \E idx \in DOMAIN history[m.msrc] : 
-                    /\ history[m.msrc][idx].zxid = m.mzxid  
-                    /\ lastCommitted[m.msrc].index >= idx
+            /\ \E idx \in DOMAIN history[m.msrc] : history[m.msrc][idx].zxid = m.mzxid  
+                    \* /\ lastCommitted[m.msrc].index >= idx
             /\ state[m.mdst] = LEADING
             /\ state[m.msrc] = FOLLOWING
-            /\ zabState[m.mdst] = SYNCHRONIZATION
+            /\ zabState[m.mdst] \in {SYNCHRONIZATION, BROADCAST}
+            /\ zabState[m.msrc] \in {SYNCHRONIZATION}
 
 \* \* If a COMMITLD message has been sent by a node, then the zxid in this message must be committed 
 \* \* in the sender's history.
@@ -1880,6 +1881,10 @@ H_CommittedEntryExistsInLeaderHistory ==
                 \E idx2 \in DOMAIN history[j] : 
                     /\ idx2 = idx
                     /\ history[j][idx2].zxid = history[i][idx].zxid
+
+\* A node's lastCommitted index must always be <= its history length.
+H_NodeHistoryBoundByLastCommittedIndex == 
+    \A s \in Server : lastCommitted[s].index <= Len(history[s])
 
 (******
 
@@ -2170,10 +2175,6 @@ H_ACKLDMsgImpliesZxidInLog ==
             /\ state[i] = FOLLOWING
             /\ state[j] = LEADING
             /\ zabState[i] \in {SYNCHRONIZATION, BROADCAST}
-
-\* A node's lastCommitted index must always be <= its history length.
-H_NodeHistoryBoundByLastCommittedIndex == 
-    \A s \in Server : lastCommitted[s].index <= Len(history[s])
 
 \* If a follower has sent ACKLD to a leader, then its log must match the leader's log.
 H_ACKLDSentByFollowerImpliesLogMatch == 
