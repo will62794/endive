@@ -898,6 +898,7 @@ UpdateAckeRecv(oldSet, sid, peerEpoch, peerHistory) ==
     
 
 \* TRUE: f1.a > f2.a or (f1.a = fa.a and f1.zxid >= f2.zxid)
+\* @type: ({sid:SERVER, currentEpoch:Int, lastZxid:ZXID}, {sid:SERVER, currentEpoch:Int, lastZxid:ZXID}) => Bool;
 MoreRecentOrEqual(ss1, ss2) == \/ ss1.currentEpoch > ss2.currentEpoch
                                \/ /\ ss1.currentEpoch = ss2.currentEpoch
                                   /\ ~ZxidCompare(ss2.lastZxid, ss1.lastZxid)
