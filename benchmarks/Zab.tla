@@ -30,6 +30,9 @@ EXTENDS Integers, FiniteSets, Sequences, Naturals, Apalache, TLC
 CONSTANT 
     \* @typeAlias: SERVER = Str;
     \* @typeAlias: ZXID = <<Int,Int>>;
+    \* @typeAlias: TXN = {zxid: ZXID, value: Int, ackSid: Set(SERVER), epoch: Int};
+    \* @typeAlias: CEPOCHRECVTYPE = {sid: SERVER, connected: Bool, epoch: Int};
+    \* @typeAlias: ACKERECVTYPE = {sid: SERVER, connected: Bool, peerLastEpoch: Int, peerHistory: Seq(TXN)};
     \* @type: Set(SERVER);
     Server
 
@@ -90,12 +93,12 @@ VARIABLES
     \* @type: SERVER -> Int; 
     currentEpoch,   
     \* History of servers: sequence of transactions, containing: [zxid, value, ackSid, epoch].
-    \* @type: SERVER -> Seq(Int);                   
+    \* @type: SERVER -> Seq(TXN);                   
     history,       
     \* Maximum index and zxid known to be committed,
     \* namely 'lastCommitted' in Leader. Starts from 0,
     \* and increases monotonically before restarting. 
-    \* @type: SERVER -> {index: Int, zxid: <<Int, Int>>};
+    \* @type: SERVER -> {index: Int, zxid: ZXID};
     lastCommitted   
 
 \* Variables only used for leader.
@@ -106,17 +109,15 @@ VARIABLES
     \* Set of learners leader has received CEPOCH from.
     \* Set of record [sid, connected, epoch],
     \* where epoch means f.p from followers.    
-    \* @type: SERVER -> Set({sid: SERVER, connected: BOOLEAN, epoch: Int});
+    \* @type: SERVER -> Set(CEPOCHRECVTYPE);
     cepochRecv,  
     \* Set of learners leader has received ACKEPOCH from.
-    \* Set of record 
-    \* [sid, connected, peerLastEpoch, peerHistory],
-    \* to record f.a and h(f) from followers.   
-    \* @type: SERVER -> Set({sid: SERVER, connected: BOOLEAN, peerLastEpoch: Int, peerHistory: Seq(Int)});
+    \* Set of record  [sid, connected, peerLastEpoch, peerHistory], to record f.a and h(f) from followers.   
+    \* @type: SERVER -> Set(ACKERECVTYPE);
     ackeRecv,  
     \* Set of learners leader has received ACKLD from.
     \* Set of record [sid, connected].     
-    \* @type: SERVER -> Set({sid: SERVER, connected: BOOLEAN});
+    \* @type: SERVER -> Set({sid: SERVER, connected: Bool});
     ackldRecv,   
     \* Count of txns leader has broadcast.   
     \* @type: SERVER -> Int;
@@ -140,7 +141,7 @@ VARIABLE
 \* msgs[i][j] means the input buffer of server j from server i.
 
 VARIABLE 
-    \* @type: Set(Int);
+    \* @type: SERVER -> (SERVER -> Seq(Int));
     msgs
 
 VARIABLE 
@@ -152,31 +153,31 @@ VARIABLE
     NEWEPOCHmsgs
 
 VARIABLE 
-    \* @type: Set ({ mtype: Str, mepoch: Int, msrc: SERVER, mdst: SERVER, morder: Int });
+    \* @type: Set ({ mtype: Str, mepoch: Int, mhistory: Seq(TXN), msrc: SERVER, mdst: SERVER, morder: Int });
     ACKEPOCHmsgs
 
 VARIABLE 
-    \* @type: Set ({ mtype: Str, mepoch: Int, mhistory: Seq(Int), msrc: SERVER, mdst: SERVER, morder: Int });
+    \* @type: Set ({ mtype: Str, mepoch: Int, mhistory: Seq(TXN), msrc: SERVER, mdst: SERVER, morder: Int });
     NEWLEADERmsgs
 
 VARIABLE 
-    \* @type: Set ({ mtype: Str, mzxid: <<Int, Int>>, msrc: SERVER, mdst: SERVER, morder: Int });
+    \* @type: Set ({ mtype: Str, mzxid: ZXID, msrc: SERVER, mdst: SERVER, morder: Int });
     ACKLDmsgs
 
 VARIABLE 
-    \* @type: Set ({ mtype: Str, mzxid: <<Int, Int>>, msrc: SERVER, mdst: SERVER, morder: Int });
+    \* @type: Set ({ mtype: Str, mzxid: ZXID, msrc: SERVER, mdst: SERVER, morder: Int });
     COMMITLDmsgs
 
 VARIABLE 
-    \* @type: Set ({ mtype: Str, mzxid: <<Int, Int>>, msrc: SERVER, mdst: SERVER, morder: Int });
+    \* @type: Set ({ mtype: Str, mzxid: ZXID, mdata: Int, msrc: SERVER, mdst: SERVER });
     PROPOSEmsgs
 
 VARIABLE 
-    \* @type: Set ({ mtype: Str, mzxid: <<Int, Int>>, msrc: SERVER, mdst: SERVER, morder: Int });
+    \* @type: Set ({ mtype: Str, mzxid: ZXID, msrc: SERVER, mdst: SERVER});
     ACKmsgs
 
 VARIABLE 
-    \* @type: Set ({ mtype: Str, mzxid: <<Int, Int>>, msrc: SERVER, mdst: SERVER, morder: Int });
+    \* @type: Set ({ mtype: Str, mzxid: ZXID, msrc: SERVER, mdst: SERVER});
     COMMITmsgs
 
 NullPoint == CHOOSE p: p \notin Server
