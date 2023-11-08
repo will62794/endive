@@ -2074,7 +2074,9 @@ H_LeaderInBROADCASTImpliesAckLDQuorum ==
     \A i,j \in Server : 
         (/\ IsLeader(i) 
          /\ zabState[i] = BROADCAST) => 
-            AckLDRecvServers(i) \in Quorums
+            /\ AckLDRecvServers(i) \in Quorums
+            \* Should have gotten ACKLD responses back only from your learners.
+            /\ AckLDRecvServers(i) \subseteq learners[i]
 
 \* If an ACKLD is pending from a follower to a leader, then
 \* that follower must have no other outstanding messages.
@@ -2088,12 +2090,17 @@ H_ACKLDMsgSentByFollowerImpliesEmptyBuffer ==
 H_LeaderInBROADCASTImpliesLearnerInBROADCAST == 
     \A i,j \in Server : 
         (/\ IsLeader(i) 
-         /\ zabState[i] = BROADCAST
-         /\ j \in AckLDRecvServers(i)) => 
+         /\ zabState[i] = BROADCAST) =>   
+            /\ (j \in AckLDRecvServers(i)) => zabState[j] \in {SYNCHRONIZATION, BROADCAST}
+            /\ ((j \in learners[i]) /\ (i # j)) => IsFollower(j)
+            /\ AckLDRecvServers(i) \in Quorums
+            \* Should have gotten ACKLD responses back only from your learners.
+            /\ AckLDRecvServers(i) \subseteq learners[i]
             \* /\ ((zabState[j] # BROADCAST) => (msgs[i][j] # <<>>) /\ msgs[i][j][1].mtype = COMMITLD)
             \* Shouldn't be any pending NEWEPOCH messages while in BROADCAST.
-            \* /\ ((zabState[j] = BROADCAST) => \A mind \in DOMAIN msgs[i][j] : msgs[i][j][mind].mtype \notin {CEPOCH,NEWEPOCH})
-            /\ (i # j) => IsFollower(j)
+            /\ (zabState[j] = BROADCAST) => \A m \in NEWEPOCHmsgs : ~(m.msrc = i /\ m.mdst = j)
+            \* /\ (zabState[j] = BROADCAST /\ (j \in learners[i]) /\ (i # j)) => \A m \in CEPOCH : ~(m.msrc = j /\ m.mdst = i)
+            \* \A mind \in DOMAIN msgs[i][j] : msgs[i][j][mind].mtype \notin {CEPOCH,NEWEPOCH})
 
 (******
 
