@@ -196,21 +196,21 @@ msgVars == <<msgs, CEPOCHmsgs, NEWEPOCHmsgs, ACKEPOCHmsgs, NEWLEADERmsgs, ACKLDm
 vars == <<serverVars, leaderVars, followerVars, electionVars, msgVars>>
 
 \* Gives a candidate TypeOK definition for all variables in the spec.
-TypeOK == 
-    /\ state \in [Server -> {LOOKING, FOLLOWING, LEADING}]
-    /\ zabState \in [Server -> {ELECTION, DISCOVERY, SYNCHRONIZATION, BROADCAST}]
-    /\ acceptedEpoch \in [Server -> Nat]
-    /\ currentEpoch \in [Server -> Nat]
-    /\ history \in [Server -> Seq([zxid: Nat, value: Nat, ackSid: Server, epoch: Nat])]
-    /\ lastCommitted \in [Server -> [index: Nat, zxid: Nat \X Nat]]
-    /\ learners \in [Server -> SUBSET Server]
-    /\ cepochRecv \in [Server -> SUBSET [sid: Server, connected: BOOLEAN, epoch: Nat]]
-    /\ ackeRecv \in [Server -> SUBSET [sid: Server, connected: BOOLEAN, peerLastEpoch: Nat, peerHistory: Seq([zxid: Nat, value: Nat, ackSid: Server, epoch: Nat])]]
-    /\ ackldRecv \in [Server -> SUBSET [sid: Server, connected: BOOLEAN]]
-    /\ sendCounter \in [Server -> Nat]
-    /\ connectInfo \in [Server -> Server]
-    /\ leaderOracle \in Server
-    /\ msgs = {}
+\* TypeOK == 
+\*     /\ state \in [Server -> {LOOKING, FOLLOWING, LEADING}]
+\*     /\ zabState \in [Server -> {ELECTION, DISCOVERY, SYNCHRONIZATION, BROADCAST}]
+\*     /\ acceptedEpoch \in [Server -> Nat]
+\*     /\ currentEpoch \in [Server -> Nat]
+\*     /\ history \in [Server -> Seq([zxid: Nat, value: Nat, ackSid: Server, epoch: Nat])]
+\*     /\ lastCommitted \in [Server -> [index: Nat, zxid: Nat \X Nat]]
+\*     /\ learners \in [Server -> SUBSET Server]
+\*     /\ cepochRecv \in [Server -> SUBSET [sid: Server, connected: BOOLEAN, epoch: Nat]]
+\*     /\ ackeRecv \in [Server -> SUBSET [sid: Server, connected: BOOLEAN, peerLastEpoch: Nat, peerHistory: Seq([zxid: Nat, value: Nat, ackSid: Server, epoch: Nat])]]
+\*     /\ ackldRecv \in [Server -> SUBSET [sid: Server, connected: BOOLEAN]]
+\*     /\ sendCounter \in [Server -> Nat]
+\*     /\ connectInfo \in [Server -> Server]
+\*     /\ leaderOracle \in Server
+\*     /\ msgs = {}
     \* /\ msgs \in [Server -> [Server -> Seq([mtype: {CEPOCH, NEWEPOCH, ACKEPOCH, NEWLEADER, ACKLD, COMMITLD, PROPOSE, ACK, COMMIT}, 
                                             \* mepoch: Nat, 
 
