@@ -695,7 +695,7 @@ FollowLeaderOther(i) ==
    this is equivalent to executing a crash.
 *)
 
-\* \* Timeout between leader and follower.  
+\* \* \* Timeout between leader and follower.  
 \* TimeoutWithQuorum(i, j) ==
 \*         \* /\ CheckTimeout \* test restrictions of timeout
 \*         /\ IsLeader(i)   
@@ -703,24 +703,34 @@ FollowLeaderOther(i) ==
 \*         /\ IsFollower(j) 
 \*         /\ IsMyLeader(j, i)
 \*         /\ (learners[i] \ {j}) \in Quorums  \* just remove this learner
-\*         /\ RemoveLearner(i, j)
+\*         \* /\ RemoveLearner(i, j)
 \*         /\ FollowerShutdown(j)
-\*         /\ Clean(i, j)
+\*         \* /\ Clean(i, j)
 \*         /\ UNCHANGED <<acceptedEpoch, currentEpoch, history, lastCommitted, sendCounter, electionVars>>
 
-\* TimeoutNoQuorum(i, j) ==
-\*         \* /\ CheckTimeout \* test restrictions of timeout
-\*         /\ IsLeader(i)   
-\*         /\ IsMyLearner(i, j)
-\*         /\ IsFollower(j) 
-\*         /\ IsMyLeader(j, i)
-\*         /\ (learners[i] \ {j}) \notin Quorums \* leader switches to looking
-\*         /\ state' = [s \in Server |-> IF s \in learners[i] THEN LOOKING ELSE state[s] ]
-\*         /\ zabState' = [s \in Server |-> IF s \in learners[i] THEN ELECTION ELSE zabState[s] ]
-\*         /\ connectInfo' = [s \in Server |-> IF s \in learners[i] THEN NullPoint ELSE connectInfo[s] ]
-\*         /\ CleanInputBuffer(learners[i])
-\*         /\ learners'   = [learners   EXCEPT ![i] = {}]
-\*         /\ UNCHANGED <<cepochRecv, ackeRecv, ackldRecv, acceptedEpoch, currentEpoch, history, lastCommitted, sendCounter, electionVars>>
+TimeoutNoQuorum(i, j) ==
+        \* /\ CheckTimeout \* test restrictions of timeout
+        /\ IsLeader(i)   
+        /\ IsMyLearner(i, j)
+        /\ IsFollower(j) 
+        /\ IsMyLeader(j, i)
+        /\ (learners[i] \ {j}) \notin Quorums \* leader switches to looking
+        /\ state' = [s \in Server |-> IF s \in learners[i] THEN LOOKING ELSE state[s] ]
+        /\ zabState' = [s \in Server |-> IF s \in learners[i] THEN ELECTION ELSE zabState[s] ]
+        /\ connectInfo' = [s \in Server |-> IF s \in learners[i] THEN NullPoint ELSE connectInfo[s] ]
+        /\ learners'   = [learners   EXCEPT ![i] = {}]
+        \* /\ CleanInputBuffer(learners[i])
+        /\ COMMITmsgs' = {m \in COMMITmsgs : m.mdst \notin learners[i]}
+        /\ CEPOCHmsgs' = {m \in CEPOCHmsgs : m.mdst \notin learners[i]}
+        /\ NEWEPOCHmsgs' = {m \in NEWEPOCHmsgs : m.mdst \notin learners[i]}
+        /\ ACKEPOCHmsgs' = {m \in ACKEPOCHmsgs : m.mdst \notin learners[i]}
+        /\ NEWLEADERmsgs' = {m \in NEWLEADERmsgs : m.mdst \notin learners[i]}
+        /\ ACKLDmsgs' = {m \in ACKLDmsgs : m.mdst \notin learners[i]}
+        /\ COMMITLDmsgs' = {m \in COMMITLDmsgs : m.mdst \notin learners[i]}
+        /\ PROPOSEmsgs' = {m \in PROPOSEmsgs : m.mdst \notin learners[i]}
+        /\ ACKmsgs' = {m \in ACKmsgs : m.mdst \notin learners[i]}
+        /\ COMMITmsgs' = {m \in COMMITmsgs : m.mdst \notin learners[i]}
+        /\ UNCHANGED <<cepochRecv, ackeRecv, ackldRecv, acceptedEpoch, currentEpoch, history, lastCommitted, sendCounter, electionVars, mesgs>>
 
 \* Restart(i) ==
 \*         \* /\ CheckRestart \* test restrictions of restart
@@ -919,15 +929,16 @@ MoreRecentOrEqual(ss1, ss2) == \/ ss1.currentEpoch > ss2.currentEpoch
                                   /\ ~ZxidCompare(ss2.lastZxid, ss1.lastZxid)
 
 
-\* DetermineInitialHistoryFromArg(ackeRecvArg, i) ==
-\*         LET set == ackeRecvArg[i]
-\*             ss_set == { [ sid          |-> a.sid,
-\*                           currentEpoch |-> a.peerLastEpoch,
-\*                           lastZxid     |-> LastZxidOfHistory(a.peerHistory) ] : a \in ackeRecvArg[i] }
-\*             \* Choose server with most recent history.
-\*             selected == CHOOSE ss \in ss_set: \A ss1 \in (ss_set \ {ss}): MoreRecentOrEqual(ss, ss1)
-\*             info == CHOOSE f \in ackeRecvArg[i] : f.sid = selected.sid
-\*         IN info.peerHistory
+\* @type: (Set({ sid: SERVER, connected: Bool, peerLastEpoch: Int, peerHistory: Seq(TXN) }), SERVER) => Seq(TXN);
+DetermineInitialHistoryFromArg(ackeRecvArg, i) ==
+        LET set == ackeRecvArg[i]
+            ss_set == { [ sid          |-> a.sid,
+                          currentEpoch |-> a.peerLastEpoch,
+                          lastZxid     |-> LastZxidOfHistory(a.peerHistory) ] : a \in ackeRecvArg[i] }
+            \* Choose server with most recent history.
+            selected == CHOOSE ss \in ss_set: \A ss1 \in (ss_set \ {ss}): MoreRecentOrEqual(ss, ss1)
+            info == CHOOSE f \in ackeRecvArg[i] : f.sid = selected.sid
+        IN info.peerHistory
 
 \* Determine initial history Ie' in this round from a quorum of ACKEPOCH.
 \* @type: (SERVER) => Seq(TXN);
@@ -1511,7 +1522,7 @@ FollowLeaderOtherAction == TRUE /\ \E i \in Server:    FollowLeaderOther(i)
 
 (* Abnormal situations like failure, network disconnection *)
 \* TimeoutWithQuorumAction == TRUE /\ \E i, j \in Server : TimeoutWithQuorum(i, j)
-\* TimeoutNoQuorumAction == TRUE /\ \E i, j \in Server : TimeoutNoQuorum(i, j)
+TimeoutNoQuorumAction == TRUE /\ \E i, j \in Server : TimeoutNoQuorum(i, j)
 
 \* RestartAction == TRUE /\ \E i \in Server:    Restart(i)
 
@@ -1547,7 +1558,7 @@ Next ==
     \/ FollowLeaderOtherAction
     \* Disable these actions for now.
     \* \/ TimeoutWithQuorumAction
-    \* \/ TimeoutNoQuorumAction
+    \/ TimeoutNoQuorumAction
     \* \/ RestartAction
     \/ ConnectAndFollowerSendCEPOCHAction
     \/ LeaderProcessCEPOCHAction
@@ -1574,10 +1585,16 @@ Spec == Init /\ [][Next]_vars
 \* Define safety properties of Zab.
 
 \* Inv1 == ~(\E s \in Server : state[s] = LEADING)
-DebugInv1 == ~(\E s \in Server : state[s] = LEADING /\ Len(history[s]) > 0 /\ lastCommitted[s].index > 0)
+DebugInv1 == ~(\E s,t \in Server : 
+                    /\ s # t
+                    /\ state[s] = LEADING /\ Len(history[s]) > 1 /\ lastCommitted[s].index > 0 /\ history[s][1].zxid[1] # history[s][2].zxid[1]
+                    \* /\ Cardinality(learners[s]) = 2
+                    \* /\ state[t] = FOLLOWING /\ Len(history[t]) > 0 /\ lastCommitted[t].index > 0
+                    )
 \* DebugInv2 == CEPOCHmsgs = {}
 \* DebugInv2 == NEWEPOCHmsgs = {}
-DebugInv2 == ACKmsgs = {}
+DebugInv2 == ~(\E s \in Server : currentEpoch[s] > 1)
+DebugInv3 == TLCGet("level") < 80
 \* DebugInv2 == \A m \in NEWLEADERmsgs : m.morder < 2
 
 \* ShouldNotBeTriggered == \A p \in DOMAIN violatedInvariants: violatedInvariants[p] = FALSE
@@ -1825,6 +1842,45 @@ H_CommittedEntryExistsInACKEPOCHQuorumHistory ==
                         /\ TxnEqual(history[s][idx], initHistory[k]))
 
 
+COMMITLDSentByNodeImpliesZxidCommittedInLog == 
+    \A m \in COMMITLDmsgs :
+        (~ZxidEqual(m.mzxid, <<0,0>>)) => 
+            /\ \E idx \in DOMAIN history[m.msrc] : 
+                    /\ history[m.msrc][idx].zxid = m.mzxid  
+                    /\ lastCommitted[m.msrc].index >= idx
+            /\ state[m.msrc] = LEADING
+            /\ state[m.mdst] = FOLLOWING
+            /\ zabState[m.msrc] = SYNCHRONIZATION
+
+ACKLDSentByNodeImpliesZxidCommittedInLog == 
+    \A m \in ACKLDmsgs :
+        (\/ (~ZxidEqual(m.mzxid, <<0,0>>)) ) => 
+            /\ \E idx \in DOMAIN history[m.msrc] : 
+                    /\ history[m.msrc][idx].zxid = m.mzxid  
+                    /\ lastCommitted[m.msrc].index >= idx
+            /\ state[m.mdst] = LEADING
+            /\ state[m.msrc] = FOLLOWING
+            /\ zabState[m.mdst] = SYNCHRONIZATION
+
+\* \* If a COMMITLD message has been sent by a node, then the zxid in this message must be committed 
+\* \* in the sender's history.
+H_COMMITLDSentByNodeImpliesZxidCommittedInLog == 
+    /\ COMMITLDSentByNodeImpliesZxidCommittedInLog
+    /\ ACKLDSentByNodeImpliesZxidCommittedInLog
+
+
+\* If an entry is committed, then it should be contained in a leader's history.
+H_CommittedEntryExistsInLeaderHistory == 
+    \A i,j \in Server : 
+        \A idx \in DOMAIN history[i] : 
+            (/\ idx <= lastCommitted[i].index
+             /\ IsLeader(j)
+             /\ zabState[j] = SYNCHRONIZATION) => 
+                \* Committed entry exists in leader's history.
+                \E idx2 \in DOMAIN history[j] : 
+                    /\ idx2 = idx
+                    /\ history[j][idx2].zxid = history[i][idx].zxid
+
 (******
 
 
@@ -1935,23 +1991,6 @@ H_PROPOSEMsgSentByNodeImpliesZxidInLog ==
             /\ zabState[j] = BROADCAST
             /\ \E idx \in DOMAIN history[j] : history[j][idx].zxid = msgs[j][i][1].mzxid
 
-\* If a COMMITLD message has been sent by a node, then the zxid in this message must be committed 
-\* in the sender's history.
-H_COMMITLDSentByNodeImpliesZxidCommittedInLog == 
-    \A i,j \in Server : 
-        (\/ (PendingCOMMITLD(i,j) /\ ~ZxidEqual(msgs[j][i][1].mzxid, <<0,0>>))
-         \/ (PendingACKLD(j,i) /\ ~ZxidEqual(msgs[i][j][1].mzxid, <<0,0>>)) ) => 
-            /\ (PendingCOMMITLD(i,j) /\ ~ZxidEqual(msgs[j][i][1].mzxid, <<0,0>>)) => 
-                \E idx \in DOMAIN history[j] : 
-                    /\ history[j][idx].zxid = msgs[j][i][1].mzxid  
-                    /\ lastCommitted[j].index >= idx
-            /\ (PendingACKLD(j,i) /\ ~ZxidEqual(msgs[i][j][1].mzxid, <<0,0>>)) => 
-                \E idx \in DOMAIN history[i] : 
-                    /\ history[i][idx].zxid = msgs[i][j][1].mzxid  
-                    /\ lastCommitted[i].index >= idx
-            /\ state[j] = LEADING
-            /\ state[i] = FOLLOWING
-            /\ zabState[j] = SYNCHRONIZATION
 
 H_FollowersHaveNoMessagesSentToSelf == 
     \A s \in Server : (IsFollower(s) \/ IsLooking(s)) => msgs[s][s] = <<>>
@@ -2007,30 +2046,6 @@ H_ACKEPOCHHistoryContainedInFOLLOWINGSender ==
             /\ state[i] = LEADING
             /\ zabState[j] \in {DISCOVERY, SYNCHRONIZATION}
             /\ TxnHistory(msgs[j][i][mind].mhistory) = TxnHistory(history[j])
-
-\* If a history entry is covered by some lastCommitted, then it must be present in 
-\* the initial history as determined by a received quorum of ACKEPOCH messages.
-H_CommittedEntryExistsInACKEPOCHQuorumHistory ==
-    \A s \in Server : 
-    \A idx \in DOMAIN history[s] : 
-    \A i,j \in Server :
-        \* Entry is covered by lastCommitted on s.
-        (/\ idx <= lastCommitted[s].index
-         /\ PendingACKEPOCH(i, j)) => 
-            \* Server i is a leader who is about to receive an ACK-E quorum and compute the new initial history.
-            \* This initial history must contain the committed entry. 
-            (LET msg == msgs[j][i][1]
-                \* ackeRecvUpdated == [ackeRecv EXCEPT ![i] = UpdateAckeRecv(@, j, msg.mepoch, msg.mhistory) ] IN
-                ackeRecvUpdated == [ackeRecv EXCEPT ![i] = @ ] IN
-                (
-                    /\ zabState[i] \in {ELECTION, DISCOVERY}
-                    /\ state[i] = LEADING
-                    /\ IsQuorum({a.sid: a \in ackeRecvUpdated[i]})
-                ) => 
-                    LET initHistory == DetermineInitialHistoryFromArg(ackeRecvUpdated, i) IN
-                    \E k \in DOMAIN initHistory : 
-                        /\ k = idx
-                        /\ TxnEqual(history[s][idx], initHistory[k]))
 
 H_ServerInEntryAckSidImpliesHasEntry == 
     \A s,t \in Server : 
@@ -2167,18 +2182,6 @@ H_ACKLDSentByFollowerImpliesLogMatch ==
          /\ IsLeader(i)) => 
             IsPrefix(TxnHistory(history[j]), TxnHistory(history[i]))
 
-\* If an entry is committed, then it should be contained in a leader's history.
-H_CommittedEntryExistsInLeaderHistory == 
-    \A i,j \in Server : 
-        \A idx \in DOMAIN history[i] : 
-            (/\ idx <= lastCommitted[i].index
-             /\ IsLeader(j)
-             /\ zabState[j] = SYNCHRONIZATION) => 
-                \* Committed entry exists in leader's history.
-                \E idx2 \in DOMAIN history[j] : 
-                    /\ idx2 = idx
-                    /\ history[j][idx2].zxid = history[i][idx].zxid
-
 \* If a leader is in DISCOVERY in epoch E, then no NEWLEADER messages could have been sent
 \* from this leader in epoch E.
 H_LeaderInDiscoveryImpliesNoNEWLEADERMsgs == 
@@ -2243,14 +2246,19 @@ Morder1 ==
         (mi < mj /\ msgs[i][j][mi].mtype = PROPOSE) => msgs[i][j][mj].mtype \notin {ACKLD, NEWEPOCH}
 
 
+
+*********)
+
 \* Assume at most one outstanding message in input buffer for each process.
 \* Optional constraint to consider to simplify modeling/verification/proofs.
 StateConstraint == 
-    /\ \A s \in Server : Cardinality({m \in CEPOCHmsgs : m.mdst = s}) <= 1
-    /\ \A s \in Server : Cardinality({m \in ACKEPOCHmsgs : m.mdst = s}) <= 1
+    /\ \A s \in Server : Len(history[s]) <= MaxHistLen
+    /\ \A s \in Server : currentEpoch[s] <= MaxEpoch
+    /\ \A s \in Server : acceptedEpoch[s] <= MaxEpoch
 
-
-*********)
+    \* /\ \A s \in Server : Cardinality({m \in CEPOCHmsgs : m.mdst = s}) <= 1
+    \* /\ \A s \in Server : Cardinality({m \in NEWEPOCHmsgs : m.mdst = s}) <= 1
+    \* /\ \A s \in Server : Cardinality({m \in ACKEPOCHmsgs : m.mdst = s}) <= 1
 
 =============================================================================
 \* Modification History
