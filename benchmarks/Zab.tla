@@ -1001,7 +1001,7 @@ LeaderProcessACKEPOCHHasntBroadcast(i, j, ackEpochMsg) ==
                                         mhistory |-> toSend] IN DiscardAndBroadcastNEWLEADER(i, j, m, toSend)
                 \/  \* 2.2. ackeRecv still not quorum.
                     /\ ~AckeRecvBecomeQuorum(i)
-                    /\ Discard(j, i)
+                    /\ msgs' = msgs \* Discard(j, i)
                     /\ ACKEPOCHmsgs' = ACKEPOCHmsgs \ {ackEpochMsg}
                     /\ UNCHANGED <<currentEpoch, history, zabState, NEWLEADERmsgs>>
     /\ UNCHANGED <<state, acceptedEpoch, lastCommitted, learners, cepochRecv, ackldRecv, sendCounter, followerVars, electionVars, CEPOCHmsgs, NEWEPOCHmsgs, ACKLDmsgs, COMMITLDmsgs, PROPOSEmsgs, ACKmsgs, COMMITmsgs>>
