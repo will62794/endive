@@ -616,18 +616,19 @@ SwitchToLeader(i) ==
                                                      connected |-> TRUE ] }]
         /\ sendCounter' = [sendCounter EXCEPT ![i] = 0]
 
+\* @type: (Set(CEPOCHRECVTYPE), SERVER) => Set(CEPOCHRECVTYPE);
 RemoveCepochRecv(set, sid) ==
-        LET sid_cepochRecv == {s.sid: s \in set}
-        IN IF sid \notin sid_cepochRecv THEN set
-           ELSE LET info == CHOOSE s \in set: s.sid = sid
-                    new_info == [ sid       |-> sid,
-                                  connected |-> FALSE,
-                                  epoch     |-> info.epoch ]
-                IN (set \ {info}) \union {new_info}
+    IF sid \notin {s.sid: s \in set} 
+        THEN set
+        ELSE LET info == CHOOSE s \in set: s.sid = sid
+                 new_info == [ sid       |-> sid,
+                               connected |-> FALSE,
+                               epoch     |-> info.epoch ]
+            IN (set \ {info}) \union {new_info}
 
+\* @type: (Set(ACKERECVTYPE), SERVER) => Set(ACKERECVTYPE);
 RemoveAckeRecv(set, sid) ==
-        LET sid_ackeRecv == {s.sid: s \in set}
-        IN IF sid \notin sid_ackeRecv THEN set
+        IF sid \notin {s.sid: s \in set} THEN set
            ELSE LET info == CHOOSE s \in set: s.sid = sid
                     new_info == [ sid |-> sid,
                                   connected |-> FALSE,
@@ -635,19 +636,19 @@ RemoveAckeRecv(set, sid) ==
                                   peerHistory   |-> info.peerHistory ]
                 IN (set \ {info}) \union {new_info}
 
+\* @type: (Set(ACKLDRECVTYPE), SERVER) => Set(ACKLDRECVTYPE);
 RemoveAckldRecv(set, sid) ==
-        LET sid_ackldRecv == {s.sid: s \in set}
-        IN IF sid \notin sid_ackldRecv THEN set
+        IF sid \notin {s.sid: s \in set} THEN set
            ELSE LET info == CHOOSE s \in set: s.sid = sid
                     new_info == [ sid |-> sid,
                                   connected |-> FALSE ]
                 IN (set \ {info}) \union {new_info}
 
-RemoveLearner(i, j) ==
-        /\ learners'   = [learners   EXCEPT ![i] = @ \ {j}] 
-        /\ cepochRecv' = [cepochRecv EXCEPT ![i] = RemoveCepochRecv(@, j) ]
-        /\ ackeRecv'   = [ackeRecv   EXCEPT ![i] = RemoveAckeRecv(@, j) ]
-        /\ ackldRecv'  = [ackldRecv  EXCEPT ![i] = RemoveAckldRecv(@, j) ]
+\* RemoveLearner(i, j) ==
+        \* /\ learners'   = [learners   EXCEPT ![i] = @ \ {j}] 
+        \* /\ cepochRecv' = [cepochRecv EXCEPT ![i] = RemoveCepochRecv(cepochRecv[i], j) ]
+        \* /\ ackeRecv'   = [ackeRecv   EXCEPT ![i] = RemoveAckeRecv(ackeRecv[i], j) ]
+        \* /\ ackldRecv'  = [ackldRecv  EXCEPT ![i] = RemoveAckldRecv(ackldRecv[i], j) ]
 -----------------------------------------------------------------------------
 \* Actions of election
 UpdateLeader(i) ==
@@ -858,8 +859,22 @@ FollowerProcessNEWEPOCH(i, j, newEpochMsg) ==
                     /\ ~epochOk
                     /\ FollowerShutdown(i)
                     /\ LET leader == connectInfo[i]
-                       IN /\ Clean(i, leader)
-                          /\ RemoveLearner(leader, i)
+                       IN \*/\ Clean(i, leader)
+                          /\ COMMITmsgs' = {m \in COMMITmsgs : ~((m.msrc = i /\ m.mdst = j) \/ (m.msrc = j /\ m.mdst = i))}
+                          /\ CEPOCHmsgs' = {m \in CEPOCHmsgs : ~((m.msrc = i /\ m.mdst = j) \/ (m.msrc = j /\ m.mdst = i))}
+                          /\ NEWEPOCHmsgs' = {m \in NEWEPOCHmsgs : ~((m.msrc = i /\ m.mdst = j) \/ (m.msrc = j /\ m.mdst = i))}
+                          /\ ACKEPOCHmsgs' = {m \in ACKEPOCHmsgs : ~((m.msrc = i /\ m.mdst = j) \/ (m.msrc = j /\ m.mdst = i))}
+                          /\ NEWLEADERmsgs' = {m \in NEWLEADERmsgs : ~((m.msrc = i /\ m.mdst = j) \/ (m.msrc = j /\ m.mdst = i))}
+                          /\ ACKLDmsgs' = {m \in ACKLDmsgs : ~((m.msrc = i /\ m.mdst = j) \/ (m.msrc = j /\ m.mdst = i))}
+                          /\ COMMITLDmsgs' = {m \in COMMITLDmsgs : ~((m.msrc = i /\ m.mdst = j) \/ (m.msrc = j /\ m.mdst = i))}
+                          /\ PROPOSEmsgs' = {m \in PROPOSEmsgs : ~((m.msrc = i /\ m.mdst = j) \/ (m.msrc = j /\ m.mdst = i))}
+                          /\ ACKmsgs' = {m \in ACKmsgs : ~((m.msrc = i /\ m.mdst = j) \/ (m.msrc = j /\ m.mdst = i))}
+                          /\ COMMITmsgs' = {m \in COMMITmsgs : ~((m.msrc = i /\ m.mdst = j) \/ (m.msrc = j /\ m.mdst = i))}
+                          \* /\ RemoveLearner(leader, i)
+                          /\ learners'   = [learners   EXCEPT ![leader] = learners[leader] \ {i}] 
+                          /\ cepochRecv' = [cepochRecv EXCEPT ![leader] = RemoveCepochRecv(cepochRecv[leader], i) ]
+                          /\ ackeRecv'   = [ackeRecv   EXCEPT ![leader] = RemoveAckeRecv(ackeRecv[leader], i) ]
+                          /\ ackldRecv'  = [ackldRecv  EXCEPT ![leader] = RemoveAckldRecv(ackldRecv[leader], i) ]
                     /\ UNCHANGED <<acceptedEpoch>>
         /\ UNCHANGED <<currentEpoch, history, lastCommitted, sendCounter, electionVars>>
 
@@ -906,14 +921,14 @@ DetermineInitialHistoryFromArg(ackeRecvArg, i) ==
         IN info.peerHistory
 
 \* Determine initial history Ie' in this round from a quorum of ACKEPOCH.
+\* @type: (SERVER) => Seq(TXN);
 DetermineInitialHistory(i) ==
         LET set == ackeRecv'[i]
             ss_set == { [ sid          |-> a.sid,
                           currentEpoch |-> a.peerLastEpoch,
                           lastZxid     |-> LastZxidOfHistory(a.peerHistory) ]
                         : a \in set }
-            selected == CHOOSE ss \in ss_set: 
-                            \A ss1 \in (ss_set \ {ss}): MoreRecentOrEqual(ss, ss1)
+            selected == CHOOSE ss \in ss_set: \A ss1 \in (ss_set \ {ss}): MoreRecentOrEqual(ss, ss1)
             info == CHOOSE f \in set: f.sid = selected.sid
         IN info.peerHistory
 
