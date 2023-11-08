@@ -1121,7 +1121,7 @@ LeaderProcessACKLDHasntBroadcast(i, j, ackldMsg) ==
                     /\ LET m == [ mtype |-> COMMITLD, mzxid |-> LastZxid(i) ] IN DiscardAndBroadcastCOMMITLD(i, j, m)
                  \/ \* 1.2. ackldRecv still not quorum.
                     /\ ~AckldRecvBecomeQuorum(i)
-                    /\ Discard(j, i)
+                    /\ msgs' = msgs \* Discard(j, i)
                     /\ ACKLDmsgs' = ACKLDmsgs \ {ackldMsg}
                     /\ UNCHANGED <<zabState, lastCommitted, COMMITLDmsgs>>
         /\ UNCHANGED <<state, acceptedEpoch, currentEpoch, learners, cepochRecv, ackeRecv, sendCounter, followerVars, electionVars, CEPOCHmsgs, NEWLEADERmsgs, ACKEPOCHmsgs, NEWEPOCHmsgs, NEWLEADERmsgs, ACKEPOCHmsgs, PROPOSEmsgs, ACKmsgs, COMMITmsgs>>
