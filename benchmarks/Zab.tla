@@ -2025,6 +2025,45 @@ H_NEWLEADERHistoryExistsOnQuorum ==
             /\ history[n][ic].zxid = m.mhistory[ih].zxid 
             \* /\ acceptedEpoch[n] >= m.mepoch
 
+\* If a node is LOOKING, then it must have an empty input buffer.
+H_NodeLOOKINGImpliesEmptyInputBuffer == 
+    \A i \in Server : 
+        (state[i] = LOOKING) => 
+            /\ \A m \in CEPOCHmsgs : ~(m.mdst =i)
+            /\ \A m \in NEWEPOCHmsgs : ~(m.mdst =i)
+            /\ \A m \in NEWLEADERmsgs : ~(m.mdst =i)
+            /\ \A m \in ACKEPOCHmsgs : ~(m.mdst =i)
+            /\ \A m \in ACKLDmsgs : ~(m.mdst =i)
+            /\ \A m \in COMMITLDmsgs : ~(m.mdst =i)
+            /\ \A m \in PROPOSEmsgs : ~(m.mdst =i)
+            /\ \A m \in ACKmsgs : ~(m.mdst =i)
+            /\ \A m \in COMMITmsgs : ~(m.mdst =i)
+            /\ (zabState[i] \in {ELECTION, DISCOVERY})
+            \* a node in LOOKING shouldn't exist as a learner of any leader.
+            /\ ~\E j \in Server : IsLeader(j) /\ i \in learners[j]
+
+\* If a node is LOOKING, then it must be in DISCOVERY or ELECTION and have an empty input buffer.
+H_NodeLOOKINGImpliesELECTIONorDISCOVERY == 
+    \A i \in Server : (state[i] = LOOKING) => (zabState[i] \in {ELECTION, DISCOVERY})
+
+H_FollowersHaveNoMessagesSentToSelf == 
+    \A s \in Server : 
+        (IsFollower(s) \/ IsLooking(s)) =>  
+            /\ \A m \in CEPOCHmsgs : (m.mdst # m.msrc)
+            /\ \A m \in NEWEPOCHmsgs : (m.mdst # m.msrc)
+            /\ \A m \in NEWLEADERmsgs : (m.mdst # m.msrc)
+            /\ \A m \in ACKEPOCHmsgs : (m.mdst # m.msrc)
+            /\ \A m \in ACKLDmsgs : (m.mdst # m.msrc)
+            /\ \A m \in COMMITLDmsgs : (m.mdst # m.msrc)
+            /\ \A m \in PROPOSEmsgs : (m.mdst # m.msrc)
+            /\ \A m \in ACKmsgs : (m.mdst # m.msrc)
+            /\ \A m \in COMMITmsgs : (m.mdst # m.msrc)
+
+H_NEWEPOCHFromNodeImpliesLEADING ==
+    \A i,j \in Server : 
+    \A m \in NEWEPOCHmsgs :
+        IsLeader(m.msrc)
+
 (******
 
 
