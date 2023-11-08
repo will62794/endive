@@ -1264,6 +1264,7 @@ CurrentCounter(i) == IF LastZxid(i)[1] = currentEpoch[i] THEN LastZxid(i)[2]
                      ELSE 0
 
 (* Leader broadcasts PROPOSE when sendCounter < currentCounter. *)
+\* @type: SERVER => Bool;
 LeaderBroadcastPROPOSE(i) == 
         /\ IsLeader(i)
         /\ zabState[i] = BROADCAST
@@ -1271,28 +1272,24 @@ LeaderBroadcastPROPOSE(i) ==
          \* Explicit check here to avoid out-of-bounds access. (Will S. 10/26/23)
         /\ ZxidToIndex(history[i], <<currentEpoch[i], sendCounter[i] + 1>>) \in DOMAIN history[i]
         /\ LET toSendCounter == sendCounter[i] + 1
-               toSendZxid == <<currentEpoch[i], toSendCounter>>
-               toSendIndex == ZxidToIndex(history[i], toSendZxid)
+               toSendIndex == ZxidToIndex(history[i], <<currentEpoch[i], toSendCounter>>)
                toSendTxn == history[i][toSendIndex]
                m_proposal == [ mtype |-> PROPOSE,
                                mzxid |-> toSendTxn.zxid,
                                mdata |-> toSendTxn.value ]
-            \*    m_proposal_forChecking == [ source |-> i,
-            \*                                epoch  |-> currentEpoch[i],
-            \*                                zxid   |-> toSendTxn.zxid,
-            \*                                data   |-> toSendTxn.value ]
            IN /\ sendCounter' = [sendCounter EXCEPT ![i] = toSendCounter]
               /\ msgs' = msgs \* Broadcast(i, m_proposal)
               /\ LET ackeRecv_quorum == {a \in ackeRecv[i]: a.connected = TRUE }
                      sid_ackeRecv == { a.sid: a \in ackeRecv_quorum } IN
-                    PROPOSEmsgs' = PROPOSEmsgs \cup {
+                        PROPOSEmsgs' = PROPOSEmsgs \cup {
                                         [ mtype |-> PROPOSE,
                                           mzxid |-> toSendTxn.zxid,
                                           mdata |-> toSendTxn.value,
-                                           msrc |-> i,
-                                           mdst |-> to ] : to \in (sid_ackeRecv \cap learners[i]) \ {i}}
+                                          msrc |-> i,
+                                          mdst |-> to ] : to \in (sid_ackeRecv \cap learners[i]) \ {i}}
         /\ UNCHANGED <<serverVars, learners, cepochRecv, ackeRecv, ackldRecv, followerVars, electionVars, CEPOCHmsgs, COMMITLDmsgs, ACKLDmsgs, NEWLEADERmsgs, ACKEPOCHmsgs, NEWEPOCHmsgs, NEWLEADERmsgs, ACKEPOCHmsgs, ACKmsgs, COMMITmsgs>>
 
+\* @type: (ZXID, ZXID) => Bool;
 IsNextZxid(curZxid, nextZxid) ==
             \/ \* first PROPOSAL in this epoch
                /\ nextZxid[2] = 1
@@ -1303,6 +1300,7 @@ IsNextZxid(curZxid, nextZxid) ==
                /\ curZxid[2] + 1 = nextZxid[2]
 
 (* Follower processes PROPOSE, saves it in history and replies ACK. *)
+\* @type: (SERVER, SERVER, { mtype: Str, mzxid: ZXID, mdata: Int, msrc: SERVER, mdst: SERVER }) => Bool;
 FollowerProcessPROPOSE(i, j, proposeMsg) ==
         /\ IsFollower(i)
         \* /\ PendingPROPOSE(i, j)
