@@ -1756,6 +1756,50 @@ H_ACKMsgImpliesZxidInLog ==
         /\ state[m.msrc] = FOLLOWING
         /\ \E idx \in DOMAIN history[m.msrc] :  history[m.msrc][idx].zxid = m.mzxid
 
+
+\* AllMsgs == UNION {{msgs[i][j][mi] : mi \in DOMAIN msgs[i][j]} : <<i,j>> \in Server \X Server}
+
+
+\* MsgsWithHistoryZxids == 
+    \* {m \in AllMsgs : (m.mtype = PROPOSE) \/ ("mhistory" \in DOMAIN m)}
+
+MsgZxids == 
+    {[zxid |-> m.mzxid, value |-> m.mdata] : m \in PROPOSEmsgs} \cup
+    UNION {{[zxid |-> m.mhistory[i].zxid, value |-> m.mhistory[i].value] : i \in DOMAIN m.mhistory} : m \in ACKEPOCHmsgs}  \cup
+    UNION {{[zxid |-> m.mhistory[i].zxid, value |-> m.mhistory[i].value] : i \in DOMAIN m.mhistory} : m \in NEWLEADERmsgs}  
+         
+    \* UNION {IF m.mtype = PROPOSE
+    \*                         THEN {[zxid |-> m.mzxid, value |-> m.mdata]}
+    \*                         ELSE {[zxid |-> m.mhistory[i].zxid, value |-> m.mhistory[i].value] : i \in DOMAIN m.mhistory} : 
+    \*                         m \in MsgsWithHistoryZxids}
+
+TxnWithSameZxidEqualBetweenAllMessages == 
+     \A txn,txn2 \in MsgZxids : 
+        ZxidEqual(txn.zxid, txn2.zxid) => txn.value = txn2.value   
+
+TxnZxidUniqueBetweenLocalHistoryAndMessages ==
+    \A s \in Server :
+    \A ind \in DOMAIN history[s] :
+    \A txn \in MsgZxids : 
+        ZxidEqual(txn.zxid, history[s][ind].zxid) => txn.value = history[s][ind].value
+
+\* Any two transactions with the same zxid must be equal.
+\* Note: this must hold no matter where a zxid appears i.e. in a message or on a local node.
+TxnWithSameZxidEqual == 
+    \A i,j \in Server : 
+        \A idxi \in (DOMAIN history[i]) :
+        \A idxj \in (DOMAIN history[j]) : 
+            ZxidEqual(history[i][idxi].zxid, history[j][idxj].zxid) =>
+                TxnEqual(history[i][idxi], history[j][idxj])
+
+\* Transaction zxids are unique throughout local histories and all messages.
+H_TxnZxidsUniqueHistoriesAndMessages == 
+    /\ TxnWithSameZxidEqual
+    /\ TxnWithSameZxidEqualBetweenAllMessages
+    /\ TxnZxidUniqueBetweenLocalHistoryAndMessages
+
+
+
 (******
 
 
