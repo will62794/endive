@@ -1033,7 +1033,7 @@ FollowerProcessNEWLEADER(i, j, newLeaderMsg) ==
                         /\ NEWLEADERmsgs' = NEWLEADERmsgs \ {newLeaderMsg}
                         /\ ACKLDmsgs' = ACKLDmsgs \cup {[ mtype |-> ACKLD, 
                                                           mzxid |-> LastZxidOfHistory(history'[i]), 
-                                                          msrc |-> i, mdst |-> j, morder |-> NextMsgOrder(i,j) ]}
+                                                          msrc |-> i, mdst |-> j, morder |-> 0 ]}
               /\ UNCHANGED <<followerVars, state, zabState, learners, cepochRecv, ackeRecv, ackldRecv, acceptedEpoch, lastCommitted, sendCounter, electionVars, CEPOCHmsgs, NEWEPOCHmsgs, ACKEPOCHmsgs, COMMITLDmsgs, PROPOSEmsgs, ACKmsgs, COMMITmsgs>>
 
 \* FollowerProcessNEWLEADERNewIteration(i, j) ==
