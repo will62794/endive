@@ -2280,8 +2280,13 @@ Morder1 ==
 
 *********)
 
+
+\* 
+\* Apalache stuff.
+\* 
+
 CInit == 
-    /\ MaxEpoch = 2
+    /\ MaxEpoch = 3
     /\ MaxHistLen = 2
     /\ Server = {"s1", "s2", "s3"}
     /\ CEPOCH = "CEPOCH"
@@ -2300,6 +2305,83 @@ CInit ==
     /\ LOOKING = "LOOKING"
     /\ FOLLOWING = "FOLLOWING"
     /\ LEADING = "LEADING"
+
+
+
+\* SetOfHistsTypeBounded == RandomSetOfSubsets(5, 5, HistTypeBounded)
+
+\* AckeRecvTypeBounded == 
+\*     RandomSetOfSubsets(1, 1, [sid: Server, connected: BOOLEAN, peerLastEpoch: Nat, peerHistory: HistTypeBounded]) \cup
+\*     RandomSetOfSubsets(2, 2, [sid: Server, connected: BOOLEAN, peerLastEpoch: Nat, peerHistory: HistTypeBounded])
+
+
+
+ApaValue == {0,1}
+Indices == 1..MaxHistLen
+
+ApaZxidType == Epoch \X Indices
+
+ApaHistEntryType == [zxid: ApaZxidType, value: ApaValue, ackSid: SUBSET Server, epoch: Epoch]
+
+ApaHistTypeBounded == Gen(2)
+    \* Seq(ApaHistEntryType)
+
+ApaMsgCEPOCHType == [mtype: {CEPOCH}, mepoch: Epoch, msrc:Server, mdst:Server, morder: {0}]
+ApaMsgNEWEPOCHType == [mtype: {NEWEPOCH}, mepoch: Epoch,  msrc:Server, mdst:Server, morder: {0}]
+ApaMsgACKEPOCHType == [mtype: {ACKEPOCH}, mepoch: Epoch, mhistory: ApaHistTypeBounded,  msrc:Server, mdst:Server, morder: {0}]
+ApaMsgNEWLEADERType == [mtype: {NEWLEADER}, mepoch: Epoch, mhistory: ApaHistTypeBounded,  msrc:Server, mdst:Server, morder: {0}]
+ApaMsgACKLDType == [mtype: {ACKLD}, mzxid: ApaZxidType, msrc:Server, mdst:Server, morder: {0}]
+ApaMsgCOMMITLDType == [mtype: {COMMITLD}, mzxid: ApaZxidType, msrc:Server, mdst:Server, morder: {0}]
+ApaMsgPROPOSEType == [mtype: {PROPOSE}, mzxid: ApaZxidType, mdata: ApaValue,  msrc:Server, mdst:Server]
+ApaMsgACKType == [mtype: {ACK}, mzxid: ApaZxidType, msrc:Server, mdst:Server]
+ApaMsgCOMMITType == [mtype: {COMMIT}, mzxid: ApaZxidType, msrc:Server, mdst:Server]
+
+ApaCEpochRecvType == [sid: Server, connected: BOOLEAN, epoch: Epoch]
+
+\* Gives a candidate TypeOK definition for all variables in the spec.
+ApaTypeOK == 
+    /\ state \in [Server -> {LOOKING, FOLLOWING, LEADING}]
+    /\ zabState \in [Server -> {ELECTION, DISCOVERY, SYNCHRONIZATION, BROADCAST}]
+    /\ acceptedEpoch \in [Server -> Epoch]
+    /\ currentEpoch \in [Server -> Epoch]
+    /\ history = Gen(3)
+    /\ \A s \in Server : \A i \in DOMAIN history[s] : history[s][i] \in ApaHistEntryType
+    /\ \A s \in Server : Len(history[s]) <= MaxHistLen
+    /\ DOMAIN history = Server
+    /\ lastCommitted \in [Server -> [index: Indices, zxid: ApaZxidType]]
+    /\ learners \in [Server -> SUBSET Server]
+    /\ cepochRecv \in [Server -> SUBSET ApaCEpochRecvType]
+    /\ ackeRecv \in [Server -> SUBSET [sid: Server, connected: BOOLEAN, peerLastEpoch: Epoch, peerHistory: ApaHistTypeBounded]]
+    /\ \A s \in Server : \A a \in ackeRecv[s] : \A mi \in DOMAIN a.peerHistory : a.peerHistory[mi] \in ApaHistEntryType
+    /\ ackldRecv \in [Server -> SUBSET [sid: Server, connected: BOOLEAN]]
+    /\ sendCounter \in [Server -> Indices]
+    /\ connectInfo \in [Server -> Server]
+    /\ leaderOracle \in Server
+    /\ mesgs = [s \in Server |-> [v \in Server |-> << >>] ]
+    /\ CEPOCHmsgs = Gen(2)
+    /\ \A m \in CEPOCHmsgs : m \in ApaMsgCEPOCHType
+    /\ NEWEPOCHmsgs = Gen(2)
+    /\ \A m \in NEWEPOCHmsgs : m \in ApaMsgNEWEPOCHType
+    /\ ACKEPOCHmsgs = Gen(2)
+    /\ \A m \in ACKEPOCHmsgs : m \in ApaMsgACKEPOCHType
+    /\ \A m \in ACKEPOCHmsgs : \A mi \in DOMAIN m.mhistory : m.mhistory[mi] \in ApaHistEntryType
+    /\ NEWLEADERmsgs = Gen(2)
+    /\ \A m \in NEWLEADERmsgs : m \in ApaMsgNEWLEADERType
+    /\ \A m \in NEWLEADERmsgs : \A mi \in DOMAIN m.mhistory : m.mhistory[mi] \in ApaHistEntryType
+    /\ ACKLDmsgs = Gen(2)
+    /\ \A m \in ACKLDmsgs : m \in ApaMsgACKLDType
+    /\ COMMITLDmsgs = Gen(2)
+    /\ \A m \in COMMITLDmsgs : m \in ApaMsgCOMMITLDType
+    /\ PROPOSEmsgs = Gen(2)
+    /\ \A m \in PROPOSEmsgs : m \in ApaMsgPROPOSEType
+    /\ ACKmsgs = Gen(2)
+    /\ \A m \in ACKmsgs : m \in ApaMsgACKType
+    /\ COMMITmsgs = Gen(2)
+    /\ \A m \in COMMITmsgs : m \in ApaMsgCOMMITType
+
+InvTest == 
+    /\ ApaTypeOK
+    /\ H_UniqueLeadership
 
 =============================================================================
 \* Modification History
