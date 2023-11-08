@@ -575,30 +575,13 @@ InitMsgVars ==
     /\ ACKmsgs      = {}
     /\ COMMITmsgs   = {}
 
-\* InitVerifyVars == /\ proposalMsgsLog    = {}
-                \*   /\ epochLeader        = [i \in 1..MAXEPOCH |-> {} ]
-                \*   /\ violatedInvariants = {}
-                \*   [stateInconsistent    |-> FALSE,
-                \*                            proposalInconsistent |-> FALSE,
-                \*                            commitInconsistent   |-> FALSE,
-                \*                            ackInconsistent      |-> FALSE,
-                \*                            messageIllegal       |-> FALSE ]
-
-\* InitRecorder == recorder = <<>>
-\* [nTimeout       |-> 0,
-                            \* nTransaction   |-> 0,
-                            \* maxEpoch       |-> 0,
-                            \* nRestart       |-> 0,
-                            \* pc             |-> <<"Init">>,
-                            \* nClientRequest |-> 0]
-
 Init == /\ InitServerVars
         /\ InitLeaderVars
         /\ InitFollowerVars
         /\ InitElectionVars
         \* /\ InitVerifyVars
         /\ InitMsgVars
-        \* /\ InitRecorder
+
 -----------------------------------------------------------------------------
 \* Utils in state switching
 FollowerShutdown(i) == 
@@ -606,13 +589,13 @@ FollowerShutdown(i) ==
         /\ zabState' = [zabState   EXCEPT ![i] = ELECTION]
         /\ connectInfo' = [connectInfo EXCEPT ![i] = NullPoint]
 
-LeaderShutdown(i) ==
-        /\ LET S == learners[i]
-           IN /\ state' = [s \in Server |-> IF s \in S THEN LOOKING ELSE state[s] ]
-              /\ zabState' = [s \in Server |-> IF s \in S THEN ELECTION ELSE zabState[s] ]
-              /\ connectInfo' = [s \in Server |-> IF s \in S THEN NullPoint ELSE connectInfo[s] ]
-              /\ CleanInputBuffer(S)
-        /\ learners'   = [learners   EXCEPT ![i] = {}]
+\* LeaderShutdown(i) ==
+\*         /\ LET S == learners[i]
+\*            IN /\ state' = [s \in Server |-> IF s \in S THEN LOOKING ELSE state[s] ]
+\*               /\ zabState' = [s \in Server |-> IF s \in S THEN ELECTION ELSE zabState[s] ]
+\*               /\ connectInfo' = [s \in Server |-> IF s \in S THEN NullPoint ELSE connectInfo[s] ]
+\*               /\ CleanInputBuffer(S)
+\*         /\ learners'   = [learners   EXCEPT ![i] = {}]
 
 SwitchToFollower(i) ==
         /\ state' = [state EXCEPT ![i] = FOLLOWING]
