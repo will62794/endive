@@ -19,15 +19,15 @@ AckeRecvTypeBounded ==
     RandomSetOfSubsets(1, 1, [sid: Server, connected: BOOLEAN, peerLastEpoch: Nat, peerHistory: HistTypeBounded]) \cup
     RandomSetOfSubsets(2, 2, [sid: Server, connected: BOOLEAN, peerLastEpoch: Nat, peerHistory: HistTypeBounded])
 
-MsgCEPOCHType == [mtype: {CEPOCH}, mepoch: Epoch]
-MsgNEWEPOCHType == [mtype: {NEWEPOCH}, mepoch: Epoch]
-MsgACKEPOCHType == [mtype: {ACKEPOCH}, mepoch: Epoch, mhistory: HistTypeBounded]
-MsgNEWLEADERType == [mtype: {NEWLEADER}, mepoch: Epoch, mhistory: HistTypeBounded]
-MsgACKLDType == [mtype: {ACKLD}, mzxid: ZxidType]
-MsgCOMMITLDType == [mtype: {COMMITLD}, mzxid: ZxidType]
-MsgPROPOSEType == [mtype: {PROPOSE}, mzxid: ZxidType, mdata: Value]
-MsgACKType == [mtype: {ACK}, mzxid: ZxidType]
-MsgCOMMITType == [mtype: {COMMIT}, mzxid: ZxidType]
+MsgCEPOCHType == [mtype: {CEPOCH}, mepoch: Epoch, msrc:Server, mdst:Server, morder: {0}]
+MsgNEWEPOCHType == [mtype: {NEWEPOCH}, mepoch: Epoch,  msrc:Server, mdst:Server, morder: {0}]
+MsgACKEPOCHType == [mtype: {ACKEPOCH}, mepoch: Epoch, mhistory: HistTypeBounded,  msrc:Server, mdst:Server, morder: {0}]
+MsgNEWLEADERType == [mtype: {NEWLEADER}, mepoch: Epoch, mhistory: HistTypeBounded,  msrc:Server, mdst:Server, morder: {0}]
+MsgACKLDType == [mtype: {ACKLD}, mzxid: ZxidType, msrc:Server, mdst:Server, morder: {0}]
+MsgCOMMITLDType == [mtype: {COMMITLD}, mzxid: ZxidType, msrc:Server, mdst:Server, morder: {0}]
+MsgPROPOSEType == [mtype: {PROPOSE}, mzxid: ZxidType, mdata: Value,  msrc:Server, mdst:Server, morder: {0}]
+MsgACKType == [mtype: {ACK}, mzxid: ZxidType, msrc:Server, mdst:Server, morder: {0}]
+MsgCOMMITType == [mtype: {COMMIT}, mzxid: ZxidType, msrc:Server, mdst:Server, morder: {0}]
 
 MsgType == 
     MsgCEPOCHType \cup 
@@ -58,11 +58,16 @@ TypeOKRandom ==
     /\ sendCounter \in [Server -> Nat]
     /\ connectInfo \in [Server -> Server]
     /\ leaderOracle \in Server
-    /\ msgs \in [Server -> [Server -> BoundedSeq(RandomSubset(7, MsgType), MaxMsgChanLen)]]
-    \* /\ proposalMsgsLog    = {}
-    \* /\ epochLeader        = [i \in 1..MaxEpoch |-> {} ]
-    \* /\ violatedInvariants = {}
-    \* /\ recorder = <<>>
+    /\ msgs \in [Server -> [Server -> {<<>>}]]
+    /\ CEPOCHmsgs \in RandomSetOfSubsets(2, 2, MsgCEPOCHType)
+    /\ NEWEPOCHmsgs \in RandomSetOfSubsets(2, 2, MsgNEWEPOCHType)
+    /\ ACKEPOCHmsgs \in RandomSetOfSubsets(2, 2, MsgACKEPOCHType)
+    /\ NEWLEADERmsgs \in RandomSetOfSubsets(2, 2, MsgNEWLEADERType)
+    /\ ACKLDmsgs \in RandomSetOfSubsets(2, 2, MsgACKLDType)
+    /\ COMMITLDmsgs \in RandomSetOfSubsets(2, 2, MsgCOMMITLDType)
+    /\ PROPOSEmsgs \in RandomSetOfSubsets(2, 2, MsgPROPOSEType)
+    /\ ACKmsgs \in  RandomSetOfSubsets(2, 2, MsgACKType)
+    /\ COMMITmsgs \in RandomSetOfSubsets(2, 2, MsgCOMMITType)
 
 
 
