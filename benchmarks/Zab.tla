@@ -756,9 +756,9 @@ ConnectAndFollowerSendCEPOCH(i, j) ==
 CepochRecvQuorumFormed(i) == LET sid_cepochRecv == {c.sid: c \in cepochRecv[i]} IN IsQuorum(sid_cepochRecv)
 CepochRecvBecomeQuorum(i) == LET sid_cepochRecv == {c.sid: c \in cepochRecv'[i]} IN IsQuorum(sid_cepochRecv)
 
+\* @type: (Set({ sid: SERVER, connected: Bool, epoch: Int }), SERVER, Int) => Set({ sid: SERVER, connected: Bool, epoch: Int });
 UpdateCepochRecv(oldSet, sid, peerEpoch) ==
-        LET sid_set == {s.sid: s \in oldSet}
-        IN IF sid \in sid_set
+        IF sid \in {s.sid: s \in oldSet}
            THEN LET old_info == CHOOSE info \in oldSet: info.sid = sid
                     new_info == [ sid       |-> sid,
                                   connected |-> TRUE,
@@ -802,7 +802,7 @@ LeaderProcessCEPOCH(i, j, cepochMsg) ==
                              IN DiscardAndBroadcastNEWEPOCH(i, j, m)
                        \/ \* 1.2. cepochRecv still not quorum.
                           /\ ~CepochRecvBecomeQuorum(i)
-                          /\ DiscardIn(msgs ,j, i)
+                          /\ msgs' = msgs \* DiscardIn(msgs ,j, i)
                           /\ CEPOCHmsgs' = CEPOCHmsgs \ {cepochMsg}
                           /\ UNCHANGED <<acceptedEpoch, NEWEPOCHmsgs>>
                  \/ \* 2. has broadcast NEWEPOCH
@@ -817,6 +817,9 @@ LeaderProcessCEPOCH(i, j, cepochMsg) ==
                     /\ NEWEPOCHmsgs' = NEWEPOCHmsgs \cup 
                                         {[ mtype  |-> NEWEPOCH,
                                           mepoch |-> acceptedEpoch[i], msrc |-> i, mdst |-> j, morder |-> NextMsgOrderCEPOCH(j,i) ]}
+                                          mepoch |-> acceptedEpoch[i], msrc |-> i, mdst |-> j, morder |-> NextMsgOrderCEPOCH(j,i) ]}
+                    \* TODO: Update NEWEPOCHmsgs here?
+                                           mepoch |-> acceptedEpoch[i], msrc |-> i, mdst |-> j, morder |-> NextMsgOrderCEPOCH(j,i) ]}
                     \* TODO: Update NEWEPOCHmsgs here?
                     /\ UNCHANGED <<acceptedEpoch>>
         /\ UNCHANGED <<state, zabState, currentEpoch, history, lastCommitted, learners, 
