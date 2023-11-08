@@ -1685,12 +1685,6 @@ PrimaryIntegrity == \A i, j \in Server: /\ IsLeader(i)   /\ IsMyLearner(i, j)
 
 ----------------------
 
-(**************
-
-\* 
-\* Helper lemma invariants
-\* 
-
 \* Is log li a prefix of log lj.
 IsPrefix(li,lj) == 
     /\ Len(li) <= Len(lj)
@@ -1699,6 +1693,14 @@ IsPrefix(li,lj) ==
 \* Extract only zxid and value from a given history.
 \* @type: Seq(TXN) => Seq({zxid: ZXID, value: Int});
 TxnHistory(h) == FunAsSeq([i \in DOMAIN h |-> [zxid |-> h[i].zxid, value |-> h[i].value] ], Cardinality(DOMAIN h), Cardinality(DOMAIN h))
+
+
+(**************
+
+\* 
+\* Helper lemma invariants
+\* 
+
 
 \* A leader is always a part of its own learner set.
 H_LeaderInLearnerSet == \A i \in Server : IsLeader(i) => i \in learners[i]
@@ -1713,35 +1715,52 @@ H_NEWLEADERMsgSentByLeader ==
             /\ i \in learners[j]
             /\ zabState[j] \in {SYNCHRONIZATION, BROADCAST}
 
+*****)
+
 \* If a NEWLEADER message has been sent from a leader N in epoch E, then 
 \* that message's history must be a prefix of the leader's history in epoch E, w.r.t the txns
 \* that appear in that history i.e. (zxid, value) pairs.
-H_NEWLEADERMsgHistAndStateInv == 
-    \A i,j \in Server : 
-        (PendingNEWLEADER(i,j)) => 
-            (/\ IsPrefix(TxnHistory(msgs[j][i][1].mhistory), TxnHistory(history[j])))
-             /\ IsLeader(j) 
-             /\ msgs[j][i][1].mepoch = currentEpoch[j]
-             /\ i \in learners[j]
-             /\ zabState[j] \in {SYNCHRONIZATION, BROADCAST}
+H_NEWLEADERMsgHistAndStateInv ==
+    \A m \in NEWLEADERmsgs :
+    \* \A i,j \in Server : 
+        \* (PendingNEWLEADER(i,j)) => 
+        /\ IsPrefix(TxnHistory(m.mhistory), TxnHistory(history[m.msrc]))
+        /\ IsLeader(m.msrc) 
+        /\ m.mepoch = currentEpoch[m.msrc]
+        /\ m.mdst \in learners[m.msrc]
+        /\ zabState[m.msrc] \in {SYNCHRONIZATION, BROADCAST}
 
 H_NEWLEADERIncomingImpliesLastCommittedBound == 
-    \A i,j \in Server : 
-        PendingNEWLEADER(i,j) => 
+    \A m \in NEWLEADERmsgs :
+    \* \A i,j \in Server : 
+        \* PendingNEWLEADER(i,j) => 
             (\* lastCommitted on node is <= length of incoming history.
-             lastCommitted[i].index <= Len(msgs[j][i][1].mhistory))
+             lastCommitted[m.mdst].index <= Len(m.mhistory))
 
 \* If a COMMIT message has been sent by a node, then the zxid referred to by that COMMIT
 \* must be present in the sender's history, and its lastCommitted must cover that zxid in its history.
 H_COMMITSentByNodeImpliesZxidInLog == 
-    \A i,j \in Server : 
-        PendingCOMMIT(i,j) =>   
-            \E idx \in DOMAIN history[j] : 
-                /\ history[j][idx].zxid = msgs[j][i][1].mzxid  
-                /\ lastCommitted[j].index >= idx
-                /\ state[i] = FOLLOWING
-                /\ state[j] = LEADING
-                /\ zabState[j] = BROADCAST
+    \A m \in COMMITmsgs :
+    \* \A i,j \in Server : 
+        \* PendingCOMMIT(i,j) =>   
+            \E idx \in DOMAIN history[m.msrc] : 
+                /\ history[m.msrc][idx].zxid = m.mzxid  
+                /\ lastCommitted[m.msrc].index >= idx
+                /\ state[m.mdst] = FOLLOWING
+                /\ state[m.msrc] = LEADING
+                /\ zabState[m.msrc] = BROADCAST
+
+\* If an ACK message exists from S for a given zxid, then that zxid must be present in the sender's history.
+H_ACKMsgImpliesZxidInLog == 
+    \A m \in ACKmsgs :
+        /\ state[m.msrc] = FOLLOWING
+        /\ \E idx \in DOMAIN history[m.msrc] :  history[m.msrc][idx].zxid = m.mzxid
+
+(******
+
+
+
+
 
 \* TODO: Work on this further to develop a more unified lemma for establishing zxid uniqueness throughout the whole system.
 \* All messages currently in the system
