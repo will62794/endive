@@ -385,9 +385,9 @@ function focusOnNode(nodeId, nodeData){
             let varsProjected = Object.keys(state_var_proj_map).filter(k => !state_var_proj_map[k]);
             let varsRetained = Object.keys(state_var_proj_map).filter(k => state_var_proj_map[k]);
             ctiCounter.innerHTML += "<br>";
-            ctiCounter.innerHTML += `State variables, projected out (${varsProjected.length}/${numVars}): { ${varsProjected} }`;
+            ctiCounter.innerHTML += `State variables hidden: (${varsProjected.length}/${numVars}): { ${varsProjected} }`;
             ctiCounter.innerHTML += "<br>";
-            ctiCounter.innerHTML += `State variables, node-local  (${numVars-varsProjected.length}/${numVars}): { ${varsRetained} }`;
+            ctiCounter.innerHTML += `State variables slice:  (${numVars-varsProjected.length}/${numVars}): { ${varsRetained} }`;
         }
 
         ctipane.appendChild(ctiCounter);
