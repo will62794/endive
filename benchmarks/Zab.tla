@@ -866,6 +866,7 @@ FollowerProcessNEWEPOCH(i, j, newEpochMsg) ==
 AckeRecvQuorumFormed(i) == LET sid_ackeRecv == {a.sid: a \in ackeRecv[i]} IN IsQuorum(sid_ackeRecv)
 AckeRecvBecomeQuorum(i) == LET sid_ackeRecv == {a.sid: a \in ackeRecv'[i]} IN IsQuorum(sid_ackeRecv)
 
+\* @type: (Set({ sid: SERVER, connected: Bool, peerLastEpoch: Int, peerHistory: Seq(TXN) }), SERVER, Int, Seq(TXN)) => Set({ sid: SERVER, connected: Bool, peerLastEpoch: Int, peerHistory: Seq(TXN) });
 UpdateAckeRecv(oldSet, sid, peerEpoch, peerHistory) ==
         LET sid_set == {s.sid: s \in oldSet}
             follower_info == [ sid           |-> sid,
