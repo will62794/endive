@@ -2064,6 +2064,37 @@ H_NEWEPOCHFromNodeImpliesLEADING ==
     \A m \in NEWEPOCHmsgs :
         IsLeader(m.msrc)
 
+AckLDRecvServers(i) == {v.sid : v \in {a \in ackldRecv[i]: a.connected = TRUE }}
+
+
+H_AckLDRecvsAreConnected == 
+    \A s \in Server : IsLeader(s) => (\A a \in ackldRecv[s] : a.connected = TRUE)
+
+H_LeaderInBROADCASTImpliesAckLDQuorum == 
+    \A i,j \in Server : 
+        (/\ IsLeader(i) 
+         /\ zabState[i] = BROADCAST) => 
+            AckLDRecvServers(i) \in Quorums
+
+\* If an ACKLD is pending from a follower to a leader, then
+\* that follower must have no other outstanding messages.
+H_ACKLDMsgSentByFollowerImpliesEmptyBuffer == 
+    \A i,j \in Server : 
+    \A m \in ACKLDmsgs : 
+        \* (PendingACKLD(i,j)) => 
+            /\ ~(m.msrc = i /\ m.mdst = j) 
+            /\ state[m.msrc] = FOLLOWING
+
+H_LeaderInBROADCASTImpliesLearnerInBROADCAST == 
+    \A i,j \in Server : 
+        (/\ IsLeader(i) 
+         /\ zabState[i] = BROADCAST
+         /\ j \in AckLDRecvServers(i)) => 
+            \* /\ ((zabState[j] # BROADCAST) => (msgs[i][j] # <<>>) /\ msgs[i][j][1].mtype = COMMITLD)
+            \* Shouldn't be any pending NEWEPOCH messages while in BROADCAST.
+            \* /\ ((zabState[j] = BROADCAST) => \A mind \in DOMAIN msgs[i][j] : msgs[i][j][mind].mtype \notin {CEPOCH,NEWEPOCH})
+            /\ (i # j) => IsFollower(j)
+
 (******
 
 
@@ -2140,7 +2171,6 @@ H_ServerInEntryAckSidImpliesHasEntry ==
             \E indt \in DOMAIN history[t] : 
                 TxnEqual(history[t][indt], history[s][ind])
 
-AckLDRecvServers(i) == {v.sid : v \in {a \in ackldRecv[i]: a.connected = TRUE }}
 
 
 \* TODO.
@@ -2149,32 +2179,7 @@ AckLDRecvServers(i) == {v.sid : v \in {a \in ackldRecv[i]: a.connected = TRUE }}
 \*     \A i,j \in Server : 
 \*         (IsLeader(j) /\ zabState[j] = BROADCAST /\ j \in AckLDRecvServers(j)) => ~PendingNEWEPOCH(i,j)
 
-H_AckLDRecvsAreConnected == 
-    \A s \in Server : IsLeader(s) => (\A a \in ackldRecv[s] : a.connected = TRUE)
 
-H_LeaderInBROADCASTImpliesAckLDQuorum == 
-    \A i,j \in Server : 
-        (/\ IsLeader(i) 
-         /\ zabState[i] = BROADCAST) => 
-            AckLDRecvServers(i) \in Quorums
-
-\* If an ACKLD is pending from a follower to a leader, then
-\* that follower must have no other outstanding messages.
-H_ACKLDMsgSentByFollowerImpliesEmptyBuffer == 
-    \A i,j \in Server : 
-        (PendingACKLD(i,j)) => 
-            /\ msgs[i][j] = <<>>
-            /\ state[j] = FOLLOWING
-
-H_LeaderInBROADCASTImpliesLearnerInBROADCAST == 
-    \A i,j \in Server : 
-        (/\ IsLeader(i) 
-         /\ zabState[i] = BROADCAST
-         /\ j \in AckLDRecvServers(i)) => 
-            /\ ((zabState[j] # BROADCAST) => (msgs[i][j] # <<>>) /\ msgs[i][j][1].mtype = COMMITLD)
-            \* Shouldn't be any pending NEWEPOCH messages while in BROADCAST.
-            /\ ((zabState[j] = BROADCAST) => \A mind \in DOMAIN msgs[i][j] : msgs[i][j][mind].mtype \notin {CEPOCH,NEWEPOCH})
-            /\ (i # j) => IsFollower(j)
 
 \* The learner of a leader in BROADCAST must also be in BROADCAST and a follower.
 \* H_LeaderInBROADCASTImpliesLearnerInBROADCAST == 
