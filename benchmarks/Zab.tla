@@ -804,7 +804,7 @@ LeaderProcessCEPOCH(i, j, cepochMsg) ==
                     /\ ~CepochRecvQuorumFormed(i)
                     /\ zabState[i] = DISCOVERY
                     \* /\ UNCHANGED violatedInvariants
-                    /\ cepochRecv' = [cepochRecv EXCEPT ![i] = UpdateCepochRecv(@, j, cepochMsg.mepoch) ]
+                    /\ cepochRecv' = [cepochRecv EXCEPT ![i] = UpdateCepochRecv(cepochRecv[i], j, cepochMsg.mepoch) ]
                     /\ \/ \* 1.1. cepochRecv becomes quorum, 
                           \* then determine e' and broadcasts NEWEPOCH in Q. 
                           /\ CepochRecvBecomeQuorum(i)
@@ -820,16 +820,12 @@ LeaderProcessCEPOCH(i, j, cepochMsg) ==
                           /\ UNCHANGED <<acceptedEpoch, NEWEPOCHmsgs>>
                  \/ \* 2. has broadcast NEWEPOCH
                     /\ CepochRecvQuorumFormed(i)
-                    /\ cepochRecv' = [cepochRecv EXCEPT ![i] = UpdateCepochRecv(@, j, cepochMsg.mepoch) ]
+                    /\ cepochRecv' = [cepochRecv EXCEPT ![i] = UpdateCepochRecv(cepochRecv[i], j, cepochMsg.mepoch) ]
                     /\ mesgs' = mesgs
-                        \* [msgs EXCEPT ![j][i] = Tail(msgs[j][i]), 
-                        \*                     ![i][j] = Append(msgs[i][j], 
-                        \*                         [ mtype  |-> NEWEPOCH,
-                        \*                           mepoch |-> acceptedEpoch[i] ])]
                     /\ CEPOCHmsgs' = CEPOCHmsgs \ {cepochMsg}
                     /\ NEWEPOCHmsgs' = NEWEPOCHmsgs \cup 
                                         {[ mtype  |-> NEWEPOCH,
-                                           mepoch |-> acceptedEpoch[i], msrc |-> i, mdst |-> j, morder |-> NextMsgOrderCEPOCH(j,i) ]}
+                                           mepoch |-> acceptedEpoch[i], msrc |-> i, mdst |-> j, morder |-> 0 ]}
                     /\ UNCHANGED <<acceptedEpoch>>
         /\ UNCHANGED <<state, zabState, currentEpoch, history, lastCommitted, learners, 
                        ackeRecv, ackldRecv, sendCounter, followerVars,
