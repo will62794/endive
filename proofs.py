@@ -15,6 +15,8 @@ def mean(S):
     return sum(S) / len(S)
 
 def median(S):
+    if len(S) == 0:
+        return -1
     S.sort()
     return S[len(S)//2]
 
@@ -463,7 +465,10 @@ class StructuredProof():
         stats["num_state_vars"] = len(all_vars)
 
         stats["median_slice_size"] = median([len(s) for s in all_var_slices])
-        stats["median_slice_pct"] = stats["median_slice_size"] / len(all_vars)
+        if len(all_vars) == 0:
+            stats["median_slice_pct"] = 0
+        else:
+            stats["median_slice_pct"] = stats["median_slice_size"] / len(all_vars)
 
         f = open(f"benchmarks/{self.specname}_proofstats.json", 'w')
         json.dump(stats, f, indent=2)
