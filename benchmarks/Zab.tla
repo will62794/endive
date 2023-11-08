@@ -825,6 +825,7 @@ LeaderProcessCEPOCH(i, j, cepochMsg) ==
 (* Follower receives LEADERINFO. If newEpoch >= acceptedEpoch, then follower 
    updates acceptedEpoch and sends ACKEPOCH back, containing currentEpoch and
    history. After this, zabState turns to SYNC. *)
+\* @type: (SERVER, SERVER, { mtype: Str, mepoch: Int, msrc: SERVER, mdst: SERVER, morder: Int }) => Bool;
 FollowerProcessNEWEPOCH(i, j, newEpochMsg) ==
         /\ IsFollower(i)
         \* /\ PendingNEWEPOCH(i, j)
