@@ -3,6 +3,22 @@ EXTENDS Zab,TLC, Randomization
 
 \* Model checking stuff.
 
+InitAcksidTLC(i, his) == [ind \in DOMAIN his |-> [his[ind] EXCEPT !.ackSid = {i}]]
+
+UpdateAcksidIterTLC(his, target, endZxid) == 
+    LET zxidIndicesLessThanEnd == {i \in DOMAIN his : ~ZxidCompare(his[i].zxid, endZxid)}
+        firstZxidIndex == IF zxidIndicesLessThanEnd # {} 
+                            THEN Maximum(zxidIndicesLessThanEnd)
+                            ELSE 100 IN
+    FunAsSeq([idx \in DOMAIN his |-> 
+        IF firstZxidIndex >= 0 /\ idx <= firstZxidIndex 
+            THEN [his[idx] EXCEPT !.ackSid = his[idx].ackSid \cup {target}]
+            ELSE his[idx]
+    ], Cardinality(DOMAIN his), Cardinality(DOMAIN his))
+
+\* Atomically add ackSid of one learner according to zxid in ACKLD.
+UpdateAcksidTLC(his, target, endZxid) == UpdateAcksidIter(his, target, endZxid)
+
 
 SeqOf(S, n) == UNION {[1..m -> S] : m \in 0..n}
 BoundedSeq(S, n) == SeqOf(S, n)

@@ -225,35 +225,6 @@ CONSTANT
 Epoch == 1..MaxEpoch
 Value == Nat
 
-ApaZxidType == Epoch \X Nat
-
-ApaHistEntryType == [zxid: ApaZxidType, value: Nat, ackSid: SUBSET Server, epoch: Epoch]
-\* HistTypeBounded == BoundedSeq(HistEntryType, MaxHistLen)
-
-\* Gives a candidate TypeOK definition for all variables in the spec.
-ApaTypeOK == 
-    /\ state \in [Server -> {LOOKING, FOLLOWING, LEADING}]
-    /\ zabState \in [Server -> {ELECTION, DISCOVERY, SYNCHRONIZATION, BROADCAST}]
-    /\ acceptedEpoch \in [Server -> Epoch]
-    /\ currentEpoch \in [Server -> Epoch]
-    \* /\ history = Gen(4)
-    \* /\ history \in [Server -> {<<>>}]
-    /\ history = Gen(3)
-    /\ \A s \in Server : \A i \in DOMAIN history[s] : history[s][i] \in ApaHistEntryType
-    /\ \A s \in Server : Len(history[s]) <= MaxHistLen
-    /\ DOMAIN history = Server
-    /\ lastCommitted \in [Server -> [index: Nat, zxid: ApaZxidType]]
-    /\ learners \in [Server -> SUBSET Server]
-    \* /\ cepochRecv \in [Server -> RandomSetOfSubsets(3, 3, CEpochRecvType)]
-    \* /\ ackeRecv \in [Server -> [sid: Server, connected: BOOLEAN, peerLastEpoch: Nat, peerHistory: HistTypeBounded]]
-    /\ ackldRecv \in [Server -> SUBSET [sid: Server, connected: BOOLEAN]]
-    /\ sendCounter \in [Server -> Nat]
-    /\ connectInfo \in [Server -> Server]
-    /\ leaderOracle \in Server
-    \* /\ msgs = {}
-    \* /\ msgs \in [Server -> [Server -> Seq([mtype: {CEPOCH, NEWEPOCH, ACKEPOCH, NEWLEADER, ACKLD, COMMITLD, PROPOSE, ACK, COMMIT}, 
-      
-
 -----------------------------------------------------------------------------
 \* Return the maximum value from the set S
 Maximum(S) == IF S = {} THEN -1
@@ -966,7 +937,9 @@ DetermineInitialHistory(i) ==
 
 \* Atomically let all txns in initial history contain self's acks. (declarative version)
 \* @type: (SERVER, Seq(TXN)) => Seq(TXN);
-InitAcksid(i, his) == FunAsSeq([ind \in DOMAIN his |-> [his[ind] EXCEPT !.ackSid = {i}]], Cardinality(DOMAIN his), Cardinality(DOMAIN his))
+InitAcksid(i, his) == FunAsSeq([ind \in DOMAIN his |-> [his[ind] EXCEPT !.ackSid = {i}]], Cardinality(DOMAIN his), MaxHistLen)
+
+\* ASSUME PrintT(InitAcksid(12, <<[zxid |-> <<2, 1>>, value |-> 0, ackSid |-> {"s3"}, epoch |-> 2]>>))
 
 \* Eq1 == \A i \in Server : \A j \in Server : InitAcksidAlt(i,history[j]) = InitAcksid(i,history[j])
 
@@ -1384,7 +1357,7 @@ LeaderTryToCommit(s, index, zxid, newTxn, follower, ackMsg) ==
 
 
 LastAckIndexFromFollower(i, j) == 
-        LET set_index == {idx \in 1..Len(history[i]): j \in history[i][idx].ackSid }
+        LET set_index == {idx \in DOMAIN history[i] : j \in history[i][idx].ackSid }
         IN Maximum(set_index)
 
 
@@ -1613,12 +1586,24 @@ H_UniqueLeadership == \A i, j \in Server:
 \* in history in any process is the same.
 H_PrefixConsistency == 
     \A i, j \in Server:
-        LET smaller == Minimum({lastCommitted[i].index, lastCommitted[j].index}) IN
-            (smaller > 0) =>
-                (\A index \in 1..smaller: 
-                    /\ index \in DOMAIN history[i]
-                    /\ index \in DOMAIN history[j]
-                    /\ TxnEqual(history[i][index], history[j][index]))
+        \A ii \in DOMAIN history[i] :
+        \A ij \in DOMAIN history[j] :
+            \* If entries at both indices are committed, then they must be equal.
+            (/\ ii <= lastCommitted[i].index 
+             /\ ij <= lastCommitted[j].index
+             /\ lastCommitted[i].index > 0
+             /\ lastCommitted[j].index > 0
+             /\ ii = ij) =>
+                TxnEqual(history[i][ii], history[j][ij])
+
+        \* LET smaller == Minimum({lastCommitted[i].index, lastCommitted[j].index}) IN
+        \*     (smaller > 0) =>
+        \*         (\*\A index \in 1..smaller: 
+        \*          \A index \in (DOMAIN history[i]) \cap (DOMAIN history[j]) :
+        \*             index <= smaller =>
+        \*                 /\ index \in DOMAIN history[i]
+        \*                 /\ index \in DOMAIN history[j]
+        \*                 /\ TxnEqual(history[i][index], history[j][index]))
 
 \* Integrity: If some follower delivers one transaction, then some primary has broadcast it.
 \* Integrity == \A i \in Server:
@@ -1709,10 +1694,9 @@ IsPrefix(li,lj) ==
     /\ Len(li) <= Len(lj)
     /\ SubSeq(li, 1, Len(li)) = SubSeq(lj, 1, Len(li))
 
+\* old_type: Seq(TXN) => Seq({zxid: ZXID, value: Int});
 \* Extract only zxid and value from a given history.
-\* @type: Seq(TXN) => Seq({zxid: ZXID, value: Int});
-TxnHistory(h) == FunAsSeq([i \in DOMAIN h |-> [zxid |-> h[i].zxid, value |-> h[i].value] ], Cardinality(DOMAIN h), Cardinality(DOMAIN h))
-
+\* TxnHistory(h) == FunAsSeq([i \in DOMAIN h |-> [zxid |-> h[i].zxid, value |-> h[i].value] ], Cardinality(DOMAIN h), Cardinality(DOMAIN h))
 
 (**************
 
@@ -1743,7 +1727,12 @@ H_NEWLEADERMsgHistAndStateInv ==
     \A m \in NEWLEADERmsgs :
     \* \A i,j \in Server : 
         \* (PendingNEWLEADER(i,j)) => 
-        /\ IsPrefix(TxnHistory(m.mhistory), TxnHistory(history[m.msrc]))
+        \* /\ IsPrefix(TxnHistory(m.mhistory), TxnHistory(history[m.msrc]))
+        \* Is prefix.
+        /\ Len(m.mhistory) <= Len(history[m.msrc])
+        /\ \A i \in DOMAIN m.mhistory : 
+                /\ m.mhistory[i].zxid = history[m.msrc][i].zxid
+                /\ m.mhistory[i].value = history[m.msrc][i].value
         /\ IsLeader(m.msrc) 
         /\ m.mepoch = currentEpoch[m.msrc]
         /\ m.mdst \in learners[m.msrc]
@@ -1961,7 +1950,10 @@ H_ACKEPOCHHistoryContainedInFOLLOWINGSender ==
             /\ state[m.msrc] = FOLLOWING
             /\ state[m.mdst] = LEADING
             /\ zabState[m.msrc] \in {DISCOVERY, SYNCHRONIZATION}
-            /\ TxnHistory(m.mhistory) = TxnHistory(history[m.msrc])
+            /\ Len(m.mhistory) = Len(history[m.msrc])
+            /\ \A ind \in DOMAIN m.mhistory : 
+                /\ m.mhistory[ind].zxid = history[m.msrc][ind].zxid
+                /\ m.mhistory[ind].value = history[m.msrc][ind].value
 
 H_PROPOSEMsgInFlightImpliesNodesInBROADCAST == 
     \A m \in PROPOSEmsgs :
