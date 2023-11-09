@@ -255,12 +255,28 @@ Symmetry == Permutations(Server)
 Terms == InitTerm..MaxTerm
 LogIndices == 1..MaxLogLen
 
+CServerInit == {"s1", "s2", "s3"}
+CServerInitSize == 3
+
+\* CServerInit == {"s1", "s2", "s3", "s4"}
+\* CServerInitSize == 4
+
+CInit == 
+    /\ Primary = "Primary"
+    /\ Secondary = "Secondary"
+    /\ Nil = "Nil"
+    /\ Server = CServerInit
+    /\ MaxLogLen = 3
+    /\ MaxTerm = 3
+    /\ InitTerm = 0
 
 \* Statement of type correctness tailored to Apalache. 
 ApaTypeOK ==
     /\ currentTerm \in [Server -> Terms]
     /\ state \in [Server -> {Secondary, Primary}]
-    /\ log = Gen(3)
+    \* Size of log generator should be at least as large as number of
+    \* servers and max length of logs.
+    /\ log = Gen(CServerInitSize)
     /\ \A s \in Server : \A i \in DOMAIN log[s] : log[s][i] \in Terms
     /\ \A s \in Server : Len(log[s]) <= MaxLogLen
     /\ DOMAIN log = Server
@@ -268,17 +284,6 @@ ApaTypeOK ==
     \* with elements of the appropriate type.
     /\ immediatelyCommitted = Gen(3)
     /\ \A c \in immediatelyCommitted : c \in (LogIndices \X Terms)
-    
-\* /\ committed \in SUBSET (LogIndices \X Terms \X Terms)
-
-CInit == 
-    /\ Primary = "Primary"
-    /\ Secondary = "Secondary"
-    /\ Nil = "Nil"
-    /\ Server = {"s1", "s2", "s3"}
-    /\ MaxLogLen = 3
-    /\ MaxTerm = 3
-    /\ InitTerm = 0
 
 \* 
 \* Helper lemmas.
