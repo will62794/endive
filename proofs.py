@@ -10,6 +10,9 @@ import mc
 import logging
 import json
 import dot2tex
+import subprocess
+import sys
+import multiprocessing
 
 def mean(S):
     return sum(S) / len(S)
@@ -390,6 +393,46 @@ class StructuredProof():
         spec_lines += "===="
         f.write(spec_lines)
         f.close()
+
+    def apalache_check_all_nodes(self):
+        # Save Apalache proof obligations to own spec file.
+        self.to_apalache_proof_obligations()
+
+        # Check all the obligations.
+        nodes = []
+        seen = set()
+        self.walk_proof_graph(self.root, seen=seen, all_nodes=nodes)
+        modname = self.specname + "_ApaIndProofCheck"
+        cmds = []
+        for n in nodes:
+            obl = n.to_apalache_inductive_proof_obligation(modname)
+            cmd = obl["cmd"]
+            proc = subprocess.Popen(cmd, shell=True, stderr=subprocess.PIPE, cwd="benchmarks")
+            # out = proc.stdout.read().decode(sys.stdout.encoding)
+             # Get exit code of proc.
+            # exit_code = proc.returncode
+            exitcode = proc.wait()
+            print("EXIT CODE:", exitcode)
+            if exitcode != 0:
+                raise Exception(f"Apalache proof check failed for node '{n.expr}'. Command: " + cmd)
+            cmds.append(cmd)
+            # print(cmd)
+            # print(out)
+
+        #
+        # TODO: See if can make this work with thread pool for parallelized checking.
+        #
+        # def runcmd(c):
+        #     proc = subprocess.Popen(c, shell=True, stderr=subprocess.PIPE, cwd="benchmarks")
+        #     out = proc.stderr.read().decode(sys.stdout.encoding)
+        #     return out
+        
+        # # Submit all commands to a multiprocessing pool with 4 threads.
+        # pool = multiprocessing.Pool(processes=4)
+        # results = pool.map(runcmd, cmds[:6])
+        # pool.close()
+        # for r in results:
+        #     print(r)
 
 
     def to_apalache_proof_obligations(self):
