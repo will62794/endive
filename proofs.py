@@ -13,6 +13,7 @@ import dot2tex
 import subprocess
 import sys
 import multiprocessing
+import time
 
 def mean(S):
     return sum(S) / len(S)
@@ -401,11 +402,13 @@ class StructuredProof():
     def runcmd(self, c):
         cmd = c[0]
         expr = c[1]
+        start = time.time()
         proc = subprocess.Popen(cmd, shell=True, stderr=subprocess.PIPE, cwd="benchmarks")
         # out = proc.stderr.read().decode(sys.stdout.encoding)
         exitcode = proc.wait()
+        duration = int(time.time() - start)
         print("EXIT CODE:", exitcode)
-        return (expr, exitcode)
+        return (expr, exitcode, duration)
 
     def apalache_check_all_nodes(self):
         # Save Apalache proof obligations to own spec file.
