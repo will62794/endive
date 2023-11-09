@@ -2382,7 +2382,6 @@ class InductiveInvGen():
             proof.vars_in_action = vars_in_action
             proof.vars_in_lemma_defs = vars_in_lemma_defs
             proof.lemma_action_coi = lemma_action_coi
-            proof.save_proof()
 
             # Re-generate CTIs.
             if self.proof_tree_cmd[0] == "reload":
@@ -2399,15 +2398,15 @@ class InductiveInvGen():
             proof = pickle.load(f)
 
         root = proof.root
-
         proof.save_tex = False
 
         # Add spec definitions.
         if self.load_parse_tree:
             proof.spec_defs = self.spec_defs
 
-        if self.proof_tree_cmd == "check_proof_apalache":
-            print("Checking whole proof with Apalache.")
+        if self.proof_tree_cmd and self.proof_tree_cmd[0] == "check_proof_apalache":
+            print("Checking all proof obligations with Apalache.")
+            proof.apalache_check_all_nodes()
             return
 
         proof.save_proof()
