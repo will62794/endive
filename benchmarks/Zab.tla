@@ -1586,24 +1586,12 @@ H_UniqueLeadership == \A i, j \in Server:
 \* in history in any process is the same.
 H_PrefixConsistency == 
     \A i, j \in Server:
-        \A ii \in DOMAIN history[i] :
-        \A ij \in DOMAIN history[j] :
-            \* If entries at both indices are committed, then they must be equal.
-            (/\ ii <= lastCommitted[i].index 
-             /\ ij <= lastCommitted[j].index
-             /\ lastCommitted[i].index > 0
-             /\ lastCommitted[j].index > 0
-             /\ ii = ij) =>
-                TxnEqual(history[i][ii], history[j][ij])
-
-        \* LET smaller == Minimum({lastCommitted[i].index, lastCommitted[j].index}) IN
-        \*     (smaller > 0) =>
-        \*         (\*\A index \in 1..smaller: 
-        \*          \A index \in (DOMAIN history[i]) \cap (DOMAIN history[j]) :
-        \*             index <= smaller =>
-        \*                 /\ index \in DOMAIN history[i]
-        \*                 /\ index \in DOMAIN history[j]
-        \*                 /\ TxnEqual(history[i][index], history[j][index]))
+        LET smaller == Minimum({lastCommitted[i].index, lastCommitted[j].index}) IN
+            (smaller > 0) =>
+                /\ smaller \in DOMAIN history[i]
+                /\ smaller \in DOMAIN history[j]
+                /\ \A ind \in (DOMAIN history[i] \cap DOMAIN history[j]):
+                    (ind <= smaller) => TxnEqual(history[i][ind], history[j][ind])
 
 \* Integrity: If some follower delivers one transaction, then some primary has broadcast it.
 \* Integrity == \A i \in Server:
