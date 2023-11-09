@@ -395,6 +395,18 @@ class StructuredProof():
         f.write(spec_lines)
         f.close()
 
+    #
+    # TODO: See if can make this work with thread pool for parallelized checking.
+    #
+    def runcmd(self, c):
+        cmd = c[0]
+        expr = c[1]
+        proc = subprocess.Popen(cmd, shell=True, stderr=subprocess.PIPE, cwd="benchmarks")
+        # out = proc.stderr.read().decode(sys.stdout.encoding)
+        exitcode = proc.wait()
+        print("EXIT CODE:", exitcode)
+        return (expr, exitcode)
+
     def apalache_check_all_nodes(self):
         # Save Apalache proof obligations to own spec file.
         self.to_apalache_proof_obligations()
@@ -405,37 +417,37 @@ class StructuredProof():
         self.walk_proof_graph(self.root, seen=seen, all_nodes=nodes)
         modname = self.specname + "_ApaIndProofCheck"
         cmds = []
+        node_exprs = []
         metadir = f"apa_indcheck/{modname}"
 
         clean_cmd = f"rm -rf {metadir}"
         proc = subprocess.Popen(clean_cmd, shell=True, stderr=subprocess.PIPE, cwd="benchmarks")
         exitcode = proc.wait()
         
+        # Gather all proof checking commands to run.
         for n in nodes:
             obl = n.to_apalache_inductive_proof_obligation(modname)
             cmd = obl["cmd"]
-            proc = subprocess.Popen(cmd, shell=True, stderr=subprocess.PIPE, cwd="benchmarks")
+            # proc = subprocess.Popen(cmd, shell=True, stderr=subprocess.PIPE, cwd="benchmarks")
             # out = proc.stdout.read().decode(sys.stdout.encoding)
-            exitcode = proc.wait()
-            print("EXIT CODE:", exitcode)
-            if exitcode != 0:
-                raise Exception(f"Apalache proof check failed for node '{n.expr}'. Command: " + cmd)
+            # exitcode = proc.wait()
+            # print("EXIT CODE:", exitcode)
+            # if exitcode != 0:
+                # raise Exception(f"Apalache proof check failed for node '{n.expr}'. Command: " + cmd)
             cmds.append(cmd)
-
-        #
-        # TODO: See if can make this work with thread pool for parallelized checking.
-        #
-        # def runcmd(c):
-        #     proc = subprocess.Popen(c, shell=True, stderr=subprocess.PIPE, cwd="benchmarks")
-        #     out = proc.stderr.read().decode(sys.stdout.encoding)
-        #     return out
+            node_exprs.append(n.expr)
         
-        # # Submit all commands to a multiprocessing pool with 4 threads.
-        # pool = multiprocessing.Pool(processes=4)
-        # results = pool.map(runcmd, cmds[:6])
-        # pool.close()
-        # for r in results:
-        #     print(r)
+        #
+        # Submit all commands to a multiprocessing pool to run in parallel.
+        #
+        num_threads = 4
+        pool = multiprocessing.Pool(processes=num_threads)
+        cmds_to_run = zip(cmds, node_exprs)
+        results = pool.map(self.runcmd, cmds_to_run)
+        pool.close()
+        print("--- Proof checking RESULTS:")
+        for r in results:
+            print(r)
 
 
     def to_apalache_proof_obligations(self):
