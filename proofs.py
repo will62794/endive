@@ -714,6 +714,13 @@ class StructuredProof():
             "H_OnePrimaryPerTerm",
             "H_PrimaryHasEntriesItCreated",
             "H_QuorumsSafeAtTerms"
+
+            # Zab lemmas.
+            "H_PrefixConsistency",
+            "H_CommittedEntryExistsInNEWLEADERHistory",
+            "H_CommittedEntryExistsOnQuorum",
+            "H_UniqueLeadership",
+            "H_TxnZxidsUniqueHistoriesAndMessages"
         ]
 
         if not omit_labels or node.expr in lemmas_to_always_show:
