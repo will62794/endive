@@ -440,12 +440,12 @@ class StructuredProof():
         #
         # Submit all commands to a multiprocessing pool to run in parallel.
         #
-        num_threads = 4
+        num_threads = 5
         pool = multiprocessing.Pool(processes=num_threads)
         cmds_to_run = zip(cmds, node_exprs)
         results = pool.map(self.runcmd, cmds_to_run)
         pool.close()
-        print("--- Proof checking RESULTS:")
+        print(f"--- Proof checking RESULTS ({len(cmds)} total obligations checked):")
         for r in results:
             print(r)
 
