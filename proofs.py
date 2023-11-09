@@ -318,6 +318,8 @@ class StructuredProof():
 
         self.current_config_instance_index = -1
 
+        self.save_tex = False
+
         if load_from_obj:
             self.load_from(load_from_obj)
 
@@ -520,8 +522,8 @@ class StructuredProof():
 
         if include_dot:
             print(f"Saving latest proof as DOT to '{dot_filename}'")
-            self.save_as_dot(dot_filename)
-            self.save_as_dot(dot_filename, omit_labels=True)
+            self.save_as_dot(dot_filename, save_tex=self.save_tex)
+            self.save_as_dot(dot_filename, omit_labels=True, save_tex=self.save_tex)
 
         print(f"Finished saving proof objects.")
 
@@ -638,7 +640,7 @@ class StructuredProof():
 
         if node.expr in seen:
             return
-        print("NODEEXP:", node.expr)
+        # print("NODEEXP:", node.expr)
         
         lemmas_to_always_show = [
             # AsyncRaft key lemmas.
@@ -688,7 +690,7 @@ class StructuredProof():
                 self.add_node_to_dot_graph(dot, c, seen=seen, omit_labels=omit_labels)
 
 
-    def save_as_dot(self, out_file, omit_labels=False):
+    def save_as_dot(self, out_file, omit_labels=False, save_tex=False):
         """ Generate DOT graph representation of this structured proof. """
         dot = graphviz.Digraph('proof-graph', strict=True, comment='Proof Structure')  
         # dot.graph_attr["rankdir"] = "LR"
@@ -710,8 +712,7 @@ class StructuredProof():
             tex_out_file = out_file + ".tex"
 
         # Convert to TeX.
-        save_as_tex = True
-        if save_as_tex:
+        if save_tex:
             texcode = dot2tex.dot2tex(dot.source, output="dot2tex.log", format='tikz', figpreamble="\Large", autosize=True, crop=False, figonly=True, texmode="math")
             f = open(tex_out_file, 'w')
             f.write(texcode)

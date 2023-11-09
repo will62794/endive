@@ -2371,9 +2371,8 @@ class InductiveInvGen():
         #         if "H_" in l:
         #             print("  ", l, lemma_action_coi[a][l])
 
-
         # Optionally reload proof structure from locally defined template.
-        if self.proof_tree_cmd and self.proof_tree_cmd[0] in ["reload", "reload_proof_struct"]:
+        if self.proof_tree_cmd and self.proof_tree_cmd[0] in ["reload", "reload_proof_struct", "check_proof_apalache"]:
             logging.info(f"Reloading entire proof and re-generating CTIs.")
             proof = StructuredProof(root, 
                                     specname = self.specname, 
@@ -2401,9 +2400,15 @@ class InductiveInvGen():
 
         root = proof.root
 
+        proof.save_tex = False
+
         # Add spec definitions.
         if self.load_parse_tree:
             proof.spec_defs = self.spec_defs
+
+        if self.proof_tree_cmd == "check_proof_apalache":
+            print("Checking whole proof with Apalache.")
+            return
 
         proof.save_proof()
 
