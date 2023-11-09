@@ -104,8 +104,8 @@ NEWLEADERMsgImpliesNoLogEntriesInEpoch.children = {
     ]
 }
 
-leaderInBroadcastImpliesAllHistoryEntriesInEpoch = make_node("H_LeaderInBroadcastImpliesAllHistoryEntriesInEpoch")
-leaderInBroadcastImpliesAllHistoryEntriesInEpoch.children = {
+leaderInBroadcastImpliesHasAllEntriesInEpoch = make_node("H_LeaderInBroadcastImpliesHasAllEntriesInEpoch")
+leaderInBroadcastImpliesHasAllEntriesInEpoch.children = {
     "FollowerProcessPROPOSEAction": [
         PROPOSEMsgSentByNodeImpliesZxidInLog
     ],
@@ -149,9 +149,9 @@ LeaderinBROADCASTImpliesNoNEWLEADERorACKEInFlight.children = {
     "LeaderProcessACKEPOCHHasntBroadcastAction": [
         uniqueLeadership
     ],
-    "LeaderProcessACKLDHasntBroadcastAction": [
-        ACKLDMsgSentByFollowerImpliesEmptyBuffer
-    ]
+    # "LeaderProcessACKLDHasntBroadcastAction": [
+    #     ACKLDMsgSentByFollowerImpliesEmptyBuffer
+    # ]
 }
 
 LeaderInBROADCASTImpliesLearnerInBROADCAST = make_node("H_LeaderInBROADCASTImpliesLearnerInBROADCAST")
@@ -160,13 +160,13 @@ LeaderInBROADCASTImpliesLearnerInBROADCAST.children = {
         PROPOSEMsgInFlightImpliesNodesInBROADCAST
     ],
     "LeaderProcessACKLDHasntBroadcastAction": [
-        ACKLDMsgSentByFollowerImpliesEmptyBuffer
+        # ACKLDMsgSentByFollowerImpliesEmptyBuffer
     ]
 }
 
 PROPOSEMsgInFlightImpliesNodesInBROADCAST.children = {
     "LeaderBroadcastPROPOSEAction": [
-        LeaderInBROADCASTImpliesAckLDQuorum,
+        # LeaderInBROADCASTImpliesAckLDQuorum,
         LeaderInBROADCASTImpliesLearnerInBROADCAST
     ]
 }
@@ -191,7 +191,7 @@ NEWLEADERHistoryExistsOnQuorum.children = {
 ACKLDMsgImpliesZxidInLog = make_node("H_ACKLDMsgImpliesZxidInLog")
 ACKLDMsgImpliesZxidInLog.children = {
     "FollowerProcessNEWLEADERAction": [
-        NEWLEADERHistoryExistsOnQuorum
+        # NEWLEADERHistoryExistsOnQuorum
     ]
 }
 
@@ -312,9 +312,12 @@ committedEntryExistsInACKEPOCHQuorumHistory.children = {
     "LeaderProcessACKAction": [
         ACKMsgInFlightImpliesNodesInBROADCAST
     ],
-    # "LeaderProcessACKEPOCHHasBroadcastAction": [
-    #     committedEntryExistsOnQuorum
-    # ]
+    "LeaderProcessACKEPOCHHasBroadcastAction": [
+        committedEntryExistsOnQuorum
+    ],
+    "LeaderProcessACKLDHasntBroadcastAction": [
+        ACKEPOCHHistoryContainedInFOLLOWINGSender
+    ],
 }   
 
 # txnZxidsUniqueHistoriesAndMessagesBetweenLocalHistoryAndMessages = make_node("H_txnZxidsUniqueHistoriesAndMessagesBetweenLocalHistoryAndMessages")
@@ -335,7 +338,7 @@ TxnWithSameZxidEqualPeerHistory.children = {
     "LeaderProcessRequestAction": [
         LeaderinBROADCASTImpliesNoNEWLEADERorACKEInFlight,
         txnZxidsUniqueHistoriesAndMessages,
-        leaderInBroadcastImpliesAllHistoryEntriesInEpoch
+        leaderInBroadcastImpliesHasAllEntriesInEpoch
     ],
     "LeaderProcessACKEPOCHHasntBroadcastAction": [
         # committedEntryExistsInACKEPOCHQuorumHistory
@@ -349,8 +352,9 @@ txnZxidsUniqueHistoriesAndMessages.children = {
     #     # txnZxidUniqueBetweenLocalHistoriesAndAllMessages
     # ],
     "LeaderProcessRequestAction": [
-        leaderInBroadcastImpliesAllHistoryEntriesInEpoch,
-        LeaderinBROADCASTImpliesNoNEWLEADERorACKEInFlight
+        leaderInBroadcastImpliesHasAllEntriesInEpoch,
+        LeaderinBROADCASTImpliesNoNEWLEADERorACKEInFlight,
+        PROPOSEMsgSentByNodeImpliesZxidInLog
     ],
     # "FollowerProcessPROPOSEAction": [
     #     # txnZxidsUniqueHistoriesAndMessagesInPROPOSEMessages,
@@ -394,6 +398,7 @@ NEWLEADERMsgHistAndStateInv.children = {
     # ]
 }
 
+UniqueEstablishedLeader = make_node("H_UniqueEstablishedLeader")
 
 committedEntryExistsInLeaderHistory = make_node("H_CommittedEntryExistsInLeaderHistory")
 committedEntryExistsInLeaderHistory.children = {
@@ -411,7 +416,8 @@ committedEntryExistsInLeaderHistory.children = {
         committedEntryExistsInACKEPOCHQuorumHistory
     ],
     "LeaderProcessACKAction": [
-        nodeHistoryBoundByLastCommittedIndex
+        nodeHistoryBoundByLastCommittedIndex,
+        aCKMsgImpliesZxidInLog
     ],
     "FollowerProcessCOMMITLDAction": [
         COMMITLDSentByNodeImpliesZxidCommittedInLog
@@ -419,13 +425,16 @@ committedEntryExistsInLeaderHistory.children = {
     "FollowerProcessPROPOSEAction": [
         PROPOSEMsgSentByNodeImpliesZxidInLog
     ],
+    "LeaderProcessACKLDHasntBroadcastAction": [
+        UniqueEstablishedLeader
+    ]
 }
 
 
 safety.children = {
     "FollowerProcessNEWLEADERAction": [
         NEWLEADERMsgHistAndStateInv,
-        NEWLEADERIncomingImpliesLastCommittedBound,
+        # NEWLEADERIncomingImpliesLastCommittedBound,
         # nEWLEADERMsgSentByLeader
     ],
     "FollowerProcessCOMMITAction": [
@@ -440,7 +449,8 @@ safety.children = {
         committedEntryExistsInACKEPOCHQuorumHistory,        
     ],
     "LeaderProcessACKAction": [
-        aCKMsgImpliesZxidInLog
+        aCKMsgImpliesZxidInLog,
+        txnZxidsUniqueHistoriesAndMessages
     ],
     "LeaderProcessACKLDHasntBroadcastAction": [
         committedEntryExistsInLeaderHistory,

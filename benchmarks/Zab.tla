@@ -668,16 +668,31 @@ FollowLeaderOther(i) ==
 
 \* \* \* Timeout between leader and follower.  
 \* TimeoutWithQuorum(i, j) ==
-\*         \* /\ CheckTimeout \* test restrictions of timeout
-\*         /\ IsLeader(i)   
-\*         /\ IsMyLearner(i, j)
-\*         /\ IsFollower(j) 
-\*         /\ IsMyLeader(j, i)
-\*         /\ (learners[i] \ {j}) \in Quorums  \* just remove this learner
-\*         \* /\ RemoveLearner(i, j)
-\*         /\ FollowerShutdown(j)
-\*         \* /\ Clean(i, j)
-\*         /\ UNCHANGED <<acceptedEpoch, currentEpoch, history, lastCommitted, sendCounter, electionVars>>
+\*     /\ IsLeader(i)   
+\*     /\ IsMyLearner(i, j)
+\*     /\ IsFollower(j) 
+\*     /\ IsMyLeader(j, i)
+\*     /\ (learners[i] \ {j}) \in Quorums  \* just remove this learner
+\*     /\ state' = [s \in Server |-> IF s \in learners[i] THEN LOOKING ELSE state[s] ]
+\*     /\ zabState' = [s \in Server |-> IF s \in learners[i] THEN ELECTION ELSE zabState[s] ]
+\*     /\ connectInfo' = [s \in Server |-> IF s \in learners[i] THEN NullPoint ELSE connectInfo[s] ]
+\*     /\ learners'   = [learners   EXCEPT ![i] = {}]
+\*     \* /\ FollowerShutdown(j)
+\*     /\ state'    = [state      EXCEPT ![i] = LOOKING]
+\*     /\ zabState' = [zabState   EXCEPT ![i] = ELECTION]
+\*     /\ connectInfo' = [connectInfo EXCEPT ![i] = NullPoint]
+\*     \* /\ Clean(i, j)
+\*     /\ COMMITmsgs' = {m \in COMMITmsgs : ~((m.msrc = i /\ m.mdst = j) \/ (m.msrc = j /\ m.mdst = i))}
+\*     /\ CEPOCHmsgs' = {m \in CEPOCHmsgs : ~((m.msrc = i /\ m.mdst = j) \/ (m.msrc = j /\ m.mdst = i))}
+\*     /\ NEWEPOCHmsgs' = {m \in NEWEPOCHmsgs : ~((m.msrc = i /\ m.mdst = j) \/ (m.msrc = j /\ m.mdst = i))}
+\*     /\ ACKEPOCHmsgs' = {m \in ACKEPOCHmsgs : ~((m.msrc = i /\ m.mdst = j) \/ (m.msrc = j /\ m.mdst = i))}
+\*     /\ NEWLEADERmsgs' = {m \in NEWLEADERmsgs : ~((m.msrc = i /\ m.mdst = j) \/ (m.msrc = j /\ m.mdst = i))}
+\*     /\ ACKLDmsgs' = {m \in ACKLDmsgs : ~((m.msrc = i /\ m.mdst = j) \/ (m.msrc = j /\ m.mdst = i))}
+\*     /\ COMMITLDmsgs' = {m \in COMMITLDmsgs : ~((m.msrc = i /\ m.mdst = j) \/ (m.msrc = j /\ m.mdst = i))}
+\*     /\ PROPOSEmsgs' = {m \in PROPOSEmsgs : ~((m.msrc = i /\ m.mdst = j) \/ (m.msrc = j /\ m.mdst = i))}
+\*     /\ ACKmsgs' = {m \in ACKmsgs : ~((m.msrc = i /\ m.mdst = j) \/ (m.msrc = j /\ m.mdst = i))}
+\*     /\ COMMITmsgs' = {m \in COMMITmsgs : ~((m.msrc = i /\ m.mdst = j) \/ (m.msrc = j /\ m.mdst = i))}
+\*     /\ UNCHANGED <<acceptedEpoch, currentEpoch, history, lastCommitted, sendCounter, electionVars>>
 
 TimeoutNoQuorum(i, j) ==
         \* /\ CheckTimeout \* test restrictions of timeout
@@ -1570,7 +1585,16 @@ DebugInv1 == ~(\E s,t \in Server :
                     )
 \* DebugInv2 == CEPOCHmsgs = {}
 \* DebugInv2 == NEWEPOCHmsgs = {}
-DebugInv2 == ~(\E s \in Server : currentEpoch[s] > 1)
+DebugInv2 == ~(\E s,t \in Server : 
+                    /\ s # t 
+                    /\  currentEpoch[s] > currentEpoch[t]
+                    /\ state[s] = LEADING /\ state[t] = LEADING
+                    /\ zabState[s] = SYNCHRONIZATION
+                    /\ \E ind \in DOMAIN history[t] : history[t][ind].zxid[1] < currentEpoch[s]
+                )
+
+\* If a node is currently leading 
+
 \* DebugInv3 == TLCGet("level") < 80
 \* DebugInv2 == \A m \in NEWLEADERmsgs : m.morder < 2
 
@@ -1710,6 +1734,13 @@ H_NEWLEADERMsgSentByLeader ==
 
 *****)
 
+\* If a node is currently an established leader, then there can be no other currently active,
+\* established leaders.
+H_UniqueEstablishedLeader == 
+    \A i, j \in Server:
+        (IsLeader(i) /\ zabState[i] \in {SYNCHRONIZATION, BROADCAST} /\ i # j) =>
+        ~(IsLeader(j) /\ zabState[j] \in {SYNCHRONIZATION, BROADCAST})
+
 \* If a NEWLEADER message has been sent from a leader N in epoch E, then 
 \* that message's history must be a prefix of the leader's history in epoch E, w.r.t the txns
 \* that appear in that history i.e. (zxid, value) pairs.
@@ -1752,6 +1783,7 @@ H_COMMITSentByNodeImpliesZxidInLog ==
 H_ACKMsgImpliesZxidInLog == 
     \A m \in ACKmsgs :
         /\ state[m.msrc] = FOLLOWING
+        /\ connectInfo[m.msrc] = m.mdst
         /\ \E idx \in DOMAIN history[m.msrc] :  history[m.msrc][idx].zxid = m.mzxid
 
 
@@ -1867,8 +1899,18 @@ H_CommittedEntryExistsInLeaderHistory ==
 H_NodeHistoryBoundByLastCommittedIndex == 
     \A s \in Server : lastCommitted[s].index <= Len(history[s])
 
+LeaderInBroadcastImpliesAllAckERecvEntriesInEpoch == 
+    \A i \in Server :
+    \A j \in Server :
+    \A acke \in ackeRecv[j] :
+    \A ai \in DOMAIN acke.peerHistory :
+        (/\ IsLeader(i)
+         /\ zabState[i] \in {BROADCAST, SYNCHRONIZATION}
+         /\ acke.peerHistory[ai].zxid[1] = currentEpoch[i]) => 
+            \E idx2 \in DOMAIN history[i] : ZxidEqual(history[i][idx2].zxid, acke.peerHistory[ai].zxid)
+
 \* Leader in BROADCAST phase must contain all history entries created in its epoch.
-H_LeaderInBroadcastImpliesAllHistoryEntriesInEpoch == 
+LeaderInBroadcastImpliesAllHistoryEntriesInEpoch == 
     \A i,j \in Server : 
     \A idx \in DOMAIN history[j] :
         (/\ IsLeader(i)
@@ -1876,6 +1918,10 @@ H_LeaderInBroadcastImpliesAllHistoryEntriesInEpoch ==
          /\ history[j][idx].zxid[1] = currentEpoch[i]) => 
             \* Entry is in leader's history.
             \E idx2 \in DOMAIN history[i] : ZxidEqual(history[i][idx2].zxid, history[j][idx].zxid)
+
+H_LeaderInBroadcastImpliesHasAllEntriesInEpoch == 
+    /\ LeaderInBroadcastImpliesAllAckERecvEntriesInEpoch
+    /\ LeaderInBroadcastImpliesAllHistoryEntriesInEpoch
 
 \* If a leader is in BROADCAST, no NEWLEADER messages should be in-flight
 H_LeaderinBROADCASTImpliesNoNEWLEADERorACKEInFlight == 
@@ -2083,13 +2129,14 @@ H_LeaderInBROADCASTImpliesLearnerInBROADCAST ==
             /\ (j \in AckLDRecvServers(i)) => zabState[j] \in {SYNCHRONIZATION, BROADCAST}
             /\ ((j \in learners[i]) /\ (i # j)) => IsFollower(j)
             /\ AckLDRecvServers(i) \in Quorums
-            \* Should have gotten ACKLD responses back only from your learners.
+            \* \* Should have gotten ACKLD responses back only from your learners.
             /\ AckLDRecvServers(i) \subseteq learners[i]
-            \* /\ ((zabState[j] # BROADCAST) => (msgs[i][j] # <<>>) /\ msgs[i][j][1].mtype = COMMITLD)
-            \* Shouldn't be any pending NEWEPOCH messages while in BROADCAST.
-            /\ (zabState[j] = BROADCAST) => \A m \in NEWEPOCHmsgs : ~(m.msrc = i /\ m.mdst = j)
-            \* /\ (zabState[j] = BROADCAST /\ (j \in learners[i]) /\ (i # j)) => \A m \in CEPOCH : ~(m.msrc = j /\ m.mdst = i)
-            \* \A mind \in DOMAIN msgs[i][j] : msgs[i][j][mind].mtype \notin {CEPOCH,NEWEPOCH})
+            \* \* /\ ((zabState[j] # BROADCAST) => (msgs[i][j] # <<>>) /\ msgs[i][j][1].mtype = COMMITLD)
+            \* \* Shouldn't be any pending NEWEPOCH messages while in BROADCAST.
+            \* /\ (zabState[j] = BROADCAST) => \A m \in NEWEPOCHmsgs : ~(m.msrc = i /\ m.mdst = j)
+            \* /\ (zabState[j] = BROADCAST /\ j \in learners[i] /\ i # j) => \A m \in CEPOCHmsgs : ~(m.msrc = j /\ m.mdst = i)
+            \* \* Established leaders must have received a CEPOCH quorum.
+            \* /\ CepochRecvQuorumFormed(i)
 
 (******
 
