@@ -656,6 +656,28 @@ Apa_AppendEntriesRequestType == [
     mdest          : Server
 ]
 
+
+Spec == Init /\ [][Next]_vars
+
+CServerInit == {"s1", "s2", "s3"}
+CServerInitSize == 3
+
+\* CServerInit == {"s1", "s2", "s3", "s4"}
+\* CServerInitSize == 4
+
+CInit == 
+    /\ Leader = "Leader"
+    /\ Follower = "Follower"
+    /\ Candidate = "Candidate"
+    /\ Nil = "Nil"
+    /\ Server = CServerInit
+    /\ MaxLogLen = 2
+    /\ MaxTerm = 2
+    /\ RequestVoteRequest = "RequestVoteRequest"
+    /\ RequestVoteResponse = "RequestVoteResponse"
+    /\ AppendEntriesRequest = "AppendEntriesRequest"
+    /\ AppendEntriesResponse = "AppendEntriesResponse"
+
 ApaTypeOK ==
     \* 
     \* TODO: Think carefully about how to handle the bounding of these message types safely.
@@ -686,28 +708,12 @@ ApaTypeOK ==
     \* Constrain 'log' as a bounded sequence type.
     \* Note that this parameter size will, I believe, always need to be at least
     \* as large as the cardinality of 'Server'.
-    /\ log = Gen(3)
+    /\ log = Gen(CServerInitSize)
     /\ \A s \in Server : \A i \in DOMAIN log[s] : log[s][i] \in Terms
     /\ \A s \in Server : Len(log[s]) <= MaxLogLen
     /\ DOMAIN log = Server
     /\ commitIndex     \in [Server -> LogIndicesWithZero]
 
-
-Spec == Init /\ [][Next]_vars
-
-CInit == 
-    /\ Leader = "Leader"
-    /\ Follower = "Follower"
-    /\ Candidate = "Candidate"
-    /\ Nil = "Nil"
-    /\ Server = {"s1", "s2", "s3"}
-    \* /\ Server = {"s1", "s2", "s3", "s4"}
-    /\ MaxLogLen = 2
-    /\ MaxTerm = 2
-    /\ RequestVoteRequest = "RequestVoteRequest"
-    /\ RequestVoteResponse = "RequestVoteResponse"
-    /\ AppendEntriesRequest = "AppendEntriesRequest"
-    /\ AppendEntriesResponse = "AppendEntriesResponse"
 
 ----
 
