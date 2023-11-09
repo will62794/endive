@@ -258,9 +258,10 @@ class StructuredProofNode():
     def to_apalache_inductive_proof_obligation(self, modname):
         """ Export this node and support lemmas as base for Apalache checking."""
         # "THEOREM IndAuto /\ Next => IndAuto'"
+        metadir = f"apa_indcheck/{modname}"
         out_str = "\n"
         def_name = f"{self.expr}_IndCheck"
-        apa_cmd = f"""JVM_ARGS="-Xss16m" ./apalache/bin/apalache-mc check --init={def_name} --next=Next --inv={self.expr} --cinit=CInit --tuning-options='search.invariantFilter=1->.*' --length=1 --smtprof --debug --out-dir=apa_indcheck/{self.expr} --run-dir=apa_indcheck/{self.expr} {modname}.tla"""
+        apa_cmd = f"""JVM_ARGS="-Xss16m" ./apalache/bin/apalache-mc check --init={def_name} --next=Next --inv={self.expr} --cinit=CInit --tuning-options='search.invariantFilter=1->.*' --length=1 --smtprof --debug --out-dir={metadir}/{self.expr} --run-dir={metadir}/{self.expr} {modname}.tla"""
         out_str += f"(** \nApalache command:\n{apa_cmd}\n **)\n"
         out_str += f"{def_name} == \n"
         typeok = "ApaTypeOK"
@@ -404,6 +405,12 @@ class StructuredProof():
         self.walk_proof_graph(self.root, seen=seen, all_nodes=nodes)
         modname = self.specname + "_ApaIndProofCheck"
         cmds = []
+        metadir = f"apa_indcheck/{modname}"
+
+        clean_cmd = f"rm -rf {metadir}"
+        proc = subprocess.Popen(clean_cmd, shell=True, stderr=subprocess.PIPE, cwd="benchmarks")
+        exitcode = proc.wait()
+        
         for n in nodes:
             obl = n.to_apalache_inductive_proof_obligation(modname)
             cmd = obl["cmd"]
@@ -486,11 +493,13 @@ class StructuredProof():
         f.write(spec_lines)
         f.close()
 
+        metadir = f"apa_indcheck/{modname}"
+
         f = open(f"benchmarks/apacheck_{self.specname}.sh", 'w')
         f.write("#!/bin/bash\n\n")
         f.write(f"#\n# Inductive proof obligations for '{self.specname}'\n")
         f.write(f"# Total num proof obligations: {len(nodes)}\n#\n\n")
-        f.write("rm -rf apa_indcheck\n")
+        f.write(f"rm -rf {metadir}\n")
         for cmd in apa_cmds:
             f.write(cmd)
             f.write("\n")
