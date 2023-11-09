@@ -943,7 +943,10 @@ H_VoteGrantedImpliesVoteResponseMsgConsistent ==
 H_VoteGrantedImpliesNodeSafeAtTerm == 
     \A s \in Server : 
         state[s] \in {Candidate,Leader} => 
-        (\A t \in votesGranted[s] : currentTerm[t] >= currentTerm[s])
+        (\A t \in votesGranted[s] : 
+            /\ currentTerm[t] >= currentTerm[s]
+            /\ currentTerm[t] = currentTerm[s] => votedFor[t] = s
+        )
 
 H_VotesCantBeGrantedTwiceToCandidatesInSameTerm ==
     \A s,t \in Server : 
