@@ -194,6 +194,14 @@ class InductiveInvGen():
         # return self.get_config_constant_instances()[-1]
         return self.constants_obj_to_constants_str(self.get_config_constant_instances()[-1])
     
+    def get_tlc_overrides_str(self):
+        out = ""
+        if "tlc_overrides" in self.spec_config:
+            for k in self.spec_config["tlc_overrides"]:
+                out += k + " <- " + self.spec_config["tlc_overrides"][k] + "\n"
+        return out
+
+    
     def get_config_constant_instances(self):
         """ 
         If the CONSTANT parameter settings are multi-valued, enumerate the possible
@@ -496,6 +504,7 @@ class InductiveInvGen():
         invcheck_cfg = "INIT PredInit\n"
         invcheck_cfg += "NEXT PredNext\n"
         invcheck_cfg += self.get_tlc_config_constants_str()
+        invcheck_cfg += self.get_tlc_overrides_str()
         invcheck_cfg += "\n"
         invcheck_cfg += f"CONSTRAINT {self.state_constraint}"
         invcheck_cfg += "\n"
@@ -685,6 +694,7 @@ class InductiveInvGen():
         invcheck_cfg = "INIT Init\n"
         invcheck_cfg += "NEXT Next\n"
         invcheck_cfg += self.get_tlc_config_constants_str()
+        invcheck_cfg += self.get_tlc_overrides_str()
         invcheck_cfg += "\n"
         invcheck_cfg += f"CONSTRAINT {self.state_constraint}"
         invcheck_cfg += "\n"
@@ -1047,6 +1057,7 @@ class InductiveInvGen():
         invcheck_tla_indcheck_cfg += "INVARIANT InvStrengthened_Constraint\n"
         # invcheck_tla_indcheck_cfg += "INVARIANT OnePrimaryPerTerm\n"
         invcheck_tla_indcheck_cfg += self.constants_obj_to_constants_str(constants_obj)
+        invcheck_tla_indcheck_cfg += self.get_tlc_overrides_str()
         invcheck_tla_indcheck_cfg += "\n"
         # TODO: See if we really want to allow symmetry here or not.
         # if symmetry:
@@ -1386,6 +1397,7 @@ class InductiveInvGen():
             invcheck_tla_indcheck_cfg += self.constants_obj_to_constants_str(constants_obj)
         else:
             invcheck_tla_indcheck_cfg += self.get_tlc_config_constants_str()
+        invcheck_tla_indcheck_cfg += self.get_tlc_overrides_str()
         invcheck_tla_indcheck_cfg += "\n"
         
         # for inv in sat_invs_group:

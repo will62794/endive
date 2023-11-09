@@ -1084,7 +1084,7 @@ UpdateAcksidIter(his, target, endZxid) ==
         IF firstZxidIndex >= 0 /\ idx <= firstZxidIndex 
             THEN [his[idx] EXCEPT !.ackSid = his[idx].ackSid \cup {target}]
             ELSE his[idx]
-    ], Cardinality(DOMAIN his), Cardinality(DOMAIN his))
+    ], Cardinality(DOMAIN his), MaxHistLen)
 
 \* Atomically add ackSid of one learner according to zxid in ACKLD.
 UpdateAcksid(his, target, endZxid) == UpdateAcksidIter(his, target, endZxid)

@@ -29,6 +29,10 @@
         "s2": "s2",
         "s3": "s3"
     },
+    "tlc_overrides":{
+        "InitAcksid": "InitAcksidTLC",
+        "UpdateAcksid": "UpdateAcksidTLC"
+    },
     "actions": [
         "UpdateLeaderAction",
         "FollowLeaderMyselfAction",
