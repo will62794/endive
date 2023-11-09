@@ -630,27 +630,53 @@ class StructuredProof():
         color = "black"
         penwidth="2"
         if node.expr == self.safety_goal:
-            color="green"
+            color="black"
             penwidth="5"
+            style="filled"
+        else:
+            style="rounded corners"
 
         if node.expr in seen:
             return
+        print("NODEEXP:", node.expr)
         
-        if omit_labels:
-            label = "L"
-        else:
-            label = node.expr.replace("H_", "")
+        lemmas_to_always_show = [
+            # AsyncRaft key lemmas.
+            "H_LeaderMatchIndexValid",
+            self.safety_goal,
+            "H_LogMatching",
+            "H_LogMatchingInAppendEntriesMsgs",
+            "H_OnePrimaryPerTerm",
+            "H_PrimaryHasEntriesItCreated",
+            "H_QuorumsSafeAtTerms"
+        ]
 
-        dot.node(node.expr, color=color, shape="box", style="rounded corners", penwidth=penwidth, label=label)
+        if not omit_labels or node.expr in lemmas_to_always_show:
+            label = node.expr.replace("H_", "")
+        else:
+            label = "L_{" + str(self.dotnode_ind) + "}"
+            self.dotnode_ind += 1
+
+        dot.node(node.expr, color=color, fillcolor="green!50", shape="box", style=style, penwidth=penwidth, label=label)
         seen.add(node.expr)
+
+        actions_to_always_show = {
+            "AppendEntriesAction" : "AppendEntriesAction",
+            "AcceptAppendEntriesRequestAppendAction": "AcceptAEReqAppendAction",
+            # "ClientRequestAction",
+            # "BecomeLeaderAction"
+        }
 
         # Add sub-nodes for each action child.
         for action in node.children:
             action_node_id = node.expr + "_" + action
-            if omit_labels:
+            if omit_labels and action not in actions_to_always_show:
                 label = "A"
             else:
-                label = action.replace("Action", "")
+                if action in actions_to_always_show:
+                    label = actions_to_always_show[action].replace("Action", "")
+                else:
+                    label = action.replace("Action", "")
             dot.node(action_node_id, label=label, style="filled", fillcolor="lightgray")
             dot.edge(action_node_id, node.expr)
 
@@ -670,6 +696,7 @@ class StructuredProof():
         dot.node_attr["shape"] = "box"
         
         # Store all nodes.
+        self.dotnode_ind = 0
         self.add_node_to_dot_graph(dot, self.root, seen=set(), omit_labels=omit_labels)
 
 
