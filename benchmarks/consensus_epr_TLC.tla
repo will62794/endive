@@ -1,5 +1,5 @@
 ---- MODULE consensus_epr_TLC ----
-EXTENDS consensus_epr
+EXTENDS consensus_epr,Randomization
 
 \* Sum the elements in the range of a function.
 RECURSIVE SumFnRange(_)
@@ -12,5 +12,15 @@ CTICost ==
     Cardinality(vote_request_msg) + 
     SumFnRange([n \in Node |-> Cardinality(decided[n])]) +
     SumFnRange([n \in Node |-> Cardinality(votes[n])])
+
+TypeOKRandom ==
+    /\ vote_request_msg \in RandomSubset(40, SUBSET (Node \X Node)) 
+    /\ voted \in RandomSubset(7, [Node -> BOOLEAN])
+    /\ vote_msg \in RandomSubset(40, SUBSET(Node \X Node)) 
+    /\ votes \in RandomSubset(10, [Node -> SUBSET Node]) 
+    /\ leader \in RandomSubset(4, [Node -> BOOLEAN])
+    /\ decided \in RandomSubset(10, [Node -> SUBSET Value]) 
+
+Symmetry == Permutations(Node) \cup Permutations(Value)
 
 ====

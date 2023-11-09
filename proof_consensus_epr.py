@@ -6,7 +6,7 @@ from proofs import *
 
 uniqueLeaders = StructuredProofNode("UniqueLeaders","H_UniqueLeaders")
 decidedImpliesLeader = StructuredProofNode("DecidedImpliesLeader","H_DecidedImpliesLeader")
-leaderHasQuorum = StructuredProofNode("LeaderImpliesVotesInQuorum","H_LeaderImpliesVotesInQuorum")
+leaderHasQuorum = StructuredProofNode("LeaderImpliesVotesInQuorum","H_LeaderHasQuorum")
 nodesCantVoteTwice = StructuredProofNode("NodesCantVoteTwice","H_NodesCantVoteTwice")
 voteRecordedImpliesNodeVoted = StructuredProofNode("VoteRecordedImpliesNodeVoted","H_VoteRecordedImpliesNodeVoted")
 nodesCantSendVotesToDifferentNodes = StructuredProofNode("NodesCantSendVotesToDifferentNodes","H_NodesCantSendVotesToDifferentNodes")
