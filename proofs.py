@@ -416,15 +416,11 @@ class StructuredProof():
             cmd = obl["cmd"]
             proc = subprocess.Popen(cmd, shell=True, stderr=subprocess.PIPE, cwd="benchmarks")
             # out = proc.stdout.read().decode(sys.stdout.encoding)
-             # Get exit code of proc.
-            # exit_code = proc.returncode
             exitcode = proc.wait()
             print("EXIT CODE:", exitcode)
             if exitcode != 0:
                 raise Exception(f"Apalache proof check failed for node '{n.expr}'. Command: " + cmd)
             cmds.append(cmd)
-            # print(cmd)
-            # print(out)
 
         #
         # TODO: See if can make this work with thread pool for parallelized checking.
