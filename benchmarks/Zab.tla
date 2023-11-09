@@ -836,7 +836,7 @@ FollowerProcessNEWEPOCH(i, j, newEpochMsg) ==
                                         mhistory |-> history[i],
                                         msrc |-> i,
                                         mdst |-> j,
-                                        morder |-> NextMsgOrder(i,j) ]
+                                        morder |-> 0 ]
                              IN 
                             \*  /\ Reply(i, j, m)
                              /\ ACKEPOCHmsgs' = ACKEPOCHmsgs \cup {m}
@@ -846,19 +846,21 @@ FollowerProcessNEWEPOCH(i, j, newEpochMsg) ==
                     /\ UNCHANGED <<mesgs, followerVars, learners, cepochRecv, ackeRecv, ackldRecv, state, CEPOCHmsgs, NEWLEADERmsgs, ACKLDmsgs, COMMITLDmsgs, PROPOSEmsgs, ACKmsgs, COMMITmsgs>>
                  \/ \* 2. Abnormal case - go back to election
                     /\ ~epochOk
-                    /\ FollowerShutdown(i)
+                    /\ state'    = [state      EXCEPT ![i] = LOOKING]
+                    /\ zabState' = [zabState   EXCEPT ![i] = ELECTION]
+                    /\ connectInfo' = [connectInfo EXCEPT ![i] = NullPoint]
                     /\ LET leader == connectInfo[i]
                        IN \*/\ Clean(i, leader)
-                          /\ COMMITmsgs' = {m \in COMMITmsgs : ~((m.msrc = i /\ m.mdst = j) \/ (m.msrc = j /\ m.mdst = i))}
-                          /\ CEPOCHmsgs' = {m \in CEPOCHmsgs : ~((m.msrc = i /\ m.mdst = j) \/ (m.msrc = j /\ m.mdst = i))}
-                          /\ NEWEPOCHmsgs' = {m \in NEWEPOCHmsgs : ~((m.msrc = i /\ m.mdst = j) \/ (m.msrc = j /\ m.mdst = i))}
-                          /\ ACKEPOCHmsgs' = {m \in ACKEPOCHmsgs : ~((m.msrc = i /\ m.mdst = j) \/ (m.msrc = j /\ m.mdst = i))}
-                          /\ NEWLEADERmsgs' = {m \in NEWLEADERmsgs : ~((m.msrc = i /\ m.mdst = j) \/ (m.msrc = j /\ m.mdst = i))}
-                          /\ ACKLDmsgs' = {m \in ACKLDmsgs : ~((m.msrc = i /\ m.mdst = j) \/ (m.msrc = j /\ m.mdst = i))}
-                          /\ COMMITLDmsgs' = {m \in COMMITLDmsgs : ~((m.msrc = i /\ m.mdst = j) \/ (m.msrc = j /\ m.mdst = i))}
-                          /\ PROPOSEmsgs' = {m \in PROPOSEmsgs : ~((m.msrc = i /\ m.mdst = j) \/ (m.msrc = j /\ m.mdst = i))}
-                          /\ ACKmsgs' = {m \in ACKmsgs : ~((m.msrc = i /\ m.mdst = j) \/ (m.msrc = j /\ m.mdst = i))}
-                          /\ COMMITmsgs' = {m \in COMMITmsgs : ~((m.msrc = i /\ m.mdst = j) \/ (m.msrc = j /\ m.mdst = i))}
+                          /\ COMMITmsgs' = {m \in COMMITmsgs : ~((m.msrc = i /\ m.mdst = leader) \/ (m.msrc = leader /\ m.mdst = i))}
+                          /\ CEPOCHmsgs' = {m \in CEPOCHmsgs : ~((m.msrc = i /\ m.mdst = leader) \/ (m.msrc = leader /\ m.mdst = i))}
+                          /\ NEWEPOCHmsgs' = {m \in NEWEPOCHmsgs : ~((m.msrc = i /\ m.mdst = leader) \/ (m.msrc = leader /\ m.mdst = i))}
+                          /\ ACKEPOCHmsgs' = {m \in ACKEPOCHmsgs : ~((m.msrc = i /\ m.mdst = leader) \/ (m.msrc = leader /\ m.mdst = i))}
+                          /\ NEWLEADERmsgs' = {m \in NEWLEADERmsgs : ~((m.msrc = i /\ m.mdst = leader) \/ (m.msrc = leader /\ m.mdst = i))}
+                          /\ ACKLDmsgs' = {m \in ACKLDmsgs : ~((m.msrc = i /\ m.mdst = leader) \/ (m.msrc = leader /\ m.mdst = i))}
+                          /\ COMMITLDmsgs' = {m \in COMMITLDmsgs : ~((m.msrc = i /\ m.mdst = leader) \/ (m.msrc = leader /\ m.mdst = i))}
+                          /\ PROPOSEmsgs' = {m \in PROPOSEmsgs : ~((m.msrc = i /\ m.mdst = leader) \/ (m.msrc = leader /\ m.mdst = i))}
+                          /\ ACKmsgs' = {m \in ACKmsgs : ~((m.msrc = i /\ m.mdst = leader) \/ (m.msrc = leader /\ m.mdst = i))}
+                          /\ COMMITmsgs' = {m \in COMMITmsgs : ~((m.msrc = i /\ m.mdst = leader) \/ (m.msrc = leader /\ m.mdst = i))}
                           \* /\ RemoveLearner(leader, i)
                           /\ learners'   = [learners   EXCEPT ![leader] = learners[leader] \ {i}] 
                           /\ cepochRecv' = [cepochRecv EXCEPT ![leader] = RemoveCepochRecv(cepochRecv[leader], i) ]
