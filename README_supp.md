@@ -24,3 +24,8 @@ where `<SPECNAME>` is the name of a protocol benchmark and proof to load. You ca
 - Zab
 - SimpleConsensus
 - AbstractRaft
+
+To check all inductive proof obligations of a proof graph, you can run the following command:
+```
+$ python3 indigo.py --spec benchmarks/<SPECNAME> --proof_tree_mode --interactive  --apalache_smt_timeout_secs 125 --proof_tree_cmd check_proof_apalache --proof_struct_tag no_truncate
+```
