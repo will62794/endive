@@ -255,11 +255,11 @@ Symmetry == Permutations(Server)
 Terms == InitTerm..MaxTerm
 LogIndices == 1..MaxLogLen
 
-CServerInit == {"s1", "s2", "s3"}
-CServerInitSize == 3
+\* CServerInit == {"s1", "s2", "s3"}
+\* CServerInitSize == 3
 
-\* CServerInit == {"s1", "s2", "s3", "s4"}
-\* CServerInitSize == 4
+CServerInit == {"s1", "s2", "s3", "s4"}
+CServerInitSize == 4
 
 CInit == 
     /\ Primary = "Primary"
