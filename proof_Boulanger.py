@@ -21,9 +21,30 @@ H7 = make_node("H_L7")
 H8 = make_node("H_L8")
 H9 = make_node("H_L9")
 
+H9.children = {
+    "w1Action": [
+        H6
+    ],
+    "w2Action": [
+        H2,
+        H6,
+        H8,
+        H7
+    ]
+}
+
+H7.children = {
+    "w1Action": [
+        H3
+    ]
+}
+
 H6.children = {
     "w2Action": [
-        H2,H8
+        H2,
+        H8,
+        # H9,
+        H7
     ]
 }
 # Comment out stuff below for demo.

@@ -373,7 +373,7 @@ H_L7 == \A i \in Procs :
         (/\ pc[i] = "w2"
          /\ \/ (pc[nxt[i]] = "e2") /\ (i \notin unchecked[nxt[i]])
             \/ pc[nxt[i]] = "e3") => max[nxt[i]] >= num[i]
-H_L8 == \A i \in Procs : (   /\ pc[i] = "w2"
+H_L8 == \A i \in Procs : (  /\ pc[i] = "w2"
                             /\ previous[i] # -1 
                             /\ previous[i] # num[nxt[i]]
                             /\ pc[nxt[i]] \in {"e4", "w1", "w2", "cs"}) => Before(i, nxt[i])             
