@@ -43,12 +43,17 @@ leaderInDiscoveryImpliesNoNEWLEADERMsgs.children = {
     # ]
 }
 
+PROPOSEMsgInFlightImpliesNodesInBROADCAST = make_node("H_PROPOSEMsgInFlightImpliesNodesInBROADCAST")
+
 NEWLEADERMsgHistAndStateInv = make_node("H_NEWLEADERMsgHistAndStateInv")
 
 aCKMsgImpliesZxidInLog = make_node("H_ACKMsgImpliesZxidInLog")
 aCKMsgImpliesZxidInLog.children = {
     "FollowerProcessNEWLEADERAction": [
         NEWLEADERMsgHistAndStateInv
+    ],
+    "FollowerProcessPROPOSEAction": [
+        PROPOSEMsgInFlightImpliesNodesInBROADCAST
     ]
 }
 
@@ -67,7 +72,6 @@ nodeHistoryBoundByLastCommittedIndex.children = {
     ],
 }
 
-PROPOSEMsgInFlightImpliesNodesInBROADCAST = make_node("H_PROPOSEMsgInFlightImpliesNodesInBROADCAST")
 
 NEWEPOCHFromNodeImpliesLEADING = make_node("H_NEWEPOCHFromNodeImpliesLEADING")
 
@@ -84,9 +88,16 @@ ACKEPOCHHistoryContainedInFOLLOWINGSender.children = {
     ]   
 }
 
+ACKMsgInFlightImpliesNodesInBROADCAST = make_node("H_ACKMsgInFlightImpliesNodesInBROADCAST")
+
 PROPOSEMsgSentByNodeImpliesZxidInLog = make_node("H_PROPOSEMsgSentByNodeImpliesZxidInLog")
 
 COMMITSentByNodeImpliesZxidInLog = make_node("H_COMMITSentByNodeImpliesZxidInLog")
+COMMITSentByNodeImpliesZxidInLog.children = {
+    "LeaderProcessACKAction": [
+        ACKMsgInFlightImpliesNodesInBROADCAST
+    ]
+}
 
 txnZxidsUniqueHistoriesAndMessagesInPROPOSEMessages = make_node("H_txnZxidsUniqueHistoriesAndMessagesInPROPOSEMessages")
 
@@ -171,7 +182,6 @@ PROPOSEMsgInFlightImpliesNodesInBROADCAST.children = {
     ]
 }
 
-ACKMsgInFlightImpliesNodesInBROADCAST = make_node("H_ACKMsgInFlightImpliesNodesInBROADCAST")
 ACKMsgInFlightImpliesNodesInBROADCAST.children = {
     "FollowerProcessPROPOSEAction": [
         PROPOSEMsgInFlightImpliesNodesInBROADCAST
@@ -229,6 +239,12 @@ NEWLEADERIncomingImpliesLastCommittedBound.children = {
     "LeaderProcessACKEPOCHHasntBroadcastAction": [
         committedEntryExistsInNEWLEADERHistory,
         nodeHistoryBoundByLastCommittedIndex
+    ],
+    "LeaderProcessACKAction": [
+        NEWLEADERMsgHistAndStateInv
+    ],
+    "FollowerProcessCOMMITLDAction": [
+        COMMITLDSentByNodeImpliesZxidCommittedInLog
     ]
 }
 

@@ -1319,6 +1319,7 @@ IsNextZxid(curZxid, nextZxid) ==
 (* Follower processes PROPOSE, saves it in history and replies ACK. *)
 \* @type: (SERVER, SERVER, { mtype: Str, mzxid: ZXID, mdata: Int, msrc: SERVER, mdst: SERVER }) => Bool;
 FollowerProcessPROPOSE(i, j, proposeMsg) ==
+        /\ proposeMsg \in PROPOSEmsgs
         /\ IsFollower(i)
         \* /\ PendingPROPOSE(i, j)
         /\ proposeMsg.mdst = i
@@ -1764,26 +1765,29 @@ H_NEWLEADERIncomingImpliesLastCommittedBound ==
     \* \A i,j \in Server : 
         \* PendingNEWLEADER(i,j) => 
             (\* lastCommitted on node is <= length of incoming history.
-             lastCommitted[m.mdst].index <= Len(m.mhistory))
+             /\ lastCommitted[m.mdst].index <= Len(m.mhistory))
+            \*  /\ IsFollower(m.mdst)
+            \*  /\ IsLeader(m.msrc)
+            \*  /\ zabState[m.msrc] \in {SYNCHRONIZATION, BROADCAST}
 
 \* If a COMMIT message has been sent by a node, then the zxid referred to by that COMMIT
 \* must be present in the sender's history, and its lastCommitted must cover that zxid in its history.
 H_COMMITSentByNodeImpliesZxidInLog == 
     \A m \in COMMITmsgs :
-    \* \A i,j \in Server : 
-        \* PendingCOMMIT(i,j) =>   
-            \E idx \in DOMAIN history[m.msrc] : 
-                /\ history[m.msrc][idx].zxid = m.mzxid  
-                /\ lastCommitted[m.msrc].index >= idx
-                /\ state[m.mdst] = FOLLOWING
-                /\ state[m.msrc] = LEADING
-                /\ zabState[m.msrc] = BROADCAST
+        \E idx \in DOMAIN history[m.msrc] : 
+            /\ history[m.msrc][idx].zxid = m.mzxid  
+            /\ lastCommitted[m.msrc].index >= idx
+            /\ state[m.mdst] = FOLLOWING
+            /\ state[m.msrc] = LEADING
+            /\ zabState[m.msrc] = BROADCAST
 
 \* If an ACK message exists from S for a given zxid, then that zxid must be present in the sender's history.
 H_ACKMsgImpliesZxidInLog == 
     \A m \in ACKmsgs :
         /\ state[m.msrc] = FOLLOWING
         /\ connectInfo[m.msrc] = m.mdst
+        /\ state[m.mdst] = LEADING 
+        /\ m.mdst \in learners[m.mdst]
         /\ \E idx \in DOMAIN history[m.msrc] :  history[m.msrc][idx].zxid = m.mzxid
 
 
@@ -2059,6 +2063,16 @@ H_NEWLEADERHistoryExistsOnQuorum ==
         \E ic \in DOMAIN history[n] : 
             /\ history[n][ic].zxid = m.mhistory[ih].zxid 
             \* /\ acceptedEpoch[n] >= m.mepoch
+
+\* If a follower has an incoming NEWEPOCH message, then this must be the only incoming message it
+\* has?
+\* H_NEWEPOCHMsgImpliesOnlyInBuffer == 
+\*     \A i \in Server :
+\*      IsFollower(i) =>
+\*     \A m \in NEWEPOCHmsgs :
+\*         (m.mdst = i) =>
+\*             \A cem \in CEPOCHmsgs : cem.dst # i  
+ 
 
 \* If a node is LOOKING, then it must have an empty input buffer.
 H_NodeLOOKINGImpliesEmptyInputBuffer == 
