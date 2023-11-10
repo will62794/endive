@@ -750,16 +750,18 @@ class StructuredProof():
                 else:
                     label = action.replace("Action", "")
 
-            # # Merge 'UpdateTerm' action nodes for now.
-            # if action.startswith("H_UpdateTerm"):
-            #     action_node_id = "UpdateTermAction"
-            #     label = "A"
+            # Merge 'UpdateTerm' action nodes for now.
+            if action.startswith("UpdateTerm"):
+                action_node_id = node.expr + "_" + "UpdateTermAction"
+                label = "A"
             dot.node(action_node_id, label=label, style="filled", fillcolor="lightgray")
             dot.edge(action_node_id, node.expr)
 
         for action in node.children:
             for c in node.children[action]:
                 action_node_id = node.expr + "_" + action
+                if action.startswith("UpdateTerm"):
+                    action_node_id = node.expr + "_" + "UpdateTermAction"
                 # dot.edge(c.expr, node.expr)
                 dot.edge(c.expr, action_node_id)
                 self.add_node_to_dot_graph(dot, c, seen=seen, omit_labels=omit_labels)
