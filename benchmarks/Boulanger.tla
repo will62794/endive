@@ -168,13 +168,28 @@ a \prec b == \/ a[1] < b[1]
 *************)
 
 \* BEGIN TRANSLATION  (this begins the translation of the PlusCal code)
-VARIABLES num
-VARIABLE flag
-VARIABLE pc
-VARIABLE unchecked
-VARIABLE max
-VARIABLE nxt
-VARIABLE previous
+VARIABLES 
+    \* @typeAlias: PROCS = Set(Int);
+    \* @type: PROCS -> Int; 
+    num
+VARIABLE 
+    \* @type: PROCS -> Bool;
+    flag
+VARIABLE 
+    \* @type: PROCS -> Str;
+    pc
+VARIABLE 
+    \* @type: PROCS -> Set(PROCS);
+    unchecked
+VARIABLE 
+    \* @type: PROCS -> Int;
+    max
+VARIABLE 
+    \* @type: PROCS -> PROCS;
+    nxt
+VARIABLE 
+    \* @type: PROCS -> PROCS;
+    previous
 
 vars == << num, flag, pc, unchecked, max, nxt, previous >>
 
