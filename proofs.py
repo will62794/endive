@@ -749,6 +749,11 @@ class StructuredProof():
                     label = actions_to_always_show[action].replace("Action", "")
                 else:
                     label = action.replace("Action", "")
+
+            # # Merge 'UpdateTerm' action nodes for now.
+            # if action.startswith("H_UpdateTerm"):
+            #     action_node_id = "UpdateTermAction"
+            #     label = "A"
             dot.node(action_node_id, label=label, style="filled", fillcolor="lightgray")
             dot.edge(action_node_id, node.expr)
 
