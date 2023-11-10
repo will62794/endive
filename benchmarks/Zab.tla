@@ -1735,12 +1735,28 @@ H_NEWLEADERMsgSentByLeader ==
 
 *****)
 
+\* If a node is currently established leader in epoch E, it implies it has received a quorum of ACKE
+\* responses from nodes.
+H_EstablishedLeaderImpliesACKEQuorum == 
+    \A i \in Server:
+        (IsLeader(i) /\ zabState[i] \in {SYNCHRONIZATION, BROADCAST}) =>
+            \E Q \in Quorums : 
+            \A n \in Q :
+            \E a \in ackeRecv[i] : 
+                /\ a.sid = n
+                /\ a.connected
+
 \* If a node is currently an established leader, then there can be no other currently active,
 \* established leaders.
 H_UniqueEstablishedLeader == 
     \A i, j \in Server:
         (IsLeader(i) /\ zabState[i] \in {SYNCHRONIZATION, BROADCAST} /\ i # j) =>
-        ~(IsLeader(j) /\ zabState[j] \in {SYNCHRONIZATION, BROADCAST})
+            /\ ~(IsLeader(j) /\ zabState[j] \in {SYNCHRONIZATION, BROADCAST})
+            /\ \E Q \in Quorums : 
+               \A n \in Q :
+               \E a \in ackeRecv[i] : 
+                    /\ a.sid = n
+                    /\ a.connected
 
 \* If a NEWLEADER message has been sent from a leader N in epoch E, then 
 \* that message's history must be a prefix of the leader's history in epoch E, w.r.t the txns
