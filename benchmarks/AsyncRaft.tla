@@ -671,8 +671,8 @@ CInit ==
     /\ Candidate = "Candidate"
     /\ Nil = "Nil"
     /\ Server = CServerInit
-    /\ MaxLogLen = 2
-    /\ MaxTerm = 2
+    /\ MaxLogLen = 3
+    /\ MaxTerm = 3
     /\ RequestVoteRequest = "RequestVoteRequest"
     /\ RequestVoteResponse = "RequestVoteResponse"
     /\ AppendEntriesRequest = "AppendEntriesRequest"
