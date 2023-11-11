@@ -495,7 +495,7 @@ class StructuredProof():
                     duration = int(time.time() - start)
                     print("EXIT CODE:", exitcode)
                     res = ((r[0],a), exitcode, duration)
-                    status_map[(res[0], a)] = res[1]
+                    status_map[(r[0], a)] = res[1]
                     sys.stdout.flush()
 
             # Otherwise, just save the results on a per action basis.
@@ -785,7 +785,7 @@ class StructuredProof():
             "H_PrimaryHasEntriesItCreated",
             "H_QuorumsSafeAtTerms",
             # "H_CommitIndexInAppendEntriesImpliesCommittedEntryExists",
-            "H_CommitIndexCoversEntryImpliesExistsOnQuorum",
+            "H_CommitIndexCoveredOnQuorum",
 
             # Zab lemmas.
             "H_PrefixConsistency",
@@ -796,17 +796,22 @@ class StructuredProof():
         ]
 
         if not omit_labels or node.expr in lemmas_to_always_show:
+            # Make selected lemmas display larger.
             label = node.expr.replace("H_", "")
+            # style += ",font=\\huge"
+            texbl = "\huge" + "\emph{" + label + "}"
         else:
             label = "L_{" + str(self.dotnode_ind) + "}"
             self.dotnode_ind += 1
+            texbl = f"${label}$"
 
-        dot.node(node.expr, color=color, fillcolor="green!50", shape="box", style=style, penwidth=penwidth, label=label)
+        dot.node(node.expr, color=color, fillcolor="green!50", shape="box", font="\Huge", style=style, penwidth=penwidth, label=label, texlbl=texbl)
         seen.add(node.expr)
 
         actions_to_always_show = {
             "AppendEntriesAction" : "AEAction",
             "AcceptAppendEntriesRequestAppendAction": "AcceptAEAppendAction",
+            "AcceptAppendEntriesRequestLearnCommitAction": "LearnCommitAction",
             # "ClientRequestAction",
             # "BecomeLeaderAction"
         }
@@ -829,7 +834,7 @@ class StructuredProof():
 
             fillcolor="lightgray"
             if proof_status_map is not None and (node.expr, action) in proof_status_map and proof_status_map[(node.expr, action)] != 0:
-                fillcolor = "red"
+                fillcolor = "orange"
 
             if action in node.children:
                 dot.node(action_node_id, label=label, style="filled", fillcolor=fillcolor)
