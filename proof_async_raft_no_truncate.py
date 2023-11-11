@@ -555,6 +555,9 @@ noLogDivergence.children = {
     ],
     "ClientRequestAction": [
         commitIndexBoundValid
+    ],
+    "AcceptAppendEntriesRequestAppendAction": [
+        commitIndexBoundValid
     ]
 }
 root = noLogDivergence

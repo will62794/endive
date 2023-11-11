@@ -435,10 +435,10 @@ class StructuredProof():
         proc = subprocess.Popen(clean_cmd, shell=True, stderr=subprocess.PIPE, cwd="benchmarks")
         exitcode = proc.wait()
 
-        # nodes = nodes[:3]
+        # nodes = nodes[:2]
         # nodes = [n for n in nodes if n.expr == "H_CommitIndexCoversEntryImpliesExistsOnQuorum"]
 
-        do_per_action_checks = False
+        do_per_action_checks = True
         
         # Gather all proof checking commands to run.
         for n in nodes:
@@ -466,44 +466,44 @@ class StructuredProof():
         #
         num_threads = 6
         cmds_to_run = list(zip(cmds, node_exprs))
-        print("CMDS TO RUN:", cmds_to_run)
+        # print("CMDS TO RUN:", cmds_to_run)
         pool = multiprocessing.Pool(processes=num_threads)
         results = pool.map(runcmd, cmds_to_run)
         pool.close()
         pool.join()
 
         # Optionally save graph with proof status map.
-        # status_map = {r[0]:r[1] for r in results}
-        status_map = {}
+        status_map = {r[0]:r[1] for r in results}
+        # status_map = {}
 
         print("RESULTS:", results)
 
         # If there are any obligations that failed, then now go back and check these per action.
-        print("---- Checking to see if any obligations failed.")
-        sys.stdout.flush()
-        for ind,r in enumerate(results):
-            # Error was found.
-            if r[1] != 0:
-                for a in self.actions:
-                    obl = nodes[ind].to_apalache_inductive_proof_obligation(modname, action=a)
-                    cmd = obl["cmd"]
-                    # Just run the command now.
+        # print("---- Checking to see if any obligations failed.")
+        # sys.stdout.flush()
+        # for ind,r in enumerate(results):
+        #     # Error was found.
+        #     if r[1] != 0:
+        #         for a in self.actions:
+        #             obl = nodes[ind].to_apalache_inductive_proof_obligation(modname, action=a)
+        #             cmd = obl["cmd"]
+        #             # Just run the command now.
 
-                    start = time.time()
-                    proc = subprocess.Popen(cmd, shell=True, stderr=subprocess.PIPE, cwd="benchmarks")
-                    exitcode = proc.wait()
-                    duration = int(time.time() - start)
-                    print("EXIT CODE:", exitcode)
-                    res = ((r[0],a), exitcode, duration)
-                    status_map[(r[0], a)] = res[1]
-                    sys.stdout.flush()
+        #             start = time.time()
+        #             proc = subprocess.Popen(cmd, shell=True, stderr=subprocess.PIPE, cwd="benchmarks")
+        #             exitcode = proc.wait()
+        #             duration = int(time.time() - start)
+        #             print("EXIT CODE:", exitcode)
+        #             res = ((r[0],a), exitcode, duration)
+        #             status_map[(r[0], a)] = res[1]
+        #             sys.stdout.flush()
 
             # Otherwise, just save the results on a per action basis.
-            else:
-                for a in self.actions:
-                    status_map[(r[0], a)] = r[1]
+            # else:
+            #     for a in self.actions:
+            #         status_map[(r[0], a)] = r[1]
 
-        print("Status Map")
+        print("- Status Map")
         for s in status_map:
             print(s, status_map[s])
 
