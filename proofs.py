@@ -779,7 +779,7 @@ class StructuredProof():
         for ai,action in enumerate(self.actions):
             action_node_id = node.expr + "_" + action
             if omit_labels and action not in actions_to_always_show:
-                label = "A_" + str(ai)
+                label = "A_{" + str(ai) + "}"
             else:
                 if action in actions_to_always_show:
                     label = actions_to_always_show[action].replace("Action", "")
@@ -789,7 +789,7 @@ class StructuredProof():
             # Merge 'UpdateTerm' action nodes for now.
             if action.startswith("UpdateTerm"):
                 action_node_id = node.expr + "_" + "UpdateTermAction"
-                label = "A_" + str(ai)
+                label = "A_{" + str(ai) + "}"
 
             fillcolor="lightgray"
             if proof_status_map is not None and (node.expr, action) in proof_status_map and proof_status_map[(node.expr, action)] != 0:
