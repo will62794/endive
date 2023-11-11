@@ -372,7 +372,7 @@ H_PrimaryHasEntriesItCreated ==
             /\ ~InLog(<<k,log[j][k]>>, i))
 
 \* A server's current term is always at least as large as the terms in its log.
-H_CurrentTermAtLeastAsLargeAsLogTermsForPrimary == 
+H_PrimaryTermGTELogTerm == 
     \A s \in Server : 
         (state[s] = Primary) => 
             (\A i \in DOMAIN log[s] : currentTerm[s] >= log[s][i])
@@ -404,7 +404,7 @@ HumanDecompInd ==
     /\ H_LeaderCompleteness
     /\ H_CommittedEntryExistsOnQuorum
     /\ H_LogsLaterThanCommittedMustHaveCommitted
-    /\ H_CurrentTermAtLeastAsLargeAsLogTermsForPrimary
+    /\ H_PrimaryTermGTELogTerm
     /\ H_EntriesCommittedInOwnOrLaterTerm
     /\ H_EntriesCommittedInOwnTerm
     /\ H_LogEntryInTermImpliesSafeAtTerm

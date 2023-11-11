@@ -37,8 +37,8 @@ primaryHasEntriesItCreated.children = {
 # primaryHasEntriesItCreated.cti_view = "<<state, currentTerm, log>>"
 primaryHasEntriesItCreated.cti_project_vars = ["state", "currentTerm", "log"]
 
-currentTermsAtLeastLargeAsLogTermsForPrimary =  StructuredProofNode("CurrentTermAtLeastAsLargeAsLogTermsForPrimary", "H_CurrentTermAtLeastAsLargeAsLogTermsForPrimary")
-currentTermsAtLeastLargeAsLogTermsForPrimary.children = {
+PrimaryTermGTELogTerm =  StructuredProofNode("CurrentTermAtLeastAsLargeAsLogTermsForPrimary", "H_PrimaryTermGTELogTerm")
+PrimaryTermGTELogTerm.children = {
     "BecomeLeaderAction": [
         logEntryInTermImpliesSafeAtTerms
     ]
@@ -47,7 +47,7 @@ currentTermsAtLeastLargeAsLogTermsForPrimary.children = {
 termsGrowMonotonically = StructuredProofNode("TermsGrowMonotonically", "H_TermsGrowMonotonically")
 termsGrowMonotonically.children = {
     "ClientRequestAction": [
-        currentTermsAtLeastLargeAsLogTermsForPrimary
+        PrimaryTermGTELogTerm
     ]
 }
 # termsGrowMonotonically.ctigen_typeok = "TypeOKRandomEmptyCommitted"
@@ -105,7 +105,7 @@ coreLogInv.children = {
     "ClientRequestAction": [
         logMatching,
         primaryHasEntriesItCreated,
-        currentTermsAtLeastLargeAsLogTermsForPrimary
+        PrimaryTermGTELogTerm
     ]
 }
 
@@ -199,7 +199,7 @@ asr_root = StructuredProofNode("StateMachineSafety", "H_StateMachineSafety", chi
 asr_nodes = [
     committedEntryExistsOnQuorum,
     logMatching,
-    currentTermsAtLeastLargeAsLogTermsForPrimary
+    PrimaryTermGTELogTerm
     # primaryHasEntriesItCreated
 ]
 asr_actions = [
