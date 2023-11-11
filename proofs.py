@@ -17,6 +17,18 @@ import time
 import io
 import contextlib
 
+def runcmd(c):
+    print("RUNNING CMD:", c)
+    cmd = c[0]
+    expr = c[1]
+    start = time.time()
+    sys.stdout.flush()
+    proc = subprocess.Popen(cmd, shell=True, stderr=subprocess.PIPE, cwd="benchmarks")
+    exitcode = proc.wait()
+    duration = int(time.time() - start)
+    print("EXIT CODE:", exitcode)
+    return (expr, exitcode, duration)
+
 def mean(S):
     return sum(S) / len(S)
 
@@ -405,19 +417,6 @@ class StructuredProof():
         f.write(spec_lines)
         f.close()
 
-    #
-    # TODO: See if can make this work with thread pool for parallelized checking.
-    #
-    def runcmd(self, c):
-        cmd = c[0]
-        expr = c[1]
-        start = time.time()
-        proc = subprocess.Popen(cmd, shell=True, stderr=subprocess.PIPE, cwd="benchmarks")
-        # out = proc.stderr.read().decode(sys.stdout.encoding)
-        exitcode = proc.wait()
-        duration = int(time.time() - start)
-        print("EXIT CODE:", exitcode)
-        return (expr, exitcode, duration)
 
     def apalache_check_all_nodes(self):
         # Save Apalache proof obligations to own spec file.
@@ -436,10 +435,10 @@ class StructuredProof():
         proc = subprocess.Popen(clean_cmd, shell=True, stderr=subprocess.PIPE, cwd="benchmarks")
         exitcode = proc.wait()
 
-        # nodes = nodes[:12]
+        # nodes = nodes[:3]
         # nodes = [n for n in nodes if n.expr == "H_CommitIndexCoversEntryImpliesExistsOnQuorum"]
 
-        do_per_action_checks = True
+        do_per_action_checks = False
         
         # Gather all proof checking commands to run.
         for n in nodes:
@@ -466,13 +465,48 @@ class StructuredProof():
         # Submit all commands to a multiprocessing pool to run in parallel.
         #
         num_threads = 6
+        cmds_to_run = list(zip(cmds, node_exprs))
+        print("CMDS TO RUN:", cmds_to_run)
         pool = multiprocessing.Pool(processes=num_threads)
-        cmds_to_run = zip(cmds, node_exprs)
-        results = pool.map(self.runcmd, cmds_to_run)
+        results = pool.map(runcmd, cmds_to_run)
         pool.close()
+        pool.join()
 
         # Optionally save graph with proof status map.
-        status_map = {r[0]:r[1] for r in results}
+        # status_map = {r[0]:r[1] for r in results}
+        status_map = {}
+
+        print("RESULTS:", results)
+
+        # If there are any obligations that failed, then now go back and check these per action.
+        print("---- Checking to see if any obligations failed.")
+        sys.stdout.flush()
+        for ind,r in enumerate(results):
+            # Error was found.
+            if r[1] != 0:
+                for a in self.actions:
+                    obl = nodes[ind].to_apalache_inductive_proof_obligation(modname, action=a)
+                    cmd = obl["cmd"]
+                    # Just run the command now.
+
+                    start = time.time()
+                    proc = subprocess.Popen(cmd, shell=True, stderr=subprocess.PIPE, cwd="benchmarks")
+                    exitcode = proc.wait()
+                    duration = int(time.time() - start)
+                    print("EXIT CODE:", exitcode)
+                    res = ((r[0],a), exitcode, duration)
+                    status_map[(res[0], a)] = res[1]
+                    sys.stdout.flush()
+
+            # Otherwise, just save the results on a per action basis.
+            else:
+                for a in self.actions:
+                    status_map[(r[0], a)] = r[1]
+
+        print("Status Map")
+        for s in status_map:
+            print(s, status_map[s])
+
         self.save_as_dot(f"benchmarks/{self.specname}_proof_with_status.dot", omit_labels=True, save_tex=True, proof_status_map=status_map)
 
         print(f"--- Proof checking RESULTS ({len(cmds)} total obligations checked):")
