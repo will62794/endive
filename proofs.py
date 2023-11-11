@@ -17,6 +17,9 @@ import time
 import io
 import contextlib
 
+log = logging.getLogger("dot2tex")
+log.setLevel(logging.WARNING)
+
 def runcmd(c):
     print("RUNNING CMD:", c)
     cmd = c[0]
@@ -897,7 +900,7 @@ class StructuredProof():
                 import os
                 old_stdout = sys.stdout # backup current stdout
                 sys.stdout = open(os.devnull, "w")
-                texcode = dot2tex.dot2tex(dot.source, debug=True, output="dot2tex.log", format='tikz', figpreamble="\Large", autosize=True, crop=False, figonly=True, texmode="math")
+                texcode = dot2tex.dot2tex(dot.source, debug=False, output="dot2tex.log", format='tikz', figpreamble="\Large", autosize=True, crop=False, figonly=True, texmode="math")
                 sys.stdout = old_stdout # reset old stdout
                 f = open(tex_out_file, 'w')
                 f.write(texcode)
