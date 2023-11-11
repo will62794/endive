@@ -1909,7 +1909,7 @@ H_CommittedEntryExistsInLeaderHistory ==
         \A idx \in DOMAIN history[i] : 
             (/\ idx <= lastCommitted[i].index
              /\ IsLeader(j)
-             /\ zabState[j] = SYNCHRONIZATION) => 
+             /\ zabState[j] \in {SYNCHRONIZATION, BROADCAST}) => 
                 \* Committed entry exists in leader's history.
                 \E idx2 \in DOMAIN history[j] : 
                     /\ idx2 = idx
