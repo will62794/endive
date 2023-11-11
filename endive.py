@@ -2398,7 +2398,7 @@ class InductiveInvGen():
             proof = pickle.load(f)
 
         root = proof.root
-        proof.save_tex = False
+        proof.save_tex = True
 
         # Add spec definitions.
         if self.load_parse_tree:
