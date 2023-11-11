@@ -46,7 +46,9 @@ apalache/
 apalache-*/
 apa_indcheck
 *.proof.dot*
+*_proof_with_status*
 *.proof.dot*.pdf
+*.proof.dot_nolabels*
 *.proof.json
 *.proof.pickle
 *.svg
