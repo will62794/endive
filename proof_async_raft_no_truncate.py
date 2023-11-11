@@ -347,7 +347,7 @@ divergentEntriesInAppendEntriesMsgs.children = {
 logMatching = StructuredProofNode("LogMatching", "H_LogMatching")
 
 logMatchingInAppendEntriesMsgsLeaders = make_node("H_LogMatchingInAppendEntriesMsgsLeaders")
-logMatchingInAppendEntriesMsgs = make_node("H_LogMatchingInAppendEntriesMsgs")
+logMatchingInAppendEntriesMsgs = make_node("H_LogMatchingAppendEntries")
 logMatchingBetweenAppendEntriesMsgs = make_node("H_LogMatchingBetweenAppendEntriesMsgs")
 
 logMatchingInAppendEntriesMsgsLeaders.children = {

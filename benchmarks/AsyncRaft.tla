@@ -1145,7 +1145,7 @@ H_LogMatchingInAppendEntriesMsgsLeaders ==
                         /\ prevInd = m.mprevLogIndex 
                         /\ log[s][prevInd] = m.mprevLogTerm)
 
-H_LogMatchingInAppendEntriesMsgs ==
+H_LogMatchingAppendEntries ==
     \* If a server contains the log entry being sent in this AppendEntries, 
     \* then the server's previous entry must match the AppendEntries previous entry.
     \A m \in appendEntriesRequestMsgs : 

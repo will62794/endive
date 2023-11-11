@@ -790,7 +790,7 @@ class StructuredProof():
             "H_LeaderMatchIndexValid",
             self.safety_goal,
             "H_LogMatching",
-            "H_LogMatchingInAppendEntriesMsgs",
+            "H_LogMatchingAppendEntries",
             "H_OnePrimaryPerTerm",
             "H_PrimaryHasEntriesItCreated",
             "H_QuorumsSafeAtTerms",
@@ -820,7 +820,7 @@ class StructuredProof():
 
         actions_to_always_show = {
             "AppendEntriesAction" : "AEAction",
-            "AcceptAppendEntriesRequestAppendAction": "AcceptAEAppendAction",
+            "AcceptAppendEntriesRequestAppendAction": "AcceptAEAction",
             "AcceptAppendEntriesRequestLearnCommitAction": "LearnCommitAction",
             # "ClientRequestAction",
             # "BecomeLeaderAction"
