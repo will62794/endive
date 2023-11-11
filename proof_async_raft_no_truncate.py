@@ -66,7 +66,8 @@ voteGrantedImpliesVoteResponseMsgConsistent.children = {
         requestVoteResponseTermsMatchSource
     ],
     "HandleRequestVoteRequestAction": [
-        voteInGrantedImpliesVotedFor
+        voteInGrantedImpliesVotedFor,
+        voteGrantedImpliesNodeSafeAtTerm
     ],
     "HandleRequestVoteResponseAction": [
         requestVoteResponseMsgsInTermUnique,
@@ -143,7 +144,8 @@ requestVoteQuorumInTermImpliesNoOtherLeadersInTerm = make_node("H_RequestVoteQuo
 requestVoteQuorumInTermImpliesNoOtherLeadersInTerm.children = {
     "BecomeLeaderAction":[
         candidateWithVotesGrantedInTermImplyVotersSafeAtTerm,
-        voteGrantedImpliesVoteResponseMsgConsistent
+        voteGrantedImpliesVoteResponseMsgConsistent,
+        candidateInTermVotedForItself
     ],
     "HandleRequestVoteRequestAction":[
         quorumsSafeAtTerms,
