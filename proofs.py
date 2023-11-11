@@ -436,7 +436,7 @@ class StructuredProof():
         exitcode = proc.wait()
 
         # nodes = nodes[:2]
-        # nodes = [n for n in nodes if n.expr == "H_CommitIndexCoversEntryImpliesExistsOnQuorum"]
+        # nodes = [n for n in nodes if n.expr == "H_VoteGrantedImpliesVoteResponseMsgConsistent"]
 
         do_per_action_checks = True
         
@@ -523,6 +523,8 @@ class StructuredProof():
                 if r[1] != 0:
                     print(r, "ERROR")
                     error_found = True
+        else:
+            print(f"No errors found in proof checking! ({len(cmds)} obligations checked, for {len(nodes)} lemmas).")
 
 
     def to_apalache_proof_obligations(self):
