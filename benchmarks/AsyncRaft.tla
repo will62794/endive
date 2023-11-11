@@ -1320,7 +1320,7 @@ H_LeaderHasEntriesCoveredByCommitIndexes ==
 
 
 
-H_CommitIndexCoversEntryImpliesExistsOnQuorum == 
+H_CommitIndexCoveredOnQuorum == 
     \A s \in Server :
         (commitIndex[s] > 0) => 
             \E Q \in Quorum :
