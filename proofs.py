@@ -442,7 +442,6 @@ class StructuredProof():
         
         # Gather all proof checking commands to run.
         for n in nodes:
-            print(self.actions)
             obl = n.to_apalache_inductive_proof_obligation(modname)
             cmd = obl["cmd"]
 
