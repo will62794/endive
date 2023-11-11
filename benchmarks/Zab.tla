@@ -1855,24 +1855,20 @@ H_CommittedEntryExistsInACKEPOCHQuorumHistory ==
     \A s \in Server : 
     \A idx \in DOMAIN history[s] : 
     \A m \in ACKEPOCHmsgs :
-    \* \A i,j \in Server :
-        \* Entry is covered by lastCommitted on s.
-        (/\ idx <= lastCommitted[s].index
-        \*  /\ PendingACKEPOCH(i, j)
-         ) => 
-            \* Server i is a leader who is about to receive an ACK-E quorum and compute the new initial history.
-            \* This initial history must contain the committed entry. 
-            (LET \*msg == msgs[j][i][1]
-                ackeRecvUpdated == [ackeRecv EXCEPT ![m.mdst] = UpdateAckeRecv(@, m.msrc, m.mepoch, m.mhistory) ] IN
-                (
-                    /\ zabState[m.mdst] \in {ELECTION, DISCOVERY, SYNCHRONIZATION}
-                    /\ state[m.mdst] = LEADING
-                    /\ IsQuorum({a.sid: a \in ackeRecvUpdated[m.mdst]})
-                ) => 
-                    LET initHistory == DetermineInitialHistoryFromArg(ackeRecvUpdated, m.mdst) IN
-                    \E k \in DOMAIN initHistory : 
-                        /\ k = idx
-                        /\ TxnEqual(history[s][idx], initHistory[k]))
+        \* Server i is a leader who is about to receive an ACK-E quorum and compute the new initial history.
+        \* This initial history must contain the committed entry. 
+        LET ackeRecvUpdated == [ackeRecv EXCEPT ![m.mdst] = UpdateAckeRecv(@, m.msrc, m.mepoch, m.mhistory) ] IN
+            (
+                \* Entry is covered by lastCommitted on s.
+                /\ idx <= lastCommitted[s].index
+                /\ zabState[m.mdst] \in {ELECTION, DISCOVERY, SYNCHRONIZATION}
+                /\ state[m.mdst] = LEADING
+                /\ IsQuorum({a.sid: a \in ackeRecvUpdated[m.mdst]})
+            ) => 
+                LET initHistory == DetermineInitialHistoryFromArg(ackeRecvUpdated, m.mdst) IN
+                \E k \in DOMAIN initHistory : 
+                    /\ k = idx
+                    /\ TxnEqual(history[s][idx], initHistory[k])
 
 
 COMMITLDSentByNodeImpliesZxidCommittedInLog == 
