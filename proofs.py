@@ -437,6 +437,7 @@ class StructuredProof():
         exitcode = proc.wait()
 
         # nodes = nodes[:12]
+        # nodes = [n for n in nodes if n.expr == "H_CommitIndexCoversEntryImpliesExistsOnQuorum"]
 
         do_per_action_checks = True
         
@@ -750,6 +751,7 @@ class StructuredProof():
             "H_PrimaryHasEntriesItCreated",
             "H_QuorumsSafeAtTerms",
             # "H_CommitIndexInAppendEntriesImpliesCommittedEntryExists",
+            "H_CommitIndexCoversEntryImpliesExistsOnQuorum",
 
             # Zab lemmas.
             "H_PrefixConsistency",
@@ -813,7 +815,7 @@ class StructuredProof():
                     action_node_id = node.expr + "_" + "UpdateTermAction"
                 # dot.edge(c.expr, node.expr)
                 dot.edge(c.expr, action_node_id)
-                self.add_node_to_dot_graph(dot, c, seen=seen, omit_labels=omit_labels)
+                self.add_node_to_dot_graph(dot, c, seen=seen, omit_labels=omit_labels, proof_status_map=proof_status_map)
 
 
     def save_as_dot(self, out_file, omit_labels=False, save_tex=False, proof_status_map=None):
