@@ -510,11 +510,19 @@ class StructuredProof():
         self.save_as_dot(f"benchmarks/{self.specname}_proof_with_status.dot", omit_labels=True, save_tex=True, proof_status_map=status_map)
 
         print(f"--- Proof checking RESULTS ({len(cmds)} total obligations checked, for {len(nodes)} lemmas):")
+        error_found = False
         for r in results:
             if r[1] != 0:
                 print(r, "ERROR")
+                error_found = True
             else:
                 print(r)
+        if error_found:
+            print("*** Some ERRORs found:")
+            for r in results:
+                if r[1] != 0:
+                    print(r, "ERROR")
+                    error_found = True
 
 
     def to_apalache_proof_obligations(self):
