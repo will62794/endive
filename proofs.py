@@ -256,13 +256,18 @@ class StructuredProofNode():
             return {a:[str(hash(c)) for c in cti_clusters[a]] for a in cti_clusters}
         return cti_clusters
     
-    def to_apalache_inductive_proof_obligation(self, modname):
+    def to_apalache_inductive_proof_obligation(self, modname, action=None):
         """ Export this node and support lemmas as base for Apalache checking."""
         # "THEOREM IndAuto /\ Next => IndAuto'"
         metadir = f"apa_indcheck/{modname}"
         out_str = "\n"
-        def_name = f"{self.expr}_IndCheck"
-        apa_cmd = f"""JVM_ARGS="-Xss16m" ./apalache/bin/apalache-mc check --init={def_name} --next=Next --inv={self.expr} --cinit=CInit --tuning-options='search.invariantFilter=1->.*' --length=1 --smtprof --debug --out-dir={metadir}/{self.expr} --run-dir={metadir}/{self.expr} {modname}.tla"""
+        action_suffix = "" if action is None else action + "_"
+        def_name = f"{self.expr}_{action_suffix}IndCheck"
+        next_expr = "Next" if action is None else action
+        outdir = f"{metadir}/{self.expr}"
+        if action is not None:
+            outdir += "_" + action
+        apa_cmd = f"""JVM_ARGS="-Xss16m" ./apalache/bin/apalache-mc check --init={def_name} --next={next_expr} --inv={self.expr} --cinit=CInit --tuning-options='search.invariantFilter=1->.*' --length=1 --smtprof --debug --out-dir={outdir} --run-dir={outdir} {modname}.tla"""
         out_str += f"(** \nApalache command:\n{apa_cmd}\n **)\n"
         out_str += f"{def_name} == \n"
         typeok = "ApaTypeOK"
@@ -272,6 +277,8 @@ class StructuredProofNode():
             supports = [c.expr for c in self.children[a]]
             supports_conj = land.join(supports)
             supports_list = ",".join(supports)
+            if action is not None and a != action:
+                continue
             out_str += f"  \* Action support lemmas: {a}\n"
             for s in supports:
                 out_str += f"  {land} {s}\n"
@@ -426,19 +433,32 @@ class StructuredProof():
         clean_cmd = f"rm -rf {metadir}"
         proc = subprocess.Popen(clean_cmd, shell=True, stderr=subprocess.PIPE, cwd="benchmarks")
         exitcode = proc.wait()
+
+        # nodes = nodes[:6]
+
+        do_per_action_checks = True
         
         # Gather all proof checking commands to run.
         for n in nodes:
+            print(self.actions)
             obl = n.to_apalache_inductive_proof_obligation(modname)
             cmd = obl["cmd"]
-            # proc = subprocess.Popen(cmd, shell=True, stderr=subprocess.PIPE, cwd="benchmarks")
-            # out = proc.stdout.read().decode(sys.stdout.encoding)
-            # exitcode = proc.wait()
-            # print("EXIT CODE:", exitcode)
-            # if exitcode != 0:
-                # raise Exception(f"Apalache proof check failed for node '{n.expr}'. Command: " + cmd)
-            cmds.append(cmd)
-            node_exprs.append(n.expr)
+
+            if do_per_action_checks:
+                for a in self.actions:
+                    obl = n.to_apalache_inductive_proof_obligation(modname, action=a)
+                    cmd = obl["cmd"]
+                    cmds.append(cmd)
+                    node_exprs.append((n.expr, a))
+            else:
+                # proc = subprocess.Popen(cmd, shell=True, stderr=subprocess.PIPE, cwd="benchmarks")
+                # out = proc.stdout.read().decode(sys.stdout.encoding)
+                # exitcode = proc.wait()
+                # print("EXIT CODE:", exitcode)
+                # if exitcode != 0:
+                    # raise Exception(f"Apalache proof check failed for node '{n.expr}'. Command: " + cmd)
+                cmds.append(cmd)
+                node_exprs.append(n.expr)
         
         #
         # Submit all commands to a multiprocessing pool to run in parallel.
@@ -448,6 +468,11 @@ class StructuredProof():
         cmds_to_run = zip(cmds, node_exprs)
         results = pool.map(self.runcmd, cmds_to_run)
         pool.close()
+
+        # Optionally save graph with proof status map.
+        status_map = {r[0]:r[1] for r in results}
+        self.save_as_dot(f"benchmarks/{self.specname}_proof_with_status.dot", omit_labels=True, save_tex=True, proof_status_map=status_map)
+
         print(f"--- Proof checking RESULTS ({len(cmds)} total obligations checked):")
         for r in results:
             print(r)
@@ -492,6 +517,12 @@ class StructuredProof():
             # spec_lines += f"\n\* -- {n.expr}\n"
             obl = n.to_apalache_inductive_proof_obligation(modname)
             spec_lines += obl["out_str"]
+
+            # Also add a separate obligation for each action.
+            for a in self.actions:
+                obl = n.to_apalache_inductive_proof_obligation(modname, action=a)
+                spec_lines += obl["out_str"]
+
             apa_cmds.append(obl["cmd"])
             spec_lines += "\n"
 
@@ -690,7 +721,7 @@ class StructuredProof():
 
         return html
 
-    def add_node_to_dot_graph(self, dot, node, seen=set(), omit_labels=False):
+    def add_node_to_dot_graph(self, dot, node, seen=set(), omit_labels=False, proof_status_map=None):
         """ Add this node and its children, recursively, to DOT graph."""
         color = "black"
         penwidth="2"
@@ -754,7 +785,12 @@ class StructuredProof():
             if action.startswith("UpdateTerm"):
                 action_node_id = node.expr + "_" + "UpdateTermAction"
                 label = "A"
-            dot.node(action_node_id, label=label, style="filled", fillcolor="lightgray")
+
+            fillcolor="lightgray"
+            if proof_status_map is not None and (node.expr, action) in proof_status_map and proof_status_map[(node.expr, action)] != 0:
+                fillcolor = "red"
+
+            dot.node(action_node_id, label=label, style="filled", fillcolor=fillcolor)
             dot.edge(action_node_id, node.expr)
 
         for action in node.children:
@@ -767,7 +803,7 @@ class StructuredProof():
                 self.add_node_to_dot_graph(dot, c, seen=seen, omit_labels=omit_labels)
 
 
-    def save_as_dot(self, out_file, omit_labels=False, save_tex=False):
+    def save_as_dot(self, out_file, omit_labels=False, save_tex=False, proof_status_map=None):
         """ Generate DOT graph representation of this structured proof. """
         dot = graphviz.Digraph('proof-graph', strict=True, comment='Proof Structure')  
         # dot.graph_attr["rankdir"] = "LR"
@@ -776,7 +812,7 @@ class StructuredProof():
         
         # Store all nodes.
         self.dotnode_ind = 0
-        self.add_node_to_dot_graph(dot, self.root, seen=set(), omit_labels=omit_labels)
+        self.add_node_to_dot_graph(dot, self.root, seen=set(), omit_labels=omit_labels, proof_status_map=proof_status_map)
 
 
         # print("Final proof graph:")
