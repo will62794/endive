@@ -14,6 +14,8 @@ import subprocess
 import sys
 import multiprocessing
 import time
+import io
+import contextlib
 
 def mean(S):
     return sum(S) / len(S)
@@ -434,7 +436,7 @@ class StructuredProof():
         proc = subprocess.Popen(clean_cmd, shell=True, stderr=subprocess.PIPE, cwd="benchmarks")
         exitcode = proc.wait()
 
-        # nodes = nodes[:6]
+        # nodes = nodes[:12]
 
         do_per_action_checks = True
         
@@ -475,7 +477,10 @@ class StructuredProof():
 
         print(f"--- Proof checking RESULTS ({len(cmds)} total obligations checked):")
         for r in results:
-            print(r)
+            if r[1] != 0:
+                print(r, "ERROR")
+            else:
+                print(r)
 
 
     def to_apalache_proof_obligations(self):
@@ -744,14 +749,15 @@ class StructuredProof():
             "H_LogMatchingInAppendEntriesMsgs",
             "H_OnePrimaryPerTerm",
             "H_PrimaryHasEntriesItCreated",
-            "H_QuorumsSafeAtTerms"
+            "H_QuorumsSafeAtTerms",
+            # "H_CommitIndexInAppendEntriesImpliesCommittedEntryExists",
 
             # Zab lemmas.
             "H_PrefixConsistency",
             "H_CommittedEntryExistsInNEWLEADERHistory",
             "H_CommittedEntryExistsOnQuorum",
             "H_UniqueLeadership",
-            "H_TxnZxidsUniqueHistoriesAndMessages"
+            "H_TxnZxidsUniqueHistoriesAndMessages",
         ]
 
         if not omit_labels or node.expr in lemmas_to_always_show:
@@ -764,17 +770,17 @@ class StructuredProof():
         seen.add(node.expr)
 
         actions_to_always_show = {
-            "AppendEntriesAction" : "AppendEntriesAction",
-            "AcceptAppendEntriesRequestAppendAction": "AcceptAEReqAppendAction",
+            "AppendEntriesAction" : "AEAction",
+            "AcceptAppendEntriesRequestAppendAction": "AcceptAEAppendAction",
             # "ClientRequestAction",
             # "BecomeLeaderAction"
         }
 
         # Add sub-nodes for each action child.
-        for action in node.children:
+        for ai,action in enumerate(self.actions):
             action_node_id = node.expr + "_" + action
             if omit_labels and action not in actions_to_always_show:
-                label = "A"
+                label = "A_" + str(ai)
             else:
                 if action in actions_to_always_show:
                     label = actions_to_always_show[action].replace("Action", "")
@@ -784,14 +790,22 @@ class StructuredProof():
             # Merge 'UpdateTerm' action nodes for now.
             if action.startswith("UpdateTerm"):
                 action_node_id = node.expr + "_" + "UpdateTermAction"
-                label = "A"
+                label = "A_" + str(ai)
 
             fillcolor="lightgray"
             if proof_status_map is not None and (node.expr, action) in proof_status_map and proof_status_map[(node.expr, action)] != 0:
                 fillcolor = "red"
 
-            dot.node(action_node_id, label=label, style="filled", fillcolor=fillcolor)
-            dot.edge(action_node_id, node.expr)
+            if action in node.children:
+                dot.node(action_node_id, label=label, style="filled", fillcolor=fillcolor)
+                dot.edge(action_node_id, node.expr)
+            # If the action is not in the node's children, we may still add it to the graph in case proof status is red for it.
+            else:
+                if proof_status_map is not None and (node.expr, action) in proof_status_map and proof_status_map[(node.expr, action)] != 0:
+                    # fillcolor = "red"
+                    dot.node(action_node_id, label=label, style="filled", fillcolor=fillcolor)
+                    dot.edge(action_node_id, node.expr)                
+
 
         for action in node.children:
             for c in node.children[action]:
@@ -826,10 +840,18 @@ class StructuredProof():
 
         # Convert to TeX.
         if save_tex:
-            texcode = dot2tex.dot2tex(dot.source, output="dot2tex.log", format='tikz', figpreamble="\Large", autosize=True, crop=False, figonly=True, texmode="math")
-            f = open(tex_out_file, 'w')
-            f.write(texcode)
-            f.close()
+            output_capture = io.StringIO()
+
+            # Use context manager to redirect stdout
+            with contextlib.redirect_stdout(output_capture):
+                import os
+                old_stdout = sys.stdout # backup current stdout
+                sys.stdout = open(os.devnull, "w")
+                texcode = dot2tex.dot2tex(dot.source, debug=True, output="dot2tex.log", format='tikz', figpreamble="\Large", autosize=True, crop=False, figonly=True, texmode="math")
+                sys.stdout = old_stdout # reset old stdout
+                f = open(tex_out_file, 'w')
+                f.write(texcode)
+                f.close()
 
         return dot.source
 
