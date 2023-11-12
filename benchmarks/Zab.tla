@@ -492,8 +492,9 @@ DiscardAndBroadcastNEWEPOCH(i, j, m) ==
         \*                                                  THEN Append(msgs[i][v], m)
         \*                                                  ELSE msgs[i][v] ] ]
            /\ NEWEPOCHmsgs' = NEWEPOCHmsgs \cup {[ mtype  |-> NEWEPOCH,
-                                                   mepoch |-> acceptedEpoch[i],
-                                                   msrc |-> i, mdst |-> to, morder |-> NextMsgOrder(i,to) ] : to \in (new_sid_cepochRecv \cap learners[i]) \ {i}}
+                                                   mepoch |-> acceptedEpoch'[i],
+                                                   msrc |-> i, mdst |-> to, 
+                                                   morder |-> NextMsgOrder(i,to) ] : to \in (new_sid_cepochRecv \cap learners[i]) \ {i}}
 
 \* Leader broadcasts NEWLEADER to all other servers in ackeRecv.
 DiscardAndBroadcastNEWLEADER(i, j, m, toSend) ==
