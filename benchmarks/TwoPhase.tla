@@ -39,7 +39,7 @@ VARIABLES
   \* @type: RM -> Str;
   rmState,       \* $rmState[rm]$ is the state of resource manager RM.
   \* @type: Str;
-  tmState,       \* The state of the transaction manager.
+ tmState,       \* The state of the transaction manager.
   \* @type: Set(RM);
   tmPrepared,    \* The set of RMs from which the TM has received "Prepared" messages
   \* @type: Set( { type: Str, rm: RM } );
@@ -195,7 +195,7 @@ H_CommittedRMImpliesCommitMsg == \A rmi \in RM : ([type |-> "Commit"] \in msgsAb
 
 H_CommitMsgImpliesAllPrepared == ([type |-> "Commit"] \in msgsAbortCommit) => (tmPrepared = RM)
 
-H_CommitMsgImpliesAllRMsPreparedOrCommitted == ([type |-> "Commit"] \in msgsAbortCommit) => \A rmi \in RM : rmState[rmi] \in {"committed", "prepared"}
+H_CommitSentImpliesRMsNotWorking == ([type |-> "Commit"] \in msgsAbortCommit) => \A rmi \in RM : rmState[rmi] \in {"committed", "prepared"}
 
 H_AllPreparedImpliesNoRMsWorking == \A rmi \in RM : (tmPrepared = RM) => ~(rmState[rmi] = "working") 
 
@@ -230,7 +230,7 @@ H_RMAbortedImpliesNoCommitMsg == \A rmi \in RM : (rmState[rmi] = "aborted") => (
 
 H_CommitMsgImpliesTMCommitted == \A rmi \in RM : ([type |-> "Commit"] \in msgsAbortCommit) => tmState = "committed"
 
-H_RMCommittedImpliesOtherRMsPreparedOrCommitted == 
+H_RMCommittedImpliesNoRMsWorking == 
         \A rmi,rmj \in RM : (rmState[rmi] = "committed") => rmState[rmj] \in {"prepared", "committed"}
 
 H_RMWorkingImpliesNoCommitMsg == 

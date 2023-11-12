@@ -146,9 +146,9 @@ committedRMImpliesCommitMsg = StructuredProofNode("CommittedRMImpliesCommitMsg",
 #     tMKnowsPrepareImpliesRMPreparedCommittedOrAborted
 # ]
 
-commitMsgImpliesAllRMsPreparedOrCommitted = StructuredProofNode("CommitMsgImpliesAllRMsPreparedOrCommitted", "H_CommitMsgImpliesAllRMsPreparedOrCommitted")
+commitMsgImpliesAllRMsPreparedOrCommitted = StructuredProofNode("CommitSentImpliesRMsNotWorking", "H_CommitSentImpliesRMsNotWorking")
 
-rMCommittedImpliesOtherRMsPreparedOrCommitted = StructuredProofNode("RMCommittedImpliesOtherRMsPreparedOrCommitted", "H_RMCommittedImpliesOtherRMsPreparedOrCommitted")
+rMCommittedImpliesOtherRMsPreparedOrCommitted = StructuredProofNode("RMCommittedImpliesNoRMsWorking", "H_RMCommittedImpliesNoRMsWorking")
 rMCommittedImpliesOtherRMsPreparedOrCommitted.children = {
     "RMRcvAbortMsgAction": [
         rMCommittedImpliesNoAbortMsg

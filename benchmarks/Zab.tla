@@ -868,29 +868,32 @@ FollowerProcessNEWEPOCH(i, j, newEpochMsg) ==
                           /\ zabState' = [zabState EXCEPT ![i] = SYNCHRONIZATION]
                         \*   /\ UNCHANGED violatedInvariants
                     /\ UNCHANGED <<mesgs, followerVars, learners, cepochRecv, ackeRecv, ackldRecv, state, CEPOCHmsgs, NEWLEADERmsgs, ACKLDmsgs, COMMITLDmsgs, PROPOSEmsgs, ACKmsgs, COMMITmsgs>>
-                 \/ \* 2. Abnormal case - go back to election
-                    /\ ~epochOk
-                    /\ state'    = [state      EXCEPT ![i] = LOOKING]
-                    /\ zabState' = [zabState   EXCEPT ![i] = ELECTION]
-                    /\ connectInfo' = [connectInfo EXCEPT ![i] = NullPoint]
-                    /\ LET leader == connectInfo[i]
-                       IN \*/\ Clean(i, leader)
-                          /\ COMMITmsgs' = {m \in COMMITmsgs : ~((m.msrc = i /\ m.mdst = leader) \/ (m.msrc = leader /\ m.mdst = i))}
-                          /\ CEPOCHmsgs' = {m \in CEPOCHmsgs : ~((m.msrc = i /\ m.mdst = leader) \/ (m.msrc = leader /\ m.mdst = i))}
-                          /\ NEWEPOCHmsgs' = {m \in NEWEPOCHmsgs : ~((m.msrc = i /\ m.mdst = leader) \/ (m.msrc = leader /\ m.mdst = i))}
-                          /\ ACKEPOCHmsgs' = {m \in ACKEPOCHmsgs : ~((m.msrc = i /\ m.mdst = leader) \/ (m.msrc = leader /\ m.mdst = i))}
-                          /\ NEWLEADERmsgs' = {m \in NEWLEADERmsgs : ~((m.msrc = i /\ m.mdst = leader) \/ (m.msrc = leader /\ m.mdst = i))}
-                          /\ ACKLDmsgs' = {m \in ACKLDmsgs : ~((m.msrc = i /\ m.mdst = leader) \/ (m.msrc = leader /\ m.mdst = i))}
-                          /\ COMMITLDmsgs' = {m \in COMMITLDmsgs : ~((m.msrc = i /\ m.mdst = leader) \/ (m.msrc = leader /\ m.mdst = i))}
-                          /\ PROPOSEmsgs' = {m \in PROPOSEmsgs : ~((m.msrc = i /\ m.mdst = leader) \/ (m.msrc = leader /\ m.mdst = i))}
-                          /\ ACKmsgs' = {m \in ACKmsgs : ~((m.msrc = i /\ m.mdst = leader) \/ (m.msrc = leader /\ m.mdst = i))}
-                          /\ COMMITmsgs' = {m \in COMMITmsgs : ~((m.msrc = i /\ m.mdst = leader) \/ (m.msrc = leader /\ m.mdst = i))}
-                          \* /\ RemoveLearner(leader, i)
-                          /\ learners'   = [learners   EXCEPT ![leader] = learners[leader] \ {i}] 
-                          /\ cepochRecv' = [cepochRecv EXCEPT ![leader] = RemoveCepochRecv(cepochRecv[leader], i) ]
-                          /\ ackeRecv'   = [ackeRecv   EXCEPT ![leader] = RemoveAckeRecv(ackeRecv[leader], i) ]
-                          /\ ackldRecv'  = [ackldRecv  EXCEPT ![leader] = RemoveAckldRecv(ackldRecv[leader], i) ]
-                    /\ UNCHANGED <<mesgs, acceptedEpoch>>
+                \*
+                \* Why does follower necessarily need to revert to election in this case?
+                \*
+                \*  \/ \* 2. Abnormal case - go back to election
+                \*     /\ ~epochOk
+                \*     /\ state'    = [state      EXCEPT ![i] = LOOKING]
+                \*     /\ zabState' = [zabState   EXCEPT ![i] = ELECTION]
+                \*     /\ connectInfo' = [connectInfo EXCEPT ![i] = NullPoint]
+                \*     /\ LET leader == connectInfo[i]
+                \*        IN \*/\ Clean(i, leader)
+                \*           /\ COMMITmsgs' = {m \in COMMITmsgs : ~((m.msrc = i /\ m.mdst = leader) \/ (m.msrc = leader /\ m.mdst = i))}
+                \*           /\ CEPOCHmsgs' = {m \in CEPOCHmsgs : ~((m.msrc = i /\ m.mdst = leader) \/ (m.msrc = leader /\ m.mdst = i))}
+                \*           /\ NEWEPOCHmsgs' = {m \in NEWEPOCHmsgs : ~((m.msrc = i /\ m.mdst = leader) \/ (m.msrc = leader /\ m.mdst = i))}
+                \*           /\ ACKEPOCHmsgs' = {m \in ACKEPOCHmsgs : ~((m.msrc = i /\ m.mdst = leader) \/ (m.msrc = leader /\ m.mdst = i))}
+                \*           /\ NEWLEADERmsgs' = {m \in NEWLEADERmsgs : ~((m.msrc = i /\ m.mdst = leader) \/ (m.msrc = leader /\ m.mdst = i))}
+                \*           /\ ACKLDmsgs' = {m \in ACKLDmsgs : ~((m.msrc = i /\ m.mdst = leader) \/ (m.msrc = leader /\ m.mdst = i))}
+                \*           /\ COMMITLDmsgs' = {m \in COMMITLDmsgs : ~((m.msrc = i /\ m.mdst = leader) \/ (m.msrc = leader /\ m.mdst = i))}
+                \*           /\ PROPOSEmsgs' = {m \in PROPOSEmsgs : ~((m.msrc = i /\ m.mdst = leader) \/ (m.msrc = leader /\ m.mdst = i))}
+                \*           /\ ACKmsgs' = {m \in ACKmsgs : ~((m.msrc = i /\ m.mdst = leader) \/ (m.msrc = leader /\ m.mdst = i))}
+                \*           /\ COMMITmsgs' = {m \in COMMITmsgs : ~((m.msrc = i /\ m.mdst = leader) \/ (m.msrc = leader /\ m.mdst = i))}
+                \*           \* /\ RemoveLearner(leader, i)
+                \*           /\ learners'   = [learners   EXCEPT ![leader] = learners[leader] \ {i}] 
+                \*           /\ cepochRecv' = [cepochRecv EXCEPT ![leader] = RemoveCepochRecv(cepochRecv[leader], i) ]
+                \*           /\ ackeRecv'   = [ackeRecv   EXCEPT ![leader] = RemoveAckeRecv(ackeRecv[leader], i) ]
+                \*           /\ ackldRecv'  = [ackldRecv  EXCEPT ![leader] = RemoveAckldRecv(ackldRecv[leader], i) ]
+                \*     /\ UNCHANGED <<mesgs, acceptedEpoch>>
         /\ UNCHANGED <<currentEpoch, history, lastCommitted, sendCounter, electionVars>>
 
 AckeRecvQuorumFormed(i) == LET sid_ackeRecv == {a.sid: a \in ackeRecv[i]} IN IsQuorum(sid_ackeRecv)
@@ -1962,6 +1965,18 @@ H_LeaderInBroadcastImpliesHasAllEntriesInEpoch ==
     /\ LeaderInBroadcastImpliesAllAckERecvEntriesInEpoch
     /\ LeaderInBroadcastImpliesAllHistoryEntriesInEpoch
 
+H_ACKEPOCHImpliesSenderSafeAtEpoch == 
+    /\ \A m \in ACKEPOCHmsgs : 
+        acceptedEpoch[m.msrc] >= m.mepoch
+    /\ \A s \in Server : \A a \in ackeRecv[s] : acceptedEpoch[a.sid] >= a.peerLastEpoch
+
+H_EstablishedLeaderImpliesSafeAtCurrentEpoch == 
+   \A i \in Server:
+        ( /\ IsLeader(i) 
+          /\ zabState[i] \in {SYNCHRONIZATION, BROADCAST}) =>
+            /\ \E Q \in Quorums : \A n \in Q : acceptedEpoch[n] >= acceptedEpoch[i]
+
+
 \* If a leader is in BROADCAST, no NEWLEADER messages should be in-flight
 H_LeaderinBROADCASTImpliesNoNEWLEADERorACKEInFlight == 
     \A s \in Server : 
@@ -2039,6 +2054,7 @@ H_LeaderInBroadcastImpliesNoNEWEPOCHInFlight ==
         /\ \A m \in NEWEPOCHmsgs :
             /\ m.mepoch >= currentEpoch[s]
             /\ m.mepoch >= acceptedEpoch[s]
+            /\ currentEpoch[s] <= acceptedEpoch[s]
 
 H_PROPOSEMsgInFlightImpliesNodesInBROADCAST == 
     \A m \in PROPOSEmsgs :
@@ -2058,6 +2074,7 @@ H_ACKMsgInFlightImpliesNodesInBROADCAST ==
             /\ zabState[m.mdst] = BROADCAST
             /\ IsFollower(m.msrc)
             /\ IsLeader(m.mdst)
+            \* /\ NEWEPOCHmsgs = {}
 
 H_CommittedEntryExistsInNEWLEADERHistory ==
     \A s \in Server : 
@@ -2159,7 +2176,8 @@ H_NEWEPOCHFromNodeImpliesLEADING ==
     \A m \in NEWEPOCHmsgs :
         IsLeader(m.msrc)
 
-AckLDRecvServers(i) == {v.sid : v \in {a \in ackldRecv[i]: TRUE }}
+\* AckLDRecvServers(i) == {v.sid : v \in {a \in ackldRecv[i]: TRUE }}
+AckLDRecvServers(i) == {a.sid : a \in ackldRecv[i]}
 
 
 H_AckLDRecvsAreConnected == 
@@ -2181,6 +2199,23 @@ H_ACKLDMsgSentByFollowerImpliesEmptyBuffer ==
         \* (PendingACKLD(i,j)) => 
             /\ ~(m.msrc = i /\ m.mdst = j) 
             /\ state[m.msrc] = FOLLOWING
+
+H_FollowerCantBeLearnerToDifferentLeaders == 
+    \A i,la,lb \in Server : 
+        (/\ IsFollower(i)
+         /\ IsLeader(la)
+         /\ IsLeader(lb)
+         /\ la # lb) => 
+            ~(i \in learners[la] /\ i \in learners[lb])
+
+H_LeaderContainsSelfAsLearner == 
+    \A s \in Server : IsLeader(s) => s \in learners[s]
+
+H_LeaderImpliesLearnersFollowing == 
+    \A i \in Server :
+    (/\ IsLeader(i) 
+     /\ zabState[i] \in {SYNCHRONIZATION, BROADCAST}) =>
+        /\ \A j \in learners[i] : i # j => state[j] # LEADING
 
 H_LeaderInBROADCASTImpliesLearnerInBROADCAST == 
     \A i,j \in Server : 
