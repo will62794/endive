@@ -328,10 +328,6 @@ committedEntryExistsInACKEPOCHQuorumHistory.children = {
     "LeaderProcessACKAction": [
         ACKMsgInFlightImpliesNodesInBROADCAST
     ],
-    "LeaderProcessACKEPOCHHasBroadcastAction": [
-        committedEntryExistsOnQuorum,
-        ACKEPOCHHistoryContainedInFOLLOWINGSender
-    ],
     "LeaderProcessACKLDHasntBroadcastAction": [
         ACKEPOCHHistoryContainedInFOLLOWINGSender
     ],
