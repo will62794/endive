@@ -203,9 +203,9 @@ PROPOSEMsgInFlightImpliesNodesInBROADCAST.children = {
         # LeaderInBROADCASTImpliesAckLDQuorum,
         LeaderInBROADCASTImpliesLearnerInBROADCAST
     ],
-    "FollowerProcessNEWEPOCHAction": [
-        LeaderInBroadcastImpliesNoNEWEPOCHInFlight
-    ]
+    # "FollowerProcessNEWEPOCHAction": [
+        # LeaderInBroadcastImpliesNoNEWEPOCHInFlight
+    # ]
 }
 
 ACKMsgInFlightImpliesNodesInBROADCAST.children = {
