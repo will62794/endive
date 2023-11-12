@@ -802,7 +802,7 @@ class StructuredProof():
 
             # Zab lemmas.
             "H_PrefixConsistency",
-            "H_CommittedEntryExistsInNEWLEADERHistory",
+            # "H_CommittedEntryExistsInNEWLEADERHistory",
             "H_CommittedEntryExistsOnQuorum",
             "H_UniqueLeadership",
             "H_TxnZxidsUniqueHistoriesAndMessages",

@@ -43,6 +43,8 @@ leaderInDiscoveryImpliesNoNEWLEADERMsgs.children = {
     # ]
 }
 
+LeaderInBroadcastImpliesNoNEWEPOCHInFlight = make_node("H_LeaderInBroadcastImpliesNoNEWEPOCHInFlight")
+
 PROPOSEMsgInFlightImpliesNodesInBROADCAST = make_node("H_PROPOSEMsgInFlightImpliesNodesInBROADCAST")
 
 NEWLEADERMsgHistAndStateInv = make_node("H_NEWLEADERMsgHistAndStateInv")
@@ -103,7 +105,14 @@ txnZxidsUniqueHistoriesAndMessagesInPROPOSEMessages = make_node("H_txnZxidsUniqu
 
 txnZxidsUniqueHistoriesAndMessagesBetweenLocalHistoryAndPROPOSEMessages = make_node("H_txnZxidsUniqueHistoriesAndMessagesBetweenLocalHistoryAndPROPOSEMessages")
 
+UniqueEstablishedLeaderImpliesSafeAtEpoch = make_node("H_UniqueEstablishedLeaderImpliesSafeAtEpoch")
+
 uniqueLeadership = make_node("H_UniqueLeadership")
+uniqueLeadership.children = {
+    "LeaderProcessACKEPOCHHasntBroadcastAction": [
+        UniqueEstablishedLeaderImpliesSafeAtEpoch
+    ],
+}   
 
 NEWLEADERMsgImpliesNoLogEntriesInEpoch = make_node("H_NEWLEADERMsgImpliesNoLogEntriesInEpoch")
 NEWLEADERMsgImpliesNoLogEntriesInEpoch.children = {
@@ -179,6 +188,9 @@ PROPOSEMsgInFlightImpliesNodesInBROADCAST.children = {
     "LeaderBroadcastPROPOSEAction": [
         # LeaderInBROADCASTImpliesAckLDQuorum,
         LeaderInBROADCASTImpliesLearnerInBROADCAST
+    ],
+    "FollowerProcessNEWEPOCHAction": [
+        LeaderInBroadcastImpliesNoNEWEPOCHInFlight
     ]
 }
 
@@ -444,7 +456,7 @@ committedEntryExistsInLeaderHistory.children = {
         PROPOSEMsgSentByNodeImpliesZxidInLog
     ],
     "LeaderProcessACKLDHasntBroadcastAction": [
-        UniqueEstablishedLeader
+        uniqueLeadership
     ]
 }
 

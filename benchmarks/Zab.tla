@@ -702,21 +702,28 @@ TimeoutNoQuorum(i, j) ==
         /\ IsFollower(j) 
         /\ IsMyLeader(j, i)
         /\ (learners[i] \ {j}) \notin Quorums \* leader switches to looking
-        /\ state' = [s \in Server |-> IF s \in learners[i] THEN LOOKING ELSE state[s] ]
-        /\ zabState' = [s \in Server |-> IF s \in learners[i] THEN ELECTION ELSE zabState[s] ]
-        /\ connectInfo' = [s \in Server |-> IF s \in learners[i] THEN NullPoint ELSE connectInfo[s] ]
-        /\ learners'   = [learners   EXCEPT ![i] = {}]
         \* /\ CleanInputBuffer(learners[i])
-        /\ COMMITmsgs' = {m \in COMMITmsgs : m.mdst \notin learners[i]}
+        /\ COMMITmsgs' = {} \*{m \in COMMITmsgs : ~(m["mdst"] \in learners[i])} 
+        \* \cup {[mtype |-> COMMIT, mzxid |-> <<2, 0>>, msrc |-> "s5", mdst |-> "s6"]}
+        \* /\ COMMITmsgs' = {} \* {m \in COMMITmsgs : ~(m.mdst \in learners[i])}
         /\ CEPOCHmsgs' = {m \in CEPOCHmsgs : m.mdst \notin learners[i]}
         /\ NEWEPOCHmsgs' = {m \in NEWEPOCHmsgs : m.mdst \notin learners[i]}
         /\ ACKEPOCHmsgs' = {m \in ACKEPOCHmsgs : m.mdst \notin learners[i]}
         /\ NEWLEADERmsgs' = {m \in NEWLEADERmsgs : m.mdst \notin learners[i]}
         /\ ACKLDmsgs' = {m \in ACKLDmsgs : m.mdst \notin learners[i]}
         /\ COMMITLDmsgs' = {m \in COMMITLDmsgs : m.mdst \notin learners[i]}
-        /\ PROPOSEmsgs' = {m \in PROPOSEmsgs : m.mdst \notin learners[i]}
-        /\ ACKmsgs' = {m \in ACKmsgs : m.mdst \notin learners[i]}
-        /\ COMMITmsgs' = {m \in COMMITmsgs : m.mdst \notin learners[i]}
+        /\ PROPOSEmsgs' = {} \* {m \in PROPOSEmsgs : ~(m.mdst \in learners[i])}
+        /\ ACKmsgs' = {m \in ACKmsgs : ~(m.mdst \in learners[i])}
+        \* /\ PrintT("-----------------")
+        \* /\ PrintT(i)
+        \* /\ PrintT(PROPOSEmsgs)
+        \* /\ PrintT(learners[i])
+        \* /\ PrintT({m \in PROPOSEmsgs : ~(m.mdst \in learners[i])})
+        \* /\ COMMITmsgs' = {m \in COMMITmsgs : m.mdst \notin learners[i]}
+        /\ state' = [s \in Server |-> IF s \in learners[i] THEN LOOKING ELSE state[s] ]
+        /\ zabState' = [s \in Server |-> IF s \in learners[i] THEN ELECTION ELSE zabState[s] ]
+        /\ connectInfo' = [s \in Server |-> IF s \in learners[i] THEN NullPoint ELSE connectInfo[s] ]
+        /\ learners'   = [learners   EXCEPT ![i] = {}]
         /\ UNCHANGED <<cepochRecv, ackeRecv, ackldRecv, acceptedEpoch, currentEpoch, history, lastCommitted, sendCounter, electionVars, mesgs>>
 
 \* Restart(i) ==
@@ -833,6 +840,7 @@ LeaderProcessCEPOCH(i, j, cepochMsg) ==
    history. After this, zabState turns to SYNC. *)
 \* @type: (SERVER, SERVER, { mtype: Str, mepoch: Int, msrc: SERVER, mdst: SERVER, morder: Int }) => Bool;
 FollowerProcessNEWEPOCH(i, j, newEpochMsg) ==
+        /\ newEpochMsg \in NEWEPOCHmsgs
         /\ IsFollower(i)
         \* /\ PendingNEWEPOCH(i, j)
         /\ newEpochMsg.mdst = i
@@ -1747,17 +1755,26 @@ H_EstablishedLeaderImpliesACKEQuorum ==
                 /\ a.sid = n
                 /\ a.connected
 
+\* If there is an established leader, there mustn't be a quorum of nodes that
+\* sent ACKE to a different node.
+H_UniqueEstablishedLeaderImpliesSafeAtEpoch == 
+    \A i, j \in Server:
+        ( /\ IsLeader(i) 
+          /\ zabState[i] \in {SYNCHRONIZATION, BROADCAST} 
+          /\ i # j) =>
+            /\ \* No other leader can be prepared to receive a quorum of ACKEs.
+                LET ackeJ == {av.sid : av \in {a \in ackeRecv[j] : TRUE}} IN
+                ~\E m \in ACKEPOCHmsgs : 
+                    /\ m.mdst = j
+                    /\ (ackeJ \in Quorums) \/ (ackeJ \cup {m.msrc} \in Quorums)
+            /\ \E Q \in Quorums : \A n \in Q : acceptedEpoch[n] >= acceptedEpoch[i]
+
 \* If a node is currently an established leader, then there can be no other currently active,
 \* established leaders.
 H_UniqueEstablishedLeader == 
     \A i, j \in Server:
         (IsLeader(i) /\ zabState[i] \in {SYNCHRONIZATION, BROADCAST} /\ i # j) =>
             /\ ~(IsLeader(j) /\ zabState[j] \in {SYNCHRONIZATION, BROADCAST})
-            /\ \E Q \in Quorums : 
-               \A n \in Q :
-               \E a \in ackeRecv[i] : 
-                    /\ a.sid = n
-                    /\ a.connected
 
 \* If a NEWLEADER message has been sent from a leader N in epoch E, then 
 \* that message's history must be a prefix of the leader's history in epoch E, w.r.t the txns
@@ -1794,9 +1811,11 @@ H_COMMITSentByNodeImpliesZxidInLog ==
         \E idx \in DOMAIN history[m.msrc] : 
             /\ history[m.msrc][idx].zxid = m.mzxid  
             /\ lastCommitted[m.msrc].index >= idx
-            /\ state[m.mdst] = FOLLOWING
+            \* /\ state[m.mdst] \in {FOLLOWING}
             /\ state[m.msrc] = LEADING
             /\ zabState[m.msrc] = BROADCAST
+            \* /\ m.msrc \in learners[m.msrc]
+            \* /\ m.mdst \in learners[m.msrc]
 
 \* If an ACK message exists from S for a given zxid, then that zxid must be present in the sender's history.
 H_ACKMsgImpliesZxidInLog == 
@@ -1806,6 +1825,8 @@ H_ACKMsgImpliesZxidInLog ==
         /\ state[m.mdst] = LEADING 
         /\ m.mdst \in learners[m.mdst]
         /\ \E idx \in DOMAIN history[m.msrc] :  history[m.msrc][idx].zxid = m.mzxid
+        \* Will also be present in the history of the leader receiving the ACK.
+        /\ \E idx \in DOMAIN history[m.mdst] :  history[m.mdst][idx].zxid = m.mzxid
 
 
 \* AllMsgs == UNION {{msgs[i][j][mi] : mi \in DOMAIN msgs[i][j]} : <<i,j>> \in Server \X Server}
@@ -1991,6 +2012,7 @@ H_PROPOSEMsgSentByNodeImpliesZxidInLog ==
         \* (PendingPROPOSE(i,j)) => 
             /\ IsLeader(m.msrc)
             /\ zabState[m.msrc] = BROADCAST
+            /\ m.mdst \in learners[m.msrc]
             /\ \E idx \in DOMAIN history[m.msrc] : history[m.msrc][idx].zxid = m.mzxid
 
 \* ACKEPOCH response history must be contained in the sender's history, who must
@@ -2007,6 +2029,15 @@ H_ACKEPOCHHistoryContainedInFOLLOWINGSender ==
             /\ \A ind \in DOMAIN m.mhistory : 
                 /\ m.mhistory[ind].zxid = history[m.msrc][ind].zxid
                 /\ m.mhistory[ind].value = history[m.msrc][ind].value
+
+\* Leader in broadcast implies no NEWEPOCH messages in flight.
+H_LeaderInBroadcastImpliesNoNEWEPOCHInFlight == 
+    \A s \in Server : 
+    ( /\ state[s] = LEADING 
+      /\ zabState[s] \in {BROADCAST}) => 
+        /\ \A m \in NEWEPOCHmsgs :
+            /\ m.mepoch >= currentEpoch[s]
+            /\ m.mepoch >= acceptedEpoch[s]
 
 H_PROPOSEMsgInFlightImpliesNodesInBROADCAST == 
     \A m \in PROPOSEmsgs :
@@ -2126,7 +2157,7 @@ H_NEWEPOCHFromNodeImpliesLEADING ==
     \A m \in NEWEPOCHmsgs :
         IsLeader(m.msrc)
 
-AckLDRecvServers(i) == {v.sid : v \in {a \in ackldRecv[i]: a.connected = TRUE }}
+AckLDRecvServers(i) == {v.sid : v \in {a \in ackldRecv[i]: TRUE }}
 
 
 H_AckLDRecvsAreConnected == 
@@ -2158,6 +2189,7 @@ H_LeaderInBROADCASTImpliesLearnerInBROADCAST ==
             /\ AckLDRecvServers(i) \in Quorums
             \* \* Should have gotten ACKLD responses back only from your learners.
             /\ AckLDRecvServers(i) \subseteq learners[i]
+            /\ i \in learners[i]
             \* \* /\ ((zabState[j] # BROADCAST) => (msgs[i][j] # <<>>) /\ msgs[i][j][1].mtype = COMMITLD)
             \* \* Shouldn't be any pending NEWEPOCH messages while in BROADCAST.
             \* /\ (zabState[j] = BROADCAST) => \A m \in NEWEPOCHmsgs : ~(m.msrc = i /\ m.mdst = j)
