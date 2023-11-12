@@ -186,13 +186,15 @@ LeaderinBROADCASTImpliesNoNEWLEADERorACKEInFlight.children = {
     ]
 }
 
+# LeaderImpliesLearnersFollowing = make_node("H_LeaderImpliesLearnersFollowing")
+
 LeaderInBROADCASTImpliesLearnerInBROADCAST = make_node("H_LeaderInBROADCASTImpliesLearnerInBROADCAST")
 LeaderInBROADCASTImpliesLearnerInBROADCAST.children = {
     "FollowerProcessPROPOSEAction": [
         PROPOSEMsgInFlightImpliesNodesInBROADCAST
     ],
     "LeaderProcessACKLDHasntBroadcastAction": [
-        # ACKLDMsgSentByFollowerImpliesEmptyBuffer
+        ACKLDMsgSentByFollowerImpliesEmptyBuffer
     ]
 }
 
