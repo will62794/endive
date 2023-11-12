@@ -1035,6 +1035,7 @@ LeaderProcessACKEPOCHHasntBroadcast(i, j, ackEpochMsg) ==
 -----------------------------------------------------------------------------    
 (* Follower receives NEWLEADER. Update f.a and history. *)
 FollowerProcessNEWLEADER(i, j, newLeaderMsg) ==
+        /\ newLeaderMsg \in NEWLEADERmsgs
         /\ IsFollower(i)
         \* /\ PendingNEWLEADER(i, j)
         /\ newLeaderMsg.mdst = i
@@ -2096,6 +2097,7 @@ H_ACKLDMsgImpliesZxidInLog ==
             /\ state[m.msrc] = FOLLOWING
             /\ state[m.mdst] = LEADING
             /\ zabState[m.msrc] \in {SYNCHRONIZATION, BROADCAST}
+            /\ zabState[m.mdst] \in {SYNCHRONIZATION, BROADCAST}
 
 \* NEWLEADER history exists on a quorum.
 \* WRONG!
