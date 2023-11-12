@@ -434,7 +434,8 @@ committedEntryExistsInLeaderHistory.children = {
         nodeHistoryBoundByLastCommittedIndex
     ],
     "LeaderProcessACKEPOCHHasntBroadcastAction": [
-        committedEntryExistsInACKEPOCHQuorumHistory
+        committedEntryExistsInACKEPOCHQuorumHistory,
+        nodeHistoryBoundByLastCommittedIndex
     ],
     "LeaderProcessACKAction": [
         nodeHistoryBoundByLastCommittedIndex,
