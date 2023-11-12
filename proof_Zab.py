@@ -347,6 +347,9 @@ committedEntryExistsInACKEPOCHQuorumHistory.children = {
         committedEntryExistsOnQuorum,
         ACKEPOCHHistoryContainedInFOLLOWINGSender
     ],
+    "FollowerProcessPROPOSEAction": [
+        nodeHistoryBoundByLastCommittedIndex
+    ]
 }   
 
 # txnZxidsUniqueHistoriesAndMessagesBetweenLocalHistoryAndMessages = make_node("H_txnZxidsUniqueHistoriesAndMessagesBetweenLocalHistoryAndMessages")
