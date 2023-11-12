@@ -305,6 +305,9 @@ NodeLOOKINGImpliesEmptyInputBuffer.children = {
     "FollowerProcessNEWEPOCHAction": [
         FollowersHaveNoMessagesSentToSelf
     ],
+    "FollowerProcessPROPOSEAction": [
+        NodeLOOKINGImpliesEmptyInputBuffer
+    ]
     # "LeaderProcessACKLDHasntBroadcastAction": [
     #     NodeLOOKINGImpliesELECTIONorDISCOVERY
     # ]
