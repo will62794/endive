@@ -708,12 +708,12 @@ TimeoutNoQuorum(i, j) ==
         \* /\ COMMITmsgs' = {} \* {m \in COMMITmsgs : ~(m.mdst \in learners[i])}
         /\ CEPOCHmsgs' = {m \in CEPOCHmsgs : m.mdst \notin learners[i]}
         /\ NEWEPOCHmsgs' = {m \in NEWEPOCHmsgs : m.mdst \notin learners[i]}
-        /\ ACKEPOCHmsgs' = {m \in ACKEPOCHmsgs : m.mdst \notin learners[i]}
-        /\ NEWLEADERmsgs' = {m \in NEWLEADERmsgs : m.mdst \notin learners[i]}
-        /\ ACKLDmsgs' = {m \in ACKLDmsgs : m.mdst \notin learners[i]}
+        /\ ACKEPOCHmsgs' = {} \* {m \in ACKEPOCHmsgs : m.mdst \notin learners[i]}
+        /\ NEWLEADERmsgs' = {} \* {m \in NEWLEADERmsgs : m.mdst \notin learners[i]}
+        /\ ACKLDmsgs' = {} \* {m \in ACKLDmsgs : m.mdst \notin learners[i]}
         /\ COMMITLDmsgs' = {m \in COMMITLDmsgs : m.mdst \notin learners[i]}
         /\ PROPOSEmsgs' = {} \* {m \in PROPOSEmsgs : ~(m.mdst \in learners[i])}
-        /\ ACKmsgs' = {m \in ACKmsgs : ~(m.mdst \in learners[i])}
+        /\ ACKmsgs' = {} \* {m \in ACKmsgs : ~(m.mdst \in learners[i])}
         \* /\ PrintT("-----------------")
         \* /\ PrintT(i)
         \* /\ PrintT(PROPOSEmsgs)
