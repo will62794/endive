@@ -61,7 +61,8 @@ cp benchmarks/Zab_TLC.tla ${target_dir}/benchmarks
 # cp benchmarks/AsyncRaft_ApaIndProofCheck.tla ${target_dir}/benchmarks
 
 # Copy TLC and Apalache binaries.
-cp -r benchmarks/apalache $target_dir/benchmarks
+# cp -r benchmarks/apalache $target_dir/benchmarks
+cp -r /Users/willyschultz/Dropbox/PhD/Research/artifacts/apalache-0.43.0 $target_dir/benchmarks
 cp benchmarks/tla2tools-checkall.jar $target_dir/benchmarks
 
 # Zip it up.

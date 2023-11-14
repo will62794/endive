@@ -2414,7 +2414,7 @@ class InductiveInvGen():
 
         if self.proof_tree_cmd and self.proof_tree_cmd[0] == "check_proof_apalache":
             print("Checking all proof obligations with Apalache.")
-            proof.apalache_check_all_nodes()
+            proof.apalache_check_all_nodes(save_dot=self.save_dot)
             return
 
         proof.save_proof(include_dot=self.save_dot)

@@ -347,7 +347,7 @@ class StructuredProof():
 
         self.current_config_instance_index = -1
 
-        self.save_tex = False
+        self.save_tex = True
 
         if load_from_obj:
             self.load_from(load_from_obj)
@@ -421,7 +421,7 @@ class StructuredProof():
         f.close()
 
 
-    def apalache_check_all_nodes(self):
+    def apalache_check_all_nodes(self, save_dot=False):
         # Save Apalache proof obligations to own spec file.
         self.to_apalache_proof_obligations()
 
@@ -516,7 +516,8 @@ class StructuredProof():
         for s in status_map:
             print(s, status_map[s])
 
-        self.save_as_dot(f"benchmarks/{self.specname}_proof_with_status.dot", omit_labels=True, save_tex=True, proof_status_map=status_map)
+        if save_dot:
+            self.save_as_dot(f"benchmarks/{self.specname}_proof_with_status.dot", omit_labels=True, proof_status_map=status_map)
 
         print(f"--- Proof checking RESULTS ({len(cmds)} total obligations checked, for {len(nodes)} lemmas):")
         error_found = False
