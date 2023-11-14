@@ -17,9 +17,9 @@ This repository also contains binaries for both the TLC and Apalache model check
 You can load the proof graph for each protocol from our benchmark set by running the following commands from the root directory of this repository.
 
 ```
-python3 indigo.py --spec benchmarks/<SPECNAME> --seed 42 --num_simulate_traces 30000 --tlc_workers 7 --proof_tree_mode --interactive --max_proof_node_ctis 20 --override_num_cti_workers 5 --apalache_smt_timeout_secs 125  --proof_tree_cmd reload_proof_struct --debug --target_sample_time_limit_ms 28000 --target_sample_states 20000 --proof_struct_tag no_truncate --k_cti_induction_depth 1
+python3 indigo.py --spec benchmarks/<SPECNAME> --seed 42 --num_simulate_traces 30000 --tlc_workers 4 --proof_tree_mode --interactive --max_proof_node_ctis 20 --override_num_cti_workers 3  --proof_tree_cmd reload_proof_struct --debug --target_sample_time_limit_ms 25000 --target_sample_states 20000 --k_cti_induction_depth 1
 ```
-where `<SPECNAME>` is the name of a protocol benchmark and its corresponding completed proof graph to load. You can load the following specs, which correspond to those from Table of our paper:
+where `<SPECNAME>` is the name of a protocol benchmark and its corresponding proof graph to load. You can load the following specs, which correspond to those from Table of our paper:
 
 - `SimpleConsensus`
 - `TwoPhase`

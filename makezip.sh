@@ -45,6 +45,7 @@ cp benchmarks/TwoPhase.config.json ${target_dir}/benchmarks
 cp benchmarks/AsyncRaft.tla ${target_dir}/benchmarks
 cp benchmarks/AsyncRaft.config.json ${target_dir}/benchmarks
 cp benchmarks/AsyncRaft_TLC.tla ${target_dir}/benchmarks
+cp benchmarks/Apalache.tla ${target_dir}/benchmarks
 # cp benchmarks/AsyncRaft_ApasIndProofCheck.tla ${target_dir}/benchmarks
 
 # Zab.
