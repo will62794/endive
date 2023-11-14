@@ -438,8 +438,14 @@ class StructuredProof():
         proc = subprocess.Popen(clean_cmd, shell=True, stderr=subprocess.PIPE, cwd="benchmarks")
         exitcode = proc.wait()
 
-        # nodes = nodes[:2]
-        # nodes = [n for n in nodes if n.expr == "H_VoteGrantedImpliesVoteResponseMsgConsistent"]
+        # nodes = nodes[:8]
+        # Just the 3 nodes that we expect to have breakages in AsyncRaft.
+        filtered = [
+            "H_NoLogDivergence",    
+            "H_CommitIndexCoveredOnQuorum", 
+            "H_CommitIndexInAppendEntriesImpliesCommittedEntryExists"
+        ]
+        # nodes = [n for n in nodes if n.expr in filtered]
 
         do_per_action_checks = True
         
