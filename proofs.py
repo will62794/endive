@@ -858,6 +858,13 @@ class StructuredProof():
             "RMRcvAbortMsgAction": "RMRcvAbortMsgAction"
         }
 
+        edges_to_highlight = [
+            ("H_LogMatching",("H_LogMatchingAppendEntries", "AppendEntriesAction")),
+            ("H_LogMatchingAppendEntries",("H_LogMatching", "AcceptAppendEntriesRequestAppendAction")),
+            # ("H_LeaderMatchIndexBound", "HandleAppendEntriesResponseAction"),
+            # ("H_QuorumsSafeAtTerms", "BecomeLeaderAction")
+        ]
+
         # Add sub-nodes for each action child.
         for ai,action in enumerate(self.actions):
             action_node_id = node.expr + "_" + action
@@ -887,17 +894,22 @@ class StructuredProof():
                 fillcolor = "orange"
 
             if action in node.children:
-                style = f"fill={fillcolor}"
+                # style = f"fill={fillcolor}"
+                style = f"fill={fillcolor},proofactionedge"
                 if slice_label != "":
                     style += ",label=" + slice_label
+                edgestyle = "proofactionedge"
+                if (node.expr, action) in [x[1] for x in edges_to_highlight]:
+                    edgestyle += ",edgehighlight"
                 dot.node(action_node_id, label=label, style=style, fillcolor=fillcolor)
-                dot.edge(action_node_id, node.expr, style="proofactionedge")
+                dot.edge(action_node_id, node.expr, style=edgestyle)
             # If the action is not in the node's children, we may still add it to the graph in case proof status is red for it.
             else:
                 if proof_status_map is not None and (node.expr, action) in proof_status_map and proof_status_map[(node.expr, action)] != 0:
                     # fillcolor = "red"
+                    style = "proofactionedge"
                     dot.node(action_node_id, label=label, style="filled", fillcolor=fillcolor)
-                    dot.edge(action_node_id, node.expr, style="proofactionedge")                
+                    dot.edge(action_node_id, node.expr, style=style)                
 
 
         for action in node.children:
@@ -906,7 +918,10 @@ class StructuredProof():
                 if action.startswith("UpdateTerm"):
                     action_node_id = node.expr + "_" + "UpdateTermAction"
                 # dot.edge(c.expr, node.expr)
-                dot.edge(c.expr, action_node_id, style="prooflemmaedge")
+                style = "prooflemmaedge"
+                if (c.expr, (node.expr, action)) in edges_to_highlight:
+                    style += ",edgehighlight"
+                dot.edge(c.expr, action_node_id, style=style)
                 self.add_node_to_dot_graph(dot, c, seen=seen, omit_labels=omit_labels, proof_status_map=proof_status_map)
 
 
