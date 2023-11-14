@@ -36,7 +36,7 @@ For each protocol and proof graph, you can independently check that all nodes of
 
 To check the proof for a protocol, you can run the following command:
 ```
-python3 indigo.py --spec benchmarks/<SPECNAME> --proof_tree_mode --interactive  --apalache_smt_timeout_secs 125 --proof_tree_cmd check_proof_apalache
+python3 indigo.py --spec benchmarks/<SPECNAME> --proof_tree_mode --interactive --proof_tree_cmd check_proof_apalache
 ```
 where `<SPECNAME>` is the name of the protocol benchmark. This should run Apalache on all inductive proof obligations for a given proof graph in parallel. Upon successful completion you should see a message reported like
 
@@ -46,7 +46,7 @@ No errors found in proof checking! (120 obligations checked, for 8 lemmas).
 In our tests, running on a 2020 M1 Macbook Air, approximate proof checking times for each protocol was as follows:
 
 - `SimpleConsensus`: 73 secs.
-- `TwoPhase`: 72 secs.
+- `TwoPhase`: 184 secs.
 - `AbstractRaft`: 969 secs. (16 minutes)
 - `AsyncRaft`: 6592 secs. (~2 hours)
 - `Zab`: (TODO)
