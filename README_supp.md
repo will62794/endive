@@ -32,7 +32,7 @@ checking proof obligations for each node, and viewing local CTIs for invalid nod
 
 ## Checking the Proof Graphs
 
-For each protocol and proof graph, you can independently check that all nodes of its proof graph are locally valid. For this we use the [Apalache symoblic model checker](https://github.com/informalsystems/apalache), which is able to produce complete proofs of inductive invariants for bounded protocol parameters.
+For each protocol and proof graph, you can independently check that all nodes of its proof graph are locally valid. For this we use the [Apalache symbolic model checker](https://github.com/informalsystems/apalache), which is able to produce complete proofs of inductive invariants for bounded protocol parameters.
 
 To check the proof for a protocol, you can run the following command:
 ```
