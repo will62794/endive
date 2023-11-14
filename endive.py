@@ -2438,7 +2438,7 @@ class InductiveInvGen():
                     return flask.send_from_directory('benchmarks', f"{self.specname}.proof.html")
                 return flask.send_from_directory('benchmarks', path)
 
-            @app.route('/getProofGraph')
+            @app.route('/api/getProofGraph')
             def getProofGraph():
                 proof_json = proof.serialize(include_ctis=True, cti_hashes_only=True)
                 response = flask.jsonify({'ok': True, 'proof_graph': proof_json})
@@ -2449,7 +2449,7 @@ class InductiveInvGen():
                 proof.to_apalache_proof_obligations()
                 return response
 
-            @app.route('/getNode/<expr>')
+            @app.route('/api/getNode/<expr>')
             def getNode(expr):
                 node = proof.get_node_by_name(proof.root, expr)
                 if node is None:
@@ -2461,7 +2461,7 @@ class InductiveInvGen():
                     response.headers.add('Access-Control-Allow-Origin', '*')
                 return response
             
-            @app.route('/addNode/<expr>')
+            @app.route('/api/addNode/<expr>')
             def addNode(expr):
                 # Create new node without any children or edges to other nodes.
                 newNode = StructuredProofNode(expr.replace("H_", ""), expr)
@@ -2473,7 +2473,7 @@ class InductiveInvGen():
                 response.headers.add('Access-Control-Allow-Origin', '*')
                 return response
 
-            @app.route('/addSupportEdge/<target>/<action>/<src>')
+            @app.route('/api/addSupportEdge/<target>/<action>/<src>')
             def addSupportEdge(target, action, src):
                 target_node = proof.get_node_by_name(proof.root, target)
 
@@ -2508,7 +2508,7 @@ class InductiveInvGen():
                 response.headers.add('Access-Control-Allow-Origin', '*')
                 return response
 
-            @app.route('/deleteSupportEdge/<target>/<action>/<src>')
+            @app.route('/api/deleteSupportEdge/<target>/<action>/<src>')
             def deleteSupportEdge(target, action, src):
                 target_node = proof.get_node_by_name(proof.root, target)
                 src_node = proof.get_node_by_name(proof.root, src)
@@ -2534,7 +2534,7 @@ class InductiveInvGen():
                 response.headers.add('Access-Control-Allow-Origin', '*')
                 return response
 
-            @app.route('/getActiveCtiGenThreads')
+            @app.route('/api/getActiveCtiGenThreads')
             def getActiveCtiGenThreads():
                 response = flask.jsonify({
                     'ok': True, 
@@ -2546,7 +2546,7 @@ class InductiveInvGen():
                 response.headers.add('Access-Control-Allow-Origin', '*')
                 return response
 
-            @app.route('/genCtis/<flag>/<expr>')
+            @app.route('/api/genCtis/<flag>/<expr>')
             def genCtis(flag, expr):
                 logging.info(f"genCtis({flag}, {expr})")
                 print(flag, expr)

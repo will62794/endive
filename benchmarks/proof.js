@@ -1,5 +1,6 @@
 // local_server = "http://127.0.0.1:5000"
-local_server = "http://" + location.host
+// local_server = "http://" + location.host
+local_server = ""
 cy = null;
 
 currentNodeId = null;
@@ -47,7 +48,7 @@ function consensus_epr_demo3(){
 }
 
 function awaitGenCtiCompletion(expr, onCompleteFn){
-    $.get(local_server + `/getActiveCtiGenThreads`, function(data){
+    $.get(local_server + `/api/getActiveCtiGenThreads`, function(data){
         console.log("checking active cti threads:", data)
 
         let active_threads = data["active_threads"];
@@ -117,7 +118,7 @@ function genCtis(exprName, onCompleteFn){
     let activeStyle = {"border-color": "blue", "border-width": "6px", "background-color": "steelblue"};
     cy.nodes(`node[name = "${exprName}"]`).style(activeStyle);
 
-    $.get(local_server + `/genCtis/single/${exprName}`, function(data){
+    $.get(local_server + `/api/genCtis/single/${exprName}`, function(data){
         // console.log(data);
         awaitGenCtiCompletion(exprName, onCompleteFn);
     });
@@ -145,7 +146,7 @@ function traverseProofGraphRec(startNode, visited){
 
 function traverseProofGraph(startNodeExprName, onCompleteFn){
     console.log("Traverse proof graph from start node:", startNodeExprName);
-    $.get(local_server + `/getNode/${startNodeExprName}`, function(data){
+    $.get(local_server + `/api/getNode/${startNodeExprName}`, function(data){
         console.log(data);
         let visited = [];
         traverseProofGraphRec(data, visited);
@@ -156,7 +157,7 @@ function traverseProofGraph(startNodeExprName, onCompleteFn){
 
 function addLemmaNode(lemmaName, onCompleteFn){
     console.log("Adding lemma:", lemmaName);
-    $.get(local_server + `/addNode/${lemmaName}`, function(data){
+    $.get(local_server + `/api/addNode/${lemmaName}`, function(data){
         reloadProofGraph(onCompleteFn);
     });
 }
@@ -170,7 +171,7 @@ function deleteSupportLemmaEdge(edge){
     let parentId = edge.data()["targetParentId"];
 
     console.log("Deleting support edge, target:", target, ", source:", source, ", action: ", action);
-    $.get(local_server + `/deleteSupportEdge/${target["name"]}/${action}/${sourceNode["name"]}`, function(data){
+    $.get(local_server + `/api/deleteSupportEdge/${target["name"]}/${action}/${sourceNode["name"]}`, function(data){
         // console.log(data);
         // console.log("add edge complete.");
 
@@ -186,7 +187,7 @@ function deleteSupportLemmaEdge(edge){
 
 function addSupportLemmaEdge(target, action, src){
     console.log("Adding support edge, target:", target, ", source:", src, ", action: ", action);
-    $.get(local_server + `/addSupportEdge/${target}/${action}/${src}`, function(data){
+    $.get(local_server + `/api/addSupportEdge/${target}/${action}/${src}`, function(data){
         // console.log(data);
         // console.log("add edge complete.");
 
@@ -298,7 +299,7 @@ function computeNodeColor(data, action){
 function refreshNode(nodeId){
     console.log("Refreshing proof node '" + nodeId + "'");
     focusOnNode(nodeId);
-    $.get(local_server + `/getNode/${nodeId}`, function(data){
+    $.get(local_server + `/api/getNode/${nodeId}`, function(data){
         console.log(data);
 
         let color = computeNodeColor(data);
@@ -321,7 +322,7 @@ function focusOnNode(nodeId, nodeData){
         nodeIdArg = nodeData["parentId"];
     }
 
-    $.get(local_server + `/getNode/${nodeIdArg}`, function(data){
+    $.get(local_server + `/api/getNode/${nodeIdArg}`, function(data){
         console.log("Retrieved CTIs for '" + nodeId + "'");
         console.log("node data:", data);
 
@@ -466,6 +467,8 @@ function focusOnNode(nodeId, nodeData){
                         escapedLine = escapedLine.replaceAll("                  ", "\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ");
                         escapedLine = escapedLine.replaceAll("             ", "\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ");
                         escapedLine = escapedLine.replaceAll("       ", "\n&nbsp;&nbsp;&nbsp; ");
+                        // escapedLine = escapedLine.replaceAll("      ", "\n&nbsp;&nbsp; ");
+                        // escapedLine = escapedLine.replaceAll("     ", "\n&nbsp;&nbsp;&nbsp; ");
                         // escapedLine = escapedLine.replaceAll("    ", "\n&nbsp;&nbsp;&nbsp; ");
 
                         let maxLineLen = 100;
@@ -545,7 +548,7 @@ function focusOnNode(nodeId, nodeData){
 }
 
 function showCtisForNode(nodeId){
-    $.get(local_server + `/getCtis/${nodeId}`, function(data){
+    $.get(local_server + `/api/getCtis/${nodeId}`, function(data){
         console.log(data);
     });   
 }
@@ -869,7 +872,7 @@ function reloadProofGraph(onCompleteFn){
 
     console.log("Fetching proof graph.");
 
-    $.get(local_server + `/getProofGraph`, function(data){
+    $.get(local_server + `/api/getProofGraph`, function(data){
         console.log("proof graph obj:", data);
 
         let proof_graph = data["proof_graph"];
@@ -965,6 +968,7 @@ function reloadLayout(){
     }
 
     // Optionally show variables underneath action node name.
+    // let includeVars = true;
     let includeVars = false;
 
     cy = cytoscape({
