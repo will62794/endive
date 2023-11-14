@@ -925,10 +925,10 @@ class StructuredProof():
         # print("Final proof graph:")
         # print(dot.source)
         if omit_labels:
-            dot.render(out_file + "_nolabels")
+            dot.render(out_file + "_nolabels", quiet=True)
             tex_out_file = out_file + "_nolabels.tex"
         else:
-            dot.render(out_file)
+            dot.render(out_file, quiet=True)
             tex_out_file = out_file + ".tex"
 
         # Convert to TeX.
