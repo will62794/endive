@@ -787,10 +787,17 @@ class StructuredProof():
         if node.expr in seen:
             return
         # print("NODEEXP:", node.expr)
+
+        nodes_to_include_var_slice = [
+            ("H_LeaderMatchIndexValid", "ClientRequestAction"),
+            ("H_LeaderMatchIndexBound", "HandleAppendEntriesResponseAction")
+        ]
         
         lemmas_to_always_show = [
             # AsyncRaft key lemmas.
             "H_LeaderMatchIndexValid",
+            "H_LeaderMatchIndexBound",
+            "H_LeaderMatchIndexValidAppendEntries",
             self.safety_goal,
             "H_LogMatching",
             "H_LogMatchingAppendEntries",
@@ -813,10 +820,18 @@ class StructuredProof():
             "H_RMAbortedImpliesNoCommitMsg"
         ]
 
+        lemmas_to_show_for_graph_diff = [
+            "H_LeaderMatchIndexValid",
+            self.safety_goal
+        ]
+
         if not omit_labels or node.expr in lemmas_to_always_show:
             # Make selected lemmas display larger.
             label = node.expr.replace("H_", "")
             # style += ",font=\\huge"
+            # if node.expr not in lemmas_to_show_for_graph_diff and self.specname == "AsyncRaft":
+            #     texbl = "\phantom{\Huge" + "\emph{" + label + "}}"
+            # else:
             texbl = "\Huge" + "\emph{" + label + "}"
         else:
             label = "L_{" + str(self.dotnode_ind) + "}"
@@ -852,12 +867,23 @@ class StructuredProof():
                 action_node_id = node.expr + "_" + "UpdateTermAction"
                 label = "A_{" + str(ai) + "}"
 
+            slice_label = ""
+            if (node.expr, action) in nodes_to_include_var_slice:
+                slice_vars = self.lemma_action_coi[action][node.expr]
+                sliced = ",".join(slice_vars)
+                slice_label="-90:{\{%s\}}" % sliced
+
+                # slice_label=""
+
             fillcolor="lightgray"
             if proof_status_map is not None and (node.expr, action) in proof_status_map and proof_status_map[(node.expr, action)] != 0:
                 fillcolor = "orange"
 
             if action in node.children:
-                dot.node(action_node_id, label=label, style="filled", fillcolor=fillcolor)
+                style = "fill=lightgray"
+                if slice_label != "":
+                    style += ",label=" + slice_label
+                dot.node(action_node_id, label=label, style=style, fillcolor=fillcolor)
                 dot.edge(action_node_id, node.expr, style="proofactionedge")
             # If the action is not in the node's children, we may still add it to the graph in case proof status is red for it.
             else:
@@ -907,7 +933,12 @@ class StructuredProof():
                 import os
                 old_stdout = sys.stdout # backup current stdout
                 sys.stdout = open(os.devnull, "w")
-                texcode = dot2tex.dot2tex(dot.source, debug=False, output="dot2tex.log", format='tikz', figpreamble="\Large", autosize=True, crop=False, figonly=True, texmode="math")
+                figpreamble=f"""
+                \Large
+                """
+                if self.specname == "AsyncRaft":
+                    figpreamble += "\AsyncRaftFigPreamble{}"
+                texcode = dot2tex.dot2tex(dot.source, debug=False, output="dot2tex.log", format='tikz', figpreamble=figpreamble, autosize=True, crop=False, figonly=True, texmode="math")
                 sys.stdout = old_stdout # reset old stdout
                 f = open(tex_out_file, 'w')
                 f.write(texcode)
