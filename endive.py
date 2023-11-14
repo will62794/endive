@@ -320,7 +320,7 @@ class InductiveInvGen():
         f.write(f"---- MODULE {self.specname}_IndAutoGen_{self.seed} ----\n")
         f.write(f"EXTENDS {self.specname}\n")
         f.write("\n")
-        f.write(f"\* endive.py stats\n")
+        f.write(f"\* statistics\n")
         f.write(f"\* -----------------\n")
         stats = self.get_stats_obj()
         for stat in stats:
