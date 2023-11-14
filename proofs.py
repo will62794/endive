@@ -648,7 +648,7 @@ class StructuredProof():
             "lemma_action_coi": {a:{l:list(self.lemma_action_coi[a][l]) for l in self.lemma_action_coi[a]} for a in self.lemma_action_coi}
         }
     
-    def save_proof(self, include_json=False, include_dot=True):
+    def save_proof(self, include_json=False, include_dot=False):
         """ Visualize proof structure in HTML format for inspection, and serialize to JSON. """
         filename = f"{self.proof_base_filename}.html"
         pickle_filename = f"{self.proof_base_filename}.pickle"
@@ -674,8 +674,8 @@ class StructuredProof():
 
         if include_dot:
             print(f"Saving latest proof as DOT to '{dot_filename}'")
-            self.save_as_dot(dot_filename, save_tex=self.save_tex)
-            self.save_as_dot(dot_filename, omit_labels=True, save_tex=self.save_tex)
+            self.save_as_dot(dot_filename)
+            self.save_as_dot(dot_filename, omit_labels=True)
 
         print(f"Finished saving proof objects.")
 
@@ -929,7 +929,7 @@ class StructuredProof():
                 self.add_node_to_dot_graph(dot, c, seen=seen, omit_labels=omit_labels, proof_status_map=proof_status_map)
 
 
-    def save_as_dot(self, out_file, omit_labels=False, save_tex=False, proof_status_map=None):
+    def save_as_dot(self, out_file, omit_labels=False, proof_status_map=None):
         """ Generate DOT graph representation of this structured proof. """
         dot = graphviz.Digraph('proof-graph', strict=True, comment='Proof Structure')  
         # dot.graph_attr["rankdir"] = "LR"
@@ -951,7 +951,7 @@ class StructuredProof():
             tex_out_file = out_file + ".tex"
 
         # Convert to TeX.
-        if save_tex:
+        if self.save_tex:
             output_capture = io.StringIO()
 
             # Use context manager to redirect stdout

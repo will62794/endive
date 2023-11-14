@@ -103,6 +103,7 @@ class InductiveInvGen():
 
         self.target_sample_states = all_args["target_sample_states"]
         self.target_sample_time_limit_ms = all_args["target_sample_time_limit_ms"]
+        self.save_dot = all_args["save_dot"]
 
 
         # Set an upper limit on CTIs per round to avoid TLC getting overwhelmend. Hope is that 
@@ -2416,7 +2417,7 @@ class InductiveInvGen():
             proof.apalache_check_all_nodes()
             return
 
-        proof.save_proof()
+        proof.save_proof(include_dot=self.save_dot)
 
         run_server = True
         if run_server:
@@ -2586,7 +2587,7 @@ class InductiveInvGen():
             # proof = StructuredProof(load_from_obj=proof_obj)
 
         # Re-save proof at this point.
-        self.save_proof(proof)
+        self.save_proof(proof, include_dot=self.save_dot)
         if not self.proof_tree_cmd:
             return
         
@@ -3002,6 +3003,7 @@ if __name__ == "__main__":
     parser.add_argument('--proof_struct_tag', help='Tag of proof structure to load (EXPERIMENTAL).', default=None, type=str, required=False)
     parser.add_argument('--target_sample_states', help='Target # initial states to sample. (EXPERIMENTAL).', default=10000, type=int, required=False)
     parser.add_argument('--target_sample_time_limit_ms', help='Target initial state sampling time (EXPERIMENTAL).', default=10000, type=int, required=False)
+    parser.add_argument('--save_dot', help='Save proof graphs in DOT and TeX info.', default=False, action='store_true')
 
     # Apalache related commands.
     parser.add_argument('--use_apalache_ctigen', help='Use Apalache for CTI generation (experimental).', required=False, default=False, action='store_true')
