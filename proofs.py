@@ -891,12 +891,14 @@ class StructuredProof():
                 # slice_label=""
 
             fillcolor="lightgray"
+            proof_status_style = ""
             if proof_status_map is not None and (node.expr, action) in proof_status_map and proof_status_map[(node.expr, action)] != 0:
-                fillcolor = "orange"
+                # fillcolor = ""
+                proof_status_style = ",broken"
 
             if action in node.children:
                 # style = f"fill={fillcolor}"
-                style = f"fill={fillcolor},proofactionedge"
+                style = f"fill={fillcolor},proofactionnode" + proof_status_style
                 if slice_label != "":
                     style += ",label=" + slice_label
                 edgestyle = "proofactionedge"
@@ -909,6 +911,7 @@ class StructuredProof():
                 if proof_status_map is not None and (node.expr, action) in proof_status_map and proof_status_map[(node.expr, action)] != 0:
                     # fillcolor = "red"
                     style = "proofactionedge"
+                    style += proof_status_style
                     dot.node(action_node_id, label=label, style="filled", fillcolor=fillcolor)
                     dot.edge(action_node_id, node.expr, style=style)                
 
