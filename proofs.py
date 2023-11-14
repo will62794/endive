@@ -937,7 +937,12 @@ class StructuredProof():
                 \Large
                 """
                 if self.specname == "AsyncRaft":
-                    figpreamble += "\AsyncRaftFigPreamble{}"
+                    if "proof_with_status" in out_file: 
+                        figpreamble += "\AsyncRaftWithProofStatusFigPreamble{}"
+                    else:
+                        figpreamble += "\AsyncRaftFigPreamble{}"
+
+
                 texcode = dot2tex.dot2tex(dot.source, debug=False, output="dot2tex.log", format='tikz', figpreamble=figpreamble, autosize=True, crop=False, figonly=True, texmode="math")
                 sys.stdout = old_stdout # reset old stdout
                 f = open(tex_out_file, 'w')
