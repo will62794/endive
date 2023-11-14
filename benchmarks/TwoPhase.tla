@@ -75,6 +75,17 @@ TypeOK ==
   /\ msgsPrepared \in SUBSET [type : {"Prepared"}, rm : RM]
   /\ msgsAbortCommit \in SUBSET [type : {"Commit", "Abort"}]
 
+ApaTypeOK ==  
+  (*************************************************************************)
+  (* The type-correctness invariant                                        *)
+  (*************************************************************************)
+  /\ rmState \in [RM -> {"working", "prepared", "committed", "aborted"}]
+  /\ tmState \in {"init", "committed", "aborted"}
+  /\ tmPrepared \in SUBSET RM
+  /\ msgsPrepared \in SUBSET [type : {"Prepared"}, rm : RM]
+  /\ msgsAbortCommit \in SUBSET [type : {"Commit", "Abort"}]
+
+
 Init ==   
   (*************************************************************************)
   (* The initial predicate.                                                *)
