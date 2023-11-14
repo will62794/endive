@@ -297,18 +297,18 @@ H_QuorumsSafeAtTerms ==
     \A s \in Server : (state[s] = Primary) =>
         (\E Q \in Quorums(Server) : \A n \in Q : currentTerm[n] >= currentTerm[s])
 
-H_TermsGrowMonotonically ==
+H_TermsMonotonic ==
     \A s \in Server : \A i,j \in DOMAIN log[s] : (i <= j) => (log[s][i] <= log[s][j])
 
 H_PrimaryTermAtLeastAsLargeAsLogTerms == 
     \A s \in Server : (state[s] = Primary) => 
         \A i \in DOMAIN log[s] : currentTerm[s] >= log[s][i]
 
-H_CommittedEntryExistsOnQuorum == 
+H_CommittedEntryIsOnQuorum == 
     \A c \in immediatelyCommitted :
         \E Q \in Quorums(Server) : \A n \in Q : InLog(<<c[1],c[2]>>, n)  
 
-H_CommittedEntryExistsOnQuorum_cyclebreak == 
+H_CommittedEntryIsOnQuorum_cyclebreak == 
     \A c \in immediatelyCommitted :
         \E Q \in Quorums(Server) : \A n \in Q : InLog(<<c[1],c[2]>>, n)
 
@@ -322,14 +322,14 @@ H_EntriesCommittedInOwnTerm ==
 
 \* Existence of an entry in term T implies a past election in T, so 
 \* there must be some quorum at this term or greater.
-H_LogEntryInTermImpliesSafeAtTerm == 
+H_LogEntryImpliesSafeAtTerm == 
     \A s \in Server : 
     \A i \in DOMAIN log[s] :
         \E Q \in Quorums(Server) : \A n \in Q : currentTerm[n] >= log[s][i]
 
 \* If a server's latest log term exceeds a committed entry c's term, then it must contain that 
 \* committed entry in its log.
-H_LogsLaterThanCommittedMustHaveCommitted ==
+H_LaterLogsHaveEarlierCommitted ==
     \A s \in Server : 
     \A c \in immediatelyCommitted :
         \* Exists an entry in log[s] with a term greater than the term in which the entry was committed.
@@ -338,7 +338,7 @@ H_LogsLaterThanCommittedMustHaveCommitted ==
             /\ log[s][c[1]] = c[2] \* entry exists in the server's log.
 
 \* Alternate statement of the above that I think works just as well.
-H_LogsLaterThanCommittedMustHaveCommittedAlt ==
+H_LaterLogsMustHaveCommittedAlt ==
     \A s \in Server : 
     \A c \in immediatelyCommitted :
         \* Exists an entry in log[s] with a term greater than the term in which the entry was committed.
@@ -349,7 +349,7 @@ H_LogsLaterThanCommittedMustHaveCommittedAlt ==
 \* If a server's latest log term exceeds a committed entry c's term, then it must contain that 
 \* committed entry in its log. Also, primary logs must contain entries committed in earlier terms.
 H_PrimaryOrLogsLaterThanCommittedMustHaveEarlierCommitted ==
-    /\ H_LogsLaterThanCommittedMustHaveCommitted
+    /\ H_LaterLogsHaveEarlierCommitted
     /\ H_LeaderCompleteness
 
 H_LogsWithEntryInTermMustHaveEarlierCommittedEntriesFromTerm ==
@@ -386,14 +386,14 @@ H_UniformLogEntriesInTerm ==
         (\A j \in DOMAIN log[s] : (j < i) => log[s][j] # log[s][i]) => 
             (~\E k \in DOMAIN log[t] : log[t][k] = log[s][i] /\ k < i)
 
-\* H_CommittedEntryExistsOnQuorum_AND_LogsLaterThanCommittedMustHaveCommitted_AND_LeaderCompleteness == 
+\* H_CommittedEntryIsOnQuorum_AND_LogsLaterThanCommittedMustHaveCommitted_AND_LeaderCompleteness == 
 \*     /\ LeaderCompleteness
-\*     /\ H_CommittedEntryExistsOnQuorum
-\*     /\ H_LogsLaterThanCommittedMustHaveCommitted
+\*     /\ H_CommittedEntryIsOnQuorum
+\*     /\ H_LaterLogsMustHaveCommitted
 
 H_UniformLogEntriesInTerm_AND_TermsGrowMonotonically == 
     /\ H_UniformLogEntriesInTerm
-    /\ H_TermsGrowMonotonically
+    /\ H_TermsMonotonic
 
 H_CoreLogInv == H_UniformLogEntriesInTerm_AND_TermsGrowMonotonically
 
@@ -402,16 +402,16 @@ H_CoreLogInv == H_UniformLogEntriesInTerm_AND_TermsGrowMonotonically
 HumanDecompInd == 
     /\ H_StateMachineSafety
     /\ H_LeaderCompleteness
-    /\ H_CommittedEntryExistsOnQuorum
-    /\ H_LogsLaterThanCommittedMustHaveCommitted
+    /\ H_CommittedEntryIsOnQuorum
+    /\ H_LaterLogsHaveEarlierCommitted
     /\ H_PrimaryTermGTELogTerm
     /\ H_EntriesCommittedInOwnOrLaterTerm
     /\ H_EntriesCommittedInOwnTerm
-    /\ H_LogEntryInTermImpliesSafeAtTerm
+    /\ H_LogEntryImpliesSafeAtTerm
     /\ H_OnePrimaryPerTerm
     /\ H_PrimaryHasEntriesItCreated
     /\ H_QuorumsSafeAtTerms
-    /\ H_TermsGrowMonotonically
+    /\ H_TermsMonotonic
     /\ H_LogMatching
     /\ H_UniformLogEntriesInTerm
 

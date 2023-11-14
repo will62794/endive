@@ -806,13 +806,18 @@ class StructuredProof():
             "H_CommittedEntryExistsOnQuorum",
             "H_UniqueLeadership",
             "H_TxnZxidsUniqueHistoriesAndMessages",
+
+            # TwoPhase lemmas.
+            "H_RMCommittedImpliesNoRMsWorking",
+            "H_RMCommittedImpliesNoAbortMsg",
+            "H_RMAbortedImpliesNoCommitMsg"
         ]
 
         if not omit_labels or node.expr in lemmas_to_always_show:
             # Make selected lemmas display larger.
             label = node.expr.replace("H_", "")
             # style += ",font=\\huge"
-            texbl = "\huge" + "\emph{" + label + "}"
+            texbl = "\Huge" + "\emph{" + label + "}"
         else:
             label = "L_{" + str(self.dotnode_ind) + "}"
             self.dotnode_ind += 1
@@ -827,6 +832,8 @@ class StructuredProof():
             "AcceptAppendEntriesRequestLearnCommitAction": "LearnCommitAction",
             # "ClientRequestAction",
             # "BecomeLeaderAction"
+            "RMChooseToAbortAction": "RMChooseAbortAction",
+            "RMRcvAbortMsgAction": "RMRcvAbortMsgAction"
         }
 
         # Add sub-nodes for each action child.
@@ -851,13 +858,13 @@ class StructuredProof():
 
             if action in node.children:
                 dot.node(action_node_id, label=label, style="filled", fillcolor=fillcolor)
-                dot.edge(action_node_id, node.expr)
+                dot.edge(action_node_id, node.expr, style="proofactionedge")
             # If the action is not in the node's children, we may still add it to the graph in case proof status is red for it.
             else:
                 if proof_status_map is not None and (node.expr, action) in proof_status_map and proof_status_map[(node.expr, action)] != 0:
                     # fillcolor = "red"
                     dot.node(action_node_id, label=label, style="filled", fillcolor=fillcolor)
-                    dot.edge(action_node_id, node.expr)                
+                    dot.edge(action_node_id, node.expr, style="proofactionedge")                
 
 
         for action in node.children:
@@ -866,7 +873,7 @@ class StructuredProof():
                 if action.startswith("UpdateTerm"):
                     action_node_id = node.expr + "_" + "UpdateTermAction"
                 # dot.edge(c.expr, node.expr)
-                dot.edge(c.expr, action_node_id)
+                dot.edge(c.expr, action_node_id, style="prooflemmaedge")
                 self.add_node_to_dot_graph(dot, c, seen=seen, omit_labels=omit_labels, proof_status_map=proof_status_map)
 
 

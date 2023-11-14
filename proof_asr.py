@@ -17,7 +17,7 @@ onePrimaryPerTerm = StructuredProofNode("OnePrimaryPerTerm", "H_OnePrimaryPerTer
 onePrimaryPerTerm.ctigen_typeok = "TypeOKSmallCommitted"
 
 
-logEntryInTermImpliesSafeAtTerms = StructuredProofNode("LogEntryInTermImpliesSafeAtTerm", "H_LogEntryInTermImpliesSafeAtTerm")
+logEntryInTermImpliesSafeAtTerms = StructuredProofNode("LogEntryImpliesSafeAtTerm", "H_LogEntryImpliesSafeAtTerm")
 logEntryInTermImpliesSafeAtTerms.children = {    
     "ClientRequestAction": [
         quorumsSafeAtTerms
@@ -44,7 +44,7 @@ PrimaryTermGTELogTerm.children = {
     ]
 }
 
-termsGrowMonotonically = StructuredProofNode("TermsGrowMonotonically", "H_TermsGrowMonotonically")
+termsGrowMonotonically = StructuredProofNode("TermsMonotonic", "H_TermsMonotonic")
 termsGrowMonotonically.children = {
     "ClientRequestAction": [
         PrimaryTermGTELogTerm
@@ -78,13 +78,13 @@ entriesCommittedInOwnTerm = StructuredProofNode("EntriesCommittedInOwnTerm", "H_
 
 primaryOrLogsLaterThanCommittedMustHaveEarlierCommitted = StructuredProofNode("PrimaryOrLogsLaterThanCommittedMustHaveEarlierCommitted", "H_PrimaryOrLogsLaterThanCommittedMustHaveEarlierCommitted")
 
-logsLaterThanCommittedMustHaveCommitted = StructuredProofNode("LogsLaterThanCommittedMustHaveCommitted", "H_LogsLaterThanCommittedMustHaveCommitted")
+logsLaterThanCommittedMustHaveCommitted = StructuredProofNode("LaterLogsHaveEarlierCommitted", "H_LaterLogsHaveEarlierCommitted")
 # logsLaterThanCommittedMustHaveCommitted.ctigen_typeok = "TypeOKSmallCommitted"
 # logsLaterThanCommittedMustHaveCommitted.ctigen_typeok = "TypeOK"
 
 leaderCompleteness = StructuredProofNode("LeaderCompleteness", "H_LeaderCompleteness")
 
-committedEntryExistsOnQuorum = StructuredProofNode("CommittedEntryExistsOnQuorum", "H_CommittedEntryExistsOnQuorum")
+committedEntryExistsOnQuorum = StructuredProofNode("CommittedEntryIsOnQuorum", "H_CommittedEntryIsOnQuorum")
 committedEntryExistsOnQuorum.children = {
     "RollbackEntriesAction":[
         # lemmaTRUE,
