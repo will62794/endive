@@ -855,7 +855,8 @@ class StructuredProof():
             # "ClientRequestAction",
             # "BecomeLeaderAction"
             "RMChooseToAbortAction": "RMChooseAbortAction",
-            "RMRcvAbortMsgAction": "RMRcvAbortMsgAction"
+            "RMRcvAbortMsgAction": "RMRcvAbortMsgAction",
+            "RMRcvCommitMsgAction": "RMRcvCommitMsgAction"
         }
 
         edges_to_highlight = [
