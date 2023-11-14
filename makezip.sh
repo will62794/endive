@@ -3,7 +3,9 @@
 #
 #!/bin/sh
 
-target_dir="/Users/willyschultz/Dropbox/PhD/Research/inductive-invariant-inference/pldi24_supp_test"
+base_dir="/Users/willyschultz/Dropbox/PhD/Research/artifacts"
+target_dirname="pldi24_supp"
+target_dir="$base_dir/$target_dirname"
 
 # Clean
 rm -rf $target_dir
@@ -58,5 +60,6 @@ cp benchmarks/Zab_TLC.tla ${target_dir}/benchmarks
 cp -r benchmarks/apalache $target_dir/benchmarks
 cp benchmarks/tla2tools-checkall.jar $target_dir/benchmarks
 
-
-# TODO: README?
+# Zip it up.
+cd $base_dir
+zip -r pldi24_supp.zip $target_dirname
