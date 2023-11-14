@@ -1,0 +1,33 @@
+{
+    "preds"  :  [
+    ],
+    "preds_alt" : [],
+    "safety"  :  "H_NoConflictingValues",
+    "constants"  :  {
+        "Node": ["{n1}", "{n1,n2}"],
+        "Value": ["{v1}","{v1,v2}"],
+        "n1": "n1",
+        "n2": "n2",
+        "n3": "n3",
+        "n4": "n4",
+        "n5": "n5",
+        "v1": "v1",
+        "v2": "v2"
+    },
+    "constraint"  :  "",
+    "quant_inv"  :  "\\A VARI \\in Node : \\A VARJ \\in Node : \\A VARK \\in Node : \\E QJ \\in Quorum : \\A VALI \\in Value : ",
+    "quant_inv_alt"  :  null,
+    "quant_vars": ["VARI", "VARJ"],
+    "model_consts"  :  "CONSTANT n1,n2,n3,v1,v2",
+    "symmetry" : true,
+    "typeok"  :  "TypeOK",
+    "simulate"  :  true,
+    "tlc_specific_spec": true,
+    "actions":[
+        "SendRequestVoteAction",
+        "SendVoteAction",
+        "RecvVoteAction",
+        "BecomeLeaderAction",
+        "DecideAction"
+    ]      
+}

@@ -2198,6 +2198,7 @@ class InductiveInvGen():
         import proof_consensus_epr
         import proof_consensus_epr_demo
         import proof_basic_consensus
+        import proof_simple_consensus
         import proof_async_raft
         import proof_async_raft_no_truncate
         import proof_Paxos
@@ -2216,7 +2217,7 @@ class InductiveInvGen():
             root = proof_2pc.root
             actions = proof_2pc.actions
             nodes = proof_2pc.nodes
-        elif self.specname == "AbstractStaticRaft":
+        elif self.specname == "AbstractRaft":
             if self.proof_struct_tag == "coreLogInv":
                 print(f"Loading from proof struct tag: {self.proof_struct_tag}")
                 root = proof_asr_coreLogInv.asr_root
@@ -2243,6 +2244,10 @@ class InductiveInvGen():
                 root = proof_consensus_epr.root
                 actions = proof_consensus_epr.actions
                 nodes = proof_consensus_epr.nodes 
+        elif self.specname == "SimpleConsensus":
+            root = proof_simple_consensus.root
+            actions = proof_simple_consensus.actions
+            nodes = proof_simple_consensus.nodes 
         elif self.specname == "AsyncRaft":
             if self.proof_struct_tag == "no_truncate":
                 root = proof_async_raft_no_truncate.root
@@ -2364,12 +2369,12 @@ class InductiveInvGen():
             del lemma_action_coi[a]
         
         # Optionally print out full action-lemma COI table.
-        # print("LEMMA COI", lemma_action_coi)
-        # for a in lemma_action_coi:
-        #     print("ACTION: ", a)
-        #     for l in lemma_action_coi[a]:
-        #         if "H_" in l:
-        #             print("  ", l, lemma_action_coi[a][l])
+        print("LEMMA COI", lemma_action_coi)
+        for a in lemma_action_coi:
+            print("ACTION: ", a)
+            for l in lemma_action_coi[a]:
+                if "H_" in l:
+                    print("  ", l, lemma_action_coi[a][l])
 
         # Optionally reload proof structure from locally defined template.
         if self.proof_tree_cmd and self.proof_tree_cmd[0] in ["reload", "reload_proof_struct", "check_proof_apalache"]:
@@ -2421,6 +2426,14 @@ class InductiveInvGen():
             import threading
 
             self.active_ctigen_threads = set()
+
+            @app.route('/', defaults={'path': ''})
+            @app.route('/<path:path>')
+            def home(path):
+                # For empty path, send base spec HTML.
+                if path == "":
+                    return flask.send_from_directory('benchmarks', f"{self.specname}.proof.html")
+                return flask.send_from_directory('benchmarks', path)
 
             @app.route('/getProofGraph')
             def getProofGraph():

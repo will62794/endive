@@ -21,18 +21,38 @@ mv $target_dir/endive.py $target_dir/indigo.py
 # Copy benchmarks.
 #
 
-# AsyncRaft.
-cp benchmarks/AsyncRaft.tla ${target_dir}/benchmarks
-cp benchmarks/AsyncRaft_TLC.tla ${target_dir}/benchmarks
-cp benchmarks/AsyncRaft_ApaIndProofCheck.tla ${target_dir}/benchmarks
+cp benchmarks/proof.js ${target_dir}/benchmarks
+cp benchmarks/proof.css ${target_dir}/benchmarks
+
+# SimpleConsensus.
+cp benchmarks/SimpleConsensus.tla ${target_dir}/benchmarks
+# cp benchmarks/SimpleConsensus_ApaIndProofCheck.tla ${target_dir}/benchmarks
+
+# SimpleConsensus.
+cp benchmarks/AbstractRaft.tla ${target_dir}/benchmarks/
+cp benchmarks/AbstractRaft.config.json ${target_dir}/benchmarks/
+# cp benchmarks/AbstractStaticRaft_ApaIndProofCheck.tla ${target_dir}/benchmarks
 
 # TwoPhase.
 cp benchmarks/TwoPhase.tla ${target_dir}/benchmarks
-cp benchmarks/TwoPhase_ApaIndProofCheck.tla ${target_dir}/benchmarks
+cp benchmarks/TwoPhase.config.json ${target_dir}/benchmarks
+# cp benchmarks/TwoPhase_ApaIndProofCheck.tla ${target_dir}/benchmarks
+
+# AsyncRaft.
+cp benchmarks/AsyncRaft.tla ${target_dir}/benchmarks
+cp benchmarks/AsyncRaft.config.json ${target_dir}/benchmarks
+cp benchmarks/AsyncRaft_TLC.tla ${target_dir}/benchmarks
+# cp benchmarks/AsyncRaft_ApasIndProofCheck.tla ${target_dir}/benchmarks
+
+# Zab.
+cp benchmarks/Zab.tla ${target_dir}/benchmarks
+cp benchmarks/Zab.config.json ${target_dir}/benchmarks
+cp benchmarks/Zab_TLC.tla ${target_dir}/benchmarks
+# cp benchmarks/AsyncRaft_ApaIndProofCheck.tla ${target_dir}/benchmarks
 
 # Copy TLC and Apalache binaries.
-# cp -r benchmarks/apalache benchmarks/$target_dir
-# cp -r benchmarks/tla2tools-checkall.jar benchmarks/$target_dir
+cp -r benchmarks/apalache $target_dir/benchmarks
+cp benchmarks/tla2tools-checkall.jar $target_dir/benchmarks
 
 
 # TODO: README?

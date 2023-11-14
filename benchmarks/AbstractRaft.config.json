@@ -1,0 +1,43 @@
+{
+    "preds"  :  [
+        "(currentTerm[VARI] > currentTerm[VARJ])",
+        "(currentTerm[VARJ] > currentTerm[VARI])",
+
+        "(currentTerm[VARI] >= currentTerm[VARJ])",
+        "(currentTerm[VARJ] >= currentTerm[VARI])",
+
+        "(currentTerm[VARI] <= currentTerm[VARJ])",
+        "(currentTerm[VARJ] <= currentTerm[VARI])",
+
+        "(currentTerm[VARI] = currentTerm[VARJ])",
+    
+        "(state[VARI] = Primary)",
+        "(state[VARJ] = Primary)"
+    ],
+    "preds_alt" : [],
+    "safety"  :  "H_StateMachineSafety",
+    "constants"  : {
+        "Nil": "Nil",
+        "Server": ["{n1}","{n1,n2}","{n1,n2,n3}"],
+        "Secondary": "Secondary",
+        "Primary": "Primary",
+        "MaxLogLen": ["1","2","3"],
+        "MaxTerm": "3",
+        "InitTerm": "0",
+        "n1": "n1",
+        "n2": "n2",
+        "n3": "n3",
+        "n4": "n4"
+    },
+    "constraint"  :  "StateConstraint",
+    "quant_inv"  :  "\\A VARI \\in Server : \\A VARJ \\in Server : ",
+    "quant_inv_alt"  :  null,
+    "quant_vars": ["VARI", "VARJ"],
+    "model_consts"  :  "CONSTANT n1,n2,n3",
+    "symmetry" : true,
+    "typeok"  :  "TypeOK",
+    "tlc_specific_spec": true,
+    "try_final_minimize": false,
+    "simulate"  :  true,
+    "actions": []
+}
