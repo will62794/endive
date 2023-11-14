@@ -24,7 +24,7 @@ logEntryInTermImpliesSafeAtTerms.children = {
     ]
 }
 
-primaryHasEntriesItCreated = StructuredProofNode("PrimaryHasEntriesItCreated", "H_PrimaryHasEntriesItCreated")
+primaryHasEntriesItCreated = StructuredProofNode("PrimaryHasOwnEntries", "H_PrimaryHasOwnEntries")
 primaryHasEntriesItCreated.children = {
     "ClientRequestAction": [
         onePrimaryPerTerm,
@@ -63,7 +63,7 @@ lemmaTRUEShim.children = {
     "UpdateTermsAction":[primaryHasEntriesItCreated]
 }
 
-uniformLogEntriesInTerm = StructuredProofNode("UniformLogEntriesInTerm", "H_UniformLogEntriesInTerm")
+uniformLogEntriesInTerm = StructuredProofNode("UniformLogEntries", "H_UniformLogEntries")
 uniformLogEntriesInTerm.children = {
     "GetEntriesAction": [
         logMatching
