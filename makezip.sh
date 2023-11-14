@@ -14,6 +14,7 @@ mkdir -p $target_dir
 mkdir -p $target_dir/benchmarks
 
 # Copy all Python code files.
+cp requirements.txt $target_dir
 cp *.py $target_dir
 cp README_supp.md $target_dir/README.md
 # Rename some stuff.
