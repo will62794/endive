@@ -10,7 +10,7 @@ In order to run the tool you will need the following prerequisites:
 - Python 3 with pip installed
 - Install Python dependencies with `python3 -m pip install -r requirements.txt`
 
-This paackage contains binaries for both the TLC and Apalache model checker, so you will not need to install these. 
+This repository also contains binaries for both the TLC and Apalache model checker, so you will not need to install these separately. 
 
 ## Viewing the Proof Graphs
 
@@ -21,14 +21,14 @@ python3 indigo.py --spec benchmarks/<SPECNAME> --seed 42 --num_simulate_traces 3
 ```
 where `<SPECNAME>` is the name of a protocol benchmark and its corresponding completed proof graph to load. You can load the following specs, which correspond to those from Table of our paper:
 
-- AsyncRaft
-- TwoPhase
-- Zab
-- SimpleConsensus
-- AbstractRaft
+- `SimpleConsensus`
+- `TwoPhase`
+- `AbstractRaft`
+- `AsyncRaft`
+- `Zab`
 
-After running this, you can view and interact with the proof graph by opening a local browser at `http://127.0.0.1:5000/`. There you will be presented with a graphical user interface for viewing the proof graph,
-checking proof obligations for each node, and viewing local CTIs. Note that the interactive tool uses TLC for generating CTIs, so there may be some nondeterminism in generated CTIs for certain protocols. For complete proof checking with the Apalache symbolic model checker, you can run the commands in the following next section.
+After running the above command for a chosen protocol, you can view and interact with its proof graph by opening a local browser window at `http://127.0.0.1:5000/`. You will be presented with a graphical user interface for viewing the proof graph,
+checking proof obligations for each node, and viewing local CTIs for invalid nodes. Note that the interactive tool uses TLC for generating CTIs, so there may be some nondeterminism in generated CTIs for some protocols. For complete proof checking with the Apalache symbolic model checker, you can use the instructions in the following section.
 
 ## Checking the Proof Graphs
 
@@ -45,9 +45,9 @@ No errors found in proof checking! (120 obligations checked, for 8 lemmas).
 ```
 In our tests, running on a 2020 M1 Macbook Air, approximate proof checking times for each protocol was as follows:
 
-- SimpleConsensus: 73 secs.
-- TwoPhase: 72 secs.
-- AbstractRaft: 969 secs. (16 minutes)
-- AsyncRaft: 6592 secs. (~ 2 hours)
-- Zab: (TODO)
+- `SimpleConsensus`: 73 secs.
+- `TwoPhase`: 72 secs.
+- `AbstractRaft`: 969 secs. (16 minutes)
+- `AsyncRaft`: 6592 secs. (~2 hours)
+- `Zab`: (TODO)
 
