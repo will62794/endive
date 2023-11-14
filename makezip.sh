@@ -26,10 +26,13 @@ cp benchmarks/proof.css ${target_dir}/benchmarks
 
 # SimpleConsensus.
 cp benchmarks/SimpleConsensus.tla ${target_dir}/benchmarks
+cp benchmarks/SimpleConsensus_TLC.tla ${target_dir}/benchmarks
+cp benchmarks/SimpleConsensus.config.json ${target_dir}/benchmarks
 # cp benchmarks/SimpleConsensus_ApaIndProofCheck.tla ${target_dir}/benchmarks
 
 # SimpleConsensus.
 cp benchmarks/AbstractRaft.tla ${target_dir}/benchmarks/
+cp benchmarks/AbstractRaft_TLC.tla ${target_dir}/benchmarks/
 cp benchmarks/AbstractRaft.config.json ${target_dir}/benchmarks/
 # cp benchmarks/AbstractStaticRaft_ApaIndProofCheck.tla ${target_dir}/benchmarks
 

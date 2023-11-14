@@ -1,9 +1,9 @@
----- MODULE AbstractStaticRaft_TLC ----
+---- MODULE AbstractRaft_TLC ----
 \* 
 \* Separate spec for 'TypeOKRandom' and other TLC specific definitions
 \* to avoid clashes with  Apalache type checking.
 \* 
-EXTENDS AbstractStaticRaft, Randomization, FiniteSetsExt
+EXTENDS AbstractRaft, Randomization, FiniteSetsExt
 
 SeqOf(S, n) == UNION {[1..m -> S] : m \in 0..n}
 BoundedSeq(S, n) == SeqOf(S, n)

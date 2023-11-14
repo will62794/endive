@@ -2249,14 +2249,16 @@ class InductiveInvGen():
             actions = proof_simple_consensus.actions
             nodes = proof_simple_consensus.nodes 
         elif self.specname == "AsyncRaft":
-            if self.proof_struct_tag == "no_truncate":
-                root = proof_async_raft_no_truncate.root
-                actions = proof_async_raft_no_truncate.actions
-                nodes = proof_async_raft_no_truncate.nodes
-            else:
-                root = proof_async_raft.root
-                actions = proof_async_raft.actions
-                nodes = proof_async_raft.nodes
+            # if self.proof_struct_tag == "no_truncate":
+            
+            # For now just always use this version of the proof.
+            root = proof_async_raft_no_truncate.root
+            actions = proof_async_raft_no_truncate.actions
+            nodes = proof_async_raft_no_truncate.nodes
+            # else:
+            #     root = proof_async_raft.root
+            #     actions = proof_async_raft.actions
+            #     nodes = proof_async_raft.nodes
         elif self.specname == "EPaxos":
             root = proof_EPaxos.root
             actions = proof_EPaxos.actions
