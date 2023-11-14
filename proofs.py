@@ -912,7 +912,7 @@ class StructuredProof():
                     # fillcolor = "red"
                     style = "proofactionedge"
                     style += proof_status_style
-                    dot.node(action_node_id, label=label, style="filled", fillcolor=fillcolor)
+                    dot.node(action_node_id, label=label, style="proofactionnode," + proof_status_style, fillcolor=fillcolor)
                     dot.edge(action_node_id, node.expr, style=style)                
 
 
