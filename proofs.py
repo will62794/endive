@@ -790,7 +790,8 @@ class StructuredProof():
 
         nodes_to_include_var_slice = [
             ("H_LeaderMatchIndexValid", "ClientRequestAction"),
-            ("H_LeaderMatchIndexBound", "HandleAppendEntriesResponseAction")
+            ("H_LeaderMatchIndexBound", "HandleAppendEntriesResponseAction"),
+            ("H_QuorumsSafeAtTerms", "BecomeLeaderAction")
         ]
         
         lemmas_to_always_show = [
@@ -880,7 +881,7 @@ class StructuredProof():
                 fillcolor = "orange"
 
             if action in node.children:
-                style = "fill=lightgray"
+                style = f"fill={fillcolor}"
                 if slice_label != "":
                     style += ",label=" + slice_label
                 dot.node(action_node_id, label=label, style=style, fillcolor=fillcolor)
