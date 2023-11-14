@@ -27,7 +27,7 @@ where `<SPECNAME>` is the name of a protocol benchmark and its corresponding com
 - `AsyncRaft`
 - `Zab`
 
-After running the above command for a chosen protocol, you can view and interact with its proof graph by opening a local browser window at `http://127.0.0.1:5000/`. You will be presented with a graphical user interface for viewing the proof graph,
+After running the above command for a chosen protocol, you can view and interact with its proof graph by opening a local browser window at `http://127.0.0.1:5000`. You will be presented with a graphical user interface for viewing the proof graph,
 checking proof obligations for each node, and viewing local CTIs for invalid nodes. Note that the interactive tool uses TLC for generating CTIs, so there may be some nondeterminism in generated CTIs for some protocols. For complete proof checking with the Apalache symbolic model checker, you can use the instructions in the following section.
 
 ## Checking the Proof Graphs
