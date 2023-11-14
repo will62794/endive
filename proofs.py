@@ -473,7 +473,7 @@ class StructuredProof():
         #
         # Submit all commands to a multiprocessing pool to run in parallel.
         #
-        num_threads = 5
+        num_threads = 3
         cmds_to_run = list(zip(cmds, node_exprs))
         # print("CMDS TO RUN:", cmds_to_run)
         pool = multiprocessing.Pool(processes=num_threads)
