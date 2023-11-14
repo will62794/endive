@@ -362,7 +362,7 @@ H_LogsWithEntryInTermMustHaveEarlierCommittedEntriesFromTerm ==
 
 \* If a log entry exists in term T and there is a primary in term T, then this
 \* log entry should be present in that primary's log.
-H_PrimaryHasEntriesItCreated == 
+H_PrimaryHasOwnEntries == 
     \A i,j \in Server :
     (state[i] = Primary) => 
     \* Can't be that another node has an entry in this primary's term
@@ -380,7 +380,7 @@ H_PrimaryTermGTELogTerm ==
 \* If a log contains an entry in term T at index I such that
 \* the entries at J < I are in a different term, then there must be
 \* no other logs that contains entries in term T at indices J < I
-H_UniformLogEntriesInTerm ==
+H_UniformLogEntries ==
     \A s,t \in Server :
     \A i \in DOMAIN log[s] : 
         (\A j \in DOMAIN log[s] : (j < i) => log[s][j] # log[s][i]) => 
@@ -391,11 +391,11 @@ H_UniformLogEntriesInTerm ==
 \*     /\ H_CommittedEntryIsOnQuorum
 \*     /\ H_LaterLogsMustHaveCommitted
 
-H_UniformLogEntriesInTerm_AND_TermsGrowMonotonically == 
-    /\ H_UniformLogEntriesInTerm
+H_UniformLogEntries_AND_TermsGrowMonotonically == 
+    /\ H_UniformLogEntries
     /\ H_TermsMonotonic
 
-H_CoreLogInv == H_UniformLogEntriesInTerm_AND_TermsGrowMonotonically
+H_CoreLogInv == H_UniformLogEntries_AND_TermsGrowMonotonically
 
 \* Invariant developed during inductive proof decomposition experimenting.
 \* 08/19/2023
@@ -409,11 +409,11 @@ HumanDecompInd ==
     /\ H_EntriesCommittedInOwnTerm
     /\ H_LogEntryImpliesSafeAtTerm
     /\ H_OnePrimaryPerTerm
-    /\ H_PrimaryHasEntriesItCreated
+    /\ H_PrimaryHasOwnEntries
     /\ H_QuorumsSafeAtTerms
     /\ H_TermsMonotonic
     /\ H_LogMatching
-    /\ H_UniformLogEntriesInTerm
+    /\ H_UniformLogEntries
 
 HumanDecompIndWithApaTypeOK ==
     /\ ApaTypeOK
