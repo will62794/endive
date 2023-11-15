@@ -1818,11 +1818,20 @@ H_NEWLEADERMsgHistAndStateInv ==
         /\ m.mdst \in learners[m.msrc]
         /\ zabState[m.msrc] \in {SYNCHRONIZATION, BROADCAST}
 
+H_LeaderInDISCOVERYImpliesNoCOMMITs == 
+    \A s \in Server : 
+    \A m \in COMMITmsgs :
+        (IsLeader(s) /\ zabState[s] = DISCOVERY) => m.msrc # s
+
 H_NEWLEADERIncomingImpliesNoIncomingCOMMIT == 
     \A m \in NEWLEADERmsgs :
         /\ ~\E mc \in COMMITmsgs : mc.mdst = m.mdst
         \* If you have an outstanding NEWLEADER, you can't have sent an ACKLD to that leader yet.
-        /\ ~\E j \in Server : \E ackld \in ACKLDmsgs : ackld.sid = m.mdst
+        /\ ~\E ackld \in ACKLDmsgs : ackld.msrc = m.mdst
+        /\ zabState[m.msrc] \in {SYNCHRONIZATION, BROADCAST}
+        /\ IsLeader(m.msrc) 
+        /\ m.mdst \in learners[m.msrc]
+
 
 H_NEWLEADERIncomingImpliesLastCommittedBound == 
     \A m \in NEWLEADERmsgs :
