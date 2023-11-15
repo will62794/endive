@@ -110,7 +110,25 @@ txnZxidsUniqueHistoriesAndMessagesInPROPOSEMessages = make_node("H_txnZxidsUniqu
 
 txnZxidsUniqueHistoriesAndMessagesBetweenLocalHistoryAndPROPOSEMessages = make_node("H_txnZxidsUniqueHistoriesAndMessagesBetweenLocalHistoryAndPROPOSEMessages")
 
+NodeLOOKINGImpliesNoIncomingACKEPOCH = make_node("H_NodeLOOKINGImpliesNoIncomingACKEPOCH")
+
+UniqueEstablishedLeaderImpliesNEWEPOCHsFromThem = make_node("H_UniqueEstablishedLeaderImpliesNEWEPOCHsFromThem")
+
 UniqueEstablishedLeaderImpliesSafeAtEpoch = make_node("H_UniqueEstablishedLeaderImpliesSafeAtEpoch")
+UniqueEstablishedLeaderImpliesSafeAtEpoch.children = {
+    "LeaderProcessACKEPOCHHasntBroadcastAction": [
+        ACKEPOCHHistoryContainedInFOLLOWINGSender
+    ],
+    "UpdateLeaderAction": [
+        NodeLOOKINGImpliesNoIncomingACKEPOCH
+    ],
+    "FollowLeaderMyselfAction": [
+        NodeLOOKINGImpliesNoIncomingACKEPOCH
+    ],
+    "FollowerProcessNEWEPOCHAction": [  
+        UniqueEstablishedLeaderImpliesNEWEPOCHsFromThem
+    ]
+}
 
 uniqueLeadership = make_node("H_UniqueLeadership")
 uniqueLeadership.children = {
@@ -346,7 +364,6 @@ NodeLOOKINGImpliesNoIncomingNEWEPOCH.children = {
     ],
 }
 
-NodeLOOKINGImpliesNoIncomingACKEPOCH = make_node("H_NodeLOOKINGImpliesNoIncomingACKEPOCH")
 NodeLOOKINGImpliesNoIncomingACKEPOCH.children = {
     "FollowerProcessNEWEPOCHAction": [
         NodeLOOKINGImpliesNoIncomingNEWEPOCH

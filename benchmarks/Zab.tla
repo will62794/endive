@@ -1760,6 +1760,19 @@ H_EstablishedLeaderImpliesACKEQuorum ==
                 /\ a.sid = n
                 /\ a.connected
 
+\* H_NEWEPOCHImpliesQuorumSafeAtEpoch == 
+\*     \A m \in NEWEPOCHmsgs : 
+\*         \E Q \in Quorums : \A n \in Q : acceptedEpoch[n] >= m.mepoch
+
+
+H_UniqueEstablishedLeaderImpliesNEWEPOCHsFromThem == 
+    \A m \in NEWEPOCHmsgs :
+    \A i \in Server:
+        ( /\ IsLeader(i) 
+          /\ zabState[i] \in {SYNCHRONIZATION, BROADCAST}) => 
+            /\ m.mepoch <= acceptedEpoch[i]
+            /\ m.mepoch = acceptedEpoch[i] => m.msrc = i
+
 \* If there is an established leader, there mustn't be a quorum of nodes that
 \* sent ACKE to a different node.
 H_UniqueEstablishedLeaderImpliesSafeAtEpoch == 
