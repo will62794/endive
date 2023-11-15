@@ -767,7 +767,7 @@ ConnectAndFollowerSendCEPOCH(i, j) ==
     /\ learners'   = [learners   EXCEPT ![i] = learners[i] \cup {j}]
     /\ connectInfo' = [connectInfo EXCEPT ![j] = i]
     /\ mesgs' = mesgs \* Send(j, i, [ mtype  |-> CEPOCH, mepoch |-> acceptedEpoch[j] ]) \* contains f.p
-    /\ CEPOCHmsgs' = CEPOCHmsgs \cup {[ mtype  |-> CEPOCH, mepoch |-> acceptedEpoch[j], msrc |-> j, mdst |-> i, morder |-> NextMsgOrder(j,i) ]}
+    /\ CEPOCHmsgs' = CEPOCHmsgs \cup {[ mtype  |-> CEPOCH, mepoch |-> acceptedEpoch[j], msrc |-> j, mdst |-> i, morder |-> 0 ]}
     /\ UNCHANGED <<serverVars, electionVars, cepochRecv, ackeRecv, ackldRecv, sendCounter, NEWEPOCHmsgs, ACKEPOCHmsgs, NEWLEADERmsgs, ACKLDmsgs, COMMITLDmsgs, PROPOSEmsgs, ACKmsgs, COMMITmsgs>>
 
 CepochRecvQuorumFormed(i) == LET sid_cepochRecv == {c.sid: c \in cepochRecv[i]} IN IsQuorum(sid_cepochRecv)
