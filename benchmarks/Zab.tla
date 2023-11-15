@@ -1814,7 +1814,9 @@ H_NEWLEADERMsgHistAndStateInv ==
 
 H_NEWLEADERIncomingImpliesNoIncomingCOMMIT == 
     \A m \in NEWLEADERmsgs :
-        ~\E mc \in COMMITmsgs : mc.mdst = m.mdst
+        /\ ~\E mc \in COMMITmsgs : mc.mdst = m.mdst
+        \* If you have an outstanding NEWLEADER, you can't have sent an ACKLD to that leader yet.
+        /\ ~\E j \in Server : \E ackld \in ACKLDmsgs : ackld.sid = m.mdst
 
 H_NEWLEADERIncomingImpliesLastCommittedBound == 
     \A m \in NEWLEADERmsgs :
