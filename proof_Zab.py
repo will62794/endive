@@ -210,6 +210,8 @@ LeaderinBROADCASTImpliesNoNEWLEADERorACKEInFlight.children = {
 
 # LeaderImpliesLearnersFollowing = make_node("H_LeaderImpliesLearnersFollowing")
 
+FollowerCantBeLearnerToDifferentLeaders = make_node("H_FollowerCantBeLearnerToDifferentLeaders")
+
 LeaderInBROADCASTImpliesLearnerInBROADCAST = make_node("H_LeaderInBROADCASTImpliesLearnerInBROADCAST")
 LeaderInBROADCASTImpliesLearnerInBROADCAST.children = {
     "FollowerProcessPROPOSEAction": [
@@ -219,7 +221,7 @@ LeaderInBROADCASTImpliesLearnerInBROADCAST.children = {
         ACKEPOCHHistoryContainedInFOLLOWINGSender
     ],
     "TimeoutNoQuorumAction": [
-        
+        FollowerCantBeLearnerToDifferentLeaders
     ],
 }
 

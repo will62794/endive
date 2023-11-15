@@ -2243,7 +2243,7 @@ H_ACKLDMsgSentByFollowerImpliesEmptyBuffer ==
 
 H_FollowerCantBeLearnerToDifferentLeaders == 
     \A i,la,lb \in Server : 
-        (/\ IsFollower(i)
+        (/\ (IsFollower(i) \/ IsLooking(i))
          /\ IsLeader(la)
          /\ IsLeader(lb)
          /\ la # lb) => 
@@ -2262,8 +2262,9 @@ H_LeaderInBROADCASTImpliesLearnerInBROADCAST ==
     \A i,j \in Server : 
         (/\ IsLeader(i) 
          /\ zabState[i] \in {DISCOVERY, SYNCHRONIZATION, BROADCAST}) =>   
+            /\ i \in learners[i]
             /\ (\A a \in ackeRecv[i] :
-                (a.connected /\ a.sid # i) => 
+                (a.connected /\ a.sid # i /\ a.sid \in learners[i]) => 
                     /\ IsFollower(a.sid)
                     /\ zabState[a.sid] \in {SYNCHRONIZATION, BROADCAST})
 
