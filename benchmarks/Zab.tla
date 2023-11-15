@@ -2146,6 +2146,7 @@ H_NEWLEADERHistoryExistsOnQuorum ==
         \A n \in Q : 
         \E ic \in DOMAIN history[n] : 
             /\ history[n][ic].zxid = m.mhistory[ih].zxid 
+            /\ IsLeader(m.msrc)
             \* /\ acceptedEpoch[n] >= m.mepoch
 
 \* If a follower has an incoming NEWEPOCH message, then this must be the only incoming message it
