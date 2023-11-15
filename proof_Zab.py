@@ -59,6 +59,7 @@ aCKMsgImpliesZxidInLog.children = {
     ]
 }
 
+NEWLEADERIncomingImpliesNoIncomingCOMMIT = make_node("H_NEWLEADERIncomingImpliesNoIncomingCOMMIT")
 
 NEWLEADERIncomingImpliesLastCommittedBound = make_node("H_NEWLEADERIncomingImpliesLastCommittedBound")
 
@@ -74,6 +75,7 @@ nodeHistoryBoundByLastCommittedIndex.children = {
     ],
 }
 
+COMMITLDSentByNodeImpliesZxidCommittedInLog = make_node("H_COMMITLDSentByNodeImpliesZxidCommittedInLog")
 
 NEWEPOCHFromNodeImpliesLEADING = make_node("H_NEWEPOCHFromNodeImpliesLEADING")
 
@@ -87,7 +89,10 @@ ACKEPOCHHistoryContainedInFOLLOWINGSender.children = {
     ],
     "FollowerProcessNEWEPOCHAction": [
         NEWEPOCHFromNodeImpliesLEADING
-    ]   
+    ],
+    "FollowerProcessCOMMITLDAction": [
+        COMMITLDSentByNodeImpliesZxidCommittedInLog
+    ],
 }
 
 ACKMsgInFlightImpliesNodesInBROADCAST = make_node("H_ACKMsgInFlightImpliesNodesInBROADCAST")
@@ -143,7 +148,6 @@ leaderInBroadcastImpliesHasAllEntriesInEpoch.children = {
     # ]
 }
 
-COMMITLDSentByNodeImpliesZxidCommittedInLog = make_node("H_COMMITLDSentByNodeImpliesZxidCommittedInLog")
 COMMITLDSentByNodeImpliesZxidCommittedInLog.children = {
     "FollowerProcessNEWLEADERAction": [ 
         NEWLEADERMsgHistAndStateInv
@@ -175,14 +179,14 @@ EstablishedLeaderImpliesSafeAtCurrentEpoch.children = {
 
 LeaderinBROADCASTImpliesNoNEWLEADERorACKEInFlight = make_node("H_LeaderinBROADCASTImpliesNoNEWLEADERorACKEInFlight")
 LeaderinBROADCASTImpliesNoNEWLEADERorACKEInFlight.children = {
-    "LeaderProcessACKEPOCHHasntBroadcastAction": [
-        uniqueLeadership
-    ],
-    "FollowerProcessNEWEPOCHAction": [
-        EstablishedLeaderImpliesSafeAtCurrentEpoch
-    ],
+    # "LeaderProcessACKEPOCHHasntBroadcastAction": [
+        # uniqueLeadership
+    # ],
+    # "FollowerProcessNEWEPOCHAction": [
+    #     EstablishedLeaderImpliesSafeAtCurrentEpoch
+    # ],
     "LeaderProcessACKLDHasntBroadcastAction": [
-        ACKLDMsgSentByFollowerImpliesEmptyBuffer
+        # ACKLDMsgSentByFollowerImpliesEmptyBuffer
     ]
 }
 
@@ -193,9 +197,12 @@ LeaderInBROADCASTImpliesLearnerInBROADCAST.children = {
     "FollowerProcessPROPOSEAction": [
         PROPOSEMsgInFlightImpliesNodesInBROADCAST
     ],
-    "LeaderProcessACKLDHasntBroadcastAction": [
-        ACKLDMsgSentByFollowerImpliesEmptyBuffer
-    ]
+    "LeaderProcessACKEPOCHHasntBroadcastAction": [
+        ACKEPOCHHistoryContainedInFOLLOWINGSender
+    ],
+    "TimeoutNoQuorumAction": [
+        
+    ],
 }
 
 PROPOSEMsgInFlightImpliesNodesInBROADCAST.children = {
@@ -271,6 +278,9 @@ NEWLEADERIncomingImpliesLastCommittedBound.children = {
     ],
     "FollowerProcessCOMMITLDAction": [
         COMMITLDSentByNodeImpliesZxidCommittedInLog
+    ],
+    "FollowerProcessCOMMITAction": [
+        NEWLEADERIncomingImpliesNoIncomingCOMMIT
     ]
 }
 
@@ -327,6 +337,21 @@ NodeLOOKINGImpliesEmptyInputBuffer.children = {
     ]
 }
 
+NodeLOOKINGImpliesNoIncomingCEPOCH = make_node("H_NodeLOOKINGImpliesNoIncomingCEPOCH")
+
+NodeLOOKINGImpliesNoIncomingNEWEPOCH = make_node("H_NodeLOOKINGImpliesNoIncomingNEWEPOCH")
+NodeLOOKINGImpliesNoIncomingNEWEPOCH.children = {
+    "LeaderProcessCEPOCHAction": [
+        NodeLOOKINGImpliesNoIncomingCEPOCH
+    ],
+}
+
+NodeLOOKINGImpliesNoIncomingACKEPOCH = make_node("H_NodeLOOKINGImpliesNoIncomingACKEPOCH")
+NodeLOOKINGImpliesNoIncomingACKEPOCH.children = {
+    "FollowerProcessNEWEPOCHAction": [
+        NodeLOOKINGImpliesNoIncomingNEWEPOCH
+    ]
+}
 
 committedEntryExistsInACKEPOCHQuorumHistory.children = {
     "LeaderProcessRequestAction": [
@@ -341,11 +366,11 @@ committedEntryExistsInACKEPOCHQuorumHistory.children = {
     ],
     "UpdateLeaderAction":[
         # NodeLOOKINGImpliesELECTIONorDISCOVERY,
-        NodeLOOKINGImpliesEmptyInputBuffer
+        NodeLOOKINGImpliesNoIncomingACKEPOCH
     ],
     "FollowLeaderMyselfAction":[
         # NodeLOOKINGImpliesELECTIONorDISCOVERY,
-        NodeLOOKINGImpliesEmptyInputBuffer
+        NodeLOOKINGImpliesNoIncomingACKEPOCH
     ],
     "LeaderProcessACKEPOCHHasntBroadcastAction": [
         # committedEntryExistsOnQuorum,

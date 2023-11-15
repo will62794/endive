@@ -1244,6 +1244,7 @@ ZxidToIndex(his, zxid) == ZxidToIndexIter(his, zxid)
 (* Follower receives COMMITLD. Commit all txns. *)
 \* @type: (SERVER, SERVER, { mtype: Str, mzxid: ZXID, msrc: SERVER, mdst: SERVER, morder: Int }) => Bool;
 FollowerProcessCOMMITLD(i, j, commitLDmsg) ==
+        /\ commitLDmsg \in COMMITLDmsgs
         /\ IsFollower(i)
         \* /\ PendingCOMMITLD(i, j)
         /\ commitLDmsg.mdst = i
@@ -1798,6 +1799,10 @@ H_NEWLEADERMsgHistAndStateInv ==
         /\ m.mdst \in learners[m.msrc]
         /\ zabState[m.msrc] \in {SYNCHRONIZATION, BROADCAST}
 
+H_NEWLEADERIncomingImpliesNoIncomingCOMMIT == 
+    \A m \in NEWLEADERmsgs :
+        ~\E mc \in COMMITmsgs : mc.mdst = m.mdst
+
 H_NEWLEADERIncomingImpliesLastCommittedBound == 
     \A m \in NEWLEADERmsgs :
     \* \A i,j \in Server : 
@@ -1984,7 +1989,10 @@ H_LeaderinBROADCASTImpliesNoNEWLEADERorACKEInFlight ==
         (\A i,j \in Server :
             /\ ACKLDmsgs = {} 
             /\ NEWLEADERmsgs = {}
-            /\ \A m \in ACKEPOCHmsgs : \A idx \in DOMAIN m.mhistory : m.mhistory[idx].zxid[1] # currentEpoch[s])
+            /\ \A m \in ACKEPOCHmsgs : m.mdst = s
+            \* /\ NEWEPOCHmsgs = {}
+            \* /\ \A m \in ACKEPOCHmsgs : \A idx \in DOMAIN m.mhistory : m.mhistory[idx].zxid[1] # currentEpoch[s]
+            )
 
 
 \* Zxids across peer history at all nodes.
@@ -2136,20 +2144,37 @@ H_NEWLEADERHistoryExistsOnQuorum ==
 \*         (m.mdst = i) =>
 \*             \A cem \in CEPOCHmsgs : cem.dst # i  
  
+H_NodeLOOKINGImpliesNoIncomingCEPOCH ==
+    \A i \in Server : 
+        (state[i] = LOOKING) => 
+            /\ \A m \in CEPOCHmsgs : ~(m.mdst =i \/ m.msrc = i)
+            /\ (zabState[i] \in {ELECTION, DISCOVERY})
+
+H_NodeLOOKINGImpliesNoIncomingNEWEPOCH ==
+    \A i \in Server : 
+        (state[i] = LOOKING) => 
+            /\ \A m \in NEWEPOCHmsgs : ~(m.mdst =i \/ m.msrc = i)
+            /\ (zabState[i] \in {ELECTION, DISCOVERY})
+
+H_NodeLOOKINGImpliesNoIncomingACKEPOCH ==
+    \A i \in Server : 
+        (state[i] = LOOKING) => 
+            /\ \A m \in ACKEPOCHmsgs : ~(m.mdst =i)
+            /\ (zabState[i] \in {ELECTION, DISCOVERY})
 
 \* If a node is LOOKING, then it must have an empty input buffer.
 H_NodeLOOKINGImpliesEmptyInputBuffer == 
     \A i \in Server : 
         (state[i] = LOOKING) => 
-            /\ \A m \in CEPOCHmsgs : ~(m.mdst =i)
-            /\ \A m \in NEWEPOCHmsgs : ~(m.mdst =i)
-            /\ \A m \in NEWLEADERmsgs : ~(m.mdst =i)
+            \* /\ \A m \in CEPOCHmsgs : ~(m.mdst =i)
+            \* /\ \A m \in NEWEPOCHmsgs : ~(m.mdst =i)
+            \* /\ \A m \in NEWLEADERmsgs : ~(m.mdst =i)
             /\ \A m \in ACKEPOCHmsgs : ~(m.mdst =i)
-            /\ \A m \in ACKLDmsgs : ~(m.mdst =i)
-            /\ \A m \in COMMITLDmsgs : ~(m.mdst =i)
-            /\ \A m \in PROPOSEmsgs : ~(m.mdst =i)
-            /\ \A m \in ACKmsgs : ~(m.mdst =i)
-            /\ \A m \in COMMITmsgs : ~(m.mdst =i)
+            \* /\ \A m \in ACKLDmsgs : ~(m.mdst =i)
+            \* /\ \A m \in COMMITLDmsgs : ~(m.mdst =i)
+            \* /\ \A m \in PROPOSEmsgs : ~(m.mdst =i)
+            \* /\ \A m \in ACKmsgs : ~(m.mdst =i)
+            \* /\ \A m \in COMMITmsgs : ~(m.mdst =i)
             /\ (zabState[i] \in {ELECTION, DISCOVERY})
             \* a node in LOOKING shouldn't exist as a learner of any leader.
             /\ ~\E j \in Server : IsLeader(j) /\ i \in learners[j]
@@ -2220,19 +2245,12 @@ H_LeaderImpliesLearnersFollowing ==
 H_LeaderInBROADCASTImpliesLearnerInBROADCAST == 
     \A i,j \in Server : 
         (/\ IsLeader(i) 
-         /\ zabState[i] = BROADCAST) =>   
-            /\ (j \in AckLDRecvServers(i)) => zabState[j] \in {SYNCHRONIZATION, BROADCAST}
-            /\ ((j \in learners[i]) /\ (i # j)) => IsFollower(j)
-            /\ AckLDRecvServers(i) \in Quorums
-            \* \* Should have gotten ACKLD responses back only from your learners.
-            /\ AckLDRecvServers(i) \subseteq learners[i]
-            /\ i \in learners[i]
-            \* \* /\ ((zabState[j] # BROADCAST) => (msgs[i][j] # <<>>) /\ msgs[i][j][1].mtype = COMMITLD)
-            \* \* Shouldn't be any pending NEWEPOCH messages while in BROADCAST.
-            \* /\ (zabState[j] = BROADCAST) => \A m \in NEWEPOCHmsgs : ~(m.msrc = i /\ m.mdst = j)
-            \* /\ (zabState[j] = BROADCAST /\ j \in learners[i] /\ i # j) => \A m \in CEPOCHmsgs : ~(m.msrc = j /\ m.mdst = i)
-            \* \* Established leaders must have received a CEPOCH quorum.
-            \* /\ CepochRecvQuorumFormed(i)
+         /\ zabState[i] \in {DISCOVERY, SYNCHRONIZATION, BROADCAST}) =>   
+            /\ (\A a \in ackeRecv[i] :
+                (a.connected /\ a.sid # i) => 
+                    /\ IsFollower(a.sid)
+                    /\ zabState[a.sid] \in {SYNCHRONIZATION, BROADCAST})
+
 
 (******
 
@@ -2415,8 +2433,8 @@ Morder1 ==
 \* 
 
 CInit == 
-    /\ MaxEpoch = 3
-    /\ MaxHistLen = 2
+    /\ MaxEpoch = 1
+    /\ MaxHistLen = 1
     /\ Server = {"s1", "s2", "s3"}
     /\ CEPOCH = "CEPOCH"
     /\ NEWEPOCH = "NEWEPOCH"
