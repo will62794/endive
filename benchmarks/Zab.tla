@@ -2457,7 +2457,7 @@ Morder1 ==
 \* 
 
 CInit == 
-    /\ MaxEpoch = 1
+    /\ MaxEpoch = 2
     /\ MaxHistLen = 1
     /\ Server = {"s1", "s2", "s3"}
     /\ CEPOCH = "CEPOCH"
@@ -2529,25 +2529,25 @@ ApaTypeOK ==
     /\ connectInfo \in [Server -> Server]
     /\ leaderOracle \in Server
     /\ mesgs = [s \in Server |-> [v \in Server |-> << >>] ]
-    /\ CEPOCHmsgs = Gen(2)
+    /\ CEPOCHmsgs = Gen(4)
     /\ \A m \in CEPOCHmsgs : m \in ApaMsgCEPOCHType
-    /\ NEWEPOCHmsgs = Gen(2)
+    /\ NEWEPOCHmsgs = Gen(4)
     /\ \A m \in NEWEPOCHmsgs : m \in ApaMsgNEWEPOCHType
-    /\ ACKEPOCHmsgs = Gen(2)
+    /\ ACKEPOCHmsgs = Gen(4)
     /\ \A m \in ACKEPOCHmsgs : m \in ApaMsgACKEPOCHType
     /\ \A m \in ACKEPOCHmsgs : \A mi \in DOMAIN m.mhistory : m.mhistory[mi] \in ApaHistEntryType
-    /\ NEWLEADERmsgs = Gen(2)
+    /\ NEWLEADERmsgs = Gen(4)
     /\ \A m \in NEWLEADERmsgs : m \in ApaMsgNEWLEADERType
     /\ \A m \in NEWLEADERmsgs : \A mi \in DOMAIN m.mhistory : m.mhistory[mi] \in ApaHistEntryType
-    /\ ACKLDmsgs = Gen(2)
+    /\ ACKLDmsgs = Gen(4)
     /\ \A m \in ACKLDmsgs : m \in ApaMsgACKLDType
-    /\ COMMITLDmsgs = Gen(2)
+    /\ COMMITLDmsgs = Gen(4)
     /\ \A m \in COMMITLDmsgs : m \in ApaMsgCOMMITLDType
-    /\ PROPOSEmsgs = Gen(2)
+    /\ PROPOSEmsgs = Gen(4)
     /\ \A m \in PROPOSEmsgs : m \in ApaMsgPROPOSEType
-    /\ ACKmsgs = Gen(2)
+    /\ ACKmsgs = Gen(4)
     /\ \A m \in ACKmsgs : m \in ApaMsgACKType
-    /\ COMMITmsgs = Gen(2)
+    /\ COMMITmsgs = Gen(4)
     /\ \A m \in COMMITmsgs : m \in ApaMsgCOMMITType
 
 InvTest == 
