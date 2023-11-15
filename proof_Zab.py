@@ -112,9 +112,24 @@ txnZxidsUniqueHistoriesAndMessagesBetweenLocalHistoryAndPROPOSEMessages = make_n
 
 NodeLOOKINGImpliesNoIncomingACKEPOCH = make_node("H_NodeLOOKINGImpliesNoIncomingACKEPOCH")
 
-UniqueEstablishedLeaderImpliesNEWEPOCHsFromThem = make_node("H_UniqueEstablishedLeaderImpliesNEWEPOCHsFromThem")
+NodeCantSendCEPOCHToDifferentLeaders = make_node("H_NodeCantSendCEPOCHToDifferentLeaders")
 
 UniqueEstablishedLeaderImpliesSafeAtEpoch = make_node("H_UniqueEstablishedLeaderImpliesSafeAtEpoch")
+
+uniqueLeadership = make_node("H_UniqueLeadership")
+
+UniqueEstablishedLeaderImpliesNEWEPOCHsFromThem = make_node("H_UniqueEstablishedLeaderImpliesNEWEPOCHsFromThem")
+UniqueEstablishedLeaderImpliesNEWEPOCHsFromThem.children = {
+    "LeaderProcessCEPOCHAction": [
+        NodeCantSendCEPOCHToDifferentLeaders,
+        UniqueEstablishedLeaderImpliesSafeAtEpoch,
+        uniqueLeadership
+    ],
+    "LeaderProcessACKEPOCHHasntBroadcastAction": [
+        ACKEPOCHHistoryContainedInFOLLOWINGSender
+    ],
+}
+
 UniqueEstablishedLeaderImpliesSafeAtEpoch.children = {
     "LeaderProcessACKEPOCHHasntBroadcastAction": [
         ACKEPOCHHistoryContainedInFOLLOWINGSender
@@ -130,7 +145,6 @@ UniqueEstablishedLeaderImpliesSafeAtEpoch.children = {
     ]
 }
 
-uniqueLeadership = make_node("H_UniqueLeadership")
 uniqueLeadership.children = {
     "LeaderProcessACKEPOCHHasntBroadcastAction": [
         UniqueEstablishedLeaderImpliesSafeAtEpoch

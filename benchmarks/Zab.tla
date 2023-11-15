@@ -1764,6 +1764,12 @@ H_EstablishedLeaderImpliesACKEQuorum ==
 \*     \A m \in NEWEPOCHmsgs : 
 \*         \E Q \in Quorums : \A n \in Q : acceptedEpoch[n] >= m.mepoch
 
+H_NodeCantSendCEPOCHToDifferentLeaders == 
+    \A s,t \in Server : 
+        IsLeader(s) /\ IsLeader(t) => 
+        (\A cs \in cepochRecv[s] :
+         \A ct \in cepochRecv[t] :
+            ~(cs.epoch = ct.epoch /\ cs.sid = ct.sid /\ s # t))
 
 H_UniqueEstablishedLeaderImpliesNEWEPOCHsFromThem == 
     \A m \in NEWEPOCHmsgs :
@@ -2000,14 +2006,15 @@ H_EstablishedLeaderImpliesSafeAtCurrentEpoch ==
 \* If a leader is in BROADCAST, no NEWLEADER messages should be in-flight
 H_LeaderinBROADCASTImpliesNoNEWLEADERorACKEInFlight == 
     \A s \in Server : 
-    (state[s] = LEADING /\ zabState[s] \in {BROADCAST}) => 
+    (/\ state[s] = LEADING 
+     /\ zabState[s] \in {BROADCAST}) => 
         (\A i,j \in Server :
             /\ ACKLDmsgs = {} 
             /\ NEWLEADERmsgs = {}
             /\ \A m \in ACKEPOCHmsgs : m.mdst = s
-            \* /\ NEWEPOCHmsgs = {}
-            \* /\ \A m \in ACKEPOCHmsgs : \A idx \in DOMAIN m.mhistory : m.mhistory[idx].zxid[1] # currentEpoch[s]
-            )
+            /\ \A m \in NEWEPOCHmsgs : m.msrc = s
+            /\ \A m \in CEPOCHmsgs : m.mdst = s
+        )
 
 
 \* Zxids across peer history at all nodes.
