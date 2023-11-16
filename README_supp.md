@@ -49,5 +49,12 @@ In our tests, running on a 2020 M1 Macbook Air, approximate proof checking times
 - `TwoPhase`: 184 secs.
 - `AbstractRaft`: 969 secs. (16 minutes)
 - `AsyncRaft`: 6592 secs. (~2 hours)
-- `Zab`: (TODO)
 
+Due to some encoding inefficiences encountered in Apalache for our Zab specification, we currently verified the proof graph for Zab using a probabilistic technique with TLC. This can be checked with the following command, which should similarly report no errors.
+
+```
+python3 indigo.py --spec benchmarks/Zab --seed 1 --num_simulate_traces 30000 --proof_tree_mode --interactive --max_proof_node_ctis 20 --debug --target_sample_time_limit_ms 25000 --target_sample_states 20000 --k_cti_induction_depth 1 --proof_tree_cmd check_proof_tlc
+```
+We checked this across 3 seeds, `{1,2,3}`. In our tests running on a 2020 M1 Macbook the checking time for one run of the above command was approximately as follows:
+
+- `Zab`: 6500 secs. (~1 hour)
