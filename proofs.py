@@ -1234,7 +1234,7 @@ class StructuredProof():
         # TODO: Eventually may want a different unique naming scheme for proof nodes.
         if target_node_name is not None and target_node_name != node.name:
             # Recurse right away if this is not the target node.
-            for child_node in node.children:
+            for child_node in node.children_list():
                 self.gen_ctis_for_node(indgen, child_node, target_node_name=target_node_name)   
             return         
 

@@ -2421,12 +2421,18 @@ class InductiveInvGen():
             print("Checking all proof obligations with TLC.")
             start_node = proof.root
 
-            # Check all proof graph nodes recursively.
-            proof.gen_ctis_for_node(self, start_node)
-
+            # Retrieve all proof graph nodes.
             nodes = []
             seen = set()
             proof.walk_proof_graph(proof.root, seen=seen, all_nodes=nodes)
+
+            # Check all proof graph nodes.
+            for n in nodes:
+                # proof.get_node_by_name()
+                node = proof.get_node_by_name(proof.root, n.name)
+                print(node.expr)
+                proof.gen_ctis_for_node(self, node, target_node_name=node.name)
+
             errs = []
             print("--- Status of proof obligations after checking.")
             for n in nodes:
