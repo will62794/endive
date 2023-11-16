@@ -2256,8 +2256,10 @@ H_FollowersHaveNoMessagesSentToSelf ==
 H_TwoLeadersCantHaveSameCEPOCH ==
     \A i,j \in Server :
         \* Two leaders cannot have recorded CEPOCHs from the same node.
-        (IsLeader(i) /\ IsLeader(j) /\ i # j) => 
-            \A cj \in cepochRecv[j] : \A ci \in cepochRecv[i] : ci.sid # cj.sid
+        /\ (IsLeader(i) /\ IsLeader(j) /\ i # j) => 
+             \A cj \in cepochRecv[j] : \A ci \in cepochRecv[i] : ci.sid # cj.sid
+        \* If a CEPOCH msg is outstanding, a different leader can't have recorded such a CEPOCH.
+        \* /\ \A m \in CEPOCHmsgs : IsLeader(j) => ~\E c \in cepochRecv[j] : c.sid = m.msrc /\ m.mdst # j
 
 H_ACKEPOCHFromNodeImpliesCEPOCHRecvd == 
     \A m \in ACKEPOCHmsgs : 
