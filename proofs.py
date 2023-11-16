@@ -915,7 +915,8 @@ class StructuredProof():
             if (node.expr, action) in nodes_to_include_var_slice:
                 slice_vars = self.lemma_action_coi[action][node.expr]
                 sliced = ",".join(slice_vars)
-                slice_label="-90:{\{%s\}}" % sliced
+                slice_font_size="\Larger"
+                slice_label="-90:{%s\{%s\}}" % (slice_font_size,sliced)
 
                 # slice_label=""
 

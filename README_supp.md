@@ -52,8 +52,8 @@ In our tests, running on a 2020 M1 Macbook Air, approximate proof checking times
 Due to some encoding inefficiences encountered in Apalache for our Zab specification, we currently verified the proof graph for Zab using a probabilistic technique with TLC. This can be checked with the following command, which should similarly report no errors.
 
 ```
-python3 indigo.py --spec benchmarks/Zab --seed 1 --num_simulate_traces 30000 --proof_tree_mode --interactive --max_proof_node_ctis 20 --debug --target_sample_time_limit_ms 25000 --target_sample_states 20000 --k_cti_induction_depth 1 --proof_tree_cmd check_proof_tlc
+python3 indigo.py --spec benchmarks/Zab --seed 1111 --num_simulate_traces 30000 --proof_tree_mode --interactive --max_proof_node_ctis 20 --proof_tree_cmd check_proof_tlc --debug --target_sample_time_limit_ms 10000 --target_sample_states 10000 --override_num_cti_workers 5 --k_cti_induction_depth 1
 ```
-We checked this across 3 seeds, `{1,2,3}`. In our tests running on a 2020 M1 Macbook the checking time for one run of the above command was approximately as follows:
+In our tests running on a 2020 M1 Macbook the checking time for one run of the above command was approximately as follows:
 
-- `Zab`: 6500 secs. (~1 hour)
+- `Zab`: 1100 secs. (~18 minutes)
