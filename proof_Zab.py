@@ -348,7 +348,8 @@ committedEntryExistsOnQuorum.children = {
         nodeHistoryBoundByLastCommittedIndex
     ],
     "FollowerProcessCOMMITAction": [
-        COMMITSentByNodeImpliesZxidInLog
+        COMMITSentByNodeImpliesZxidInLog,
+        txnZxidsUniqueHistoriesAndMessages
     ],
     "FollowerProcessCOMMITLDAction": [
         COMMITLDSentByNodeImpliesZxidCommittedInLog
@@ -536,7 +537,11 @@ CEPOCHRecvsAreLearners.children = {
     "LeaderProcessCEPOCHAction": [
         LeaderCEPOCHRecvsUnique
     ]
+    # "TimeoutNoQuorum":[
+
+    # ]
 }
+
 
 NodeLOOKINGImpliesNotInOtherCEPOCHRecv = make_node("H_NodeLOOKINGImpliesNotInOtherCEPOCHRecv")
 NodeLOOKINGImpliesNotInOtherCEPOCHRecv.children = {

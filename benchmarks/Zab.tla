@@ -1749,6 +1749,8 @@ H_NEWLEADERMsgSentByLeader ==
 
 *****)
 
+\* START_PROOF
+
 \* If a node is currently established leader in epoch E, it implies it has received a quorum of ACKE
 \* responses from nodes.
 H_EstablishedLeaderImpliesACKEQuorum == 
@@ -2104,6 +2106,25 @@ H_PROPOSEMsgSentByNodeImpliesZxidInLog ==
             /\ m.mdst \in learners[m.msrc]
             /\ \E idx \in DOMAIN history[m.msrc] : history[m.msrc][idx].zxid = m.mzxid
 
+H_ACKERecvPeerHistoryContainedInSender == 
+    \A s \in Server :
+    IsLeader(s) => 
+        \A a \in ackeRecv[s] :  
+            /\ a.sid # s => IsFollower(a.sid)
+            /\ \A ind \in DOMAIN a.peerHistory : 
+                /\ Len(history[a.sid]) >= ind
+                /\ TxnEqual(history[a.sid][ind], a.peerHistory[ind])
+                \* /\ m.mhistory[ind].zxid = history[m.msrc][ind].zxid
+                \* /\ m.mhistory[ind].value = history[m.msrc][ind].value
+        \* a.peerHistory
+        \* /\ state[m.msrc] = FOLLOWING
+        \* /\ state[m.mdst] = LEADING
+        \* /\ zabState[m.msrc] \in {SYNCHRONIZATION}
+        \* /\ Len(m.mhistory) = Len(history[m.msrc])
+        \* /\ \A ind \in DOMAIN m.mhistory : 
+        \*     /\ m.mhistory[ind].zxid = history[m.msrc][ind].zxid
+        \*     /\ m.mhistory[ind].value = history[m.msrc][ind].value
+
 \* ACKEPOCH response history must be contained in the sender's history, who must
 \* be a follower.
 H_ACKEPOCHHistoryContainedInFOLLOWINGSender == 
@@ -2267,7 +2288,7 @@ H_CEPOCHRecvsAreLearners ==
         IsLeader(s) => 
             /\ \E c \in cepochRecv[s] : c.sid = s
             /\ \A c \in cepochRecv[s] :
-                 /\ (c.sid # s) => IsFollower(c.sid) 
+                \*  /\ (c.sid # s) => IsFollower(c.sid) 
                  /\ (c.sid \in learners[s])
 
 H_NodeLOOKINGImpliesNotInOtherCEPOCHRecv == 

@@ -490,9 +490,9 @@ AcceptAppendEntriesRequestLearnCommit(m) ==
             \* we don't actually update our log here, only our commitIndex.
 
             \* PRE (can comment these conditions out to introduce bug)
-            /\ logOk
-            /\ Len(log[i]) = m.mprevLogIndex
-            /\ CanAppend(m, i)
+            \* /\ logOk
+            \* /\ Len(log[i]) = m.mprevLogIndex
+            \* /\ CanAppend(m, i)
 
             /\ m.mcommitIndex > commitIndex[i] \* no need to ever decrement our commitIndex.
             /\ state' = [state EXCEPT ![i] = Follower]
@@ -769,6 +769,8 @@ StateConstraint ==
 \**************
 \* Helper lemmas.
 \**************
+
+\* START_PROOF
 
 \* Is log entry e = <<index, term>> in the log of node 'i'.
 \* InLog(e, i) == \E x \in DOMAIN log[i] : x = e[1] /\ log[i][x] = e[2]

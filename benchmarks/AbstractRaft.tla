@@ -208,36 +208,6 @@ NextUnchanged == UNCHANGED vars
 
 --------------------------------------------------------------------------------
 
-\*
-\* Correctness properties
-\*
-
-H_OnePrimaryPerTerm == 
-    \A s,t \in Server :
-        (/\ state[s] = Primary 
-         /\ state[t] = Primary
-         /\ currentTerm[s] = currentTerm[t]) => (s = t)
-
-LeaderAppendOnly == 
-    [][\A s \in Server : state[s] = Primary => Len(log'[s]) >= Len(log[s])]_vars
-
-\* <<index, term>> pairs uniquely identify log prefixes.
-H_LogMatching == 
-    \A s,t \in Server : 
-    \A i \in DOMAIN log[s] :
-        (\E j \in DOMAIN log[t] : i = j /\ log[s][i] = log[t][j]) => 
-        (SubSeq(log[s],1,i) = SubSeq(log[t],1,i)) \* prefixes must be the same.
-
-\* When a node gets elected as primary it contains all entries committed in previous terms.
-H_LeaderCompleteness == 
-    \A s \in Server : (state[s] = Primary) => 
-        \A c \in immediatelyCommitted : (c[2] < currentTerm[s] => InLog(<<c[1],c[2]>>, s))
-
-\* \* If two entries are committed at the same index, they must be the same entry.
-H_StateMachineSafety == 
-    \A c1, c2 \in immediatelyCommitted : (c1[1] = c2[1]) => (c1 = c2)
-
---------------------------------------------------------------------------------
 
 CONSTANTS 
     \* @type: Int;
@@ -288,6 +258,38 @@ ApaTypeOK ==
 \* 
 \* Helper lemmas.
 \* 
+
+\* START_PROOF
+
+\*
+\* Correctness properties
+\*
+
+H_OnePrimaryPerTerm == 
+    \A s,t \in Server :
+        (/\ state[s] = Primary 
+         /\ state[t] = Primary
+         /\ currentTerm[s] = currentTerm[t]) => (s = t)
+
+LeaderAppendOnly == 
+    [][\A s \in Server : state[s] = Primary => Len(log'[s]) >= Len(log[s])]_vars
+
+\* <<index, term>> pairs uniquely identify log prefixes.
+H_LogMatching == 
+    \A s,t \in Server : 
+    \A i \in DOMAIN log[s] :
+        (\E j \in DOMAIN log[t] : i = j /\ log[s][i] = log[t][j]) => 
+        (SubSeq(log[s],1,i) = SubSeq(log[t],1,i)) \* prefixes must be the same.
+
+\* When a node gets elected as primary it contains all entries committed in previous terms.
+H_LeaderCompleteness == 
+    \A s \in Server : (state[s] = Primary) => 
+        \A c \in immediatelyCommitted : (c[2] < currentTerm[s] => InLog(<<c[1],c[2]>>, s))
+
+\* \* If two entries are committed at the same index, they must be the same entry.
+H_StateMachineSafety == 
+    \A c1, c2 \in immediatelyCommitted : (c1[1] = c2[1]) => (c1 = c2)
+
 
 \* Dummy lemma that is trivially true.
 H_TRUE == Cardinality(DOMAIN state) >= 0

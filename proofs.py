@@ -20,6 +20,21 @@ import contextlib
 log = logging.getLogger("dot2tex")
 log.setLevel(logging.WARNING)
 
+def find_ind_containing(l,substr):
+    for ind in range(len(l)):
+        if substr in l[ind]:
+            return ind
+    return -1
+
+# Count spec and proof LOC.
+def count_spec_loc(specfile):
+    lines = open(specfile).read().splitlines()
+    # Remove commented lines.
+    lines = [l for l in lines if (not l.startswith("\*") or "START_PROOF" in l)]
+    spec_loc = find_ind_containing(lines, "START_PROOF")
+    proof_loc = len(lines) - spec_loc
+    return {"spec_loc": spec_loc, "proof_loc": proof_loc}
+
 def runcmd(c):
     print("RUNNING CMD:", c)
     cmd = c[0]
@@ -629,9 +644,20 @@ class StructuredProof():
         json.dump(stats, f, indent=2)
         f.close()
 
+        # Also get some general spec stats for LaTeX stats.
+        spec_path = f"benchmarks/{self.specname}.tla"
+        res = count_spec_loc(spec_path)
+        stats["spec_loc"] = res["spec_loc"]
+        stats["proof_loc"] = res["proof_loc"]
+
         # Save proof graph stats in LaTeX format too.
         f = open(f"benchmarks/{self.specname}_proofstats.tex", 'w')
-        for stat in ["num_state_vars", "mean_in_degree", "median_slice_size", "median_in_degree", "num_lemmas", "num_actions"]:
+        tex_stats = [
+            "num_state_vars", "mean_in_degree", "median_slice_size", 
+            "median_in_degree", "num_lemmas", "num_actions", "spec_loc",
+            "proof_loc"
+        ]
+        for stat in tex_stats:
             f.write("\\newcommand*{\\%s%s}{%d}\n" % (self.specname.replace("_", ""), stat.replace("_", ""), stats[stat]))
         stat = "median_slice_pct"
         f.write("\\newcommand*{\\%s%s}{%.2f}\n" % (self.specname.replace("_", ""), stat.replace("_", ""), stats[stat]))
@@ -817,11 +843,12 @@ class StructuredProof():
 
             # Zab lemmas.
             "H_PrefixConsistency",
-            # "H_CommittedEntryExistsInNEWLEADERHistory",
+            "H_CommittedEntryExistsInLeaderHistory",
             "H_CommittedEntryExistsOnQuorum",
             "H_UniqueLeadership",
             "H_UniqueEstablishedLeader",
             "H_TxnZxidsUniqueHistoriesAndMessages",
+            "H_TwoLeadersCantHaveSameCEPOCH",
 
             # TwoPhase lemmas.
             "H_RMCommittedImpliesNoRMsWorking",

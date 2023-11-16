@@ -187,6 +187,12 @@ NextUnchanged == UNCHANGED vars
 
 Symmetry == Permutations(RM)
 
+\* 
+\* Helper lemmas
+\* 
+
+\* START_PROOF
+
 H_TCConsistent ==  
   (*************************************************************************)
   (* A state predicate asserting that two RMs have not arrived at          *)
@@ -194,23 +200,27 @@ H_TCConsistent ==
   (*************************************************************************)
   \A rm1, rm2 \in RM : ~ (rmState[rm1] = "aborted" /\ rmState[rm2] = "committed")
 
-\* 
-\* Helper lemmas
-\* 
+H_CommitMsgImpliesNoAbortMsg ==  
+    ([type |-> "Commit"] \in msgsAbortCommit) => ~([type |-> "Abort"] \in msgsAbortCommit)
 
-H_CommitMsgImpliesNoAbortMsg ==  ([type |-> "Commit"] \in msgsAbortCommit) => ~([type |-> "Abort"] \in msgsAbortCommit)
+H_CommitMsgImpliesNoRMAborted == 
+    \A rmi \in RM : ~([type |-> "Commit"] \in msgsAbortCommit) \/ (~(rmState[rmi] = "aborted"))
 
-H_CommitMsgImpliesNoRMAborted == \A rmi \in RM : ~([type |-> "Commit"] \in msgsAbortCommit) \/ (~(rmState[rmi] = "aborted"))
-
-H_CommittedRMImpliesCommitMsg == \A rmi \in RM : ([type |-> "Commit"] \in msgsAbortCommit) \/ (~(rmState[rmi] = "committed"))
+H_CommittedRMImpliesCommitMsg == 
+    \A rmi \in RM : 
+        ([type |-> "Commit"] \in msgsAbortCommit) \/ (~(rmState[rmi] = "committed"))
 
 H_CommitMsgImpliesAllPrepared == ([type |-> "Commit"] \in msgsAbortCommit) => (tmPrepared = RM)
 
 H_CommitSentImpliesRMsNotWorking == ([type |-> "Commit"] \in msgsAbortCommit) => \A rmi \in RM : rmState[rmi] \in {"committed", "prepared"}
 
-H_AllPreparedImpliesNoRMsWorking == \A rmi \in RM : (tmPrepared = RM) => ~(rmState[rmi] = "working") 
+H_AllPreparedImpliesNoRMsWorking == 
+    \A rmi \in RM : 
+        (tmPrepared = RM) => ~(rmState[rmi] = "working") 
 
-H_RMSentPrepareImpliesNotWorking == \A rmi \in RM : ([type |-> "Prepared", rm |-> rmi] \in msgsPrepared) => (~(rmState[rmi] = "working"))
+H_RMSentPrepareImpliesNotWorking == 
+    \A rmi \in RM : 
+        ([type |-> "Prepared", rm |-> rmi] \in msgsPrepared) => (~(rmState[rmi] = "working"))
 
 H_AllPreparedImpliesAllPreparesSent == (tmPrepared = RM) => \A rmj \in RM : ([type |-> "Prepared", rm |-> rmj] \in msgsPrepared)
 
@@ -258,7 +268,6 @@ H_TMCommittedImpliesAbortMsg == \A rmi \in RM : \A rmj \in RM : (tmState = "comm
 
 H_AbortMsgImpliesTMAborted == ([type |-> "Abort"] \in msgsAbortCommit) => tmState = "aborted"
 
-\* Level 3.
 H_Inv1863 == \A rmi \in RM : (rmState[rmi] = "prepared") \/ (~([type |-> "Prepared", rm |-> rmi] \in msgsPrepared) \/ (~(tmState = "init")))
 
 H_Inv2000 == \A rmi \in RM : (rmState[rmi] = "prepared") \/ (~(tmPrepared = RM)) \/ (~(tmState = "init"))
@@ -267,23 +276,9 @@ H_Inv2000 == \A rmi \in RM : (rmState[rmi] = "prepared") \/ (~(tmPrepared = RM))
 H_Inv8880 == \A rmi \in RM : ~([type |-> "Abort"] \in msgsAbortCommit) \/ (~(rmState[rmi] = "committed"))
 H_Inv8881 == \A rmi \in RM : (~(rmState[rmi] = "committed")) \/ (~(tmState = "init"))
 
-\* If a resource manager has aborted and also prepared, then transaction manager must have decided to abort.
 H_Inv7777 == \A rmi \in RM :  ((rmState[rmi] = "aborted") /\ ([type |-> "Prepared", rm |-> rmi] \in msgsPrepared)) => tmState = "aborted"
 
 H_Inv446 == \A rmi \in RM : ~([type |-> "Prepared", rm |-> rmi] \in msgsPrepared) \/ (~(rmState[rmi] = "working"))
-
-
-
-
-
-
-
-
-
-
-
-
-\* alternate.
 
 Inv1433_2_7_def2 == \A rmi \in RM : \A rmj \in RM : (rmState[rmi] = "prepared") \/ (~([type |-> "Prepared", rm |-> rmi] \in msgsPrepared))
 
@@ -303,18 +298,6 @@ Inv429_1_2 == \A rmi \in RM : ~([type |-> "Commit"] \in msgsAbortCommit) \/ (~(r
 Inv415_1_3 == \A rmi \in RM : ~([type |-> "Abort"] \in msgsAbortCommit) \/ (~(rmState[rmi] = "committed"))
 Inv507_1_4 == \A rmi \in RM : ~(rmState[rmi] = "working") \/ (~(tmPrepared = RM))
 
-
-\* 
-\* Simple/minimal TLAPS proof structure example, just to test hierarchy/folding behavior.
-\* 
-
-L1 == 1
-L2 == 2
-L3 == 3
-L4 == 5
-L5 == 5
-
-
 \* Constant initialization for model checking with Apalache.
 CInit == RM = {"1_OF_RM", "2_OF_RM", "3_OF_RM"}
 
@@ -330,21 +313,6 @@ ApaInv ==
 
 Safe == H_TCConsistent
 
-
-\* ApaInv == TypeOK /\ H_Inv344
-
-\* ApaInv == TypeOK /\ H_Inv446
-
-\* ApaInv2 == 
-\*     /\ TypeOK 
-\*     /\ H_Inv9990
-\*     /\ H_Inv9991
-\*     /\ H_Inv7777
-\*     /\ H_Inv318
-\*     /\ H_Inv349
-\*     /\ H_Inv334 \* to check in next state
-
-
 \* Dummy CTI cost for now.
 CTICost == 
     Cardinality(msgsAbortCommit) + 
@@ -352,59 +320,6 @@ CTICost ==
     Cardinality(tmPrepared) + 
     \* Consider initial TM states as lower cost.
     IF tmState = "init" THEN 0 ELSE 1
-
-
-  (*************************************************************************)
-  (* This theorem asserts that the type-correctness predicate TPTypeOK is  *)
-  (* an invariant of the specification.                                    *)
-  (*************************************************************************)
------------------------------------------------------------------------------
-
-
-\* 
-\* Some notes and stuff on liveness.
-\* 
-
-Fairness ==
-    /\ WF_vars(TMCommit)
-    /\ WF_vars(TMAbort)
-    /\ \A rm \in RM : WF_vars(TMRcvPrepared(rm))
-    /\ \A rm \in RM : WF_vars(RMPrepare(rm))
-    /\ \A rm \in RM : WF_vars(RMChooseToAbort(rm))
-    /\ \A rm \in RM : WF_vars(RMRcvCommitMsg(rm))
-    /\ \A rm \in RM : WF_vars(RMRcvAbortMsg(rm))
-
-Spec == Init /\ [][Next]_vars /\ Fairness
-
-\* Simple liveness property.
-TMCommitImpliesAllEventuallyCommit == \A rm \in RM : [](tmState = "committed" => <> (rmState[rm] = "committed"))
-
-\* If the TM has committed, then we always must be taking a step where 
-\* either (1) TM sends a commit message or (2) RM receives a commit message.
-RankingFunctionTest == 
-    LET commitMsgs == {s \in msgsAbortCommit : s.type = "Commit"}
-        committedRMs == {rm \in RM : rmState[rm] = "committed"}
-        maxSize == (1 + Cardinality(RM)) IN
-    maxSize - Cardinality(commitMsgs) - Cardinality(committedRMs)
-
-\* If we are in a state where the TM has committed, the ranking function decreasing condition must hold
-\* on any transition.
-RankingInit == (tmState = "committed")
-RankingNext == Next
-RankingInv == RankingFunctionTest' < RankingFunctionTest
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 =============================================================================
