@@ -2213,6 +2213,7 @@ H_NodeLOOKINGImpliesNoIncomingCEPOCH ==
         (state[i] = LOOKING) => 
             /\ \A m \in CEPOCHmsgs : ~(m.mdst =i \/ m.msrc = i)
             /\ (zabState[i] \in {ELECTION, DISCOVERY})
+            /\ \A c \in cepochRecv[i] : c.sid = i
 
 H_NodeLOOKINGImpliesNoIncomingNEWEPOCH ==
     \A i \in Server : 
@@ -2264,9 +2265,12 @@ H_TwoLeadersCantHaveSameCEPOCH ==
     \A i,j \in Server :
         \* Two leaders cannot have recorded CEPOCHs from the same node.
         /\ (IsLeader(i) /\ IsLeader(j) /\ i # j) => 
-             \A cj \in cepochRecv[j] : \A ci \in cepochRecv[i] : ci.sid # cj.sid
+             /\ \A cj \in cepochRecv[j] : \A ci \in cepochRecv[i] : ci.sid # cj.sid
+            \*  /\ \A ci \in cepochRecv[i] : ci.sid # i => IsFollower(ci.sid)
         \* If a CEPOCH msg is outstanding, a different leader can't have recorded such a CEPOCH.
-        \* /\ \A m \in CEPOCHmsgs : IsLeader(j) => ~\E c \in cepochRecv[j] : c.sid = m.msrc /\ m.mdst # j
+        /\ \A m \in CEPOCHmsgs : IsLeader(j) => ~\E c \in cepochRecv[j] : c.sid = m.msrc /\ m.mdst # j
+        \* Nodes don't send CEPOCH to different leaders.
+        /\ \A mi,mj \in CEPOCHmsgs : ~(mi.msrc = mj.msrc /\ mi.mdst # mj.mdst)
 
 H_ACKEPOCHFromNodeImpliesCEPOCHRecvd == 
     \A m \in ACKEPOCHmsgs : 
