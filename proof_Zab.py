@@ -529,7 +529,24 @@ ACKEPOCHFromNodeImpliesCEPOCHRecvd.children = {
     ]
 }
 
+LeaderCEPOCHRecvsUnique = make_node("H_LeaderCEPOCHRecvsUnique")
+
+CEPOCHRecvsAreLearners = make_node("H_CEPOCHRecvsAreLearners")
+CEPOCHRecvsAreLearners.children = {
+    "LeaderProcessCEPOCHAction": [
+        LeaderCEPOCHRecvsUnique
+    ]
+}
+
 NodeLOOKINGImpliesNotInOtherCEPOCHRecv = make_node("H_NodeLOOKINGImpliesNotInOtherCEPOCHRecv")
+NodeLOOKINGImpliesNotInOtherCEPOCHRecv.children = {
+    "LeaderProcessCEPOCHAction": [
+        LeaderCEPOCHRecvsUnique
+    ],
+    "TimeoutNoQuorumAction": [
+        CEPOCHRecvsAreLearners
+    ],
+}
 
 LeaderCEPOCHsUnique = make_node("H_LeaderCEPOCHsUnique")
 LeaderCEPOCHsUnique.children = {
@@ -542,6 +559,13 @@ LeaderCEPOCHsUnique.children = {
     ],    
 }
 
+LeaderCEPOCHMsgsUnique = make_node("H_LeaderCEPOCHMsgsUnique")
+LeaderCEPOCHRecvsUnique.children  = {
+    "LeaderProcessCEPOCHAction": [
+        LeaderCEPOCHMsgsUnique
+    ]
+}
+
 TwoLeadersCantHaveSameCEPOCH = make_node("H_TwoLeadersCantHaveSameCEPOCH")
 TwoLeadersCantHaveSameCEPOCH.children = {
     "FollowLeaderMyselfAction": [
@@ -552,7 +576,9 @@ TwoLeadersCantHaveSameCEPOCH.children = {
         NodeLOOKINGImpliesNotInOtherCEPOCHRecv
     ],
     "LeaderProcessCEPOCHAction": [
-        LeaderCEPOCHsUnique
+        # LeaderCEPOCHsUnique,
+        # LeaderCEPOCHMsgsUnique,
+        LeaderCEPOCHRecvsUnique
     ]
 }
 

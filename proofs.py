@@ -820,6 +820,7 @@ class StructuredProof():
             # "H_CommittedEntryExistsInNEWLEADERHistory",
             "H_CommittedEntryExistsOnQuorum",
             "H_UniqueLeadership",
+            "H_UniqueEstablishedLeader",
             "H_TxnZxidsUniqueHistoriesAndMessages",
 
             # TwoPhase lemmas.

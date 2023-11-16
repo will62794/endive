@@ -2262,19 +2262,32 @@ H_FollowersHaveNoMessagesSentToSelf ==
             /\ \A m \in ACKmsgs : (m.mdst # m.msrc)
             /\ \A m \in COMMITmsgs : (m.mdst # m.msrc)
 
-H_NodeLOOKINGImpliesNotInOtherCEPOCHRecv == 
-    \A i,j \in Server : 
-        /\ (IsLeader(j) /\ state[i] = LOOKING /\ i # j) => \A c \in cepochRecv[j] : c.sid # i
+H_CEPOCHRecvsAreLearners == 
+    \A s \in Server : 
+        IsLeader(s) => 
+            /\ \E c \in cepochRecv[s] : c.sid = s
+            /\ \A c \in cepochRecv[s] :
+                 /\ (c.sid # s) => IsFollower(c.sid) 
+                 /\ (c.sid \in learners[s])
 
-H_LeaderCEPOCHsUnique == 
+H_NodeLOOKINGImpliesNotInOtherCEPOCHRecv == 
+    \A i,j \in Server :
+        (IsLeader(j) /\ state[i] = LOOKING /\ i # j) => 
+            \A c \in cepochRecv[j] : c.sid # i
+
+H_LeaderCEPOCHMsgsUnique == 
+    \A i,j \in Server :
+        \* \* Nodes don't send CEPOCH to different leaders.
+        /\ \A mi,mj \in CEPOCHmsgs : ~(mi.msrc = mj.msrc /\ mi.mdst # mj.mdst)
+
+H_LeaderCEPOCHRecvsUnique == 
     \A i,j \in Server :
         \* If a CEPOCH msg is outstanding, a different leader can't have recorded such a CEPOCH.
         /\ \A m \in CEPOCHmsgs : 
             /\ IsLeader(m.mdst)
             /\ IsLeader(j) => ~\E c \in cepochRecv[j] : c.sid = m.msrc /\ m.mdst # j
             /\ m.msrc \in learners[m.mdst]
-        \* \* Nodes don't send CEPOCH to different leaders.
-        /\ \A mi,mj \in CEPOCHmsgs : ~(mi.msrc = mj.msrc /\ mi.mdst # mj.mdst)
+            /\ IsFollower(m.msrc)
 
 H_TwoLeadersCantHaveSameCEPOCH ==
     \A i,j \in Server :
