@@ -284,7 +284,7 @@ class StructuredProofNode():
         outdir = f"{metadir}/{self.expr}"
         if action is not None:
             outdir += "_" + action
-        apa_cmd = f"""JVM_ARGS="-Xss16m" ./apalache/bin/apalache-mc check --init={def_name} --next={next_expr} --inv={self.expr} --cinit=CInit --tuning-options='search.invariantFilter=1->.*' --length=1 --smtprof --debug --out-dir={outdir} --run-dir={outdir} {modname}.tla"""
+        apa_cmd = f"""JVM_ARGS="-Xss16m" ./apalache/bin/apalache-mc check --init={def_name} --next={next_expr} --inv={self.expr} --cinit=CInit --tuning-options='search.invariantFilter=1->.*' --no-deadlock --length=1 --smtprof --debug --out-dir={outdir} --run-dir={outdir} {modname}.tla"""
         out_str += f"(** \nApalache command:\n{apa_cmd}\n **)\n"
         out_str += f"{def_name} == \n"
         typeok = "ApaTypeOK"
@@ -438,7 +438,7 @@ class StructuredProof():
         proc = subprocess.Popen(clean_cmd, shell=True, stderr=subprocess.PIPE, cwd="benchmarks")
         exitcode = proc.wait()
 
-        # nodes = nodes[:8]
+        nodes = nodes[:6]
         # Just the 3 nodes that we expect to have breakages in AsyncRaft.
         filtered = [
             "H_NoLogDivergence",    
@@ -473,7 +473,7 @@ class StructuredProof():
         #
         # Submit all commands to a multiprocessing pool to run in parallel.
         #
-        num_threads = 3
+        num_threads = 5
         cmds_to_run = list(zip(cmds, node_exprs))
         # print("CMDS TO RUN:", cmds_to_run)
         pool = multiprocessing.Pool(processes=num_threads)
