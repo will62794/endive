@@ -16,6 +16,8 @@ mkdir -p $target_dir/benchmarks
 # Copy all Python code files.
 cp requirements.txt $target_dir
 cp *.py $target_dir
+rm $target_dir/benchmark.py # unused
+rm $target_dir/checkproofs.py # unused
 cp README_supp.md $target_dir/README.md
 # Rename some stuff.
 mv $target_dir/endive.py $target_dir/indigo.py
