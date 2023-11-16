@@ -249,7 +249,7 @@ LeaderInBROADCASTImpliesLearnerInBROADCAST.children = {
     ],
     "LeaderProcessACKEPOCHHasntBroadcastAction": [
         ACKEPOCHHistoryContainedInFOLLOWINGSender,
-        ACKEPOCHMsgImpliesSenderFollowing
+        # ACKEPOCHMsgImpliesSenderFollowing
     ],
     "TimeoutNoQuorumAction": [
         FollowerCantBeLearnerToDifferentLeaders
@@ -329,10 +329,10 @@ NEWLEADERIncomingImpliesLastCommittedBound.children = {
     ],
     "FollowerProcessCOMMITLDAction": [
         COMMITLDSentByNodeImpliesZxidCommittedInLog
-    ],
-    "FollowerProcessCOMMITAction": [
-        NEWLEADERIncomingImpliesNoIncomingCOMMIT
     ]
+    # "FollowerProcessCOMMITAction": [
+        # NEWLEADERIncomingImpliesNoIncomingCOMMIT
+    # ]
 }
 
 txnZxidsUniqueHistoriesAndMessages = make_node("H_TxnZxidsUniqueHistoriesAndMessages")
@@ -477,7 +477,7 @@ txnZxidsUniqueHistoriesAndMessages.children = {
     # ],
     "LeaderProcessRequestAction": [
         leaderInBroadcastImpliesHasAllEntriesInEpoch,
-        LeaderinBROADCASTImpliesNoNEWLEADERorACKEInFlight,
+        # LeaderinBROADCASTImpliesNoNEWLEADERorACKEInFlight,
         PROPOSEMsgSentByNodeImpliesZxidInLog
     ],
     # "FollowerProcessPROPOSEAction": [
