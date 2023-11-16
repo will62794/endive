@@ -2380,7 +2380,7 @@ class InductiveInvGen():
         #             print("  ", l, lemma_action_coi[a][l])
 
         # Optionally reload proof structure from locally defined template.
-        if self.proof_tree_cmd and self.proof_tree_cmd[0] in ["reload", "reload_proof_struct", "check_proof_apalache"]:
+        if self.proof_tree_cmd and self.proof_tree_cmd[0] in ["reload", "reload_proof_struct", "check_proof_apalache", "check_proof_tlc"]:
             logging.info(f"Reloading entire proof and re-generating CTIs.")
             proof = StructuredProof(root, 
                                     specname = self.specname, 
@@ -2415,6 +2415,36 @@ class InductiveInvGen():
         if self.proof_tree_cmd and self.proof_tree_cmd[0] == "check_proof_apalache":
             print("Checking all proof obligations with Apalache.")
             proof.apalache_check_all_nodes(save_dot=self.save_dot)
+            return
+
+        if self.proof_tree_cmd and self.proof_tree_cmd[0] == "check_proof_tlc":
+            print("Checking all proof obligations with TLC.")
+            start_node = proof.root
+
+            # Check all proof graph nodes recursively.
+            proof.gen_ctis_for_node(self, start_node)
+
+            nodes = []
+            seen = set()
+            proof.walk_proof_graph(proof.root, seen=seen, all_nodes=nodes)
+            errs = []
+            print("--- Status of proof obligations after checking.")
+            for n in nodes:
+                for a in n.ctis:
+                    num_remaining_ctis = len(n.ctis[a]) - len(n.ctis_eliminated[a])
+                    if num_remaining_ctis > 0:
+                        print((n.expr, a), ": remaining CTIS:", num_remaining_ctis, "(ERROR)")
+                        errs.append((n.expr, a))
+                    else:
+                        print((n.expr, a), ": no remaining CTIS.")
+
+            print(f"Checked proof obligations for {len(nodes)} lemmas of {self.specname} proof graph.")
+            if len(errs) > 0:
+                print(f"--- Found {len(errs)} errors when checking proof graph obligations:")
+                for e in errs:
+                    print(e)
+            else:
+                print(f"No errors found in proof checking! (Obligations checked for {len(nodes)} lemmas).")
             return
 
         proof.save_proof(include_dot=self.save_dot)
