@@ -488,7 +488,7 @@ class StructuredProof():
         #
         # Submit all commands to a multiprocessing pool to run in parallel.
         #
-        num_threads = 5
+        num_threads = 4
         cmds_to_run = list(zip(cmds, node_exprs))
         # print("CMDS TO RUN:", cmds_to_run)
         pool = multiprocessing.Pool(processes=num_threads)
@@ -500,7 +500,7 @@ class StructuredProof():
         status_map = {r[0]:r[1] for r in results}
         # status_map = {}
 
-        print("RESULTS:", results)
+        # print("RESULTS:", results)
 
         # If there are any obligations that failed, then now go back and check these per action.
         # print("---- Checking to see if any obligations failed.")
@@ -527,7 +527,7 @@ class StructuredProof():
             #     for a in self.actions:
             #         status_map[(r[0], a)] = r[1]
 
-        print("- Status Map")
+        print("- Proof status Map")
         for s in status_map:
             print(s, status_map[s])
 
