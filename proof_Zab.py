@@ -285,7 +285,7 @@ NEWLEADERUniquePerEpoch = make_node("H_NEWLEADERUniquePerEpoch")
 ACKLDMsgImpliesZxidInLog = make_node("H_ACKLDMsgImpliesZxidInLog")
 ACKLDMsgImpliesZxidInLog.children = {
     "FollowerProcessNEWLEADERAction": [
-        # NEWLEADERHistoryExistsOnQuorum
+        NEWLEADERMsgHistAndStateInv
     ]
 }
 
@@ -529,7 +529,32 @@ ACKEPOCHFromNodeImpliesCEPOCHRecvd.children = {
     ]
 }
 
+NodeLOOKINGImpliesNotInOtherCEPOCHRecv = make_node("H_NodeLOOKINGImpliesNotInOtherCEPOCHRecv")
+
+LeaderCEPOCHsUnique = make_node("H_LeaderCEPOCHsUnique")
+LeaderCEPOCHsUnique.children = {
+    "FollowLeaderMyselfAction": [
+        # NodeLOOKINGImpliesNoIncomingCEPOCH,
+        # NodeLOOKINGImpliesNotInOtherCEPOCHRecv
+    ],
+    "UpdateLeaderAction": [
+        # NodeLOOKINGImpliesNotInOtherCEPOCHRecv
+    ],    
+}
+
 TwoLeadersCantHaveSameCEPOCH = make_node("H_TwoLeadersCantHaveSameCEPOCH")
+TwoLeadersCantHaveSameCEPOCH.children = {
+    "FollowLeaderMyselfAction": [
+        # NodeLOOKINGImpliesNoIncomingCEPOCH,
+        NodeLOOKINGImpliesNotInOtherCEPOCHRecv
+    ],
+    "UpdateLeaderAction": [
+        NodeLOOKINGImpliesNotInOtherCEPOCHRecv
+    ],
+    "LeaderProcessCEPOCHAction": [
+        LeaderCEPOCHsUnique
+    ]
+}
 
 ACKEPOCHMsgsOnlyMustMatchRecv = make_node("H_ACKEPOCHMsgsOnlyMustMatchRecv")
 ACKEPOCHMsgsOnlyMustMatchRecv.children = {

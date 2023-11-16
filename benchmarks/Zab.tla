@@ -2190,7 +2190,8 @@ H_ACKLDMsgImpliesZxidInLog ==
 \* WRONG!
 H_NEWLEADERHistoryExistsOnQuorum == 
     \A m \in NEWLEADERmsgs :
-    IsLeader(m.msrc) => 
+    (/\ IsLeader(m.msrc) 
+     /\ zabState[m.msrc] \in {SYNCHRONIZATION, BROADCAST}) => 
         \A ih \in DOMAIN m.mhistory : 
             \E Q \in Quorums : 
             \A n \in Q : 
@@ -2213,7 +2214,7 @@ H_NodeLOOKINGImpliesNoIncomingCEPOCH ==
         (state[i] = LOOKING) => 
             /\ \A m \in CEPOCHmsgs : ~(m.mdst =i \/ m.msrc = i)
             /\ (zabState[i] \in {ELECTION, DISCOVERY})
-            /\ \A c \in cepochRecv[i] : c.sid = i
+            \* /\ \A c \in cepochRecv[i] : c.sid = i
 
 H_NodeLOOKINGImpliesNoIncomingNEWEPOCH ==
     \A i \in Server : 
@@ -2261,16 +2262,26 @@ H_FollowersHaveNoMessagesSentToSelf ==
             /\ \A m \in ACKmsgs : (m.mdst # m.msrc)
             /\ \A m \in COMMITmsgs : (m.mdst # m.msrc)
 
+H_NodeLOOKINGImpliesNotInOtherCEPOCHRecv == 
+    \A i,j \in Server : 
+        /\ (IsLeader(j) /\ state[i] = LOOKING /\ i # j) => \A c \in cepochRecv[j] : c.sid # i
+
+H_LeaderCEPOCHsUnique == 
+    \A i,j \in Server :
+        \* If a CEPOCH msg is outstanding, a different leader can't have recorded such a CEPOCH.
+        /\ \A m \in CEPOCHmsgs : 
+            /\ IsLeader(j) => ~\E c \in cepochRecv[j] : c.sid = m.msrc /\ m.mdst # j
+            /\ m.msrc \in learners[m.mdst]
+        \* \* Nodes don't send CEPOCH to different leaders.
+        /\ \A mi,mj \in CEPOCHmsgs : ~(mi.msrc = mj.msrc /\ mi.mdst # mj.mdst)
+
 H_TwoLeadersCantHaveSameCEPOCH ==
     \A i,j \in Server :
         \* Two leaders cannot have recorded CEPOCHs from the same node.
         /\ (IsLeader(i) /\ IsLeader(j) /\ i # j) => 
              /\ \A cj \in cepochRecv[j] : \A ci \in cepochRecv[i] : ci.sid # cj.sid
             \*  /\ \A ci \in cepochRecv[i] : ci.sid # i => IsFollower(ci.sid)
-        \* If a CEPOCH msg is outstanding, a different leader can't have recorded such a CEPOCH.
-        /\ \A m \in CEPOCHmsgs : IsLeader(j) => ~\E c \in cepochRecv[j] : c.sid = m.msrc /\ m.mdst # j
-        \* Nodes don't send CEPOCH to different leaders.
-        /\ \A mi,mj \in CEPOCHmsgs : ~(mi.msrc = mj.msrc /\ mi.mdst # mj.mdst)
+
 
 H_ACKEPOCHFromNodeImpliesCEPOCHRecvd == 
     \A m \in ACKEPOCHmsgs : 
