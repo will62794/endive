@@ -154,11 +154,11 @@ VARIABLE
     NEWEPOCHmsgs
 
 VARIABLE 
-    \* @type: Set ({ mtype: Str, mepoch: Int, mhistory: Seq(TXN), msrc: SERVER, mdst: SERVER, morder: Int });
+    \* @type: Set ({ mtype: Str, mepoch: Int, mhistory: Seq({zxid: <<Int,Int>>, value: Int, ackSid: Set(SERVER), epoch: Int}), msrc: SERVER, mdst: SERVER, morder: Int });
     ACKEPOCHmsgs
 
 VARIABLE 
-    \* @type: Set ({ mtype: Str, mepoch: Int, mhistory: Seq(TXN), msrc: SERVER, mdst: SERVER, morder: Int });
+    \* @type: Set ({ mtype: Str, mepoch: Int, mhistory: Seq({zxid: <<Int,Int>>, value: Int, ackSid: Set(SERVER), epoch: Int}), msrc: SERVER, mdst: SERVER, morder: Int });
     NEWLEADERmsgs
 
 VARIABLE 
@@ -526,7 +526,7 @@ DiscardAndBroadcastCOMMITLD(i, j, m) ==
          /\ COMMITLDmsgs' = COMMITLDmsgs \cup {
                 [   mtype |-> COMMITLD, 
                     mzxid |-> LastZxid(i),
-                    msrc |-> i, mdst |-> to, morder |-> NextMsgOrder(i, to) ] : to \in (new_sid_ackldRecv \cap learners[i]) \ {i}} 
+                    msrc |-> i, mdst |-> to, morder |-> 0 ] : to \in (new_sid_ackldRecv \cap learners[i]) \ {i}} 
 -----------------------------------------------------------------------------
 \* Define initial values for all variables 
 InitServerVars == /\ state         = [s \in Server |-> LOOKING]
@@ -1793,6 +1793,18 @@ H_UniqueEstablishedLeaderImpliesSafeAtEpoch ==
                     /\ (ackeJ \in Quorums) \/ (ackeJ \cup {m.msrc} \in Quorums)
             /\ \E Q \in Quorums : \A n \in Q : acceptedEpoch[n] >= acceptedEpoch[i]
 
+\* ACKEPOCH messages sent must be consistent with the CEPOCH quorum that a leader received recorded.
+H_ACKEPOCHMsgsOnlyMustMatchRecv == 
+    \A i, j \in Server:
+        (IsLeader(i) 
+        /\ zabState[i] \in {SYNCHRONIZATION, BROADCAST} 
+        /\ i # j) =>
+            /\ \A m \in ACKEPOCHmsgs : 
+                /\ m.mdst = i
+                /\ \E c \in cepochRecv[i] : c.sid = m.msrc
+            \* Two leaders cannot have recorded CEPOCHs from the same node.
+            \* /\ IsLeader(j) => \A cj \in cepochRecv[j] : \A ci \in cepochRecv[i] : ci.sid # cj.sid
+
 \* If a node is currently an established leader, then there can be no other currently active,
 \* established leaders.
 H_UniqueEstablishedLeader == 
@@ -2012,6 +2024,18 @@ H_EstablishedLeaderImpliesSafeAtCurrentEpoch ==
             /\ \E Q \in Quorums : \A n \in Q : acceptedEpoch[n] >= acceptedEpoch[i]
 
 
+H_ACKLDImpliesNoNewACKEPOCHFromMe == 
+    /\ \A i \in Server : 
+        IsLeader(i) => 
+            /\ \A mi \in ackldRecv[i] : 
+                /\ ~\E ma \in ACKEPOCHmsgs : ma.msrc = mi.sid    
+                /\ ~\E ma \in NEWLEADERmsgs : ma.mdst = mi.sid
+    /\ \A m \in ACKLDmsgs :
+        IsLeader(m.mdst) =>
+            /\ IsFollower(m.msrc)
+            /\ \A ma \in ACKEPOCHmsgs : ma.msrc # m.msrc 
+            /\ \A ma \in NEWLEADERmsgs : ma.mdst # m.msrc 
+
 \* If a leader is in BROADCAST, no NEWLEADER messages should be in-flight
 H_LeaderinBROADCASTImpliesNoNEWLEADERorACKEInFlight == 
     \A s \in Server : 
@@ -2159,12 +2183,13 @@ H_ACKLDMsgImpliesZxidInLog ==
 \* WRONG!
 H_NEWLEADERHistoryExistsOnQuorum == 
     \A m \in NEWLEADERmsgs :
-    \A ih \in DOMAIN m.mhistory : 
-        \E Q \in Quorums : 
-        \A n \in Q : 
-        \E ic \in DOMAIN history[n] : 
-            /\ history[n][ic].zxid = m.mhistory[ih].zxid 
-            /\ IsLeader(m.msrc)
+    IsLeader(m.msrc) => 
+        \A ih \in DOMAIN m.mhistory : 
+            \E Q \in Quorums : 
+            \A n \in Q : 
+            \E ic \in DOMAIN history[n] : 
+                /\ history[n][ic].zxid = m.mhistory[ih].zxid 
+                \* /\ IsLeader(m.msrc)
             \* /\ acceptedEpoch[n] >= m.mepoch
 
 \* If a follower has an incoming NEWEPOCH message, then this must be the only incoming message it
@@ -2228,10 +2253,22 @@ H_FollowersHaveNoMessagesSentToSelf ==
             /\ \A m \in ACKmsgs : (m.mdst # m.msrc)
             /\ \A m \in COMMITmsgs : (m.mdst # m.msrc)
 
+H_TwoLeadersCantHaveSameCEPOCH ==
+    \A i,j \in Server :
+        \* Two leaders cannot have recorded CEPOCHs from the same node.
+        (IsLeader(i) /\ IsLeader(j) /\ i # j) => 
+            \A cj \in cepochRecv[j] : \A ci \in cepochRecv[i] : ci.sid # cj.sid
+
+H_ACKEPOCHFromNodeImpliesCEPOCHRecvd == 
+    \A m \in ACKEPOCHmsgs : 
+        /\ IsLeader(m.mdst)
+        /\ \E c \in cepochRecv[m.mdst] : c.sid = m.msrc
+
 H_NEWEPOCHFromNodeImpliesLEADING ==
-    \A i,j \in Server : 
     \A m \in NEWEPOCHmsgs :
-        IsLeader(m.msrc)
+        /\ IsLeader(m.msrc)
+        /\ \E c \in cepochRecv[m.msrc] : c.sid = m.mdst
+
 
 \* AckLDRecvServers(i) == {v.sid : v \in {a \in ackldRecv[i]: TRUE }}
 AckLDRecvServers(i) == {a.sid : a \in ackldRecv[i]}
@@ -2468,7 +2505,8 @@ Morder1 ==
 CInit == 
     /\ MaxEpoch = 2
     /\ MaxHistLen = 1
-    /\ Server = {"s1", "s2", "s3"}
+    \* /\ Server = {"s1", "s2", "s3"}
+    /\ Server = {"s1", "s2"}
     /\ CEPOCH = "CEPOCH"
     /\ NEWEPOCH = "NEWEPOCH"
     /\ NEWLEADER = "NEWLEADER"
@@ -2497,19 +2535,21 @@ CInit ==
 
 
 ApaValue == {0,1}
-Indices == 1..MaxHistLen
+Indices == 0..MaxHistLen
 
 ApaZxidType == Epoch \X Indices
 
 ApaHistEntryType == [zxid: ApaZxidType, value: ApaValue, ackSid: SUBSET Server, epoch: Epoch]
 
-ApaHistTypeBounded == Gen(2)
+\* ApaHistTypeBounded == Gen(3)
     \* Seq(ApaHistEntryType)
+
+ApaHistEntryTypeBoundLen1 == {<<>>} \cup {<<x>> : x \in ApaHistEntryType}
 
 ApaMsgCEPOCHType == [mtype: {CEPOCH}, mepoch: Epoch, msrc:Server, mdst:Server, morder: {0}]
 ApaMsgNEWEPOCHType == [mtype: {NEWEPOCH}, mepoch: Epoch,  msrc:Server, mdst:Server, morder: {0}]
-ApaMsgACKEPOCHType == [mtype: {ACKEPOCH}, mepoch: Epoch, mhistory: ApaHistTypeBounded,  msrc:Server, mdst:Server, morder: {0}]
-ApaMsgNEWLEADERType == [mtype: {NEWLEADER}, mepoch: Epoch, mhistory: ApaHistTypeBounded,  msrc:Server, mdst:Server, morder: {0}]
+ApaMsgACKEPOCHType == [mtype: {ACKEPOCH}, mepoch: Epoch, mhistory: ApaHistEntryTypeBoundLen1,  msrc:Server, mdst:Server, morder: {0}]
+ApaMsgNEWLEADERType == [mtype: {NEWLEADER}, mepoch: Epoch, mhistory: ApaHistEntryTypeBoundLen1,  msrc:Server, mdst:Server, morder: {0}]
 ApaMsgACKLDType == [mtype: {ACKLD}, mzxid: ApaZxidType, msrc:Server, mdst:Server, morder: {0}]
 ApaMsgCOMMITLDType == [mtype: {COMMITLD}, mzxid: ApaZxidType, msrc:Server, mdst:Server, morder: {0}]
 ApaMsgPROPOSEType == [mtype: {PROPOSE}, mzxid: ApaZxidType, mdata: ApaValue,  msrc:Server, mdst:Server]
@@ -2524,45 +2564,49 @@ ApaTypeOK ==
     /\ zabState \in [Server -> {ELECTION, DISCOVERY, SYNCHRONIZATION, BROADCAST}]
     /\ acceptedEpoch \in [Server -> Epoch]
     /\ currentEpoch \in [Server -> Epoch]
-    /\ history = Gen(3)
+    /\ history = Gen(4)
     /\ \A s \in Server : \A i \in DOMAIN history[s] : history[s][i] \in ApaHistEntryType
     /\ \A s \in Server : Len(history[s]) <= MaxHistLen
     /\ DOMAIN history = Server
     /\ lastCommitted \in [Server -> [index: Indices, zxid: ApaZxidType]]
     /\ learners \in [Server -> SUBSET Server]
     /\ cepochRecv \in [Server -> SUBSET ApaCEpochRecvType]
-    /\ ackeRecv \in [Server -> SUBSET [sid: Server, connected: BOOLEAN, peerLastEpoch: Epoch, peerHistory: ApaHistTypeBounded]]
-    /\ \A s \in Server : \A a \in ackeRecv[s] : \A mi \in DOMAIN a.peerHistory : a.peerHistory[mi] \in ApaHistEntryType
+    \* Assumes here that MaxHistLen=1 for now.
+    /\ ackeRecv \in [Server -> SUBSET [sid: Server, connected: BOOLEAN, peerLastEpoch: Epoch, peerHistory: ApaHistEntryTypeBoundLen1]]
     /\ ackldRecv \in [Server -> SUBSET [sid: Server, connected: BOOLEAN]]
-    /\ sendCounter \in [Server -> Indices]
+    /\ sendCounter \in [Server -> {0,1,2}]
     /\ connectInfo \in [Server -> Server]
     /\ leaderOracle \in Server
     /\ mesgs = [s \in Server |-> [v \in Server |-> << >>] ]
-    /\ CEPOCHmsgs = Gen(4)
+    /\ CEPOCHmsgs = Gen(3)
     /\ \A m \in CEPOCHmsgs : m \in ApaMsgCEPOCHType
-    /\ NEWEPOCHmsgs = Gen(4)
+    /\ NEWEPOCHmsgs = Gen(3)
     /\ \A m \in NEWEPOCHmsgs : m \in ApaMsgNEWEPOCHType
-    /\ ACKEPOCHmsgs = Gen(4)
+    /\ ACKEPOCHmsgs = Gen(3)
     /\ \A m \in ACKEPOCHmsgs : m \in ApaMsgACKEPOCHType
-    /\ \A m \in ACKEPOCHmsgs : \A mi \in DOMAIN m.mhistory : m.mhistory[mi] \in ApaHistEntryType
+    \* /\ \A m \in ACKEPOCHmsgs : \A mi \in DOMAIN m.mhistory : m.mhistory[mi] \in ApaHistEntryType
     /\ NEWLEADERmsgs = Gen(4)
     /\ \A m \in NEWLEADERmsgs : m \in ApaMsgNEWLEADERType
-    /\ \A m \in NEWLEADERmsgs : \A mi \in DOMAIN m.mhistory : m.mhistory[mi] \in ApaHistEntryType
-    /\ ACKLDmsgs = Gen(4)
+    \* /\ \A m \in NEWLEADERmsgs : \A mi \in DOMAIN m.mhistory : m.mhistory[mi] \in ApaHistEntryType
+    /\ ACKLDmsgs = Gen(3)
     /\ \A m \in ACKLDmsgs : m \in ApaMsgACKLDType
-    /\ COMMITLDmsgs = Gen(4)
+    /\ COMMITLDmsgs = Gen(3)
     /\ \A m \in COMMITLDmsgs : m \in ApaMsgCOMMITLDType
-    /\ PROPOSEmsgs = Gen(4)
+    /\ PROPOSEmsgs = Gen(3)
     /\ \A m \in PROPOSEmsgs : m \in ApaMsgPROPOSEType
-    /\ ACKmsgs = Gen(4)
+    /\ ACKmsgs = Gen(3)
     /\ \A m \in ACKmsgs : m \in ApaMsgACKType
-    /\ COMMITmsgs = Gen(4)
+    /\ COMMITmsgs = Gen(3)
     /\ \A m \in COMMITmsgs : m \in ApaMsgCOMMITType
+    \* /\ COMMITmsgs \in SUBSET ApaMsgCOMMITType
 
 InvTest == 
     /\ ApaTypeOK
     /\ H_UniqueLeadership
 
+
+\* DInv1 == ACKEPOCHmsgs = {}
+DInv1 == ACKmsgs = {}
 =============================================================================
 \* Modification History
 \* Last modified Tue Jan 31 20:40:11 CST 2023 by huangbinyu
