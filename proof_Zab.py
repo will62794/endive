@@ -182,6 +182,7 @@ leaderInBroadcastImpliesHasAllEntriesInEpoch.children = {
         UniqueEstablishedLeader
     ],
     "FollowerProcessNEWLEADERAction": [ 
+        # Can remove maybe?
         NEWLEADERMsgHistAndStateInv
     ],
     "LeaderProcessACKEPOCHHasntBroadcastAction": [
@@ -239,13 +240,16 @@ LeaderinBROADCASTImpliesNoNEWLEADERorACKEInFlight.children = {
 
 FollowerCantBeLearnerToDifferentLeaders = make_node("H_FollowerCantBeLearnerToDifferentLeaders")
 
+ACKEPOCHMsgImpliesSenderFollowing = make_node("H_ACKEPOCHMsgImpliesSenderFollowing")
+
 LeaderInBROADCASTImpliesLearnerInBROADCAST = make_node("H_LeaderInBROADCASTImpliesLearnerInBROADCAST")
 LeaderInBROADCASTImpliesLearnerInBROADCAST.children = {
     "FollowerProcessPROPOSEAction": [
         PROPOSEMsgInFlightImpliesNodesInBROADCAST
     ],
     "LeaderProcessACKEPOCHHasntBroadcastAction": [
-        ACKEPOCHHistoryContainedInFOLLOWINGSender
+        ACKEPOCHHistoryContainedInFOLLOWINGSender,
+        ACKEPOCHMsgImpliesSenderFollowing
     ],
     "TimeoutNoQuorumAction": [
         FollowerCantBeLearnerToDifferentLeaders
@@ -473,7 +477,7 @@ txnZxidsUniqueHistoriesAndMessages.children = {
     # ],
     "LeaderProcessRequestAction": [
         leaderInBroadcastImpliesHasAllEntriesInEpoch,
-        # LeaderinBROADCASTImpliesNoNEWLEADERorACKEInFlight,
+        LeaderinBROADCASTImpliesNoNEWLEADERorACKEInFlight,
         PROPOSEMsgSentByNodeImpliesZxidInLog
     ],
     # "FollowerProcessPROPOSEAction": [
@@ -519,6 +523,11 @@ NEWLEADERMsgHistAndStateInv.children = {
 }
 
 ACKEPOCHFromNodeImpliesCEPOCHRecvd = make_node("H_ACKEPOCHFromNodeImpliesCEPOCHRecvd")
+ACKEPOCHFromNodeImpliesCEPOCHRecvd.children = {
+    "FollowerProcessNEWEPOCHAction": [
+        NEWEPOCHFromNodeImpliesLEADING
+    ]
+}
 
 TwoLeadersCantHaveSameCEPOCH = make_node("H_TwoLeadersCantHaveSameCEPOCH")
 

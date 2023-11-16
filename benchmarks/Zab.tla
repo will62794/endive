@@ -1988,6 +1988,15 @@ H_CommittedEntryExistsInLeaderHistory ==
 H_NodeHistoryBoundByLastCommittedIndex == 
     \A s \in Server : lastCommitted[s].index <= Len(history[s])
 
+LeaderInBroadcastImpliesAllACKEPOCHorNEWLEADEREntriesInEpoch == 
+    \A i \in Server :
+    \A mhist \in ({ma.mhistory : ma \in ACKEPOCHmsgs} \cup {ma.mhistory : ma \in NEWLEADERmsgs}) :
+    \A ind \in DOMAIN mhist :
+        (/\ IsLeader(i)
+         /\ zabState[i] \in {BROADCAST, SYNCHRONIZATION}
+         /\ mhist[ind].zxid[1] = currentEpoch[i]) => 
+            \E idx2 \in DOMAIN history[i] : ZxidEqual(history[i][idx2].zxid, mhist[ind].zxid)
+
 LeaderInBroadcastImpliesAllAckERecvEntriesInEpoch == 
     \A i \in Server :
     \A j \in Server :
@@ -2008,7 +2017,8 @@ LeaderInBroadcastImpliesAllHistoryEntriesInEpoch ==
             \* Entry is in leader's history.
             \E idx2 \in DOMAIN history[i] : ZxidEqual(history[i][idx2].zxid, history[j][idx].zxid)
 
-H_LeaderInBroadcastImpliesHasAllEntriesInEpoch == 
+H_LeaderInBroadcastImpliesHasAllEntriesInEpoch ==
+    /\ LeaderInBroadcastImpliesAllACKEPOCHorNEWLEADEREntriesInEpoch 
     /\ LeaderInBroadcastImpliesAllAckERecvEntriesInEpoch
     /\ LeaderInBroadcastImpliesAllHistoryEntriesInEpoch
 
@@ -2097,17 +2107,14 @@ H_PROPOSEMsgSentByNodeImpliesZxidInLog ==
 \* ACKEPOCH response history must be contained in the sender's history, who must
 \* be a follower.
 H_ACKEPOCHHistoryContainedInFOLLOWINGSender == 
-    \* \A i,j \in Server : 
     \A m \in ACKEPOCHmsgs :
-    \* \A mind \in DOMAIN msgs[j][i] :
-        \* msgs[j][i][mind].mtype = ACKEPOCH => 
-            /\ state[m.msrc] = FOLLOWING
-            /\ state[m.mdst] = LEADING
-            /\ zabState[m.msrc] \in {DISCOVERY, SYNCHRONIZATION}
-            /\ Len(m.mhistory) = Len(history[m.msrc])
-            /\ \A ind \in DOMAIN m.mhistory : 
-                /\ m.mhistory[ind].zxid = history[m.msrc][ind].zxid
-                /\ m.mhistory[ind].value = history[m.msrc][ind].value
+        /\ state[m.msrc] = FOLLOWING
+        /\ state[m.mdst] = LEADING
+        /\ zabState[m.msrc] \in {SYNCHRONIZATION}
+        /\ Len(m.mhistory) = Len(history[m.msrc])
+        /\ \A ind \in DOMAIN m.mhistory : 
+            /\ m.mhistory[ind].zxid = history[m.msrc][ind].zxid
+            /\ m.mhistory[ind].value = history[m.msrc][ind].value
 
 \* Leader in broadcast implies no NEWEPOCH messages in flight.
 H_LeaderInBroadcastImpliesNoNEWEPOCHInFlight == 
