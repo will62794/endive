@@ -453,7 +453,7 @@ class StructuredProof():
         proc = subprocess.Popen(clean_cmd, shell=True, stderr=subprocess.PIPE, cwd="benchmarks")
         exitcode = proc.wait()
 
-        nodes = nodes[:6]
+        # nodes = nodes[:6]
         # Just the 3 nodes that we expect to have breakages in AsyncRaft.
         filtered = [
             "H_NoLogDivergence",    
