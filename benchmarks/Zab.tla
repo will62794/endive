@@ -2270,6 +2270,7 @@ H_LeaderCEPOCHsUnique ==
     \A i,j \in Server :
         \* If a CEPOCH msg is outstanding, a different leader can't have recorded such a CEPOCH.
         /\ \A m \in CEPOCHmsgs : 
+            /\ IsLeader(m.mdst)
             /\ IsLeader(j) => ~\E c \in cepochRecv[j] : c.sid = m.msrc /\ m.mdst # j
             /\ m.msrc \in learners[m.mdst]
         \* \* Nodes don't send CEPOCH to different leaders.
