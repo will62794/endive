@@ -49,13 +49,16 @@ PROPOSEMsgInFlightImpliesNodesInBROADCAST = make_node("H_PROPOSEMsgInFlightImpli
 
 NEWLEADERMsgHistAndStateInv = make_node("H_NEWLEADERMsgHistAndStateInv")
 
+PROPOSEMsgSentByNodeImpliesZxidInLog = make_node("H_PROPOSEMsgSentByNodeImpliesZxidInLog")
+
 aCKMsgImpliesZxidInLog = make_node("H_ACKMsgImpliesZxidInLog")
 aCKMsgImpliesZxidInLog.children = {
     "FollowerProcessNEWLEADERAction": [
         NEWLEADERMsgHistAndStateInv
     ],
     "FollowerProcessPROPOSEAction": [
-        PROPOSEMsgInFlightImpliesNodesInBROADCAST
+        PROPOSEMsgInFlightImpliesNodesInBROADCAST,
+        PROPOSEMsgSentByNodeImpliesZxidInLog
     ]
 }
 
@@ -106,8 +109,6 @@ ACKEPOCHHistoryContainedInFOLLOWINGSender.children = {
 }
 
 ACKMsgInFlightImpliesNodesInBROADCAST = make_node("H_ACKMsgInFlightImpliesNodesInBROADCAST")
-
-PROPOSEMsgSentByNodeImpliesZxidInLog = make_node("H_PROPOSEMsgSentByNodeImpliesZxidInLog")
 
 COMMITSentByNodeImpliesZxidInLog = make_node("H_COMMITSentByNodeImpliesZxidInLog")
 COMMITSentByNodeImpliesZxidInLog.children = {
