@@ -2242,6 +2242,8 @@ H_NodeLOOKINGImpliesNoIncomingNEWEPOCH ==
         (state[i] = LOOKING) => 
             /\ \A m \in NEWEPOCHmsgs : ~(m.mdst =i \/ m.msrc = i)
             /\ (zabState[i] \in {ELECTION, DISCOVERY})
+            /\ ~\E j \in Server : IsLeader(j) /\ i \in learners[j]
+
 
 H_NodeLOOKINGImpliesNoIncomingACKEPOCH ==
     \A i \in Server : 
@@ -2256,7 +2258,7 @@ H_NodeLOOKINGImpliesEmptyInputBuffer ==
             \* /\ \A m \in CEPOCHmsgs : ~(m.mdst =i)
             \* /\ \A m \in NEWEPOCHmsgs : ~(m.mdst =i)
             \* /\ \A m \in NEWLEADERmsgs : ~(m.mdst =i)
-            /\ \A m \in ACKEPOCHmsgs : ~(m.mdst =i)
+            \* /\ \A m \in ACKEPOCHmsgs : ~(m.mdst =i)
             \* /\ \A m \in ACKLDmsgs : ~(m.mdst =i)
             \* /\ \A m \in COMMITLDmsgs : ~(m.mdst =i)
             \* /\ \A m \in PROPOSEmsgs : ~(m.mdst =i)

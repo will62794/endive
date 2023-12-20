@@ -396,6 +396,7 @@ NodeLOOKINGImpliesNoIncomingNEWEPOCH = make_node("H_NodeLOOKINGImpliesNoIncoming
 NodeLOOKINGImpliesNoIncomingNEWEPOCH.children = {
     "LeaderProcessCEPOCHAction": [
         NodeLOOKINGImpliesNoIncomingCEPOCH
+        # NodeLOOKINGImpliesEmptyInputBuffer
     ],
 }
 
