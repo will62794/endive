@@ -2366,10 +2366,14 @@ H_FollowerCantBeLearnerToDifferentLeaders ==
 H_LeaderContainsSelfAsLearner == 
     \A s \in Server : IsLeader(s) => s \in learners[s]
 
+H_LeaderImpliesNotInELECTION == 
+    \A s \in Server : IsLeader(s) => zabState[s] \notin {ELECTION}
+
 H_LeaderImpliesLearnersFollowing == 
     \A i \in Server :
     (/\ IsLeader(i) 
-     /\ zabState[i] \in {SYNCHRONIZATION, BROADCAST}) =>
+     /\ zabState[i] \in {SYNCHRONIZATION, BROADCAST}
+     ) =>
         /\ \A j \in learners[i] : i # j => state[j] # LEADING
 
 H_LeaderInBROADCASTImpliesLearnerInBROADCAST == 
