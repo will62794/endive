@@ -237,9 +237,19 @@ LeaderinBROADCASTImpliesNoNEWLEADERorACKEInFlight.children = {
     ]
 }
 
+NodeLOOKINGImpliesNoIncomingNEWEPOCH = make_node("H_NodeLOOKINGImpliesNoIncomingNEWEPOCH")
+
 # LeaderImpliesLearnersFollowing = make_node("H_LeaderImpliesLearnersFollowing")
 
 FollowerCantBeLearnerToDifferentLeaders = make_node("H_FollowerCantBeLearnerToDifferentLeaders")
+FollowerCantBeLearnerToDifferentLeaders.children = {
+    "FollowLeaderMyselfAction": [
+        NodeLOOKINGImpliesNoIncomingNEWEPOCH
+    ],
+    "UpdateLeaderAction":[
+        NodeLOOKINGImpliesNoIncomingNEWEPOCH
+    ]
+}
 
 ACKEPOCHMsgImpliesSenderFollowing = make_node("H_ACKEPOCHMsgImpliesSenderFollowing")
 
