@@ -404,7 +404,6 @@ LeaderImpliesNotInELECTION = make_node("H_LeaderImpliesNotInELECTION")
 
 NodeLOOKINGImpliesNoIncomingCEPOCH = make_node("H_NodeLOOKINGImpliesNoIncomingCEPOCH")
 
-NodeLOOKINGImpliesNoIncomingNEWEPOCH = make_node("H_NodeLOOKINGImpliesNoIncomingNEWEPOCH")
 NodeLOOKINGImpliesNoIncomingNEWEPOCH.children = {
     "LeaderProcessCEPOCHAction": [
         NodeLOOKINGImpliesNoIncomingCEPOCH
