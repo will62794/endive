@@ -2357,7 +2357,7 @@ H_ACKLDMsgSentByFollowerImpliesEmptyBuffer ==
 
 H_FollowerCantBeLearnerToDifferentLeaders == 
     \A i,la,lb \in Server : 
-        (/\ (IsFollower(i) \/ IsLooking(i))
+        (\*/\ \*(IsFollower(i) \/ IsLooking(i))
          /\ IsLeader(la)
          /\ IsLeader(lb)
          /\ la # lb) => 
