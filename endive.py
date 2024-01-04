@@ -2413,8 +2413,13 @@ class InductiveInvGen():
             proof.spec_defs = self.spec_defs
 
         if self.proof_tree_cmd and self.proof_tree_cmd[0] == "check_proof_apalache":
+            # Allow lemma filter to be passed in as comma separated lemma list.
             print("Checking all proof obligations with Apalache.")
-            proof.apalache_check_all_nodes(save_dot=self.save_dot)
+            lemma_filter = None
+            if len(self.proof_tree_cmd) > 1:
+                lemma_filter = self.proof_tree_cmd[1].split(",")
+                print("Using lemma filter for proof checking:", lemma_filter)
+            proof.apalache_check_all_nodes(save_dot=self.save_dot, lemma_filter=lemma_filter)
             return
 
         if self.proof_tree_cmd and self.proof_tree_cmd[0] == "check_proof_tlc":

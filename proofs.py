@@ -438,7 +438,7 @@ class StructuredProof():
         f.close()
 
 
-    def apalache_check_all_nodes(self, save_dot=False):
+    def apalache_check_all_nodes(self, save_dot=False, lemma_filter=None):
         # Save Apalache proof obligations to own spec file.
         self.to_apalache_proof_obligations()
 
@@ -457,12 +457,13 @@ class StructuredProof():
 
         # nodes = nodes[:6]
         # Just the 3 nodes that we expect to have breakages in AsyncRaft.
-        filtered = [
-            "H_NoLogDivergence",    
-            "H_CommitIndexCoveredOnQuorum", 
-            "H_CommitIndexInAppendEntriesImpliesCommittedEntryExists"
-        ]
-        # nodes = [n for n in nodes if n.expr in filtered]
+        if lemma_filter is not None:
+            # filtered = [
+            #     "H_NoLogDivergence",    
+            #     "H_CommitIndexCoveredOnQuorum", 
+            #     "H_CommitIndexInAppendEntriesImpliesCommittedEntryExists"
+            # ]
+            nodes = [n for n in nodes if n.expr in lemma_filter]
 
         do_per_action_checks = True
         
