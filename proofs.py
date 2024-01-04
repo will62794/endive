@@ -299,7 +299,9 @@ class StructuredProofNode():
         outdir = f"{metadir}/{self.expr}"
         if action is not None:
             outdir += "_" + action
-        apa_cmd = f"""JVM_ARGS="-Xss16m" ./apalache/bin/apalache-mc check --init={def_name} --next={next_expr} --inv={self.expr} --cinit=CInit --tuning-options='search.invariantFilter=1->.*' --no-deadlock --length=1 --smtprof --debug --out-dir={outdir} --run-dir={outdir} {modname}.tla"""
+        smtprof = ""
+        # smtprof = "--smtprof" # can enable if you want.
+        apa_cmd = f"""JVM_ARGS="-Xss16m" ./apalache/bin/apalache-mc check --init={def_name} --next={next_expr} --inv={self.expr} --cinit=CInit --tuning-options='search.invariantFilter=1->.*' --no-deadlock --length=1 {smtprof} --debug --out-dir={outdir} --run-dir={outdir} {modname}.tla"""
         out_str += f"(** \nApalache command:\n{apa_cmd}\n **)\n"
         out_str += f"{def_name} == \n"
         typeok = "ApaTypeOK"
