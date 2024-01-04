@@ -530,9 +530,9 @@ class StructuredProof():
             #     for a in self.actions:
             #         status_map[(r[0], a)] = r[1]
 
-        print("- Proof status Map")
-        for s in status_map:
-            print(s, status_map[s])
+        # print("- Proof status Map")
+        # for s in status_map:
+        #     print(s, status_map[s])
 
         if save_dot:
             self.save_as_dot(f"benchmarks/{self.specname}_proof_with_status.dot", omit_labels=True, proof_status_map=status_map)
