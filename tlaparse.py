@@ -30,6 +30,9 @@ class TLASpec:
         line_end -= 1
         col_end -= 1
 
+        if line_end == line_begin:
+            return self.spec_text_lines[line_begin][col_begin:col_end + 1]
+
         start_line = self.spec_text_lines[line_begin][col_begin:].strip()
         middle_lines = self.spec_text_lines[line_begin+1:line_end]
         if line_end > line_begin:
@@ -456,9 +459,23 @@ class TLASpec:
                         paramName = param.find("uniquename").text
                         print("param name:", paramName)
                     if x.tag == "OpApplNode":
+
+                        begin = self.elem_to_location_tuple(x, "begin")
+                        end = self.elem_to_location_tuple(x, "end")
+                        print(begin, end)
+                        text = self.get_text_from_location_endpoints(begin, end)
+                        print(text)
                         for a in x:
+                            # if a.tag == "operator":
+                                # begin = self.elem_to_location_tuple(a, "begin")
+                                # end = self.elem_to_location_tuple(a, "end")
+                                # print("BEGIN:", begin)
+                                # print("END  :", end)
+                                # text = self.get_text_from_location_endpoints(begin, end)
+                                # print(text)
+                                # print(a)
                             print(a)
-                            print(list(a))
+                            # print(list(a))
                             # for c in a:
                             #     print(c)
                         # self.extract_quant_and_predicate_grammar()
@@ -689,6 +706,7 @@ if __name__ == "__main__":
     # my_spec.extract_quant_and_predicate_grammar("HandleRequestVoteRequestAction")
     print("Extracting from ACTION:", "TMRcvPrepared")
     my_spec.extract_quant_and_predicate_grammar("TMRcvPreparedAction")
+    my_spec.extract_quant_and_predicate_grammar("Inv362_1_4_def")
     # my_spec.extract_quant_and_predicate_grammar("RMPrepareAction")
     exit()
 
