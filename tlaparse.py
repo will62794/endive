@@ -6,6 +6,26 @@ import xml.etree.ElementTree as ET
 import subprocess
 import copy
 
+class QuantPrefix:
+    def __init__(self, quant_type, param_name):
+        self.quant_type = quant_type
+        self.paramName = param_name
+
+class QuantPred:
+    """ Represents a quantified TLA+ state predicate."""
+    def __init__(self, quant_prefix_elems, pred_expr_elem):
+        self.quant_prefix_elems = quant_prefix_elems # ordered list of quantifier prefix elements.
+        self.pred_expr_elem = pred_expr_elem
+
+    def quant_prefix_text(self):
+        print("quant_prefix_text", self.quant_prefix_elems)
+        for qp in self.quant_prefix_elems:
+            for el in qp:
+                print(el)
+
+        return self.quant_prefix_elems
+
+
 class TLASpec:
     """ Represents a parsed TLA+ spec file. """
     def __init__(self, xml_ast, spec_text_lines):
@@ -419,7 +439,7 @@ class TLASpec:
             builtin = self.spec_obj["builtins"][uid.text]
 
         # Conjunction list.
-        if builtin is not None and builtin["uniquename"] == "\\land":
+        if builtin is not None and builtin["uniquename"] in ["\\land", "\\lor"]:
             print(builtin)
             print(elem.find("operands"))
             for conj in elem.find("operands"):
@@ -429,9 +449,10 @@ class TLASpec:
 
 
         if builtin is not None and builtin["uniquename"] == "TRUE":
-            curr_preds.append(elem)
+            pred = QuantPred(curr_quants, elem)
+            curr_preds.append((curr_quants, elem))
 
-        if builtin is not None and builtin["uniquename"] == "$ConjList":
+        if builtin is not None and builtin["uniquename"] in ["$ConjList", "$DisjList"]:
             print("CONJUNCTION LIST")
             for conj in elem.find("operands"):
                 level = conj.find("level").text
@@ -439,7 +460,9 @@ class TLASpec:
                 # print("conjunct level: ", level)
                 # For now append level 1 conjunct predicates.
                 if level in ["0", "1"]:
-                    curr_preds.append(conj)
+                    pred = QuantPred(curr_quants, conj)
+                    print(pred.quant_prefix_text())
+                    curr_preds.append((curr_quants, conj))
 
         # Bounded quantifier.
         if builtin is not None and builtin["uniquename"] in ["$BoundedForall", "$BoundedExists"]:
@@ -449,6 +472,7 @@ class TLASpec:
             print("uid", uid.text)
             operands = elem.find("operands")
             boundSymbols = elem.find("boundSymbols")
+
             for sym in boundSymbols:
                 print("bound:", sym)
                 for x in sym:
@@ -464,7 +488,7 @@ class TLASpec:
                         end = self.elem_to_location_tuple(x, "end")
                         print(begin, end)
                         text = self.get_text_from_location_endpoints(begin, end)
-                        print(text)
+                        print("bound text:", text)
                         for a in x:
                             # if a.tag == "operator":
                                 # begin = self.elem_to_location_tuple(a, "begin")
@@ -479,8 +503,17 @@ class TLASpec:
                             # for c in a:
                             #     print(c)
                         # self.extract_quant_and_predicate_grammar()
+                            
+                        begin = self.elem_to_location_tuple(elem, "begin")
+                        end = self.elem_to_location_tuple(elem, "end")
+                        txt = self.get_text_from_location_endpoints(begin, end)
+                        print("TXT:", txt)
 
-                        curr_quants.append((builtin["uniquename"], paramName))
+                        # curr_quants.append(x)
+
+                        # curr_quants.append(QuantPrefix(builtin["uniquename"], ))
+
+                        curr_quants.append((builtin["uniquename"], paramName, text))
             # curr_quants.append(builtin)
             # curr_quants.append(elem)
             print(curr_quants)
@@ -500,6 +533,7 @@ class TLASpec:
 
         # Extract quantifier prefixes.
         # for el in elem:
+        print("curr_quants:", curr_quants)
 
         if elem.tag == "UserDefinedOpKind":
             uid = elem.find("UID")
@@ -528,7 +562,7 @@ class TLASpec:
         node_uid = node["uid"]
         node_elem = node["elem"]
 
-        print("--- EXTRACT QUANTS ---")
+        # print("--- EXTRACT QUANTS ---")
         curr_quants = []
         curr_preds = []
         body = node_elem.find("body")
@@ -539,26 +573,24 @@ class TLASpec:
         print(curr_quants)
         print(curr_preds)
 
-        print("---")
-        print("---")
+        print("###############")
 
-        print("EXTRACTED QUANTS:")
-        for quant in curr_quants:
-            # begin = self.elem_to_location_tuple(quant, "begin")
-            # end = self.elem_to_location_tuple(quant, "end")
-            # print("BEGIN:", begin)
-            # print("END  :", end)
-            # text = self.get_text_from_location_endpoints(begin, end)
-            print(quant)           
+        # for quant in curr_quants:
+        #     # begin = self.elem_to_location_tuple(quant, "begin")
+        #     # end = self.elem_to_location_tuple(quant, "end")
+        #     # print("BEGIN:", begin)
+        #     # print("END  :", end)
+        #     # text = self.get_text_from_location_endpoints(begin, end)
+        #     print(quant)           
 
-        print("EXTRACTED PREDS:")
+        print("EXTRACTED PREDICATES:")
         for pred in curr_preds:
-            begin = self.elem_to_location_tuple(pred, "begin")
-            end = self.elem_to_location_tuple(pred, "end")
+            begin = self.elem_to_location_tuple(pred[1], "begin")
+            end = self.elem_to_location_tuple(pred[1], "end")
             # print("BEGIN:", begin)
             # print("END  :", end)
             text = self.get_text_from_location_endpoints(begin, end)
-            print(text)
+            print(pred[0], text)
 
         # print("---EXTRACT PREDS")
         # self.extract_predicates(node_elem)
@@ -690,7 +722,7 @@ def parse_tla_file(workdir, specname):
     # return tree
 
 if __name__ == "__main__":
-    tla_file = "TwoPhase"
+    tla_file = "AsyncRaft"
     my_spec = parse_tla_file("benchmarks", tla_file)
 
     top_level_defs = my_spec.get_all_user_defs(level="1")
@@ -704,9 +736,11 @@ if __name__ == "__main__":
 
     print("EXTRACT QUANT")
     # my_spec.extract_quant_and_predicate_grammar("HandleRequestVoteRequestAction")
-    print("Extracting from ACTION:", "TMRcvPrepared")
-    my_spec.extract_quant_and_predicate_grammar("TMRcvPreparedAction")
-    my_spec.extract_quant_and_predicate_grammar("Inv362_1_4_def")
+    defname = "AcceptAppendEntriesRequestAppendAction"
+    print(f"Extracting from: {defname}")
+    # my_spec.extract_quant_and_predicate_grammar("TMRcvPreparedAction")
+    my_spec.extract_quant_and_predicate_grammar(defname)
+    # my_spec.extract_quant_and_predicate_grammar("Inv362_1_4_def")
     # my_spec.extract_quant_and_predicate_grammar("RMPrepareAction")
     exit()
 
