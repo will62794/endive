@@ -2643,25 +2643,25 @@ ApaTypeOK ==
     /\ connectInfo \in [Server -> Server]
     /\ leaderOracle \in Server
     /\ mesgs = [s \in Server |-> [v \in Server |-> << >>] ]
-    /\ CEPOCHmsgs = Gen(3)
+    /\ CEPOCHmsgs = Gen(5)
     /\ \A m \in CEPOCHmsgs : m \in ApaMsgCEPOCHType
-    /\ NEWEPOCHmsgs = Gen(3)
+    /\ NEWEPOCHmsgs = Gen(5)
     /\ \A m \in NEWEPOCHmsgs : m \in ApaMsgNEWEPOCHType
-    /\ ACKEPOCHmsgs = Gen(3)
+    /\ ACKEPOCHmsgs = Gen(5)
     /\ \A m \in ACKEPOCHmsgs : m \in ApaMsgACKEPOCHType
     \* /\ \A m \in ACKEPOCHmsgs : \A mi \in DOMAIN m.mhistory : m.mhistory[mi] \in ApaHistEntryType
-    /\ NEWLEADERmsgs = Gen(4)
+    /\ NEWLEADERmsgs = Gen(6)
     /\ \A m \in NEWLEADERmsgs : m \in ApaMsgNEWLEADERType
     \* /\ \A m \in NEWLEADERmsgs : \A mi \in DOMAIN m.mhistory : m.mhistory[mi] \in ApaHistEntryType
-    /\ ACKLDmsgs = Gen(3)
+    /\ ACKLDmsgs = Gen(5)
     /\ \A m \in ACKLDmsgs : m \in ApaMsgACKLDType
-    /\ COMMITLDmsgs = Gen(3)
+    /\ COMMITLDmsgs = Gen(5)
     /\ \A m \in COMMITLDmsgs : m \in ApaMsgCOMMITLDType
-    /\ PROPOSEmsgs = Gen(3)
+    /\ PROPOSEmsgs = Gen(5)
     /\ \A m \in PROPOSEmsgs : m \in ApaMsgPROPOSEType
-    /\ ACKmsgs = Gen(3)
+    /\ ACKmsgs = Gen(4)
     /\ \A m \in ACKmsgs : m \in ApaMsgACKType
-    /\ COMMITmsgs = Gen(3)
+    /\ COMMITmsgs = Gen(4)
     /\ \A m \in COMMITmsgs : m \in ApaMsgCOMMITType
     \* /\ COMMITmsgs \in SUBSET ApaMsgCOMMITType
 
