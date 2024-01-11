@@ -2620,7 +2620,7 @@ class InductiveInvGen():
                 return response
             
             # Start up server API.
-            app.run(debug=False)
+            app.run(debug=False, port=9000)
             return
 
 
