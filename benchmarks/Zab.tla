@@ -928,6 +928,7 @@ MoreRecentOrEqual(ss1, ss2) == \/ ss1.currentEpoch > ss2.currentEpoch
                                \/ /\ ss1.currentEpoch = ss2.currentEpoch
                                   /\ ~ZxidCompare(ss2.lastZxid, ss1.lastZxid)
 
+MoreRecentOrEqualFold(ss1, ss2) ==  IF MoreRecentOrEqual(ss1, ss2) THEN ss1 ELSE ss2
 
 \* @type: (SERVER -> Set(ACKERECVTYPE), SERVER) => Seq(TXN);
 DetermineInitialHistoryFromArg(ackeRecvArg, i) ==
@@ -936,7 +937,10 @@ DetermineInitialHistoryFromArg(ackeRecvArg, i) ==
                           currentEpoch |-> a.peerLastEpoch,
                           lastZxid     |-> LastZxidOfHistory(a.peerHistory) ] : a \in ackeRecvArg[i] }
             \* Choose server with most recent history.
-            selected == CHOOSE ss \in ss_set: \A ss1 \in (ss_set \ {ss}): MoreRecentOrEqual(ss, ss1)
+            ss_local == [sid |-> i, currentEpoch |-> currentEpoch[i], lastZxid |-> LastZxidOfHistory(history[i])]
+            selected == ApaFoldSet(MoreRecentOrEqualFold, ss_local , ss_set)
+            \* CHOOSE based variant that is inefficient for Apalache.
+            \* selected == CHOOSE ss \in ss_set: \A ss1 \in (ss_set \ {ss}): MoreRecentOrEqual(ss, ss1)
             info == CHOOSE f \in ackeRecvArg[i] : f.sid = selected.sid
         IN info.peerHistory
 
@@ -948,7 +952,10 @@ DetermineInitialHistory(i) ==
                           currentEpoch |-> a.peerLastEpoch,
                           lastZxid     |-> LastZxidOfHistory(a.peerHistory) ]
                         : a \in set }
-            selected == CHOOSE ss \in ss_set: \A ss1 \in (ss_set \ {ss}): MoreRecentOrEqual(ss, ss1)
+            ss_local == [sid |-> i, currentEpoch |-> currentEpoch[i], lastZxid |-> LastZxidOfHistory(history[i])]
+            selected == ApaFoldSet(MoreRecentOrEqualFold, ss_local , ss_set)
+            \* CHOOSE based variant that is inefficient for Apalache.
+            \* selected == CHOOSE ss \in ss_set: \A ss1 \in (ss_set \ {ss}): MoreRecentOrEqual(ss, ss1)
             info == CHOOSE f \in set: f.sid = selected.sid
         IN info.peerHistory
 
@@ -1019,7 +1026,8 @@ LeaderProcessACKEPOCHHasntBroadcast(i, j, ackEpochMsg) ==
                       LET newLeaderEpoch == acceptedEpoch[i] IN 
                       /\ currentEpoch' = [currentEpoch EXCEPT ![i] = newLeaderEpoch]
                       /\ \* Determine initial history Ie'
-                            LET initialHistory == DetermineInitialHistory(i) IN 
+                            LET initialHistory == DetermineInitialHistory(i) 
+                            IN 
                             history' = [history EXCEPT ![i] = InitAcksid(i, initialHistory) ]
                       /\ zabState' = [zabState EXCEPT ![i] = SYNCHRONIZATION]
                       /\ ACKEPOCHmsgs' = ACKEPOCHmsgs \ {ackEpochMsg}
