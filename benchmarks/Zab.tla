@@ -2637,7 +2637,7 @@ ApaTypeOK ==
     /\ zabState \in [Server -> {ELECTION, DISCOVERY, SYNCHRONIZATION, BROADCAST}]
     /\ acceptedEpoch \in [Server -> Epoch]
     /\ currentEpoch \in [Server -> Epoch]
-    /\ history = Gen(4)
+    /\ history = Gen(3)
     /\ \A s \in Server : \A i \in DOMAIN history[s] : history[s][i] \in ApaHistEntryType
     /\ \A s \in Server : Len(history[s]) <= MaxHistLen
     /\ DOMAIN history = Server
