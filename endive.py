@@ -2347,7 +2347,7 @@ class InductiveInvGen():
                 print(udef, vars_in_lemma_defs[udef])
             except:
                 print(f"Def '{udef}': failed to get variables for. Using all state variables.")
-                vars_in_action[action] = all_state_vars
+                vars_in_lemma_defs[udef] = all_state_vars
 
 
         # Compute COI for each action-lemma pair
