@@ -466,6 +466,10 @@ class StructuredProof():
             nodes = [n for n in nodes if n.expr in lemma_filter]
 
         do_per_action_checks = True
+
+        print(f"All {len(nodes)} lemmas to check:")
+        for n in nodes:
+            print(f"- `{n.expr}`")
         
         # Gather all proof checking commands to run.
         for n in nodes:
