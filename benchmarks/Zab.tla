@@ -2112,6 +2112,7 @@ H_PROPOSEMsgSentByNodeImpliesZxidInLog ==
             /\ IsLeader(m.msrc)
             /\ zabState[m.msrc] = BROADCAST
             /\ m.mdst \in learners[m.msrc]
+            /\ m.msrc \in learners[m.msrc]
             /\ \E idx \in DOMAIN history[m.msrc] : history[m.msrc][idx].zxid = m.mzxid
 
 H_ACKERecvPeerHistoryContainedInSender == 
