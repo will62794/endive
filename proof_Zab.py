@@ -658,6 +658,7 @@ committedEntryExistsInLeaderHistory.children = {
 safety.children = {
     "FollowerProcessNEWLEADERAction": [
         NEWLEADERMsgHistAndStateInv,
+        committedEntryExistsInNEWLEADERHistory
         # NEWLEADERIncomingImpliesLastCommittedBound,
         # nEWLEADERMsgSentByLeader
     ],
