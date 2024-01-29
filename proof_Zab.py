@@ -366,6 +366,7 @@ committedEntryExistsOnQuorum.children = {
         COMMITLDSentByNodeImpliesZxidCommittedInLog
     ],
     "FollowerProcessPROPOSEAction": [
+        nodeHistoryBoundByLastCommittedIndex,
         PROPOSEMsgSentByNodeImpliesZxidInLog
     ],
     "FollowerProcessNEWLEADERAction": [
