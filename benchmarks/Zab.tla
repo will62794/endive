@@ -2578,8 +2578,8 @@ Morder1 ==
 CInit == 
     /\ MaxEpoch = 2
     /\ MaxHistLen = 1
-    \* /\ Server = {"s1", "s2", "s3"}
-    /\ Server = {"s1", "s2"}
+    /\ Server = {"s1", "s2", "s3"}
+    \* /\ Server = {"s1", "s2"}
     /\ CEPOCH = "CEPOCH"
     /\ NEWEPOCH = "NEWEPOCH"
     /\ NEWLEADER = "NEWLEADER"
