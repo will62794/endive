@@ -647,6 +647,7 @@ class TLASpec:
             coi_vars.update(action_updated_vars[v])
         # print("All COI vars for updated lemma vars:", coi_vars)
 
+        # TODO: Does 'vars_in_lemma' actually need to be included here?
         projection_var_sets = [
             vars_in_action_non_updated, # vars appearing in precondition.
             vars_in_lemma, # vars appearing in lemma.
@@ -655,6 +656,60 @@ class TLASpec:
         projected_vars = set.union(*projection_var_sets)
         # print("Overall projected vars:", projected_vars)
         return projected_vars        
+
+    def compute_backwards_coi_closure(self, lemma_action_coi, target_prop):
+
+        vars_in_action = {}
+        vars_in_action_non_updated = {}
+        # vars_in_lemma_defs = {}
+        action_updated_vars = {}
+        actions = list(lemma_action_coi.keys())
+
+        # Extract variables per action.
+        for action in actions:
+            try:
+                vars_in_action[action],action_updated_vars[action] = self.get_vars_in_def(action)
+                # print(action_updated_vars[action])
+                vars_in_action_non_updated[action],_ = self.get_vars_in_def(action, ignore_update_expressions=True)
+            # print(f"Vars in action '{action}':", vars_in_action[action])
+            except:
+                # Fall back to conservative computation if we fail above.
+                vars_in_action[action] = set(self.get_all_vars())
+                action_updated_vars[action] = {v:set(self.get_all_vars()) for v in self.get_all_vars()}
+                vars_in_action_non_updated[action] = set(self.get_all_vars())
+
+
+        """ Iteratively compute the partitioned COI (one for each action) until fixpoints are reached."""
+        vars_in_lemma = self.get_vars_in_def(target_prop)[0]
+        var_set_frontier = [vars_in_lemma]
+        visited_var_sets = []
+        edges = []
+        actions = lemma_action_coi.keys()
+        
+        print("Target prop:", target_prop)
+        while len(var_set_frontier) > 0:
+            curr_var_set = var_set_frontier.pop()
+            # Get var set in next target lemma.
+            visited_var_sets.append(curr_var_set)
+
+            print("current prop vars:", curr_var_set)
+            for a in actions:
+                # vars_in_lemma = lemma_action_coi[a][target_prop]
+                action_coi = self.compute_coi(None, None, None, action_updated_vars[a], vars_in_action_non_updated[a], vars_in_lemma)
+                print("- ", vars_in_lemma, a, action_coi)
+
+                if action_coi not in visited_var_sets:
+                    var_set_frontier.append(action_coi)
+                    edges.append((curr_var_set, action_coi, a))
+
+        # # Print in simple DOT format.
+        # for e in edges:
+        #     e0_str = "_".join(sorted(list(e[1])))
+        #     e1_str = "_".join(sorted(list(e[0])))
+        #     print(e0_str, "->", e1_str, f" [label=\"{e[2]}\"]")
+        # print("   ")
+        return edges
+
 
     def compute_coi_table(self, lemmas, actions):
         "Compute the set of cone-of-influence (COI) variables for an action lemma pair."

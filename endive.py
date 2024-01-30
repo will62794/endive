@@ -2363,6 +2363,19 @@ class InductiveInvGen():
             for a in actions:
                 lemma_action_coi[a.replace("Action", "")] = {lemma:all_state_vars for lemma in vars_in_lemma_defs.keys()}
 
+
+        build_coi_closure = False
+        if build_coi_closure:
+            print("======= BACKWARDS COI CLOSURE =========")
+            G_coi_closure = graphviz.Digraph()
+            coi_closure_edges = self.tla_spec_obj.compute_backwards_coi_closure(lemma_action_coi, self.safety)
+            # Generate simple DOT graph.
+            for e in coi_closure_edges:
+                e0_str = "_".join(sorted(list(e[1])))
+                e1_str = "_".join(sorted(list(e[0])))
+                G_coi_closure.edge(e0_str, e1_str, label=f"{e[2]}")
+            G_coi_closure.render(f"notes/{self.specname}_coi_closure", view=False)
+
         # TODO: Eventually have COI properly drill down into action definitions.
         orig_keys = list(lemma_action_coi.keys())
         for a in orig_keys:
