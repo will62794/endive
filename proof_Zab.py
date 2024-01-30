@@ -88,6 +88,10 @@ nodeHistoryBoundByLastCommittedIndex.children = {
     ],
 }
 
+PROPOSEIncomingImpliesNoACKEPOCH = make_node("H_PROPOSEIncomingImpliesNoACKEPOCH")
+
+NEWLEADERIncomingImpliesNoACKEPOCH = make_node("H_NEWLEADERIncomingImpliesNoACKEPOCH")
+
 COMMITLDSentByNodeImpliesZxidCommittedInLog = make_node("H_COMMITLDSentByNodeImpliesZxidCommittedInLog")
 
 NEWEPOCHFromNodeImpliesLEADING = make_node("H_NEWEPOCHFromNodeImpliesLEADING")
@@ -95,10 +99,12 @@ NEWEPOCHFromNodeImpliesLEADING = make_node("H_NEWEPOCHFromNodeImpliesLEADING")
 ACKEPOCHHistoryContainedInFOLLOWINGSender = make_node("H_ACKEPOCHHistoryContainedInFOLLOWINGSender")
 ACKEPOCHHistoryContainedInFOLLOWINGSender.children = {
     "FollowerProcessPROPOSEAction": [
-        PROPOSEMsgInFlightImpliesNodesInBROADCAST
+        PROPOSEMsgInFlightImpliesNodesInBROADCAST,
+        PROPOSEIncomingImpliesNoACKEPOCH
     ],
     "FollowerProcessNEWLEADERAction": [
-        NEWLEADERMsgHistAndStateInv
+        NEWLEADERMsgHistAndStateInv,
+        NEWLEADERIncomingImpliesNoACKEPOCH
     ],
     "FollowerProcessNEWEPOCHAction": [
         NEWEPOCHFromNodeImpliesLEADING

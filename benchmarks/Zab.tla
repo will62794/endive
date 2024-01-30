@@ -1855,6 +1855,20 @@ H_NEWLEADERIncomingImpliesNoIncomingCOMMIT ==
         /\ m.mdst \in learners[m.msrc]
 
 
+H_PROPOSEIncomingImpliesNoACKEPOCH == 
+    \A m \in PROPOSEmsgs :
+        /\ ~\E mc \in ACKEPOCHmsgs : mc.msrc = m.mdst
+        /\ zabState[m.msrc] \in {SYNCHRONIZATION, BROADCAST}
+        /\ IsLeader(m.msrc) 
+        /\ m.mdst \in learners[m.msrc]
+
+H_NEWLEADERIncomingImpliesNoACKEPOCH == 
+    \A m \in NEWLEADERmsgs :
+        /\ ~\E mc \in ACKEPOCHmsgs : mc.msrc = m.mdst
+        /\ zabState[m.msrc] \in {SYNCHRONIZATION, BROADCAST}
+        /\ IsLeader(m.msrc) 
+        /\ m.mdst \in learners[m.msrc]
+
 H_NEWLEADERIncomingImpliesLastCommittedBound == 
     \A m \in NEWLEADERmsgs :
     \* \A i,j \in Server : 
@@ -2396,6 +2410,13 @@ H_LeaderInBROADCASTImpliesLearnerInBROADCAST ==
                     /\ zabState[a.sid] \in {SYNCHRONIZATION, BROADCAST})
 
 
+H_NEWLEADERHistoryAtLeastNewerThanACKEPOCHs ==
+    \A m \in NEWLEADERmsgs : 
+    \A mae \in ACKEPOCHmsgs :
+        \/ ZxidCompare(LastZxidOfHistory(m.mhistory),LastZxidOfHistory(mae.mhistory))
+        \/ ZxidEqual(LastZxidOfHistory(m.mhistory),LastZxidOfHistory(mae.mhistory))
+
+
 (******
 
 
@@ -2646,6 +2667,7 @@ ApaTypeOK ==
     /\ learners \in [Server -> SUBSET Server]
     /\ cepochRecv \in [Server -> SUBSET ApaCEpochRecvType]
     \* Assumes here that MaxHistLen=1 for now.
+    /\ ackeRecv = Gen(3)
     /\ ackeRecv \in [Server -> SUBSET [sid: Server, connected: BOOLEAN, peerLastEpoch: Epoch, peerHistory: ApaHistEntryTypeBoundLen1]]
     /\ ackldRecv \in [Server -> SUBSET [sid: Server, connected: BOOLEAN]]
     /\ sendCounter \in [Server -> {0,1,2}]
