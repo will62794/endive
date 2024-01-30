@@ -313,6 +313,7 @@ committedEntryExistsInNEWLEADERHistory.children = {
     ],
     "FollowerProcessNEWLEADERAction": [
         NEWLEADERMsgHistAndStateInv,
+        nodeHistoryBoundByLastCommittedIndex
     ],
     "LeaderProcessACKAction": [
         aCKMsgImpliesZxidInLog,
