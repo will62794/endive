@@ -1,0 +1,15 @@
+digraph {
+	msgsPrepared_rmState_tmState -> rmState [label=TMRcvPrepared]
+	msgsAbortCommit_rmState -> rmState [label=RMRcvCommitMsg]
+	msgsAbortCommit_rmState -> rmState [label=RMRcvAbortMsg]
+	rmState_tmState -> rmState [label=TMAbort]
+	rmState_tmPrepared_tmState -> rmState [label=TMCommit]
+	msgsPrepared_rmState_tmState -> rmState_tmPrepared_tmState [label=TMRcvPrepared]
+	msgsAbortCommit_rmState -> rmState_tmPrepared_tmState [label=RMRcvCommitMsg]
+	msgsAbortCommit_rmState -> rmState_tmPrepared_tmState [label=RMRcvAbortMsg]
+	rmState_tmState -> rmState_tmPrepared_tmState [label=TMAbort]
+	msgsPrepared_rmState_tmState -> rmState_tmState [label=TMRcvPrepared]
+	msgsAbortCommit_rmState -> rmState_tmState [label=RMRcvCommitMsg]
+	msgsAbortCommit_rmState -> rmState_tmState [label=RMRcvAbortMsg]
+	msgsPrepared_rmState_tmState -> msgsAbortCommit_rmState [label=TMRcvPrepared]
+}
