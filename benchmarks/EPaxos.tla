@@ -271,7 +271,9 @@ Init ==
   /\ executed = [r \in Replicas |-> {}]
   /\ crtInst = [r \in Replicas |-> 1]
   /\ leaderOfInst = [r \in Replicas |-> {}]
-  /\ committed = [i \in Instances |-> {}]
+  \* /\ committed = [i \in Instances |-> {}]
+  \* Force concrete evaluation to make TLC happy here for some reason.
+  /\ committed = TLCEval([i \in Instances |-> {}]) 
   /\ ballots = 1
   /\ preparing = [r \in Replicas |-> {}]
 
