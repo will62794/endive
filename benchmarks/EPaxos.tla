@@ -542,7 +542,7 @@ ReplyPrepare(replica, msg) ==
                  /\ cmdLog' = [cmdLog EXCEPT ![replica] = (@ \ {rec}) \cup
                             {[inst  |-> rec.inst,
                               status|-> rec.status,
-                              ballot|-> msg.ballot,
+                              ballot|-> msg.ballot,  \* problematic use of single variable from Sutra's bug?
                               cmd   |-> rec.cmd,
                               deps  |-> rec.deps,
                               seq   |-> rec.seq]}]
@@ -568,7 +568,7 @@ ReplyPrepare(replica, msg) ==
               /\ cmdLog' = [cmdLog EXCEPT ![replica] = @ \cup
                             {[inst  |-> msg.inst,
                               status|-> "not-seen",
-                              ballot|-> msg.ballot,
+                              ballot|-> msg.ballot, \* problematic use of single variable from Sutra's bug?
                               cmd   |-> none,
                               deps  |-> {},
                               seq   |-> 0]}]
