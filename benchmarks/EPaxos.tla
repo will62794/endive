@@ -851,6 +851,10 @@ Stability ==
 H_Consistency ==
     \A i \in Instances : Cardinality(committed[i]) <= 1
 
+\* Ignores 'none' command.
+H_Consistency_Alt ==
+    \A i \in Instances : Cardinality({c \in committed[i] : c[1] # none}) <= 1
+
 \* Debug invariant.
 Inv1 == ~(\E i \in Instances : Cardinality(committed[i]) = 1)
 
