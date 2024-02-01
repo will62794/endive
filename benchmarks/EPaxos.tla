@@ -43,7 +43,7 @@ ASSUME IsFiniteSet(Replicas)
 FastQuorums(r) == {a \in SUBSET Replicas: r \in a /\ Cardinality(a) = ((Cardinality(Replicas) \div 2) + ((Cardinality(Replicas) \div 2) + 1) \div 2)}
 SlowQuorums(r) == {a \in SUBSET Replicas: r \in a /\ Cardinality(a) = ((Cardinality(Replicas) \div 2) + 1) }
 
-Max(S) == IF S = {} THEN 0 ELSE CHOOSE i \in S : \A j \in S : j <= i
+MyMax(S) == IF S = {} THEN 0 ELSE CHOOSE i \in S : \A j \in S : j <= i
 
 (***************************************************************************)
 (* Special none command                                                    *)
@@ -285,7 +285,7 @@ Init ==
 
 StartPhase1(C, cleader, Q, inst, ballot, oldMsg) ==
     LET newDeps == {rec.inst: rec \in cmdLog[cleader]} 
-        newSeq == 1 + Max({t.seq: t \in cmdLog[cleader]}) 
+        newSeq == 1 + MyMax({t.seq: t \in cmdLog[cleader]}) 
         oldRecs == {rec \in cmdLog[cleader] : rec.inst = inst} IN
         /\ cmdLog' = [cmdLog EXCEPT ![cleader] = (@ \ oldRecs) \cup 
                                 {[inst   |-> inst,
@@ -325,8 +325,8 @@ Phase1Reply(replica) ==
                 (rec.ballot = msg.ballot \/rec.ballot[1] < msg.ballot[1]))
             /\ LET newDeps == msg.deps \cup 
                             ({t.inst: t \in cmdLog[replica]} \ {msg.inst})
-                   newSeq == Max({msg.seq, 
-                                  1 + Max({t.seq: t \in cmdLog[replica]})})
+                   newSeq == MyMax({msg.seq, 
+                                  1 + MyMax({t.seq: t \in cmdLog[replica]})})
                    instCom == {t.inst: t \in {tt \in cmdLog[replica] :
                               tt.status \in {"committed", "executed"}}} IN
                 /\ cmdLog' = [cmdLog EXCEPT ![replica] = (@ \ oldRec) \cup
@@ -406,7 +406,7 @@ Phase1Slow(cleader, i, Q) ==
                                 /\ msg.ballot = record.ballot} IN
             /\ (\A replica \in (Q \ {cleader}): \E msg \in replies: msg.src = replica)
             /\ LET finalDeps == UNION {msg.deps : msg \in replies}
-                   finalSeq == Max({msg.seq : msg \in replies}) IN    
+                   finalSeq == MyMax({msg.seq : msg \in replies}) IN    
                 /\ cmdLog' = [cmdLog EXCEPT ![cleader] = (@ \ {record}) \cup 
                                         {[inst   |-> i,
                                           status |-> "accepted",
