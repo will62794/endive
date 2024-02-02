@@ -310,7 +310,8 @@ StartPhase1(C, cleader, Q, inst, ballot, oldMsg) ==
 Propose(C, cleader, Q) ==
     LET newInst == <<cleader, crtInst[cleader]>> 
         newBallot == <<0, cleader>> 
-    IN  /\ proposed' = proposed \cup {C}
+    IN  /\ Q \in FastQuorums(cleader)
+        /\ proposed' = proposed \cup {C}
         /\ StartPhase1(C, cleader, Q, newInst, newBallot, {})
         /\ crtInst' = [crtInst EXCEPT ![cleader] = @ + 1]
         /\ UNCHANGED << executed, committed, ballots, preparing >>
@@ -506,6 +507,9 @@ Commit(replica, cmsg) ==
 
 SendPrepare(replica, i, Q) ==
     /\ i \notin leaderOfInst[replica]
+    /\ Q \in SlowQuorums(replica)
+    \* This condition states that the instance has been started by its original owner.
+    /\ crtInst[i[1]] > i[2] 
     \*/\ i \notin preparing[replica]
     /\ ballots <= MaxBallot
     /\ ~(\E rec \in cmdLog[replica] :
@@ -576,6 +580,7 @@ ReplyPrepare(replica, msg) ==
     
 PrepareFinalize(replica, i, Q) ==
     /\ i \in preparing[replica]
+    /\ Q \in SlowQuorums(replica)
     /\ \E rec \in cmdLog[replica] :
        /\ rec.inst = i
        /\ rec.status \notin {"committed", "executed"}
@@ -819,6 +824,20 @@ Next ==
     \/ ReplyPrepareAction
     \/ PrepareFinalizeAction
     \/ ReplyTryPreacceptAction
+
+NextForAnnotations == 
+    \/ \E C \in (Commands \ proposed), cleader \in Replicas, Q \in SUBSET Replicas : Propose(C, cleader, Q)
+    \/ \E cleader \in Replicas, inst \in Instances, Q \in SUBSET Replicas : Phase1Fast(cleader, inst, Q)
+    \/ \E cleader \in Replicas, inst \in Instances, Q \in SUBSET Replicas : Phase1Slow(cleader, inst, Q)
+    \/ \E cleader \in Replicas, inst \in Instances, Q \in SUBSET Replicas : Phase2Finalize(cleader, inst, Q)
+    \/ \E cleader \in Replicas : \E inst \in leaderOfInst[cleader] : \E Q \in SlowQuorums(cleader) : FinalizeTryPreAccept(cleader, inst, Q)
+    \/ \E replica \in Replicas : Phase1Reply(replica)
+    \/ \E replica \in Replicas : Phase2Reply(replica)
+    \/ \E replica \in Replicas : \E cmsg \in sentMsg : (cmsg.type = "commit" /\ Commit(replica, cmsg))
+    \/ \E replica \in Replicas, i \in Instances, Q \in SUBSET Replicas : SendPrepare(replica, i, Q)
+    \/ \E replica \in Replicas, msg \in prepareMsg : ReplyPrepare(replica, msg)
+    \/ \E replica \in Replicas : \E i \in preparing[replica] : \E Q \in SUBSET Replicas : PrepareFinalize(replica, i, Q)
+    \/ \E replica \in Replicas : ReplyTryPreaccept(replica)
 
 (***************************************************************************)
 (* The complete definition of the algorithm                                *)
