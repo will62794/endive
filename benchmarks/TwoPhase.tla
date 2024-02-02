@@ -181,6 +181,15 @@ Next ==
   \/ RMRcvCommitMsgAction
   \/ RMRcvAbortMsgAction
 
+NextAnnotated ==
+    \/ TMAbort
+    \/ TMCommit
+    \/ \E rm \in RM : TMRcvPrepared(rm) 
+    \/ \E rm \in RM : RMPrepare(rm)
+    \/ \E rm \in RM : RMChooseToAbort(rm)
+    \/ \E rm \in RM : RMRcvCommitMsg(rm)
+    \/ \E rm \in RM : RMRcvAbortMsg(rm)
+
 -----------------------------------------------------------------------------
 
 NextUnchanged == UNCHANGED vars
