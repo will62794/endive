@@ -417,6 +417,7 @@ class StructuredProof():
         spec_lines += f"\* Proof Graph Stats\n"
         spec_lines += f"\* ==================\n"
         spec_lines += f"\* num proof graph nodes: {len(nodes)}\n"
+        spec_lines += f"\* num proof obligations: {len(nodes) * len(self.actions)}\n"
         in_degrees = list(map(lambda n : n.num_children(), nodes))
         mean_in_degree = sum(in_degrees)/len(nodes)
         sorted_in_degrees = list(sorted(in_degrees))
