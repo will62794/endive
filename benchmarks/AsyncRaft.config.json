@@ -112,12 +112,13 @@
     "tlaps_proof_config": {
         "assumes": [
             "IsFiniteSet(Server)",
-            "MaxLogLen \\in Nat",
-            "MaxTerm \\in Nat",
             "Nil \\notin Server",
             "(Leader # Follower) /\\ (Leader # Candidate)",
             "(Follower # Candidate)",
-            "Server = {0,1}"
+            "Server = Server",
+            "Quorum \\subseteq Server",
+            "MaxLogLen \\in Nat",
+            "MaxTerm \\in Nat"
         ],
         "def_expands":{
             "HandleRequestVoteRequestAction": ["LastTerm","RequestVoteRequestType","RequestVoteResponseType","Terms","LogIndicesWithZero"]

@@ -323,15 +323,20 @@ class StructuredProofNode():
             "cmd": apa_cmd
         }
 
-    def to_tlaps_proof_obligation(self, actions, tlaps_proof_def_expands):
+    def to_tlaps_proof_obligation(self, actions, tlaps_proof_def_expands, assumes_list):
         """ Export this node and support lemmas as TLAPS proof obligation skeleton."""
         # "THEOREM IndAuto /\ Next => IndAuto'"
         
         typeok = "TypeOK"
         land = " /\\ "
 
-        out_str = "\n"
+        out_str = ""
         out_str += f"THEOREM TRUE\n"
+
+        assumes_str = ",".join(assumes_list)
+
+        out_str += f"""  <1>. USE {assumes_str}\n"""
+
         # Export obligations for all actions.
         for (ind,a) in enumerate(actions):
             support_set = []
@@ -346,7 +351,6 @@ class StructuredProofNode():
             # If action is listed in custom proof def expands list, add those definitions here.
             if a in tlaps_proof_def_expands:
                 defs_list += tlaps_proof_def_expands[a]
-       
             out_str += f"  \* ({self.expr},{a})\n"
             out_str += f"""  <1>{ind+1}. {supports_conj_str}{land}{a} => {self.expr}'\n"""
             out_str += f"       BY DEF {','.join(defs_list)}\n" 
@@ -417,6 +421,15 @@ class StructuredProof():
         mean_in_degree = sum(in_degrees)/len(nodes)
         sorted_in_degrees = list(sorted(in_degrees))
         median_in_degree = sorted_in_degrees[len(sorted_in_degrees)//2]
+        
+        assumes_name_list = []
+
+        assume_spec_lines = ""
+        if "assumes" in tlaps_proof_config:
+            for ind,assume in enumerate(tlaps_proof_config["assumes"]):
+                name = f"A{ind}"
+                assume_spec_lines += f"ASSUME {name} == {assume}\n"
+                assumes_name_list.append(name)
 
         all_var_slices = []
         proof_obligation_lines = ""
@@ -430,8 +443,8 @@ class StructuredProof():
 
             if n.expr == self.root.expr:
                 proof_obligation_lines += "\n\* (ROOT SAFETY PROP)"
-            proof_obligation_lines += f"\n\*************\n\* -- {n.expr}\n\*************\n"
-            proof_obligation_lines += n.to_tlaps_proof_obligation(self.actions, tlaps_proof_config["def_expands"])
+            proof_obligation_lines += f"\n\*** {n.expr}\n"
+            proof_obligation_lines += n.to_tlaps_proof_obligation(self.actions, tlaps_proof_config["def_expands"], assumes_name_list)
             proof_obligation_lines += "\n"
 
         var_slice_sizes = [len(s) for s in all_var_slices]
@@ -447,9 +460,11 @@ class StructuredProof():
         spec_lines += f"\* min in-degree: {min(in_degrees)}\n"
         spec_lines += f"\* mean variable slice size: {mean_slice_size}\n"
         spec_lines += "\n"
-        if "assumes" in tlaps_proof_config:
-            for assume in tlaps_proof_config["assumes"]:
-                spec_lines += f"ASSUME {assume}\n"
+
+        # Add assumes.
+        spec_lines += assume_spec_lines
+
+        # Add proof obligation lines.
         spec_lines += proof_obligation_lines
 
         spec_lines += "\n"
