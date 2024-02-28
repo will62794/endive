@@ -245,50 +245,48 @@ HRcvInv(n) ==  \* Process a received invalidation
         /\ UNCHANGED <<nodeLastWriteTS, aliveNodes, nodeRcvedAcks, epochID, nodeWriteEpochID>>
      
             
-HRcvVal(n) ==   \* Process a received validation
-    \E m \in msgs: 
-        /\ nodeState[n] /= "valid"
-        /\ m.type = "VAL"
-        /\ equalTS(m.version, m.tieBreaker,
-                   nodeTS[n].version, 
-                   nodeTS[n].tieBreaker)
-        /\ nodeState' = [nodeState EXCEPT ![n] = "valid"]
-        /\ UNCHANGED <<msgs, nodeTS, nodeLastWriter, nodeLastWriteTS,
-                       aliveNodes, nodeRcvedAcks, epochID, nodeWriteEpochID>>
-   
+HRcvVal(n, m) ==   \* Process a received validation
+    /\ nodeState[n] /= "valid"
+    /\ m.type = "VAL"
+    /\ equalTS(m.version, m.tieBreaker,
+                nodeTS[n].version, 
+                nodeTS[n].tieBreaker)
+    /\ nodeState' = [nodeState EXCEPT ![n] = "valid"]
+    /\ UNCHANGED <<msgs, nodeTS, nodeLastWriter, nodeLastWriteTS, aliveNodes, nodeRcvedAcks, epochID, nodeWriteEpochID>>
+
 HFollowerWriteReplay(n) == \* Execute a write-replay when coordinator failed
     /\  nodeState[n] \in {"invalid", "invalid_write"}
     /\  ~isAlive(nodeLastWriter[n])
     /\  h_actions_for_upd_replay(n, {}) 
 
    
-HFollowerActions(n) ==  \* Actions of a write follower
+HFollowerActions(n, m) ==  \* Actions of a write follower
     \/ HRcvInv(n)
     \/ HFollowerWriteReplay(n)
-    \/ HRcvVal(n) 
+    \/ HRcvVal(n, m) 
  
 ------------------------------------------------------------------------------------- 
 
-RcvInvAction == TRUE /\ \E n \in aliveNodes : HRcvInv(n)
-FollowerWriteReplayAction == TRUE /\ \E n \in aliveNodes : HFollowerWriteReplay(n)
-RcvValAction == TRUE /\ \E n \in aliveNodes : HRcvVal(n)
-ReadAction == TRUE /\ \E n \in aliveNodes : HRead(n)
-CoordWriteReplayAction == TRUE /\ \E n \in aliveNodes : HCoordWriteReplay(n)
-WriteAction == TRUE /\ \E n \in aliveNodes : HWrite(n)
-RcvAckAction == TRUE /\ \E n \in aliveNodes : HRcvAck(n)
-SendValsAction == TRUE /\ \E n \in aliveNodes : HSendVals(n)
-NodeFailureAction == TRUE /\ \E n \in aliveNodes : nodeFailure(n)
+HRcvInvAction == TRUE /\ \E n \in aliveNodes : HRcvInv(n)
+HFollowerWriteReplayAction == TRUE /\ \E n \in aliveNodes : HFollowerWriteReplay(n)
+HRcvValAction == TRUE /\ \E n \in aliveNodes, m \in msgs : HRcvVal(n, m)
+HReadAction == TRUE /\ \E n \in aliveNodes : HRead(n)
+HCoordWriteReplayAction == TRUE /\ \E n \in aliveNodes : HCoordWriteReplay(n)
+HWriteAction == TRUE /\ \E n \in aliveNodes : HWrite(n)
+HRcvAckAction == TRUE /\ \E n \in aliveNodes : HRcvAck(n)
+HSendValsAction == TRUE /\ \E n \in aliveNodes : HSendVals(n)
+HNodeFailureAction == TRUE /\ \E n \in aliveNodes : nodeFailure(n)
 
 Next == \* Hermes (read/write) protocol (Coordinator and Follower actions) + failures
-    \/ RcvInvAction
-    \/ FollowerWriteReplayAction
-    \/ RcvValAction
-    \/ ReadAction
-    \/ CoordWriteReplayAction
-    \/ WriteAction
-    \/ RcvAckAction
-    \/ SendValsAction
-    \/ NodeFailureAction
+    \/ HRcvInvAction
+    \/ HFollowerWriteReplayAction
+    \/ HRcvValAction
+    \/ HReadAction
+    \/ HCoordWriteReplayAction
+    \/ HWriteAction
+    \/ HRcvAckAction
+    \/ HSendValsAction
+    \/ HNodeFailureAction
 
 
 Spec == Init /\ [][Next]_hvars

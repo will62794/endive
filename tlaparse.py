@@ -723,12 +723,14 @@ class TLASpec:
         # Extract variables per action.
         for action in actions:
             try:
-                vars_in_action[action],action_updated_vars[action] = self.get_vars_in_def(action)
-                # print(action_updated_vars[action])
+                ret = self.get_vars_in_def(action)
+                vars_in_action[action],action_updated_vars[action] = ret
+                # print("vars in action:", action_updated_vars[action])
                 vars_in_action_non_updated[action],_ = self.get_vars_in_def(action, ignore_update_expressions=True)
-            # print(f"Vars in action '{action}':", vars_in_action[action])
-            except:
+                # print(f"Vars in action '{action}':", vars_in_action[action])
+            except Exception as e:
                 # Fall back to conservative computation if we fail above.
+                print("exception while extracting variables:", e)
                 vars_in_action[action] = set(self.get_all_vars())
                 action_updated_vars[action] = {v:set(self.get_all_vars()) for v in self.get_all_vars()}
                 vars_in_action_non_updated[action] = set(self.get_all_vars())

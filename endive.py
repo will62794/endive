@@ -2206,6 +2206,7 @@ class InductiveInvGen():
         import proof_EPaxos
         import proof_Zab
         import proof_Boulanger
+        import proof_Hermes
 
         #
         # Set the specified spec appropriately.
@@ -2218,6 +2219,10 @@ class InductiveInvGen():
             root = proof_2pc.root
             actions = proof_2pc.actions
             nodes = proof_2pc.nodes
+        if self.specname == "Hermes":
+            root = proof_Hermes.root
+            actions = proof_Hermes.actions
+            nodes = proof_Hermes.nodes
         elif self.specname == "AbstractRaft":
             if self.proof_struct_tag == "coreLogInv":
                 print(f"Loading from proof struct tag: {self.proof_struct_tag}")
@@ -2354,8 +2359,10 @@ class InductiveInvGen():
         # Refer to actions by their underlying operator definition for computing COI.
         actions_real_defs = [a.replace("Action", "") for a in actions]
         lemma_action_coi = {}
+        all_vars_in_lemma_defs = set(vars_in_lemma_defs.keys())
         try:
-            lemma_action_coi = self.tla_spec_obj.compute_coi_table(set(vars_in_lemma_defs.keys()), actions_real_defs)
+            print("Computing COI table")
+            lemma_action_coi = self.tla_spec_obj.compute_coi_table(all_vars_in_lemma_defs, actions_real_defs)
         except Exception as e:
             print(e)
             print("ERROR: Failed to generate lemma-action COI table, defaulting to all variable COI.")
