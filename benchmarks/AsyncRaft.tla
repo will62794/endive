@@ -221,7 +221,7 @@ RequestVote(i) ==
                 mlastLogIndex |-> Len(log[i]),
                 msource       |-> i,
                 mdest         |-> j] : j \in Server \ {i}}
-    /\ UNCHANGED <<nextIndex, matchIndex, logVars, appendEntriesRequestMsgs, appendEntriesResponseMsgs, requestVoteResponseMsgs>>
+    /\ UNCHANGED <<nextIndex, matchIndex, log, commitIndex, appendEntriesRequestMsgs, appendEntriesResponseMsgs, requestVoteResponseMsgs>>
 
 \* ACTION: AppendEntries ----------------------------------------
 \* Leader i sends j an AppendEntries request containing up to 1 entry.
@@ -258,14 +258,14 @@ BecomeLeader(i) ==
     /\ state'      = [state EXCEPT ![i] = Leader]
     /\ nextIndex'  = [nextIndex EXCEPT ![i] = [j \in Server |-> Len(log[i]) + 1]]
     /\ matchIndex' = [matchIndex EXCEPT ![i] = [j \in Server |-> 0]]
-    /\ UNCHANGED <<appendEntriesRequestMsgs, appendEntriesResponseMsgs, currentTerm, votedFor, votesGranted, logVars, requestVoteRequestMsgs, requestVoteResponseMsgs>>
+    /\ UNCHANGED <<appendEntriesRequestMsgs, appendEntriesResponseMsgs, currentTerm, votedFor, votesGranted, log, commitIndex, requestVoteRequestMsgs, requestVoteResponseMsgs>>
 
 \* ACTION: ClientRequest ----------------------------------
 \* Leader i receives a client request to add v to the log.
 ClientRequest(i) ==
     /\ state[i] = Leader
     /\ log' = [log EXCEPT ![i] = Append(log[i], currentTerm[i])]
-    /\ UNCHANGED <<appendEntriesRequestMsgs, appendEntriesResponseMsgs, serverVars, votesGranted, nextIndex, matchIndex, commitIndex, requestVoteRequestMsgs, requestVoteResponseMsgs>>
+    /\ UNCHANGED <<appendEntriesRequestMsgs, appendEntriesResponseMsgs, currentTerm, state, votedFor, votesGranted, nextIndex, matchIndex, commitIndex, requestVoteRequestMsgs, requestVoteResponseMsgs>>
 
 \* The set of servers that agree up through index.
 Agree(i, index) == {i} \cup {k \in Server : matchIndex[i][k] >= index }
@@ -288,7 +288,7 @@ AdvanceCommitIndex(i) ==
        IN 
           /\ commitIndex[i] < newCommitIndex \* only enabled if it actually advances
           /\ commitIndex' = [commitIndex EXCEPT ![i] = newCommitIndex]
-    /\ UNCHANGED <<appendEntriesRequestMsgs, appendEntriesResponseMsgs, serverVars, votesGranted, nextIndex, matchIndex, log, requestVoteRequestMsgs, requestVoteResponseMsgs>>
+    /\ UNCHANGED <<appendEntriesRequestMsgs, appendEntriesResponseMsgs, currentTerm, state, votedFor, votesGranted, nextIndex, matchIndex, log, requestVoteRequestMsgs, requestVoteResponseMsgs>>
 
 \* ACTION: UpdateTerm
 \* Any RPC with a newer term causes the recipient to advance its term first.
@@ -298,7 +298,7 @@ UpdateTermRVReq(mterm,mdest) ==
     /\ state'          = [state       EXCEPT ![mdest] = Follower]
     /\ votedFor'       = [votedFor    EXCEPT ![mdest] = Nil]
         \* messages is unchanged so m can be processed further.
-    /\ UNCHANGED <<appendEntriesRequestMsgs, appendEntriesResponseMsgs, votesGranted, nextIndex, matchIndex, logVars, requestVoteRequestMsgs, requestVoteResponseMsgs>>
+    /\ UNCHANGED <<appendEntriesRequestMsgs, appendEntriesResponseMsgs, votesGranted, nextIndex, matchIndex, log, commitIndex, requestVoteRequestMsgs, requestVoteResponseMsgs>>
 
 UpdateTermRVRes(mterm,mdest) ==
     /\ mterm > currentTerm[mdest]
@@ -306,7 +306,7 @@ UpdateTermRVRes(mterm,mdest) ==
     /\ state'          = [state       EXCEPT ![mdest] = Follower]
     /\ votedFor'       = [votedFor    EXCEPT ![mdest] = Nil]
         \* messages is unchanged so m can be processed further.
-    /\ UNCHANGED <<appendEntriesRequestMsgs, appendEntriesResponseMsgs, votesGranted, nextIndex, matchIndex, logVars, requestVoteRequestMsgs, requestVoteResponseMsgs>>
+    /\ UNCHANGED <<appendEntriesRequestMsgs, appendEntriesResponseMsgs, votesGranted, nextIndex, matchIndex, log, commitIndex, requestVoteRequestMsgs, requestVoteResponseMsgs>>
 
 UpdateTermAEReq(mterm,mdest) ==
     /\ mterm > currentTerm[mdest]
@@ -314,7 +314,7 @@ UpdateTermAEReq(mterm,mdest) ==
     /\ state'          = [state       EXCEPT ![mdest] = Follower]
     /\ votedFor'       = [votedFor    EXCEPT ![mdest] = Nil]
         \* messages is unchanged so m can be processed further.
-    /\ UNCHANGED <<appendEntriesRequestMsgs, appendEntriesResponseMsgs, votesGranted, nextIndex, matchIndex, logVars, requestVoteRequestMsgs, requestVoteResponseMsgs>>
+    /\ UNCHANGED <<appendEntriesRequestMsgs, appendEntriesResponseMsgs, votesGranted, nextIndex, matchIndex, log, commitIndex, requestVoteRequestMsgs, requestVoteResponseMsgs>>
 
 UpdateTermAERes(mterm,mdest) ==
     /\ mterm > currentTerm[mdest]
@@ -322,7 +322,7 @@ UpdateTermAERes(mterm,mdest) ==
     /\ state'          = [state       EXCEPT ![mdest] = Follower]
     /\ votedFor'       = [votedFor    EXCEPT ![mdest] = Nil]
         \* messages is unchanged so m can be processed further.
-    /\ UNCHANGED <<appendEntriesRequestMsgs, appendEntriesResponseMsgs, votesGranted, nextIndex, matchIndex, logVars, requestVoteRequestMsgs, requestVoteResponseMsgs>>
+    /\ UNCHANGED <<appendEntriesRequestMsgs, appendEntriesResponseMsgs, votesGranted, nextIndex, matchIndex, log, commitIndex, requestVoteRequestMsgs, requestVoteResponseMsgs>>
 
 
 
@@ -350,7 +350,7 @@ HandleRequestVoteRequest(m) ==
                             mvoteGranted |-> grant,
                             msource      |-> i,
                             mdest        |-> j]}
-            /\ UNCHANGED <<state, currentTerm, votesGranted, nextIndex, matchIndex, logVars, appendEntriesRequestMsgs, appendEntriesResponseMsgs, requestVoteRequestMsgs>>
+            /\ UNCHANGED <<state, currentTerm, votesGranted, nextIndex, matchIndex, log, commitIndex, appendEntriesRequestMsgs, appendEntriesResponseMsgs, requestVoteRequestMsgs>>
 
 \* ACTION: HandleRequestVoteResponse --------------------------------
 \* Server i receives a RequestVote response from server j with
@@ -366,7 +366,7 @@ HandleRequestVoteResponse(m) ==
                                     THEN votesGranted[m.mdest] \cup {m.msource} 
                                     ELSE votesGranted[m.mdest]]
     /\ requestVoteResponseMsgs' = requestVoteResponseMsgs \ {m} \* discard the message.
-    /\ UNCHANGED <<serverVars, nextIndex, matchIndex, logVars, appendEntriesRequestMsgs, appendEntriesResponseMsgs, requestVoteRequestMsgs>>
+    /\ UNCHANGED <<currentTerm, state, votedFor, nextIndex, matchIndex, log, commitIndex, appendEntriesRequestMsgs, appendEntriesResponseMsgs, requestVoteRequestMsgs>>
 
 \* ACTION: RejectAppendEntriesRequest -------------------
 \* Either the term of the message is stale or the message
@@ -398,7 +398,7 @@ RejectAppendEntriesRequest(m) ==
                         mmatchIndex     |-> 0,
                         msource         |-> i,
                         mdest           |-> j]}
-            /\ UNCHANGED <<state, votesGranted, nextIndex, matchIndex, serverVars, logVars, requestVoteRequestMsgs, requestVoteResponseMsgs, appendEntriesRequestMsgs>>
+            /\ UNCHANGED <<state, votesGranted, nextIndex, matchIndex, currentTerm, state, votedFor, log, commitIndex, requestVoteRequestMsgs, requestVoteResponseMsgs, appendEntriesRequestMsgs>>
 
 \* ACTION: AcceptAppendEntriesRequest ------------------
 \* The original spec had to three sub actions, this version is compressed.
@@ -518,7 +518,7 @@ HandleAppendEntriesResponse(m) ==
                   /\ nextIndex' = [nextIndex EXCEPT ![i][j] = Max({nextIndex[i][j] - 1, 1})]
                   /\ UNCHANGED <<matchIndex>>
             /\ appendEntriesResponseMsgs' = appendEntriesResponseMsgs \ {m}
-            /\ UNCHANGED <<serverVars, votesGranted, logVars, requestVoteRequestMsgs, requestVoteResponseMsgs, appendEntriesRequestMsgs>>
+            /\ UNCHANGED <<currentTerm, state, votedFor, votesGranted, log, commitIndex, requestVoteRequestMsgs, requestVoteResponseMsgs, appendEntriesRequestMsgs>>
 
 
 \* RestartAction == TRUE /\ \E i \in Server : Restart(i)
