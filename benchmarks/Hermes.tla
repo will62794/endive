@@ -27,13 +27,21 @@ hvars == << msgs, nodeTS, nodeState, nodeRcvedAcks, nodeLastWriter,
 
 -------------------------------------------------------------------------------------
 
-INVACKMessage == [
-    type: {"INV", "ACK"}, 
+INVMessage == [
+    type: {"INV"}, 
     sender    : H_NODES,
     epochID   : 0..(Cardinality(H_NODES) - 1),
     version   : 0..H_MAX_VERSION,  
     tieBreaker: H_NODES
 ] 
+
+ACKMessage == [
+    type: {"ACK"}, 
+    sender    : H_NODES,
+    epochID   : 0..(Cardinality(H_NODES) - 1),
+    version   : 0..H_MAX_VERSION,  
+    tieBreaker: H_NODES
+]
 
 VALMessage == [
     type: {"VAL"},        \* optimization: epochID is not required for VALs
@@ -42,13 +50,13 @@ VALMessage == [
     tieBreaker: H_NODES    
 ]
 
-Message ==  INVACKMessage \cup VALMessage
+Message ==  INVMessage \cup ACKMessage \cup VALMessage
 
 \* Set of all subsets of a set of size <= k.
 kOrSmallerSubset(k, S) == UNION {(kSubset(n, S)) : n \in 0..k}
 
 TypeOK ==  \* The type correctness invariant
-    /\ msgs \in kOrSmallerSubset(2, Message)
+    /\ msgs \in Message
     /\ nodeRcvedAcks \in [H_NODES -> SUBSET H_NODES]
     /\ \A n \in H_NODES: nodeRcvedAcks[n] \subseteq (H_NODES \ {n})
     /\  nodeLastWriter  \in [H_NODES -> H_NODES]
@@ -59,7 +67,6 @@ TypeOK ==  \* The type correctness invariant
     /\  aliveNodes      \in SUBSET H_NODES
     /\  epochID         \in 0..(Cardinality(H_NODES) - 1)
     /\  nodeWriteEpochID \in [H_NODES -> 0..(Cardinality(H_NODES) - 1)]
-                                              
 
 \* The consistent invariant: all alive nodes in valid state should have the same value / TS         
 HConsistent == 
@@ -288,10 +295,6 @@ Spec == Init /\ [][Next]_hvars
 
 NextUnchanged == UNCHANGED hvars
 
-
 \* THEOREM H_Spec =>([]HTypeOK) /\ ([]HConsistent)
-
-
-CTICost == 0
 
 =============================================================================

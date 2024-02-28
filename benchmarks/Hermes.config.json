@@ -16,7 +16,7 @@
     "preds_alt" : [],
     "safety"  :  "HConsistent",
     "constants"  : {
-        "H_NODES" : [ "{0,1}"],
+        "H_NODES" : [ "{0,1,2}"],
         "H_MAX_VERSION" : [ "1", "2"]
     },
     "actions": [],
@@ -26,8 +26,8 @@
     "quant_vars": ["VARN"],
     "model_consts"  :  "",
     "symmetry" : false,
-    "typeok"  :  "TypeOK",
-    "tlc_specific_spec": false,
+    "typeok"  :  "TypeOKRandom",
+    "tlc_specific_spec": true,
     "try_final_minimize": false,
     "simulate"  :  true,
     "local_grammars": {},
