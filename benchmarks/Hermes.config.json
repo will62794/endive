@@ -1,0 +1,66 @@
+{
+    "preds"  :  [
+        "(currentTerm[VARI] > currentTerm[VARJ])",
+        "(currentTerm[VARJ] > currentTerm[VARI])",
+
+        "(currentTerm[VARI] >= currentTerm[VARJ])",
+        "(currentTerm[VARJ] >= currentTerm[VARI])",
+
+        "(currentTerm[VARI] <= currentTerm[VARJ])",
+        "(currentTerm[VARJ] <= currentTerm[VARI])",
+
+        "(currentTerm[VARI] = currentTerm[VARJ])",
+    
+        "(state[VARI] = Primary)",
+        "(state[VARJ] = Primary)"
+    ],
+    "preds_alt" : [],
+    "safety"  :  "HConsistent",
+    "constants"  : {
+        "n1" : "n1",
+        "n2" : "n2",
+        "n3" : "n3",
+        "n4" : "n4",
+        "n5" : "n5",
+        "v1" : "v1",
+        "H_NODES" : [ "{0}"],
+        "H_MAX_VERSION" : [ "1"],
+        "Follower" : "Follower",
+        "Candidate" : "Candidate"
+    },
+    "actions": [
+        "RequestVoteAction",
+        "BecomeLeaderAction",
+        "ClientRequestAction"
+    ],
+    "constraint"  :  "",
+    "quant_inv"  :  "",
+    "quant_inv_alt"  :  null,
+    "quant_vars": ["VARI", "VARJ"],
+    "model_consts"  :  "CONSTANT n1,n2,n3,n4,n5",
+    "symmetry" : true,
+    "typeok"  :  "TypeOK",
+    "tlc_specific_spec": false,
+    "try_final_minimize": false,
+    "simulate"  :  true,
+    "local_grammars": {},
+    "tlaps_proof_config": {
+        "assumes": [
+            "IsFiniteSet(Server)",
+            "Nil \\notin Server",
+            "(Leader # Follower) /\\ (Leader # Candidate)",
+            "(Follower # Candidate)",
+            "Server = Server",
+            "Quorum \\subseteq Server",
+            "MaxLogLen \\in Nat",
+            "MaxTerm \\in Nat"
+        ],
+        "lemma_def_expands": {
+            "H_RequestVoteQuorumInTermImpliesNoOtherLogsInTerm": ["ExistsRequestVoteResponseQuorum"]
+        },
+        "action_def_expands":{
+            "HandleRequestVoteRequestAction": ["LastTerm","RequestVoteRequestType","RequestVoteResponseType","Terms","LogIndicesWithZero"],
+            "HandleRequestVoteResponseAction": ["LastTerm","RequestVoteRequestType","RequestVoteResponseType","Terms","LogIndicesWithZero"]
+        }
+    }
+}
