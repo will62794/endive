@@ -295,4 +295,9 @@ NextUnchanged == UNCHANGED hvars
 
 \* THEOREM H_Spec =>([]HTypeOK) /\ ([]HConsistent)
 
+\* 
+\* Lemmas for inductive invariant.
+\* 
+
+
 =============================================================================

@@ -11,13 +11,17 @@
         "nodeState[VARJ] = \"write\"",
         "nodeState[VARJ] = \"replay\"",
         "nodeTS[VARI].version > nodeTS[VARJ].version",
-        "nodeTS[VARI].version < nodeTS[VARJ].version"
+        "nodeTS[VARI].version >= nodeTS[VARJ].version",
+        "nodeTS[VARI].version < nodeTS[VARJ].version",
+        "nodeTS[VARI].tieBreaker = nodeTS[VARJ].tieBreaker",
+        "VARI \\in aliveNodes",
+        "VARJ \\in aliveNodes"
     ],
     "preds_alt" : [],
     "safety"  :  "HConsistent",
     "constants"  : {
         "H_NODES" : [ "{0,1,2}"],
-        "H_MAX_VERSION" : [ "1", "2"]
+        "H_MAX_VERSION" : ["2"]
     },
     "actions": [],
     "constraint"  :  "",
