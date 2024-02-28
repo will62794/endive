@@ -323,7 +323,7 @@ class StructuredProofNode():
             "cmd": apa_cmd
         }
 
-    def to_tlaps_proof_obligation(self, actions, tlaps_proof_def_expands, assumes_list):
+    def to_tlaps_proof_obligation(self, actions, action_def_expands, lemma_def_expands, assumes_list):
         """ Export this node and support lemmas as TLAPS proof obligation skeleton."""
         # "THEOREM IndAuto /\ Next => IndAuto'"
         
@@ -349,8 +349,10 @@ class StructuredProofNode():
         
             defs_list = [typeok] + support_set + [a, a.replace('Action', ''), self.expr]
             # If action is listed in custom proof def expands list, add those definitions here.
-            if a in tlaps_proof_def_expands:
-                defs_list += tlaps_proof_def_expands[a]
+            if a in action_def_expands:
+                defs_list += action_def_expands[a]
+            if self.expr in lemma_def_expands:
+                defs_list += lemma_def_expands[self.expr]
             out_str += f"  \* ({self.expr},{a})\n"
             out_str += f"""  <1>{ind+1}. {supports_conj_str}{land}{a} => {self.expr}'\n"""
             out_str += f"       BY DEF {','.join(defs_list)}\n" 
@@ -445,7 +447,7 @@ class StructuredProof():
             if n.expr == self.root.expr:
                 proof_obligation_lines += "\n\* (ROOT SAFETY PROP)"
             proof_obligation_lines += f"\n\*** {n.expr}\n"
-            proof_obligation_lines += n.to_tlaps_proof_obligation(self.actions, tlaps_proof_config["def_expands"], assumes_name_list)
+            proof_obligation_lines += n.to_tlaps_proof_obligation(self.actions, tlaps_proof_config["action_def_expands"], tlaps_proof_config["lemma_def_expands"], assumes_name_list)
             proof_obligation_lines += "\n"
 
         var_slice_sizes = [len(s) for s in all_var_slices]
