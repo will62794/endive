@@ -323,19 +323,24 @@ class StructuredProofNode():
             "cmd": apa_cmd
         }
 
-    def to_tlaps_proof_obligation(self):
+    def to_tlaps_proof_obligation(self, actions):
         """ Export this node and support lemmas as TLAPS proof obligation skeleton."""
         # "THEOREM IndAuto /\ Next => IndAuto'"
         out_str = "\n"
-        for a in self.children:
+        # Export obligations for all actions.
+        for a in actions:
+            support_set = []
+            # For actions without any children the support set will be empty.
+            if a in self.children:
+                support_set = [c.expr for c in self.children[a]]
             land = " /\\ "
             typeok = "TypeOK"
-            supports = [c.expr for c in self.children[a]]
-            supports_conj = land.join(supports)
-            supports_list = ",".join(supports)
+            defs_list = [typeok] + support_set + [a, a.replace('Action', ''), self.expr]
+            supports_list = [typeok] + support_set + [self.expr, a]
+            supports_conj_str = land.join(supports_list)
             out_str += f"\* ({self.expr},{a})\n"
-            out_str += f"""THEOREM {typeok} /\\ {supports_conj}{land}{self.expr} /\\ {a} => {self.expr}'\n"""
-            out_str += f"   <1> QED BY DEF {typeok},{supports_list},{a},{a.replace('Action', '')},{self.expr}\n" 
+            out_str += f"""THEOREM {supports_conj_str} => {self.expr}'\n"""
+            out_str += f"   <1> QED BY DEF {','.join(defs_list)}\n" 
             out_str += "\n"
         return out_str
 
@@ -414,8 +419,8 @@ class StructuredProof():
 
             if n.expr == self.root.expr:
                 proof_obligation_lines += "\n\* (ROOT SAFETY PROP)"
-            proof_obligation_lines += f"\n\* -- {n.expr}\n"
-            proof_obligation_lines += n.to_tlaps_proof_obligation()
+            proof_obligation_lines += f"\n\*******\n\* -- {n.expr}\n\*******\n"
+            proof_obligation_lines += n.to_tlaps_proof_obligation(self.actions)
             proof_obligation_lines += "\n"
 
         var_slice_sizes = [len(s) for s in all_var_slices]
