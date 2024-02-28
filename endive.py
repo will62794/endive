@@ -1868,7 +1868,7 @@ class InductiveInvGen():
                 # invs = set(invs) - self.all_sat_invs
                 # invs = sorted(list(invs))
                 
-                sat_invs = self.check_invariants(invs, tlc_workers=tlc_workers)
+                sat_invs = self.check_invariants(invs, tlc_workers=tlc_workers, max_depth = self.spec_config["max_tlc_inv_depth"])
                 
                 sat_invs = list(sorted(sat_invs))
                 print("sat invs")
@@ -2935,6 +2935,7 @@ class InductiveInvGen():
                 self.run_interactive_mode()
                 return
 
+            logging.info("Running invariant generation in proof tree mode.")
             self.do_invgen_proof_tree_mode(interactive_mode=self.interactive_mode)
             # print("")
             # print("Proof graph edges")
