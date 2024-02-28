@@ -121,7 +121,8 @@
             "MaxTerm \\in Nat"
         ],
         "def_expands":{
-            "HandleRequestVoteRequestAction": ["LastTerm","RequestVoteRequestType","RequestVoteResponseType","Terms","LogIndicesWithZero"]
+            "HandleRequestVoteRequestAction": ["LastTerm","RequestVoteRequestType","RequestVoteResponseType","Terms","LogIndicesWithZero"],
+            "HandleRequestVoteResponseAction": ["LastTerm","RequestVoteRequestType","RequestVoteResponseType","Terms","LogIndicesWithZero"]
         }
     }
 }
