@@ -264,6 +264,8 @@ HFollowerActions(n) ==  \* Actions of a write follower
 
 RcvInvAction == TRUE /\ \E n \in aliveNodes : HRcvInv(n)
 FollowerWriteReplayAction == TRUE /\ \E n \in aliveNodes : HFollowerWriteReplay(n)
+RcvValAction == TRUE /\ \E n \in aliveNodes : HRcvVal(n)
+ReadAction == TRUE /\ \E n \in aliveNodes : HRead(n)
 CoordWriteReplayAction == TRUE /\ \E n \in aliveNodes : HCoordWriteReplay(n)
 WriteAction == TRUE /\ \E n \in aliveNodes : HWrite(n)
 RcvAckAction == TRUE /\ \E n \in aliveNodes : HRcvAck(n)
@@ -273,6 +275,8 @@ NodeFailureAction == TRUE /\ \E n \in aliveNodes : nodeFailure(n)
 Next == \* Hermes (read/write) protocol (Coordinator and Follower actions) + failures
     \/ RcvInvAction
     \/ FollowerWriteReplayAction
+    \/ RcvValAction
+    \/ ReadAction
     \/ CoordWriteReplayAction
     \/ WriteAction
     \/ RcvAckAction
