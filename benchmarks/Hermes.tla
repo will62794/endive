@@ -265,7 +265,7 @@ HFollowerActions(n) ==  \* Actions of a write follower
 ------------------------------------------------------------------------------------- 
 
 RcvInvAction == TRUE /\ \E n \in aliveNodes : HRcvInv(n)
-HFollowerWriteReplayAction == TRUE /\ \E n \in aliveNodes : HFollowerWriteReplay(n)
+FollowerWriteReplayAction == TRUE /\ \E n \in aliveNodes : HFollowerWriteReplay(n)
 CoordWriteReplayAction == TRUE /\ \E n \in aliveNodes : HCoordWriteReplay(n)
 WriteAction == TRUE /\ \E n \in aliveNodes : HWrite(n)
 RcvAckAction == TRUE /\ \E n \in aliveNodes : HRcvAck(n)
@@ -273,10 +273,13 @@ SendValsAction == TRUE /\ \E n \in aliveNodes : HSendVals(n)
 NodeFailureAction == TRUE /\ \E n \in aliveNodes : nodeFailure(n)
 
 Next == \* Hermes (read/write) protocol (Coordinator and Follower actions) + failures
-    \E n \in aliveNodes:       
-            \/ HFollowerActions(n)
-            \/ HCoordinatorActions(n)
-            \/ nodeFailure(n) 
+    \/ RcvInvAction
+    \/ FollowerWriteReplayAction
+    \/ CoordWriteReplayAction
+    \/ WriteAction
+    \/ RcvAckAction
+    \/ SendValsAction
+    \/ NodeFailureAction
 
 
 H_Spec == HInit /\ [][Next]_hvars
@@ -285,5 +288,8 @@ NextUnchanged == UNCHANGED hvars
 
 
 \* THEOREM H_Spec =>([]HTypeOK) /\ ([]HConsistent)
+
+
+CTICost == 0
 
 =============================================================================

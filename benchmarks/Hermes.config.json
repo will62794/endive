@@ -1,43 +1,19 @@
 {
     "preds"  :  [
-        "(currentTerm[VARI] > currentTerm[VARJ])",
-        "(currentTerm[VARJ] > currentTerm[VARI])",
-
-        "(currentTerm[VARI] >= currentTerm[VARJ])",
-        "(currentTerm[VARJ] >= currentTerm[VARI])",
-
-        "(currentTerm[VARI] <= currentTerm[VARJ])",
-        "(currentTerm[VARJ] <= currentTerm[VARI])",
-
-        "(currentTerm[VARI] = currentTerm[VARJ])",
-    
-        "(state[VARI] = Primary)",
-        "(state[VARJ] = Primary)"
+        ""
     ],
     "preds_alt" : [],
     "safety"  :  "HConsistent",
     "constants"  : {
-        "n1" : "n1",
-        "n2" : "n2",
-        "n3" : "n3",
-        "n4" : "n4",
-        "n5" : "n5",
-        "v1" : "v1",
-        "H_NODES" : [ "{0}"],
-        "H_MAX_VERSION" : [ "1"],
-        "Follower" : "Follower",
-        "Candidate" : "Candidate"
+        "H_NODES" : [ "{0,1}"],
+        "H_MAX_VERSION" : [ "1", "2"]
     },
-    "actions": [
-        "RequestVoteAction",
-        "BecomeLeaderAction",
-        "ClientRequestAction"
-    ],
+    "actions": [],
     "constraint"  :  "",
     "quant_inv"  :  "",
     "quant_inv_alt"  :  null,
     "quant_vars": ["VARI", "VARJ"],
-    "model_consts"  :  "CONSTANT n1,n2,n3,n4,n5",
+    "model_consts"  :  "",
     "symmetry" : true,
     "typeok"  :  "TypeOK",
     "tlc_specific_spec": false,
