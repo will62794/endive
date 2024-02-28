@@ -52,10 +52,8 @@ TypeOK ==  \* The type correctness invariant
     /\ nodeRcvedAcks \in [H_NODES -> SUBSET H_NODES]
     /\ \A n \in H_NODES: nodeRcvedAcks[n] \subseteq (H_NODES \ {n})
     /\  nodeLastWriter  \in [H_NODES -> H_NODES]
-    /\  nodeLastWriteTS \in [H_NODES -> [version   : 0..H_MAX_VERSION,
-                                       tieBreaker: H_NODES         ]]
-    /\  nodeTS          \in [H_NODES -> [version   : 0..H_MAX_VERSION,
-                                       tieBreaker: H_NODES         ]]
+    /\  nodeLastWriteTS \in [H_NODES -> [version : 0..H_MAX_VERSION, tieBreaker: H_NODES ]]
+    /\  nodeTS          \in [H_NODES -> [version : 0..H_MAX_VERSION, tieBreaker: H_NODES ]]
     /\  nodeState       \in [H_NODES -> {"valid", "invalid", "invalid_write", "write", "replay"}]
     \*  membership and epoch id related
     /\  aliveNodes      \in SUBSET H_NODES
@@ -69,7 +67,7 @@ HConsistent ==
                             \/ nodeState[s] /= "valid" 
                             \/ nodeTS[k] = nodeTS[s]
                                               
-HInit == \* The initial predicate
+Init == \* The initial predicate
     /\  msgs            = {}
     \*  membership and epoch id related
     /\  epochID         = 0
@@ -282,7 +280,7 @@ Next == \* Hermes (read/write) protocol (Coordinator and Follower actions) + fai
     \/ NodeFailureAction
 
 
-H_Spec == HInit /\ [][Next]_hvars
+Spec == Init /\ [][Next]_hvars
 
 NextUnchanged == UNCHANGED hvars
 

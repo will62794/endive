@@ -1,6 +1,17 @@
 {
     "preds"  :  [
-        ""
+        "nodeState[VARI] = \"valid\"",
+        "nodeState[VARI] = \"invalid\"",
+        "nodeState[VARI] = \"invalid_write\"",
+        "nodeState[VARI] = \"write\"",
+        "nodeState[VARI] = \"replay\"",
+        "nodeState[VARJ] = \"valid\"",
+        "nodeState[VARJ] = \"invalid\"",
+        "nodeState[VARJ] = \"invalid_write\"",
+        "nodeState[VARJ] = \"write\"",
+        "nodeState[VARJ] = \"replay\"",
+        "nodeTS[VARI].version > nodeTS[VARJ].version",
+        "nodeTS[VARI].version < nodeTS[VARJ].version"
     ],
     "preds_alt" : [],
     "safety"  :  "HConsistent",
@@ -10,11 +21,11 @@
     },
     "actions": [],
     "constraint"  :  "",
-    "quant_inv"  :  "",
+    "quant_inv"  :  "\\A VARI \\in H_NODES : \\A VARJ \\in H_NODES : ",
     "quant_inv_alt"  :  null,
-    "quant_vars": ["VARI", "VARJ"],
+    "quant_vars": ["VARN"],
     "model_consts"  :  "",
-    "symmetry" : true,
+    "symmetry" : false,
     "typeok"  :  "TypeOK",
     "tlc_specific_spec": false,
     "try_final_minimize": false,
