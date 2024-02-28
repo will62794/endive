@@ -299,5 +299,8 @@ NextUnchanged == UNCHANGED hvars
 \* Lemmas for inductive invariant.
 \* 
 
+H_Inv18_1_0 == \A VARI \in H_NODES : \A VARJ \in H_NODES : (VARI \in aliveNodes) \/ (~(nodeState[VARI] = "replay"))
+H_Inv2558_2_1 == \A VARI \in H_NODES : \A VARJ \in H_NODES : (nodeTS[VARI].version >= nodeTS[VARJ].version) \/ (~(VARI \in aliveNodes)) \/ (~(nodeState[VARJ] = "valid"))
+H_Inv2587_2_2 == \A VARI \in H_NODES : \A VARJ \in H_NODES : (nodeTS[VARI].version >= nodeTS[VARJ].version) \/ (~(nodeState[VARI] = "write") \/ (~(nodeTS[VARI].tieBreaker = nodeTS[VARJ].tieBreaker)))
 
 =============================================================================
