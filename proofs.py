@@ -323,25 +323,36 @@ class StructuredProofNode():
             "cmd": apa_cmd
         }
 
-    def to_tlaps_proof_obligation(self, actions):
+    def to_tlaps_proof_obligation(self, actions, tlaps_proof_def_expands):
         """ Export this node and support lemmas as TLAPS proof obligation skeleton."""
         # "THEOREM IndAuto /\ Next => IndAuto'"
+        
+        typeok = "TypeOK"
+        land = " /\\ "
+
         out_str = "\n"
+        out_str += f"THEOREM TRUE\n"
         # Export obligations for all actions.
-        for a in actions:
+        for (ind,a) in enumerate(actions):
             support_set = []
             # For actions without any children the support set will be empty.
             if a in self.children:
                 support_set = [c.expr for c in self.children[a]]
-            land = " /\\ "
-            typeok = "TypeOK"
-            defs_list = [typeok] + support_set + [a, a.replace('Action', ''), self.expr]
-            supports_list = [typeok] + support_set + [self.expr, a]
+
+            supports_list = [typeok] + support_set + [self.expr]
             supports_conj_str = land.join(supports_list)
-            out_str += f"\* ({self.expr},{a})\n"
-            out_str += f"""THEOREM {supports_conj_str} => {self.expr}'\n"""
-            out_str += f"   <1> QED BY DEF {','.join(defs_list)}\n" 
-            out_str += "\n"
+        
+            defs_list = [typeok] + support_set + [a, a.replace('Action', ''), self.expr]
+            # If action is listed in custom proof def expands list, add those definitions here.
+            if a in tlaps_proof_def_expands:
+                defs_list += tlaps_proof_def_expands[a]
+       
+            out_str += f"  \* ({self.expr},{a})\n"
+            out_str += f"""  <1>{ind+1}. {supports_conj_str}{land}{a} => {self.expr}'\n"""
+            out_str += f"       BY DEF {','.join(defs_list)}\n" 
+            out_str += ""
+        out_str += f"<1>{len(actions)+1}. " + "QED BY " + ",".join([f"<1>{ind}" for ind in range(1, len(actions)+1)])
+        out_str += "\n"
         return out_str
 
 class StructuredProof():
@@ -385,7 +396,7 @@ class StructuredProof():
                 if c.expr not in seen:
                     self.walk_proof_graph(c, visit_fn, seen, all_nodes=all_nodes)
 
-    def to_tlaps_proof_skeleton(self):
+    def to_tlaps_proof_skeleton(self, tlaps_proof_config):
         """ Export proof graph obligations to TLAPS proof structure."""
         modname = self.specname + "_IndDecompProof"
         f = open("benchmarks/" + modname + ".tla", 'w')
@@ -419,8 +430,8 @@ class StructuredProof():
 
             if n.expr == self.root.expr:
                 proof_obligation_lines += "\n\* (ROOT SAFETY PROP)"
-            proof_obligation_lines += f"\n\*******\n\* -- {n.expr}\n\*******\n"
-            proof_obligation_lines += n.to_tlaps_proof_obligation(self.actions)
+            proof_obligation_lines += f"\n\*************\n\* -- {n.expr}\n\*************\n"
+            proof_obligation_lines += n.to_tlaps_proof_obligation(self.actions, tlaps_proof_config["def_expands"])
             proof_obligation_lines += "\n"
 
         var_slice_sizes = [len(s) for s in all_var_slices]
@@ -435,6 +446,10 @@ class StructuredProof():
         spec_lines += f"\* max in-degree: {max(in_degrees)}\n"
         spec_lines += f"\* min in-degree: {min(in_degrees)}\n"
         spec_lines += f"\* mean variable slice size: {mean_slice_size}\n"
+        spec_lines += "\n"
+        if "assumes" in tlaps_proof_config:
+            for assume in tlaps_proof_config["assumes"]:
+                spec_lines += f"ASSUME {assume}\n"
         spec_lines += proof_obligation_lines
 
         spec_lines += "\n"

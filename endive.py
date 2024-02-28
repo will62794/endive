@@ -2498,7 +2498,7 @@ class InductiveInvGen():
                 response = flask.jsonify({'ok': True, 'proof_graph': proof_json})
                 response.headers.add('Access-Control-Allow-Origin', '*')
                 # Save TLAPS proof.
-                proof.to_tlaps_proof_skeleton()
+                proof.to_tlaps_proof_skeleton(self.spec_config["tlaps_proof_config"])
                 # Save Apalache inductive proof obligations.
                 proof.to_apalache_proof_obligations()
                 return response
