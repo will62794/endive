@@ -245,6 +245,7 @@ HRcvInv(n) ==  \* Process a received invalidation
      
             
 HRcvVal(n, m) ==   \* Process a received validation
+    /\ m \in msgs
     /\ nodeState[n] /= "valid"
     /\ m.type = "VAL"
     /\ equalTS(m.version, m.tieBreaker,
