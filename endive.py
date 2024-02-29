@@ -2951,7 +2951,7 @@ class InductiveInvGen():
                     logging.info("Apalache final induction check: FAIL (not truly inductive)")
 
 
-            logging.info("Final inductive invariant:")
+            logging.info(f"Final inductive invariant ({len(self.strengthening_conjuncts)} strengthening lemmas):")
             logging.info("----" * 10)
             # Print the final inductive invariant in a paste-able TLA+ format.
             for c in self.strengthening_conjuncts:
