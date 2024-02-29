@@ -1,8 +1,6 @@
 {
     "preds"  :  [
         "tmState = \"init\"",
-        "tmState = \"aborted\"",
-        "tmState = \"committed\"",
         "[type |-> \"Prepared\", rm |-> VARRMI] \\in msgsPrepared",
         "[type |-> \"Prepared\", rm |-> VARRMJ] \\in msgsPrepared",
         "tmPrepared = RM",
