@@ -1292,7 +1292,9 @@ class InductiveInvGen():
     def make_indquickcheck_tla_spec(self, spec_name, invs, sat_invs_group, orig_k_ctis, quant_inv_fn):
         # print("invs:", invs)
         # print("sat_invs_group:", sat_invs_group)
-        invs_sorted = sorted(invs)
+        
+        # invs_sorted = sorted(invs)
+        invs_sorted = invs
         
         # Start building the spec.
         # invcheck_tla_indcheck="---- MODULE %s_IndQuickCheck ----\n" % self.specname
@@ -1850,7 +1852,14 @@ class InductiveInvGen():
 
                 # Generate and check random set of invariants.
                 logging.info("Generating %d candidate invariants." % num_invs)
-                all_invs = mc.generate_invs(self.preds, num_invs, min_num_conjuncts=min_conjs, max_num_conjuncts=max_conjs, process_local=process_local, quant_vars=self.quant_vars)
+                use_pred_identifiers = self.use_fast_pred_eval
+                boolean_style = "pyeda" if self.use_fast_pred_eval else "tla"
+                all_invs = mc.generate_invs(
+                    self.preds, num_invs, min_num_conjuncts=min_conjs, max_num_conjuncts=max_conjs, 
+                    process_local=process_local, quant_vars=self.quant_vars, 
+                    boolean_style = boolean_style,
+                    use_pred_identifiers=use_pred_identifiers)
+                
                 invs = all_invs["raw_invs"]
 
                 # Sort the set of invariants to give them a consistent order.
@@ -1858,8 +1867,9 @@ class InductiveInvGen():
                 # print("Raw invs")
                 # print(invs[:5])
                 # print(hashlib.md5("".join(invs).encode()).hexdigest())
-                # for inv in invs:
-                #     print("invpred,",inv)
+                # for xinv in invs:
+                    # xprint("generated pred:",inv)
+
                 # print(self.all_sat_invs)
 
                 # No need to re-check invariants if they have already been
@@ -1870,16 +1880,53 @@ class InductiveInvGen():
                 prechecked_invs = set(invs).intersection(self.all_sat_invs) 
                 # invs = set(invs) - self.all_sat_invs
                 # invs = sorted(list(invs))
-                
-                # Pass max exploration depth if given. Otherwise we just use (effectively) infinite depth.
-                max_depth = 2**30
-                if "max_tlc_inv_depth" in self.spec_config:
-                    max_depth = self.spec_config["max_tlc_inv_depth"]
 
-                sat_invs = self.check_invariants(invs, tlc_workers=tlc_workers, max_depth = max_depth)
+                # Check all generated candidate invariants.
+                if not self.use_fast_pred_eval:
+                    # Pass max exploration depth if given. Otherwise we just use (effectively) infinite depth.
+                    max_depth = 2**30
+                    if "max_tlc_inv_depth" in self.spec_config:
+                        max_depth = self.spec_config["max_tlc_inv_depth"]
+                    sat_invs = self.check_invariants(invs, tlc_workers=tlc_workers, max_depth=max_depth)
+                else:
+                    print("Doing fast check of candidate predicates.")
+                    violated_invs = set()
+                    # Check invariants for each state.
+                    for state_fp in self.pred_vals:
+                        # print(s)
+                        pred_state_vals = self.pred_vals[state_fp]
+                        for inv_ind,inv in enumerate(invs):
+                            if inv_ind in violated_invs:
+                                # No need to keep re-checking violated invariants.
+                                continue
+                            for p_ind in pred_state_vals:
+                                inv = inv.replace(f"(PRED_{p_ind})", "(" + str(pred_state_vals[p_ind]) + ")")
+                            # print("state inv:", inv)
+                            pred_res = eval(inv)
+                            if not pred_res:
+                                violated_invs.add(inv_ind)
+                    # print(violated_invs)
+                                
+                    print(f"[FASTPRED] Found {len(invs)-len(violated_invs)} satisfied invariants:")
+                    sat_invs = []
+                    for inv_ind,inv in enumerate(invs):
+
+                        # Replace abstract pred identifiers with original pred expressions.
+                        orig_inv_expr = inv
+                        for p_ind,p in enumerate(self.preds):
+                            orig_inv_expr = orig_inv_expr.replace(f"(PRED_{p_ind})", f"({p})")
+                            orig_inv_expr = orig_inv_expr.replace(f"not", "~")
+                            orig_inv_expr = orig_inv_expr.replace(f" or ", " \/ ")
+                        invs[inv_ind] = orig_inv_expr
+
+                        # Save the satisfied invariants.
+                        if inv_ind not in violated_invs:
+                            # print(f"Satisfied invariant (Inv{inv_ind}):", orig_inv_expr)
+                            sat_invs.append(f"Inv{inv_ind}")
+
                 
                 sat_invs = list(sorted(sat_invs))
-                print("sat invs")
+                print("first few sat invs:")
                 print(sat_invs[:5])
 
                 print_invs = False # disable printing for now.
@@ -1896,7 +1943,10 @@ class InductiveInvGen():
                 iteration += 1
                 continue
 
-            orig_invs_sorted = sorted(invs)
+            if self.use_fast_pred_eval:
+                orig_invs_sorted = invs
+            else:
+                orig_invs_sorted = sorted(invs)
 
             # Try to select invariants based on size ordering.
             # First, sort invariants by the number of CTIs they eliminate.
@@ -2097,7 +2147,7 @@ class InductiveInvGen():
                 
                     inv_suffix = ""
                     if append_inv_round_id:
-                        inv_suffix = "_" + str(iteration) + "_" + str(uniqid)
+                        inv_suffix = "_" + "R" + str(roundi) + "_" + str(iteration) + "_" + str(uniqid)
                         
                     # Add the invariant as a conjunct.
                     self.strengthening_conjuncts.append((inv + inv_suffix, invexp))
@@ -2802,6 +2852,7 @@ class InductiveInvGen():
         # (EXPERIMENTAL)
         #
         self.pred_vals = None
+        # self.use_fast_pred_eval = True
         self.use_fast_pred_eval = False
         if self.use_fast_pred_eval:
             logging.info("Checking predicates on reachable states")

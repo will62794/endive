@@ -64,7 +64,7 @@ def symb_equivalence_reduction(invs, invs_symb):
 
 
 def generate_invs(preds, num_invs, min_num_conjuncts=2, max_num_conjuncts=2, 
-                    process_local=False, boolean_style="tla", quant_vars=[]):
+                    process_local=False, boolean_style="tla", quant_vars=[], use_pred_identifiers=False):
     """ Generate 'num_invs' random invariants with the specified number of conjuncts. """
     # Pick some random conjunct.
     # OR and negations should be functionally complete
@@ -74,6 +74,13 @@ def generate_invs(preds, num_invs, min_num_conjuncts=2, max_num_conjuncts=2,
         ops = ["||"]
         andop = "&&"
         neg_op = "!"
+    elif boolean_style == "pyeda":
+        # TODO: Python vs. pyeda syntax?
+        # ops = ["|"]
+        ops = ["or"]
+        andop = "&"
+        # neg_op = "~"
+        neg_op = "not"
     elif boolean_style == "tla":
         # ops = ["/\\", "\\/"]
         ops = ["\\/"]
@@ -92,7 +99,8 @@ def generate_invs(preds, num_invs, min_num_conjuncts=2, max_num_conjuncts=2,
         num_conjuncts = random.randint(min_num_conjuncts, max_num_conjuncts)
         
         # Select first atomic term of overall predicate.
-        c = random.choice(conjuncts)
+        cind = random.randint(0, len(conjuncts)-1)
+        c = conjuncts[cind]
         conjuncts.remove(c)
 
         # Optionally negate it.
@@ -100,11 +108,17 @@ def generate_invs(preds, num_invs, min_num_conjuncts=2, max_num_conjuncts=2,
         (n,fn) = (neg_op,symb_neg_op) if negate else ("","")
 
         inv = n + "(" + c + ")"
+        # Use only the identifier of the predicate in the overall expression,
+        # rather than the actual predicate expression itself.
+        if use_pred_identifiers:
+            inv = n + "(" + f"PRED_{cind}" + ")"
+
         pred_id_var = f"x_{str(pred_id[c]).zfill(3)}"
         symb_inv_str = fn + "(" + pred_id_var + ")"
 
         for i in range(1,num_conjuncts):
-            c = random.choice(conjuncts)
+            cind = random.randint(0, len(conjuncts)-1)
+            c = conjuncts[cind]
             conjuncts.remove(c)
             op = ""
             fop = "|"
@@ -113,6 +127,9 @@ def generate_invs(preds, num_invs, min_num_conjuncts=2, max_num_conjuncts=2,
             negate = random.choice([True, False])
             (n,fn) = (neg_op,symb_neg_op) if negate else ("","")
             new_term = n + "(" + c + ")"
+            # Use only the identifier of the predicate in the overall expression.
+            if use_pred_identifiers:
+                new_term = n + "(" + f"PRED_{cind}" + ")"
 
             # Sort invariant terms to produce more consistent output regardless of random seed.
             new_inv_args = [new_term,inv]
