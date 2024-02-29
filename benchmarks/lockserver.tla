@@ -63,4 +63,6 @@ Ind ==
     \* A client and server never hold the same lock at the same time.
     /\ \A c \in Client, s \in Server : (s \in clientlocks[c]) => ~semaphore[s]
 
+CTICost == 0
+
 ====
