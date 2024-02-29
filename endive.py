@@ -1868,7 +1868,12 @@ class InductiveInvGen():
                 # invs = set(invs) - self.all_sat_invs
                 # invs = sorted(list(invs))
                 
-                sat_invs = self.check_invariants(invs, tlc_workers=tlc_workers, max_depth = self.spec_config["max_tlc_inv_depth"])
+                # Pass max exploration depth if given. Otherwise we just use (effectively) infinite depth.
+                max_depth = 2**30
+                if "max_tlc_inv_depth" not in self.spec_config:
+                    max_depth = self.spec_config["max_tlc_inv_depth"]
+
+                sat_invs = self.check_invariants(invs, tlc_workers=tlc_workers, max_depth = max_depth)
                 
                 sat_invs = list(sorted(sat_invs))
                 print("sat invs")
