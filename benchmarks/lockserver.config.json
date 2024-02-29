@@ -10,7 +10,7 @@
     "constraint"  :  "",
     "quant_inv"  :  "\\A VARS \\in Server : \\A VARC \\in Client : ",
     "quant_inv_alt"  :  null,
-    "quant_vars": [],
+    "quant_vars": ["VARS", "VARC"],
     "model_consts"  :  "CONSTANT s1,s2,c1,c2",
     "symmetry" : false,
     "typeok"  :  "TypeOK",
