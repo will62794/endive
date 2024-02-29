@@ -10,6 +10,7 @@
         "nodeState[VARJ] = \"invalid_write\"",
         "nodeState[VARJ] = \"write\"",
         "nodeState[VARJ] = \"replay\"",
+        "nodeTS[VARI] = nodeTS[VARJ]",
         "nodeTS[VARI].version = nodeTS[VARJ].version",
         "nodeTS[VARI].version > nodeTS[VARJ].version",
         "nodeTS[VARI].version >= nodeTS[VARJ].version",
