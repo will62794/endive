@@ -30,7 +30,7 @@
     "constraint"  :  "",
     "quant_inv"  :  "\\A VARI \\in H_NODES : \\A VARJ \\in H_NODES : \\A MI \\in msgs : ",
     "quant_inv_alt"  :  null,
-    "quant_vars": ["VARN"],
+    "quant_vars": ["VARI", "VARJ", "MI"],
     "model_consts"  :  "",
     "symmetry" : false,
     "typeok"  :  "TypeOKRandom",
