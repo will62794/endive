@@ -115,48 +115,58 @@ def symb_equivalence_reduction(invs, invs_symb):
     print("symb inv unique:", len(invs_unique))
     return {"invs": invs_unique, "invs_symb": symb_invs_unique}
 
+class PredExpr():
+    """ A boolean expression over a set of predicates.
+    
+    Represent these internally as pyeda expressions. By operating on the AST
+    we can also convert these expressions to various other formats.
+    """
+    def __init__(self, expr):
+        self.expr = expr
+    # TODO.
+    
+    def transform_ast(ast, subst_rules):
+        print(ast)
 
-def pyeda_rand_pred(preds, max_terms=2):
+    def to_tla_expr(self):
+        ast = self.expr.to_ast()
+        # TODO.
+        return
+
+def pyeda_rand_pred(preds, num_terms=2):
     """ Generate a random predicate expression with the given number of variables. """
     
     # Pick some random number of remaining terms.
-    if max_terms == 0:
+    if num_terms == 0:
+        # Neutral term when using only disjunction ops.
         return pyeda.inter.expr(False)
     
     # End with terminal.
-    if max_terms == 1:  
-        p = random.choice(preds)
+    if num_terms == 1:  
+        p = pyeda.inter.expr(random.choice(preds))
         if random.choice([True, False]):
             p = pyeda.inter.Not(p)
         return p
     
     # Extend.
-    if max_terms >= 2:
-        # Extend.
-        l_terms_to_use = random.randint(0, max_terms)
-        max_terms -= l_terms_to_use
-        r_terms_to_use = random.randint(0, max_terms)
+    if num_terms >= 2:
+        # If we have exactly two terms left, then we must give 1 terminal
+        # to each branch.
+        if num_terms == 2:
+            l_terms_to_use = 1
+            r_terms_to_use = 1
+        else:
+            l_terms_to_use = random.randint(0, num_terms)
+            r_terms_to_use = random.randint(0, num_terms - l_terms_to_use)
+
+        # Build the binary expression with each branch.
         out = pyeda.inter.Or(
-                pyeda_rand_pred(preds, max_terms=l_terms_to_use),
-                pyeda_rand_pred(preds, max_terms=r_terms_to_use))
+                pyeda_rand_pred(preds, num_terms=l_terms_to_use),
+                pyeda_rand_pred(preds, num_terms=r_terms_to_use))
+        # Optionally negate.
+        if random.choice([True, False]):
+            out = pyeda.inter.Not(out)
         return out
-
-        # l_terms_to_use = random.randint(1, max_terms)
-        # l = random.choice(preds)
-        # if random.choice([True, False]):
-            # l = pyeda.inter.Not(l)
-        # max_terms -= l_terms_to_use - 1
-    
-    # if max_terms > 0:
-    #     r_terms_to_use = random.randint(1, max_terms)
-    #     r = random.choice(preds)
-    #     if random.choice([True, False]):
-    #         r = pyeda.inter.Not(r)
-    #     max_terms -= r_terms_to_use - 1
-
-    # out = pyeda.inter.Or(l, r)
-    # return out
-    # Generate a random boolean expression.
 
 def generate_invs(preds, num_invs, min_num_conjuncts=2, max_num_conjuncts=2, 
                     process_local=False, boolean_style="tla", quant_vars=[], use_pred_identifiers=False):
