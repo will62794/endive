@@ -159,14 +159,17 @@ def generate_invs(preds, num_invs, min_num_conjuncts=2, max_num_conjuncts=2,
             # Sort invariant terms to produce more consistent output regardless of random seed.
             new_inv_args = [new_term,inv]
             new_inv_args = sorted(new_inv_args)
-            inv  =  new_inv_args[0] + " " + op + " (" + new_inv_args[1] +")"
+            # TODO: Generalize this so that whole expressions can be negated?
+            # front_neg = random.choice(["", "~"])
+            front_neg = random.choice([""])
+            inv  =  new_inv_args[0] + " " + op + " " + front_neg + "(" + new_inv_args[1] +")"
 
             # inv  =  n + "(" + c + ")" + " " + op + " (" + inv +")"
             
             # Symbolic version of the predicate. Used for quickly 
             # detecting logically equivalent predicate forms.
             pred_id_var = f"x_{str(pred_id[c]).zfill(3)}"
-            symb_inv_str = fn + "(" + pred_id_var + ")" + " " + fop + front_neg + " (" + symb_inv_str +")"
+            symb_inv_str = fn + "(" + pred_id_var + ")" + " " + fop + " " + front_neg + "(" + symb_inv_str +")"
 
         if inv not in invs:
             symb_expr = pyeda.inter.expr(symb_inv_str)
