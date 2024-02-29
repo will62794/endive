@@ -60,6 +60,31 @@ def symb_equivalence_reduction(invs, invs_symb):
         if cnf_str not in cnf_invs_set:
             invs_unique.append(inv)
             cnf_invs_set.add(cnf_str)
+
+    # Experimental checks for implication relations between predicates.
+    num_implication_orderings = 0
+    check_implication_relations = False
+    if check_implication_relations:
+        for invi,inv in enumerate(invs):
+            symb_inv = invs_symb[invi]
+            for invi2,inv2 in enumerate(invs):
+                symb_inv2 = invs_symb[invi2]
+                impliesforward = pyeda.inter.Implies(symb_inv, symb_inv2, simplify=True)
+                impliesback = pyeda.inter.Implies(symb_inv2, symb_inv, simplify=True)
+                
+                # comparing Or(~x_017, ~x_000, x_013) and Or(x_007, x_016, ~x_011)
+
+                if impliesforward.equivalent(True) and not impliesback.equivalent(True):
+                    # print(f"comparing {symb_inv} => {symb_inv2}")
+                    # print("  implies:", impliesforward)
+                    num_implication_orderings += 1
+                if impliesback.equivalent(True) and not impliesforward.equivalent(True):
+                    # print(f"comparing {symb_inv} <= {symb_inv2}")
+                    # print("  implies:", impliesback)
+                    num_implication_orderings += 1
+                    # print("  implies:", impliesback)
+        print("TOTAL IMPLICATION ORDERINGS:", num_implication_orderings)
+
     return invs_unique
 
 
