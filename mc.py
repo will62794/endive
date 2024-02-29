@@ -9,6 +9,7 @@ import random
 import re
 import tempfile
 import pyeda
+import pyeda.inter
 import uuid
 
 from itertools import chain, combinations
@@ -51,15 +52,41 @@ def symb_equivalence_reduction(invs, invs_symb):
     # Ensure we return invariants in a consistent order i.e. avoid nondeterminism
     # of using a set here.
     invs_unique = []
+    symb_invs_unique = []
     cnf_invs_set = set()
     for invi,inv in enumerate(invs):
         symb_inv = invs_symb[invi]
-        cnf_str = str(symb_inv.to_cnf())
 
-        # Only add predicate if there is not an equivalent one that already exists.
-        if cnf_str not in cnf_invs_set:
-            invs_unique.append(inv)
-            cnf_invs_set.add(cnf_str)
+        # symb_min, = pyeda.inter.espresso_exprs(symb_inv.to_dnf())
+        # print("ESPRESSO:", symb_min)
+
+        # cnf_str = str(symb_inv.to_cnf())
+        cnf_str = str(symb_inv.to_cnf())
+        # print(cnf_str)
+
+        # Generate and print truth table.
+        # tt_expr1 = pyeda.inter.expr2truthtable(symb_min)
+        # print(tt_expr1)
+        
+        fast_equiv_checking = True
+
+        if fast_equiv_checking:
+            # Only add predicate if there is not an equivalent one that already exists.
+            if cnf_str not in cnf_invs_set:
+                invs_unique.append(inv)
+                cnf_invs_set.add(cnf_str)
+                symb_invs_unique.append(symb_inv)
+        else:
+            # Potentially slower, but complete equivalence checking.
+            exists_equiv = False
+            for s in symb_invs_unique:
+                if symb_inv.equivalent(s):
+                    exists_equiv = True
+                    break
+            if not exists_equiv:
+                invs_unique.append(inv)
+                cnf_invs_set.add(cnf_str)
+                symb_invs_unique.append(symb_inv)
 
     # Experimental checks for implication relations between predicates.
     num_implication_orderings = 0
@@ -84,9 +111,52 @@ def symb_equivalence_reduction(invs, invs_symb):
                     num_implication_orderings += 1
                     # print("  implies:", impliesback)
         print("TOTAL IMPLICATION ORDERINGS:", num_implication_orderings)
+    print("symb inv unique:", len(symb_invs_unique))
+    print("symb inv unique:", len(invs_unique))
+    return {"invs": invs_unique, "invs_symb": symb_invs_unique}
 
-    return invs_unique
 
+def pyeda_rand_pred(preds, max_terms=2):
+    """ Generate a random predicate expression with the given number of variables. """
+    
+    # Pick some random number of remaining terms.
+    if max_terms == 0:
+        return pyeda.inter.expr(False)
+    
+    # End with terminal.
+    if max_terms == 1:  
+        p = random.choice(preds)
+        if random.choice([True, False]):
+            p = pyeda.inter.Not(p)
+        return p
+    
+    # Extend.
+    if max_terms >= 2:
+        # Extend.
+        l_terms_to_use = random.randint(0, max_terms)
+        max_terms -= l_terms_to_use
+        r_terms_to_use = random.randint(0, max_terms)
+        out = pyeda.inter.Or(
+                pyeda_rand_pred(preds, max_terms=l_terms_to_use),
+                pyeda_rand_pred(preds, max_terms=r_terms_to_use))
+        return out
+
+        # l_terms_to_use = random.randint(1, max_terms)
+        # l = random.choice(preds)
+        # if random.choice([True, False]):
+            # l = pyeda.inter.Not(l)
+        # max_terms -= l_terms_to_use - 1
+    
+    # if max_terms > 0:
+    #     r_terms_to_use = random.randint(1, max_terms)
+    #     r = random.choice(preds)
+    #     if random.choice([True, False]):
+    #         r = pyeda.inter.Not(r)
+    #     max_terms -= r_terms_to_use - 1
+
+    # out = pyeda.inter.Or(l, r)
+    # return out
+    # Generate a random boolean expression.
 
 def generate_invs(preds, num_invs, min_num_conjuncts=2, max_num_conjuncts=2, 
                     process_local=False, boolean_style="tla", quant_vars=[], use_pred_identifiers=False):
@@ -185,7 +255,9 @@ def generate_invs(preds, num_invs, min_num_conjuncts=2, max_num_conjuncts=2,
     logging.info(f"number of invs: {len(invs)}")
 
     # Do CNF based equivalence reduction.
-    invs = symb_equivalence_reduction(invs, invs_symb)
+    res = symb_equivalence_reduction(invs, invs_symb)
+    invs = res["invs"]
+    invs_symb_strs = res["invs_symb"]
     logging.info(f"number of invs post CNF based equivalence reduction: {len(invs)}")
 
     # if len(quant_vars):
