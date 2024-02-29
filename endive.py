@@ -580,7 +580,6 @@ class InductiveInvGen():
         return pred_vals
 
 
-
         # predlines = fdump.read().splitlines()
         # fdump.close()
         # predlines = filter(lambda l : "State " in l or "invval_" in l, predlines)
