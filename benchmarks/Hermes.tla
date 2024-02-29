@@ -27,6 +27,8 @@ hvars == << msgs, nodeTS, nodeState, nodeRcvedAcks, nodeLastWriter,
 
 -------------------------------------------------------------------------------------
 
+\* Invalidation (INV) messages are broadcast when a write comes in that
+\* cannot be completed due to a node not currently being in a valid state.
 INVMessage == [
     type: {"INV"}, 
     sender    : H_NODES,
@@ -35,6 +37,10 @@ INVMessage == [
     tieBreaker: H_NODES
 ] 
 
+\* Acknowledgment (ACK) messages are sent by nodes back to 
+\* the coordinator to acknowledge the receipt of an INV message.
+\* Once the coordinator receives ACKS from all live replicas, the 
+\* write is completed by transitioning the key to the Valid state.
 ACKMessage == [
     type: {"ACK"}, 
     sender    : H_NODES,
@@ -43,6 +49,8 @@ ACKMessage == [
     tieBreaker: H_NODES
 ]
 
+\* After receipt of enough ACK messages, a coordinator will broadcast a VAL
+\* message with the key and the same timestamp to all followers.
 VALMessage == [
     type: {"VAL"},        \* optimization: epochID is not required for VALs
                           \* epochID   : 0..(Cardinality(H_NODES) - 1),
@@ -273,14 +281,17 @@ HSendValsAction == TRUE /\ \E n \in aliveNodes : HSendVals(n)
 HNodeFailureAction == TRUE /\ \E n \in aliveNodes : nodeFailure(n)
 
 Next == \* Hermes (read/write) protocol (Coordinator and Follower actions) + failures
+    \* Follower actions.
     \/ HRcvInvAction
     \/ HFollowerWriteReplayAction
     \/ HRcvValAction
+    \* Coordinator actions
     \/ HReadAction
     \/ HCoordWriteReplayAction
     \/ HWriteAction
     \/ HRcvAckAction
     \/ HSendValsAction
+    \* Failure actions.
     \/ HNodeFailureAction
 
 
