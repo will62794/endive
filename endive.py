@@ -459,7 +459,7 @@ class InductiveInvGen():
         return len(self.all_checked_invs)
 
     def check_predicates(self, preds, tlc_workers=6):
-        """ Check which of the given invariants are valid. """
+        """ Check which of the given invariants are valid on every reachable state. """
         
         spec_suffix = "PredCheck"
 
@@ -469,29 +469,32 @@ class InductiveInvGen():
 
         invval_varname = "predval"
 
-        # for i,inv in enumerate(preds):    
-        #     invcheck_tla += f"VARIABLE {invval_varname}_{i}\n"
+        for i,inv in enumerate(preds):    
+            invcheck_tla += f"VARIABLE {invval_varname}_{i}\n"
+        
+        invcheck_tla += "\n"
 
-        # all_inv_names = set()
-        # for i,inv in enumerate(preds):    
-        #     sinv = ("Pred_%d == " % i) + self.quant_inv(inv)
-        #     all_inv_names.add("Pred_%d" % i)
-        #     invcheck_tla += sinv + "\n"
+        all_inv_names = set()
+        for i,inv in enumerate(preds):    
+            sinv = ("Pred_%d == " % i) + self.quant_inv(inv)
+            all_inv_names.add("Pred_%d" % i)
+            invcheck_tla += sinv + "\n"
 
-        # invcheck_tla += "InvInit ==\n"
-        # for i,inv in enumerate(preds):    
-        #     invcheck_tla += f"  /\\ {invval_varname}_{i} = Pred_{i}\n"
+        invcheck_tla += "InvInit ==\n"
+        for i,inv in enumerate(preds):    
+            invcheck_tla += f"  /\\ {invval_varname}_{i} = Pred_{i}\n"
 
-        # invcheck_tla += "InvNext ==\n"
-        # for i,inv in enumerate(preds):    
-        #     invcheck_tla += f"  /\\ {invval_varname}_{i}' = Pred_{i}'\n"
+        invcheck_tla += "InvNext ==\n"
+        for i,inv in enumerate(preds):    
+            invcheck_tla += f"  /\\ {invval_varname}_{i}' = Pred_{i}'\n"
 
+        invcheck_tla += "\n"
 
-        # invcheck_tla += "PredInit == Init /\ InvInit\n"
-        # invcheck_tla += "PredNext == Next /\ InvNext\n"
+        invcheck_tla += "PredInit == Init /\ InvInit\n"
+        invcheck_tla += "PredNext == Next /\ InvNext\n"
 
-        invcheck_tla += "PredInit == Init\n"
-        invcheck_tla += "PredNext == Next\n"
+        # invcheck_tla += "PredInit == Init\n"
+        # invcheck_tla += "PredNext == Next\n"
 
         invcheck_tla += "===="
 
@@ -558,6 +561,7 @@ class InductiveInvGen():
         fdump = open(dumppath)
         dumpstates = json.load(fdump)
         pred_vals = {}
+        # Extract the valuation of each predicate on each reachable state.
         for s in dumpstates["states"]:
             # print(s)
             state_pred_vals = {}
@@ -565,14 +569,14 @@ class InductiveInvGen():
             # print(s["val"].keys())
             for k in s["val"]:
                 if invval_varname in k:
-                    state_pred_vals[k.split("_")[1]] = s["val"][k]
+                    state_pred_vals[int(k.split("_")[1])] = s["val"][k]
             # print(state_pred_vals)
             pred_vals[s["fp"]] = state_pred_vals
         # print(pred_vals)
-        # for fp in pred_vals:
-            # print(fp, pred_vals[fp])
+        for fp in pred_vals:
+            print(fp, pred_vals[fp])
         
-        print(sys.getsizeof(pred_vals)/1000, "KB")
+        print("Size of pred vals:", sys.getsizeof(pred_vals)/1000, "KB")
         return pred_vals
 
 
