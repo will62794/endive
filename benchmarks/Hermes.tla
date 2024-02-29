@@ -68,11 +68,6 @@ TypeOK ==  \* The type correctness invariant
     /\  epochID         \in 0..(Cardinality(H_NODES) - 1)
     /\  nodeWriteEpochID \in [H_NODES -> 0..(Cardinality(H_NODES) - 1)]
 
-\* The consistent invariant: all alive nodes in valid state should have the same value / TS         
-HConsistent == 
-    \A k,s \in aliveNodes:  
-        (nodeState[k] = "valid" /\ nodeState[s] = "valid") => nodeTS[k] = nodeTS[s]
-                                              
 Init == \* The initial predicate
     /\  msgs            = {}
     \*  membership and epoch id related
@@ -291,9 +286,18 @@ Next == \* Hermes (read/write) protocol (Coordinator and Follower actions) + fai
 
 Spec == Init /\ [][Next]_hvars
 
-NextUnchanged == UNCHANGED hvars
+
+\* The consistent invariant: all alive nodes in valid state should have the same value / TS         
+HConsistent == 
+    \A k,s \in aliveNodes:  
+        (nodeState[k] = "valid" /\ nodeState[s] = "valid") => nodeTS[k] = nodeTS[s]
+
+
 
 \* THEOREM H_Spec =>([]HTypeOK) /\ ([]HConsistent)
+
+NextUnchanged == UNCHANGED hvars
+
 
 \* 
 \* Lemmas for inductive invariant.
