@@ -11,6 +11,7 @@ import tempfile
 import pyeda
 import pyeda.inter
 import uuid
+import itertools
 
 from itertools import chain, combinations
 
@@ -168,6 +169,58 @@ def pyeda_rand_pred(preds, num_terms=2):
             out = pyeda.inter.Not(out)
         return out
 
+def generate_all_exprs(preds, num_terms=2):
+    """ Generate a all predicate pyeda expressions with the given number of variables. """
+    
+    # Pick some random number of remaining terms.
+    if num_terms == 0:
+        # Neutral term when using only disjunction ops.
+        return [pyeda.inter.expr(False)]
+    
+    # End with terminal.
+    if num_terms == 1:  
+        pos = [pyeda.inter.expr(p) for p in preds]
+        neg = [pyeda.inter.Not(pyeda.inter.expr(p)) for p in preds]
+        return pos + neg
+        # p = pyeda.inter.expr(random.choice(preds))
+        # if random.choice([True, False]):
+        #     p = pyeda.inter.Not(p)
+        # return p
+    
+    # Extend.
+    if num_terms >= 2:
+        # If we have exactly two terms left, then we must give 1 terminal
+        # to each branch.
+        if num_terms == 2:
+            l_terms_to_use = 1
+            r_terms_to_use = 1
+
+            left = generate_all_exprs(preds, num_terms=l_terms_to_use)
+            right = generate_all_exprs(preds, num_terms=r_terms_to_use)
+            pos = [pyeda.inter.Or(left,right) for (left,right) in itertools.product(left,right)]
+            neg = [pyeda.inter.Not(pyeda.inter.Or(left,right)) for (left,right) in itertools.product(left,right)]
+            return pos + neg
+
+        else:
+            #
+            # TODO: Finish this properly.
+            #
+            
+            # Explore all left/right splits that sum to remaining terms allowed.
+            terms_to_use = [(l,r) for (l,r) in itertools.product(range(num_terms+1),range(num_terms+1)) if l+r == num_terms]
+            # l_terms_to_use = random.randint(0, num_terms)
+            # r_terms_to_use = random.randint(0, num_terms - l_terms_to_use)
+
+            # Build the binary expression for each branch.
+            branches = [(generate_all_exprs(preds, num_terms=l),generate_all_exprs(preds, num_terms=r)) for (l,r) in terms_to_use]
+            pos = [pyeda.inter.Or(l,r) for (l,r) in branches]
+            neg = []
+            # neg = [pyeda.inter.Not(pyeda.inter.Or(
+            #         generate_all_exprs(preds, num_terms=l),
+            #         generate_all_exprs(preds, num_terms=r)))
+            #         for (l,r) in terms_to_use]
+            return pos + neg
+            
 def generate_invs(preds, num_invs, min_num_conjuncts=2, max_num_conjuncts=2, 
                     process_local=False, boolean_style="tla", quant_vars=[], use_pred_identifiers=False):
     """ Generate 'num_invs' random invariants with the specified number of conjuncts. """
