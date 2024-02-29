@@ -169,10 +169,15 @@ def generate_invs(preds, num_invs, min_num_conjuncts=2, max_num_conjuncts=2,
             symb_inv_str = fn + "(" + pred_id_var + ")" + " " + fop + front_neg + " (" + symb_inv_str +")"
 
         if inv not in invs:
-            invs.append(inv)
-            invs_symb.append(pyeda.inter.expr(symb_inv_str))
+            symb_expr = pyeda.inter.expr(symb_inv_str)
+            # Don't add tautologies or contradictions.
+            if not symb_expr.equivalent(True) and not symb_expr.equivalent(False):
+                invs.append(inv)
+                invs_symb.append(symb_expr)
+                invs_symb_strs.append(symb_inv_str)
+
+            # print(symb_inv_str)
             # print(type(invs_symb[-1]))
-            invs_symb_strs.append(symb_inv_str)
 
     logging.info(f"number of invs: {len(invs)}")
 
