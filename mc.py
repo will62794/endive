@@ -140,8 +140,8 @@ def generate_invs(preds, num_invs, min_num_conjuncts=2, max_num_conjuncts=2,
             
             # Symbolic version of the predicate. Used for quickly 
             # detecting logically equivalent predicate forms.
-            pred_id_var = f"x_{str(pred_id[c]).zfill(4)}"
-            symb_inv_str = fn + "(" + pred_id_var + ")" + " " + fop + " (" + symb_inv_str +")"
+            pred_id_var = f"x_{str(pred_id[c]).zfill(3)}"
+            symb_inv_str = fn + "(" + pred_id_var + ")" + " " + fop + front_neg + " (" + symb_inv_str +")"
 
         if inv not in invs:
             invs.append(inv)
