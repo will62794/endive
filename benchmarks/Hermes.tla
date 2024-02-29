@@ -70,9 +70,8 @@ TypeOK ==  \* The type correctness invariant
 
 \* The consistent invariant: all alive nodes in valid state should have the same value / TS         
 HConsistent == 
-    \A k,s \in aliveNodes:  \/ nodeState[k] /= "valid"
-                            \/ nodeState[s] /= "valid" 
-                            \/ nodeTS[k] = nodeTS[s]
+    \A k,s \in aliveNodes:  
+        (nodeState[k] = "valid" /\ nodeState[s] = "valid") => nodeTS[k] = nodeTS[s]
                                               
 Init == \* The initial predicate
     /\  msgs            = {}
