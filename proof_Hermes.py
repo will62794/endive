@@ -16,11 +16,11 @@ H_Inv548_R0_2_4 = StructuredProofNode("LInv548_R0_2_4", "H_Inv548_R0_2_4")
 
 hermes_root = StructuredProofNode("Safety", "HConsistent", children = {
     "HRcvValAction": [
-        H_Inv130_R0_1_0,
-        H_Inv3149_R0_2_1,
-        H_Inv545_R0_2_2,
-        H_Inv3135_R0_2_3,
-        H_Inv548_R0_2_4
+        # H_Inv130_R0_1_0,
+        # H_Inv3149_R0_2_1,
+        # H_Inv545_R0_2_2,
+        # H_Inv3135_R0_2_3,
+        # H_Inv548_R0_2_4
         # rMCommittedImpliesOtherRMsPreparedOrCommitted
         # tMKnowsPrepareImpliesRMPreparedCommittedOrAborted,
         # commitMsgImpliesAllPrepared,
@@ -28,11 +28,11 @@ hermes_root = StructuredProofNode("Safety", "HConsistent", children = {
         # committedRMImpliesCommitMsg,
     ],
     "HSendValsAction": [
-        H_Inv130_R0_1_0,
-        H_Inv3149_R0_2_1,
-        H_Inv545_R0_2_2,
-        H_Inv3135_R0_2_3,
-        H_Inv548_R0_2_4
+        # H_Inv130_R0_1_0,
+        # H_Inv3149_R0_2_1,
+        # H_Inv545_R0_2_2,
+        # H_Inv3135_R0_2_3,
+        # H_Inv548_R0_2_4
     ]
 })
 
