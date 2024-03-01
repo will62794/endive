@@ -1886,7 +1886,8 @@ class InductiveInvGen():
                 if compute_subsumption:
                     logging.info("Computing subsumption ordering.")
 
-                    (subsumption_edges_inds,subsumption_edges,redundant) = mc.compute_subsumption_ordering(invs_symb_strs)
+                    # (subsumption_edges_inds,subsumption_edges,redundant) = mc.compute_subsumption_ordering(invs_symb_strs)
+                    (subsumption_edges_inds,subsumption_edges,redundant) = mc.compute_subsumption_ordering(invs_symb_strs, num_samples_to_check=500)
                     logging.info(f"{len(subsumption_edges)} Subsumption edges:")
                     
                     import graphviz

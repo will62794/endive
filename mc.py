@@ -221,7 +221,7 @@ def generate_all_exprs(preds, num_terms=2):
             #         for (l,r) in terms_to_use]
             return pos + neg
 
-def compute_subsumption_ordering(invs):
+def compute_subsumption_ordering(invs, num_samples_to_check=None):
     """ 
     Compute graph of subsumption partial order between given set of invariants/predicates.
     
@@ -232,7 +232,14 @@ def compute_subsumption_ordering(invs):
     ind_edges = []
     # If A => B, then we only need to check A, since B is weaker than A.
     redundant = set()
+    now = time.time()
+    # Limit cost of these checks with some limiting.
+    sampled_inds = list(range(len(invs)))
+    if num_samples_to_check is not None:
+        sampled_inds = random.sample(range(len(invs)), num_samples_to_check)
     for invi,inv in enumerate(invs):
+        if invi not in sampled_inds:
+            continue
         symb_inv = inv
 
         for invi2,inv2 in enumerate(invs):
@@ -262,6 +269,7 @@ def compute_subsumption_ordering(invs):
             #     edges.append((symb_inv2, symb_inv))
             #     ind_edges.append((invi2, invi))
 
+    print("subsumption checks took {:.2f}s:".format(time.time()-now))
     print("redundant:", len(redundant))
     return (ind_edges,edges,redundant)
    
