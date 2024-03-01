@@ -14,8 +14,17 @@ H_Inv545_R0_2_2 = StructuredProofNode("LInv545_R0_2_2", "H_Inv545_R0_2_2")
 H_Inv3135_R0_2_3 = StructuredProofNode("LInv3135_R0_2_3", "H_Inv3135_R0_2_3")
 H_Inv548_R0_2_4 = StructuredProofNode("LInv548_R0_2_4", "H_Inv548_R0_2_4")
 
+VALMsgImpliesValidAliveNodesHaveEqualOrNewer = StructuredProofNode("VALMsgImpliesValidAliveNodesHaveEqualOrNewer", "H_VALMsgImpliesValidAliveNodesHaveEqualOrNewer") 
+
+HBD = StructuredProofNode("HBDnode", "HBD")
+
+H_VALMsgImpliesSomeValidNodeWithVersion = StructuredProofNode("VALMsgImpliesSomeValidNodeWithVersion", "H_VALMsgImpliesSomeValidNodeWithVersion")
+
 hermes_root = StructuredProofNode("Safety", "HConsistent", children = {
     "HRcvValAction": [
+        # HBD,
+        VALMsgImpliesValidAliveNodesHaveEqualOrNewer,
+        H_VALMsgImpliesSomeValidNodeWithVersion
         # H_Inv130_R0_1_0,
         # H_Inv3149_R0_2_1,
         # H_Inv545_R0_2_2,
