@@ -5,8 +5,6 @@
         "[type |-> \"Prepared\", rm |-> VARRMJ] \\in msgsPrepared",
         "tmPrepared = RM",
         "rmState[VARRMI] = \"working\"",
-        "rmState[VARRMI] = \"working\"",
-        "rmState[VARRMJ] = \"working\"",
         "rmState[VARRMJ] = \"working\"",
         "[type |-> \"Commit\"] \\in msgsAbortCommit",
         "[type |-> \"Abort\"] \\in msgsAbortCommit",
