@@ -285,7 +285,7 @@ Next == \* Hermes (read/write) protocol (Coordinator and Follower actions) + fai
     \/ HRcvInvAction
     \/ HFollowerWriteReplayAction
     \/ HRcvValAction
-    \* Coordinator actions
+    \* Coordinator actions (leader of writes/reads)
     \/ HReadAction
     \/ HCoordWriteReplayAction
     \/ HWriteAction
