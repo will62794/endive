@@ -48,6 +48,6 @@ TypeOKRandom ==  \* The type correctness invariant
     /\  epochID         \in 0..(Cardinality(H_NODES) - 1)
     /\  nodeWriteEpochID \in [H_NODES -> 0..(Cardinality(H_NODES) - 1)]
 
-CTICost == Cardinality(msgs)
+CTICost == Cardinality(msgs) + Cardinality(aliveNodes)
 
 =============================================================================
