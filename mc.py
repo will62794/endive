@@ -236,6 +236,8 @@ def compute_subsumption_ordering(invs):
         symb_inv = inv
 
         for invi2,inv2 in enumerate(invs):
+            if invi == invi2:
+                continue
             symb_inv2 = inv2
             # pyeda.inter.expr(inv2)
             impliesforward = pyeda.inter.Implies(symb_inv, symb_inv2, simplify=True)
