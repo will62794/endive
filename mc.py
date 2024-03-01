@@ -293,8 +293,10 @@ def generate_invs(preds, num_invs, min_num_conjuncts=2, max_num_conjuncts=2,
             new_inv_args = [new_term,inv]
             new_inv_args = sorted(new_inv_args)
             # TODO: Generalize this so that whole expressions can be negated?
-            # front_neg = random.choice(["", "~"])
-            front_neg = random.choice([""])
+            use_restricted_negation = False
+            front_neg = random.choice(["", "~"])
+            if use_restricted_negation:
+                front_neg = random.choice([""]) # less general but possibly more compact/efficient in practice.
             inv  =  new_inv_args[0] + " " + op + " " + front_neg + "(" + new_inv_args[1] +")"
 
             # inv  =  n + "(" + c + ")" + " " + op + " (" + inv +")"
