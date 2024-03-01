@@ -1861,6 +1861,7 @@ class InductiveInvGen():
                     use_pred_identifiers=use_pred_identifiers)
                 
                 invs = all_invs["raw_invs"]
+                invs_symb_strs = all_invs["pred_invs"]
 
                 # Sort the set of invariants to give them a consistent order.
                 invs = sorted(list(invs))
@@ -1937,6 +1938,31 @@ class InductiveInvGen():
                         invexp = quant_inv_fn(invs[invi])
                         logging.info("%s %s %s", invname,"==",invexp)
                 self.end_timing_invcheck()
+
+                compute_subsumption = False
+                if compute_subsumption:
+                    print("Computing subsumption ordering.")
+
+                    (subsumption_edges_inds,subsumption_edges) = mc.compute_subsumption_ordering(invs_symb_strs)
+                    print(f"{len(subsumption_edges)} Subsumption edges:")
+                    
+                    import graphviz
+                    sat_invs_inds = [int(s.replace("Inv","")) for s in sat_invs]
+                    nodes = set()
+                    for e in subsumption_edges_inds:
+                        nodes.add(e[0])
+                        nodes.add(e[1])
+                    dot = graphviz.Digraph(comment='The Round Table', strict=True)
+                    dot.attr(rankdir="LR", ranksep="1.5", pad="1.6")
+                    for n in nodes:
+                        # create a green node.
+                        color = "green" if n in sat_invs_inds else "red"
+                        dot.node(str(n), style="filled", fillcolor=color)
+                    for e in subsumption_edges_inds:
+                        dot.edge(str(e[0]), str(e[1]))
+                    dot.render(f"subsumption_graphs/subsumption_graph_R{roundi}_I{iteration}_conjs{min_conjs}", format="pdf")
+                    # for e in subsumption_edges:
+                    #     print(e)
 
             if len(sat_invs)==0:
                 logging.info("No invariants found. Continuing.")
