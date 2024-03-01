@@ -12,6 +12,7 @@ import pyeda
 import pyeda.inter
 import uuid
 import itertools
+import time
 
 from itertools import chain, combinations
 
