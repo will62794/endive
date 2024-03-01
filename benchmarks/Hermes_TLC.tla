@@ -3,11 +3,14 @@
 \* Spec source: https://github.com/ease-lab/Hermes
 \* 
 
-EXTENDS Hermes, Randomization
+EXTENDS Hermes, Randomization, FiniteSetsExt, TLC
 
 \* 
 \* Try to work around large message types here by using randomized message set definitions.
 \* 
+
+\* Set of all subsets of a set of size <= k.
+\* kOrSmallerSubset(k, S) == UNION {(kSubset(n, S)) : n \in 0..k}
 
 INVMessageRandom(r) == [
     type       |-> "INV", 

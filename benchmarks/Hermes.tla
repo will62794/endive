@@ -4,9 +4,7 @@
 \* 
 
 EXTENDS     Integers,
-            FiniteSets,
-            TLC,
-            FiniteSetsExt
+            FiniteSets
 
 CONSTANTS   H_NODES,
             H_MAX_VERSION
@@ -59,9 +57,6 @@ VALMessage == [
 ]
 
 Message ==  INVMessage \cup ACKMessage \cup VALMessage
-
-\* Set of all subsets of a set of size <= k.
-kOrSmallerSubset(k, S) == UNION {(kSubset(n, S)) : n \in 0..k}
 
 TypeOK ==  \* The type correctness invariant
     /\ msgs \in Message
@@ -324,5 +319,35 @@ H_Inv3149_R0_2_1 == \A VARI \in H_NODES : \A VARJ \in H_NODES : (nodeTS[VARI].ve
 H_Inv545_R0_2_2 == \A VARI \in H_NODES : \A VARJ \in H_NODES : \A MI \in msgs : (MI.type = "VAL" => MI.version = nodeTS[VARI].version) \/ (~(nodeTS[VARI].version < nodeTS[VARJ].version)) \/ ((VARJ \in aliveNodes))
 H_Inv3135_R0_2_3 == \A VARI \in H_NODES : \A VARJ \in H_NODES : (nodeTS[VARI].version >= nodeTS[VARJ].version) \/ (~(nodeState[VARI] = "write") \/ (~(nodeTS[VARI].tieBreaker = nodeTS[VARJ].tieBreaker)))
 H_Inv548_R0_2_4 == \A VARI \in H_NODES : \A VARJ \in H_NODES : \A MI \in msgs : (MI.type = "VAL" => MI.version = nodeTS[VARI].version) \/ (~(nodeTS[VARI].version < nodeTS[VARJ].version)) \/ (~(nodeState[VARI] = "replay"))
+
+
+H_Inv1274_R0_1_0 == \A VARJ \in H_NODES : \E VARK \in H_NODES : ~(VARK \in aliveNodes) \/ (~(nodeState[VARJ] = "replay"))
+H_Inv369_R0_1_1 == \A VARJ \in H_NODES : (VARJ \in aliveNodes) \/ (~(nodeState[VARJ] = "replay"))
+H_Inv1407_R0_2_2 == \A VARI \in H_NODES : \A VARJ \in H_NODES : \E VARK \in H_NODES : (nodeState[VARK] = "write") \/ (~(VARK \in aliveNodes) \/ (~(nodeTS[VARI].tieBreaker < nodeTS[VARJ].tieBreaker)))
+H_Inv392_R0_2_3 == \A VARI \in H_NODES : \A VARJ \in H_NODES : \E VARK \in H_NODES : \A VARMI \in msgs : ((VARMI.type = "VAL") => VARMI.version = nodeTS[VARK].version) \/ (~(nodeState[VARJ] = "replay") \/ (~(nodeTS[VARI].version > nodeTS[VARJ].version)))
+H_Inv380_R0_2_4 == 
+    \A VARI \in H_NODES : 
+    \A VARJ \in H_NODES : 
+    \E VARK \in H_NODES : 
+    \A VARMI \in msgs : 
+        ((VARMI.type = "VAL") => VARMI.version = nodeTS[VARK].version) \/ (~(VARK \in aliveNodes) \/ (~(nodeTS[VARI].version < nodeTS[VARJ].version)))
+
+H_Inv700_R0_2_5 == 
+    \A VARI \in H_NODES : 
+    \A VARJ \in H_NODES : (VARJ \in aliveNodes) \/ ((nodeTS[VARI].version >= nodeTS[VARJ].version) \/ (~(nodeState[VARJ] = "valid")))
+
+InvA == 
+    \A VARI \in H_NODES : 
+    \A VARJ \in H_NODES : 
+    \A MI \in msgs :
+        (MI.type = "VAL" => MI.version = nodeTS[VARI].version) \/ (~(nodeTS[VARI].version < nodeTS[VARJ].version)) \/ ((VARJ \in aliveNodes))
+
+
+
+
+
+H12 == 
+    \A m \in msgs :
+        m.type = "VAL" => \E k \in aliveNodes : m.version = nodeTS[k].version
 
 =============================================================================
