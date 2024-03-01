@@ -62,7 +62,7 @@ for inv in invs:
 print(f"Generated {len(invs)} total unique invariant candidates.")
 print(f"We expected 2^(2^{len(preds)}) = {2**(2**len(preds))} unique invariants for {len(preds)} predicates ({preds}).")
 
-exit(0)
+# exit(0)
 
 num_implication_orderings = 0
 edges = []
@@ -91,6 +91,11 @@ for invi,inv in enumerate(invs):
 
             # print("  implies:", impliesback)
 print("TOTAL IMPLICATION ORDERINGS:", num_implication_orderings)
-# for e in edges:
+import graphviz
+
+dot = graphviz.Digraph(comment='The Round Table', strict=True)
+for e in edges:
     # print(f'"{e[0]}"', "->", f'"{e[1]}"')
+    dot.edge(f'"{e[0]}"', f'"{e[1]}"')
+dot.render("pred_ordering", format="pdf")
 # print(edges)
