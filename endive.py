@@ -1882,6 +1882,7 @@ class InductiveInvGen():
                 # invs = set(invs) - self.all_sat_invs
                 # invs = sorted(list(invs))
 
+                compute_subsumption = False
                 if compute_subsumption:
                     logging.info("Computing subsumption ordering.")
 
