@@ -163,7 +163,7 @@ LastTerm(xlog) == IF Len(xlog) = 0 THEN 0 ELSE xlog[Len(xlog)]
 ----
 \* Define initial values for all variables
 
-\* InitServerVars == /\ currentTerm = [i \in Server |-> 1]
+\* InitcurrentTerm, state, votedFor == /\ currentTerm = [i \in Server |-> 1]
 \*                   /\ state       = [i \in Server |-> Follower]
 \*                   /\ votedFor    = [i \in Server |-> Nil]
 \* InitCandidateVars == votesGranted   = [i \in Server |-> {}]
@@ -172,7 +172,7 @@ LastTerm(xlog) == IF Len(xlog) = 0 THEN 0 ELSE xlog[Len(xlog)]
 \* \* in the functions.
 \* InitLeaderVars == /\ nextIndex  = [i \in Server |-> [j \in Server |-> 1]]
 \*                   /\ matchIndex = [i \in Server |-> [j \in Server |-> 0]]
-\* InitLogVars == /\ log             = [i \in Server |-> << >>]
+\* Initlog, commitIndex == /\ log             = [i \in Server |-> << >>]
 \*                /\ commitIndex     = [i \in Server |-> 0]
 
 Init == 
