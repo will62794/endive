@@ -343,11 +343,25 @@ InvA ==
         (MI.type = "VAL" => MI.version = nodeTS[VARI].version) \/ (~(nodeTS[VARI].version < nodeTS[VARJ].version)) \/ ((VARJ \in aliveNodes))
 
 
+VALMsgs == {m \in msgs : m.type = "VAL"} 
+
+NewestVALMsg(m) == (\A m2 \in VALMsgs : m.version >= m2.version)
+
+\* If a validate (VAL) message has been sent with value at version V, then all alive and valid nodes 
+\* should match it (?)
+H_VALMsgImpliesValidAliveNodesHaveEqualOrNewer == 
+    \A m \in VALMsgs :
+    \A n \in aliveNodes :
+        nodeTS[n].version >= m.version 
+
+\* Not correct.
+H_VALMsgImpliesSomeValidNodeWithVersion == 
+    \A m \in VALMsgs :
+        \* This is the newest VAL message.
+        (\A m2 \in VALMsgs : m.version >= m2.version) =>
+            (\A n \in aliveNodes : 
+                nodeState[n] = "valid" => m.version = nodeTS[n].version)
 
 
-
-H12 == 
-    \A m \in msgs :
-        m.type = "VAL" => \E k \in aliveNodes : m.version = nodeTS[k].version
 
 =============================================================================
