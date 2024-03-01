@@ -32,6 +32,7 @@
         "VARK \\in aliveNodes",
         "(VARMI.type = \"VAL\")",
         "(VARMI.type = \"VAL\") => VARMI.version = nodeTS[VARI].version",
+        "(VARMI.type = \"VAL\") => VARMI.version < nodeTS[VARI].version",
         "(VARMI.type = \"VAL\") => VARMI.version = nodeTS[VARK].version",
         "(VARMI.type = \"VAL\") => VARMI.tieBreaker = nodeTS[VARI].tieBreaker",
         "(VARMI.type = \"VAL\") => VARMI.tieBreaker = nodeTS[VARK].tieBreaker",
