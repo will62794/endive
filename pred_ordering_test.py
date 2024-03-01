@@ -40,6 +40,9 @@ for i in range(5000):
         uniq_ps.append(p)
     # print(p)
     # print("===")
+        
+# uniq_ps = mc.generate_all_exprs(preds, num_terms=3)
+
 print(f"Generated {len(uniq_ps)} unique ps.")
 for p in uniq_ps:
     print(p)
@@ -48,8 +51,8 @@ for p in uniq_ps:
 # invs = res["pred_invs"]
 invs = uniq_ps
 
-epred = mc.PredExpr(invs[0])
-print("EPRED:", epred)
+# epred = mc.PredExpr(invs[0])
+# print("EPRED:", epred)
 
 
 print("All generated invariants:")
@@ -58,6 +61,8 @@ for inv in invs:
     pass
 print(f"Generated {len(invs)} total unique invariant candidates.")
 print(f"We expected 2^(2^{len(preds)}) = {2**(2**len(preds))} unique invariants for {len(preds)} predicates ({preds}).")
+
+exit(0)
 
 num_implication_orderings = 0
 edges = []
@@ -86,6 +91,6 @@ for invi,inv in enumerate(invs):
 
             # print("  implies:", impliesback)
 print("TOTAL IMPLICATION ORDERINGS:", num_implication_orderings)
-for e in edges:
-    print(f'"{e[0]}"', "->", f'"{e[1]}"')
+# for e in edges:
+    # print(f'"{e[0]}"', "->", f'"{e[1]}"')
 # print(edges)
