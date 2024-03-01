@@ -230,38 +230,38 @@ def compute_subsumption_ordering(invs):
     num_implication_orderings = 0
     edges = []
     ind_edges = []
+    # If A => B, then we only need to check A, since B is weaker than A.
+    redundant = set()
     for invi,inv in enumerate(invs):
-        # symb_inv = invs_symb[invi]
         symb_inv = inv
-        # print(symb_inv)
-        # pyeda.inter.expr(inv)
-        # print(symb_inv.to_ast())
 
         for invi2,inv2 in enumerate(invs):
             symb_inv2 = inv2
             # pyeda.inter.expr(inv2)
             impliesforward = pyeda.inter.Implies(symb_inv, symb_inv2, simplify=True)
-            impliesback = pyeda.inter.Implies(symb_inv2, symb_inv, simplify=True)
+            # impliesback = pyeda.inter.Implies(symb_inv2, symb_inv, simplify=True)
             
             # comparing Or(~x_017, ~x_000, x_013) and Or(x_007, x_016, ~x_011)
             # print(f"comparing {symb_inv} => {symb_inv2}")
             # print("  implies:", impliesforward)
             # print("  implies:", impliesback)
 
-            if impliesforward.equivalent(True) and not impliesback.equivalent(True):
+            if impliesforward.equivalent(True) and (not invi2 == invi):
                 # print(f"comparing {symb_inv} => {symb_inv2}")
-                # print("  implies:", impliesforward)
                 num_implication_orderings += 1
                 edges.append((symb_inv, symb_inv2))
                 ind_edges.append((invi, invi2))
-            if impliesback.equivalent(True) and not impliesforward.equivalent(True):
-                # print(f"comparing {symb_inv} <= {symb_inv2}")
-                # print("  implies:", impliesback)
-                num_implication_orderings += 1
-                edges.append((symb_inv2, symb_inv))
-                ind_edges.append((invi2, invi))
+                redundant.add(invi)
 
-    return (ind_edges,edges)
+            # if impliesback.equivalent(True) and not impliesforward.equivalent(True):
+            #     # print(f"comparing {symb_inv} <= {symb_inv2}")
+            #     # print("  implies:", impliesback)
+            #     num_implication_orderings += 1
+            #     edges.append((symb_inv2, symb_inv))
+            #     ind_edges.append((invi2, invi))
+
+    print("redundant:", len(redundant))
+    return (ind_edges,edges,redundant)
    
 def generate_invs(preds, num_invs, min_num_conjuncts=2, max_num_conjuncts=2, 
                     process_local=False, boolean_style="tla", quant_vars=[], use_pred_identifiers=False):
