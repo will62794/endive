@@ -345,7 +345,10 @@ InvA ==
 
 VALMsgs == {m \in msgs : m.type = "VAL"} 
 
-NewestVALMsg(m) == (\A m2 \in VALMsgs : m.version >= m2.version)
+NewestVALMsg(m) == 
+    \A m2 \in VALMsgs : 
+        \/ <<m.version, m.tieBreaker>> = <<m2.version, m2.tieBreaker>>
+        \/ greaterTS(m.version, m.tieBreaker, m2.version, m2.tieBreaker)
 
 \* If a validate (VAL) message has been sent with value at version V, then all alive and valid nodes 
 \* should match it (?)
@@ -354,14 +357,41 @@ H_VALMsgImpliesValidAliveNodesHaveEqualOrNewer ==
     \A n \in aliveNodes :
         nodeTS[n].version >= m.version 
 
-\* Not correct.
 H_VALMsgImpliesSomeValidNodeWithVersion == 
     \A m \in VALMsgs :
         \* This is the newest VAL message.
-        (\A m2 \in VALMsgs : m.version >= m2.version) =>
+        (\A m2 \in VALMsgs : 
+            \/ <<m.version, m.tieBreaker>> = <<m2.version, m2.tieBreaker>>
+            \/ greaterTS(m.version, m.tieBreaker, m2.version, m2.tieBreaker)) =>
             (\A n \in aliveNodes : 
-                nodeState[n] = "valid" => m.version = nodeTS[n].version)
+                nodeState[n] = "valid" => 
+                    /\ m.version = nodeTS[n].version
+                    /\ m.tieBreaker = nodeTS[n].tieBreaker)
 
+\* For the newest VAL message, all alive nodes in the invalid state should
+\* match its timestamp.
+H_VALMsgImpliesInvalidAliveNodesHaveEqualOrNewer == 
+    \A m \in VALMsgs :
+    \A n \in aliveNodes :
+        nodeState[n] = "invalid" => 
+            nodeTS[n].version >= m.version
 
+\* If a node is in replay, then there cannot be a VAL message withs its timestamp.
+H_VALMsgImpliesNoReplay == 
+    \A m \in VALMsgs :
+    \A n \in aliveNodes :
+        nodeState[n] = "replay" => 
+            ~(/\ nodeTS[n].version = m.version
+              /\ nodeTS[n].tieBreaker = m.tieBreaker)
+
+\* If a node is in write, and it has received ack from a node N, then N
+\* must be in invalid state with an equal or higher timestamp.
+\* Not correct yet.
+H_ACKImpliesInvalidWrite == 
+    \A ni,nj \in aliveNodes :
+     (nodeState[ni] = "write" /\ nj \in nodeRcvedAcks[ni]) => 
+        /\ nodeState[nj] = "invalid"
+        /\ nodeTS[nj].version >= nodeTS[ni].version
+        /\ nodeTS[nj].tieBreaker = nodeTS[ni].tieBreaker
 
 =============================================================================
