@@ -390,7 +390,7 @@ H_VALMsgImpliesNoReplay ==
 H_ACKImpliesFreshTS == 
     \A ni,nj \in aliveNodes :
      (nodeState[ni] = "write" /\ nj \in nodeRcvedAcks[ni]) => 
-        /\ nj \in aliveNodes
+        /\ nodeState[nj] # "valid"
         /\ \/ equalTS(nodeTS[nj].version, nodeTS[nj].tieBreaker, nodeTS[ni].version, nodeTS[ni].tieBreaker)
            \/ greaterTS(nodeTS[nj].version, nodeTS[nj].tieBreaker, nodeTS[ni].version, nodeTS[ni].tieBreaker)
 
