@@ -352,8 +352,6 @@ InvA ==
         (MI.type = "VAL" => MI.version = nodeTS[VARI].version) \/ (~(nodeTS[VARI].version < nodeTS[VARJ].version)) \/ ((VARJ \in aliveNodes))
 
 
-VALMsgs == {m \in msgs : m.type = "VAL"} 
-
 NewestVALMsg(m) == 
     \A m2 \in VALMsgs : 
         \/ <<m.version, m.tieBreaker>> = <<m2.version, m2.tieBreaker>>
@@ -364,26 +362,32 @@ NewestVALMsg(m) ==
 H_VALMsgImpliesValidAliveNodesHaveEqualOrNewer == 
     \A m \in VALMsgs :
     \A n \in aliveNodes :
-        nodeTS[n].version >= m.version 
+        \/ greaterTS(nodeTS[n].version, nodeTS[n].tieBreaker, m.version, m.tieBreaker) 
+        \/ equalTS(nodeTS[n].version, nodeTS[n].tieBreaker, m.version, m.tieBreaker)
 
 H_VALMsgImpliesSomeValidNodeWithVersion == 
     \A m \in VALMsgs :
         \* This is the newest VAL message.
-        (\A m2 \in VALMsgs : 
-            \/ <<m.version, m.tieBreaker>> = <<m2.version, m2.tieBreaker>>
-            \/ greaterTS(m.version, m.tieBreaker, m2.version, m2.tieBreaker)) =>
+        NewestVALMsg(m) =>
+        \* (\A m2 \in VALMsgs : 
+            \* \/ <<m.version, m.tieBreaker>> = <<m2.version, m2.tieBreaker>>
+            \* \/ greaterTS(m.version, m.tieBreaker, m2.version, m2.tieBreaker)) =>
             (\A n \in aliveNodes : 
                 nodeState[n] = "valid" => 
                     /\ m.version = nodeTS[n].version
                     /\ m.tieBreaker = nodeTS[n].tieBreaker)
 
-\* For the newest VAL message, all alive nodes in the invalid state should
-\* match its timestamp.
-H_VALMsgImpliesInvalidAliveNodesHaveEqualOrNewer == 
-    \A m \in VALMsgs :
-    \A n \in aliveNodes :
-        nodeState[n] = "invalid" => 
-            nodeTS[n].version >= m.version
+H_VALMsgImpliesTieBreakerIsAlive == 
+    \A m \in VALMsgs :  
+        m.tieBreaker \in aliveNodes
+
+\* \* For the newest VAL message, all alive nodes in the invalid state should
+\* \* match its timestamp.
+\* H_VALMsgImpliesInvalidAliveNodesHaveEqualOrNewer == 
+\*     \A m \in VALMsgs :
+\*     \A n \in aliveNodes :
+\*         nodeState[n] \in {"invalid", "invalid_write", "write"} => 
+\*             nodeTS[n].version >= m.version
 
 \* If a node is in replay, then there cannot be a VAL message withs its timestamp.
 H_VALMsgImpliesNoReplay == 
