@@ -367,15 +367,12 @@ H_VALMsgImpliesValidAliveNodesHaveEqualOrNewer ==
 
 H_VALMsgImpliesSomeValidNodeWithVersion == 
     \A m \in VALMsgs :
+    \A n \in aliveNodes :
         \* This is the newest VAL message.
         NewestVALMsg(m) =>
-        \* (\A m2 \in VALMsgs : 
-            \* \/ <<m.version, m.tieBreaker>> = <<m2.version, m2.tieBreaker>>
-            \* \/ greaterTS(m.version, m.tieBreaker, m2.version, m2.tieBreaker)) =>
-            (\A n \in aliveNodes : 
-                nodeState[n] = "valid" => 
-                    /\ m.version = nodeTS[n].version
-                    /\ m.tieBreaker = nodeTS[n].tieBreaker)
+            (nodeState[n] = "valid" => 
+                /\ m.version = nodeTS[n].version
+                /\ m.tieBreaker = nodeTS[n].tieBreaker)
 
 H_VALMsgImpliesTieBreakerIsAlive == 
     \A m \in VALMsgs :  
