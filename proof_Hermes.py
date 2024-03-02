@@ -21,29 +21,16 @@ HBD = StructuredProofNode("HBDnode", "HBD")
 H_VALMsgImpliesSomeValidNodeWithVersion = StructuredProofNode("VALMsgImpliesSomeValidNodeWithVersion", "H_VALMsgImpliesSomeValidNodeWithVersion")
 H_VALMsgImpliesInvalidAliveNodesHaveEqualOrNewer = StructuredProofNode("VALMsgImpliesInvalidAliveNodesHaveEqualOrNewer", "H_VALMsgImpliesInvalidAliveNodesHaveEqualOrNewer")
 
+H_ACKImpliesFreshTS = StructuredProofNode("ACKImpliesFreshTS", "H_ACKImpliesFreshTS")
+
 hermes_root = StructuredProofNode("Safety", "HConsistent", children = {
     "HRcvValAction": [
         # HBD,
         VALMsgImpliesValidAliveNodesHaveEqualOrNewer,
         H_VALMsgImpliesSomeValidNodeWithVersion,
-        # H_VALMsgImpliesInvalidAliveNodesHaveEqualOrNewer
-        # H_Inv130_R0_1_0,
-        # H_Inv3149_R0_2_1,
-        # H_Inv545_R0_2_2,
-        # H_Inv3135_R0_2_3,
-        # H_Inv548_R0_2_4
-        # rMCommittedImpliesOtherRMsPreparedOrCommitted
-        # tMKnowsPrepareImpliesRMPreparedCommittedOrAborted,
-        # commitMsgImpliesAllPrepared,
-        # rMSentPrepareImpliesNotWorking,
-        # committedRMImpliesCommitMsg,
     ],
     "HSendValsAction": [
-        # H_Inv130_R0_1_0,
-        # H_Inv3149_R0_2_1,
-        # H_Inv545_R0_2_2,
-        # H_Inv3135_R0_2_3,
-        # H_Inv548_R0_2_4
+        H_ACKImpliesFreshTS
     ]
 })
 
