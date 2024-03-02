@@ -304,6 +304,15 @@ HConsistent ==
 
 NextUnchanged == UNCHANGED hvars
 
+VALMsgs == {m \in msgs : m.type = "VAL"} 
+
+
+Alias == [
+    nodeTS |-> nodeTS,
+    msgs |-> VALMsgs,
+    nodeState |-> nodeState,
+    aliveNodes  |-> aliveNodes
+]
 
 \* 
 \* Lemmas for inductive invariant.
