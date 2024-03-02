@@ -387,11 +387,11 @@ H_VALMsgImpliesNoReplay ==
 \* If a node is in write, and it has received ack from a node N, then N
 \* must be in invalid state with an equal or higher timestamp.
 \* Not correct yet.
-H_ACKImpliesInvalidWrite == 
+H_ACKImpliesFreshTS == 
     \A ni,nj \in aliveNodes :
      (nodeState[ni] = "write" /\ nj \in nodeRcvedAcks[ni]) => 
-        /\ nodeState[nj] = "invalid"
-        /\ nodeTS[nj].version >= nodeTS[ni].version
-        /\ nodeTS[nj].tieBreaker = nodeTS[ni].tieBreaker
+        /\ nj \in aliveNodes
+        /\ \/ equalTS(nodeTS[nj].version, nodeTS[nj].tieBreaker, nodeTS[ni].version, nodeTS[ni].tieBreaker)
+           \/ greaterTS(nodeTS[nj].version, nodeTS[nj].tieBreaker, nodeTS[ni].version, nodeTS[ni].tieBreaker)
 
 =============================================================================
