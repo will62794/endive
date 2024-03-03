@@ -25,8 +25,16 @@ H_ACKImpliesFreshTS = StructuredProofNode("ACKImpliesFreshTS", "H_ACKImpliesFres
 
 HH_Inv859_R0_1_0 = StructuredProofNode("LInv859_R0_1_0", "HH_Inv859_R0_1_0") 
 HH_Inv4183_R0_1_1 = StructuredProofNode("LInv4183_R0_1_1", "HH_Inv4183_R0_1_1")
-HH_Inv4137_R0_1_2 = StructuredProofNode("LInv4137_R0_1_2", "HH_Inv4137_R0_1_2")
+# HH_Inv4137_R0_1_2 = StructuredProofNode("LInv4137_R0_1_2", "HH_Inv4137_R0_1_2")
 HH_Inv776_R0_2_3 = StructuredProofNode("LInv776_R0_2_3", "HH_Inv776_R0_2_3")
+
+H_AllAcksRecvdImpliesNewerTS = StructuredProofNode("AllAcksRecvdImpliesNewerTS", "H_AllAcksRecvdImpliesNewerTS")
+
+VALMsgImpliesValidAliveNodesHaveEqualOrNewer.children = {
+    "HSendValsAction": [
+        H_AllAcksRecvdImpliesNewerTS
+    ]
+}
 
 hermes_root = StructuredProofNode("Safety", "HConsistent", children = {
     "HRcvValAction": [

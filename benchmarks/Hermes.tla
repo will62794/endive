@@ -430,6 +430,12 @@ H_ACKRecvd ==
             \* /\ nodeState[ni] \in {"write", "replay"}
             /\ nodeState[nj] # "valid"
 
+H_AllAcksRecvdImpliesNewerTS ==
+    \A n \in aliveNodes : 
+    \A n2 \in aliveNodes :
+        (receivedAllAcks(n) /\ nodeState[n] \in {"replay", "write"}) => 
+            (greaterOrEqualTS(nodeTS[n2].version, nodeTS[n2].tieBreaker, nodeTS[n].version, nodeTS[n].tieBreaker)) 
+
 \* HH_Inv4137_R0_1_2 == \A VARI \in aliveNodes : \A VARJ \in aliveNodes : ~(nodeState[VARI] = "replay") \/ (~(receivedAllAcks(VARI))) \/ (~(nodeTS[VARI].version > nodeTS[VARJ].version))
 
 HH_Inv859_R0_1_0 == 
@@ -442,7 +448,7 @@ HH_Inv859_R0_1_0 ==
 HH_Inv4183_R0_1_1 == 
     \A VARI \in aliveNodes : 
     \A VARJ \in aliveNodes : 
-        ~(nodeState[VARI] = "write") \/ (~(nodeState[VARJ] = "valid") \/ (~(receivedAllAcks(VARI))))
+        (receivedAllAcks(VARI) /\ (nodeState[VARI] = "write")) => (nodeState[VARJ] # "valid")
 
 HH_Inv776_R0_2_3 == 
     \A VARI \in aliveNodes : 
