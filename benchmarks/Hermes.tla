@@ -109,7 +109,11 @@ greaterTS(v1,tb1,v2,tb2) == \* Timestamp comparison
     \/ v1 > v2
     \/ /\   v1 = v2
        /\  tb1 > tb2
-       
+
+greaterOrEqualTS(v1,tb1,v2,tb2) == 
+    \/ equalTS(v1,tb1,v2,tb2)
+    \/ greaterTS(v1,tb1,v2,tb2)       
+
 isAlive(n) == n \in aliveNodes
                    
 nodeFailure(n) == \* Emulate a node failure
@@ -320,8 +324,8 @@ Alias2 == [
     aliveNodes |-> aliveNodes,
     \* msgs |-> VALMsgs,
     nodeRcvedAcks |-> nodeRcvedAcks,
-    nodeState |-> nodeState
-    \* nodeTS |-> nodeTS
+    nodeState |-> nodeState,
+    nodeTS |-> nodeTS
 ]
 
 \* 
@@ -425,5 +429,11 @@ H_ACKRecvd ==
         (nj \in nodeRcvedAcks[ni] /\ nodeState[ni] \in {"write", "replay"}) => 
             \* /\ nodeState[ni] \in {"write", "replay"}
             /\ nodeState[nj] # "valid"
+
+
+HH_Inv859_R0_1_0 == \A VARI \in aliveNodes : \A VARJ \in aliveNodes : (greaterOrEqualTS(nodeTS[VARI].version, nodeTS[VARI].tieBreaker, nodeTS[VARJ].version, nodeTS[VARJ].tieBreaker)) \/ ~((nodeState[VARJ] = "valid")) \/ ((nodeState[VARI] = "valid"))
+HH_Inv4183_R0_1_1 == \A VARI \in aliveNodes : \A VARJ \in aliveNodes : ~(nodeState[VARI] = "write") \/ (~(nodeState[VARJ] = "valid") \/ (~(receivedAllAcks(VARI))))
+HH_Inv4137_R0_1_2 == \A VARI \in aliveNodes : \A VARJ \in aliveNodes : ~(nodeState[VARI] = "replay") \/ (~(receivedAllAcks(VARI))) \/ (~(nodeTS[VARI].version > nodeTS[VARJ].version))
+HH_Inv776_R0_2_3 == \A VARI \in aliveNodes : \A VARJ \in aliveNodes : (greaterOrEqualTS(nodeTS[VARI].version, nodeTS[VARI].tieBreaker, nodeTS[VARJ].version, nodeTS[VARJ].tieBreaker)) \/ (~(VARI \in nodeRcvedAcks[VARJ])) \/ (~(nodeState[VARJ] = "replay"))
 
 =============================================================================
