@@ -199,11 +199,12 @@ HRcvAck(n) ==   \* Process a received acknowledment
 
 HSendVals(n) == \* Send validations once acknowledments are received from all alive nodes
     /\ nodeState[n] \in {"write", "replay"}
+    /\ n \in aliveNodes
     /\ receivedAllAcks(n)
     /\ nodeState'         = [nodeState EXCEPT![n] = "valid"]
-    /\ send([type        |-> "VAL", 
-             version     |-> nodeTS[n].version, 
-             tieBreaker  |-> nodeTS[n].tieBreaker])
+    /\ msgs' = msgs \cup {([type        |-> "VAL", 
+                            version     |-> nodeTS[n].version, 
+                            tieBreaker  |-> nodeTS[n].tieBreaker])}
     /\ UNCHANGED <<nodeTS, nodeLastWriter, nodeLastWriteTS,
                    aliveNodes, nodeRcvedAcks, epochID, nodeWriteEpochID>>
  
@@ -244,6 +245,7 @@ HRcvInv(n) ==  \* Process a received invalidation
             
 HRcvVal(n, m) ==   \* Process a received validation
     /\ m \in msgs
+    /\ n \in aliveNodes
     /\ nodeState[n] /= "valid"
     /\ m.type = "VAL"
     /\ equalTS(m.version, m.tieBreaker,
@@ -312,6 +314,14 @@ Alias == [
     msgs |-> VALMsgs,
     nodeState |-> nodeState,
     aliveNodes  |-> aliveNodes
+]
+
+Alias2 == [
+    aliveNodes |-> aliveNodes,
+    \* msgs |-> VALMsgs,
+    nodeRcvedAcks |-> nodeRcvedAcks,
+    nodeState |-> nodeState
+    \* nodeTS |-> nodeTS
 ]
 
 \* 
@@ -396,12 +406,24 @@ H_VALMsgImpliesNoReplay ==
 
 \* If a node is in write, and it has received ack from a node N, then N
 \* must be in invalid state with an equal or higher timestamp.
-\* Not correct yet.
 H_ACKImpliesFreshTS == 
     \A ni,nj \in aliveNodes :
-     (nodeState[ni] = "write" /\ nj \in nodeRcvedAcks[ni]) => 
+     (nodeState[ni] \in {"write"} /\ nj \in nodeRcvedAcks[ni]) => 
         /\ nodeState[nj] # "valid"
         /\ \/ equalTS(nodeTS[nj].version, nodeTS[nj].tieBreaker, nodeTS[ni].version, nodeTS[ni].tieBreaker)
            \/ greaterTS(nodeTS[nj].version, nodeTS[nj].tieBreaker, nodeTS[ni].version, nodeTS[ni].tieBreaker)
+
+H_ACKImpliesFreshTSReplay == 
+    \A ni,nj \in aliveNodes :
+     (nodeState[ni] \in {"replay"} /\ nj \in nodeRcvedAcks[ni]) => 
+        \* /\ nodeState[nj] # "valid"
+        /\ \/ equalTS(nodeTS[nj].version, nodeTS[nj].tieBreaker, nodeTS[ni].version, nodeTS[ni].tieBreaker)
+           \/ greaterTS(nodeTS[nj].version, nodeTS[nj].tieBreaker, nodeTS[ni].version, nodeTS[ni].tieBreaker)
+
+H_ACKRecvd == 
+    \A ni,nj \in aliveNodes : 
+        (nj \in nodeRcvedAcks[ni] /\ nodeState[ni] \in {"write", "replay"}) => 
+            \* /\ nodeState[ni] \in {"write", "replay"}
+            /\ nodeState[nj] # "valid"
 
 =============================================================================
