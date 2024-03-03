@@ -30,6 +30,14 @@ HH_Inv776_R0_2_3 = StructuredProofNode("LInv776_R0_2_3", "HH_Inv776_R0_2_3")
 
 H_AllAcksRecvdImpliesNewerTS = StructuredProofNode("AllAcksRecvdImpliesNewerTS", "H_AllAcksRecvdImpliesNewerTS")
 
+H_ACKSentImpliesSenderAsNew = StructuredProofNode("ACKSentImpliesSenderAsNew", "H_ACKSentImpliesSenderAsNew")
+
+H_AllAcksRecvdImpliesNewerTS.children = {
+    "HRcvAckAction": [
+        H_ACKSentImpliesSenderAsNew
+    ]
+}
+
 VALMsgImpliesValidAliveNodesHaveEqualOrNewer.children = {
     "HSendValsAction": [
         H_AllAcksRecvdImpliesNewerTS

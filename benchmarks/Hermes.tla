@@ -382,11 +382,10 @@ H_VALMsgImpliesValidAliveNodesHaveEqualOrNewer ==
 H_VALMsgImpliesSomeValidNodeWithVersion == 
     \A m \in VALMsgs :
     \A n \in aliveNodes :
-        \* This is the newest VAL message.
-        NewestVALMsg(m) =>
-            (nodeState[n] = "valid" => 
-                /\ m.version = nodeTS[n].version
-                /\ m.tieBreaker = nodeTS[n].tieBreaker)
+        (/\ NewestVALMsg(m) \* newest VAL message.
+         /\ nodeState[n] = "valid") =>
+            (/\ m.version = nodeTS[n].version
+             /\ m.tieBreaker = nodeTS[n].tieBreaker)
 
 H_VALMsgImpliesTieBreakerIsAlive == 
     \A m \in VALMsgs :  
@@ -429,6 +428,11 @@ H_ACKRecvd ==
         (nj \in nodeRcvedAcks[ni] /\ nodeState[ni] \in {"write", "replay"}) => 
             \* /\ nodeState[ni] \in {"write", "replay"}
             /\ nodeState[nj] # "valid"
+
+H_ACKSentImpliesSenderAsNew == 
+    \A m \in msgs : 
+        (m.type = "ACK") => 
+            greaterOrEqualTS(nodeTS[m.sender].version, nodeTS[m.sender].tieBreaker, m.version, m.tieBreaker) 
 
 H_AllAcksRecvdImpliesNewerTS ==
     \A n \in aliveNodes : 
