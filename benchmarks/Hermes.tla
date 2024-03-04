@@ -379,7 +379,7 @@ H_VALMsgImpliesValidAliveNodesHaveEqualOrNewer ==
         \/ greaterTS(nodeTS[n].version, nodeTS[n].tieBreaker, m.version, m.tieBreaker) 
         \/ equalTS(nodeTS[n].version, nodeTS[n].tieBreaker, m.version, m.tieBreaker)
 
-H_VALMsgImpliesSomeValidNodeWithVersion == 
+H_NewestVALMsgImpliesAllValidNodesMatchVersion == 
     \A m \in VALMsgs :
     \A n \in aliveNodes :
         (/\ NewestVALMsg(m) \* newest VAL message.

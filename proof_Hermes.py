@@ -18,7 +18,7 @@ VALMsgImpliesValidAliveNodesHaveEqualOrNewer = StructuredProofNode("VALMsgImplie
 
 HBD = StructuredProofNode("HBDnode", "HBD")
 
-H_VALMsgImpliesSomeValidNodeWithVersion = StructuredProofNode("VALMsgImpliesSomeValidNodeWithVersion", "H_VALMsgImpliesSomeValidNodeWithVersion")
+NewestVALMsgImpliesAllValidNodesMatchVersion = StructuredProofNode("NewestVALMsgImpliesAllValidNodesMatchVersion", "H_NewestVALMsgImpliesAllValidNodesMatchVersion")
 H_VALMsgImpliesInvalidAliveNodesHaveEqualOrNewer = StructuredProofNode("VALMsgImpliesInvalidAliveNodesHaveEqualOrNewer", "H_VALMsgImpliesInvalidAliveNodesHaveEqualOrNewer")
 
 H_ACKImpliesFreshTS = StructuredProofNode("ACKImpliesFreshTS", "H_ACKImpliesFreshTS")
@@ -48,7 +48,7 @@ hermes_root = StructuredProofNode("Safety", "HConsistent", children = {
     "HRcvValAction": [
         # HBD,
         VALMsgImpliesValidAliveNodesHaveEqualOrNewer,
-        H_VALMsgImpliesSomeValidNodeWithVersion,
+        NewestVALMsgImpliesAllValidNodesMatchVersion,
     ],
     "HSendValsAction": [
         # H_ACKImpliesFreshTS,
