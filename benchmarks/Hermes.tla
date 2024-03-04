@@ -445,11 +445,11 @@ H_AllAcksRecvdImpliesNewerTS ==
 HH_Inv859_R0_1_0 == 
     \A VARI \in aliveNodes : 
     \A VARJ \in aliveNodes : 
-        \/ (greaterOrEqualTS(nodeTS[VARI].version, nodeTS[VARI].tieBreaker, nodeTS[VARJ].version, nodeTS[VARJ].tieBreaker)) 
-        \/ ~((nodeState[VARJ] = "valid")) 
-        \/ ((nodeState[VARI] = "valid"))
+        ((nodeState[VARJ] = "valid"))  => 
+            (\/ (greaterOrEqualTS(nodeTS[VARI].version, nodeTS[VARI].tieBreaker, nodeTS[VARJ].version, nodeTS[VARJ].tieBreaker)) 
+             \/ ((nodeState[VARI] = "valid")))
 
-HH_Inv4183_R0_1_1 == 
+HH_WriteNodeWithAllAcksImpliesAllAliveAreValid == 
     \A VARI \in aliveNodes : 
     \A VARJ \in aliveNodes : 
         (receivedAllAcks(VARI) /\ (nodeState[VARI] = "write")) => (nodeState[VARJ] # "valid")
