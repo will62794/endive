@@ -452,6 +452,11 @@ HH_Inv859_R0_1_0 ==
             (\/ (greaterOrEqualTS(nodeTS[VARI].version, nodeTS[VARI].tieBreaker, nodeTS[VARJ].version, nodeTS[VARJ].tieBreaker)) 
              \/ ((nodeState[VARI] = "valid")))
 
+H_Inv1439_R0_1_0 == 
+    \A VARI \in aliveNodes : 
+    \A VARMI \in msgsVAL : 
+        ~((VARMI.type = "VAL") => greaterTS(VARMI.version, VARMI.tieBreaker, nodeTS[VARI].version, nodeTS[VARI].tieBreaker)) \/ (~(NewestVALMsg(VARMI)))
+
 HH_WriteNodeWithAllAcksImpliesAllAliveAreValid == 
     \A VARI \in aliveNodes : 
     \A VARJ \in aliveNodes : 

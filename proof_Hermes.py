@@ -33,6 +33,14 @@ H_WriteNodeWithAllAcksImpliesAllAliveAreValid = StructuredProofNode("L_WriteNode
 # HH_Inv4137_R0_1_2 = StructuredProofNode("LInv4137_R0_1_2", "HH_Inv4137_R0_1_2")
 HH_Inv776_R0_2_3 = StructuredProofNode("LInv776_R0_2_3", "HH_Inv776_R0_2_3")
 
+Inv1439_R0_1_0 = StructuredProofNode("LInv1439_R0_1_0", "H_Inv1439_R0_1_0")
+HH_Inv859_R0_1_0.children = {
+    "HRcvValAction": [
+        Inv1439_R0_1_0
+    ]
+}
+
+
 H_AllAcksRecvdImpliesNewerTS = StructuredProofNode("AllAcksRecvdImpliesNewerTS", "H_AllAcksRecvdImpliesNewerTS")
 
 H_ACKSentImpliesSenderAsNew = StructuredProofNode("ACKSentImpliesSenderAsNew", "H_ACKSentImpliesSenderAsNew")
