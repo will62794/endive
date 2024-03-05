@@ -312,12 +312,12 @@ HConsistent ==
 
 NextUnchanged == UNCHANGED hvars
 
-VALMsgs == {m \in msgs : m.type = "VAL"} 
+VALMsgs == msgsVAL
 
 
 Alias == [
     nodeTS |-> nodeTS,
-    msgs |-> VALMsgs,
+    msgs |-> msgsVAL,
     nodeState |-> nodeState,
     aliveNodes  |-> aliveNodes
 ]
@@ -341,20 +341,20 @@ H_Inv2587_2_2 == \A VARI \in H_NODES : \A VARJ \in H_NODES : (nodeTS[VARI].versi
 
 H_Inv130_R0_1_0 == \A VARJ \in H_NODES : (VARJ \in aliveNodes) \/ (~(nodeState[VARJ] = "replay"))
 H_Inv3149_R0_2_1 == \A VARI \in H_NODES : \A VARJ \in H_NODES : (nodeTS[VARI].version >= nodeTS[VARJ].version) \/ (~(nodeState[VARJ] = "valid")) \/ (~(VARI \in aliveNodes))
-H_Inv545_R0_2_2 == \A VARI \in H_NODES : \A VARJ \in H_NODES : \A MI \in msgs : (MI.type = "VAL" => MI.version = nodeTS[VARI].version) \/ (~(nodeTS[VARI].version < nodeTS[VARJ].version)) \/ ((VARJ \in aliveNodes))
+H_Inv545_R0_2_2 == \A VARI \in H_NODES : \A VARJ \in H_NODES : \A MI \in msgsVAL : (MI.type = "VAL" => MI.version = nodeTS[VARI].version) \/ (~(nodeTS[VARI].version < nodeTS[VARJ].version)) \/ ((VARJ \in aliveNodes))
 H_Inv3135_R0_2_3 == \A VARI \in H_NODES : \A VARJ \in H_NODES : (nodeTS[VARI].version >= nodeTS[VARJ].version) \/ (~(nodeState[VARI] = "write") \/ (~(nodeTS[VARI].tieBreaker = nodeTS[VARJ].tieBreaker)))
-H_Inv548_R0_2_4 == \A VARI \in H_NODES : \A VARJ \in H_NODES : \A MI \in msgs : (MI.type = "VAL" => MI.version = nodeTS[VARI].version) \/ (~(nodeTS[VARI].version < nodeTS[VARJ].version)) \/ (~(nodeState[VARI] = "replay"))
+H_Inv548_R0_2_4 == \A VARI \in H_NODES : \A VARJ \in H_NODES : \A MI \in msgsVAL : (MI.type = "VAL" => MI.version = nodeTS[VARI].version) \/ (~(nodeTS[VARI].version < nodeTS[VARJ].version)) \/ (~(nodeState[VARI] = "replay"))
 
 
 H_Inv1274_R0_1_0 == \A VARJ \in H_NODES : \E VARK \in H_NODES : ~(VARK \in aliveNodes) \/ (~(nodeState[VARJ] = "replay"))
 H_Inv369_R0_1_1 == \A VARJ \in H_NODES : (VARJ \in aliveNodes) \/ (~(nodeState[VARJ] = "replay"))
 H_Inv1407_R0_2_2 == \A VARI \in H_NODES : \A VARJ \in H_NODES : \E VARK \in H_NODES : (nodeState[VARK] = "write") \/ (~(VARK \in aliveNodes) \/ (~(nodeTS[VARI].tieBreaker < nodeTS[VARJ].tieBreaker)))
-H_Inv392_R0_2_3 == \A VARI \in H_NODES : \A VARJ \in H_NODES : \E VARK \in H_NODES : \A VARMI \in msgs : ((VARMI.type = "VAL") => VARMI.version = nodeTS[VARK].version) \/ (~(nodeState[VARJ] = "replay") \/ (~(nodeTS[VARI].version > nodeTS[VARJ].version)))
+H_Inv392_R0_2_3 == \A VARI \in H_NODES : \A VARJ \in H_NODES : \E VARK \in H_NODES : \A VARMI \in msgsVAL : ((VARMI.type = "VAL") => VARMI.version = nodeTS[VARK].version) \/ (~(nodeState[VARJ] = "replay") \/ (~(nodeTS[VARI].version > nodeTS[VARJ].version)))
 H_Inv380_R0_2_4 == 
     \A VARI \in H_NODES : 
     \A VARJ \in H_NODES : 
     \E VARK \in H_NODES : 
-    \A VARMI \in msgs : 
+    \A VARMI \in msgsVAL : 
         ((VARMI.type = "VAL") => VARMI.version = nodeTS[VARK].version) \/ (~(VARK \in aliveNodes) \/ (~(nodeTS[VARI].version < nodeTS[VARJ].version)))
 
 H_Inv700_R0_2_5 == 
@@ -364,7 +364,7 @@ H_Inv700_R0_2_5 ==
 InvA == 
     \A VARI \in H_NODES : 
     \A VARJ \in H_NODES : 
-    \A MI \in msgs :
+    \A MI \in msgsVAL :
         (MI.type = "VAL" => MI.version = nodeTS[VARI].version) \/ (~(nodeTS[VARI].version < nodeTS[VARJ].version)) \/ ((VARJ \in aliveNodes))
 
 
@@ -473,14 +473,14 @@ H_Inv1319_R0_1_3 == \A VARI \in aliveNodes : \A VARJ \in aliveNodes : (greaterOr
 
 H_Inv730_R0_1_0 == 
     \A VARI \in aliveNodes : 
-    \A VARMI \in msgs : 
+    \A VARMI \in msgsVAL : 
         ((VARMI.type = "VAL") => 
             \/ equalTS(VARMI.version, VARMI.tieBreaker, nodeLastWriteTS[VARI].version, nodeLastWriteTS[VARI].tieBreaker)) 
             \/ ~(((VARMI.type = "VAL") => greaterTS(VARMI.version, VARMI.tieBreaker, nodeTS[VARI].version, nodeTS[VARI].tieBreaker)))
 
 H_Inv874_R0_1_1 == 
     \A VARI \in aliveNodes : 
-    \A VARMI \in msgs : 
+    \A VARMI \in msgsVAL : 
         ((VARMI.type = "VAL") => 
             \/ greaterTS(VARMI.version, VARMI.tieBreaker, nodeLastWriteTS[VARI].version, nodeLastWriteTS[VARI].tieBreaker)) 
             \/ ~(((VARMI.type = "VAL") => greaterTS(VARMI.version, VARMI.tieBreaker, nodeTS[VARI].version, nodeTS[VARI].tieBreaker)))
