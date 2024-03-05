@@ -36,8 +36,9 @@ VALMessageRandom(r) == [
 ]
 
 TypeOKRandom ==  \* The type correctness invariant
-    /\ msgs \in SUBSET {INVMessageRandom(0),INVMessageRandom(0),ACKMessageRandom(0),ACKMessageRandom(0)}
+    /\ msgsINV \in SUBSET {INVMessageRandom(0),INVMessageRandom(0)}
     /\ msgsVAL \in SUBSET {VALMessageRandom(0),VALMessageRandom(0)}
+    /\ msgsACK \in SUBSET {ACKMessageRandom(0),ACKMessageRandom(0)}
     /\ nodeRcvedAcks \in [H_NODES -> SUBSET H_NODES]
     /\ \A n \in H_NODES: nodeRcvedAcks[n] \subseteq (H_NODES \ {n})
     /\  nodeLastWriter  \in [H_NODES -> H_NODES]
@@ -49,6 +50,6 @@ TypeOKRandom ==  \* The type correctness invariant
     /\  epochID         \in 0..(Cardinality(H_NODES) - 1)
     /\  nodeWriteEpochID \in [H_NODES -> 0..(Cardinality(H_NODES) - 1)]
 
-CTICost == Cardinality(msgs) + Cardinality(aliveNodes)
+CTICost == Cardinality(msgsINV \cup msgsVAL \cup msgsACK) + Cardinality(aliveNodes)
 
 =============================================================================

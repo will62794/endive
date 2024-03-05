@@ -148,7 +148,7 @@
         },
         "HSendValsAction": {
             "H_NewestVALMsgImpliesAllValidNodesMatchVersion":{
-                "quant_inv": "\\A VARI \\in aliveNodes : \\A VARJ \\in aliveNodes : \\A VARMI \\in msgs : ",
+                "quant_inv": "\\A VARI \\in aliveNodes : \\A VARJ \\in aliveNodes : \\A VARMI \\in msgsACK : ",
                 "quant_vars": ["VARI", "VARJ", "VARMI"],
                 "preds":[
                     "nodeState[VARI] = \"valid\"",

@@ -9,8 +9,9 @@ EXTENDS     Integers,
 CONSTANTS   H_NODES,
             H_MAX_VERSION
             
-VARIABLES   msgs,
+VARIABLES   msgsINV,
             msgsVAL,
+            msgsACK,
             nodeTS,
             nodeState, 
             nodeRcvedAcks,
@@ -21,7 +22,7 @@ VARIABLES   msgs,
             epochID 
             
 \* all Hermes (+ environment) variables
-hvars == << msgs, msgsVAL, nodeTS, nodeState, nodeRcvedAcks, nodeLastWriter, 
+hvars == << msgsINV, msgsVAL, msgsACK, nodeTS, nodeState, nodeRcvedAcks, nodeLastWriter, 
             nodeLastWriteTS, nodeWriteEpochID, aliveNodes, epochID >>
 
 -------------------------------------------------------------------------------------
@@ -60,8 +61,9 @@ VALMessage == [
 Message ==  INVMessage \cup ACKMessage \cup VALMessage
 
 TypeOK ==  \* The type correctness invariant
-    /\ msgs \in Message
+    /\ msgsINV \in Message
     /\ msgsVAL \in VALMessage
+    /\ msgsACK \in VALMessage
     /\ nodeRcvedAcks \in [H_NODES -> SUBSET H_NODES]
     /\ \A n \in H_NODES: nodeRcvedAcks[n] \subseteq (H_NODES \ {n})
     /\  nodeLastWriter  \in [H_NODES -> H_NODES]
@@ -74,8 +76,9 @@ TypeOK ==  \* The type correctness invariant
     /\  nodeWriteEpochID \in [H_NODES -> 0..(Cardinality(H_NODES) - 1)]
 
 Init == \* The initial predicate
-    /\  msgs            = {}
-    /\  msgsVAL         = {}
+    /\  msgsINV            = {}
+    /\  msgsVAL            = {}
+    /\  msgsACK            = {}
     \*  membership and epoch id related
     /\  epochID         = 0
     /\  aliveNodes      = H_NODES
@@ -98,7 +101,7 @@ Init == \* The initial predicate
 
 \* A buffer maintaining all network messages. Messages are only appended to this variable (not 
 \* removed once delivered) intentionally to check protocols tolerance in dublicates and reorderings 
-send(m) == msgs' = msgs \union {m}
+send(m, msgs) == msgs' = msgs \union {m}
 
 \* Check if all acknowledgments for a write have been received                                                  
 \*receivedAllAcks(n) == nodeRcvedAcks[n] = H_NODES \ {n}
@@ -124,7 +127,7 @@ nodeFailure(n) == \* Emulate a node failure
     /\ Cardinality(aliveNodes) > 2
     /\ aliveNodes' = aliveNodes \ {n}
     /\ epochID'     = epochID + 1
-    /\ UNCHANGED <<msgs, msgsVAL, nodeState, nodeTS, nodeLastWriter, 
+    /\ UNCHANGED <<msgsINV, msgsACK, msgsVAL, nodeState, nodeTS, nodeLastWriter, 
                    nodeLastWriteTS, nodeRcvedAcks, nodeWriteEpochID>>
 
 h_upd_not_aliveNodes ==
@@ -132,7 +135,7 @@ h_upd_not_aliveNodes ==
     
     
 h_upd_aliveNodes ==
-    /\ UNCHANGED <<msgs, msgsVAL, nodeState, nodeTS, nodeLastWriter, nodeLastWriteTS, nodeRcvedAcks>>
+    /\ UNCHANGED <<msgsINV, msgsACK, msgsVAL, nodeState, nodeTS, nodeLastWriter, nodeLastWriteTS, nodeRcvedAcks>>
                    
 h_upd_nothing ==                    
     /\ h_upd_not_aliveNodes
@@ -150,17 +153,17 @@ h_upd_state(n, newVersion, newTieBreaker, newState, newAcks) ==
     /\  nodeLastWriteTS'  = [nodeLastWriteTS EXCEPT ![n].version    = newVersion, 
                                                     ![n].tieBreaker = newTieBreaker]
                                             
-h_send_inv_or_ack(n, newVersion, newTieBreaker, msgType) ==  
+h_send_inv_or_ack(n, newVersion, newTieBreaker, msgType, msgs) ==  
     /\  send([type        |-> msgType,
               epochID     |-> epochID, \* we always use the latest epochID
               sender      |-> n,
               version     |-> newVersion, 
-              tieBreaker  |-> newTieBreaker])              
+              tieBreaker  |-> newTieBreaker], msgs)              
 
 h_actions_for_upd(n, newVersion, newTieBreaker, newState, newAcks) == \* Execute a write
     /\  h_upd_state(n, newVersion, newTieBreaker, newState, newAcks)
-    /\  h_send_inv_or_ack(n, newVersion, newTieBreaker, "INV")
-    /\  UNCHANGED <<aliveNodes, epochID, msgsVAL>>
+    /\  h_send_inv_or_ack(n, newVersion, newTieBreaker, "INV", msgsINV)
+    /\  UNCHANGED <<aliveNodes, epochID, msgsVAL, msgsACK>>
  
 
 h_actions_for_upd_replay(n, acks) == \* Apply a write-replay using same TS (version, tie-breaker) 
@@ -189,7 +192,7 @@ HCoordWriteReplay(n) == \* Execute a write-replay after a membership re-config
 
 
 HRcvAck(n) ==   \* Process a received acknowledment
-    \E m \in msgs: 
+    \E m \in msgsACK: 
         /\ m.type     = "ACK"
         /\ m.epochID  = epochID
         /\ m.sender  /= n
@@ -200,7 +203,7 @@ HRcvAck(n) ==   \* Process a received acknowledment
         /\ nodeState[n] \in {"write", "invalid_write", "replay"}
         /\ nodeRcvedAcks' = [nodeRcvedAcks EXCEPT ![n] = 
                                               nodeRcvedAcks[n] \union {m.sender}]
-        /\ UNCHANGED <<msgs, msgsVAL, nodeLastWriter, nodeLastWriteTS, 
+        /\ UNCHANGED <<msgsINV, msgsACK, msgsVAL, nodeLastWriter, nodeLastWriteTS, 
                        aliveNodes, nodeTS, nodeState, epochID, nodeWriteEpochID>>
 
 
@@ -212,7 +215,7 @@ HSendVals(n) == \* Send validations once acknowledments are received from all al
     /\ msgsVAL' = msgsVAL \cup {([type        |-> "VAL", 
                             version     |-> nodeTS[n].version, 
                             tieBreaker  |-> nodeTS[n].tieBreaker])}
-    /\ UNCHANGED <<nodeTS, nodeLastWriter, nodeLastWriteTS, aliveNodes, nodeRcvedAcks, epochID, nodeWriteEpochID, msgs>>
+    /\ UNCHANGED <<nodeTS, nodeLastWriter, nodeLastWriteTS, aliveNodes, nodeRcvedAcks, epochID, nodeWriteEpochID, msgsACK, msgsINV>>
  
 HCoordinatorActions(n) ==   \* Actions of a read/write coordinator 
     \/ HRead(n)          
@@ -224,7 +227,7 @@ HCoordinatorActions(n) ==   \* Actions of a read/write coordinator
 -------------------------------------------------------------------------------------               
     
 HRcvInv(n) ==  \* Process a received invalidation
-    \E m \in msgs: 
+    \E m \in msgsINV: 
         /\ m.type     = "INV"
         /\ m.epochID  = epochID
         /\ m.sender  /= n
@@ -233,7 +236,7 @@ HRcvInv(n) ==  \* Process a received invalidation
                  sender     |-> n,   
                  epochID    |-> epochID,
                  version    |-> m.version,
-                 tieBreaker |-> m.tieBreaker])
+                 tieBreaker |-> m.tieBreaker], msgsACK)
         /\ IF greaterTS(m.version, m.tieBreaker,
                         nodeTS[n].version, nodeTS[n].tieBreaker)
            THEN   /\ nodeLastWriter' = [nodeLastWriter EXCEPT ![n] = m.sender]
@@ -246,7 +249,7 @@ HRcvInv(n) ==  \* Process a received invalidation
                         nodeState' = [nodeState EXCEPT ![n] = "invalid_write"] 
            ELSE
                   UNCHANGED <<nodeState, nodeTS, nodeLastWriter, nodeWriteEpochID>>
-        /\ UNCHANGED <<nodeLastWriteTS, aliveNodes, nodeRcvedAcks, epochID, nodeWriteEpochID, msgsVAL>>
+        /\ UNCHANGED <<nodeLastWriteTS, aliveNodes, nodeRcvedAcks, epochID, nodeWriteEpochID, msgsVAL, msgsINV>>
      
             
 HRcvVal(n, m) ==   \* Process a received validation
@@ -258,7 +261,7 @@ HRcvVal(n, m) ==   \* Process a received validation
                 nodeTS[n].version, 
                 nodeTS[n].tieBreaker)
     /\ nodeState' = [nodeState EXCEPT ![n] = "valid"]
-    /\ UNCHANGED <<msgs, msgsVAL, nodeTS, nodeLastWriter, nodeLastWriteTS, aliveNodes, nodeRcvedAcks, epochID, nodeWriteEpochID>>
+    /\ UNCHANGED <<msgsINV, msgsACK, msgsVAL, nodeTS, nodeLastWriter, nodeLastWriteTS, aliveNodes, nodeRcvedAcks, epochID, nodeWriteEpochID>>
 
 HFollowerWriteReplay(n) == \* Execute a write-replay when coordinator failed
     /\  nodeState[n] \in {"invalid", "invalid_write"}
@@ -432,7 +435,7 @@ H_ACKRecvd ==
             /\ nodeState[nj] # "valid"
 
 H_ACKSentImpliesSenderAsNew == 
-    \A m \in msgs : 
+    \A m \in msgsACK : 
         (m.type = "ACK") => 
             greaterOrEqualTS(nodeTS[m.sender].version, nodeTS[m.sender].tieBreaker, m.version, m.tieBreaker) 
 
