@@ -10,6 +10,7 @@ CONSTANTS   H_NODES,
             H_MAX_VERSION
             
 VARIABLES   msgs,
+            msgsVAL,
             nodeTS,
             nodeState, 
             nodeRcvedAcks,
@@ -20,7 +21,7 @@ VARIABLES   msgs,
             epochID 
             
 \* all Hermes (+ environment) variables
-hvars == << msgs, nodeTS, nodeState, nodeRcvedAcks, nodeLastWriter, 
+hvars == << msgs, msgsVAL, nodeTS, nodeState, nodeRcvedAcks, nodeLastWriter, 
             nodeLastWriteTS, nodeWriteEpochID, aliveNodes, epochID >>
 
 -------------------------------------------------------------------------------------
@@ -60,6 +61,7 @@ Message ==  INVMessage \cup ACKMessage \cup VALMessage
 
 TypeOK ==  \* The type correctness invariant
     /\ msgs \in Message
+    /\ msgsVAL \in VALMessage
     /\ nodeRcvedAcks \in [H_NODES -> SUBSET H_NODES]
     /\ \A n \in H_NODES: nodeRcvedAcks[n] \subseteq (H_NODES \ {n})
     /\  nodeLastWriter  \in [H_NODES -> H_NODES]
@@ -73,6 +75,7 @@ TypeOK ==  \* The type correctness invariant
 
 Init == \* The initial predicate
     /\  msgs            = {}
+    /\  msgsVAL         = {}
     \*  membership and epoch id related
     /\  epochID         = 0
     /\  aliveNodes      = H_NODES
@@ -121,7 +124,7 @@ nodeFailure(n) == \* Emulate a node failure
     /\ Cardinality(aliveNodes) > 2
     /\ aliveNodes' = aliveNodes \ {n}
     /\ epochID'     = epochID + 1
-    /\ UNCHANGED <<msgs, nodeState, nodeTS, nodeLastWriter, 
+    /\ UNCHANGED <<msgs, msgsVAL, nodeState, nodeTS, nodeLastWriter, 
                    nodeLastWriteTS, nodeRcvedAcks, nodeWriteEpochID>>
 
 h_upd_not_aliveNodes ==
@@ -129,7 +132,7 @@ h_upd_not_aliveNodes ==
     
     
 h_upd_aliveNodes ==
-    /\ UNCHANGED <<msgs, nodeState, nodeTS, nodeLastWriter, nodeLastWriteTS, nodeRcvedAcks>>
+    /\ UNCHANGED <<msgs, msgsVAL, nodeState, nodeTS, nodeLastWriter, nodeLastWriteTS, nodeRcvedAcks>>
                    
 h_upd_nothing ==                    
     /\ h_upd_not_aliveNodes
@@ -157,7 +160,7 @@ h_send_inv_or_ack(n, newVersion, newTieBreaker, msgType) ==
 h_actions_for_upd(n, newVersion, newTieBreaker, newState, newAcks) == \* Execute a write
     /\  h_upd_state(n, newVersion, newTieBreaker, newState, newAcks)
     /\  h_send_inv_or_ack(n, newVersion, newTieBreaker, "INV")
-    /\  UNCHANGED <<aliveNodes, epochID>>
+    /\  UNCHANGED <<aliveNodes, epochID, msgsVAL>>
  
 
 h_actions_for_upd_replay(n, acks) == \* Apply a write-replay using same TS (version, tie-breaker) 
@@ -197,7 +200,7 @@ HRcvAck(n) ==   \* Process a received acknowledment
         /\ nodeState[n] \in {"write", "invalid_write", "replay"}
         /\ nodeRcvedAcks' = [nodeRcvedAcks EXCEPT ![n] = 
                                               nodeRcvedAcks[n] \union {m.sender}]
-        /\ UNCHANGED <<msgs, nodeLastWriter, nodeLastWriteTS, 
+        /\ UNCHANGED <<msgs, msgsVAL, nodeLastWriter, nodeLastWriteTS, 
                        aliveNodes, nodeTS, nodeState, epochID, nodeWriteEpochID>>
 
 
@@ -206,11 +209,10 @@ HSendVals(n) == \* Send validations once acknowledments are received from all al
     /\ n \in aliveNodes
     /\ receivedAllAcks(n)
     /\ nodeState'         = [nodeState EXCEPT![n] = "valid"]
-    /\ msgs' = msgs \cup {([type        |-> "VAL", 
+    /\ msgsVAL' = msgsVAL \cup {([type        |-> "VAL", 
                             version     |-> nodeTS[n].version, 
                             tieBreaker  |-> nodeTS[n].tieBreaker])}
-    /\ UNCHANGED <<nodeTS, nodeLastWriter, nodeLastWriteTS,
-                   aliveNodes, nodeRcvedAcks, epochID, nodeWriteEpochID>>
+    /\ UNCHANGED <<nodeTS, nodeLastWriter, nodeLastWriteTS, aliveNodes, nodeRcvedAcks, epochID, nodeWriteEpochID, msgs>>
  
 HCoordinatorActions(n) ==   \* Actions of a read/write coordinator 
     \/ HRead(n)          
@@ -244,11 +246,11 @@ HRcvInv(n) ==  \* Process a received invalidation
                         nodeState' = [nodeState EXCEPT ![n] = "invalid_write"] 
            ELSE
                   UNCHANGED <<nodeState, nodeTS, nodeLastWriter, nodeWriteEpochID>>
-        /\ UNCHANGED <<nodeLastWriteTS, aliveNodes, nodeRcvedAcks, epochID, nodeWriteEpochID>>
+        /\ UNCHANGED <<nodeLastWriteTS, aliveNodes, nodeRcvedAcks, epochID, nodeWriteEpochID, msgsVAL>>
      
             
 HRcvVal(n, m) ==   \* Process a received validation
-    /\ m \in msgs
+    /\ m \in msgsVAL
     /\ n \in aliveNodes
     /\ nodeState[n] /= "valid"
     /\ m.type = "VAL"
@@ -256,7 +258,7 @@ HRcvVal(n, m) ==   \* Process a received validation
                 nodeTS[n].version, 
                 nodeTS[n].tieBreaker)
     /\ nodeState' = [nodeState EXCEPT ![n] = "valid"]
-    /\ UNCHANGED <<msgs, nodeTS, nodeLastWriter, nodeLastWriteTS, aliveNodes, nodeRcvedAcks, epochID, nodeWriteEpochID>>
+    /\ UNCHANGED <<msgs, msgsVAL, nodeTS, nodeLastWriter, nodeLastWriteTS, aliveNodes, nodeRcvedAcks, epochID, nodeWriteEpochID>>
 
 HFollowerWriteReplay(n) == \* Execute a write-replay when coordinator failed
     /\  nodeState[n] \in {"invalid", "invalid_write"}
@@ -273,7 +275,7 @@ HFollowerActions(n, m) ==  \* Actions of a write follower
 
 HRcvInvAction == TRUE /\ \E n \in aliveNodes : HRcvInv(n)
 HFollowerWriteReplayAction == TRUE /\ \E n \in aliveNodes : HFollowerWriteReplay(n)
-HRcvValAction == TRUE /\ \E n \in aliveNodes, m \in msgs : HRcvVal(n, m)
+HRcvValAction == TRUE /\ \E n \in aliveNodes, m \in msgsVAL : HRcvVal(n, m)
 HReadAction == TRUE /\ \E n \in aliveNodes : HRead(n)
 HCoordWriteReplayAction == TRUE /\ \E n \in aliveNodes : HCoordWriteReplay(n)
 HWriteAction == TRUE /\ \E n \in aliveNodes : HWrite(n)
@@ -463,9 +465,24 @@ HH_Inv776_R0_2_3 ==
 
 
 \* Another possible support group.
-Inv1359_R0_1_0 == \A VARI \in aliveNodes : \A VARJ \in aliveNodes : (greaterOrEqualTS(nodeTS[VARI].version, nodeTS[VARI].tieBreaker, nodeTS[VARJ].version, nodeTS[VARJ].tieBreaker)) \/ (~(nodeState[VARJ] = "valid")) \/ (~(VARJ \in aliveNodes))
-Inv6807_R0_1_1 == \A VARI \in aliveNodes : \A VARJ \in aliveNodes : ~(nodeState[VARI] = "write") \/ (~(nodeState[VARJ] = "valid") \/ (~(receivedAllAcks(VARI))))
-Inv6720_R0_1_2 == \A VARI \in aliveNodes : \A VARJ \in aliveNodes : ~(nodeState[VARI] = "replay") \/ (~(receivedAllAcks(VARI))) \/ (~(nodeTS[VARI].version > nodeTS[VARJ].version))
-Inv1319_R0_1_3 == \A VARI \in aliveNodes : \A VARJ \in aliveNodes : (greaterOrEqualTS(nodeTS[VARI].version, nodeTS[VARI].tieBreaker, nodeTS[VARJ].version, nodeTS[VARJ].tieBreaker)) \/ (~(VARI \in nodeRcvedAcks[VARJ])) \/ (~(nodeState[VARJ] = "replay"))
+H_Inv1359_R0_1_0 == \A VARI \in aliveNodes : \A VARJ \in aliveNodes : (greaterOrEqualTS(nodeTS[VARI].version, nodeTS[VARI].tieBreaker, nodeTS[VARJ].version, nodeTS[VARJ].tieBreaker)) \/ (~(nodeState[VARJ] = "valid")) \/ (~(VARJ \in aliveNodes))
+H_Inv6807_R0_1_1 == \A VARI \in aliveNodes : \A VARJ \in aliveNodes : ~(nodeState[VARI] = "write") \/ (~(nodeState[VARJ] = "valid") \/ (~(receivedAllAcks(VARI))))
+H_Inv6720_R0_1_2 == \A VARI \in aliveNodes : \A VARJ \in aliveNodes : ~(nodeState[VARI] = "replay") \/ (~(receivedAllAcks(VARI))) \/ (~(nodeTS[VARI].version > nodeTS[VARJ].version))
+H_Inv1319_R0_1_3 == \A VARI \in aliveNodes : \A VARJ \in aliveNodes : (greaterOrEqualTS(nodeTS[VARI].version, nodeTS[VARI].tieBreaker, nodeTS[VARJ].version, nodeTS[VARJ].tieBreaker)) \/ (~(VARI \in nodeRcvedAcks[VARJ])) \/ (~(nodeState[VARJ] = "replay"))
 
+
+H_Inv730_R0_1_0 == 
+    \A VARI \in aliveNodes : 
+    \A VARMI \in msgs : 
+        ((VARMI.type = "VAL") => 
+            \/ equalTS(VARMI.version, VARMI.tieBreaker, nodeLastWriteTS[VARI].version, nodeLastWriteTS[VARI].tieBreaker)) 
+            \/ ~(((VARMI.type = "VAL") => greaterTS(VARMI.version, VARMI.tieBreaker, nodeTS[VARI].version, nodeTS[VARI].tieBreaker)))
+
+H_Inv874_R0_1_1 == 
+    \A VARI \in aliveNodes : 
+    \A VARMI \in msgs : 
+        ((VARMI.type = "VAL") => 
+            \/ greaterTS(VARMI.version, VARMI.tieBreaker, nodeLastWriteTS[VARI].version, nodeLastWriteTS[VARI].tieBreaker)) 
+            \/ ~(((VARMI.type = "VAL") => greaterTS(VARMI.version, VARMI.tieBreaker, nodeTS[VARI].version, nodeTS[VARI].tieBreaker)))
+            
 =============================================================================
