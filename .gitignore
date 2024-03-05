@@ -75,3 +75,4 @@ apacheck_*.sh
 logout_Zab
 statecache*
 subsumption_graphs/
+*.chkpt

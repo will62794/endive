@@ -29,6 +29,9 @@ JAVA_EXE="java"
 GEN_TLA_DIR="gen_tla"
 LATEST_TLC_JAR = "tla2tools_2.18.jar"
 
+# Use local custom built TLC for now.
+TLC_JAR = "../../tlaplus/tlatools/org.lamport.tlatools/dist/tla2tools.jar"
+
 def chunks(seq, n_chunks):
     """ Splits a given iterable into n evenly (as possible) sized chunks."""
     N = len(seq)
@@ -65,7 +68,7 @@ class InductiveInvGen():
                     symmetry=False, simulate=False, simulate_depth=6, typeok="TypeOK", tlc_specific_spec=False, seed=0, num_invs=1000, num_rounds=3, num_iters=3, 
                     num_simulate_traces=10000, tlc_workers=6, quant_vars=[],java_exe="java",cached_invs=None, cached_invs_gen_time_secs=None, use_cpp_invgen=False,
                     pregen_inv_cmd=None, opt_quant_minimize=False, try_final_minimize=False, proof_tree_mode=False, interactive_mode=False, max_num_conjuncts_per_round=10000,
-                    max_num_ctis_per_round=10000, override_num_cti_workers=None, use_apalache_ctigen=False,all_args={},spec_config=None):
+                    max_num_ctis_per_round=10000, override_num_cti_workers=None, use_apalache_ctigen=False,all_args={},spec_config=None, enable_inv_state_caching=False):
         self.java_exe = java_exe
         self.java_version_info = None
         
@@ -104,6 +107,7 @@ class InductiveInvGen():
         self.target_sample_states = all_args["target_sample_states"]
         self.target_sample_time_limit_ms = all_args["target_sample_time_limit_ms"]
         self.save_dot = all_args["save_dot"]
+        self.enable_inv_state_caching = enable_inv_state_caching
 
 
         # Set an upper limit on CTIs per round to avoid TLC getting overwhelmend. Hope is that 
@@ -673,7 +677,7 @@ class InductiveInvGen():
 
     #     return set()
 
-    def check_invariants(self, invs, tlc_workers=6, max_depth=2**30):
+    def check_invariants(self, invs, tlc_workers=6, max_depth=2**30, skip_checking=False, cache_with_ignored=None, cache_state_load=False):
         """ Check which of the given invariants are valid. """
         ta = time.time()
         invcheck_tla = "---- MODULE %s_InvCheck_%d ----\n" % (self.specname,self.seed)
@@ -681,10 +685,11 @@ class InductiveInvGen():
         invcheck_tla += self.model_consts + "\n"
 
         all_inv_names = set()
-        for i,inv in enumerate(invs):    
-            sinv = ("Inv%d == " % i) + self.quant_inv(inv)
-            all_inv_names.add("Inv%d" % i)
-            invcheck_tla += sinv + "\n"
+        if not skip_checking:
+            for i,inv in enumerate(invs):    
+                sinv = ("Inv%d == " % i) + self.quant_inv(inv)
+                all_inv_names.add("Inv%d" % i)
+                invcheck_tla += sinv + "\n"
 
         invcheck_tla += "===="
 
@@ -705,9 +710,10 @@ class InductiveInvGen():
         if self.symmetry:
             invcheck_cfg += "SYMMETRY Symmetry\n"
 
-        for invi in range(len(invs)):
-            sinv = "INVARIANT Inv" + str(invi) 
-            invcheck_cfg += sinv + "\n"
+        if not skip_checking:
+            for invi in range(len(invs)):
+                sinv = "INVARIANT Inv" + str(invi) 
+                invcheck_cfg += sinv + "\n"
 
         invcheck_cfg_file = f"{os.path.join(self.specdir, GEN_TLA_DIR)}/{self.specname}_InvCheck_{self.seed}.cfg"
         invcheck_cfg_filename = f"{GEN_TLA_DIR}/{self.specname}_InvCheck_{self.seed}.cfg"
@@ -719,13 +725,17 @@ class InductiveInvGen():
         # Check invariants.
         logging.info("Checking %d candidate invariants in spec file '%s'" % (len(invs), invcheck_spec_name))
         workdir = None if self.specdir == "" else self.specdir
+
         violated_invs = mc.runtlc_check_violated_invariants(
                                 invcheck_spec_name, 
                                 config=invcheck_cfg_filename, 
                                 tlc_workers=self.tlc_workers, 
                                 cwd=workdir,
                                 java=self.java_exe,
-                                max_depth=max_depth)
+                                tlcjar = TLC_JAR,
+                                max_depth=max_depth,
+                                cache_with_ignored=cache_with_ignored,
+                                cache_state_load = cache_state_load)
         sat_invs = (all_inv_names - violated_invs)
         logging.info(f"Found {len(sat_invs)} / {len(invs)} candidate invariants satisfied in {round(time.time()-ta,2)}s.")
 
@@ -1730,8 +1740,13 @@ class InductiveInvGen():
             "cost": cti_costs
         }
 
-    def eliminate_ctis(self, orig_k_ctis, num_invs, roundi, preds_alt=[], quant_inv_alt=None, tlc_workers=6, specdir=None, append_inv_round_id=True):
+    def eliminate_ctis(self, orig_k_ctis, num_invs, roundi, preds=None, preds_alt=[], 
+                       quant_inv_alt=None, tlc_workers=6, specdir=None, append_inv_round_id=True,
+                       cache_states_with_ignored_vars=None):
         """ Check which of the given satisfied invariants eliminate CTIs. """
+        
+        if preds is None:
+            preds = self.preds
         
         # Save CTIs, indexed by their hashed value.
         cti_table = {}
@@ -1749,6 +1764,19 @@ class InductiveInvGen():
 
         iteration = 1
         uniqid = 0
+
+        # Run the initial state caching step.
+        # State vars in local grammar:
+        max_depth = 2**30
+        if "max_tlc_inv_depth" in self.spec_config:
+            max_depth = self.spec_config["max_tlc_inv_depth"]
+
+        if cache_states_with_ignored_vars is not None:
+            logging.info(f"Running initial state caching step with ignored vars: {cache_states_with_ignored_vars}")
+            dummy_inv = "3 > 2"
+            sat_invs = self.check_invariants([dummy_inv], tlc_workers=tlc_workers, max_depth=max_depth, cache_with_ignored=cache_states_with_ignored_vars)
+            logging.info("Finished initial state caching.")
+
         while iteration <= self.num_iters:
             tstart = time.time()
 
@@ -1770,7 +1798,7 @@ class InductiveInvGen():
                 process_local=False
                 if quant_inv_alt:
                     quant_inv_fn = quant_inv_alt
-                    self.preds = self.preds + preds_alt
+                    preds = preds + preds_alt
 
             if iteration==4:
                 min_conjs = 5
@@ -1778,7 +1806,7 @@ class InductiveInvGen():
                 process_local=False
                 if quant_inv_alt:
                     quant_inv_fn = quant_inv_alt
-                    self.preds = self.preds + preds_alt
+                    preds = preds + preds_alt
 
             if iteration==5:
                 min_conjs = 6
@@ -1786,7 +1814,7 @@ class InductiveInvGen():
                 process_local=False
                 if quant_inv_alt:
                     quant_inv_fn = quant_inv_alt
-                    self.preds = self.preds + preds_alt
+                    preds = preds + preds_alt
 
             if iteration==6:
                 min_conjs = 3
@@ -1794,7 +1822,7 @@ class InductiveInvGen():
                 process_local=False
                 if quant_inv_alt:
                     quant_inv_fn = quant_inv_alt
-                    self.preds = self.preds + preds_alt
+                    preds = preds + preds_alt
 
             logging.info("\n>>> Iteration %d (num_conjs=(min=%d,max=%d),process_local=%s)" % (iteration,min_conjs,max_conjs,process_local)) 
 
@@ -1855,7 +1883,7 @@ class InductiveInvGen():
                 use_pred_identifiers = self.use_fast_pred_eval
                 boolean_style = "pyeda" if self.use_fast_pred_eval else "tla"
                 all_invs = mc.generate_invs(
-                    self.preds, num_invs, min_num_conjuncts=min_conjs, max_num_conjuncts=max_conjs, 
+                    preds, num_invs, min_num_conjuncts=min_conjs, max_num_conjuncts=max_conjs, 
                     process_local=process_local, quant_vars=self.quant_vars, 
                     boolean_style = boolean_style,
                     use_pred_identifiers=use_pred_identifiers)
@@ -1915,7 +1943,15 @@ class InductiveInvGen():
                     max_depth = 2**30
                     if "max_tlc_inv_depth" in self.spec_config:
                         max_depth = self.spec_config["max_tlc_inv_depth"]
-                    sat_invs = self.check_invariants(invs, tlc_workers=tlc_workers, max_depth=max_depth)
+
+                    # Check all candidate invariants.
+                        
+                    # Use cached states if specified.
+                    cache_load = False
+                    if cache_states_with_ignored_vars is not None:
+                        cache_load = True
+
+                    sat_invs = self.check_invariants(invs, tlc_workers=tlc_workers, max_depth=max_depth, cache_state_load=cache_load)
                 else:
                     print("Doing fast check of candidate predicates.")
                     violated_invs = set()
@@ -1941,7 +1977,7 @@ class InductiveInvGen():
 
                         # Replace abstract pred identifiers with original pred expressions.
                         orig_inv_expr = inv
-                        for p_ind,p in enumerate(self.preds):
+                        for p_ind,p in enumerate(preds):
                             orig_inv_expr = orig_inv_expr.replace(f"(PRED_{p_ind})", f"({p})")
                             orig_inv_expr = orig_inv_expr.replace(f"not", "~")
                             orig_inv_expr = orig_inv_expr.replace(f" or ", " \/ ")
@@ -2787,8 +2823,16 @@ class InductiveInvGen():
 
         return
 
-    def do_invgen_proof_tree_mode(self, interactive_mode=False):
-        self.lemma_obligations = [("Safety", self.safety)]
+    def do_invgen_proof_tree_mode(self):
+        """ Do localized invariant synthesis based on an inductive proof graph structure."""
+
+        # TODO: Make node/action configurable.
+        # target_node = ("NewestVALMsgImpliesAllValidNodesMatchVersion", "H_NewestVALMsgImpliesAllValidNodesMatchVersion")
+        target_node = ("Safety", "HConsistent")
+        target_action = "HRcvValAction"
+
+        # self.lemma_obligations = [("Safety", self.safety)]
+        self.lemma_obligations = [target_node]
         self.all_generated_lemmas = set()
 
         # TODO: Optionally reload from file for interactive mode.
@@ -2816,6 +2860,9 @@ class InductiveInvGen():
             k_ctis, k_cti_traces = self.generate_ctis(props=[curr_obligation])
             count += 1
 
+            # Filter CTIs by action.
+            k_ctis = [c for c in k_ctis if c.action_name == target_action]
+
             # for kcti in k_ctis:
                 # print(str(kcti))
             logging.info("Number of total unique k-CTIs found: {}. (took {:.2f} secs)".format(len(k_ctis), (time.time()-t0)))
@@ -2840,20 +2887,51 @@ class InductiveInvGen():
                 logging.info("Not done. Current invariant candidate is not inductive.")
 
             self.total_num_cti_elimination_rounds = (roundi + 1)
-            ret = self.eliminate_ctis(k_ctis, self.num_invs, roundi, append_inv_round_id=True)
+
+
+            preds = self.preds
+            state_vars_in_local_grammar = self.state_vars
+            state_vars_not_in_local_grammar = set(self.state_vars)
+            if "local_grammars" in self.spec_config and target_action in self.spec_config["local_grammars"]:
+                lgrammar = self.spec_config["local_grammars"][target_action][target_node[1]]
+                preds = lgrammar["preds"]
+                self.quant_vars = lgrammar["preds"]
+                self.quant_inv = lgrammar["quant_inv"]
+                self.initialize_quant_inv()
+                logging.info(f"Using local grammar for node ({target_node[1]}, {target_action}) with {len(preds)} predicates.")
+
+                state_vars_in_local_grammar = set()
+                for p in (preds + [lgrammar["quant_inv"]]):
+                    for svar in self.state_vars:
+                        # avoid variables with shared substrings.
+                        if f"{svar}[" in p or f"{svar} " in p or f"{svar}:" in p:
+                            state_vars_in_local_grammar.add(svar)
+                            state_vars_not_in_local_grammar.discard(svar)
+                print(f"{len(state_vars_in_local_grammar)} state vars in local grammar:", state_vars_in_local_grammar)
+                print(f"{len(state_vars_not_in_local_grammar)} state vars not in local grammar:", state_vars_not_in_local_grammar)
+
+            cache_vars_to_ignore = None
+            # Optinoally enable caching with projected vars.
+            if self.enable_inv_state_caching:
+                cache_vars_to_ignore = state_vars_not_in_local_grammar
+            
+            # Run CTI eliminatinon.
+            ret = self.eliminate_ctis(k_ctis, self.num_invs, roundi, preds=preds, append_inv_round_id=True, cache_states_with_ignored_vars=cache_vars_to_ignore)
+
             # If we did not eliminate all CTIs in this round, then exit with failure.
             if ret == None:
                 logging.info("Could not eliminate all CTIs in this round. Exiting with failure.")
                 break
             else:
                 # Successfully eliminated all CTIs.
-                print("Adding new proof obligations:" + str(len(self.strengthening_conjuncts)))
-                self.lemma_obligations += self.strengthening_conjuncts
-                for support_lemma in self.strengthening_conjuncts:
+                pass
+                # print("Adding new proof obligations:" + str(len(self.strengthening_conjuncts)))
+                # self.lemma_obligations += self.strengthening_conjuncts
+                # for support_lemma in self.strengthening_conjuncts:
                     # Check for existence of the predicate expression in existing lemma set.
-                    if support_lemma[1] not in [x[1] for x in self.all_generated_lemmas]:
-                        self.proof_graph["edges"].append((support_lemma,curr_obligation))
-                        self.all_generated_lemmas.add(support_lemma)
+                    # if support_lemma[1] not in [x[1] for x in self.all_generated_lemmas]:
+                        # self.proof_graph["edges"].append((support_lemma,curr_obligation))
+                        # self.all_generated_lemmas.add(support_lemma)
             logging.info("")
 
     def do_invgen(self):
@@ -2902,6 +2980,12 @@ class InductiveInvGen():
             logging.info("Generating CTIs.")
             t0 = time.time()
             (k_ctis,k_cti_traces) = self.generate_ctis()
+
+            # Optionally filter down CTIs by action.
+            # k_ctis = [c for c in k_ctis if c.action_name in ["HRcvValAction"]]
+            # k_ctis = [c for c in k_ctis if c.action_name in ["HSendValsAction"]]
+            # k_ctis = [c for c in k_ctis if c.action_name in ["HRcvAckAction"]]
+
             # for kcti in k_ctis:
                 # print(str(kcti))
             logging.info("Number of total unique k-CTIs found: {}. (took {:.2f} secs)".format(len(k_ctis), (time.time()-t0)))
@@ -2998,6 +3082,7 @@ class InductiveInvGen():
         tstart = time.time()
 
         self.load_parse_tree = True
+        self.use_fast_pred_eval = False
 
         print("Config CONSTANT instances.")
         for c in self.get_config_constant_instances():
@@ -3010,6 +3095,7 @@ class InductiveInvGen():
                 tla_spec_obj = tlaparse.parse_tla_file(self.specdir, f"{self.specname}")
                 self.spec_defs = tla_spec_obj.get_all_user_defs(level="1")
                 self.tla_spec_obj = tla_spec_obj
+                self.state_vars = self.tla_spec_obj.get_all_vars()
             except Exception as e:
                 print("ERROR: error parsing TLA+ spec:", e)
                 self.tla_spec_obj = None
@@ -3023,7 +3109,7 @@ class InductiveInvGen():
                 return
 
             logging.info("Running invariant generation in proof tree mode.")
-            self.do_invgen_proof_tree_mode(interactive_mode=self.interactive_mode)
+            self.do_invgen_proof_tree_mode()
             # print("")
             # print("Proof graph edges")
             dot = graphviz.Digraph('round-table', comment='The Round Table')  
@@ -3153,6 +3239,7 @@ if __name__ == "__main__":
     parser.add_argument('--target_sample_states', help='Target # initial states to sample. (EXPERIMENTAL).', default=10000, type=int, required=False)
     parser.add_argument('--target_sample_time_limit_ms', help='Target initial state sampling time (EXPERIMENTAL).', default=10000, type=int, required=False)
     parser.add_argument('--save_dot', help='Save proof graphs in DOT and TeX info.', default=False, action='store_true')
+    parser.add_argument('--enable_inv_state_caching', help='Enable invariant state caching.', default=False, action='store_true')
 
     # Apalache related commands.
     parser.add_argument('--use_apalache_ctigen', help='Use Apalache for CTI generation (experimental).', required=False, default=False, action='store_true')
@@ -3256,7 +3343,7 @@ if __name__ == "__main__":
                                 interactive_mode=args["interactive"],
                                 max_num_conjuncts_per_round=args["max_num_conjuncts_per_round"], max_num_ctis_per_round=args["max_num_ctis_per_round"],
                                 override_num_cti_workers=args["override_num_cti_workers"],use_apalache_ctigen=args["use_apalache_ctigen"],all_args=args,
-                                spec_config=spec_config)
+                                spec_config=spec_config, enable_inv_state_caching=args["enable_inv_state_caching"])
 
 
     # Only do invariant generation, cache the invariants, and then exit.
