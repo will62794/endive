@@ -1772,7 +1772,7 @@ class InductiveInvGen():
             max_depth = self.spec_config["max_tlc_inv_depth"]
 
         if cache_states_with_ignored_vars is not None:
-            logging.info(f"Running initial state caching step with ignored vars: {cache_states_with_ignored_vars}")
+            logging.info(f"Running initial state caching step with {len(cache_states_with_ignored_vars)} ignored vars: {cache_states_with_ignored_vars}")
             dummy_inv = "3 > 2"
             sat_invs = self.check_invariants([dummy_inv], tlc_workers=tlc_workers, max_depth=max_depth, cache_with_ignored=cache_states_with_ignored_vars)
             logging.info("Finished initial state caching.")
