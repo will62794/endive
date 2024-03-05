@@ -1783,6 +1783,7 @@ class InductiveInvGen():
             # TODO: Possibly use these for optimization later on.
             self.sat_invs_in_iteration = set()
             self.invs_checked_in_iteration = set()
+            inv_candidates_generated_in_iteration = set()
 
             # On second iteration, search for non process local invariants.
             if iteration==2:
@@ -1886,10 +1887,12 @@ class InductiveInvGen():
                     preds, num_invs, min_num_conjuncts=min_conjs, max_num_conjuncts=max_conjs, 
                     process_local=process_local, quant_vars=self.quant_vars, 
                     boolean_style = boolean_style,
-                    use_pred_identifiers=use_pred_identifiers)
+                    use_pred_identifiers=use_pred_identifiers,
+                    invs_avoid_set=inv_candidates_generated_in_iteration)
                 
                 invs = all_invs["raw_invs"]
                 invs_symb_strs = all_invs["pred_invs"]
+                inv_candidates_generated_in_iteration.update(invs_symb_strs)
 
                 # Sort the set of invariants to give them a consistent order.
                 invs = sorted(list(invs))
@@ -1897,7 +1900,7 @@ class InductiveInvGen():
                 # print(invs[:5])
                 # print(hashlib.md5("".join(invs).encode()).hexdigest())
                 # for xinv in invs:
-                    # xprint("generated pred:",inv)
+                    # print("generated pred:",xinv)
 
                 # print(self.all_sat_invs)
 
@@ -2828,8 +2831,9 @@ class InductiveInvGen():
 
         # TODO: Make node/action configurable.
         # target_node = ("NewestVALMsgImpliesAllValidNodesMatchVersion", "H_NewestVALMsgImpliesAllValidNodesMatchVersion")
-        target_node = ("Safety", "HConsistent")
-        target_action = "HRcvValAction"
+        # target_node = ("Safety", "HConsistent")
+        target_node = ("Safety", "H_NewestVALMsgImpliesAllValidNodesMatchVersion")
+        target_action = "HSendValsAction"
 
         # self.lemma_obligations = [("Safety", self.safety)]
         self.lemma_obligations = [target_node]

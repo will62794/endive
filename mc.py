@@ -275,7 +275,8 @@ def compute_subsumption_ordering(invs, num_samples_to_check=None):
     return (ind_edges,edges,redundant)
    
 def generate_invs(preds, num_invs, min_num_conjuncts=2, max_num_conjuncts=2, 
-                    process_local=False, boolean_style="tla", quant_vars=[], use_pred_identifiers=False):
+                    process_local=False, boolean_style="tla", quant_vars=[], use_pred_identifiers=False,
+                    invs_avoid_set=set()):
     """ Generate 'num_invs' random invariants with the specified number of conjuncts. """
     # Pick some random conjunct.
     # OR and negations should be functionally complete
@@ -359,7 +360,7 @@ def generate_invs(preds, num_invs, min_num_conjuncts=2, max_num_conjuncts=2,
             pred_id_var = f"x_{str(pred_id[c]).zfill(3)}"
             symb_inv_str = fn + "(" + pred_id_var + ")" + " " + fop + " " + front_neg + "(" + symb_inv_str +")"
 
-        if inv not in invs:
+        if inv not in invs and (symb_inv_str not in invs_avoid_set):
             symb_expr = pyeda.inter.expr(symb_inv_str)
             # Don't add tautologies or contradictions.
             if not symb_expr.equivalent(True) and not symb_expr.equivalent(False):
