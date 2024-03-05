@@ -3130,12 +3130,13 @@ class InductiveInvGen():
                 dot.edge(e[0][0], e[1][0])
                 # print(e)
 
-            print("Final proof graph:")
-            print(dot.source)
-            f = open("notes/" + self.specname + "_ind-proof-tree.dot", 'w')
-            f.write(dot.source)
-            f.close()
-            dot.render("notes/" + self.specname + "_ind-proof-tree")
+            # print("Final proof graph:")
+            # print(dot.source)
+            # f = open("notes/" + self.specname + "_ind-proof-tree.dot", 'w')
+            # f.write(dot.source)
+            # f.close()
+            # dot.render("notes/" + self.specname + "_ind-proof-tree")
+                
             print("Finished inductive invariant generation in proof tree mode.")
         else:
             self.do_invgen()
