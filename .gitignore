@@ -74,3 +74,4 @@ apacheck_*.sh
 *.dot*.tex
 logout_Zab
 statecache*
+subsumption_graphs/
