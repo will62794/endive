@@ -122,13 +122,12 @@ greaterOrEqualTS(v1,tb1,v2,tb2) ==
 
 isAlive(n) == n \in aliveNodes
                    
-nodeFailure(n) == \* Emulate a node failure
-\*    Make sure that there are atleast 3 alive nodes before killing a node
+NodeFailure(n) == \* Emulate a node failure
+    \* Make sure that there are atleast 3 alive nodes before killing a node
     /\ Cardinality(aliveNodes) > 2
     /\ aliveNodes' = aliveNodes \ {n}
     /\ epochID'     = epochID + 1
-    /\ UNCHANGED <<msgsINV, msgsACK, msgsVAL, nodeState, nodeTS, nodeLastWriter, 
-                   nodeLastWriteTS, nodeRcvedAcks, nodeWriteEpochID>>
+    /\ UNCHANGED <<msgsINV, msgsACK, msgsVAL, nodeState, nodeTS, nodeLastWriter, nodeLastWriteTS, nodeRcvedAcks, nodeWriteEpochID>>
 
 h_upd_not_aliveNodes ==
     /\  UNCHANGED <<aliveNodes, epochID, nodeWriteEpochID>>
@@ -177,7 +176,6 @@ HRead(n) ==  \* Execute a read
     /\ h_upd_nothing
               
 HWrite(n) == \* Execute a write
-\*    /\  nodeState[n]      \in {"valid", "invalid"} 
     \* writes in invalid state are also supported as an optimization
     /\  nodeState[n]      \in {"valid"}
     /\  nodeTS[n].version < H_MAX_VERSION \* Only to configurably terminate the model checking 
@@ -284,7 +282,7 @@ HCoordWriteReplayAction == TRUE /\ \E n \in aliveNodes : HCoordWriteReplay(n)
 HWriteAction == TRUE /\ \E n \in aliveNodes : HWrite(n)
 HRcvAckAction == TRUE /\ \E n \in aliveNodes : HRcvAck(n)
 HSendValsAction == TRUE /\ \E n \in aliveNodes : HSendVals(n)
-HNodeFailureAction == TRUE /\ \E n \in aliveNodes : nodeFailure(n)
+NodeFailureAction == TRUE /\ \E n \in aliveNodes : NodeFailure(n)
 
 Next == \* Hermes (read/write) protocol (Coordinator and Follower actions) + failures
     \* Follower actions.
@@ -298,7 +296,7 @@ Next == \* Hermes (read/write) protocol (Coordinator and Follower actions) + fai
     \/ HRcvAckAction
     \/ HSendValsAction
     \* Failure actions.
-    \/ HNodeFailureAction
+    \/ NodeFailureAction
 
 
 Spec == Init /\ [][Next]_hvars
