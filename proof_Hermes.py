@@ -14,6 +14,11 @@ H_Inv545_R0_2_2 = StructuredProofNode("LInv545_R0_2_2", "H_Inv545_R0_2_2")
 H_Inv3135_R0_2_3 = StructuredProofNode("LInv3135_R0_2_3", "H_Inv3135_R0_2_3")
 H_Inv548_R0_2_4 = StructuredProofNode("LInv548_R0_2_4", "H_Inv548_R0_2_4")
 
+Inv730_R0_1_0 = StructuredProofNode("LInv730_R0_1_0", "H_Inv730_R0_1_0")
+Inv874_R0_1_1 = StructuredProofNode("LInv874_R0_1_1", "H_Inv874_R0_1_1")
+
+Inv1293_R0_1_0 = StructuredProofNode("LInv1293_R0_1_0", "H_Inv1293_R0_1_0")
+
 VALMsgImpliesValidAliveNodesHaveEqualOrNewer = StructuredProofNode("VALMsgImpliesValidAliveNodesHaveEqualOrNewer", "H_VALMsgImpliesValidAliveNodesHaveEqualOrNewer") 
 
 HBD = StructuredProofNode("HBDnode", "HBD")
@@ -41,6 +46,14 @@ H_AllAcksRecvdImpliesNewerTS.children = {
 VALMsgImpliesValidAliveNodesHaveEqualOrNewer.children = {
     "HSendValsAction": [
         H_AllAcksRecvdImpliesNewerTS
+    ]
+}
+
+NewestVALMsgImpliesAllValidNodesMatchVersion.children = {
+    "HRcvValAction": [
+        Inv1293_R0_1_0
+        # Inv730_R0_1_0,
+        # Inv874_R0_1_1
     ]
 }
 

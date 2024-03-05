@@ -484,5 +484,9 @@ H_Inv874_R0_1_1 ==
         ((VARMI.type = "VAL") => 
             \/ greaterTS(VARMI.version, VARMI.tieBreaker, nodeLastWriteTS[VARI].version, nodeLastWriteTS[VARI].tieBreaker)) 
             \/ ~(((VARMI.type = "VAL") => greaterTS(VARMI.version, VARMI.tieBreaker, nodeTS[VARI].version, nodeTS[VARI].tieBreaker)))
-            
+
+H_Inv1293_R0_1_0 == 
+    \A VARI \in aliveNodes : 
+    \A VARMI \in msgsVAL : 
+        ~((VARMI.type = "VAL") => greaterTS(VARMI.version, VARMI.tieBreaker, nodeTS[VARI].version, nodeTS[VARI].tieBreaker)) \/ (~(NewestVALMsg(VARMI)))
 =============================================================================
