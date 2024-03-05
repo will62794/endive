@@ -36,7 +36,8 @@ VALMessageRandom(r) == [
 ]
 
 TypeOKRandom ==  \* The type correctness invariant
-    /\ msgs \in SUBSET {INVMessageRandom(0),INVMessageRandom(0),ACKMessageRandom(0),ACKMessageRandom(0),VALMessageRandom(0),VALMessageRandom(0)}
+    /\ msgs \in SUBSET {INVMessageRandom(0),INVMessageRandom(0),ACKMessageRandom(0),ACKMessageRandom(0)}
+    /\ msgsVAL \in SUBSET {VALMessageRandom(0),VALMessageRandom(0)}
     /\ nodeRcvedAcks \in [H_NODES -> SUBSET H_NODES]
     /\ \A n \in H_NODES: nodeRcvedAcks[n] \subseteq (H_NODES \ {n})
     /\  nodeLastWriter  \in [H_NODES -> H_NODES]
