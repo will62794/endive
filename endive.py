@@ -2917,19 +2917,28 @@ class InductiveInvGen():
             state_vars_not_in_local_grammar = set(self.state_vars)
             if "local_grammars" in self.spec_config and target_action in self.spec_config["local_grammars"]:
                 lgrammar = self.spec_config["local_grammars"][target_action][target_node[1]]
+                if "max_depth" in lgrammar:
+                    self.spec_config["max_tlc_inv_depth"] = lgrammar["max_depth"]
+
                 preds = lgrammar["preds"]
                 self.quant_vars = lgrammar["preds"]
                 self.quant_inv = lgrammar["quant_inv"]
                 self.initialize_quant_inv()
                 logging.info(f"Using local grammar for node ({target_node[1]}, {target_action}) with {len(preds)} predicates.")
 
+                def svar_in_pred(v, p):
+                    # avoid variables with shared substrings.
+                    return f"{v}[" in p or f"{v} " in p or f"{v}:" in p
+
                 state_vars_in_local_grammar = set()
                 for p in (preds + [lgrammar["quant_inv"]]):
+                    svars = []
                     for svar in self.state_vars:
-                        # avoid variables with shared substrings.
-                        if f"{svar}[" in p or f"{svar} " in p or f"{svar}:" in p:
+                        if svar_in_pred(svar, p):
+                            svars.append(svar)
                             state_vars_in_local_grammar.add(svar)
                             state_vars_not_in_local_grammar.discard(svar)
+                    # print(p, svars)
                 print(f"{len(state_vars_in_local_grammar)} state vars in local grammar:", state_vars_in_local_grammar)
                 print(f"{len(state_vars_not_in_local_grammar)} state vars not in local grammar:", state_vars_not_in_local_grammar)
 
