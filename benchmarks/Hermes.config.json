@@ -97,13 +97,13 @@
                     "VARI \\in aliveNodes",
                     "VARJ \\in aliveNodes",
                     "NewestVALMsg(VARMI)",
-                    "VARMI.version = nodeTS[VARI].version",
-                    "VARMI.version < nodeTS[VARI].version",
-                    "VARMI.tieBreaker = nodeTS[VARI].tieBreaker",
-                    "VARMI.tieBreaker < nodeTS[VARI].tieBreaker",
-                    "equalTS(VARMI.version, VARMI.tieBreaker, nodeTS[VARI].version, nodeTS[VARI].tieBreaker)",
-                    "greaterTS(VARMI.version, VARMI.tieBreaker, nodeTS[VARI].version, nodeTS[VARI].tieBreaker)",
-                    "greaterOrEqualTS(VARMI.version, VARMI.tieBreaker, nodeTS[VARI].version, nodeTS[VARI].tieBreaker)"
+                    "(VARMI.type = \"ACK\") => VARMI.version = nodeTS[VARI].version",
+                    "(VARMI.type = \"ACK\") => VARMI.version < nodeTS[VARI].version",
+                    "(VARMI.type = \"ACK\") => VARMI.tieBreaker = nodeTS[VARI].tieBreaker",
+                    "(VARMI.type = \"ACK\") => VARMI.tieBreaker < nodeTS[VARI].tieBreaker",
+                    "(VARMI.type = \"ACK\") => equalTS(VARMI.version, VARMI.tieBreaker, nodeTS[VARI].version, nodeTS[VARI].tieBreaker)",
+                    "(VARMI.type = \"ACK\") => greaterTS(VARMI.version, VARMI.tieBreaker, nodeTS[VARI].version, nodeTS[VARI].tieBreaker)",
+                    "(VARMI.type = \"ACK\") => greaterOrEqualTS(VARMI.version, VARMI.tieBreaker, nodeTS[VARI].version, nodeTS[VARI].tieBreaker)"
                 ],
                 "max_depth": 20
             },
@@ -135,17 +135,60 @@
                     "VARI \\in aliveNodes",
                     "VARJ \\in aliveNodes",
                     "NewestVALMsg(VARMI)",
-                    "VARMI.version = nodeTS[VARI].version",
-                    "VARMI.version < nodeTS[VARI].version",
-                    "VARMI.tieBreaker = nodeTS[VARI].tieBreaker",
-                    "VARMI.tieBreaker < nodeTS[VARI].tieBreaker",
-                    "equalTS(VARMI.version, VARMI.tieBreaker, nodeTS[VARI].version, nodeTS[VARI].tieBreaker)",
-                    "greaterTS(VARMI.version, VARMI.tieBreaker, nodeTS[VARI].version, nodeTS[VARI].tieBreaker)",
-                    "greaterOrEqualTS(VARMI.version, VARMI.tieBreaker, nodeTS[VARI].version, nodeTS[VARI].tieBreaker)"
+                    "(VARMI.type = \"ACK\") => VARMI.version = nodeTS[VARI].version",
+                    "(VARMI.type = \"ACK\") => VARMI.version < nodeTS[VARI].version",
+                    "(VARMI.type = \"ACK\") => VARMI.tieBreaker = nodeTS[VARI].tieBreaker",
+                    "(VARMI.type = \"ACK\") => VARMI.tieBreaker < nodeTS[VARI].tieBreaker",
+                    "(VARMI.type = \"ACK\") => equalTS(VARMI.version, VARMI.tieBreaker, nodeTS[VARI].version, nodeTS[VARI].tieBreaker)",
+                    "(VARMI.type = \"ACK\") => greaterTS(VARMI.version, VARMI.tieBreaker, nodeTS[VARI].version, nodeTS[VARI].tieBreaker)",
+                    "(VARMI.type = \"ACK\") => greaterOrEqualTS(VARMI.version, VARMI.tieBreaker, nodeTS[VARI].version, nodeTS[VARI].tieBreaker)"
                 ],
                 "max_depth": 20
             }
+        },
+        "HSendValsAction": {
+            "H_NewestVALMsgImpliesAllValidNodesMatchVersion":{
+                "quant_inv": "\\A VARI \\in aliveNodes : \\A VARJ \\in aliveNodes : \\A VARMI \\in msgs : ",
+                "quant_vars": ["VARI", "VARJ", "VARMI"],
+                "preds":[
+                    "nodeState[VARI] = \"valid\"",
+                    "nodeState[VARI] = \"invalid\"",
+                    "nodeState[VARI] = \"invalid_write\"",
+                    "nodeState[VARI] = \"write\"",
+                    "nodeState[VARI] = \"replay\"",
+                    "nodeState[VARI] \\in {\"write\", \"replay\"}",
+                    "nodeState[VARJ] = \"valid\"",
+                    "nodeState[VARJ] = \"invalid\"",
+                    "nodeState[VARJ] = \"invalid_write\"",
+                    "nodeState[VARJ] = \"write\"",
+                    "nodeState[VARJ] = \"replay\"",
+                    "nodeTS[VARI] = nodeTS[VARJ]",
+                    "greaterOrEqualTS(nodeTS[VARI].version, nodeTS[VARI].tieBreaker, nodeTS[VARJ].version, nodeTS[VARJ].tieBreaker)",
+                    "nodeTS[VARI].version = nodeTS[VARJ].version",
+                    "nodeTS[VARI].version > nodeTS[VARJ].version",
+                    "nodeTS[VARI].version >= nodeTS[VARJ].version",
+                    "nodeTS[VARI].version < nodeTS[VARJ].version",
+                    "nodeTS[VARI].tieBreaker = nodeTS[VARJ].tieBreaker",
+                    "nodeTS[VARI].tieBreaker < nodeTS[VARJ].tieBreaker",
+                    "nodeTS[VARI].tieBreaker > nodeTS[VARJ].tieBreaker",
+                    "nodeTS[VARI].tieBreaker <= nodeTS[VARJ].tieBreaker",
+                    "VARI \\in aliveNodes",
+                    "VARJ \\in aliveNodes",
+                    "(VARMI.type = \"ACK\")",
+                    "(VARMI.type = \"ACK\") => VARMI.version = nodeTS[VARI].version",
+                    "(VARMI.type = \"ACK\") => VARMI.version < nodeTS[VARI].version",
+                    "(VARMI.type = \"ACK\") => VARMI.tieBreaker = nodeTS[VARI].tieBreaker",
+                    "(VARMI.type = \"ACK\") => VARMI.tieBreaker < nodeTS[VARI].tieBreaker",
+                    "(VARMI.type = \"ACK\") => equalTS(VARMI.version, VARMI.tieBreaker, nodeTS[VARI].version, nodeTS[VARI].tieBreaker)",
+                    "(VARMI.type = \"ACK\") => greaterTS(VARMI.version, VARMI.tieBreaker, nodeTS[VARI].version, nodeTS[VARI].tieBreaker)",
+                    "(VARMI.type = \"ACK\") => greaterOrEqualTS(VARMI.version, VARMI.tieBreaker, nodeTS[VARI].version, nodeTS[VARI].tieBreaker)",
+                    "VARI \\in nodeRcvedAcks[VARJ]",
+                    "receivedAllAcks(VARI)"
+                ]
+            }
+
         }
+
     },
 
     "tlaps_proof_config": {
