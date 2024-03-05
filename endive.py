@@ -1899,8 +1899,27 @@ class InductiveInvGen():
                 # print("Raw invs")
                 # print(invs[:5])
                 # print(hashlib.md5("".join(invs).encode()).hexdigest())
-                # for xinv in invs:
+                pred_var_set_counts = {}
+                for xinv in invs:
                     # print("generated pred:",xinv)
+                    def svar_in_inv(v, i):
+                        # avoid variables with shared substrings.
+                        qi = self.quant_inv(i)
+                        return f"{v}[" in qi or f"{v} " in qi or f"{v}:" in qi
+                    svars = []
+                    for s in self.state_vars:
+                        if svar_in_inv(s, xinv):
+                            svars.append(s)
+                    k = tuple(sorted(svars))
+                    if k in pred_var_set_counts:
+                        pred_var_set_counts[tuple(sorted(svars))] += 1
+                    else:
+                        pred_var_set_counts[tuple(sorted(svars))] = 1
+                    # print(xinv, svars, len(svars))
+                print("predicate var counts:")
+                for p in pred_var_set_counts:
+                    print(p, ":", pred_var_set_counts[p])
+
 
                 # print(self.all_sat_invs)
 
