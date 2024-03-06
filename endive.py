@@ -1976,8 +1976,13 @@ class InductiveInvGen():
                         pred_var_set_counts[tuple(sorted(svars))] = 1
                     # print(xinv, svars, len(svars))
                 print("predicate var counts:")
-                for p in pred_var_set_counts:
-                    print(p, ":", pred_var_set_counts[p])
+                pred_var_counts_tups = [(pred_var_set_counts[p],p) for p in pred_var_set_counts]
+                for p in sorted(pred_var_counts_tups, reverse=True):
+                    print(p)
+                    # Consider the top 2 predicate var counts.
+                # [p[1] for p in pred_var_counts_tups[:2]]
+
+                    # print(p, ":", pred_var_set_counts[p])
 
 
                 # print(self.all_sat_invs)
