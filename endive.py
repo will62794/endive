@@ -884,7 +884,8 @@ class InductiveInvGen():
             return (all_ctis, all_cti_traces)  
 
         res = re.match("Error: Invariant (.*) is violated",lines[curr_line])
-        inv_name = res.group(1).split("_")[0]
+        inv_name = res.group(1).replace("_Constraint", "")
+
 
         curr_line += 1
         while curr_line < len(lines):
@@ -902,7 +903,7 @@ class InductiveInvGen():
 
             # Parse invariant name of next CTI trace.
             res = re.match("Error: Invariant (.*) is violated",lines[curr_line])
-            inv_name = res.group(1).split("_")[0]
+            inv_name = res.group(1).replace("_Constraint", "")
             curr_line += 1
         
         # for cti in all_ctis:
@@ -3054,10 +3055,77 @@ class InductiveInvGen():
             # k_ctis = [c for c in k_ctis if c.action_name in ["HRcvValAction"]]
             # k_ctis = [c for c in k_ctis if c.action_name in ["HSendValsAction"]]
             # k_ctis = [c for c in k_ctis if c.action_name in ["HRcvAckAction"]]
+            
+            cti_action_invs_found = set()
 
-            # for kcti in k_ctis:
+            for kcti in k_ctis:
                 # print(str(kcti))
+                if kcti.inv_name == "Safety":
+                    cti_action_invs_found.add((self.safety, kcti.action_name))
+                else:
+                    cti_action_invs_found.add((kcti.inv_name, kcti.action_name))
             logging.info("Number of total unique k-CTIs found: {}. (took {:.2f} secs)".format(len(k_ctis), (time.time()-t0)))
+            logging.info(f"{len(cti_action_invs_found)} distinct k-CTI actions found: {cti_action_invs_found}")
+
+
+            #
+            # LEMMA-ACTION specific technique.
+            #
+
+            lemma_action_mode = False
+
+            cache_with_ignored_vars = None
+            preds = self.preds
+            if lemma_action_mode:
+                # Pick one of these CTI lemma/action obligations.
+                cti_action_lemmas_with_grammars = [
+                    c for c in cti_action_invs_found 
+                        if c[1] in self.spec_config["local_grammars"] and c[0] in self.spec_config["local_grammars"][c[1]]
+                ]
+
+                if len(cti_action_lemmas_with_grammars) == 0:
+                    print("No more current outstanding CTI lemma actions with local grammars.")
+                    return
+
+                k_cti_lemma_action = random.choice(cti_action_lemmas_with_grammars)
+                (k_cti_lemma, k_cti_action) = k_cti_lemma_action
+                print(f"Chose {k_cti_lemma_action}")
+
+                # Filter CTIs based on this choice.
+                k_ctis = [c for c in k_ctis if (c.inv_name == k_cti_lemma or (c.inv_name == "Safety" and k_cti_lemma == self.safety)) and c.action_name == k_cti_action]
+                logging.info(f"Have {len(k_ctis)} total k-CTIs after filtering to {k_cti_lemma_action}.")
+
+
+                state_vars_in_local_grammar = self.state_vars
+                state_vars_not_in_local_grammar = set(self.state_vars)
+                if "local_grammars" in self.spec_config and k_cti_action in self.spec_config["local_grammars"]:
+                    lgrammar = self.spec_config["local_grammars"][k_cti_action][k_cti_lemma]
+                    if "max_depth" in lgrammar:
+                        self.spec_config["max_tlc_inv_depth"] = lgrammar["max_depth"]
+
+                    preds = lgrammar["preds"]
+                    self.quant_vars = lgrammar["preds"]
+                    self.quant_inv = lgrammar["quant_inv"]
+                    self.initialize_quant_inv()
+                    logging.info(f"Using local grammar for node ({k_cti_lemma}, {k_cti_action}) with {len(preds)} predicates.")
+
+                    def svar_in_pred(v, p):
+                        # avoid variables with shared substrings.
+                        return f"{v}[" in p or f"{v} " in p or f"{v}:" in p
+
+                    state_vars_in_local_grammar = set()
+                    for p in (preds + [lgrammar["quant_inv"]]):
+                        svars = []
+                        for svar in self.state_vars:
+                            if svar_in_pred(svar, p):
+                                svars.append(svar)
+                                state_vars_in_local_grammar.add(svar)
+                                state_vars_not_in_local_grammar.discard(svar)
+                        # print(p, svars)
+                    print(f"{len(state_vars_in_local_grammar)} state vars in local grammar:", state_vars_in_local_grammar)
+                    print(f"{len(state_vars_not_in_local_grammar)} state vars not in local grammar:", state_vars_not_in_local_grammar)
+                    cache_with_ignored_vars = state_vars_not_in_local_grammar
+
             
             # Limit number of CTIs if necessary.
             if len(k_ctis) > self.MAX_NUM_CTIS_PER_ROUND:
@@ -3078,7 +3146,7 @@ class InductiveInvGen():
                 logging.info("Not done. Current invariant candidate is not inductive.")
 
             self.total_num_cti_elimination_rounds = (roundi + 1)
-            ret = self.eliminate_ctis(k_ctis, self.num_invs, roundi)
+            ret = self.eliminate_ctis(k_ctis, self.num_invs, roundi, preds=preds, cache_states_with_ignored_vars=cache_with_ignored_vars)
             # If we did not eliminate all CTIs in this round, then exit with failure.
             if ret == None:
                 logging.info("Could not eliminate all CTIs in this round. Exiting with failure.")
