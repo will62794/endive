@@ -3084,15 +3084,6 @@ class InductiveInvGen():
             logging.info("Checking predicates on reachable states")
             self.pred_vals = self.check_predicates(self.preds)
 
-        # quant_inv_fn = self.quant_inv
-        # quant_preds = []
-        # for p in self.preds:
-        #     quantp = quant_inv_fn(p)
-        #     quant_preds.append(quantp)
-        #     # print(p)
-        #     print(quantp)
-        # return
-
 
         for roundi in range(self.num_rounds):
             logging.info("### STARTING ROUND %d" % roundi)
