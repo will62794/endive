@@ -3352,7 +3352,8 @@ if __name__ == "__main__":
 
     logging.info(f"Loaded config for '{specname}' spec.")
     for k in spec_config:
-        logging.info(f"{k}: {spec_config[k]}")
+        if k != "local_grammars":
+            logging.info(f"{k}: {spec_config[k]}")
 
     # Read pre-cached invariants from a file if specified.
     cached_invs = None
