@@ -677,25 +677,25 @@ class InductiveInvGen():
 
     #     return set()
 
-    def check_invariants(self, invs, tlc_workers=6, max_depth=2**30, skip_checking=False, cache_with_ignored=None, cache_state_load=False):
-        """ Check which of the given invariants are valid. """
-        ta = time.time()
-        invcheck_tla = "---- MODULE %s_InvCheck_%d ----\n" % (self.specname,self.seed)
+    def make_check_invariants_spec(self, invs, root_filepath, exclude_inv_defs=False, invname_prefix="Inv"):
+        specname = os.path.basename(root_filepath)
+        invcheck_tla = f"---- MODULE {specname} ----\n"
         invcheck_tla += "EXTENDS %s\n\n" % self.specname
         invcheck_tla += self.model_consts + "\n"
 
         all_inv_names = set()
-        if not skip_checking:
+        if not exclude_inv_defs:
             for i,inv in enumerate(invs):    
-                sinv = ("Inv%d == " % i) + self.quant_inv(inv)
-                all_inv_names.add("Inv%d" % i)
+                sinv = (f"{invname_prefix}{i} == ") + self.quant_inv(inv)
+                all_inv_names.add(f"{invname_prefix}{i}")
                 invcheck_tla += sinv + "\n"
 
         invcheck_tla += "===="
 
         invcheck_spec_name = f"{GEN_TLA_DIR}/{self.specname}_InvCheck_{self.seed}"
-        invcheck_spec_filename = f"{os.path.join(self.specdir, GEN_TLA_DIR)}/{self.specname}_InvCheck_{self.seed}"
-        invchecktlafile = invcheck_spec_filename + ".tla"
+        # invcheck_spec_filename = f"{os.path.join(self.specdir, GEN_TLA_DIR)}/{self.specname}_InvCheck_{self.seed}"
+        # invcheck_spec_filename = f""
+        invchecktlafile = root_filepath + ".tla"
         f = open(invchecktlafile, 'w')
         f.write(invcheck_tla)
         f.close()
@@ -710,17 +710,38 @@ class InductiveInvGen():
         if self.symmetry:
             invcheck_cfg += "SYMMETRY Symmetry\n"
 
-        if not skip_checking:
+        if not exclude_inv_defs:
             for invi in range(len(invs)):
-                sinv = "INVARIANT Inv" + str(invi) 
+                sinv = f"INVARIANT {invname_prefix}" + str(invi) 
                 invcheck_cfg += sinv + "\n"
 
-        invcheck_cfg_file = f"{os.path.join(self.specdir, GEN_TLA_DIR)}/{self.specname}_InvCheck_{self.seed}.cfg"
-        invcheck_cfg_filename = f"{GEN_TLA_DIR}/{self.specname}_InvCheck_{self.seed}.cfg"
+        invcheck_cfg_file = root_filepath + ".cfg"
+        # invcheck_cfg_filename = f"{GEN_TLA_DIR}/{self.specname}_InvCheck_{self.seed}.cfg"
+        invcheck_cfg_filename = root_filepath + ".cfg"
 
         f = open(invcheck_cfg_file, 'w')
         f.write(invcheck_cfg)
         f.close()
+
+    def check_invariants(self, invs, tlc_workers=6, max_depth=2**30, 
+                         skip_checking=False, cache_with_ignored=None, cache_state_load=False,
+                         invcheck_file_path=None):
+        """ Check which of the given invariants are valid. """
+        ta = time.time()
+        # invcheck_tla = "---- MODULE %s_InvCheck_%d ----\n" % (self.specname,self.seed)
+        # invcheck_tla += "EXTENDS %s\n\n" % self.specname
+        # invcheck_tla += self.model_consts + "\n"
+
+        all_inv_names = set()
+        if not skip_checking:
+            for i,inv in enumerate(invs):    
+                all_inv_names.add("Inv%d" % i)
+
+        rootpath = f"{os.path.join(self.specdir, GEN_TLA_DIR)}/{self.specname}_InvCheck_{self.seed}"
+        invcheck_spec_name = f"{GEN_TLA_DIR}/{self.specname}_InvCheck_{self.seed}"
+        invcheck_cfg_filename = f"{GEN_TLA_DIR}/{self.specname}_InvCheck_{self.seed}.cfg"
+
+        self.make_check_invariants_spec(invs, rootpath, exclude_inv_defs=skip_checking)
 
         # Check invariants.
         logging.info("Checking %d candidate invariants in spec file '%s'" % (len(invs), invcheck_spec_name))
@@ -3003,6 +3024,35 @@ class InductiveInvGen():
                         # self.proof_graph["edges"].append((support_lemma,curr_obligation))
                         # self.all_generated_lemmas.add(support_lemma)
             logging.info("")
+
+    def extract_vars_from_preds(self):
+        """ Compute the set of variables that appears in each grammar predicate."""
+
+        # For each predicate, parse the set of state variables that appear in that predicate.
+        pred_invs = [p for p in self.preds]
+        print(f"{len(pred_invs)} Predicates:")
+        for p in pred_invs:
+            print(p)
+        # self.check_invariants(pred_invs)
+        specname = "pred_extract_test"
+        rootpath = f"benchmarks/{specname}"
+        invname_prefix = "PredInvDef"
+        self.make_check_invariants_spec(pred_invs, rootpath, invname_prefix=invname_prefix)
+
+        tla_spec_obj = tlaparse.parse_tla_file(self.specdir, specname)
+        self.spec_defs = tla_spec_obj.get_all_user_defs(level="1")
+        self.tla_spec_obj = tla_spec_obj
+        self.state_vars = self.tla_spec_obj.get_all_vars()
+        vars_in_preds = {}
+        for d in self.spec_defs:
+            dvars,dvars_updated = self.tla_spec_obj.get_vars_in_def(d)
+            if d.startswith(invname_prefix):
+                print("DEF:", d, dvars)
+                invind = int(d.replace(invname_prefix, "")) 
+                vars_in_preds[invind] = dvars
+        for p in sorted(vars_in_preds.keys()):
+            print(p, pred_invs[p], vars_in_preds[p])
+        return vars_in_preds
 
     def do_invgen(self):
         # Record Java version for stat recording.
