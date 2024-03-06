@@ -11,6 +11,12 @@
         "nodeState[VARJ] = \"invalid_write\"",
         "nodeState[VARJ] = \"write\"",
         "nodeState[VARJ] = \"replay\"",
+        "nodeState[VARI] \\in {\"write\", \"replay\"}",
+        "nodeState[VARI] \\in {\"invalid\", \"replay\"}",
+        "nodeState[VARI] \\in {\"write\", \"valid\"}",
+        "nodeState[VARJ] \\in {\"write\", \"replay\"}",
+        "nodeState[VARJ] \\in {\"invalid\", \"replay\"}",
+        "nodeState[VARJ] \\in {\"write\", \"valid\"}",
         "nodeTS[VARI] = nodeTS[VARJ]",
         "greaterOrEqualTS(nodeTS[VARI].version, nodeTS[VARI].tieBreaker, nodeTS[VARJ].version, nodeTS[VARJ].tieBreaker)",
         "nodeTS[VARI].version = nodeTS[VARJ].version",
@@ -47,7 +53,9 @@
         "(VARMACKI.type = \"ACK\") => greaterOrEqualTS(VARMACKI.version, VARMACKI.tieBreaker, nodeTS[VARI].version, nodeTS[VARI].tieBreaker)",
         "(VARMACKI.type = \"ACK\") => greaterOrEqualTS(VARMACKI.version, VARMACKI.tieBreaker, nodeLastWriteTS[VARI].version, nodeLastWriteTS[VARI].tieBreaker)",
         "VARI \\in nodeRcvedAcks[VARJ]",
-        "receivedAllAcks(VARI)"
+        "VARJ \\in nodeRcvedAcks[VARI]",
+        "receivedAllAcks(VARI) /\\ nodeRcvedAcks = nodeRcvedAcks",
+        "receivedAllAcks(VARJ) /\\ nodeRcvedAcks = nodeRcvedAcks"
     ],
     "preds_alt" : [],
     "safety"  :  "HConsistent",

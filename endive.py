@@ -2908,10 +2908,11 @@ class InductiveInvGen():
         """ Do localized invariant synthesis based on an inductive proof graph structure."""
 
         # TODO: Make node/action configurable.
-        # target_node = ("NewestVALMsgImpliesAllValidNodesMatchVersion", "H_NewestVALMsgImpliesAllValidNodesMatchVersion")
+        target_node = ("NewestVALMsgImpliesAllValidNodesMatchVersion", "H_NewestVALMsgImpliesAllValidNodesMatchVersion")
+        # target_node = ("WriteNodeWithAllAcksImpliesAllAliveAreValid", "HH_WriteNodeWithAllAcksImpliesAllAliveAreValid")
         # target_node = ("Safety", "HConsistent")
-        target_node = ("Safety", "H_NewestVALMsgImpliesAllValidNodesMatchVersion")
         target_action = "HSendValsAction"
+        # target_action = "HRcvValAction"
 
         # self.lemma_obligations = [("Safety", self.safety)]
         self.lemma_obligations = [target_node]
@@ -3030,9 +3031,9 @@ class InductiveInvGen():
 
         # For each predicate, parse the set of state variables that appear in that predicate.
         pred_invs = [p for p in self.preds]
-        print(f"{len(pred_invs)} Predicates:")
-        for p in pred_invs:
-            print(p)
+        # print(f"{len(pred_invs)} Predicates:")
+        # for p in pred_invs:
+            # print(p)
         # self.check_invariants(pred_invs)
         specname = f"{self.specname}_pred_extract_test"
         rootpath = f"benchmarks/{specname}"
@@ -3061,6 +3062,8 @@ class InductiveInvGen():
             logging.info(f"Pre-generating invariants with command '{self.pregen_inv_cmd}'")
             self.pre_generate_invs()
 
+        lemma_action_mode = True
+
         # A correct invariant.
         # \A VARI \in Node : \A VARJ \in Node : (vote_request_msg[<<VARJ,VARI>>]) \/ (~(votes[<<VARJ,VARI>>]))
 
@@ -3071,6 +3074,13 @@ class InductiveInvGen():
         # inv1 \/ ~inv7
         # for i,p in enumerate(self.preds):
             # print(i,p)
+
+        vars_in_preds = {}
+        if lemma_action_mode:
+            logging.info("Extracting variables present in each grammar predicate.")
+            vars_in_preds = self.extract_vars_from_preds()
+            # for p in sorted(vars_in_preds.keys()):
+                # print(p, self.preds[p], vars_in_preds[p])
 
         #
         # Check valuation of all predicates on reachable states.
@@ -3105,14 +3115,14 @@ class InductiveInvGen():
                 else:
                     cti_action_invs_found.add((kcti.inv_name, kcti.action_name))
             logging.info("Number of total unique k-CTIs found: {}. (took {:.2f} secs)".format(len(k_ctis), (time.time()-t0)))
-            logging.info(f"{len(cti_action_invs_found)} distinct k-CTI actions found: {cti_action_invs_found}")
+            logging.info(f"{len(cti_action_invs_found)} distinct k-CTI lemma-action proof obligations found: {cti_action_invs_found}")
+            for kcti in cti_action_invs_found:
+                logging.info(f" - {kcti}")
 
 
             #
             # LEMMA-ACTION specific technique.
             #
-
-            lemma_action_mode = False
 
             cache_with_ignored_vars = None
             preds = self.preds
@@ -3129,42 +3139,68 @@ class InductiveInvGen():
 
                 k_cti_lemma_action = random.choice(cti_action_lemmas_with_grammars)
                 (k_cti_lemma, k_cti_action) = k_cti_lemma_action
-                print(f"Chose {k_cti_lemma_action}")
+                print(f"Chose {k_cti_lemma_action} proof obligation")
 
                 # Filter CTIs based on this choice.
                 k_ctis = [c for c in k_ctis if (c.inv_name == k_cti_lemma or (c.inv_name == "Safety" and k_cti_lemma == self.safety)) and c.action_name == k_cti_action]
                 logging.info(f"Have {len(k_ctis)} total k-CTIs after filtering to {k_cti_lemma_action}.")
 
 
-                state_vars_in_local_grammar = self.state_vars
-                state_vars_not_in_local_grammar = set(self.state_vars)
-                if "local_grammars" in self.spec_config and k_cti_action in self.spec_config["local_grammars"]:
-                    lgrammar = self.spec_config["local_grammars"][k_cti_action][k_cti_lemma]
-                    if "max_depth" in lgrammar:
-                        self.spec_config["max_tlc_inv_depth"] = lgrammar["max_depth"]
+                logging.info(f"Computing COI for {(k_cti_lemma, k_cti_action)}")
+                # actions_real_defs = [a.replace("Action", "") for a in actions]
+                lemma_action_coi = {}
 
-                    preds = lgrammar["preds"]
-                    self.quant_vars = lgrammar["preds"]
-                    self.quant_inv = lgrammar["quant_inv"]
-                    self.initialize_quant_inv()
-                    logging.info(f"Using local grammar for node ({k_cti_lemma}, {k_cti_action}) with {len(preds)} predicates.")
+                ret = self.tla_spec_obj.get_vars_in_def(k_cti_action)
+                vars_in_action,action_updated_vars = ret
+                # print("vars in action:", action_updated_vars[action])
+                vars_in_action_non_updated,_ = self.tla_spec_obj.get_vars_in_def(k_cti_action, ignore_update_expressions=True)
+                vars_in_lemma_defs = self.tla_spec_obj.get_vars_in_def(k_cti_lemma)[0]
 
-                    def svar_in_pred(v, p):
-                        # avoid variables with shared substrings.
-                        return f"{v}[" in p or f"{v} " in p or f"{v}:" in p
+                lemma_action_coi = self.tla_spec_obj.compute_coi(None, None, None,action_updated_vars, vars_in_action_non_updated, vars_in_lemma_defs)
+                print("Lemma-action COI")
+                print(lemma_action_coi)
+                # for ind,p in enumerate(self.preds):
+                    # print(p, vars_in_preds[ind], lemma_action_coi)
 
-                    state_vars_in_local_grammar = set()
-                    for p in (preds + [lgrammar["quant_inv"]]):
-                        svars = []
-                        for svar in self.state_vars:
-                            if svar_in_pred(svar, p):
-                                svars.append(svar)
-                                state_vars_in_local_grammar.add(svar)
-                                state_vars_not_in_local_grammar.discard(svar)
-                        # print(p, svars)
-                    print(f"{len(state_vars_in_local_grammar)} state vars in local grammar:", state_vars_in_local_grammar)
-                    print(f"{len(state_vars_not_in_local_grammar)} state vars not in local grammar:", state_vars_not_in_local_grammar)
-                    cache_with_ignored_vars = state_vars_not_in_local_grammar
+                # Filter predicates based on this COI.
+                    # Set subset operator is: 
+                preds = [p for (pi,p) in enumerate(self.preds) if vars_in_preds[pi] <= lemma_action_coi]
+                logging.info(f"{len(preds)}/{len(self.preds)} filtered predicates based on COI slice.")
+
+                cache_with_ignored_vars = lemma_action_coi
+                
+                #
+                # Old logic that is based on explicit local grammar defs.
+                #
+                # state_vars_in_local_grammar = self.state_vars
+                # state_vars_not_in_local_grammar = set(self.state_vars)
+                # if "local_grammars" in self.spec_config and k_cti_action in self.spec_config["local_grammars"]:
+                #     lgrammar = self.spec_config["local_grammars"][k_cti_action][k_cti_lemma]
+                #     if "max_depth" in lgrammar:
+                #         self.spec_config["max_tlc_inv_depth"] = lgrammar["max_depth"]
+
+                #     preds = lgrammar["preds"]
+                #     self.quant_vars = lgrammar["preds"]
+                #     self.quant_inv = lgrammar["quant_inv"]
+                #     self.initialize_quant_inv()
+                #     logging.info(f"Using local grammar for node ({k_cti_lemma}, {k_cti_action}) with {len(preds)} predicates.")
+
+                #     def svar_in_pred(v, p):
+                #         # avoid variables with shared substrings.
+                #         return f"{v}[" in p or f"{v} " in p or f"{v}:" in p
+
+                #     state_vars_in_local_grammar = set()
+                #     for p in (preds + [lgrammar["quant_inv"]]):
+                #         svars = []
+                #         for svar in self.state_vars:
+                #             if svar_in_pred(svar, p):
+                #                 svars.append(svar)
+                #                 state_vars_in_local_grammar.add(svar)
+                #                 state_vars_not_in_local_grammar.discard(svar)
+                #         # print(p, svars)
+                #     print(f"{len(state_vars_in_local_grammar)} state vars in local grammar:", state_vars_in_local_grammar)
+                #     print(f"{len(state_vars_not_in_local_grammar)} state vars not in local grammar:", state_vars_not_in_local_grammar)
+                #     cache_with_ignored_vars = state_vars_not_in_local_grammar
 
             
             # Limit number of CTIs if necessary.
