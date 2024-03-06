@@ -2035,16 +2035,20 @@ class InductiveInvGen():
 
                     print("predicate var counts:")
                     pred_var_counts_tups = [(pred_var_set_counts[p],p) for p in pred_var_set_counts]
+                    pred_var_counts_tups = sorted(pred_var_counts_tups, reverse=True)
                     for p in sorted(pred_var_counts_tups, reverse=True):
                         print(p)
 
                     #
-                    # Consider the top 2 predicate var counts and test projected property checking.
+                    # Consider the top few predicate var counts and test projected property checking.
                     # EXPERIMENTAL
                     #
                     logging.info(f"Running partitioned property checking with projection caching ----")
+                    # TODO: Consider enabling this and/or computing more of these cached state projections 
+                    # upfront.
+                    top_k = 2
                     for p in []:
-                    # for p in pred_var_counts_tups[:2]:
+                    # for p in pred_var_counts_tups[:top_k]:
 
                         predvar_set = p[1]
                         ignored = [svar for svar in self.state_vars if svar not in predvar_set]
