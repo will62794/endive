@@ -3035,7 +3035,7 @@ class InductiveInvGen():
             print(p)
         # self.check_invariants(pred_invs)
         specname = f"{self.specname}_pred_extract_test"
-        rootpath = f"benchmarks/{GEN_TLA_DIR}/{specname}"
+        rootpath = f"benchmarks/{specname}"
         invname_prefix = "PredInvDef"
         self.make_check_invariants_spec(pred_invs, rootpath, invname_prefix=invname_prefix)
 
