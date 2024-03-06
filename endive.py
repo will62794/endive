@@ -2043,23 +2043,24 @@ class InductiveInvGen():
                     # Consider the top few predicate var counts and test projected property checking.
                     # EXPERIMENTAL
                     #
-                    logging.info(f"Running partitioned property checking with projection caching ----")
-                    # TODO: Consider enabling this and/or computing more of these cached state projections 
-                    # upfront.
-                    top_k = 2
-                    for p in []:
-                    # for p in pred_var_counts_tups[:top_k]:
+                    enable_partitioned_caching = False
+                    if enable_partitioned_caching:
+                        logging.info(f"Running partitioned property checking with projection caching ----")
+                        # TODO: Consider enabling this and/or computing more of these cached state projections 
+                        # upfront.
+                        top_k = 2
+                        for p in pred_var_counts_tups[:top_k]:
 
-                        predvar_set = p[1]
-                        ignored = [svar for svar in self.state_vars if svar not in predvar_set]
-                        # print(ignored)
+                            predvar_set = p[1]
+                            ignored = [svar for svar in self.state_vars if svar not in predvar_set]
+                            # print(ignored)
 
-                        invs_to_check = [inv for ind,inv in enumerate(invs) if pred_var_sets_for_invs[ind] == predvar_set]
+                            invs_to_check = [inv for ind,inv in enumerate(invs) if pred_var_sets_for_invs[ind] == predvar_set]
 
-                        logging.info(f"Running partitioned state caching step with {len(ignored)} ignored vars: {ignored}")
-                        # sat_invs = self.check_invariants([dummy_inv], tlc_workers=tlc_workers, max_depth=max_depth, cache_with_ignored=cache_states_with_ignored_vars)
-                        sat_invs = self.check_invariants([dummy_inv], tlc_workers=tlc_workers, max_depth=max_depth, cache_with_ignored=ignored, skip_checking=True)
-                        sat_invs = self.check_invariants(invs_to_check, tlc_workers=tlc_workers, max_depth=max_depth, cache_state_load=True)
+                            logging.info(f"Running partitioned state caching step with {len(ignored)} ignored vars: {ignored}")
+                            # sat_invs = self.check_invariants([dummy_inv], tlc_workers=tlc_workers, max_depth=max_depth, cache_with_ignored=cache_states_with_ignored_vars)
+                            sat_invs = self.check_invariants([dummy_inv], tlc_workers=tlc_workers, max_depth=max_depth, cache_with_ignored=ignored, skip_checking=True)
+                            sat_invs = self.check_invariants(invs_to_check, tlc_workers=tlc_workers, max_depth=max_depth, cache_state_load=True)
 
 
                     # Check all candidate invariants.
