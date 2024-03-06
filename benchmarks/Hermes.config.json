@@ -67,7 +67,7 @@
     "constraint"  :  "",
     "quant_inv"  :  "\\A VARI \\in aliveNodes : \\A VARJ \\in aliveNodes : \\A VARMVALI \\in msgsVAL : \\A VARMACKI \\in msgsACK : ",
     "quant_inv_alt"  :  null,
-    "quant_vars": ["VARI", "VARJ", "VARK", "VARMI"],
+    "quant_vars": ["VARI", "VARJ", "VARMVALI", "VARMACKI"],
     "model_consts"  :  "",
     "symmetry" : false,
     "typeok"  :  "TypeOKRandom",
