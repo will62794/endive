@@ -3034,8 +3034,8 @@ class InductiveInvGen():
         for p in pred_invs:
             print(p)
         # self.check_invariants(pred_invs)
-        specname = "pred_extract_test"
-        rootpath = f"benchmarks/{specname}"
+        specname = f"{self.specname}_pred_extract_test"
+        rootpath = f"benchmarks/{GEN_TLA_DIR}/{specname}"
         invname_prefix = "PredInvDef"
         self.make_check_invariants_spec(pred_invs, rootpath, invname_prefix=invname_prefix)
 
@@ -3047,11 +3047,10 @@ class InductiveInvGen():
         for d in self.spec_defs:
             dvars,dvars_updated = self.tla_spec_obj.get_vars_in_def(d)
             if d.startswith(invname_prefix):
-                print("DEF:", d, dvars)
+                # print("DEF:", d, dvars)
                 invind = int(d.replace(invname_prefix, "")) 
                 vars_in_preds[invind] = dvars
-        for p in sorted(vars_in_preds.keys()):
-            print(p, pred_invs[p], vars_in_preds[p])
+
         return vars_in_preds
 
     def do_invgen(self):
