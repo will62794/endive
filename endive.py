@@ -744,7 +744,9 @@ class InductiveInvGen():
         self.make_check_invariants_spec(invs, rootpath, exclude_inv_defs=skip_checking)
 
         # Check invariants.
-        logging.info("Checking %d candidate invariants in spec file '%s'" % (len(invs), invcheck_spec_name))
+        if not skip_checking:
+            logging.info("Checking %d candidate invariants in spec file '%s'" % (len(invs), invcheck_spec_name))
+
         workdir = None if self.specdir == "" else self.specdir
 
         violated_invs = mc.runtlc_check_violated_invariants(
@@ -757,8 +759,12 @@ class InductiveInvGen():
                                 max_depth=max_depth,
                                 cache_with_ignored=cache_with_ignored,
                                 cache_state_load = cache_state_load)
-        sat_invs = (all_inv_names - violated_invs)
-        logging.info(f"Found {len(sat_invs)} / {len(invs)} candidate invariants satisfied in {round(time.time()-ta,2)}s.")
+        sat_invs = set()
+        if not skip_checking:
+            sat_invs = (all_inv_names - violated_invs)
+            logging.info(f"Found {len(sat_invs)} / {len(invs)} candidate invariants satisfied in {round(time.time()-ta,2)}s.")
+        if cache_with_ignored:
+            logging.info(f"Finished state caching run in {round(time.time()-ta,2)}s.")
 
         return sat_invs  
 
@@ -1833,7 +1839,7 @@ class InductiveInvGen():
         if cache_states_with_ignored_vars is not None:
             logging.info(f"Running initial state caching step with {len(cache_states_with_ignored_vars)} ignored vars: {cache_states_with_ignored_vars}")
             dummy_inv = "3 > 2"
-            sat_invs = self.check_invariants([dummy_inv], tlc_workers=tlc_workers, max_depth=max_depth, cache_with_ignored=cache_states_with_ignored_vars)
+            sat_invs = self.check_invariants([dummy_inv], tlc_workers=tlc_workers, max_depth=max_depth, cache_with_ignored=cache_states_with_ignored_vars, skip_checking=True)
             logging.info("Finished initial state caching.")
 
         while iteration <= self.num_iters:
@@ -1959,6 +1965,7 @@ class InductiveInvGen():
                 # print(invs[:5])
                 # print(hashlib.md5("".join(invs).encode()).hexdigest())
                 pred_var_set_counts = {}
+                pred_var_sets_for_invs = []
                 for xinv in invs:
                     # print("generated pred:",xinv)
                     def svar_in_inv(v, i):
@@ -1970,17 +1977,12 @@ class InductiveInvGen():
                         if svar_in_inv(s, xinv):
                             svars.append(s)
                     k = tuple(sorted(svars))
+                    pred_var_sets_for_invs.append(k)
                     if k in pred_var_set_counts:
                         pred_var_set_counts[tuple(sorted(svars))] += 1
                     else:
                         pred_var_set_counts[tuple(sorted(svars))] = 1
                     # print(xinv, svars, len(svars))
-                print("predicate var counts:")
-                pred_var_counts_tups = [(pred_var_set_counts[p],p) for p in pred_var_set_counts]
-                for p in sorted(pred_var_counts_tups, reverse=True):
-                    print(p)
-                    # Consider the top 2 predicate var counts.
-                # [p[1] for p in pred_var_counts_tups[:2]]
 
                     # print(p, ":", pred_var_set_counts[p])
 
@@ -2030,7 +2032,35 @@ class InductiveInvGen():
                     if "max_tlc_inv_depth" in self.spec_config:
                         max_depth = self.spec_config["max_tlc_inv_depth"]
 
+
+                    print("predicate var counts:")
+                    pred_var_counts_tups = [(pred_var_set_counts[p],p) for p in pred_var_set_counts]
+                    for p in sorted(pred_var_counts_tups, reverse=True):
+                        print(p)
+
+                    #
+                    # Consider the top 2 predicate var counts and test projected property checking.
+                    # EXPERIMENTAL
+                    #
+                    logging.info(f"Running partitioned property checking with projection caching ----")
+                    for p in []:
+                    # for p in pred_var_counts_tups[:2]:
+
+                        predvar_set = p[1]
+                        ignored = [svar for svar in self.state_vars if svar not in predvar_set]
+                        # print(ignored)
+
+                        invs_to_check = [inv for ind,inv in enumerate(invs) if pred_var_sets_for_invs[ind] == predvar_set]
+
+                        logging.info(f"Running partitioned state caching step with {len(ignored)} ignored vars: {ignored}")
+                        # sat_invs = self.check_invariants([dummy_inv], tlc_workers=tlc_workers, max_depth=max_depth, cache_with_ignored=cache_states_with_ignored_vars)
+                        sat_invs = self.check_invariants([dummy_inv], tlc_workers=tlc_workers, max_depth=max_depth, cache_with_ignored=ignored, skip_checking=True)
+                        sat_invs = self.check_invariants(invs_to_check, tlc_workers=tlc_workers, max_depth=max_depth, cache_state_load=True)
+
+
                     # Check all candidate invariants.
+                    logging.info("-------")
+                    logging.info("Checking main invariant candidate group.")
                         
                     # Use cached states if specified.
                     cache_load = False
@@ -3121,6 +3151,7 @@ class InductiveInvGen():
                     cti_action_invs_found.add((kcti.inv_name, kcti.action_name))
             logging.info("Number of total unique k-CTIs found: {}. (took {:.2f} secs)".format(len(k_ctis), (time.time()-t0)))
             logging.info(f"{len(cti_action_invs_found)} distinct k-CTI lemma-action proof obligations found: {cti_action_invs_found}")
+            cti_action_invs_found = sorted(cti_action_invs_found) # for consistent odering of proof obligations.
             for kcti in cti_action_invs_found:
                 logging.info(f" - {kcti}")
 
@@ -3142,7 +3173,8 @@ class InductiveInvGen():
                     print("No more current outstanding CTI lemma actions with local grammars.")
                     return
 
-                k_cti_lemma_action = random.choice(cti_action_lemmas_with_grammars)
+                # k_cti_lemma_action = random.choice(cti_action_lemmas_with_grammars)
+                k_cti_lemma_action = cti_action_lemmas_with_grammars[0]
                 (k_cti_lemma, k_cti_action) = k_cti_lemma_action
                 print(f"Chose {k_cti_lemma_action} proof obligation")
 
