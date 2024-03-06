@@ -487,9 +487,10 @@ class Trace():
 
 class CTI():
     """ Represents a single counterexample to induction (CTI) state. """
-    def __init__(self, cti_str="", cti_lines=[], action_name="", trace=None, load_from_obj=None):
+    def __init__(self, cti_str="", cti_lines=[], action_name="", inv_name="", trace=None, load_from_obj=None):
         self.cti_str = cti_str
         self.action_name = action_name
+        self.inv_name = inv_name
         self.cti_lines = cti_lines
         # The full counterexample trace associated with this CTI. The CTI state may fall at 
         # different points within this trace.
@@ -549,6 +550,9 @@ class CTI():
     
     def setActionName(self, action_name):
         self.action_name = action_name
+
+    def setInvName(self, inv_name):
+        self.inv_name = inv_name
 
     def setTrace(self, trace):
         self.trace = trace

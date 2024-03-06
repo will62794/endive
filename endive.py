@@ -768,7 +768,7 @@ class InductiveInvGen():
     /\ semaphore = (s1 :> FALSE @@ s2 :> TRUE)
     /\ clientlocks = (c1 :> {s1, s2} @@ c2 :> {s1})
     """
-    def parse_cti_trace(self, lines, curr_line):
+    def parse_cti_trace(self, lines, curr_line, inv_name):
         # Step to the 'State x' line
         # curr_line += 1
         # res = re.match(".*State (.*)\: <(.*) .*>",lines[curr_line])
@@ -776,6 +776,10 @@ class InductiveInvGen():
         # action_name = res.group(2)
         # print(res)
         # print(statek, action_name)
+
+        # Error: Invariant Safety_Constraint is violated.
+        # Error: The behavior up to this point is:
+        # State 1: <Initial predicate>
 
         # print("Parsing CTI trace. Start line: " , lines[curr_line])
         # print(curr_line, len(lines))
@@ -790,9 +794,13 @@ class InductiveInvGen():
             if re.search('Model checking completed', lines[curr_line]):
                 break
 
-            if re.search('Error: The behavior up to this point is', lines[curr_line]):
-                # print("--")
+            # if re.search('Error: The behavior up to this point is', lines[curr_line]):
+            #     # print("--")
+            #     break
+
+            if re.search('Error: Invariant.*is violated', lines[curr_line]):
                 break
+                # print(inv_name)
 
             # Check for next "State N" line.
             if re.search("^State (.*)", lines[curr_line]):
@@ -848,6 +856,7 @@ class InductiveInvGen():
             # step ahead of it in the trace.
             action_name = trace_action_names[k+1]
             cti.setActionName(action_name)
+            cti.setInvName(inv_name)
             cti.setTrace(trace)
             cti.trace_index = k
         
@@ -860,21 +869,40 @@ class InductiveInvGen():
 
     def parse_ctis(self, lines):
         all_ctis = set()
+        all_cti_traces = []
 
         curr_line = 0
 
         # Step forward to the first CTI error trace.
-        while not re.search('Error: The behavior up to this point is', lines[curr_line]):
+        # while not re.search('Error: The behavior up to this point is', lines[curr_line]):
+        while not re.search('Error.*Invariant.*is violated.', lines[curr_line]):
             curr_line += 1
             if curr_line >= len(lines):
                 break
 
-        all_cti_traces = []
+        if curr_line >= len(lines):
+            return (all_ctis, all_cti_traces)  
+
+        res = re.match("Error: Invariant (.*) is violated",lines[curr_line])
+        inv_name = res.group(1).split("_")[0]
+
         curr_line += 1
         while curr_line < len(lines):
-            (curr_line, trace_ctis, trace) = self.parse_cti_trace(lines, curr_line)
+            (curr_line, trace_ctis, trace) = self.parse_cti_trace(lines, curr_line, inv_name)
             all_ctis = all_ctis.union(trace_ctis)
             all_cti_traces.append(trace)
+
+            if curr_line >= len(lines):
+                break
+
+            while not re.search('Error.*Invariant.*is violated.', lines[curr_line]):
+                curr_line += 1
+                if curr_line >= len(lines):
+                    break
+
+            # Parse invariant name of next CTI trace.
+            res = re.match("Error: Invariant (.*) is violated",lines[curr_line])
+            inv_name = res.group(1).split("_")[0]
             curr_line += 1
         
         # for cti in all_ctis:
@@ -1005,6 +1033,9 @@ class InductiveInvGen():
         # Use for k-induction?
         # self.k_cti_induction_depth = 2
         invcheck_tla_indcheck += f'InvStrengthened_Constraint == {precond} /\ TLCGet("level") = {self.k_cti_induction_depth} => InvStrengthened \n'
+        for cinvname,cinvexp in props:
+            invcheck_tla_indcheck += f'{cinvname}_Constraint == {precond} /\ TLCGet("level") = {self.k_cti_induction_depth} => {cinvexp} \n'
+
 
         invcheck_tla_indcheck += "IndCand ==\n"
         typeok_expr = self.typeok
@@ -1068,7 +1099,13 @@ class InductiveInvGen():
         # might be probabilistic, which doesn't seem to work correctly when checking 
         # invariance.
         # invcheck_tla_indcheck_cfg += "INVARIANT InvStrengthened\n"
-        invcheck_tla_indcheck_cfg += "INVARIANT InvStrengthened_Constraint\n"
+        # invcheck_tla_indcheck_cfg += "INVARIANT InvStrengthened_Constraint\n"
+
+        # Check each taret invariant separately.
+        for cinvname,cinvexp in props:
+            invcheck_tla_indcheck_cfg += f"INVARIANT {cinvname}_Constraint\n"
+            # invcheck_tla_indcheck += f'{cinvname}_Constraint == {precond} /\ TLCGet("level") = {self.k_cti_induction_depth} => {cinvexp} \n'
+
         # invcheck_tla_indcheck_cfg += "INVARIANT OnePrimaryPerTerm\n"
         invcheck_tla_indcheck_cfg += self.constants_obj_to_constants_str(constants_obj)
         invcheck_tla_indcheck_cfg += self.get_tlc_overrides_str()
