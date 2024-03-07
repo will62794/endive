@@ -3289,7 +3289,7 @@ class InductiveInvGen():
                     preds = [p for (pi,p) in enumerate(self.preds) if vars_in_preds[pi] <= lemma_action_coi]
                     logging.info(f"{len(preds)}/{len(self.preds)} filtered predicates based on COI slice.")
 
-                    cache_with_ignored_vars = lemma_action_coi
+                    cache_with_ignored_vars = [v for v in self.state_vars if v not in lemma_action_coi]
 
                 self.total_num_cti_elimination_rounds = (roundi + 1)
                 # ret = self.eliminate_ctis(k_ctis, self.num_invs, roundi, preds=preds, cache_states_with_ignored_vars=cache_with_ignored_vars)
