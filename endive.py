@@ -3301,8 +3301,11 @@ class InductiveInvGen():
                     logging.info(f"Could not eliminate all CTIs in this round (Round {roundi}). Exiting with failure.")
                     elim_round_failed = True
                     break
+
+                # Determines whether we will re-generate CTIs after every new strengthening lemma discovered.
                 k_ctis = [c for c in k_ctis if c not in k_ctis_to_eliminate]
                 # k_ctis = []
+
                 logging.info(f"k-ctis remaining after Round {roundi} elimination step: {len(k_ctis)} (eliminated {len(k_ctis_to_eliminate)})")
                 logging.info("")
             if elim_round_failed:
