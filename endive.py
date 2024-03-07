@@ -2350,10 +2350,15 @@ class InductiveInvGen():
 
                     logging.info("%s %s", inv, invexp) #, "(eliminates %d CTIs)" % len(cti_states_eliminated_by_invs[inv])
 
-                    # Printing edges for inductive proof graph.
+                    # Save edges for inductive proof graph.
                     if self.auto_lemma_action_decomposition:
-                        print(f"{orig_k_ctis[0].inv_name}_{orig_k_ctis[0].action_name}",  "->", f"{orig_k_ctis[0].inv_name}", "// EDGE")
-                        print(inv + inv_suffix, "->", f"{orig_k_ctis[0].inv_name}_{orig_k_ctis[0].action_name}", "// EDGE")
+                        e1 = (f"{orig_k_ctis[0].inv_name}_{orig_k_ctis[0].action_name}", f"{orig_k_ctis[0].inv_name}")
+                        e2 = (inv + inv_suffix, f"{orig_k_ctis[0].inv_name}_{orig_k_ctis[0].action_name}")
+                        self.proof_graph["edges"].append(e1)
+                        self.proof_graph["edges"].append(e2)
+                        # print(f"{orig_k_ctis[0].inv_name}_{orig_k_ctis[0].action_name}",  "->", f"{orig_k_ctis[0].inv_name}", "// EDGE")
+                        # print(inv + inv_suffix, "->", f"{orig_k_ctis[0].inv_name}_{orig_k_ctis[0].action_name}", "// EDGE")
+
                     # print "CTIs eliminated by this invariant: %d" % len(cti_states_eliminated_by_invs[inv])
                 # Re-run the iteration if new conjuncts were discovered.
                 # Don't re-run iterations where max_conjs=1, since they are small and quick.
@@ -3160,6 +3165,9 @@ class InductiveInvGen():
             vars_in_preds = self.extract_vars_from_preds()
             # for p in sorted(vars_in_preds.keys()):
                 # print(p, self.preds[p], vars_in_preds[p])
+            
+            # Save proof graph as well for diagnosis.
+            self.proof_graph = {"edges": [], "safety": self.safety}
 
         #
         # Check valuation of all predicates on reachable states.
@@ -3375,6 +3383,23 @@ class InductiveInvGen():
         else:
             logging.info("Not fully done. Discovered invariant is not inductive.")
 
+    def render_proof_graph(self):
+        dot = graphviz.Digraph(f'{self.specname}-proof-graph', comment='The Round Table')  
+        #  dot.graph_attr["rankdir"] = "LR"
+        dot.node_attr["fontname"] = "courier"
+        dot.node_attr["shape"] = "box"
+        
+        # Store all nodes.
+        for e in self.proof_graph["edges"]:
+            dot.node(e[0])
+            dot.node(e[1])
+
+        for e in self.proof_graph["edges"]:
+            dot.edge(e[0], e[1])
+
+        logging.info(f"Rendering proof graph ({len(self.proof_graph['edges'])})")
+        dot.render(self.specdir + "/" + self.specname + "_ind-proof-tree")
+
     def run(self):
         tstart = time.time()
 
@@ -3437,6 +3462,9 @@ class InductiveInvGen():
             print("Finished inductive invariant generation in proof tree mode.")
         else:
             self.do_invgen()
+
+            if self.auto_lemma_action_decomposition and len(self.proof_graph["edges"]) > 0:
+                self.render_proof_graph()
 
         tend = time.time()
         self.total_duration_secs = (tend - tstart)
