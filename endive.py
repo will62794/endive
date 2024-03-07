@@ -2477,7 +2477,7 @@ class InductiveInvGen():
             root = proof_2pc.root
             actions = proof_2pc.actions
             nodes = proof_2pc.nodes
-        if self.specname == "Hermes":
+        elif self.specname == "Hermes":
             root = proof_Hermes.root
             actions = proof_Hermes.actions
             nodes = proof_Hermes.nodes
@@ -2543,7 +2543,7 @@ class InductiveInvGen():
             logging.info("Unknown spec for proof structure: " + self.specname)
             root = StructuredProofNode("Safety", self.safety)
             nodes = []
-            actions = self.spec_config["actions"]
+            # actions = self.spec_config["actions"]
             # return
 
         ###########
@@ -2763,7 +2763,8 @@ class InductiveInvGen():
                 response = flask.jsonify({'ok': True, 'proof_graph': proof_json})
                 response.headers.add('Access-Control-Allow-Origin', '*')
                 # Save TLAPS proof.
-                proof.to_tlaps_proof_skeleton(self.spec_config["tlaps_proof_config"])
+                if "tlaps_proof_config" in self.spec_config:
+                    proof.to_tlaps_proof_skeleton(self.spec_config["tlaps_proof_config"])
                 # Save Apalache inductive proof obligations.
                 proof.to_apalache_proof_obligations()
                 return response
