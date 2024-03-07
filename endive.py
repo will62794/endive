@@ -3105,8 +3105,6 @@ class InductiveInvGen():
             logging.info(f"Pre-generating invariants with command '{self.pregen_inv_cmd}'")
             self.pre_generate_invs()
 
-        self.auto_lemma_action_decomposition = False
-
         vars_in_preds = {}
         if self.auto_lemma_action_decomposition:
             logging.info("Extracting variables present in each grammar predicate.")
