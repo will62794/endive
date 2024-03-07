@@ -77,3 +77,4 @@ statecache*
 subsumption_graphs/
 *.chkpt
 *pred_extract_test*
+*lemma_parse*
