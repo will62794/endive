@@ -68,7 +68,8 @@ class InductiveInvGen():
                     symmetry=False, simulate=False, simulate_depth=6, typeok="TypeOK", tlc_specific_spec=False, seed=0, num_invs=1000, num_rounds=3, num_iters=3, 
                     num_simulate_traces=10000, tlc_workers=6, quant_vars=[],java_exe="java",cached_invs=None, cached_invs_gen_time_secs=None, use_cpp_invgen=False,
                     pregen_inv_cmd=None, opt_quant_minimize=False, try_final_minimize=False, proof_tree_mode=False, interactive_mode=False, max_num_conjuncts_per_round=10000,
-                    max_num_ctis_per_round=10000, override_num_cti_workers=None, use_apalache_ctigen=False,all_args={},spec_config=None, enable_inv_state_caching=False):
+                    max_num_ctis_per_round=10000, override_num_cti_workers=None, use_apalache_ctigen=False,all_args={},spec_config=None, enable_inv_state_caching=False,
+                    auto_lemma_action_decomposition=False):
         self.java_exe = java_exe
         self.java_version_info = None
         
@@ -90,6 +91,7 @@ class InductiveInvGen():
         self.tlc_workers = tlc_workers
         self.use_apalache_ctigen = use_apalache_ctigen
         self.do_apalache_final_induction_check = all_args["do_apalache_final_induction_check"]
+        self.auto_lemma_action_decomposition = auto_lemma_action_decomposition
 
         # Ensure a reasonable default timeout on these checks for now.
         # See https://apalache.informal.systems/docs/apalache/tuning.html#timeouts for more details.
@@ -2160,7 +2162,7 @@ class InductiveInvGen():
             #
             ############
 
-            logging.info("Checking which invariants eliminate CTIs.")
+            logging.info(f"Checking which invariants eliminate CTIs ({len(orig_k_ctis)} total CTIs).")
 
             # Initialize table mapping from invariants to a set of CTI states they violate.
             cti_states_eliminated_by_invs = {}
@@ -2344,6 +2346,11 @@ class InductiveInvGen():
                     uniqid += 1
 
                     logging.info("%s %s", inv, invexp) #, "(eliminates %d CTIs)" % len(cti_states_eliminated_by_invs[inv])
+
+                    # Printing edges for inductive proof graph.
+                    if self.auto_lemma_action_decomposition:
+                        print(f"{orig_k_ctis[0].inv_name}_{orig_k_ctis[0].action_name}",  "->", f"{orig_k_ctis[0].inv_name}", "// EDGE")
+                        print(inv + inv_suffix, "->", f"{orig_k_ctis[0].inv_name}_{orig_k_ctis[0].action_name}", "// EDGE")
                     # print "CTIs eliminated by this invariant: %d" % len(cti_states_eliminated_by_invs[inv])
                 # Re-run the iteration if new conjuncts were discovered.
                 if self.rerun_iterations:
@@ -3071,6 +3078,41 @@ class InductiveInvGen():
                         # self.all_generated_lemmas.add(support_lemma)
             logging.info("")
 
+#
+#
+# Older logic that is based on using explicit local grammar defs.
+#
+# state_vars_in_local_grammar = self.state_vars
+# state_vars_not_in_local_grammar = set(self.state_vars)
+# if "local_grammars" in self.spec_config and k_cti_action in self.spec_config["local_grammars"]:
+#     lgrammar = self.spec_config["local_grammars"][k_cti_action][k_cti_lemma]
+#     if "max_depth" in lgrammar:
+#         self.spec_config["max_tlc_inv_depth"] = lgrammar["max_depth"]
+
+#     preds = lgrammar["preds"]
+#     self.quant_vars = lgrammar["preds"]
+#     self.quant_inv = lgrammar["quant_inv"]
+#     self.initialize_quant_inv()
+#     logging.info(f"Using local grammar for node ({k_cti_lemma}, {k_cti_action}) with {len(preds)} predicates.")
+
+#     def svar_in_pred(v, p):
+#         # avoid variables with shared substrings.
+#         return f"{v}[" in p or f"{v} " in p or f"{v}:" in p
+
+#     state_vars_in_local_grammar = set()
+#     for p in (preds + [lgrammar["quant_inv"]]):
+#         svars = []
+#         for svar in self.state_vars:
+#             if svar_in_pred(svar, p):
+#                 svars.append(svar)
+#                 state_vars_in_local_grammar.add(svar)
+#                 state_vars_not_in_local_grammar.discard(svar)
+#         # print(p, svars)
+#     print(f"{len(state_vars_in_local_grammar)} state vars in local grammar:", state_vars_in_local_grammar)
+#     print(f"{len(state_vars_not_in_local_grammar)} state vars not in local grammar:", state_vars_not_in_local_grammar)
+#     cache_with_ignored_vars = state_vars_not_in_local_grammar
+#
+
     def extract_vars_from_preds(self):
         """ Compute the set of variables that appears in each grammar predicate."""
 
@@ -3242,113 +3284,7 @@ class InductiveInvGen():
                     preds = [p for (pi,p) in enumerate(self.preds) if vars_in_preds[pi] <= lemma_action_coi]
                     logging.info(f"{len(preds)}/{len(self.preds)} filtered predicates based on COI slice.")
 
-                cache_with_ignored_vars = lemma_action_coi
-                cache_with_ignored_vars = lemma_action_coi
-                
-                #
-                # Old logic that is based on explicit local grammar defs.
-                #
-                # state_vars_in_local_grammar = self.state_vars
-                # state_vars_not_in_local_grammar = set(self.state_vars)
-                # if "local_grammars" in self.spec_config and k_cti_action in self.spec_config["local_grammars"]:
-                #     lgrammar = self.spec_config["local_grammars"][k_cti_action][k_cti_lemma]
-                #     if "max_depth" in lgrammar:
-                #         self.spec_config["max_tlc_inv_depth"] = lgrammar["max_depth"]
-
-                #     preds = lgrammar["preds"]
-                #     self.quant_vars = lgrammar["preds"]
-                #     self.quant_inv = lgrammar["quant_inv"]
-                #     self.initialize_quant_inv()
-                #     logging.info(f"Using local grammar for node ({k_cti_lemma}, {k_cti_action}) with {len(preds)} predicates.")
-
-                #     def svar_in_pred(v, p):
-                #         # avoid variables with shared substrings.
-                #         return f"{v}[" in p or f"{v} " in p or f"{v}:" in p
-
-                #     state_vars_in_local_grammar = set()
-                #     for p in (preds + [lgrammar["quant_inv"]]):
-                #         svars = []
-                #         for svar in self.state_vars:
-                #             if svar_in_pred(svar, p):
-                #                 svars.append(svar)
-                #                 state_vars_in_local_grammar.add(svar)
-                #                 state_vars_not_in_local_grammar.discard(svar)
-                #         # print(p, svars)
-                #     print(f"{len(state_vars_in_local_grammar)} state vars in local grammar:", state_vars_in_local_grammar)
-                #     print(f"{len(state_vars_not_in_local_grammar)} state vars not in local grammar:", state_vars_not_in_local_grammar)
-                #     cache_with_ignored_vars = state_vars_not_in_local_grammar
-
-            
-            # Limit number of CTIs if necessary.
-            if len(k_ctis) > self.MAX_NUM_CTIS_PER_ROUND:
-                logging.info(f"Limiting num k-CTIs to {self.MAX_NUM_CTIS_PER_ROUND} of {len(k_ctis)} total found.")
-                # Sort CTIS first to ensure we always select a consistent subset.
-                limited_ctis = sorted(list(k_ctis))[:self.MAX_NUM_CTIS_PER_ROUND]
-                k_ctis = set(limited_ctis)
-            
-            if len(k_ctis) == 0:
-                if roundi==0:
-                    logging.info("No initial CTIs found. Marking invariant as inductive and exiting.")
-                    self.is_inductive = True
-                    return
-                else:
-                    logging.info("Invariant appears likely to be inductive!")
-                break
-            else:
-                logging.info("Not done. Current invariant candidate is not inductive.")
                     cache_with_ignored_vars = lemma_action_coi
-                
-                #
-                # Old logic that is based on explicit local grammar defs.
-                #
-                # state_vars_in_local_grammar = self.state_vars
-                # state_vars_not_in_local_grammar = set(self.state_vars)
-                # if "local_grammars" in self.spec_config and k_cti_action in self.spec_config["local_grammars"]:
-                #     lgrammar = self.spec_config["local_grammars"][k_cti_action][k_cti_lemma]
-                #     if "max_depth" in lgrammar:
-                #         self.spec_config["max_tlc_inv_depth"] = lgrammar["max_depth"]
-
-                #     preds = lgrammar["preds"]
-                #     self.quant_vars = lgrammar["preds"]
-                #     self.quant_inv = lgrammar["quant_inv"]
-                #     self.initialize_quant_inv()
-                #     logging.info(f"Using local grammar for node ({k_cti_lemma}, {k_cti_action}) with {len(preds)} predicates.")
-
-                #     def svar_in_pred(v, p):
-                #         # avoid variables with shared substrings.
-                #         return f"{v}[" in p or f"{v} " in p or f"{v}:" in p
-
-                #     state_vars_in_local_grammar = set()
-                #     for p in (preds + [lgrammar["quant_inv"]]):
-                #         svars = []
-                #         for svar in self.state_vars:
-                #             if svar_in_pred(svar, p):
-                #                 svars.append(svar)
-                #                 state_vars_in_local_grammar.add(svar)
-                #                 state_vars_not_in_local_grammar.discard(svar)
-                #         # print(p, svars)
-                #     print(f"{len(state_vars_in_local_grammar)} state vars in local grammar:", state_vars_in_local_grammar)
-                #     print(f"{len(state_vars_not_in_local_grammar)} state vars not in local grammar:", state_vars_not_in_local_grammar)
-                #     cache_with_ignored_vars = state_vars_not_in_local_grammar
-
-            
-            # Limit number of CTIs if necessary.
-            if len(k_ctis) > self.MAX_NUM_CTIS_PER_ROUND:
-                logging.info(f"Limiting num k-CTIs to {self.MAX_NUM_CTIS_PER_ROUND} of {len(k_ctis)} total found.")
-                # Sort CTIS first to ensure we always select a consistent subset.
-                limited_ctis = sorted(list(k_ctis))[:self.MAX_NUM_CTIS_PER_ROUND]
-                k_ctis = set(limited_ctis)
-            
-            if len(k_ctis) == 0:
-                if roundi==0:
-                    logging.info("No initial CTIs found. Marking invariant as inductive and exiting.")
-                    self.is_inductive = True
-                    return
-                else:
-                    logging.info("Invariant appears likely to be inductive!")
-                break
-            else:
-                logging.info("Not done. Current invariant candidate is not inductive.")
 
                 self.total_num_cti_elimination_rounds = (roundi + 1)
                 # ret = self.eliminate_ctis(k_ctis, self.num_invs, roundi, preds=preds, cache_states_with_ignored_vars=cache_with_ignored_vars)
@@ -3580,6 +3516,7 @@ if __name__ == "__main__":
     parser.add_argument('--max_num_ctis_per_round', help='Max number of CTIs per round.', type=int, default=10000)
     parser.add_argument('--override_num_cti_workers', help='Max number of TLC workers for CTI generation.', type=int, default=None)
     parser.add_argument('--k_cti_induction_depth', help='CTI k-induction depth.', type=int, default=1)
+    parser.add_argument('--auto_lemma_action_decomposition', help='Automatically split inductive proof obligations by action and lemmas.', required=False, default=False, action='store_true')
     
     # Proof tree related commands.
     parser.add_argument('--proof_tree_mode', help='Run in inductive proof tree mode (EXPERIMENTAL).', default=False, action='store_true')
@@ -3695,7 +3632,8 @@ if __name__ == "__main__":
                                 interactive_mode=args["interactive"],
                                 max_num_conjuncts_per_round=args["max_num_conjuncts_per_round"], max_num_ctis_per_round=args["max_num_ctis_per_round"],
                                 override_num_cti_workers=args["override_num_cti_workers"],use_apalache_ctigen=args["use_apalache_ctigen"],all_args=args,
-                                spec_config=spec_config, enable_inv_state_caching=args["enable_inv_state_caching"])
+                                spec_config=spec_config, enable_inv_state_caching=args["enable_inv_state_caching"],
+                                auto_lemma_action_decomposition=args["auto_lemma_action_decomposition"])
 
 
     # Only do invariant generation, cache the invariants, and then exit.
