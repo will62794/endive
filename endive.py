@@ -677,7 +677,7 @@ class InductiveInvGen():
 
     #     return set()
 
-    def make_check_invariants_spec(self, invs, root_filepath, exclude_inv_defs=False, invname_prefix="Inv"):
+    def make_check_invariants_spec(self, invs, root_filepath, exclude_inv_defs=False, invname_prefix="Inv", defs_to_add=[]):
         specname = os.path.basename(root_filepath)
         invcheck_tla = f"---- MODULE {specname} ----\n"
         invcheck_tla += "EXTENDS %s\n\n" % self.specname
@@ -689,6 +689,9 @@ class InductiveInvGen():
                 sinv = (f"{invname_prefix}{i} == ") + self.quant_inv(inv)
                 all_inv_names.add(f"{invname_prefix}{i}")
                 invcheck_tla += sinv + "\n"
+
+        for d in defs_to_add:
+            invcheck_tla += f"{d[0]} == {d[1]}\n"
 
         invcheck_tla += "===="
 
@@ -3155,7 +3158,7 @@ class InductiveInvGen():
                 else:
                     cti_action_invs_found.add((kcti.inv_name, kcti.action_name))
             logging.info("Number of total unique k-CTIs found: {}. (took {:.2f} secs)".format(len(k_ctis), (time.time()-t0)))
-            logging.info(f"{len(cti_action_invs_found)} distinct k-CTI lemma-action proof obligations found: {cti_action_invs_found}")
+            logging.info(f"{len(cti_action_invs_found)} distinct k-CTI lemma-action proof obligations found:")
             cti_action_invs_found = sorted(cti_action_invs_found) # for consistent odering of proof obligations.
             for kcti in cti_action_invs_found:
                 logging.info(f" - {kcti}")
@@ -3164,22 +3167,41 @@ class InductiveInvGen():
             #
             # LEMMA-ACTION specific technique.
             #
+                
+            spec_obj_with_lemmas = self.tla_spec_obj
 
             cache_with_ignored_vars = None
             preds = self.preds
             if lemma_action_mode:
                 # Pick one of these CTI lemma/action obligations.
-                cti_action_lemmas_with_grammars = [
-                    c for c in cti_action_invs_found 
-                        if c[1] in self.spec_config["local_grammars"] and c[0] in self.spec_config["local_grammars"][c[1]]
-                ]
+                # cti_action_lemmas_with_grammars = [
+                #     c for c in cti_action_invs_found 
+                #         if c[1] in self.spec_config["local_grammars"] and c[0] in self.spec_config["local_grammars"][c[1]]
+                # ]
 
-                if len(cti_action_lemmas_with_grammars) == 0:
+                # Re-parse spec object to include definitions of any newly generate strengthening lemmas.
+                if len(self.strengthening_conjuncts) > 0:
+                    specname = f"{self.specname}_lemma_parse"
+                    rootpath = f"benchmarks/{specname}"
+                    # invname_prefix = "PredInvDef"
+                    # self.strengthening_conjuncts
+                    print("STRENGHTENING:", self.strengthening_conjuncts)
+                    self.make_check_invariants_spec([], rootpath, defs_to_add=self.strengthening_conjuncts)
+
+                    logging.info("Re-parsing spec for any newly discovered lemma definitions.")
+                    spec_obj_with_lemmas = tlaparse.parse_tla_file(self.specdir, specname)
+
+                defs = spec_obj_with_lemmas.get_all_user_defs(level="1")
+                # for d in defs:
+                    # print(d)
+
+                # if len(cti_action_lemmas_with_grammars) == 0:
+                if len(cti_action_invs_found) == 0:
                     print("No more current outstanding CTI lemma actions with local grammars.")
                     return
 
                 # k_cti_lemma_action = random.choice(cti_action_lemmas_with_grammars)
-                k_cti_lemma_action = cti_action_lemmas_with_grammars[0]
+                k_cti_lemma_action = cti_action_invs_found[0]
                 (k_cti_lemma, k_cti_action) = k_cti_lemma_action
                 print(f"Chose {k_cti_lemma_action} proof obligation")
 
@@ -3192,13 +3214,13 @@ class InductiveInvGen():
                 # actions_real_defs = [a.replace("Action", "") for a in actions]
                 lemma_action_coi = {}
 
-                ret = self.tla_spec_obj.get_vars_in_def(k_cti_action)
+                ret = spec_obj_with_lemmas.get_vars_in_def(k_cti_action)
                 vars_in_action,action_updated_vars = ret
                 # print("vars in action:", action_updated_vars[action])
-                vars_in_action_non_updated,_ = self.tla_spec_obj.get_vars_in_def(k_cti_action, ignore_update_expressions=True)
-                vars_in_lemma_defs = self.tla_spec_obj.get_vars_in_def(k_cti_lemma)[0]
+                vars_in_action_non_updated,_ = spec_obj_with_lemmas.get_vars_in_def(k_cti_action, ignore_update_expressions=True)
+                vars_in_lemma_defs = spec_obj_with_lemmas.get_vars_in_def(k_cti_lemma)[0]
 
-                lemma_action_coi = self.tla_spec_obj.compute_coi(None, None, None,action_updated_vars, vars_in_action_non_updated, vars_in_lemma_defs)
+                lemma_action_coi = spec_obj_with_lemmas.compute_coi(None, None, None,action_updated_vars, vars_in_action_non_updated, vars_in_lemma_defs)
                 print("Lemma-action COI")
                 print(lemma_action_coi)
                 # for ind,p in enumerate(self.preds):
