@@ -443,7 +443,17 @@ H_AllAcksRecvdImpliesNewerTS ==
         (receivedAllAcks(n) /\ nodeState[n] \in {"replay", "write"}) => 
             (greaterOrEqualTS(nodeTS[n2].version, nodeTS[n2].tieBreaker, nodeTS[n].version, nodeTS[n].tieBreaker)) 
 
+
+H_Inv1439_R0_1_0 == 
+    \A VARI \in aliveNodes : 
+    \A VARMI \in msgsVAL : 
+        ~((VARMI.type = "VAL") => greaterTS(VARMI.version, VARMI.tieBreaker, nodeTS[VARI].version, nodeTS[VARI].tieBreaker)) \/ (~(NewestVALMsg(VARMI)))
+
 \* HH_Inv4137_R0_1_2 == \A VARI \in aliveNodes : \A VARJ \in aliveNodes : ~(nodeState[VARI] = "replay") \/ (~(receivedAllAcks(VARI))) \/ (~(nodeTS[VARI].version > nodeTS[VARJ].version))
+
+\* 
+\* Support group of 3.
+\* 
 
 HH_Inv859_R0_1_0 == 
     \A VARI \in aliveNodes : 
@@ -452,10 +462,6 @@ HH_Inv859_R0_1_0 ==
             (\/ (greaterOrEqualTS(nodeTS[VARI].version, nodeTS[VARI].tieBreaker, nodeTS[VARJ].version, nodeTS[VARJ].tieBreaker)) 
              \/ ((nodeState[VARI] = "valid")))
 
-H_Inv1439_R0_1_0 == 
-    \A VARI \in aliveNodes : 
-    \A VARMI \in msgsVAL : 
-        ~((VARMI.type = "VAL") => greaterTS(VARMI.version, VARMI.tieBreaker, nodeTS[VARI].version, nodeTS[VARI].tieBreaker)) \/ (~(NewestVALMsg(VARMI)))
 
 HH_WriteNodeWithAllAcksImpliesAllAliveAreValid == 
     \A VARI \in aliveNodes : 
@@ -495,4 +501,7 @@ H_Inv1293_R0_1_0 ==
     \A VARI \in aliveNodes : 
     \A VARMI \in msgsVAL : 
         ~((VARMI.type = "VAL") => greaterTS(VARMI.version, VARMI.tieBreaker, nodeTS[VARI].version, nodeTS[VARI].tieBreaker)) \/ (~(NewestVALMsg(VARMI)))
+
+
+H_Inv1534_R0_1_I1_1 == \A VARI \in aliveNodes : \A VARMVALI \in msgsVAL : ~((VARMVALI.type = "VAL") => greaterTS(VARMVALI.version, VARMVALI.tieBreaker, nodeTS[VARI].version, nodeTS[VARI].tieBreaker)) \/ ~(((VARMVALI.type = "VAL")))
 =============================================================================

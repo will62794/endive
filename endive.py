@@ -1829,8 +1829,8 @@ class InductiveInvGen():
         eliminated_ctis = set()
 
         # Parameters for invariant generation.
-        min_conjs = 2
-        max_conjs = 2
+        init_conjs = 1
+        min_conjs, max_conjs = (init_conjs, init_conjs)
         process_local = False
         quant_inv_fn = self.quant_inv
 
@@ -1859,31 +1859,31 @@ class InductiveInvGen():
 
             # On second iteration, search for non process local invariants.
             if iteration==2:
-                min_conjs = 3
-                max_conjs = 3
+                num_conjs = init_conjs + 1
+                (min_conjs, max_conjs) = (num_conjs, num_conjs)
                 process_local=False
                 quant_inv_fn = self.quant_inv
 
             # On third and following iterations, search for non process local invariants with more conjuncts.
             if iteration==3:
-                min_conjs = 4
-                max_conjs = 4
+                num_conjs = init_conjs + 2
+                (min_conjs, max_conjs) = (num_conjs, num_conjs)
                 process_local=False
                 if quant_inv_alt:
                     quant_inv_fn = quant_inv_alt
                     preds = preds + preds_alt
 
             if iteration==4:
-                min_conjs = 5
-                max_conjs = 5
+                num_conjs = init_conjs + 3
+                (min_conjs, max_conjs) = (num_conjs, num_conjs)
                 process_local=False
                 if quant_inv_alt:
                     quant_inv_fn = quant_inv_alt
                     preds = preds + preds_alt
 
             if iteration==5:
-                min_conjs = 6
-                max_conjs = 6
+                num_conjs = init_conjs + 4
+                (min_conjs, max_conjs) = (num_conjs, num_conjs)
                 process_local=False
                 if quant_inv_alt:
                     quant_inv_fn = quant_inv_alt
@@ -2356,7 +2356,8 @@ class InductiveInvGen():
                         print(inv + inv_suffix, "->", f"{orig_k_ctis[0].inv_name}_{orig_k_ctis[0].action_name}", "// EDGE")
                     # print "CTIs eliminated by this invariant: %d" % len(cti_states_eliminated_by_invs[inv])
                 # Re-run the iteration if new conjuncts were discovered.
-                if self.rerun_iterations:
+                # Don't re-run iterations where max_conjs=1, since they are small and quick.
+                if self.rerun_iterations and max_conjs > 1:
                     iteration -= 1
 
             num_ctis_remaining = len(list(cti_table.keys()))-len(eliminated_ctis)
