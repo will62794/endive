@@ -179,8 +179,6 @@ HWrite(n) == \* Execute a write
     \* writes in invalid state are also supported as an optimization
     /\  nodeState[n]      \in {"valid"}
     /\  nodeTS[n].version < H_MAX_VERSION \* Only to configurably terminate the model checking 
-    \* /\  h_actions_for_upd(n, nodeTS[n].version + 1, n, "write", {})
-    \* /\  h_upd_state(n, nodeTS[n].version + 1, n, "write", {})
     /\  nodeLastWriter'   = [nodeLastWriter  EXCEPT ![n] = n]
     /\  nodeRcvedAcks'    = [nodeRcvedAcks   EXCEPT ![n] = {}]
     /\  nodeState'        = [nodeState       EXCEPT ![n] = "write"]
