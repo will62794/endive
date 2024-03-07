@@ -1038,7 +1038,7 @@ class InductiveInvGen():
         """
 
         if props == None:
-            props = [("Safety",self.safety)] + self.strengthening_conjuncts
+            props = [("Safety",self.safety,self.safety)] + self.strengthening_conjuncts
 
         # Avoid TLC directory naming conflicts.
         # Use small UUID.
@@ -1056,12 +1056,12 @@ class InductiveInvGen():
         # invcheck_tla_indcheck += self.model_consts + "\n"
 
         # Add definitions for for all strengthening conjuncts and for the current invariant.
-        for cinvname,cinvexp in props:
+        for cinvname,cinvexp,_ in props:
             invcheck_tla_indcheck += ("%s == %s\n" % (cinvname, cinvexp))
 
         # Create formula string which is conjunction of all strengthening conjuncts.
         strengthening_conjuncts_str = ""
-        for cinvname,cinvexp in props:
+        for cinvname,cinvexp,_ in props:
             strengthening_conjuncts_str += "    /\\ %s\n" % cinvname
 
         # Add definition of current inductive invariant candidate.
@@ -1079,7 +1079,7 @@ class InductiveInvGen():
         # Use for k-induction?
         # self.k_cti_induction_depth = 2
         invcheck_tla_indcheck += f'InvStrengthened_Constraint == {precond} /\ TLCGet("level") = {self.k_cti_induction_depth} => InvStrengthened \n'
-        for cinvname,cinvexp in props:
+        for cinvname,cinvexp,_ in props:
             invcheck_tla_indcheck += f'{cinvname}_Constraint == {precond} /\ TLCGet("level") = {self.k_cti_induction_depth} => {cinvexp} \n'
 
 
@@ -1148,7 +1148,7 @@ class InductiveInvGen():
         # invcheck_tla_indcheck_cfg += "INVARIANT InvStrengthened_Constraint\n"
 
         # Check each taret invariant separately.
-        for cinvname,cinvexp in props:
+        for cinvname,cinvexp,_ in props:
             invcheck_tla_indcheck_cfg += f"INVARIANT {cinvname}_Constraint\n"
             # invcheck_tla_indcheck += f'{cinvname}_Constraint == {precond} /\ TLCGet("level") = {self.k_cti_induction_depth} => {cinvexp} \n'
 
@@ -1416,7 +1416,7 @@ class InductiveInvGen():
         invcheck_tla_indcheck += "\n"
 
         # Add definitions for all invariants and strengthening conjuncts.
-        for cinvname,cinvexp in self.strengthening_conjuncts:
+        for cinvname,cinvexp,cinvexp_unquant in self.strengthening_conjuncts:
             invcheck_tla_indcheck += ("%s == %s\n" % (cinvname, cinvexp))
 
         for inv in sat_invs_group:
@@ -1442,7 +1442,7 @@ class InductiveInvGen():
         invcheck_tla_indcheck += "\n"
 
         strengthening_conjuncts_str = ""
-        for cinvname,cinvexp in self.strengthening_conjuncts:
+        for cinvname,cinvexp,cinvexp_unquant in self.strengthening_conjuncts:
             strengthening_conjuncts_str += "    /\\ %s\n" % cinvname
 
         invcheck_tla_indcheck += "\n"
@@ -1979,6 +1979,12 @@ class InductiveInvGen():
                     invs_avoid_set=inv_candidates_generated_in_iteration)
                 
                 invs = all_invs["raw_invs"]
+
+                # # Always add in existing strengthening conjuncts to the set of invariants to consider.
+                # # TODO: Need to consider cleaner ways for re-using existing strengthening conjuncts.
+                # for c in self.strengthening_conjuncts:
+                #     invs.add(c[2])
+
                 invs_symb_strs = all_invs["pred_invs"]
                 inv_candidates_generated_in_iteration.update(invs_symb_strs)
 
@@ -2351,7 +2357,8 @@ class InductiveInvGen():
                 logging.info("*** New strengthening conjuncts *** ")
                 for inv in chosen_invs:
                     invi = int(inv.replace("Inv",""))
-                    invexp = quant_inv_fn(sorted(invs)[invi])
+                    unquant_invexp = sorted(invs)[invi]
+                    invexp = quant_inv_fn(unquant_invexp)
                 
                     inv_suffix = ""
                     if append_inv_round_id:
@@ -2361,7 +2368,7 @@ class InductiveInvGen():
                         inv_suffix += "_I" + str(iteration) + "_" + str(uniqid)
                         
                     # Add the invariant as a conjunct.
-                    self.strengthening_conjuncts.append((inv + inv_suffix, invexp))
+                    self.strengthening_conjuncts.append((inv + inv_suffix, invexp, unquant_invexp))
                     uniqid += 1
 
                     logging.info("%s %s", inv, invexp) #, "(eliminates %d CTIs)" % len(cti_states_eliminated_by_invs[inv])
