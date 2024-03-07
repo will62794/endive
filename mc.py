@@ -345,7 +345,7 @@ def generate_invs(preds, num_invs, min_num_conjuncts=2, max_num_conjuncts=2,
 
             # Sort invariant terms to produce more consistent output regardless of random seed.
             new_inv_args = [new_term,inv]
-            new_inv_args = sorted(new_inv_args)
+            # new_inv_args = sorted(new_inv_args) # With generalized negation structure don't think we want sorting here.
             # TODO: Generalize this so that whole expressions can be negated?
             use_restricted_negation = False
             front_neg = random.choice(["", "~"])
