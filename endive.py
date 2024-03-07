@@ -3433,7 +3433,7 @@ class InductiveInvGen():
         for e in self.proof_graph["edges"]:
             dot.edge(e[0], e[1])
 
-        logging.info(f"Rendering proof graph ({len(self.proof_graph['edges'])})")
+        logging.info(f"Rendering proof graph ({len(self.proof_graph['edges'])} edges)")
         dot.render(self.specdir + "/" + self.specname + "_ind-proof-tree")
 
     def run(self):
