@@ -224,30 +224,30 @@ HCoordinatorActions(n) ==   \* Actions of a read/write coordinator
 
 -------------------------------------------------------------------------------------               
     
-HRcvInv(n) ==  \* Process a received invalidation
-    \E m \in msgsINV: 
-        /\ m.type     = "INV"
-        /\ m.epochID  = epochID
-        /\ m.sender  /= n
-        \* always acknowledge a received invalidation (irrelevant to the timestamp)
-        /\ send([type       |-> "ACK",
-                 sender     |-> n,   
-                 epochID    |-> epochID,
-                 version    |-> m.version,
-                 tieBreaker |-> m.tieBreaker], msgsACK)
-        /\ IF greaterTS(m.version, m.tieBreaker,
-                        nodeTS[n].version, nodeTS[n].tieBreaker)
-           THEN   /\ nodeLastWriter' = [nodeLastWriter EXCEPT ![n] = m.sender]
-                  /\ nodeTS' = [nodeTS EXCEPT ![n].version    = m.version,
-                                          ![n].tieBreaker = m.tieBreaker]
-                  /\ IF nodeState[n] \in {"valid", "invalid", "replay"}
-                     THEN 
-                        nodeState' = [nodeState EXCEPT ![n] = "invalid"]
-                     ELSE 
-                        nodeState' = [nodeState EXCEPT ![n] = "invalid_write"] 
-           ELSE
-                  UNCHANGED <<nodeState, nodeTS, nodeLastWriter, nodeWriteEpochID>>
-        /\ UNCHANGED <<nodeLastWriteTS, aliveNodes, nodeRcvedAcks, epochID, nodeWriteEpochID, msgsVAL, msgsINV>>
+HRcvInv(n, m) ==  \* Process a received invalidation
+    /\ m \in msgsINV 
+    /\ m.type     = "INV"
+    /\ m.epochID  = epochID
+    /\ m.sender  # n
+    \* always acknowledge a received invalidation (irrelevant to the timestamp)
+    /\ send([type       |-> "ACK",
+                sender     |-> n,   
+                epochID    |-> epochID,
+                version    |-> m.version,
+                tieBreaker |-> m.tieBreaker], msgsACK)
+    /\ IF greaterTS(m.version, m.tieBreaker,
+                    nodeTS[n].version, nodeTS[n].tieBreaker)
+        THEN   /\ nodeLastWriter' = [nodeLastWriter EXCEPT ![n] = m.sender]
+                /\ nodeTS' = [nodeTS EXCEPT ![n].version    = m.version,
+                                        ![n].tieBreaker = m.tieBreaker]
+                /\ IF nodeState[n] \in {"valid", "invalid", "replay"}
+                    THEN 
+                    nodeState' = [nodeState EXCEPT ![n] = "invalid"]
+                    ELSE 
+                    nodeState' = [nodeState EXCEPT ![n] = "invalid_write"] 
+        ELSE
+                UNCHANGED <<nodeState, nodeTS, nodeLastWriter, nodeWriteEpochID>>
+    /\ UNCHANGED <<nodeLastWriteTS, aliveNodes, nodeRcvedAcks, epochID, nodeWriteEpochID, msgsVAL, msgsINV>>
      
             
 HRcvVal(n, m) ==   \* Process a received validation
@@ -268,13 +268,13 @@ HFollowerWriteReplay(n) == \* Execute a write-replay when coordinator failed
 
    
 HFollowerActions(n, m) ==  \* Actions of a write follower
-    \/ HRcvInv(n)
+    \/ HRcvInv(n, m)
     \/ HFollowerWriteReplay(n)
     \/ HRcvVal(n, m) 
  
 ------------------------------------------------------------------------------------- 
 
-HRcvInvAction == TRUE /\ \E n \in aliveNodes : HRcvInv(n)
+HRcvInvAction == TRUE /\ \E n \in aliveNodes, m \in msgsINV : HRcvInv(n, m)
 HFollowerWriteReplayAction == TRUE /\ \E n \in aliveNodes : HFollowerWriteReplay(n)
 HRcvValAction == TRUE /\ \E n \in aliveNodes, m \in msgsVAL : HRcvVal(n, m)
 HReadAction == TRUE /\ \E n \in aliveNodes : HRead(n)
