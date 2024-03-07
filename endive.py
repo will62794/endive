@@ -2352,10 +2352,15 @@ class InductiveInvGen():
 
                     # Save edges for inductive proof graph.
                     if self.auto_lemma_action_decomposition:
+                        action_node = f"{orig_k_ctis[0].inv_name}_{orig_k_ctis[0].action_name}"
                         e1 = (f"{orig_k_ctis[0].inv_name}_{orig_k_ctis[0].action_name}", f"{orig_k_ctis[0].inv_name}")
                         e2 = (inv + inv_suffix, f"{orig_k_ctis[0].inv_name}_{orig_k_ctis[0].action_name}")
                         self.proof_graph["edges"].append(e1)
                         self.proof_graph["edges"].append(e2)
+                        num_ctis_remaining = len(list(cti_table.keys()))-len(eliminated_ctis)
+                        # if action_node in self.proof_graph:
+                            # self.proof_graph[action_node].append(inv + inv_suffix)
+                        self.proof_graph["nodes"][action_node] = num_ctis_remaining
                         # print(f"{orig_k_ctis[0].inv_name}_{orig_k_ctis[0].action_name}",  "->", f"{orig_k_ctis[0].inv_name}", "// EDGE")
                         # print(inv + inv_suffix, "->", f"{orig_k_ctis[0].inv_name}_{orig_k_ctis[0].action_name}", "// EDGE")
 
@@ -2981,7 +2986,7 @@ class InductiveInvGen():
         self.all_generated_lemmas = set()
 
         # TODO: Optionally reload from file for interactive mode.
-        self.proof_graph = {"edges": [], "safety": self.safety}
+        self.proof_graph = {"edges": [], "nodes": {}, "safety": self.safety}
 
         # For proof tree we look for single step inductive support lemmas.
         self.simulate_depth = 1
@@ -3167,7 +3172,7 @@ class InductiveInvGen():
                 # print(p, self.preds[p], vars_in_preds[p])
             
             # Save proof graph as well for diagnosis.
-            self.proof_graph = {"edges": [], "safety": self.safety}
+            self.proof_graph = {"edges": [], "nodes": {}, "safety": self.safety}
 
         #
         # Check valuation of all predicates on reachable states.
@@ -3384,15 +3389,19 @@ class InductiveInvGen():
             logging.info("Not fully done. Discovered invariant is not inductive.")
 
     def render_proof_graph(self):
-        dot = graphviz.Digraph(f'{self.specname}-proof-graph', comment='The Round Table')  
+        dot = graphviz.Digraph(f'{self.specname}-proof-graph', comment='The Round Table', strict=True)  
         #  dot.graph_attr["rankdir"] = "LR"
         dot.node_attr["fontname"] = "courier"
         dot.node_attr["shape"] = "box"
         
         # Store all nodes.
         for e in self.proof_graph["edges"]:
-            dot.node(e[0])
-            dot.node(e[1])
+            for n in e:
+                color = "white"
+                if n in self.proof_graph["nodes"]:
+                    num_ctis_left = self.proof_graph["nodes"][n]
+                    color = "green" if num_ctis_left == 0 else "orange"
+                dot.node(n, fillcolor=color, style="filled")
 
         for e in self.proof_graph["edges"]:
             dot.edge(e[0], e[1])
