@@ -84,7 +84,7 @@
     "typeok"  :  "TypeOKRandom",
     "tlc_specific_spec": true,
     "try_final_minimize": false,
-    "max_tlc_inv_depth": 20,
+    "max_tlc_inv_depth": 19,
     "simulate"  :  true,
     "local_grammars": {
         "HRcvValAction": {
