@@ -1442,7 +1442,9 @@ class InductiveInvGen():
         invcheck_tla_indcheck += "CTICheckInit ==\n"
         invcheck_tla_indcheck += "    /\\ %s\n" % kCTIprop
         invcheck_tla_indcheck += "    /\\ InvVals\n"
-        invcheck_tla_indcheck += strengthening_conjuncts_str
+        # TODO: I don't think we really should have these strengthening conjuncts here (?)
+        # Remove for now.
+        # invcheck_tla_indcheck += strengthening_conjuncts_str
         invcheck_tla_indcheck += "\n"
 
         # Add next-state relation that leaves the auxiliary variables unchanged.
