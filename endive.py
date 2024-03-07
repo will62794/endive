@@ -1812,7 +1812,7 @@ class InductiveInvGen():
             "cost": cti_costs
         }
 
-    def eliminate_ctis(self, orig_k_ctis, num_invs, roundi, preds=None, preds_alt=[], 
+    def eliminate_ctis(self, orig_k_ctis, num_invs, roundi, subroundi=None, preds=None, preds_alt=[], 
                        quant_inv_alt=None, tlc_workers=6, specdir=None, append_inv_round_id=True,
                        cache_states_with_ignored_vars=None):
         """ Check which of the given satisfied invariants eliminate CTIs. """
@@ -2339,7 +2339,10 @@ class InductiveInvGen():
                 
                     inv_suffix = ""
                     if append_inv_round_id:
-                        inv_suffix = "_" + "R" + str(roundi) + "_" + str(iteration) + "_" + str(uniqid)
+                        inv_suffix = "_" + "R" + str(roundi) 
+                        if subroundi is not None:
+                            inv_suffix += "_" + str(subroundi)
+                        inv_suffix += "_I" + str(iteration) + "_" + str(uniqid)
                         
                     # Add the invariant as a conjunct.
                     self.strengthening_conjuncts.append((inv + inv_suffix, invexp))
@@ -3196,6 +3199,7 @@ class InductiveInvGen():
             else:
                 logging.info("Not done. Current invariant candidate is not inductive.")
 
+            subround = 0
             while len(k_ctis) > 0:
 
                 # Could potentially be a subset of the overall CTIs.
@@ -3288,7 +3292,9 @@ class InductiveInvGen():
 
                 self.total_num_cti_elimination_rounds = (roundi + 1)
                 # ret = self.eliminate_ctis(k_ctis, self.num_invs, roundi, preds=preds, cache_states_with_ignored_vars=cache_with_ignored_vars)
-                ret = self.eliminate_ctis(k_ctis_to_eliminate, self.num_invs, roundi, preds=preds, cache_states_with_ignored_vars=cache_with_ignored_vars)
+                ret = self.eliminate_ctis(k_ctis_to_eliminate, self.num_invs, roundi, subroundi=subround, preds=preds, cache_states_with_ignored_vars=cache_with_ignored_vars)
+                subround += 1
+                
                 # If we did not eliminate all CTIs in this round, then exit with failure.
                 if ret == None:
                     logging.info(f"Could not eliminate all CTIs in this round (Round {roundi}). Exiting with failure.")
