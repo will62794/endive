@@ -186,8 +186,21 @@ HCoordWriteReplay(n) == \* Execute a write-replay after a membership re-config
     /\  nodeState[n] \in {"write", "replay"}
     /\  nodeWriteEpochID[n] < epochID
     /\  ~receivedAllAcks(n) \* optimization to not replay when we have gathered acks from all alive
-    /\  h_actions_for_upd_replay(n, nodeRcvedAcks[n])
-
+    \* /\  h_actions_for_upd_replay(n, nodeRcvedAcks[n])
+    /\ nodeLastWriter'   = [nodeLastWriter  EXCEPT ![n] = n]
+    /\ nodeRcvedAcks'    = [nodeRcvedAcks   EXCEPT ![n] = nodeRcvedAcks[n]]
+    /\ nodeState'        = [nodeState       EXCEPT ![n] = "replay"]
+    /\ nodeWriteEpochID' = [nodeWriteEpochID EXCEPT ![n] = epochID] \* we always use the latest epochID
+    /\ nodeTS'           = [nodeTS          EXCEPT ![n].version    = nodeTS[n].version, 
+                                                   ![n].tieBreaker = nodeTS[n].tieBreaker]
+    /\ nodeLastWriteTS'  = [nodeLastWriteTS EXCEPT ![n].version    = nodeTS[n].version, 
+                                                    ![n].tieBreaker = nodeTS[n].tieBreaker]
+    /\ msgsINV' = msgsINV \cup {[type        |-> "INV",
+                                 epochID     |-> epochID, \* we always use the latest epochID
+                                 sender      |-> n,
+                                 version     |-> nodeTS[n].version, 
+                                 tieBreaker  |-> nodeTS[n].tieBreaker]}
+    /\  UNCHANGED <<aliveNodes, epochID, msgsVAL, msgsACK>>
 
 HRcvAck(n) ==   \* Process a received acknowledment
     \E m \in msgsACK: 
@@ -230,11 +243,11 @@ HRcvInv(n, m) ==  \* Process a received invalidation
     /\ m.epochID  = epochID
     /\ m.sender  # n
     \* always acknowledge a received invalidation (irrelevant to the timestamp)
-    /\ send([type       |-> "ACK",
-                sender     |-> n,   
-                epochID    |-> epochID,
-                version    |-> m.version,
-                tieBreaker |-> m.tieBreaker], msgsACK)
+    /\ msgsACK' = msgsACK \cup {[type       |-> "ACK",
+                                 sender     |-> n,   
+                                 epochID    |-> epochID,
+                                 version    |-> m.version,
+                                 tieBreaker |-> m.tieBreaker]}
     /\ IF greaterTS(m.version, m.tieBreaker,
                     nodeTS[n].version, nodeTS[n].tieBreaker)
         THEN   /\ nodeLastWriter' = [nodeLastWriter EXCEPT ![n] = m.sender]
@@ -264,8 +277,20 @@ HRcvVal(n, m) ==   \* Process a received validation
 HFollowerWriteReplay(n) == \* Execute a write-replay when coordinator failed
     /\  nodeState[n] \in {"invalid", "invalid_write"}
     /\  ~isAlive(nodeLastWriter[n])
-    /\  h_actions_for_upd_replay(n, {}) 
-
+    /\ nodeLastWriter'   = [nodeLastWriter  EXCEPT ![n] = n]
+    /\ nodeRcvedAcks'    = [nodeRcvedAcks   EXCEPT ![n] = {}]
+    /\ nodeState'        = [nodeState       EXCEPT ![n] = "replay"]
+    /\ nodeWriteEpochID' = [nodeWriteEpochID EXCEPT ![n] = epochID] \* we always use the latest epochID
+    /\ nodeTS'           = [nodeTS          EXCEPT ![n].version    = nodeTS[n].version, 
+                                                   ![n].tieBreaker = nodeTS[n].tieBreaker]
+    /\ nodeLastWriteTS'  = [nodeLastWriteTS EXCEPT ![n].version    = nodeTS[n].version, 
+                                                    ![n].tieBreaker = nodeTS[n].tieBreaker]
+    /\ msgsINV' = msgsINV \cup {[type        |-> "INV",
+                                 epochID     |-> epochID, \* we always use the latest epochID
+                                 sender      |-> n,
+                                 version     |-> nodeTS[n].version, 
+                                 tieBreaker  |-> nodeTS[n].tieBreaker]}
+    /\  UNCHANGED <<aliveNodes, epochID, msgsVAL, msgsACK>>
    
 HFollowerActions(n, m) ==  \* Actions of a write follower
     \/ HRcvInv(n, m)
