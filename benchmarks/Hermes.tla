@@ -179,8 +179,24 @@ HWrite(n) == \* Execute a write
     \* writes in invalid state are also supported as an optimization
     /\  nodeState[n]      \in {"valid"}
     /\  nodeTS[n].version < H_MAX_VERSION \* Only to configurably terminate the model checking 
-    /\  h_actions_for_upd(n, nodeTS[n].version + 1, n, "write", {})
-
+    \* /\  h_actions_for_upd(n, nodeTS[n].version + 1, n, "write", {})
+    \* /\  h_upd_state(n, nodeTS[n].version + 1, n, "write", {})
+    /\  nodeLastWriter'   = [nodeLastWriter  EXCEPT ![n] = n]
+    /\  nodeRcvedAcks'    = [nodeRcvedAcks   EXCEPT ![n] = {}]
+    /\  nodeState'        = [nodeState       EXCEPT ![n] = "write"]
+    /\  nodeWriteEpochID' = [nodeWriteEpochID EXCEPT ![n] = epochID] \* we always use the latest epochID
+    /\  nodeTS'           = [nodeTS          EXCEPT ![n].version    = nodeTS[n].version + 1, 
+                                                    ![n].tieBreaker = n]
+    /\  nodeLastWriteTS'  = [nodeLastWriteTS EXCEPT ![n].version    = nodeTS[n].version + 1, 
+                                                    ![n].tieBreaker = n]
+    \* /\  h_send_inv_or_ack(n, nodeTS[n].version + 1, n, "INV", msgsINV)
+    /\ msgsINV' = msgsINV \cup {
+        [type        |-> "INV",
+              epochID     |-> epochID, \* we always use the latest epochID
+              sender      |-> n,
+              version     |-> nodeTS[n].version + 1, 
+              tieBreaker  |-> n]}
+    /\  UNCHANGED <<aliveNodes, epochID, msgsVAL, msgsACK>>
 
 HCoordWriteReplay(n) == \* Execute a write-replay after a membership re-config
     /\  nodeState[n] \in {"write", "replay"}
