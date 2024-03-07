@@ -164,6 +164,7 @@ class InductiveInvGen():
         random.seed(self.seed)
 
         # General statistics.
+        self.state_cache_start = 0
         self.ctigen_start = 0
         self.invcheck_start = 0
         self.ctielimcheck_start = 0
@@ -171,6 +172,7 @@ class InductiveInvGen():
         self.ctigen_duration_secs = 0
         self.invcheck_duration_secs = 0
         self.ctielimcheck_duration_secs = 0
+        self.state_cache_duration_secs = 0
         self.total_duration_secs = 0
         self.total_num_ctis_eliminated = 0
         self.total_num_cti_elimination_rounds = 0
@@ -375,6 +377,7 @@ class InductiveInvGen():
             "inv_size": len(self.strengthening_conjuncts) + 1,
             "invcheck_duration_secs": self.invcheck_duration_secs,
             "ctielimcheck_duration_secs": self.ctielimcheck_duration_secs,
+            "state_cache_duration_secs": self.state_cache_duration_secs,
             "ctigen_duration_secs": self.ctigen_duration_secs,
             "total_duration_secs": self.total_duration_secs,
             "total_num_ctis_eliminated": self.get_total_num_ctis_eliminated(),
@@ -417,6 +420,13 @@ class InductiveInvGen():
         json.dump(results_obj, f, indent=4)
         f.close()
 
+    def start_timing_state_caching(self):
+        self.state_cache_start = time.time()
+
+    def end_timing_state_caching(self):
+        dur_secs = time.time() - self.state_cache_start
+        self.state_cache_duration_secs += dur_secs
+
     def start_timing_ctigen(self):
         self.ctigen_start = time.time()
 
@@ -437,6 +447,9 @@ class InductiveInvGen():
     def end_timing_ctielimcheck(self):
         dur_secs = time.time() - self.ctielimcheck_start
         self.ctielimcheck_duration_secs += dur_secs
+
+    def get_state_cache_duration(self):
+        return self.state_cache_duration_secs
 
     def get_ctigen_duration(self):
         return self.ctigen_duration_secs
@@ -1846,7 +1859,10 @@ class InductiveInvGen():
         if cache_states_with_ignored_vars is not None:
             logging.info(f"Running initial state caching step with {len(cache_states_with_ignored_vars)} ignored vars: {cache_states_with_ignored_vars}")
             dummy_inv = "3 > 2"
+            tstart = time.time()
+            self.start_timing_state_caching()
             sat_invs = self.check_invariants([dummy_inv], tlc_workers=tlc_workers, max_depth=max_depth, cache_with_ignored=cache_states_with_ignored_vars, skip_checking=True)
+            self.end_timing_state_caching()
             logging.info("Finished initial state caching.")
 
         while iteration <= self.num_iters:
@@ -3309,6 +3325,10 @@ class InductiveInvGen():
                 # ret = self.eliminate_ctis(k_ctis, self.num_invs, roundi, preds=preds, cache_states_with_ignored_vars=cache_with_ignored_vars)
                 ret = self.eliminate_ctis(k_ctis_to_eliminate, self.num_invs, roundi, subroundi=subround, preds=preds, cache_states_with_ignored_vars=cache_with_ignored_vars)
                 subround += 1
+
+                if self.auto_lemma_action_decomposition and self.save_dot and len(self.proof_graph["edges"]) > 0:
+                    # Render updated proof graph as we go.
+                    self.render_proof_graph()
                 
                 # If we did not eliminate all CTIs in this round, then exit with failure.
                 if ret == None:
@@ -3700,6 +3720,7 @@ if __name__ == "__main__":
     logging.info("Total number of invariants generated: %d", indgen.get_total_num_invs_generated())
     logging.info("Total number of invariants checked: %d", indgen.get_total_num_invs_checked())
     logging.info("CTI generation duration: %f secs.", indgen.get_ctigen_duration())
+    logging.info("State caching duration: %f secs.", indgen.get_state_cache_duration())
     logging.info("Invariant checking duration: %f secs.", indgen.get_invcheck_duration())
     logging.info("CTI elimination checks duration: %f secs.", indgen.get_ctielimcheck_duration())
     logging.info("Total duration: {:.2f} secs.".format(((time.time() - tstart))))
