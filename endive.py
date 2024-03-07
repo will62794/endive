@@ -3179,6 +3179,16 @@ class InductiveInvGen():
 
         return vars_in_preds
 
+    def check_all_actions_parse(self):
+        actions_from_spec = []
+        for udef in self.tla_spec_obj.get_all_user_defs(level="2"):
+            if udef.endswith("Action"):
+                actions_from_spec.append(udef)
+
+        for a in actions_from_spec:
+            print("ACTION:", a)
+            self.tla_spec_obj.get_vars_in_def(a)
+
     def do_invgen(self):
         # Record Java version for stat recording.
         self.save_java_version_info()
@@ -3196,6 +3206,11 @@ class InductiveInvGen():
             
             # Save proof graph as well for diagnosis.
             self.proof_graph = {"edges": [], "nodes": {}, "safety": self.safety}
+
+            #
+            # Optionally try parsing all actions first to make sure no parsing errors.
+            #
+            # self.check_all_actions_parse()
 
         #
         # Check valuation of all predicates on reachable states.
