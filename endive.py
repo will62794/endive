@@ -2368,16 +2368,28 @@ class InductiveInvGen():
                         inv_suffix += "_I" + str(iteration) + "_" + str(uniqid)
                         
                     # Add the invariant as a conjunct.
-                    self.strengthening_conjuncts.append((inv + inv_suffix, invexp, unquant_invexp))
-                    uniqid += 1
+                    # If there is an existing strengthening conjunct with an identical expression, no
+                    # need to add this as a new strengthening conjunct.
+                    existing_conjuncts = [c for c in self.strengthening_conjuncts if c[1] == invexp]
+                    if len(existing_conjuncts) == 0:
+                        self.strengthening_conjuncts.append((inv + inv_suffix, invexp, unquant_invexp))
+                        uniqid += 1
+                    else:
+                        logging.info("Skipping adding invariant as strengthening conjunct, since equivalent expression is already present.")
 
                     logging.info("%s %s", inv, invexp) #, "(eliminates %d CTIs)" % len(cti_states_eliminated_by_invs[inv])
 
                     # Save edges for inductive proof graph.
                     if self.auto_lemma_action_decomposition:
+                        if len(existing_conjuncts) > 0:
+                            # Re-use existing name.
+                            invname = existing_conjuncts[0][0]
+                        else:
+                            invname = inv + inv_suffix
+
                         action_node = f"{orig_k_ctis[0].inv_name}_{orig_k_ctis[0].action_name}"
                         e1 = (f"{orig_k_ctis[0].inv_name}_{orig_k_ctis[0].action_name}", f"{orig_k_ctis[0].inv_name}")
-                        e2 = (inv + inv_suffix, f"{orig_k_ctis[0].inv_name}_{orig_k_ctis[0].action_name}")
+                        e2 = (invname, f"{orig_k_ctis[0].inv_name}_{orig_k_ctis[0].action_name}")
                         self.proof_graph["edges"].append(e1)
                         self.proof_graph["edges"].append(e2)
                         num_ctis_remaining = len(list(cti_table.keys()))-len(eliminated_ctis)
