@@ -200,7 +200,6 @@ HCoordWriteReplay(n) == \* Execute a write-replay after a membership re-config
     /\  nodeState[n] \in {"write", "replay"}
     /\  nodeWriteEpochID[n] < epochID
     /\  ~receivedAllAcks(n) \* optimization to not replay when we have gathered acks from all alive
-    \* /\  h_actions_for_upd_replay(n, nodeRcvedAcks[n])
     /\ nodeLastWriter'   = [nodeLastWriter  EXCEPT ![n] = n]
     /\ nodeRcvedAcks'    = [nodeRcvedAcks   EXCEPT ![n] = nodeRcvedAcks[n]]
     /\ nodeState'        = [nodeState       EXCEPT ![n] = "replay"]
