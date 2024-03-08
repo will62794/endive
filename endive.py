@@ -3173,25 +3173,29 @@ class InductiveInvGen():
         pred_invs = [p for p in self.preds]
         # print(f"{len(pred_invs)} Predicates:")
         # for p in pred_invs:
-            # print(p)
+        #     print(p)
         # self.check_invariants(pred_invs)
-        specname = f"{self.specname}_pred_extract_test"
+        specname = f"{self.specname}_extract_preds"
         rootpath = f"benchmarks/{specname}"
         invname_prefix = "PredInvDef"
         self.make_check_invariants_spec(pred_invs, rootpath, invname_prefix=invname_prefix)
 
+        # Parse spec and get defs.
         tla_spec_obj = tlaparse.parse_tla_file(self.specdir, specname)
-        self.spec_defs = tla_spec_obj.get_all_user_defs(level="1")
+        self.spec_defs = tla_spec_obj.get_all_user_defs(level=["0","1"])
         self.tla_spec_obj = tla_spec_obj
         self.state_vars = self.tla_spec_obj.get_all_vars()
         vars_in_preds = {}
         for d in self.spec_defs:
+            if d.startswith(invname_prefix):
             dvars,dvars_updated = self.tla_spec_obj.get_vars_in_def(d)
+            dvars,dvars_updated = self.tla_spec_obj.get_vars_in_def(d)
+            if d.startswith(invname_prefix):
+                dvars,dvars_updated = self.tla_spec_obj.get_vars_in_def(d)
             if d.startswith(invname_prefix):
                 # print("DEF:", d, dvars)
                 invind = int(d.replace(invname_prefix, "")) 
                 vars_in_preds[invind] = dvars
-
         return vars_in_preds
 
     def check_all_actions_parse(self):
