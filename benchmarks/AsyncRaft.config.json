@@ -2,17 +2,15 @@
     "preds"  :  [
         "(currentTerm[VARI] > currentTerm[VARJ])",
         "(currentTerm[VARJ] > currentTerm[VARI])",
-
         "(currentTerm[VARI] >= currentTerm[VARJ])",
         "(currentTerm[VARJ] >= currentTerm[VARI])",
-
         "(currentTerm[VARI] <= currentTerm[VARJ])",
         "(currentTerm[VARJ] <= currentTerm[VARI])",
-
         "(currentTerm[VARI] = currentTerm[VARJ])",
-    
-        "(state[VARI] = Primary)",
-        "(state[VARJ] = Primary)"
+        "(state[VARI] = Leader)",
+        "(state[VARJ] = Leader)",
+        "state[VARI] \\in { Follower, Candidate }",
+        "votesGranted[VARI] \\in Quorum"
     ],
     "preds_alt" : [],
     "safety"  :  "H_NoLogDivergence",
@@ -38,6 +36,16 @@
         "MaxLogLen" : ["1", "2", "3"],
         "MaxNumVoteMsgs": ["0"]
     },
+    "constraint"  :  "StateConstraint",
+    "quant_inv": "\\A VARI \\in Server : \\A VARJ \\in Server : \\A VARM \\in appendEntriesRequestMsgs : ",
+    "quant_vars": ["VARI", "VARJ", "VARIND", "VARM"],
+    "model_consts"  :  "CONSTANT n1,n2,n3,n4,n5",
+    "max_tlc_inv_depth": 10,
+    "symmetry" : true,
+    "typeok"  :  "TypeOKRandom",
+    "tlc_specific_spec": true,
+    "try_final_minimize": false,
+    "simulate"  :  true,
     "actions": [
         "RequestVoteAction",
         "BecomeLeaderAction",
@@ -55,16 +63,6 @@
         "AcceptAppendEntriesRequestLearnCommitAction",
         "HandleAppendEntriesResponseAction"
     ],
-    "constraint"  :  "StateConstraint",
-    "quant_inv"  :  "",
-    "quant_inv_alt"  :  null,
-    "quant_vars": ["VARI", "VARJ"],
-    "model_consts"  :  "CONSTANT n1,n2,n3,n4,n5",
-    "symmetry" : true,
-    "typeok"  :  "TypeOKRandom",
-    "tlc_specific_spec": true,
-    "try_final_minimize": false,
-    "simulate"  :  true,
     "local_grammars": {
         "AcceptAppendEntriesRequestTruncateAction": {
             "H_LeaderMatchIndexValid": {
