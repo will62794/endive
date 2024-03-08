@@ -695,6 +695,7 @@ class InductiveInvGen():
     def make_check_invariants_spec(self, invs, root_filepath, exclude_inv_defs=False, invname_prefix="Inv", defs_to_add=[]):
         specname = os.path.basename(root_filepath)
         invcheck_tla = f"---- MODULE {specname} ----\n"
+        suffix = ""
         if self.tlc_specific_spec and not self.use_apalache_ctigen:
             suffix = "_TLC"
         invcheck_tla += "EXTENDS %s%s\n\n" % (self.specname, suffix)
