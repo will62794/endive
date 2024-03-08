@@ -599,10 +599,14 @@ class TLASpec:
     def get_all_user_defs(self, level=None):
         """ Get all user defined ops at an optionally specified level."""
         # spec_obj = self.extract_spec_obj(spec_ast)
+        if type(level) == str:
+            levels = [level]
+        else:
+            levels = level
         if level is None:
             return [v["uniquename"] for v in self.spec_obj["defs"].values()]
         else:
-            return [v["uniquename"] for v in self.spec_obj["defs"].values() if v["level"]==level] 
+            return [v["uniquename"] for v in self.spec_obj["defs"].values() if v["level"] in levels] 
 
     def get_def_node_by_uniquename(self, uniquename):
         objs = [a for a in self.spec_obj["defs"].values() if a["uniquename"] == uniquename]

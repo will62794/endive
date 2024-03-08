@@ -3188,11 +3188,7 @@ class InductiveInvGen():
         vars_in_preds = {}
         for d in self.spec_defs:
             if d.startswith(invname_prefix):
-            dvars,dvars_updated = self.tla_spec_obj.get_vars_in_def(d)
-            dvars,dvars_updated = self.tla_spec_obj.get_vars_in_def(d)
-            if d.startswith(invname_prefix):
                 dvars,dvars_updated = self.tla_spec_obj.get_vars_in_def(d)
-            if d.startswith(invname_prefix):
                 # print("DEF:", d, dvars)
                 invind = int(d.replace(invname_prefix, "")) 
                 vars_in_preds[invind] = dvars
