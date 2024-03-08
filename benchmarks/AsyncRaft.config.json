@@ -10,7 +10,13 @@
         "(state[VARI] = Leader)",
         "(state[VARJ] = Leader)",
         "state[VARI] \\in { Follower, Candidate }",
-        "votesGranted[VARI] \\in Quorum"
+        "votesGranted[VARI] \\in Quorum",
+        "(commitIndex[VARI] > 0)",
+        "VARI \\in VARQ",
+        "VARJ \\in VARQ",
+        "Len(log[VARI]) >= commitIndex[VARI]",
+        "Len(log[VARJ]) >= commitIndex[VARJ]",
+        "commitIndex[VARI] \\in DOMAIN log[VARI] /\\ commitIndex[VARI] \\in DOMAIN log[VARJ] /\\ log[VARJ][commitIndex[VARI]] = log[VARI][commitIndex[VARI]]"
     ],
     "preds_alt" : [],
     "safety"  :  "H_NoLogDivergence",
@@ -37,10 +43,10 @@
         "MaxNumVoteMsgs": ["0"]
     },
     "constraint"  :  "StateConstraint",
-    "quant_inv": "\\A VARI \\in Server : \\A VARJ \\in Server : \\A VARM \\in appendEntriesRequestMsgs : ",
+    "quant_inv": "\\A VARI \\in Server : \\A VARJ \\in Server : \\E VARQ \\in Quorum : \\A VARM \\in appendEntriesRequestMsgs : ",
     "quant_vars": ["VARI", "VARJ", "VARIND", "VARM"],
     "model_consts"  :  "CONSTANT n1,n2,n3,n4,n5",
-    "max_tlc_inv_depth": 10,
+    "max_tlc_inv_depth": 15,
     "symmetry" : true,
     "typeok"  :  "TypeOKRandom",
     "tlc_specific_spec": true,
