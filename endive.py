@@ -2410,6 +2410,7 @@ class InductiveInvGen():
                         # if action_node in self.proof_graph:
                             # self.proof_graph[action_node].append(inv + inv_suffix)
                         self.proof_graph["nodes"][action_node] = num_ctis_remaining
+                        self.proof_graph["curr_node"] = action_node
                         # print(f"{orig_k_ctis[0].inv_name}_{orig_k_ctis[0].action_name}",  "->", f"{orig_k_ctis[0].inv_name}", "// EDGE")
                         # print(inv + inv_suffix, "->", f"{orig_k_ctis[0].inv_name}_{orig_k_ctis[0].action_name}", "// EDGE")
 
@@ -3486,11 +3487,15 @@ class InductiveInvGen():
         # Store all nodes.
         for e in self.proof_graph["edges"]:
             for n in e:
-                color = "white"
+                color = "black"
+                fillcolor = "white"
                 if n in self.proof_graph["nodes"]:
                     num_ctis_left = self.proof_graph["nodes"][n]
-                    color = "green" if num_ctis_left == 0 else "orange"
-                dot.node(n, fillcolor=color, style="filled")
+                    fillcolor = "green" if num_ctis_left == 0 else "orange"
+                if self.proof_graph["curr_node"] == n:
+                    # Add node with blue border (notb ackground).
+                    color = "blue"
+                dot.node(n, fillcolor=fillcolor, style="filled", color=color)
 
         for e in self.proof_graph["edges"]:
             dot.edge(e[0], e[1])
