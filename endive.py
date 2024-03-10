@@ -2413,6 +2413,10 @@ class InductiveInvGen():
                         # print(f"{orig_k_ctis[0].inv_name}_{orig_k_ctis[0].action_name}",  "->", f"{orig_k_ctis[0].inv_name}", "// EDGE")
                         # print(inv + inv_suffix, "->", f"{orig_k_ctis[0].inv_name}_{orig_k_ctis[0].action_name}", "// EDGE")
 
+                        if self.save_dot and len(self.proof_graph["edges"]) > 0:
+                            # Render updated proof graph as we go.
+                            self.render_proof_graph()
+
                     # print "CTIs eliminated by this invariant: %d" % len(cti_states_eliminated_by_invs[inv])
                 # Re-run the iteration if new conjuncts were discovered.
                 # Don't re-run iterations where max_conjs=1, since they are small and quick.
@@ -3233,6 +3237,10 @@ class InductiveInvGen():
             # Save proof graph as well for diagnosis.
             self.proof_graph = {"edges": [], "nodes": {}, "safety": self.safety}
 
+            # Maintain a potential list of lemma-action proof obligations that could not be discharged
+            # successfully after some number of iteration attempts.
+            failed_obligations = set()
+
             #
             # Optionally try parsing all actions first to make sure no parsing errors.
             #
@@ -3339,6 +3347,11 @@ class InductiveInvGen():
                     (k_cti_lemma, k_cti_action) = k_cti_lemma_action
                     print(f"Chose {k_cti_lemma_action} proof obligation")
 
+                    lemma_name = "Safety" if k_cti_lemma == self.safety else k_cti_lemma
+                    action_node = f"{lemma_name}_{k_cti_action}"
+                    self.proof_graph["edges"].append((action_node, lemma_name))
+                    self.proof_graph["nodes"][action_node] = 1000 # initialize with positive CTI count, to be updated later.
+
                     # Filter CTIs based on this choice.
                     cti_filter = lambda c  : (c.inv_name == k_cti_lemma or (c.inv_name == "Safety" and k_cti_lemma == self.safety)) and c.action_name == k_cti_action
                     k_ctis_to_eliminate = [c for c in k_ctis if cti_filter(c)]
@@ -3380,9 +3393,17 @@ class InductiveInvGen():
                 
                 # If we did not eliminate all CTIs in this round, then exit with failure.
                 if ret == None:
-                    logging.info(f"Could not eliminate all CTIs in this round (Round {roundi}). Exiting with failure.")
-                    elim_round_failed = True
-                    break
+                    if self.auto_lemma_action_decomposition:
+                        # If we were unable to eliminate this batch of CTIs, we can still continue and try to target a different 
+                        # proof obligation in the next round, simply marking this proof obligation as failed.
+                        obl = (k_cti_lemma, k_cti_action)
+                        failed_obligations.add(obl)
+                        elim_round_failed = False
+                        logging.info(f"Could not eliminate all CTIs in this round (Round {roundi}) for obligation {obl}. Marking it as failed and trying another.")
+                    else:
+                        logging.info(f"Could not eliminate all CTIs in this round (Round {roundi}). Exiting with failure.")
+                        elim_round_failed = True
+                        break
 
                 # Determines whether we will re-generate CTIs after every new strengthening lemma discovered.
                 k_ctis = [c for c in k_ctis if c not in k_ctis_to_eliminate]
