@@ -3,7 +3,7 @@
 \* Spec source: https://github.com/ease-lab/Hermes
 \* 
 
-EXTENDS Hermes, Randomization, FiniteSetsExt, TLC
+EXTENDS Hermes, Randomization, TLC
 
 \* 
 \* Try to work around large message types here by using randomized message set definitions.
