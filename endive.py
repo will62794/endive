@@ -746,7 +746,7 @@ class InductiveInvGen():
 
     def check_invariants(self, invs, tlc_workers=6, max_depth=2**30, 
                          skip_checking=False, cache_with_ignored=None, cache_state_load=False,
-                         invcheck_file_path=None):
+                         invcheck_file_path=None, tlc_flags=""):
         """ Check which of the given invariants are valid. """
         ta = time.time()
         # invcheck_tla = "---- MODULE %s_InvCheck_%d ----\n" % (self.specname,self.seed)
@@ -779,7 +779,7 @@ class InductiveInvGen():
                                 tlcjar = TLC_JAR,
                                 max_depth=max_depth,
                                 cache_with_ignored=cache_with_ignored,
-                                cache_state_load = cache_state_load)
+                                cache_state_load = cache_state_load, tlc_flags=tlc_flags)
         sat_invs = set()
         if not skip_checking:
             sat_invs = (all_inv_names - violated_invs)
@@ -1862,9 +1862,20 @@ class InductiveInvGen():
         if cache_states_with_ignored_vars is not None:
             logging.info(f"Running initial state caching step with {len(cache_states_with_ignored_vars)} ignored vars: {cache_states_with_ignored_vars}")
             dummy_inv = "3 > 2"
+            tlc_flags = ""
+            if "simulation_inv_check" in self.spec_config and self.spec_config["simulation_inv_check"]:
+                # Get value from dict self.spec_config or use default value.
+                depth = self.spec_config.get("simulation_inv_check_depth", 50)
+                num = self.spec_config.get("simulation_inv_check_num", 10000)
+                
+                logging.info(f"Running state caching step in simulation with (depth={depth}, num={num})")
+
+                tlc_flags=f"-depth {depth} -simulate num={num}"
             tstart = time.time()
             self.start_timing_state_caching()
-            sat_invs = self.check_invariants([dummy_inv], tlc_workers=tlc_workers, max_depth=max_depth, cache_with_ignored=cache_states_with_ignored_vars, skip_checking=True)
+            sat_invs = self.check_invariants([dummy_inv], tlc_workers=tlc_workers, max_depth=max_depth, 
+                                             cache_with_ignored=cache_states_with_ignored_vars, skip_checking=True,
+                                             tlc_flags=tlc_flags)
             self.end_timing_state_caching()
             logging.info("Finished initial state caching.")
 

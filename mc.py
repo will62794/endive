@@ -426,13 +426,13 @@ def runtlc(spec,config=None,tlc_workers=6,cwd=None,tlcjar="tla2tools-checkall.ja
 # Run TLC on spec to check all invariants and return the set 
 # of invariants that were violated.
 def runtlc_check_violated_invariants(spec,config=None, tlc_workers=6, cwd=None, tlcjar="tla2tools-checkall.jar", java="java", 
-                                     max_depth=2**30, cache_with_ignored=None, cache_state_load=False):
+                                     max_depth=2**30, cache_with_ignored=None, cache_state_load=False, tlc_flags=""):
     #
     # TODO: Check for this type of error:
     # 'Error: The invariant of Inv91 is equal to FALSE'
     #
     lines = runtlc(spec,config=config,tlc_workers=tlc_workers,cwd=cwd,tlcjar=tlcjar, 
-                    java=java, max_depth=max_depth, cache_with_ignored=cache_with_ignored, cache_state_load=cache_state_load)
+                    java=java, max_depth=max_depth, cache_with_ignored=cache_with_ignored, cache_state_load=cache_state_load, tlc_flags=tlc_flags)
     invs_violated = set()
     for l in greplines("is violated", lines):
         res = re.match(".*Invariant (Inv.*) is violated",l)

@@ -28,6 +28,9 @@
         "rm3" : "rm3"
     },
     "constraint"  :  "",
+    "simulation_inv_check": true,
+    "simulation_inv_check_num": 5000,
+    "simulation_inv_check_depth": 20,
     "quant_inv"  :  "\\A VARRMI \\in RM : \\A VARRMJ \\in RM : ",
     "quant_vars"  :  ["VARRMI", "VARRMJ"],
     "quant_inv_alt"  :  null,
