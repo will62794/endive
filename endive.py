@@ -1855,6 +1855,11 @@ class InductiveInvGen():
         iteration = 1
         uniqid = 0
 
+        if cache_states_with_ignored_vars is not None:
+            var_slice = [v for v in self.state_vars if v not in cache_states_with_ignored_vars]
+        else:
+            var_slice = None
+
         # Run the initial state caching step.
         # State vars in local grammar:
         max_depth = 2**30
@@ -1929,7 +1934,8 @@ class InductiveInvGen():
                     quant_inv_fn = quant_inv_alt
                     preds = preds + preds_alt
 
-            logging.info("\n>>> (Round %d) Iteration %d (num_conjs=(min=%d,max=%d),process_local=%s)" % (roundi, iteration,min_conjs,max_conjs,process_local)) 
+            var_slice_str = "{" + ",".join(var_slice) + "}"
+            logging.info("\n>>> (Round %d, subround %d) Iteration %d (num_conjs=(min=%d,max=%d),process_local=%s,var_slice=%s)" % (roundi, subroundi, iteration,min_conjs,max_conjs,process_local,str(var_slice_str))) 
 
             logging.info("Starting iteration %d of eliminate_ctis (min_conjs=%d, max_conjs=%d)" % (iteration,min_conjs,max_conjs))
 
