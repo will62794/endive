@@ -3525,8 +3525,8 @@ class InductiveInvGen():
                     num_ctis_left = self.proof_graph["nodes"][n]["ctis_remaining"]
                     fillcolor = "green" if num_ctis_left == 0 else "orange"
                     coi = "{" + ",".join(self.proof_graph["nodes"][n]["coi_vars"]) + "}"
-                if "curr_node" in self.proof_graph and self.proof_graph["curr_node"] == n:
-                    # Add node with blue border (notb ackground).
+                if "curr_node" in self.proof_graph and self.proof_graph["curr_node"] == n and self.proof_graph["nodes"][n]["ctis_remaining"] > 0:
+                    # Mark node.
                     fillcolor = "yellow"
                 if n in self.proof_graph["nodes"] and len(self.proof_graph["nodes"][n]["coi_vars"]) > 0:
                     label = "< " + n + "<BR/>" + "<FONT POINT-SIZE='8'>" + str(coi) + " </FONT>"
