@@ -3394,7 +3394,9 @@ class InductiveInvGen():
                     # Filter predicates based on this COI.
                         # Set subset operator is: 
                     preds = [p for (pi,p) in enumerate(self.preds) if vars_in_preds[pi] <= lemma_action_coi]
-                    logging.info(f"{len(preds)}/{len(self.preds)} filtered predicates based on COI slice.")
+
+                    pct_str = "{0:.1f}".format(len(preds)/len(self.preds) * 100)
+                    logging.info(f"{len(preds)}/{len(self.preds)} ({pct_str}% of) predicates being used based on COI slice filter.")
 
                     cache_with_ignored_vars = [v for v in self.state_vars if v not in lemma_action_coi]
 
