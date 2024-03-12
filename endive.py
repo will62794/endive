@@ -3384,6 +3384,10 @@ class InductiveInvGen():
 
                     cache_with_ignored_vars = [v for v in self.state_vars if v not in lemma_action_coi]
 
+                    self.proof_graph["edges"].append((action_node, lemma_name))
+                    self.proof_graph["nodes"][action_node] = {"ctis_remaining": 1000, "coi_vars": lemma_action_coi}  # initialize with positive CTI count, to be updated later.
+
+
                 self.total_num_cti_elimination_rounds = (roundi + 1)
                 # ret = self.eliminate_ctis(k_ctis, self.num_invs, roundi, preds=preds, cache_states_with_ignored_vars=cache_with_ignored_vars)
                 ret = self.eliminate_ctis(k_ctis_to_eliminate, self.num_invs, roundi, subroundi=subround, preds=preds, cache_states_with_ignored_vars=cache_with_ignored_vars)
