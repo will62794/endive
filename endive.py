@@ -3530,7 +3530,7 @@ class InductiveInvGen():
                     fillcolor = "yellow"
                 if n in self.proof_graph["nodes"] and len(self.proof_graph["nodes"][n]["coi_vars"]) > 0:
                     nlabel = n.split("_")[-1] # just show the action name.
-                    label = "< " + nlabel + "<BR/>" + "<FONT POINT-SIZE='8'>" + str(coi) + " </FONT>"
+                    label = "< " + nlabel + "<BR/>" + "<FONT POINT-SIZE='8'>" + str(coi) + " (" + str(len(self.proof_graph["nodes"][n]["coi_vars"])) + "/" + str(len(self.state_vars)) + ") </FONT>"
                     if "num_grammar_preds" in self.proof_graph["nodes"][n]:
                         label += "<FONT POINT-SIZE='8'>|preds| = " + str(self.proof_graph["nodes"][n]["num_grammar_preds"]) + "/" + str(len(self.preds)) + " </FONT>"
                     label += ">"
