@@ -2421,7 +2421,11 @@ class InductiveInvGen():
                         # if action_node in self.proof_graph:
                             # self.proof_graph[action_node].append(inv + inv_suffix)
                         lemma_action_coi = [v for v in self.state_vars if v not in cache_states_with_ignored_vars]
-                        self.proof_graph["nodes"][action_node] = {"ctis_remaining": num_ctis_remaining, "coi_vars": lemma_action_coi}
+                        self.proof_graph["nodes"][action_node] = {
+                            "ctis_remaining": num_ctis_remaining, 
+                            "coi_vars": lemma_action_coi,
+                            "num_grammar_preds": len(preds) 
+                        }
                         self.proof_graph["curr_node"] = action_node
                         # print(f"{orig_k_ctis[0].inv_name}_{orig_k_ctis[0].action_name}",  "->", f"{orig_k_ctis[0].inv_name}", "// EDGE")
                         # print(inv + inv_suffix, "->", f"{orig_k_ctis[0].inv_name}_{orig_k_ctis[0].action_name}", "// EDGE")
@@ -3525,7 +3529,10 @@ class InductiveInvGen():
                     # Add node with blue border (notb ackground).
                     fillcolor = "yellow"
                 if n in self.proof_graph["nodes"] and len(self.proof_graph["nodes"][n]["coi_vars"]) > 0:
-                    label = "< " + n + "<BR/>" + "<FONT POINT-SIZE='8'>" + str(coi) + " </FONT> >"
+                    label = "< " + n + "<BR/>" + "<FONT POINT-SIZE='8'>" + str(coi) + " </FONT>"
+                    if "num_grammar_preds" in self.proof_graph["nodes"][n]:
+                        label += "<FONT POINT-SIZE='8'>|preds| = " + str(self.proof_graph["nodes"][n]["num_grammar_preds"]) + "/" + str(len(self.preds)) + " </FONT>"
+                    label += ">"
                 else:
                     label = n
                 dot.node(n, fillcolor=fillcolor, style="filled", color=color, label=label)
