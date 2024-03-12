@@ -6,6 +6,8 @@
         "[type |-> \"Prepared\", rm |-> VARRMI] \\in msgsPrepared",
         "[type |-> \"Prepared\", rm |-> VARRMJ] \\in msgsPrepared",
         "tmPrepared = RM",
+        "tmPrepared = tmPrepared \\cup {VARRMI}",
+        "tmPrepared = tmPrepared \\cup {VARRMJ}",
         "rmState[VARRMI] = \"working\"",
         "rmState[VARRMJ] = \"working\"",
         "[type |-> \"Commit\"] \\in msgsAbortCommit",
@@ -15,9 +17,7 @@
         "rmState[VARRMI] = \"committed\"",
         "rmState[VARRMJ] = \"prepared\"",
         "rmState[VARRMJ] = \"aborted\"",
-        "rmState[VARRMJ] = \"committed\"",
-        "tmPrepared = tmPrepared \\cup {VARRMI}",
-        "tmPrepared = tmPrepared \\cup {VARRMJ}"
+        "rmState[VARRMJ] = \"committed\""
     ],
     "preds_alt" : [],
     "safety"  :  "H_TCConsistent",
