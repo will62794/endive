@@ -395,7 +395,6 @@ def runtlc(spec,config=None,tlc_workers=6,cwd=None,tlcjar="tla2tools-checkall.ja
            max_depth=2**30, cache_with_ignored=None, cache_state_load=False):
     # Make a best effort to attempt to avoid collisions between different
     # instances of TLC running on the same machine.
-    print("cache_with_ignored:", cache_with_ignored, cache_state_load)
     dirpath = tempfile.mkdtemp()
     metadir_path = f"states/states_{uuid.uuid4().hex[:16]}"
     cacheFlags = ""
