@@ -3380,7 +3380,8 @@ class InductiveInvGen():
 
                     ret = spec_obj_with_lemmas.get_vars_in_def(k_cti_action)
                     vars_in_action,action_updated_vars = ret
-                    # print("vars in action:", action_updated_vars[action])
+                    print("vars in action:", vars_in_action)
+                    print("action updated vars:", action_updated_vars)
                     vars_in_action_non_updated,_ = spec_obj_with_lemmas.get_vars_in_def(k_cti_action, ignore_update_expressions=True)
                     vars_in_lemma_defs = spec_obj_with_lemmas.get_vars_in_def(k_cti_lemma)[0]
 
