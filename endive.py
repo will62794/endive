@@ -1874,15 +1874,24 @@ class InductiveInvGen():
                 # Get value from dict self.spec_config or use default value.
                 depth = self.spec_config.get("simulation_inv_check_depth", 50)
                 num = self.spec_config.get("simulation_inv_check_num", 10000)
-                
                 logging.info(f"Running state caching step in simulation with (depth={depth}, num={num})")
-
                 tlc_flags=f"-depth {depth} -simulate num={num}"
             tstart = time.time()
             self.start_timing_state_caching()
-            sat_invs = self.check_invariants([dummy_inv], tlc_workers=tlc_workers, max_depth=max_depth, 
-                                             cache_with_ignored=cache_states_with_ignored_vars, skip_checking=True,
-                                             tlc_flags=tlc_flags)
+
+            # Option to memoize state projection cache computations.
+            self.memoize_state_projection_caches = True
+
+            if tuple(sorted(cache_states_with_ignored_vars)) not in self.state_projection_cache:
+                sat_invs = self.check_invariants([dummy_inv], tlc_workers=tlc_workers, max_depth=max_depth, 
+                                                cache_with_ignored=cache_states_with_ignored_vars, skip_checking=True,
+                                                tlc_flags=tlc_flags)
+
+                if self.memoize_state_projection_caches:
+                    self.state_projection_cache[tuple(sorted(cache_states_with_ignored_vars))] = True
+            else:
+                logging.info(f"State projection cache for slice {cache_states_with_ignored_vars} was already computed.")
+            logging.info(f"state projection cache: {self.state_projection_cache}")
             self.end_timing_state_caching()
             logging.info("Finished initial state caching.")
 
@@ -3279,6 +3288,9 @@ class InductiveInvGen():
             self.pred_vals = self.check_predicates(self.preds)
 
         elim_round_failed = False
+
+        # Stores map of state variables projections of the state space that we have already cached.
+        self.state_projection_cache = {}
 
         for roundi in range(self.num_rounds):
             logging.info("---------")
