@@ -215,20 +215,18 @@ HCoordWriteReplay(n) == \* Execute a write-replay after a membership re-config
                                  tieBreaker  |-> nodeTS[n].tieBreaker]}
     /\  UNCHANGED <<aliveNodes, epochID, msgsVAL, msgsACK>>
 
-HRcvAck(n) ==   \* Process a received acknowledment
-    \E m \in msgsACK: 
-        /\ m.type     = "ACK"
-        /\ m.epochID  = epochID
-        /\ m.sender  /= n
-        /\ m.sender  \notin nodeRcvedAcks[n]
-        /\ equalTS(m.version, m.tieBreaker,
-                   nodeLastWriteTS[n].version, 
-                   nodeLastWriteTS[n].tieBreaker)
-        /\ nodeState[n] \in {"write", "invalid_write", "replay"}
-        /\ nodeRcvedAcks' = [nodeRcvedAcks EXCEPT ![n] = 
-                                              nodeRcvedAcks[n] \union {m.sender}]
-        /\ UNCHANGED <<msgsINV, msgsACK, msgsVAL, nodeLastWriter, nodeLastWriteTS, 
-                       aliveNodes, nodeTS, nodeState, epochID, nodeWriteEpochID>>
+HRcvAck(n, m) ==   \* Process a received acknowledment
+    /\ m \in msgsACK
+    /\ m.type     = "ACK"
+    /\ m.epochID  = epochID
+    /\ m.sender  /= n
+    /\ m.sender  \notin nodeRcvedAcks[n]
+    /\ equalTS(m.version, m.tieBreaker,
+                nodeLastWriteTS[n].version, 
+                nodeLastWriteTS[n].tieBreaker)
+    /\ nodeState[n] \in {"write", "invalid_write", "replay"}
+    /\ nodeRcvedAcks' = [nodeRcvedAcks EXCEPT ![n] = nodeRcvedAcks[n] \union {m.sender}]
+    /\ UNCHANGED <<msgsINV, msgsACK, msgsVAL, nodeLastWriter, nodeLastWriteTS, aliveNodes, nodeTS, nodeState, epochID, nodeWriteEpochID>>
 
 
 HSendVals(n) == \* Send validations once acknowledments are received from all alive nodes
@@ -245,7 +243,7 @@ HCoordinatorActions(n) ==   \* Actions of a read/write coordinator
     \/ HRead(n)          
     \/ HCoordWriteReplay(n) \* After failures
     \/ HWrite(n)         
-    \/ HRcvAck(n)
+    \* \/ HRcvAck(n)
     \/ HSendVals(n) 
 
 -------------------------------------------------------------------------------------               
@@ -318,7 +316,7 @@ HRcvValAction == TRUE /\ \E n \in aliveNodes, m \in msgsVAL : HRcvVal(n, m)
 HReadAction == TRUE /\ \E n \in aliveNodes : HRead(n)
 HCoordWriteReplayAction == TRUE /\ \E n \in aliveNodes : HCoordWriteReplay(n)
 HWriteAction == TRUE /\ \E n \in aliveNodes : HWrite(n)
-HRcvAckAction == TRUE /\ \E n \in aliveNodes : HRcvAck(n)
+HRcvAckAction == TRUE /\ \E n \in aliveNodes, m \in msgsACK : HRcvAck(n, m)
 HSendValsAction == TRUE /\ \E n \in aliveNodes : HSendVals(n)
 NodeFailureAction == TRUE /\ \E n \in aliveNodes : NodeFailure(n)
 
