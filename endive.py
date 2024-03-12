@@ -3514,7 +3514,7 @@ class InductiveInvGen():
                     coi = "{" + ",".join(self.proof_graph["nodes"][n]["coi_vars"]) + "}"
                 if "curr_node" in self.proof_graph and self.proof_graph["curr_node"] == n:
                     # Add node with blue border (notb ackground).
-                    color = "blue"
+                    fillcolor = "lightblue"
                 if n in self.proof_graph["nodes"] and len(self.proof_graph["nodes"][n]["coi_vars"]) > 0:
                     label = "< " + n + "<BR/>" + "<FONT POINT-SIZE='8'>" + str(coi) + " </FONT> >"
                 else:
