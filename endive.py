@@ -2123,7 +2123,7 @@ class InductiveInvGen():
                     if cache_states_with_ignored_vars is not None:
                         cache_load = True
 
-                    sat_invs = self.check_invariants(invs, tlc_workers=tlc_workers, max_depth=max_depth, cache_state_load=cache_load)
+                    sat_invs = self.check_invariants(invs, tlc_workers=tlc_workers, max_depth=max_depth, cache_state_load=cache_load, cache_with_ignored=cache_states_with_ignored_vars)
                 else:
                     print("Doing fast check of candidate predicates.")
                     violated_invs = set()

@@ -395,13 +395,17 @@ def runtlc(spec,config=None,tlc_workers=6,cwd=None,tlcjar="tla2tools-checkall.ja
            max_depth=2**30, cache_with_ignored=None, cache_state_load=False):
     # Make a best effort to attempt to avoid collisions between different
     # instances of TLC running on the same machine.
+    print("cache_with_ignored:", cache_with_ignored, cache_state_load)
     dirpath = tempfile.mkdtemp()
     metadir_path = f"states/states_{uuid.uuid4().hex[:16]}"
     cacheFlags = ""
-    if cache_with_ignored is not None:
-        cacheFlags = f"-cacheStates cache -cacheStatesIgnoreVars {','.join(cache_with_ignored)}"
+    if (cache_with_ignored is not None) and (not cache_state_load):
+        cacheFlags = f"-cacheStates cache"
     if cache_state_load:
         cacheFlags = f"-cacheStates load"
+    if cache_with_ignored is not None:
+        cacheFlags += f" -cacheStatesIgnoreVars {','.join(cache_with_ignored)}"
+
     cmd = java + (f' -Djava.io.tmpdir="{dirpath}" -cp {tlcjar} tlc2.TLC {tlc_flags} {cacheFlags} -maxDepth {max_depth} -maxSetSize {TLC_MAX_SET_SIZE} -metadir {metadir_path} -noGenerateSpecTE -checkAllInvariants -deadlock -continue -workers {tlc_workers}')
     if config:
         cmd += " -config " + config
