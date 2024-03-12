@@ -2110,6 +2110,7 @@ class InductiveInvGen():
                         # upfront.
                         top_k = 2
                         for p in pred_var_counts_tups[:top_k]:
+                            print(p)
 
                             predvar_set = p[1]
                             ignored = [svar for svar in self.state_vars if svar not in predvar_set]
@@ -2119,8 +2120,8 @@ class InductiveInvGen():
 
                             logging.info(f"Running partitioned state caching step with {len(ignored)} ignored vars: {ignored}")
                             # sat_invs = self.check_invariants([dummy_inv], tlc_workers=tlc_workers, max_depth=max_depth, cache_with_ignored=cache_states_with_ignored_vars)
-                            sat_invs = self.check_invariants([dummy_inv], tlc_workers=tlc_workers, max_depth=max_depth, cache_with_ignored=ignored, skip_checking=True)
-                            sat_invs = self.check_invariants(invs_to_check, tlc_workers=tlc_workers, max_depth=max_depth, cache_state_load=True)
+                            sat_invs = self.check_invariants([dummy_inv], tlc_workers=tlc_workers, max_depth=max_depth, cache_with_ignored=ignored, skip_checking=True, tlc_flags=simulation_inv_tlc_flags)
+                            sat_invs = self.check_invariants(invs_to_check, tlc_workers=tlc_workers, max_depth=max_depth, cache_with_ignored=ignored, cache_state_load=True)
 
 
                     # Check all candidate invariants.
