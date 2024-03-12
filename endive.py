@@ -2409,7 +2409,8 @@ class InductiveInvGen():
                         num_ctis_remaining = len(list(cti_table.keys()))-len(eliminated_ctis)
                         # if action_node in self.proof_graph:
                             # self.proof_graph[action_node].append(inv + inv_suffix)
-                        self.proof_graph["nodes"][action_node] = num_ctis_remaining
+                        lemma_action_coi = [v for v in self.state_vars if v not in cache_states_with_ignored_vars]
+                        self.proof_graph["nodes"][action_node] = {"ctis_remaining": num_ctis_remaining, "coi_vars": lemma_action_coi}
                         self.proof_graph["curr_node"] = action_node
                         # print(f"{orig_k_ctis[0].inv_name}_{orig_k_ctis[0].action_name}",  "->", f"{orig_k_ctis[0].inv_name}", "// EDGE")
                         # print(inv + inv_suffix, "->", f"{orig_k_ctis[0].inv_name}_{orig_k_ctis[0].action_name}", "// EDGE")
@@ -3489,13 +3490,17 @@ class InductiveInvGen():
             for n in e:
                 color = "black"
                 fillcolor = "white"
+                coi = ""
                 if n in self.proof_graph["nodes"]:
-                    num_ctis_left = self.proof_graph["nodes"][n]
+                    num_ctis_left = self.proof_graph["nodes"][n]["ctis_remaining"]
                     fillcolor = "green" if num_ctis_left == 0 else "orange"
+                    coi = "{" + ",".join(self.proof_graph["nodes"][n]["coi_vars"]) + "}"
                 if self.proof_graph["curr_node"] == n:
                     # Add node with blue border (notb ackground).
                     color = "blue"
-                dot.node(n, fillcolor=fillcolor, style="filled", color=color)
+                    
+                label = "< " + n + "<BR/>" + "<FONT POINT-SIZE='8'>" + str(coi) + " </FONT> >"
+                dot.node(n, fillcolor=fillcolor, style="filled", color=color, label=label)
 
         for e in self.proof_graph["edges"]:
             dot.edge(e[0], e[1])
