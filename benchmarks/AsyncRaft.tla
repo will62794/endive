@@ -290,6 +290,15 @@ AdvanceCommitIndex(i) ==
           /\ commitIndex' = [commitIndex EXCEPT ![i] = newCommitIndex]
     /\ UNCHANGED <<appendEntriesRequestMsgs, appendEntriesResponseMsgs, currentTerm, state, votedFor, votesGranted, nextIndex, matchIndex, log, requestVoteRequestMsgs, requestVoteResponseMsgs>>
 
+UpdateTerm(mterm,mdest) ==
+    /\ mterm > currentTerm[mdest]
+    /\ currentTerm'    = [currentTerm EXCEPT ![mdest] = mterm]
+    /\ state'          = [state       EXCEPT ![mdest] = Follower]
+    /\ votedFor'       = [votedFor    EXCEPT ![mdest] = Nil]
+        \* messages is unchanged so m can be processed further.
+    /\ UNCHANGED <<appendEntriesRequestMsgs, appendEntriesResponseMsgs, votesGranted, nextIndex, matchIndex, log, commitIndex, requestVoteRequestMsgs, requestVoteResponseMsgs>>
+
+
 \* ACTION: UpdateTerm
 \* Any RPC with a newer term causes the recipient to advance its term first.
 UpdateTermRVReq(mterm,mdest) ==
@@ -523,10 +532,11 @@ HandleAppendEntriesResponse(m) ==
 
 \* RestartAction == TRUE /\ \E i \in Server : Restart(i)
 RequestVoteAction == TRUE /\ \E i \in Server : RequestVote(i)
-UpdateTermRVReqAction == TRUE /\ \E m \in requestVoteRequestMsgs : UpdateTermRVReq(m.mterm, m.mdest)
-UpdateTermRVResAction == TRUE /\ \E m \in requestVoteResponseMsgs : UpdateTermRVRes(m.mterm, m.mdest)
-UpdateTermAEReqAction == TRUE /\ \E m \in appendEntriesRequestMsgs : UpdateTermAEReq(m.mterm, m.mdest)
-UpdateTermAEResAction == TRUE /\ \E m \in appendEntriesResponseMsgs : UpdateTermAERes(m.mterm, m.mdest)
+UpdateTermAction == TRUE /\ \E m \in requestVoteRequestMsgs \cup requestVoteResponseMsgs \cup appendEntriesRequestMsgs \cup appendEntriesResponseMsgs : UpdateTerm(m.mterm, m.mdest)
+\* UpdateTermRVReqAction == TRUE /\ \E m \in requestVoteRequestMsgs : UpdateTermRVReq(m.mterm, m.mdest)
+\* UpdateTermRVResAction == TRUE /\ \E m \in requestVoteResponseMsgs : UpdateTermRVRes(m.mterm, m.mdest)
+\* UpdateTermAEReqAction == TRUE /\ \E m \in appendEntriesRequestMsgs : UpdateTermAEReq(m.mterm, m.mdest)
+\* UpdateTermAEResAction == TRUE /\ \E m \in appendEntriesResponseMsgs : UpdateTermAERes(m.mterm, m.mdest)
 BecomeLeaderAction == TRUE /\ \E i \in Server : BecomeLeader(i)
 ClientRequestAction == TRUE /\ \E i \in Server : ClientRequest(i)
 AdvanceCommitIndexAction == TRUE /\ \E i \in Server : AdvanceCommitIndex(i)
@@ -546,10 +556,11 @@ Test1 == \A s \in Server : \E r \in Server :
 \* Defines how the variables may transition.
 Next == 
     \/ RequestVoteAction
-    \/ UpdateTermRVReqAction
-    \/ UpdateTermRVResAction
-    \/ UpdateTermAEReqAction
-    \/ UpdateTermAEResAction
+    \/ UpdateTermAction
+    \* \/ UpdateTermRVReqAction
+    \* \/ UpdateTermRVResAction
+    \* \/ UpdateTermAEReqAction
+    \* \/ UpdateTermAEResAction
     \/ HandleRequestVoteRequestAction
     \/ HandleRequestVoteResponseAction
     \/ BecomeLeaderAction
