@@ -1850,6 +1850,8 @@ class InductiveInvGen():
         process_local = False
         quant_inv_fn = self.quant_inv
 
+        conjuncts_added_in_round = []
+
         iteration = 1
         uniqid = 0
 
@@ -2337,7 +2339,6 @@ class InductiveInvGen():
             cti_states_eliminated_in_iter = 0
 
             logging.info(f"Checking {len(sat_invs)} satisfied invariants for CTI elimination")
-
             for i in range(len(sorted_invs)):
                 # Sort the remaining invariants by the number of new CTIs they eliminate.
                 compare_fn = lambda inv: (len(cti_states_eliminated_by_invs[inv] - eliminated_ctis), -len(get_invexp_cost(inv)))
@@ -2351,6 +2352,8 @@ class InductiveInvGen():
                 new_ctis_eliminated = (cti_states_eliminated_by_invs[next_inv] - eliminated_ctis)
                 cti_states_eliminated_in_iter += len(new_ctis_eliminated)
 
+                if len(conjuncts_added_in_round) >= self.max_num_conjuncts_per_round and num_ctis_remaining > 0:
+                    break
 
                 if len(new_ctis_eliminated)>0:
                     logging.info("New CTIs eliminated by inv %s %s: %d" % (next_inv, invexp, len(new_ctis_eliminated)))
@@ -2359,6 +2362,8 @@ class InductiveInvGen():
                         # print(cti_table[cti].getActionName())
                     chosen_invs.append(next_inv)
                     eliminated_ctis = eliminated_ctis.union(new_ctis_eliminated)
+                    conjuncts_added_in_round.append(next_inv)
+                    num_ctis_remaining = len(list(cti_table.keys()))-len(eliminated_ctis)
 
                     if len(chosen_invs) >= self.max_num_conjuncts_per_round:
                         logging.info(f"Moving on since reached max num conjuncts per round: {self.max_num_conjuncts_per_round}")
@@ -2424,6 +2429,10 @@ class InductiveInvGen():
                 # Don't re-run iterations where max_conjs=1, since they are small and quick.
                 if self.rerun_iterations and max_conjs > 1:
                     iteration -= 1
+
+            if len(conjuncts_added_in_round) >= self.max_num_conjuncts_per_round and num_ctis_remaining > 0:
+                logging.info(f"Exiting round since reached max num conjuncts per round: {self.max_num_conjuncts_per_round}")
+                return None
 
             num_ctis_remaining = len(list(cti_table.keys()))-len(eliminated_ctis)
             num_orig_ctis = len(list(cti_table.keys()))
@@ -3308,8 +3317,14 @@ class InductiveInvGen():
                         cti_action_invs_found.add((kcti.inv_name, kcti.action_name))
                 logging.info(f"{len(cti_action_invs_found)} distinct k-CTI lemma-action proof obligations found:")
                 cti_action_invs_found = sorted(cti_action_invs_found) # for consistent odering of proof obligations.
+                # Ignore failed obligations when selecting here.
+                cti_action_invs_found = [c for c in cti_action_invs_found if c not in failed_obligations]
                 for kcti in cti_action_invs_found:
                     logging.info(f" - {kcti}")
+                if len(failed_obligations) > 0:
+                    logging.info("Failed obligations being ignored:")
+                    for f in failed_obligations:
+                        logging.info(f" - {f}")
 
                 #
                 # Lemma-action specific technique.
@@ -3497,7 +3512,7 @@ class InductiveInvGen():
                     num_ctis_left = self.proof_graph["nodes"][n]["ctis_remaining"]
                     fillcolor = "green" if num_ctis_left == 0 else "orange"
                     coi = "{" + ",".join(self.proof_graph["nodes"][n]["coi_vars"]) + "}"
-                if self.proof_graph["curr_node"] == n:
+                if "curr_node" in self.proof_graph and self.proof_graph["curr_node"] == n:
                     # Add node with blue border (notb ackground).
                     color = "blue"
                 if n in self.proof_graph["nodes"] and len(self.proof_graph["nodes"][n]["coi_vars"]) > 0:
