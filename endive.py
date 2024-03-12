@@ -3351,9 +3351,7 @@ class InductiveInvGen():
 
                     lemma_name = "Safety" if k_cti_lemma == self.safety else k_cti_lemma
                     action_node = f"{lemma_name}_{k_cti_action}"
-                    self.proof_graph["edges"].append((action_node, lemma_name))
-                    self.proof_graph["nodes"][action_node] = 1000 # initialize with positive CTI count, to be updated later.
-
+                    
                     # Filter CTIs based on this choice.
                     cti_filter = lambda c  : (c.inv_name == k_cti_lemma or (c.inv_name == "Safety" and k_cti_lemma == self.safety)) and c.action_name == k_cti_action
                     k_ctis_to_eliminate = [c for c in k_ctis if cti_filter(c)]
