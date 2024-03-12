@@ -1330,7 +1330,7 @@ class StructuredProof():
             self.ctigen_state = "ctigen"
 
             new_ctis, _ = indgen.generate_ctis(
-                                props=[(node.name, node.expr)], 
+                                props=[(node.name, node.expr, "")], 
                                 reseed=True, depth=1, 
                                 view=node.cti_view, 
                                 # actions=actions, 
