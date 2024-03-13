@@ -177,6 +177,7 @@ HRead(n) ==  \* Execute a read
               
 HWrite(n) == \* Execute a write
     \* writes in invalid state are also supported as an optimization
+    /\  n \in aliveNodes
     /\  nodeState[n]      \in {"valid"}
     /\  nodeTS[n].version < H_MAX_VERSION \* Only to configurably terminate the model checking 
     /\  nodeLastWriter'   = [nodeLastWriter  EXCEPT ![n] = n]
