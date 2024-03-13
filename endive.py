@@ -1872,6 +1872,8 @@ class InductiveInvGen():
             hashed = str(hash(cti))
             cti_table[hashed] = cti
 
+        # TODO: Can we also project CTIs onto variable slice for faster CTI elimination checking? (3/13/24)
+
         eliminated_ctis = set()
 
         # Parameters for invariant generation.
@@ -1940,7 +1942,7 @@ class InductiveInvGen():
 
             # On first iteration, look for smallest predicates.
             if iteration == 1:
-                (min_conjs, max_conjs) = (1, 2)
+                (min_conjs, max_conjs) = (1, 1)
                 process_local=False
                 quant_inv_fn = self.quant_inv
 
