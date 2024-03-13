@@ -3498,11 +3498,12 @@ class InductiveInvGen():
                     # actions_real_defs = [a.replace("Action", "") for a in actions]
                     lemma_action_coi = {}
 
-                    ret = spec_obj_with_lemmas.get_vars_in_def(k_cti_action)
+                    k_cti_action_opname = k_cti_action.replace("Action", "")
+                    ret = spec_obj_with_lemmas.get_vars_in_def(k_cti_action_opname)
                     vars_in_action,action_updated_vars = ret
                     print("vars in action:", vars_in_action)
                     print("action updated vars:", action_updated_vars)
-                    vars_in_action_non_updated,_ = spec_obj_with_lemmas.get_vars_in_def(k_cti_action, ignore_update_expressions=True)
+                    vars_in_action_non_updated,_ = spec_obj_with_lemmas.get_vars_in_def(k_cti_action_opname, ignore_update_expressions=True)
                     vars_in_lemma_defs = spec_obj_with_lemmas.get_vars_in_def(k_cti_lemma)[0]
 
                     lemma_action_coi = spec_obj_with_lemmas.compute_coi(None, None, None,action_updated_vars, vars_in_action_non_updated, vars_in_lemma_defs)
