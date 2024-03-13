@@ -1932,13 +1932,14 @@ class InductiveInvGen():
         #     self.end_timing_state_caching()
         #     logging.info("Finished initial state caching.")
 
+        inv_candidates_generated_in_round = set()
+
         while iteration <= self.num_iters:
             tstart = time.time()
 
             # TODO: Possibly use these for optimization later on.
             self.sat_invs_in_iteration = set()
             self.invs_checked_in_iteration = set()
-            inv_candidates_generated_in_iteration = set()
 
             # On first iteration, look for smallest predicates.
             if iteration == 1:
@@ -2050,7 +2051,7 @@ class InductiveInvGen():
                     process_local=process_local, quant_vars=self.quant_vars, 
                     boolean_style = boolean_style,
                     use_pred_identifiers=use_pred_identifiers,
-                    invs_avoid_set=inv_candidates_generated_in_iteration)
+                    invs_avoid_set=inv_candidates_generated_in_round)
                 
                 invs = all_invs["raw_invs"]
 
@@ -2060,7 +2061,13 @@ class InductiveInvGen():
                 #     invs.add(c[2])
 
                 invs_symb_strs = all_invs["pred_invs"]
-                inv_candidates_generated_in_iteration.update(invs_symb_strs)
+                # Count the number of generated candidates that were already checked previously.
+                repeated_invs = 0
+                for ivs in invs_symb_strs:
+                    if ivs in inv_candidates_generated_in_round:
+                        repeated_invs += 1
+                inv_candidates_generated_in_round.update(invs_symb_strs)
+                logging.info(f"Found {repeated_invs} repeated generated invariants (total generated in round {roundi}: {len(inv_candidates_generated_in_round)}).")
 
                 # Sort the set of invariants to give them a consistent order.
                 invs = sorted(list(invs))
