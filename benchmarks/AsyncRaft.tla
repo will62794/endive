@@ -160,6 +160,14 @@ Quorum == {i \in SUBSET(Server) : Cardinality(i) * 2 > Cardinality(Server)}
 \* The term of the last entry in a log, or 0 if the log is empty.
 LastTerm(xlog) == IF Len(xlog) = 0 THEN 0 ELSE xlog[Len(xlog)]
 
+IsPrefix(s, t) ==
+  (**************************************************************************)
+  (* TRUE iff the sequence s is a prefix of the sequence t, s.t.            *)
+  (* \E u \in Seq(Range(t)) : t = s \o u. In other words, there exists      *)
+  (* a suffix u that with s prepended equals t.                             *)
+  (**************************************************************************)
+  Len(s) <= Len(t) /\ SubSeq(s, 1, Len(s)) = SubSeq(t, 1, Len(s))
+  
 ----
 \* Define initial values for all variables
 

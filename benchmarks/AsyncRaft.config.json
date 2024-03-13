@@ -42,6 +42,13 @@
         "VARLOGINDI \\in DOMAIN log[VARI] /\\ VARLOGINDI \\in DOMAIN log[VARJ] /\\ log[VARI][VARLOGINDI] = log[VARJ][VARLOGINDI]",
         "VARLOGINDI \\in DOMAIN log[VARI] /\\ Agree(VARI, VARLOGINDI) \\in Quorum /\\ matchIndex = matchIndex",
         "VARLOGINDI \\in DOMAIN log[VARI] /\\ Agree(VARI, VARLOGINDI) = {} /\\ matchIndex = matchIndex",
+        "AgreeIndexes(VARI) = {} /\\ matchIndex = matchIndex",
+        "AgreeIndexes(VARI) # {} /\\ log[VARI][Max(AgreeIndexes(VARI))] = currentTerm[VARI] /\\ matchIndex = matchIndex",
+        "AgreeIndexes(VARI) # {} /\\ commitIndex[VARI] > Max(AgreeIndexes(VARI)) /\\ matchIndex = matchIndex",
+        "AgreeIndexes(VARI) # {} /\\ commitIndex[VARI] = Max(AgreeIndexes(VARI)) /\\ matchIndex = matchIndex",
+        "H_CommitIndexCoveredOnQuorum",
+        "IsPrefix(log[VARI], log[VARJ])",
+        "IsPrefix(log[VARJ], log[VARI])",
         "commitIndex[VARI] \\in DOMAIN log[VARI] /\\ commitIndex[VARI] \\in DOMAIN log[VARJ] /\\ log[VARJ][commitIndex[VARI]] = log[VARI][commitIndex[VARI]]"
     ],
     "preds_alt" : [],
