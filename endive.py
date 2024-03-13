@@ -69,7 +69,9 @@ class InductiveInvGen():
                     num_simulate_traces=10000, tlc_workers=6, quant_vars=[],java_exe="java",cached_invs=None, cached_invs_gen_time_secs=None, use_cpp_invgen=False,
                     pregen_inv_cmd=None, opt_quant_minimize=False, try_final_minimize=False, proof_tree_mode=False, interactive_mode=False, max_num_conjuncts_per_round=10000,
                     max_num_ctis_per_round=10000, override_num_cti_workers=None, use_apalache_ctigen=False,all_args={},spec_config=None, enable_inv_state_caching=False,
-                    auto_lemma_action_decomposition=False, enable_partitioned_state_caching=False):
+                    auto_lemma_action_decomposition=False, 
+                    enable_partitioned_state_caching=False,
+                    enable_cti_slice_projection=False):
         self.java_exe = java_exe
         self.java_version_info = None
         
@@ -111,6 +113,7 @@ class InductiveInvGen():
         self.save_dot = all_args["save_dot"]
         self.enable_inv_state_caching = enable_inv_state_caching
         self.enable_partitioned_state_caching = enable_partitioned_state_caching
+        self.enable_cti_slice_projection = enable_cti_slice_projection
 
 
         # Set an upper limit on CTIs per round to avoid TLC getting overwhelmend. Hope is that 
@@ -1866,14 +1869,35 @@ class InductiveInvGen():
         
         if preds is None:
             preds = self.preds
-        
+
+        assert len(orig_k_ctis) > 0 
+
+        # TODO: Can we also project CTIs onto variable slice for faster CTI elimination checking? (3/13/24)
+        # orig_k_ctis
+        if self.enable_cti_slice_projection:
+            logging.info("Projecting CTIs onto variable slice for faster CTI elimination checking.")
+            first_cti = orig_k_ctis[0]
+            first_cti_vals = first_cti.var_vals()
+            print("total CTIs:", len(orig_k_ctis))
+            if cache_states_with_ignored_vars is not None:
+                for c in orig_k_ctis:
+                    # print("ignore vars:", cache_states_with_ignored_vars)
+                    # print("pre-projected:")
+                    # for l in c.cti_lines:
+                        # print(l)
+                    for sv in cache_states_with_ignored_vars:
+                        c.set_var_val(sv, first_cti_vals[sv])
+                    # print("post-projected:")
+                    # for l in c.cti_lines:
+                        # print(l)
+            print("total projected ctis:", len(set(orig_k_ctis)))
+            orig_k_ctis = list(set(orig_k_ctis))
+
         # Save CTIs, indexed by their hashed value.
         cti_table = {}
         for cti in orig_k_ctis:
             hashed = str(hash(cti))
             cti_table[hashed] = cti
-
-        # TODO: Can we also project CTIs onto variable slice for faster CTI elimination checking? (3/13/24)
 
         eliminated_ctis = set()
 
@@ -3833,6 +3857,7 @@ if __name__ == "__main__":
     parser.add_argument('--save_dot', help='Save proof graphs in DOT and TeX info.', default=False, action='store_true')
     parser.add_argument('--enable_inv_state_caching', help='Enable invariant state caching.', default=False, action='store_true')
     parser.add_argument('--enable_partitioned_state_caching', help='Enable finer grained partitioned variable subset based state caching.', default=False, action='store_true')
+    parser.add_argument('--enable_cti_slice_projection', help='Enable slicing of CTI sets.', default=False, action='store_true')
 
     # Apalache related commands.
     parser.add_argument('--use_apalache_ctigen', help='Use Apalache for CTI generation (experimental).', required=False, default=False, action='store_true')
@@ -3940,6 +3965,7 @@ if __name__ == "__main__":
                                 spec_config=spec_config, 
                                 enable_inv_state_caching=args["enable_inv_state_caching"],
                                 enable_partitioned_state_caching=args["enable_partitioned_state_caching"],
+                                enable_cti_slice_projection=args["enable_cti_slice_projection"],
                                 auto_lemma_action_decomposition=args["auto_lemma_action_decomposition"])
 
 

@@ -507,6 +507,27 @@ class CTI():
         if load_from_obj:
             self.load_from(load_from_obj)
 
+    def var_vals(self):
+        vals = {}
+        for cti_line in self.cti_lines:
+            # Remove the conjunction (/\) at the beginning of the line.
+            cti_line = cti_line[2:].strip()
+            # Look for the first equals sign.
+            first_equals = cti_line.index("=")
+            varname = cti_line[:first_equals].strip()
+            varval = cti_line[first_equals+1:]
+            vals[varname] = varval
+        return vals
+
+    def set_var_val(self, varname, new_var_str):
+        """ Update the value of a variable in the CTI with a string representing a TLA+ expression. """
+        # Update the CTI lines.
+        vals = self.var_vals()
+        if varname in vals:
+            vals[varname] = new_var_str
+        self.cti_lines = [f"/\\ {v} = {vals[v]}" for v in vals]
+        self.cti_str = " /\\ ".join(self.cti_lines)
+
     def serialize(self):
         ret = {
             "cti_str": self.cti_str,
