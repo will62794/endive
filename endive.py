@@ -2055,10 +2055,12 @@ class InductiveInvGen():
                 
                 invs = all_invs["raw_invs"]
 
-                # # Always add in existing strengthening conjuncts to the set of invariants to consider.
-                # # TODO: Need to consider cleaner ways for re-using existing strengthening conjuncts.
-                # for c in self.strengthening_conjuncts:
-                #     invs.add(c[2])
+                # Always add in existing strengthening conjuncts to the set of invariants to consider.
+                # This will cause these conjuncts to be checked again, but that's okay for now, since we will
+                # choose them first over new invariants if they are useful, below during CTI elimination.
+                # TODO: May consider cleaner ways for re-using existing strengthening conjuncts.
+                for c in self.strengthening_conjuncts:
+                    invs.add(c[2])
 
                 invs_symb_strs = all_invs["pred_invs"]
                 # Count the number of generated candidates that were already checked previously.
