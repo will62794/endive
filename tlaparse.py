@@ -140,8 +140,15 @@ class TLASpec:
             varnames.append(varname)
         return varnames
 
-    def get_vars_in_def_rec(self, elem):
+    def get_vars_in_def_rec(self, elem, level_filter=None):
         uid = None
+        level_elem = elem.find("level")
+        level_elem_val = None
+        if level_elem is not None:
+            level_elem_val = int(level_elem.text)
+        if (level_filter is not None) and (level_elem is not None) and level_elem_val > level_filter: 
+            return (set(), {})
+
         if elem.tag in ["OpDeclNodeRef", "BuiltInKindRef"]:
             children = list(elem)
             assert children[0].tag == "UID"
@@ -369,7 +376,7 @@ class TLASpec:
             # print("Removing ", child)
             el.remove(child)
 
-    def get_vars_in_def(self, name, ignore_unchanged=True, ignore_update_expressions=False):
+    def get_vars_in_def(self, name, ignore_unchanged=True, ignore_update_expressions=False, level_filter=None):
         """ Get the set of variables that appear in a given definition body. """ 
         node = self.get_def_node_by_uniquename(name)
         node_uid = node["uid"]
@@ -394,7 +401,7 @@ class TLASpec:
         if ignore_update_expressions:
             self.remove_update_expressions(elem)
 
-        all_vars,updated_vars = self.get_vars_in_def_rec(elem)
+        all_vars,updated_vars = self.get_vars_in_def_rec(elem, level_filter=level_filter)
         # print("updated vars:", updated_vars)
         return (all_vars,updated_vars)
 
@@ -783,7 +790,7 @@ def parse_tla_file(workdir, specname):
     # return tree
 
 if __name__ == "__main__":
-    tla_file = "AsyncRaft"
+    tla_file = "Hermes"
     my_spec = parse_tla_file("benchmarks", tla_file)
 
     top_level_defs = my_spec.get_all_user_defs(level="1")
@@ -795,30 +802,39 @@ if __name__ == "__main__":
     # action_node = [a for a in spec_obj["defs"].values() if a["uniquename"] == "RollbackEntriesAction"][0]
     # print(action_node, )
 
-    print("EXTRACT QUANT")
-    # my_spec.extract_quant_and_predicate_grammar("HandleRequestVoteRequestAction")
-    defname = "AcceptAppendEntriesRequestAppendAction"
-    print(f"Extracting from: {defname}")
-    # my_spec.extract_quant_and_predicate_grammar("TMRcvPreparedAction")
-    my_spec.extract_quant_and_predicate_grammar(defname)
-    # my_spec.extract_quant_and_predicate_grammar("Inv362_1_4_def")
-    # my_spec.extract_quant_and_predicate_grammar("RMPrepareAction")
-    exit()
+    # print("EXTRACT QUANT")
+    # # my_spec.extract_quant_and_predicate_grammar("HandleRequestVoteRequestAction")
+    # defname = "AcceptAppendEntriesRequestAppendAction"
+    # print(f"Extracting from: {defname}")
+    # # my_spec.extract_quant_and_predicate_grammar("TMRcvPreparedAction")
+    # my_spec.extract_quant_and_predicate_grammar(defname)
+    # # my_spec.extract_quant_and_predicate_grammar("Inv362_1_4_def")
+    # # my_spec.extract_quant_and_predicate_grammar("RMPrepareAction")
+    # exit()
 
-    action = "RequestVoteAction"
+    action = "HWrite"
     print("### Getting vars in action:", action)
     vars_in_action, action_updated_vars = my_spec.get_vars_in_def(action)
     vars_in_action_non_updated, _ = my_spec.get_vars_in_def(action, ignore_update_expressions=True)
     print(f"### Vars in action '{action}'", vars_in_action)
+    print("----")
     print(f"### Vars in action non-updated '{action}'", vars_in_action_non_updated)
-    print("### Vars COI for updated in action:", action_updated_vars)
+    print("----")
+    # print("### Vars COI for updated in action:", action_updated_vars)
+    print("### Vars COI for updated in action:")
+    print("----")
     for v in action_updated_vars:
-        print(f"var: '{v}'", ", COI:", action_updated_vars[v])
+        print(f" - var: '{v}'", ", COI:", action_updated_vars[v])
 
-    lemma = "H_RequestVoteQuorumInTermImpliesNoOtherLeadersInTerm"
+    lemma = "T1"
     # print("### Getting vars in def:", lemma)
     vars_in_lemma, updated_vars = my_spec.get_vars_in_def(lemma)
     print(f"### Vars in lemma '{lemma}'", vars_in_lemma)
+
+    lemma_action_coi = my_spec.compute_coi(None, None, None,action_updated_vars, vars_in_action_non_updated, vars_in_lemma)
+    print("COI:", lemma_action_coi)
+
+    exit()
 
     #
     # Compute the COI reduction.
