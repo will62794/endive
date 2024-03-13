@@ -2140,6 +2140,8 @@ class InductiveInvGen():
                     for p in sorted(pred_var_counts_tups, reverse=True):
                         print(p)
 
+                    invcheck_start = time.time()
+
                     #
                     # Consider the top few predicate var counts and test projected property checking.
                     # EXPERIMENTAL
@@ -2253,7 +2255,10 @@ class InductiveInvGen():
                             # print(f"Satisfied invariant (Inv{inv_ind}):", orig_inv_expr)
                             sat_invs.append(f"Inv{inv_ind}")
 
-                
+                # Report total invariant checking time.
+                invcheck_duration = time.time() - invcheck_start
+                logging.info(f"Discovered {len(sat_invs)} / {len(invs)} total invariants in {round(invcheck_duration,2)}s.")
+
                 sat_invs = list(sorted(sat_invs))
                 # print("first few sat invs:")
                 # print(sat_invs[:5])
