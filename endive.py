@@ -2165,13 +2165,17 @@ class InductiveInvGen():
                     # Don't bother doing this partitioned caching for tiny numbers of conjuncts.
                     LARGE_PRED_GROUP_COUNT = 1000 # don't bother with the overhead of this except for relatively large predicate groups.
                     max_pred_group_count = pred_var_counts_tups[0][0]
-                    if self.enable_partitioned_state_caching and min_conjs > 1 and max_pred_group_count > LARGE_PRED_GROUP_COUNT:
+                    if self.enable_partitioned_state_caching and min_conjs > 1:
                         logging.info(f"Partitioned property checking enabled for projection caching.")
                         # TODO: Consider enabling this and/or computing more of these cached state projections 
                         # upfront.
                         top_k = 8
                         for p in pred_var_counts_tups[:top_k]:
                             # print(p)
+                            if p[0] < LARGE_PRED_GROUP_COUNT:
+                                # If we reached a group that is too small, we stop, even if we haven't dont all top K.
+                                logging.info(f"Exiting partitioned state caching loop due to small group size: {p}.")
+                                break  
 
                             predvar_set = p[1]
                             ignored = [svar for svar in self.state_vars if svar not in predvar_set]
@@ -2199,12 +2203,11 @@ class InductiveInvGen():
                                 orig_invs_to_remove.append(inv[1])
                             
                             # These no longer need to be checked.
-                            for iv in invs_to_check:
-                                main_invs_to_check = [mi for mi in main_invs_to_check if mi[1] != iv[1]]
-
+                            invs_to_check_names = set([iv[1] for iv in invs_to_check])
+                            main_invs_to_check = [mi for mi in main_invs_to_check if mi[1] not in invs_to_check_names]
                             partition_sat_invs.update(set([f"Inv{iv[0]}" for iv in local_invs_sat]))
-                                
-                    logging.info(f"Found {len(partition_sat_invs)} partitioned sat invs")
+                    
+                        logging.info(f"Found {len(partition_sat_invs)} partitioned sat invs")
 
                     # Check all candidate invariants.
                     logging.info("Checking main invariant candidate group.")
