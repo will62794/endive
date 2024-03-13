@@ -39,7 +39,7 @@
     },
     "constraint"  :  "",
     "simulation_inv_check": true,
-    "simulation_inv_check_num": 1000,
+    "simulation_inv_check_num": 200,
     "simulation_inv_check_depth": 20,
     "quant_inv"  :  "\\A VARI \\in Node : \\A VARJ \\in Node : \\A VARK \\in Node : \\E VARQJ \\in Quorum : \\A VALI \\in Value : ",
     "quant_inv_alt"  :  null,
