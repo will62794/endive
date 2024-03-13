@@ -198,6 +198,7 @@ HWrite(n) == \* Execute a write
     /\  UNCHANGED <<aliveNodes, epochID, msgsVAL, msgsACK>>
 
 HCoordWriteReplay(n) == \* Execute a write-replay after a membership re-config
+    /\ n \in aliveNodes
     /\  nodeState[n] \in {"write", "replay"}
     /\  nodeWriteEpochID[n] < epochID
     /\  ~receivedAllAcks(n) \* optimization to not replay when we have gathered acks from all alive
@@ -217,6 +218,7 @@ HCoordWriteReplay(n) == \* Execute a write-replay after a membership re-config
     /\  UNCHANGED <<aliveNodes, epochID, msgsVAL, msgsACK>>
 
 HRcvAck(n, m) ==   \* Process a received acknowledment
+    /\ n \in aliveNodes
     /\ m \in msgsACK
     /\ m.type     = "ACK"
     /\ m.epochID  = epochID
@@ -250,6 +252,7 @@ HCoordinatorActions(n) ==   \* Actions of a read/write coordinator
 -------------------------------------------------------------------------------------               
     
 HRcvInv(n, m) ==  \* Process a received invalidation
+    /\ n \in aliveNodes
     /\ m \in msgsINV 
     /\ m.type     = "INV"
     /\ m.epochID  = epochID
