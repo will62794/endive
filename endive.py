@@ -1828,6 +1828,36 @@ class InductiveInvGen():
             "cost": cti_costs
         }
 
+
+    def cache_projected_states(self, cache_states_with_ignored_vars, max_depth=2**30, tlc_workers=6):
+        logging.info(f"Running state caching step with {len(cache_states_with_ignored_vars)} ignored vars: {cache_states_with_ignored_vars}")
+        dummy_inv = "3 > 2"
+        simulation_inv_tlc_flags = ""
+        if "simulation_inv_check" in self.spec_config and self.spec_config["simulation_inv_check"]:
+            # Get value from dict self.spec_config or use default value.
+            depth = self.spec_config.get("simulation_inv_check_depth", 50)
+            num = self.spec_config.get("simulation_inv_check_num", 10000)
+            logging.info(f"Running state caching step in simulation with (depth={depth}, num={num})")
+            simulation_inv_tlc_flags=f"-depth {depth} -simulate num={num}"
+        self.start_timing_state_caching()
+
+        # Option to memoize state projection cache computations.
+        self.memoize_state_projection_caches = True
+
+        if tuple(sorted(cache_states_with_ignored_vars)) not in self.state_projection_cache:
+            self.check_invariants([dummy_inv], tlc_workers=tlc_workers, max_depth=max_depth, 
+                                            cache_with_ignored=cache_states_with_ignored_vars, skip_checking=True,
+                                            tlc_flags=simulation_inv_tlc_flags)
+
+            if self.memoize_state_projection_caches:
+                self.state_projection_cache[tuple(sorted(cache_states_with_ignored_vars))] = True
+        else:
+            logging.info(f"State projection cache for slice {cache_states_with_ignored_vars} was already computed.")
+        logging.info(f"state projection cache (var slices):")
+        for c in self.state_projection_cache:
+            logging.info([s for s in self.state_vars if s not in c])
+        self.end_timing_state_caching()
+
     def eliminate_ctis(self, orig_k_ctis, num_invs, roundi, subroundi=None, preds=None, preds_alt=[], 
                        quant_inv_alt=None, tlc_workers=6, specdir=None, append_inv_round_id=True,
                        cache_states_with_ignored_vars=None):
@@ -1867,35 +1897,38 @@ class InductiveInvGen():
             max_depth = self.spec_config["max_tlc_inv_depth"]
 
 
-        simulation_inv_tlc_flags = ""
-        if cache_states_with_ignored_vars is not None:
-            logging.info(f"Running initial state caching step with {len(cache_states_with_ignored_vars)} ignored vars: {cache_states_with_ignored_vars}")
-            dummy_inv = "3 > 2"
-            simulation_inv_tlc_flags = ""
-            if "simulation_inv_check" in self.spec_config and self.spec_config["simulation_inv_check"]:
-                # Get value from dict self.spec_config or use default value.
-                depth = self.spec_config.get("simulation_inv_check_depth", 50)
-                num = self.spec_config.get("simulation_inv_check_num", 10000)
-                logging.info(f"Running state caching step in simulation with (depth={depth}, num={num})")
-                simulation_inv_tlc_flags=f"-depth {depth} -simulate num={num}"
-            tstart = time.time()
-            self.start_timing_state_caching()
+        self.cache_projected_states(cache_states_with_ignored_vars, max_depth=max_depth, tlc_workers=tlc_workers)
+        logging.info("Finished initial state caching.")
 
-            # Option to memoize state projection cache computations.
-            self.memoize_state_projection_caches = True
+        # simulation_inv_tlc_flags = ""
+        # if cache_states_with_ignored_vars is not None:
+        #     logging.info(f"Running initial state caching step with {len(cache_states_with_ignored_vars)} ignored vars: {cache_states_with_ignored_vars}")
+        #     dummy_inv = "3 > 2"
+        #     simulation_inv_tlc_flags = ""
+        #     if "simulation_inv_check" in self.spec_config and self.spec_config["simulation_inv_check"]:
+        #         # Get value from dict self.spec_config or use default value.
+        #         depth = self.spec_config.get("simulation_inv_check_depth", 50)
+        #         num = self.spec_config.get("simulation_inv_check_num", 10000)
+        #         logging.info(f"Running state caching step in simulation with (depth={depth}, num={num})")
+        #         simulation_inv_tlc_flags=f"-depth {depth} -simulate num={num}"
+        #     tstart = time.time()
+        #     self.start_timing_state_caching()
 
-            if tuple(sorted(cache_states_with_ignored_vars)) not in self.state_projection_cache:
-                sat_invs = self.check_invariants([dummy_inv], tlc_workers=tlc_workers, max_depth=max_depth, 
-                                                cache_with_ignored=cache_states_with_ignored_vars, skip_checking=True,
-                                                tlc_flags=simulation_inv_tlc_flags)
+        #     # Option to memoize state projection cache computations.
+        #     self.memoize_state_projection_caches = True
 
-                if self.memoize_state_projection_caches:
-                    self.state_projection_cache[tuple(sorted(cache_states_with_ignored_vars))] = True
-            else:
-                logging.info(f"State projection cache for slice {cache_states_with_ignored_vars} was already computed.")
-            logging.info(f"state projection cache: {self.state_projection_cache}")
-            self.end_timing_state_caching()
-            logging.info("Finished initial state caching.")
+        #     if tuple(sorted(cache_states_with_ignored_vars)) not in self.state_projection_cache:
+        #         sat_invs = self.check_invariants([dummy_inv], tlc_workers=tlc_workers, max_depth=max_depth, 
+        #                                         cache_with_ignored=cache_states_with_ignored_vars, skip_checking=True,
+        #                                         tlc_flags=simulation_inv_tlc_flags)
+
+        #         if self.memoize_state_projection_caches:
+        #             self.state_projection_cache[tuple(sorted(cache_states_with_ignored_vars))] = True
+        #     else:
+        #         logging.info(f"State projection cache for slice {cache_states_with_ignored_vars} was already computed.")
+        #     logging.info(f"state projection cache: {self.state_projection_cache}")
+        #     self.end_timing_state_caching()
+        #     logging.info("Finished initial state caching.")
 
         while iteration <= self.num_iters:
             tstart = time.time()
@@ -1904,6 +1937,12 @@ class InductiveInvGen():
             self.sat_invs_in_iteration = set()
             self.invs_checked_in_iteration = set()
             inv_candidates_generated_in_iteration = set()
+
+            # On first iteration, look for smallest predicates.
+            if iteration == 1:
+                (min_conjs, max_conjs) = (1, 2)
+                process_local=False
+                quant_inv_fn = self.quant_inv
 
             # On second iteration, search for non process local invariants.
             if iteration==2:
@@ -1946,11 +1985,11 @@ class InductiveInvGen():
                     preds = preds + preds_alt
 
             var_slice_str = "{" + ",".join(var_slice) + "}"
-            logging.info("\n>>> (Round %d, subround %d) Iteration %d (num_conjs=(min=%d,max=%d),process_local=%s,var_slice=%s)" % (roundi, subroundi, iteration,min_conjs,max_conjs,process_local,str(var_slice_str))) 
+            logging.info("\n>>> (Round %d, sub-round %d) Iteration %d (num_conjs=(min=%d,max=%d),process_local=%s,var_slice=%s)" % (roundi, subroundi, iteration,min_conjs,max_conjs,process_local,str(var_slice_str))) 
 
             logging.info("Starting iteration %d of eliminate_ctis (min_conjs=%d, max_conjs=%d)" % (iteration,min_conjs,max_conjs))
 
-            sat_invs = {}
+            sat_invs = set()
 
             # Allow optional use of more efficient, C++ based invariant checking procedure.
             if self.use_cpp_invgen:
@@ -2106,31 +2145,54 @@ class InductiveInvGen():
                     # EXPERIMENTAL
                     #
                     enable_partitioned_caching = False
-                    if enable_partitioned_caching:
-                        logging.info(f"Running partitioned property checking with projection caching ----")
+                    partition_sat_invs = set()
+                    main_invs_to_check = [(ind, inv) for ind,inv in enumerate(invs)]
+
+                    # Don't bother doing this partitioned caching for tiny numbers of conjuncts.
+                    LARGE_PRED_GROUP_COUNT = 500 # don't bother with the overhead of this except for relatively large predicate groups.
+                    max_pred_group_count = pred_var_counts_tups[0][0]
+                    if enable_partitioned_caching and min_conjs > 1 and max_pred_group_count > LARGE_PRED_GROUP_COUNT:
+                        logging.info(f"Partitioned property checking enabled for projection caching.")
                         # TODO: Consider enabling this and/or computing more of these cached state projections 
                         # upfront.
                         top_k = 2
                         for p in pred_var_counts_tups[:top_k]:
-                            print(p)
+                            # print(p)
 
                             predvar_set = p[1]
                             ignored = [svar for svar in self.state_vars if svar not in predvar_set]
                             # print(ignored)
 
-                            invs_to_check = [inv for ind,inv in enumerate(invs) if pred_var_sets_for_invs[ind] == predvar_set]
+                            invs_to_check = [(ind, inv) for ind,inv in enumerate(invs) if pred_var_sets_for_invs[ind] == predvar_set]
 
-                            logging.info(f"Running partitioned state caching step with {len(ignored)} ignored vars: {ignored}, invs to check: {len(invs_to_check)}")
-                            # sat_invs = self.check_invariants([dummy_inv], tlc_workers=tlc_workers, max_depth=max_depth, cache_with_ignored=cache_states_with_ignored_vars)
-                            sat_invs = self.check_invariants([dummy_inv], tlc_workers=tlc_workers, max_depth=max_depth, cache_with_ignored=ignored, skip_checking=True, tlc_flags=simulation_inv_tlc_flags)
-                            sat_invs = self.check_invariants(invs_to_check, tlc_workers=tlc_workers, max_depth=max_depth, cache_with_ignored=ignored, cache_state_load=True)
-                            for si in sat_invs:
-                                orig_inv_index = int(si.replace("Inv", ""))
-                                print(i.replace("Inv", ""))
-                            invs = [inv for inv in invs if inv not in invs_to_check]
+                            logging.info(f"Running partitioned state caching step with {len(ignored)} ignored vars, num invs to check: {len(invs_to_check)}")
+                            logging.info(f"var slice: {[s for s in self.state_vars if s not in ignored]}")
+                            
+                            # Do the caching run.
+                            self.cache_projected_states(ignored, max_depth=max_depth, tlc_workers=tlc_workers)
+
+                            # Check the invariants on the cached states.
+                            # local_sat_invs will return indices of invariants that were satisfied in the given 'invs_to_check' array.
+                            local_sat_invs = self.check_invariants([iv[1] for iv in invs_to_check], tlc_workers=tlc_workers, max_depth=max_depth, cache_with_ignored=ignored, cache_state_load=True)
+                            logging.info(f"Found {len(local_sat_invs)} local partition sat invs.")
+                            orig_invs_to_remove = []
+                            local_invs_sat = [m for (mind,m) in enumerate(invs_to_check) if f"Inv{mind}" in local_sat_invs]
+
+                            for si in local_sat_invs:
+                                invs_to_check_ind = int(si.replace("Inv", ""))
+                                inv = invs_to_check[invs_to_check_ind]
+                                orig_inv_ind = inv[0]
+                                orig_invs_to_remove.append(inv[1])
+                            
+                            # These no longer need to be checked.
+                            for iv in invs_to_check:
+                                main_invs_to_check = [mi for mi in main_invs_to_check if mi[1] != iv[1]]
+
+                            partition_sat_invs.update(set([f"Inv{iv[0]}" for iv in local_invs_sat]))
+                                
+                    logging.info(f"Found {len(partition_sat_invs)} partitioned sat invs")
 
                     # Check all candidate invariants.
-                    logging.info("-------")
                     logging.info("Checking main invariant candidate group.")
                         
                     # Use cached states if specified.
@@ -2138,7 +2200,22 @@ class InductiveInvGen():
                     if cache_states_with_ignored_vars is not None:
                         cache_load = True
 
-                    sat_invs = self.check_invariants(invs, tlc_workers=tlc_workers, max_depth=max_depth, cache_state_load=cache_load, cache_with_ignored=cache_states_with_ignored_vars)
+                    if len(invs) > 0:
+                        # sat_invs = self.check_invariants(invs, tlc_workers=tlc_workers, max_depth=max_depth, cache_state_load=cache_load, cache_with_ignored=cache_states_with_ignored_vars)
+                        main_sat_invs = self.check_invariants([mi[1] for mi in main_invs_to_check], tlc_workers=tlc_workers, max_depth=max_depth, cache_state_load=cache_load, cache_with_ignored=cache_states_with_ignored_vars)
+                        main_invs_to_check_sat = [m for (mind,m) in enumerate(main_invs_to_check) if f"Inv{mind}" in main_sat_invs]
+                        sat_invs = set([f"Inv{iv[0]}" for iv in main_invs_to_check_sat])
+                    
+                    # print("sat_invs")
+                    # print(sat_invs)
+                    # print("invs")
+                    # print(len(invs))
+                    # print(partition_sat_invs)
+
+                    # Add in the sat invariants already found in partitioned, cached state checks.
+                    # print(type(sat_invs))
+                    # print(type(partition_sat_invs))
+                    sat_invs.update(partition_sat_invs)
                 else:
                     print("Doing fast check of candidate predicates.")
                     violated_invs = set()
@@ -2177,8 +2254,8 @@ class InductiveInvGen():
 
                 
                 sat_invs = list(sorted(sat_invs))
-                print("first few sat invs:")
-                print(sat_invs[:5])
+                # print("first few sat invs:")
+                # print(sat_invs[:5])
 
                 print_invs = False # disable printing for now.
                 if print_invs:
