@@ -69,7 +69,7 @@ class InductiveInvGen():
                     num_simulate_traces=10000, tlc_workers=6, quant_vars=[],java_exe="java",cached_invs=None, cached_invs_gen_time_secs=None, use_cpp_invgen=False,
                     pregen_inv_cmd=None, opt_quant_minimize=False, try_final_minimize=False, proof_tree_mode=False, interactive_mode=False, max_num_conjuncts_per_round=10000,
                     max_num_ctis_per_round=10000, override_num_cti_workers=None, use_apalache_ctigen=False,all_args={},spec_config=None, enable_inv_state_caching=False,
-                    auto_lemma_action_decomposition=False):
+                    auto_lemma_action_decomposition=False, enable_partitioned_state_caching=False):
         self.java_exe = java_exe
         self.java_version_info = None
         
@@ -110,6 +110,7 @@ class InductiveInvGen():
         self.target_sample_time_limit_ms = all_args["target_sample_time_limit_ms"]
         self.save_dot = all_args["save_dot"]
         self.enable_inv_state_caching = enable_inv_state_caching
+        self.enable_partitioned_state_caching = enable_partitioned_state_caching
 
 
         # Set an upper limit on CTIs per round to avoid TLC getting overwhelmend. Hope is that 
@@ -2158,18 +2159,17 @@ class InductiveInvGen():
                     # EXPERIMENTAL
                     #
                     # TODO: May still be some work to ensure correctness here.
-                    enable_partitioned_caching = False
                     partition_sat_invs = set()
                     main_invs_to_check = [(ind, inv) for ind,inv in enumerate(invs)]
 
                     # Don't bother doing this partitioned caching for tiny numbers of conjuncts.
-                    LARGE_PRED_GROUP_COUNT = 500 # don't bother with the overhead of this except for relatively large predicate groups.
+                    LARGE_PRED_GROUP_COUNT = 1000 # don't bother with the overhead of this except for relatively large predicate groups.
                     max_pred_group_count = pred_var_counts_tups[0][0]
-                    if enable_partitioned_caching and min_conjs > 1 and max_pred_group_count > LARGE_PRED_GROUP_COUNT:
+                    if self.enable_partitioned_state_caching and min_conjs > 1 and max_pred_group_count > LARGE_PRED_GROUP_COUNT:
                         logging.info(f"Partitioned property checking enabled for projection caching.")
                         # TODO: Consider enabling this and/or computing more of these cached state projections 
                         # upfront.
-                        top_k = 2
+                        top_k = 8
                         for p in pred_var_counts_tups[:top_k]:
                             # print(p)
 
@@ -3829,6 +3829,7 @@ if __name__ == "__main__":
     parser.add_argument('--target_sample_time_limit_ms', help='Target initial state sampling time (EXPERIMENTAL).', default=10000, type=int, required=False)
     parser.add_argument('--save_dot', help='Save proof graphs in DOT and TeX info.', default=False, action='store_true')
     parser.add_argument('--enable_inv_state_caching', help='Enable invariant state caching.', default=False, action='store_true')
+    parser.add_argument('--enable_partitioned_state_caching', help='Enable finer grained partitioned variable subset based state caching.', default=False, action='store_true')
 
     # Apalache related commands.
     parser.add_argument('--use_apalache_ctigen', help='Use Apalache for CTI generation (experimental).', required=False, default=False, action='store_true')
@@ -3933,7 +3934,9 @@ if __name__ == "__main__":
                                 interactive_mode=args["interactive"],
                                 max_num_conjuncts_per_round=args["max_num_conjuncts_per_round"], max_num_ctis_per_round=args["max_num_ctis_per_round"],
                                 override_num_cti_workers=args["override_num_cti_workers"],use_apalache_ctigen=args["use_apalache_ctigen"],all_args=args,
-                                spec_config=spec_config, enable_inv_state_caching=args["enable_inv_state_caching"],
+                                spec_config=spec_config, 
+                                enable_inv_state_caching=args["enable_inv_state_caching"],
+                                enable_partitioned_state_caching=args["enable_partitioned_state_caching"],
                                 auto_lemma_action_decomposition=args["auto_lemma_action_decomposition"])
 
 
