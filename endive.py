@@ -2144,6 +2144,7 @@ class InductiveInvGen():
                     # Consider the top few predicate var counts and test projected property checking.
                     # EXPERIMENTAL
                     #
+                    # TODO: May still be some work to ensure correctness here.
                     enable_partitioned_caching = False
                     partition_sat_invs = set()
                     main_invs_to_check = [(ind, inv) for ind,inv in enumerate(invs)]
