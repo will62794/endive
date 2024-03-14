@@ -3301,8 +3301,18 @@ class InductiveInvGen():
 
 
             # Pick a next proof graph obligation to discharge.
-            undischarged = [n for n in self.proof_graph["nodes"].keys() if "is_lemma" in self.proof_graph["nodes"][n] and not self.proof_graph["nodes"][n]["discharged"]]
+            # TODO: Consider obligations marked as failed when choosing.
+            def valid_proof_node(node):
+                # Criteria for next proof obligation to be chosen.
+                return ("is_lemma" in node) and (not node["discharged"]) and ("failed" not in node)
+            
+            undischarged = [n for n in self.proof_graph["nodes"].keys() if valid_proof_node(self.proof_graph["nodes"][n])]
             logging.info(f"Remaining, undischarged lemma obligations: {len(undischarged)}")
+
+            failed = [n for n in self.proof_graph["nodes"].keys() if "failed" in self.proof_graph["nodes"][n]]
+            logging.info(f"Failed lemma obligations: {len(failed)}")
+            for f in failed:
+                print(" - ", f)
 
             if len(undischarged) == 0:
                 logging.info("All proof obligations discharged.")
@@ -3348,7 +3358,8 @@ class InductiveInvGen():
                     self.is_inductive = True
                     return
                 else:
-                    logging.info("Invariant appears likely to be inductive!")
+                    logging.info("Current obligation appears likely to be inductive!")
+                    self.proof_graph["nodes"][curr_obligation]["discharged"] = True
                 logging.info("")
                 continue
             else:
@@ -3468,7 +3479,9 @@ class InductiveInvGen():
 
                 # If we did not eliminate all CTIs in this round, then exit with failure.
                 if ret == None:
-                    logging.info("Could not eliminate all CTIs in this round. Exiting with failure.")
+                    logging.info(f"Could not eliminate all CTIs in this round. Exiting with failure and marking {curr_obligation} as failed.")
+                    # Mark the proof node as failed.
+                    self.proof_graph["nodes"][curr_obligation]["failed"] = True
                     break
                 else:
                     # Successfully eliminated all CTIs.
