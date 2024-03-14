@@ -3518,16 +3518,18 @@ class InductiveInvGen():
 
                 # Determines whether we will re-generate CTIs after every new strengthening lemma discovered.
                 k_ctis = [c for c in k_ctis if c not in k_ctis_to_eliminate]
-                # k_ctis = []
 
-                logging.info(f"k-ctis remaining after Round {roundi} elimination step: {len(k_ctis)} (eliminated {len(k_ctis_to_eliminate)})")
-                logging.info("")
-                logging.info(f"(Round {roundi}) Cumulative CTI generation duration: %f secs.", indgen.get_ctigen_duration())
-                logging.info(f"(Round {roundi}) Cumulative State caching duration: %f secs.", indgen.get_state_cache_duration())
-                logging.info(f"(Round {roundi}) Cumulative Invariant checking duration: %f secs.", indgen.get_invcheck_duration())
-                logging.info(f"(Round {roundi}) Cumulative CTI elimination checks duration: %f secs.", indgen.get_ctielimcheck_duration())
+                if len(k_ctis) == 0:
+                    self.proof_graph["nodes"][curr_obligation]["discharged"] = True
 
-                logging.info("")
+            logging.info(f"k-ctis remaining after Round {roundi} elimination step: {len(k_ctis)} (eliminated {len(k_ctis_to_eliminate)})")
+            logging.info("")
+            logging.info(f"(Round {roundi}) Cumulative CTI generation duration: %f secs.", indgen.get_ctigen_duration())
+            logging.info(f"(Round {roundi}) Cumulative State caching duration: %f secs.", indgen.get_state_cache_duration())
+            logging.info(f"(Round {roundi}) Cumulative Invariant checking duration: %f secs.", indgen.get_invcheck_duration())
+            logging.info(f"(Round {roundi}) Cumulative CTI elimination checks duration: %f secs.", indgen.get_ctielimcheck_duration())
+
+            logging.info("")
 
 #
 #
