@@ -75,6 +75,8 @@
         "VARMINVI.epochID > epochID",
         "nodeLastWriter[VARI] = VARJ",
         "nodeLastWriter[VARI] = VARI",
+        "nodeLastWriter[VARI] = nodeLastWriter[VARJ]",
+        "nodeLastWriter[VARI] < nodeLastWriter[VARJ]",
         "nodeLastWriter[VARI] \\in aliveNodes",
         "nodeLastWriter[VARJ] \\in aliveNodes"
     ],
@@ -82,7 +84,7 @@
     "safety"  :  "HConsistent",
     "constants"  : {
         "H_NODES" : ["{33,44}" , "{33,44,55}"],
-        "H_MAX_VERSION" : ["2"]
+        "H_MAX_VERSION" : ["1", "2"]
     },
     "actions": [],
     "constraint"  :  "",
