@@ -3878,10 +3878,13 @@ class InductiveInvGen():
                 color = "black"
                 fillcolor = "white"
                 coi = ""
+                shape = "box"
+                fontsize="20pt"
                 if n in self.proof_graph["nodes"]:
                     num_ctis_left = 0
                     node = self.proof_graph["nodes"][n]
                     if "is_action" in node:
+                        shape = "octagon"
                         num_ctis_left = self.proof_graph["nodes"][n]["ctis_remaining"]
                         fillcolor = "green" if num_ctis_left == 0 else "orange"
                         coi = "{" + ",".join(self.proof_graph["nodes"][n]["coi_vars"]) + "}"
@@ -3898,14 +3901,16 @@ class InductiveInvGen():
                                 label += "<BR/>"
                                 label += "<FONT POINT-SIZE='8'> order = " + str(node["order"]) + " </FONT>"
                             label += ">"
+                            fontsize="12pt"
                     if "is_lemma" in node:
                         label = n
                         if "order" in node:
                             # label += "<BR/>"
                             label += " (" + str(node["order"]) + ")"
+                            shape = "box"
                 else:
                     label = n
-                dot.node(n, fillcolor=fillcolor, style="filled", color=color, label=label)
+                dot.node(n, fillcolor=fillcolor, style="filled", color=color, label=label, shape=shape, fontsize=fontsize)
 
         for e in self.proof_graph["edges"]:
             dot.edge(e[0], e[1])
