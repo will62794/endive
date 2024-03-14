@@ -3294,9 +3294,11 @@ class InductiveInvGen():
                 return
             
             logging.info("ALL proof graph nodes")
+            lemma_nodes = [n for n in self.proof_graph["nodes"] if "is_lemma" in self.proof_graph["nodes"][n]]
             for n in self.proof_graph["nodes"]:
                 ntype = "Lemma" if "is_lemma" in self.proof_graph["nodes"][n] else "Action"
                 print(f" ({ntype})", n, self.proof_graph["nodes"][n])
+            logging.info(f"Total lemma nodes: {len(lemma_nodes)}")
 
 
             # Pick a next proof graph obligation to discharge.
@@ -3499,6 +3501,12 @@ class InductiveInvGen():
 
                 if len(k_ctis) == 0:
                     self.proof_graph["nodes"][curr_obligation]["discharged"] = True
+
+
+            # Render once more.
+            if self.save_dot and len(self.proof_graph["edges"]) > 0:
+                # Render updated proof graph as we go.
+                self.render_proof_graph()
 
             logging.info(f"k-ctis remaining after Round {roundi} elimination step: {len(k_ctis)} (eliminated {len(k_ctis_to_eliminate)})")
             logging.info("")
@@ -3894,14 +3902,11 @@ class InductiveInvGen():
                         if len(self.proof_graph["nodes"][n]["coi_vars"]) > 0:
                             nlabel = n.split("_")[-1].replace("Action", "") # just show the action name.
                             coi_vars = self.proof_graph["nodes"][n]["coi_vars"]
-                            label = "< " + nlabel + "<BR/>" + "<FONT POINT-SIZE='8'>" + str(coi) + "<BR/>" + " (" + str(len(coi_vars)) + "/" + str(len(self.state_vars)) + " vars) </FONT>"
+                            label = "< " + nlabel + "<BR/>" + "<FONT POINT-SIZE='10'>" + str(coi) + "<BR/>" + " (" + str(len(coi_vars)) + "/" + str(len(self.state_vars)) + " vars) </FONT>"
                             if "num_grammar_preds" in self.proof_graph["nodes"][n]:
-                                label += "<FONT POINT-SIZE='8'>|preds| = " + str(self.proof_graph["nodes"][n]["num_grammar_preds"]) + "/" + str(len(self.preds)) + " </FONT>"
-                            if "order" in node:
-                                label += "<BR/>"
-                                label += "<FONT POINT-SIZE='8'> order = " + str(node["order"]) + " </FONT>"
+                                label += "<FONT POINT-SIZE='10'>|preds| = " + str(self.proof_graph["nodes"][n]["num_grammar_preds"]) + "/" + str(len(self.preds)) + " </FONT>"
                             label += ">"
-                            fontsize="12pt"
+                            fontsize="14pt"
                     if "is_lemma" in node:
                         label = "< " + n
                         if "order" in node:
