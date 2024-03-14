@@ -114,6 +114,8 @@ NextUnchanged == UNCHANGED vars
 \* Helper lemmas.
 \* 
 
+NodesEq(VI, VJ) == VI = VJ /\ votes = votes
+
 \* H_NoConflictingValues == 
 \*     \A n1,n2 \in Node, v1,v2 \in Value : 
 \*         (v1 \in decided[n1] /\ v2 \in decided[n2]) => (v1 = v2)
