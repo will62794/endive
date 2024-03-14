@@ -2362,12 +2362,6 @@ class InductiveInvGen():
 
                     # Build and save the TLA+ spec.
                     spec_name = f"{self.specname}_IndQuickCheck_chunk{ci}"
-                    # print("invs")
-                    # print(invs[:5])
-                    # print(len(invs))
-                    # print("sat invs group")
-                    # print(sat_invs_group[:5])
-                    # print(len(sat_invs_group))
                     spec_str = self.make_indquickcheck_tla_spec(spec_name, invs, sat_invs_group, cti_chunk, quant_inv_fn)
 
                     ctiquicktlafile = f"{os.path.join(self.specdir, GEN_TLA_DIR)}/{spec_name}.tla"
