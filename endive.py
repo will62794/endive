@@ -2085,7 +2085,16 @@ class InductiveInvGen():
                 # choose them first over new invariants if they are useful, below during CTI elimination.
                 # TODO: May consider cleaner ways for re-using existing strengthening conjuncts.
                 for c in self.strengthening_conjuncts:
-                    invs.add(c[2])
+                    # Only include strengthening conjunct if its variables are in this slice.
+                    # print(c)
+                    defs = self.spec_obj_with_lemmas.get_all_user_defs(level=["1"])
+                    # print(defs)
+                    if c[0] in defs:
+                        conjunct_vars = self.spec_obj_with_lemmas.get_vars_in_def(c[0])
+                        print("conjunct_vars", c, conjunct_vars[0])
+                        if set(conjunct_vars[0]).issubset(set(var_slice)):
+                            logging.info(f"Adding strengthening conjunct {c} to invs since it is in the var slice.")
+                            invs.add(c[2])
 
                 invs_symb_strs = all_invs["pred_invs"]
                 # Count the number of generated candidates that were already checked previously.
@@ -3265,7 +3274,7 @@ class InductiveInvGen():
         # self.proof_obligation_queue.append(target_node)
 
 
-        spec_obj_with_lemmas = self.tla_spec_obj
+        self.spec_obj_with_lemmas = self.tla_spec_obj
 
         # Re-parse spec object to include definitions of any newly generate strengthening lemmas.
         # if len(self.strengthening_conjuncts) > 0:
@@ -3294,6 +3303,10 @@ class InductiveInvGen():
             # Pick a next proof graph obligation to discharge.
             undischarged = [n for n in self.proof_graph["nodes"].keys() if "is_lemma" in self.proof_graph["nodes"][n] and not self.proof_graph["nodes"][n]["discharged"]]
             logging.info(f"Remaining, undischarged lemma obligations: {len(undischarged)}")
+
+            if len(undischarged) == 0:
+                logging.info("All proof obligations discharged.")
+                break
 
             # Choose next most recently added obligation.
             curr_obligation = sorted(undischarged, key = lambda n : self.proof_graph["nodes"][n]["order"])[0]
@@ -3378,12 +3391,13 @@ class InductiveInvGen():
                     specname = f"{self.specname}_lemma_parse"
                     rootpath = f"benchmarks/{specname}"
                     # self.make_check_invariants_spec([], rootpath, defs_to_add=self.strengthening_conjuncts + [curr_obligation])
-                    self.make_check_invariants_spec([], rootpath, defs_to_add=[curr_obligation_pred_tup])
+                    # self.make_check_invariants_spec([], rootpath, defs_to_add=[curr_obligation_pred_tup] + self.strengthening_conjuncts)
+                    self.make_check_invariants_spec([], rootpath, defs_to_add=self.strengthening_conjuncts)
 
                     logging.info("Re-parsing spec for any newly discovered lemma definitions.")
-                    spec_obj_with_lemmas = tlaparse.parse_tla_file(self.specdir, specname)
+                    self.spec_obj_with_lemmas = tlaparse.parse_tla_file(self.specdir, specname)
 
-                defs = spec_obj_with_lemmas.get_all_user_defs(level="1")
+                defs = self.spec_obj_with_lemmas.get_all_user_defs(level="1")
                 # for d in defs:
                     # print(d)
                 
@@ -3412,14 +3426,14 @@ class InductiveInvGen():
                 lemma_action_coi = {}
 
                 k_cti_action_opname = k_cti_action.replace("Action", "")
-                ret = spec_obj_with_lemmas.get_vars_in_def(k_cti_action_opname)
+                ret = self.spec_obj_with_lemmas.get_vars_in_def(k_cti_action_opname)
                 vars_in_action,action_updated_vars = ret
                 print("vars in action:", vars_in_action)
                 print("action updated vars:", action_updated_vars)
-                vars_in_action_non_updated,_ = spec_obj_with_lemmas.get_vars_in_def(k_cti_action_opname, ignore_update_expressions=True)
-                vars_in_lemma_defs = spec_obj_with_lemmas.get_vars_in_def(k_cti_lemma)[0]
+                vars_in_action_non_updated,_ = self.spec_obj_with_lemmas.get_vars_in_def(k_cti_action_opname, ignore_update_expressions=True)
+                vars_in_lemma_defs = self.spec_obj_with_lemmas.get_vars_in_def(k_cti_lemma)[0]
 
-                lemma_action_coi = spec_obj_with_lemmas.compute_coi(None, None, None,action_updated_vars, vars_in_action_non_updated, vars_in_lemma_defs)
+                lemma_action_coi = self.spec_obj_with_lemmas.compute_coi(None, None, None,action_updated_vars, vars_in_action_non_updated, vars_in_lemma_defs)
                 print("Lemma-action COI")
                 print(lemma_action_coi)
                 # for ind,p in enumerate(self.preds):
