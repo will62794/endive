@@ -68,7 +68,7 @@ class InductiveInvGen():
                     symmetry=False, simulate=False, simulate_depth=6, typeok="TypeOK", tlc_specific_spec=False, seed=0, num_invs=1000, num_rounds=3, num_iters=3, 
                     num_simulate_traces=10000, tlc_workers=6, quant_vars=[],java_exe="java",cached_invs=None, cached_invs_gen_time_secs=None, use_cpp_invgen=False,
                     pregen_inv_cmd=None, opt_quant_minimize=False, try_final_minimize=False, proof_tree_mode=False, interactive_mode=False, max_num_conjuncts_per_round=10000,
-                    max_num_ctis_per_round=10000, override_num_cti_workers=None, use_apalache_ctigen=False,all_args={},spec_config=None, enable_inv_state_caching=False,
+                    max_num_ctis_per_round=10000, override_num_cti_workers=None, use_apalache_ctigen=False,all_args={},spec_config=None,
                     auto_lemma_action_decomposition=False, 
                     enable_partitioned_state_caching=False,
                     enable_cti_slice_projection=False):
@@ -111,7 +111,6 @@ class InductiveInvGen():
         self.target_sample_states = all_args["target_sample_states"]
         self.target_sample_time_limit_ms = all_args["target_sample_time_limit_ms"]
         self.save_dot = all_args["save_dot"]
-        self.enable_inv_state_caching = enable_inv_state_caching
         self.enable_partitioned_state_caching = enable_partitioned_state_caching
         self.enable_cti_slice_projection = enable_cti_slice_projection
 
@@ -4090,7 +4089,6 @@ if __name__ == "__main__":
     parser.add_argument('--target_sample_states', help='Target # initial states to sample. (EXPERIMENTAL).', default=10000, type=int, required=False)
     parser.add_argument('--target_sample_time_limit_ms', help='Target initial state sampling time (EXPERIMENTAL).', default=10000, type=int, required=False)
     parser.add_argument('--save_dot', help='Save proof graphs in DOT and TeX info.', default=False, action='store_true')
-    parser.add_argument('--enable_inv_state_caching', help='Enable invariant state caching.', default=False, action='store_true')
     parser.add_argument('--enable_partitioned_state_caching', help='Enable finer grained partitioned variable subset based state caching.', default=False, action='store_true')
     parser.add_argument('--enable_cti_slice_projection', help='Enable slicing of CTI sets.', default=False, action='store_true')
 
@@ -4198,7 +4196,6 @@ if __name__ == "__main__":
                                 max_num_conjuncts_per_round=args["max_num_conjuncts_per_round"], max_num_ctis_per_round=args["max_num_ctis_per_round"],
                                 override_num_cti_workers=args["override_num_cti_workers"],use_apalache_ctigen=args["use_apalache_ctigen"],all_args=args,
                                 spec_config=spec_config, 
-                                enable_inv_state_caching=args["enable_inv_state_caching"],
                                 enable_partitioned_state_caching=args["enable_partitioned_state_caching"],
                                 enable_cti_slice_projection=args["enable_cti_slice_projection"],
                                 auto_lemma_action_decomposition=args["auto_lemma_action_decomposition"])
