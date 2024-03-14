@@ -2458,6 +2458,10 @@ class InductiveInvGen():
             chosen_invs = []
             cti_states_eliminated_in_iter = 0
 
+            #
+            # Check CTI elimination for each invariant.
+            #
+
             logging.info(f"Checking {len(sat_invs)} satisfied invariants for CTI elimination")
             for i in range(len(sorted_invs)):
                 # Sort the remaining invariants by the number of new CTIs they eliminate.
