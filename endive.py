@@ -3541,8 +3541,14 @@ class InductiveInvGen():
                     # for ind,p in enumerate(self.preds):
                         # print(p, vars_in_preds[ind], lemma_action_coi)
 
+                    #
                     # Filter predicates based on this COI.
-                        # Set subset operator is: 
+                    #
+                    # We select only predicates that contain variable sets that are a subset of the COI.
+                    # If they, for example, contain a variable set with some variables in the COI and some not, then
+                    # we don't include that predicate.
+                    #
+                    # Note that the set subset operator is "<=" here.
                     preds = [p for (pi,p) in enumerate(self.preds) if vars_in_preds[pi] <= lemma_action_coi]
 
                     pct_str = "{0:.1f}".format(len(preds)/len(self.preds) * 100)
