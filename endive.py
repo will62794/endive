@@ -3887,7 +3887,7 @@ class InductiveInvGen():
                     if "is_action" in node:
                         shape = "box"
                         num_ctis_left = self.proof_graph["nodes"][n]["ctis_remaining"]
-                        fillcolor = "lightgreen" if num_ctis_left == 0 else "lightorange"
+                        fillcolor = "lightgreen" if num_ctis_left == 0 else "orange"
                         coi = "{" + ",".join(self.proof_graph["nodes"][n]["coi_vars"]) + "}"
                         if "curr_node" in self.proof_graph and self.proof_graph["curr_node"] == n and self.proof_graph["nodes"][n]["ctis_remaining"] > 0:
                             # Mark node.
