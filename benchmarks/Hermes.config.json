@@ -72,7 +72,11 @@
         "VARI \\in nodeRcvedAcks[VARJ]",
         "VARJ \\in nodeRcvedAcks[VARI]",
         "receivedAllAcks(VARI) /\\ nodeRcvedAcks = nodeRcvedAcks",
-        "receivedAllAcks(VARJ) /\\ nodeRcvedAcks = nodeRcvedAcks"
+        "receivedAllAcks(VARJ) /\\ nodeRcvedAcks = nodeRcvedAcks",
+        "nodeLastWriter[VARI] = VARJ",
+        "nodeLastWriter[VARI] = VARI",
+        "nodeLastWriter[VARI] \\in aliveNodes",
+        "nodeLastWriter[VARJ] \\in aliveNodes"
     ],
     "preds_alt" : [],
     "safety"  :  "HConsistent",
