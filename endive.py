@@ -1926,36 +1926,6 @@ class InductiveInvGen():
         self.cache_projected_states(cache_states_with_ignored_vars, max_depth=max_depth, tlc_workers=tlc_workers)
         logging.info("Finished initial state caching.")
 
-        # simulation_inv_tlc_flags = ""
-        # if cache_states_with_ignored_vars is not None:
-        #     logging.info(f"Running initial state caching step with {len(cache_states_with_ignored_vars)} ignored vars: {cache_states_with_ignored_vars}")
-        #     dummy_inv = "3 > 2"
-        #     simulation_inv_tlc_flags = ""
-        #     if "simulation_inv_check" in self.spec_config and self.spec_config["simulation_inv_check"]:
-        #         # Get value from dict self.spec_config or use default value.
-        #         depth = self.spec_config.get("simulation_inv_check_depth", 50)
-        #         num = self.spec_config.get("simulation_inv_check_num", 10000)
-        #         logging.info(f"Running state caching step in simulation with (depth={depth}, num={num})")
-        #         simulation_inv_tlc_flags=f"-depth {depth} -simulate num={num}"
-        #     tstart = time.time()
-        #     self.start_timing_state_caching()
-
-        #     # Option to memoize state projection cache computations.
-        #     self.memoize_state_projection_caches = True
-
-        #     if tuple(sorted(cache_states_with_ignored_vars)) not in self.state_projection_cache:
-        #         sat_invs = self.check_invariants([dummy_inv], tlc_workers=tlc_workers, max_depth=max_depth, 
-        #                                         cache_with_ignored=cache_states_with_ignored_vars, skip_checking=True,
-        #                                         tlc_flags=simulation_inv_tlc_flags)
-
-        #         if self.memoize_state_projection_caches:
-        #             self.state_projection_cache[tuple(sorted(cache_states_with_ignored_vars))] = True
-        #     else:
-        #         logging.info(f"State projection cache for slice {cache_states_with_ignored_vars} was already computed.")
-        #     logging.info(f"state projection cache: {self.state_projection_cache}")
-        #     self.end_timing_state_caching()
-        #     logging.info("Finished initial state caching.")
-
         inv_candidates_generated_in_round = set()
 
         while iteration <= self.num_iters:
