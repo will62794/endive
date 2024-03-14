@@ -3878,15 +3878,16 @@ class InductiveInvGen():
                 color = "black"
                 fillcolor = "white"
                 coi = ""
-                shape = "box"
+                shape = "ellipse"
                 fontsize="20pt"
+                penwidth="1"
                 if n in self.proof_graph["nodes"]:
                     num_ctis_left = 0
                     node = self.proof_graph["nodes"][n]
                     if "is_action" in node:
-                        shape = "octagon"
+                        shape = "box"
                         num_ctis_left = self.proof_graph["nodes"][n]["ctis_remaining"]
-                        fillcolor = "green" if num_ctis_left == 0 else "orange"
+                        fillcolor = "lightgreen" if num_ctis_left == 0 else "lightorange"
                         coi = "{" + ",".join(self.proof_graph["nodes"][n]["coi_vars"]) + "}"
                         if "curr_node" in self.proof_graph and self.proof_graph["curr_node"] == n and self.proof_graph["nodes"][n]["ctis_remaining"] > 0:
                             # Mark node.
@@ -3903,14 +3904,19 @@ class InductiveInvGen():
                             label += ">"
                             fontsize="12pt"
                     if "is_lemma" in node:
-                        label = n
+                        label = "< " + n
                         if "order" in node:
                             # label += "<BR/>"
-                            label += " (" + str(node["order"]) + ")"
-                            shape = "box"
+                            label += " <BR/> <FONT POINT-SIZE='12'>(" + str(node["order"]) + ") </FONT>"
+                        label += " >"
+                        penwidth="3"
+                        if node["discharged"]:
+                            fillcolor = "green"
+                        else:
+                            fillcolor = "orange"
                 else:
                     label = n
-                dot.node(n, fillcolor=fillcolor, style="filled", color=color, label=label, shape=shape, fontsize=fontsize)
+                dot.node(n, fillcolor=fillcolor, style="filled", color=color, label=label, shape=shape, fontsize=fontsize, penwidth=penwidth)
 
         for e in self.proof_graph["edges"]:
             dot.edge(e[0], e[1])
