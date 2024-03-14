@@ -2049,21 +2049,33 @@ class InductiveInvGen():
                 
                 invs = all_invs["raw_invs"]
 
-                # Always add in existing strengthening conjuncts to the set of invariants to consider.
+                # Add in existing strengthening conjuncts to the set of invariants to consider.
                 # This will cause these conjuncts to be checked again, but that's okay for now, since we will
                 # choose them first over new invariants if they are useful, below during CTI elimination.
                 # TODO: May consider cleaner ways for re-using existing strengthening conjuncts.
-                for c in self.strengthening_conjuncts:
-                    # Only include strengthening conjunct if its variables are in this slice.
-                    # print(c)
-                    defs = self.spec_obj_with_lemmas.get_all_user_defs(level=["1"])
-                    # print(defs)
-                    if c[0] in defs:
-                        conjunct_vars = self.spec_obj_with_lemmas.get_vars_in_def(c[0])
-                        print("conjunct_vars", c, conjunct_vars[0])
-                        if set(conjunct_vars[0]).issubset(set(var_slice)):
-                            logging.info(f"Adding strengthening conjunct {c} to invs since it is in the var slice.")
-                            invs.add(c[2])
+
+                # Try to do a bit of inference without resorting to existing conjuncts, and then add them back in after a round or
+                # two. 
+                # Not sure how much effect this may have on quality of learned invariantsor proof graphs.
+                iter_to_add_existing_strengthening_conjuncts = 3
+
+                if iteration >= iter_to_add_existing_strengthening_conjuncts:
+                    added = 0
+                    for c in self.strengthening_conjuncts:
+                        # Only include strengthening conjunct if its variables are in this slice.
+                        # print(c)
+                        defs = self.spec_obj_with_lemmas.get_all_user_defs(level=["1"])
+                        # print(defs)
+                        if c[0] in defs:
+                            conjunct_vars = set(self.spec_obj_with_lemmas.get_vars_in_def(c[0])[0])
+                            var_slice_set = set(var_slice)
+                            print("conjunct_vars", c[0], conjunct_vars)
+                            print("var_slice", var_slice_set)
+                            if set(conjunct_vars).issubset(var_slice_set):
+                                logging.info(f"Adding strengthening conjunct {c} to invs since it is in the var slice.")
+                                invs.add(c[2])
+                                added += 1
+                    logging.info(f"Added {added}/{len(self.strengthening_conjuncts)} existing strengthening conjuncts to candidate invariant set.")
 
                 invs_symb_strs = all_invs["pred_invs"]
                 # Count the number of generated candidates that were already checked previously.
