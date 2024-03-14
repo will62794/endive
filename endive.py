@@ -2548,6 +2548,15 @@ class InductiveInvGen():
                         else:
                             invname = inv + inv_suffix
 
+                        # If there exists a proof graph node with the same expression don't add a new named node.
+                        existing_lemma_nodes = [n for n in self.proof_graph["nodes"].keys() if "is_lemma" in self.proof_graph["nodes"][n] and self.proof_graph["nodes"][n]["expr"] == invexp]
+                        if len(existing_lemma_nodes) > 0:
+                            invname = existing_lemma_nodes[0]
+                            print("existing invname: ", invname)
+
+                        lemma_node = (invname, invexp, unquant_invexp)
+                        self.proof_obligation_queue.append(lemma_node)
+
                         action_node = f"{orig_k_ctis[0].inv_name}_{orig_k_ctis[0].action_name}"
                         e1 = (f"{orig_k_ctis[0].inv_name}_{orig_k_ctis[0].action_name}", f"{orig_k_ctis[0].inv_name}")
                         e2 = (invname, f"{orig_k_ctis[0].inv_name}_{orig_k_ctis[0].action_name}")
@@ -2557,10 +2566,21 @@ class InductiveInvGen():
                         # if action_node in self.proof_graph:
                             # self.proof_graph[action_node].append(inv + inv_suffix)
                         lemma_action_coi = [v for v in self.state_vars if v not in cache_states_with_ignored_vars]
+
+                        all_lemma_nodes = [n for n in self.proof_graph["nodes"].keys() if "is_lemma" in self.proof_graph["nodes"][n]]
+                        if invname not in self.proof_graph["nodes"]:
+                            self.proof_graph["nodes"][lemma_node[0]] = {
+                                "discharged": False, 
+                                "is_lemma": True,
+                                "expr": lemma_node[1],
+                                "order": len(all_lemma_nodes) + 1
+                            }
+
                         self.proof_graph["nodes"][action_node] = {
                             "ctis_remaining": num_ctis_remaining, 
                             "coi_vars": lemma_action_coi,
-                            "num_grammar_preds": len(preds) 
+                            "num_grammar_preds": len(preds),
+                            "is_action": True
                         }
                         self.proof_graph["curr_node"] = action_node
                         # print(f"{orig_k_ctis[0].inv_name}_{orig_k_ctis[0].action_name}",  "->", f"{orig_k_ctis[0].inv_name}", "// EDGE")
@@ -3184,48 +3204,123 @@ class InductiveInvGen():
     def do_invgen_proof_tree_mode(self):
         """ Do localized invariant synthesis based on an inductive proof graph structure."""
 
+        logging.info("Starting automatic invariant generation in inductive proof tree mode.")
+
+        self.auto_lemma_action_decomposition = True
+
         # TODO: Make node/action configurable.
-        target_node = ("NewestVALMsgImpliesAllValidNodesMatchVersion", "H_NewestVALMsgImpliesAllValidNodesMatchVersion")
+        # target_node = ("NewestVALMsgImpliesAllValidNodesMatchVersion", "H_NewestVALMsgImpliesAllValidNodesMatchVersion")
         # target_node = ("WriteNodeWithAllAcksImpliesAllAliveAreValid", "HH_WriteNodeWithAllAcksImpliesAllAliveAreValid")
-        # target_node = ("Safety", "HConsistent")
-        target_action = "HSendValsAction"
+        # target_node = ("Safety", "HConsistent", "")
+        # target_action = "HSendValsAction"
         # target_action = "HRcvValAction"
 
+        # Start with the root safety property.
+        root_node = ("Safety", self.safety, "")
+
         # self.lemma_obligations = [("Safety", self.safety)]
-        self.lemma_obligations = [target_node]
+        # self.lemma_obligations = [target_node]
         self.all_generated_lemmas = set()
 
         # TODO: Optionally reload from file for interactive mode.
-        self.proof_graph = {"edges": [], "nodes": {}, "safety": self.safety}
+        self.proof_graph = {
+            "edges": [], 
+            "nodes": {}, 
+            "safety": self.safety
+        }
+        self.proof_graph["nodes"][root_node[0]] = {
+            "discharged": False, 
+            "is_lemma": True, 
+            "expr": root_node[1],
+            "order": 1
+        }
 
         # For proof tree we look for single step inductive support lemmas.
         self.simulate_depth = 1
 
         count = 0
 
+        logging.info("Extracting variables present in each grammar predicate.")
+        vars_in_preds = self.extract_vars_from_preds()
+        # for p in sorted(vars_in_preds.keys()):
+            # print(p, self.preds[p], vars_in_preds[p])
+        
+        # Maintain a potential list of lemma-action proof obligations that could not be discharged
+        # successfully after some number of iteration attempts.
+        failed_obligations = set()
+
+        elim_round_failed = False
+
+        # Stores map of state variables projections of the state space that we have already cached.
+        self.state_projection_cache = {}
+
+
+        ###
+        ## We probably want to maintain a queue of proof obligations to discharge, to keep this organized
+        ## cleanly, and each round will work on discharging one proof obligation.
+        ###
+
+        # Actually, can we just store the proof graph itself, with obligation status at each node?
+        self.proof_obligation_queue = [root_node]
+        # self.proof_obligation_queue.append(target_node)
+
+
+        spec_obj_with_lemmas = self.tla_spec_obj
+
+        # Re-parse spec object to include definitions of any newly generate strengthening lemmas.
+        # if len(self.strengthening_conjuncts) > 0:
+        #     specname = f"{self.specname}_lemma_parse"
+        #     rootpath = f"benchmarks/{specname}"
+        #     self.make_check_invariants_spec([], rootpath, defs_to_add=self.strengthening_conjuncts)
+
+        #     logging.info("Re-parsing spec for any newly discovered lemma definitions.")
+        #     spec_obj_with_lemmas = tlaparse.parse_tla_file(self.specdir, specname)
+        
+        self.strengthening_conjuncts = []
+
         for roundi in range(self.num_rounds):
             logging.info("### STARTING ROUND %d" % roundi)
-            logging.info("Num remaining lemma obligations %d" % len(self.lemma_obligations))
-            if len(self.lemma_obligations) == 0:
+            logging.info("Num remaining lemma obligations %d" % len(self.proof_obligation_queue))
+            if len(self.proof_obligation_queue) == 0:
                 logging.info("No remaining lemma obligations. Stopping now!")
                 return
+            
+            logging.info("ALL proof graph nodes")
+            for n in self.proof_graph["nodes"]:
+                ntype = "Lemma" if "is_lemma" in self.proof_graph["nodes"][n] else "Action"
+                print(f" ({ntype})", n, self.proof_graph["nodes"][n])
 
-            self.strengthening_conjuncts = []
+
+            # Pick a next proof graph obligation to discharge.
+            undischarged = [n for n in self.proof_graph["nodes"].keys() if "is_lemma" in self.proof_graph["nodes"][n] and not self.proof_graph["nodes"][n]["discharged"]]
+            logging.info(f"Remaining, undischarged lemma obligations: {len(undischarged)}")
+
+            # Choose next most recently added obligation.
+            curr_obligation = sorted(undischarged, key = lambda n : self.proof_graph["nodes"][n]["order"])[0]
+            # for n in self.proof_graph["nodes"]:
+            #     node = self.proof_graph["nodes"][n]
+            #     if "is_lemma" in node and not node["discharged"]:
+            #         curr_obligation = n
+            #         break
 
             logging.info("Generating CTIs.")
             t0 = time.time()
-            curr_obligation = self.lemma_obligations.pop(0)
+            # curr_obligation = self.proof_obligation_queue.pop(0)
             print("Current obligation:", curr_obligation)
             # k_ctis = self.generate_ctis(props=[("LemmaObligation" + str(count), curr_obligation[1])])
-            k_ctis, k_cti_traces = self.generate_ctis(props=[curr_obligation])
+            curr_obligation_expr = self.proof_graph["nodes"][curr_obligation]["expr"]
+            curr_obligation_pred_tup = (curr_obligation, curr_obligation_expr, "")
+            k_ctis, k_cti_traces = self.generate_ctis(props=[curr_obligation_pred_tup])
             count += 1
 
             # Filter CTIs by action.
-            k_ctis = [c for c in k_ctis if c.action_name == target_action]
+            # k_ctis = [c for c in k_ctis if c.action_name == target_action]
 
             # for kcti in k_ctis:
                 # print(str(kcti))
             logging.info("Number of total unique k-CTIs found: {}. (took {:.2f} secs)".format(len(k_ctis), (time.time()-t0)))
+
+            subround = 0
             
             # Limit number of CTIs if necessary.
             if len(k_ctis) > self.MAX_NUM_CTIS_PER_ROUND:
@@ -3252,56 +3347,173 @@ class InductiveInvGen():
             preds = self.preds
             state_vars_in_local_grammar = self.state_vars
             state_vars_not_in_local_grammar = set(self.state_vars)
-            if "local_grammars" in self.spec_config and target_action in self.spec_config["local_grammars"]:
-                lgrammar = self.spec_config["local_grammars"][target_action][target_node[1]]
-                if "max_depth" in lgrammar:
-                    self.spec_config["max_tlc_inv_depth"] = lgrammar["max_depth"]
 
-                preds = lgrammar["preds"]
-                self.quant_vars = lgrammar["preds"]
-                self.quant_inv = lgrammar["quant_inv"]
-                self.initialize_quant_inv()
-                logging.info(f"Using local grammar for node ({target_node[1]}, {target_action}) with {len(preds)} predicates.")
+            while len(k_ctis) > 0:
 
-                def svar_in_pred(v, p):
-                    # avoid variables with shared substrings.
-                    return f"{v}[" in p or f"{v} " in p or f"{v}:" in p
+                k_ctis_to_eliminate = k_ctis
 
-                state_vars_in_local_grammar = set()
-                for p in (preds + [lgrammar["quant_inv"]]):
-                    svars = []
-                    for svar in self.state_vars:
-                        if svar_in_pred(svar, p):
-                            svars.append(svar)
-                            state_vars_in_local_grammar.add(svar)
-                            state_vars_not_in_local_grammar.discard(svar)
-                    # print(p, svars)
-                print(f"{len(state_vars_in_local_grammar)} state vars in local grammar:", state_vars_in_local_grammar)
-                print(f"{len(state_vars_not_in_local_grammar)} state vars not in local grammar:", state_vars_not_in_local_grammar)
+                cti_action_invs_found = set()
 
-            cache_vars_to_ignore = None
-            # Optinoally enable caching with projected vars.
-            if self.enable_inv_state_caching:
-                cache_vars_to_ignore = state_vars_not_in_local_grammar
-            
-            # Run CTI eliminatinon.
-            ret = self.eliminate_ctis(k_ctis, self.num_invs, roundi, preds=preds, append_inv_round_id=True, cache_states_with_ignored_vars=cache_vars_to_ignore)
+                # Break down CTIs by lemma-action pair.
+                for kcti in k_ctis_to_eliminate:
+                    # print(str(kcti))
+                    if kcti.inv_name == "Safety":
+                        cti_action_invs_found.add((self.safety, kcti.action_name))
+                    else:
+                        cti_action_invs_found.add((kcti.inv_name, kcti.action_name))
+                logging.info(f"{len(cti_action_invs_found)} distinct k-CTI lemma-action proof obligations found:")
+                cti_action_invs_found = sorted(cti_action_invs_found) # for consistent odering of proof obligations.
+                # Ignore failed obligations when selecting here.
+                # cti_action_invs_found = [c for c in cti_action_invs_found if c not in failed_obligations]
+                for kcti in cti_action_invs_found:
+                    logging.info(f" - {kcti}")
+                # if len(failed_obligations) > 0:
+                    # logging.info("Failed obligations being ignored:")
+                    # for f in failed_obligations:
+                        # logging.info(f" - {f}")
 
-            # If we did not eliminate all CTIs in this round, then exit with failure.
-            if ret == None:
-                logging.info("Could not eliminate all CTIs in this round. Exiting with failure.")
-                break
-            else:
-                # Successfully eliminated all CTIs.
-                pass
-                # print("Adding new proof obligations:" + str(len(self.strengthening_conjuncts)))
-                # self.lemma_obligations += self.strengthening_conjuncts
-                # for support_lemma in self.strengthening_conjuncts:
-                    # Check for existence of the predicate expression in existing lemma set.
-                    # if support_lemma[1] not in [x[1] for x in self.all_generated_lemmas]:
-                        # self.proof_graph["edges"].append((support_lemma,curr_obligation))
-                        # self.all_generated_lemmas.add(support_lemma)
-            logging.info("")
+
+                # Re-parse spec object to include definitions of any newly generate strengthening lemmas.
+                if len(self.strengthening_conjuncts) > 0:
+                    specname = f"{self.specname}_lemma_parse"
+                    rootpath = f"benchmarks/{specname}"
+                    # self.make_check_invariants_spec([], rootpath, defs_to_add=self.strengthening_conjuncts + [curr_obligation])
+                    self.make_check_invariants_spec([], rootpath, defs_to_add=[curr_obligation_pred_tup])
+
+                    logging.info("Re-parsing spec for any newly discovered lemma definitions.")
+                    spec_obj_with_lemmas = tlaparse.parse_tla_file(self.specdir, specname)
+
+                defs = spec_obj_with_lemmas.get_all_user_defs(level="1")
+                # for d in defs:
+                    # print(d)
+                
+                # if len(cti_action_lemmas_with_grammars) == 0:
+                if len(cti_action_invs_found) == 0:
+                    print("No more current outstanding CTI lemma actions with local grammars.")
+                    return
+
+                # k_cti_lemma_action = random.choice(cti_action_lemmas_with_grammars)
+                k_cti_lemma_action = cti_action_invs_found[0]
+                (k_cti_lemma, k_cti_action) = k_cti_lemma_action
+                print(f"Chose {k_cti_lemma_action} proof obligation")
+
+                lemma_name = "Safety" if k_cti_lemma == self.safety else k_cti_lemma
+                action_node = f"{lemma_name}_{k_cti_action}"
+                
+                # Filter CTIs based on this choice.
+                cti_filter = lambda c  : (c.inv_name == k_cti_lemma or (c.inv_name == "Safety" and k_cti_lemma == self.safety)) and c.action_name == k_cti_action
+                k_ctis_to_eliminate = [c for c in k_ctis if cti_filter(c)]
+                # k_ctis_remaining = [c for c in k_ctis if not cti_filter(c)]
+                logging.info(f"Have {len(k_ctis_to_eliminate)} total k-CTIs after filtering to {k_cti_lemma_action}.")
+
+
+                logging.info(f"Computing COI for {(k_cti_lemma, k_cti_action)}")
+                # actions_real_defs = [a.replace("Action", "") for a in actions]
+                lemma_action_coi = {}
+
+                k_cti_action_opname = k_cti_action.replace("Action", "")
+                ret = spec_obj_with_lemmas.get_vars_in_def(k_cti_action_opname)
+                vars_in_action,action_updated_vars = ret
+                print("vars in action:", vars_in_action)
+                print("action updated vars:", action_updated_vars)
+                vars_in_action_non_updated,_ = spec_obj_with_lemmas.get_vars_in_def(k_cti_action_opname, ignore_update_expressions=True)
+                vars_in_lemma_defs = spec_obj_with_lemmas.get_vars_in_def(k_cti_lemma)[0]
+
+                lemma_action_coi = spec_obj_with_lemmas.compute_coi(None, None, None,action_updated_vars, vars_in_action_non_updated, vars_in_lemma_defs)
+                print("Lemma-action COI")
+                print(lemma_action_coi)
+                # for ind,p in enumerate(self.preds):
+                    # print(p, vars_in_preds[ind], lemma_action_coi)
+
+                #
+                # Filter predicates based on this COI.
+                #
+                # We select only predicates that contain variable sets that are a subset of the COI.
+                # If they, for example, contain a variable set with some variables in the COI and some not, then
+                # we don't include that predicate.
+                #
+                # Note that the set subset operator is "<=" here.
+                preds = [p for (pi,p) in enumerate(self.preds) if vars_in_preds[pi] <= lemma_action_coi]
+
+                pct_str = "{0:.1f}".format(len(preds)/len(self.preds) * 100)
+                logging.info(f"{len(preds)}/{len(self.preds)} ({pct_str}% of) predicates being used based on COI slice filter.")
+
+                cache_with_ignored_vars = [v for v in self.state_vars if v not in lemma_action_coi]
+
+                self.proof_graph["edges"].append((action_node, lemma_name))
+                self.proof_graph["nodes"][action_node] = {"ctis_remaining": 1000, "coi_vars": lemma_action_coi}  # initialize with positive CTI count, to be updated later.
+
+
+                # if "local_grammars" in self.spec_config and target_action in self.spec_config["local_grammars"]:
+                #     lgrammar = self.spec_config["local_grammars"][target_action][target_node[1]]
+                #     if "max_depth" in lgrammar:
+                #         self.spec_config["max_tlc_inv_depth"] = lgrammar["max_depth"]
+
+                #     preds = lgrammar["preds"]
+                #     self.quant_vars = lgrammar["preds"]
+                #     self.quant_inv = lgrammar["quant_inv"]
+                #     self.initialize_quant_inv()
+                #     logging.info(f"Using local grammar for node ({target_node[1]}, {target_action}) with {len(preds)} predicates.")
+
+                #     def svar_in_pred(v, p):
+                #         # avoid variables with shared substrings.
+                #         return f"{v}[" in p or f"{v} " in p or f"{v}:" in p
+
+                #     state_vars_in_local_grammar = set()
+                #     for p in (preds + [lgrammar["quant_inv"]]):
+                #         svars = []
+                #         for svar in self.state_vars:
+                #             if svar_in_pred(svar, p):
+                #                 svars.append(svar)
+                #                 state_vars_in_local_grammar.add(svar)
+                #                 state_vars_not_in_local_grammar.discard(svar)
+                #         # print(p, svars)
+                #     print(f"{len(state_vars_in_local_grammar)} state vars in local grammar:", state_vars_in_local_grammar)
+                #     print(f"{len(state_vars_not_in_local_grammar)} state vars not in local grammar:", state_vars_not_in_local_grammar)
+
+                # cache_vars_to_ignore = None
+                # Optinoally enable caching with projected vars.
+                # if self.enable_inv_state_caching:
+                    # cache_vars_to_ignore = state_vars_not_in_local_grammar
+                
+                # Run CTI eliminatinon.
+                ret = self.eliminate_ctis(k_ctis_to_eliminate, self.num_invs, roundi, subroundi=subround, preds=preds, 
+                                            append_inv_round_id=True, cache_states_with_ignored_vars=cache_with_ignored_vars)
+                subround += 1
+
+                if self.save_dot and len(self.proof_graph["edges"]) > 0:
+                    # Render updated proof graph as we go.
+                    self.render_proof_graph()
+
+                # If we did not eliminate all CTIs in this round, then exit with failure.
+                if ret == None:
+                    logging.info("Could not eliminate all CTIs in this round. Exiting with failure.")
+                    break
+                else:
+                    # Successfully eliminated all CTIs.
+                    self.proof_graph["nodes"][curr_obligation]["discharged"] = True
+                    pass
+                    # print("Adding new proof obligations:" + str(len(self.strengthening_conjuncts)))
+                    # self.lemma_obligations += self.strengthening_conjuncts
+                    # for support_lemma in self.strengthening_conjuncts:
+                        # Check for existence of the predicate expression in existing lemma set.
+                        # if support_lemma[1] not in [x[1] for x in self.all_generated_lemmas]:
+                            # self.proof_graph["edges"].append((support_lemma,curr_obligation))
+                            # self.all_generated_lemmas.add(support_lemma)
+                
+
+                # Determines whether we will re-generate CTIs after every new strengthening lemma discovered.
+                k_ctis = [c for c in k_ctis if c not in k_ctis_to_eliminate]
+                # k_ctis = []
+
+                logging.info(f"k-ctis remaining after Round {roundi} elimination step: {len(k_ctis)} (eliminated {len(k_ctis_to_eliminate)})")
+                logging.info("")
+                logging.info(f"(Round {roundi}) Cumulative CTI generation duration: %f secs.", indgen.get_ctigen_duration())
+                logging.info(f"(Round {roundi}) Cumulative State caching duration: %f secs.", indgen.get_state_cache_duration())
+                logging.info(f"(Round {roundi}) Cumulative Invariant checking duration: %f secs.", indgen.get_invcheck_duration())
+                logging.info(f"(Round {roundi}) Cumulative CTI elimination checks duration: %f secs.", indgen.get_ctielimcheck_duration())
+
+                logging.info("")
 
 #
 #
@@ -3672,19 +3884,30 @@ class InductiveInvGen():
                 fillcolor = "white"
                 coi = ""
                 if n in self.proof_graph["nodes"]:
-                    num_ctis_left = self.proof_graph["nodes"][n]["ctis_remaining"]
-                    fillcolor = "green" if num_ctis_left == 0 else "orange"
-                    coi = "{" + ",".join(self.proof_graph["nodes"][n]["coi_vars"]) + "}"
-                if "curr_node" in self.proof_graph and self.proof_graph["curr_node"] == n and self.proof_graph["nodes"][n]["ctis_remaining"] > 0:
-                    # Mark node.
-                    fillcolor = "yellow"
-                if n in self.proof_graph["nodes"] and len(self.proof_graph["nodes"][n]["coi_vars"]) > 0:
-                    nlabel = n.split("_")[-1].replace("Action", "") # just show the action name.
-                    coi_vars = self.proof_graph["nodes"][n]["coi_vars"]
-                    label = "< " + nlabel + "<BR/>" + "<FONT POINT-SIZE='8'>" + str(coi) + "<BR/>" + " (" + str(len(coi_vars)) + "/" + str(len(self.state_vars)) + " vars) </FONT>"
-                    if "num_grammar_preds" in self.proof_graph["nodes"][n]:
-                        label += "<FONT POINT-SIZE='8'>|preds| = " + str(self.proof_graph["nodes"][n]["num_grammar_preds"]) + "/" + str(len(self.preds)) + " </FONT>"
-                    label += ">"
+                    num_ctis_left = 0
+                    node = self.proof_graph["nodes"][n]
+                    if "is_action" in node:
+                        num_ctis_left = self.proof_graph["nodes"][n]["ctis_remaining"]
+                        fillcolor = "green" if num_ctis_left == 0 else "orange"
+                        coi = "{" + ",".join(self.proof_graph["nodes"][n]["coi_vars"]) + "}"
+                        if "curr_node" in self.proof_graph and self.proof_graph["curr_node"] == n and self.proof_graph["nodes"][n]["ctis_remaining"] > 0:
+                            # Mark node.
+                            fillcolor = "yellow"
+                        if len(self.proof_graph["nodes"][n]["coi_vars"]) > 0:
+                            nlabel = n.split("_")[-1].replace("Action", "") # just show the action name.
+                            coi_vars = self.proof_graph["nodes"][n]["coi_vars"]
+                            label = "< " + nlabel + "<BR/>" + "<FONT POINT-SIZE='8'>" + str(coi) + "<BR/>" + " (" + str(len(coi_vars)) + "/" + str(len(self.state_vars)) + " vars) </FONT>"
+                            if "num_grammar_preds" in self.proof_graph["nodes"][n]:
+                                label += "<FONT POINT-SIZE='8'>|preds| = " + str(self.proof_graph["nodes"][n]["num_grammar_preds"]) + "/" + str(len(self.preds)) + " </FONT>"
+                            if "order" in node:
+                                label += "<BR/>"
+                                label += "<FONT POINT-SIZE='8'> order = " + str(node["order"]) + " </FONT>"
+                            label += ">"
+                    if "is_lemma" in node:
+                        label = n
+                        if "order" in node:
+                            # label += "<BR/>"
+                            label += " (" + str(node["order"]) + ")"
                 else:
                     label = n
                 dot.node(n, fillcolor=fillcolor, style="filled", color=color, label=label)
@@ -3734,18 +3957,18 @@ class InductiveInvGen():
             dot.node_attr["fontname"] = "courier"
             # dot.node_attr["shape"] = "box"
             
-            # Store all nodes.
-            for e in self.proof_graph["edges"]:
-                print(e[0])
-                print(e[1])
-                dot.node(e[0][0], e[0][1].replace("\\", "\\\\"))
-                dot.node(e[1][0], e[1][1].replace("\\", "\\\\"))
+            # # Store all nodes.
+            # for e in self.proof_graph["edges"]:
+            #     print(e[0])
+            #     print(e[1])
+            #     dot.node(e[0][0], e[0][1].replace("\\", "\\\\"))
+            #     dot.node(e[1][0], e[1][1].replace("\\", "\\\\"))
 
-            for e in self.proof_graph["edges"]:
-                print(e[0])
-                print(e[1])
-                dot.edge(e[0][0], e[1][0])
-                # print(e)
+            # for e in self.proof_graph["edges"]:
+            #     print(e[0])
+            #     print(e[1])
+            #     dot.edge(e[0][0], e[1][0])
+            #     # print(e)
 
             # print("Final proof graph:")
             # print(dot.source)
