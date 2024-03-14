@@ -1065,6 +1065,12 @@ class InductiveInvGen():
         for cinvname,cinvexp,_ in props:
             invcheck_tla_indcheck += ("%s == %s\n" % (cinvname, cinvexp))
 
+
+        # if props is not None:
+        #     for s in self.strengthening_conjuncts:
+        #         invcheck_tla_indcheck += (f"S_{s[0]} == {s[1]}\n")
+
+
         # Create formula string which is conjunction of all strengthening conjuncts.
         strengthening_conjuncts_str = ""
         for cinvname,cinvexp,_ in props:
@@ -2056,10 +2062,10 @@ class InductiveInvGen():
 
                 # Try to do a bit of inference without resorting to existing conjuncts, and then add them back in after a round or
                 # two. 
-                # Not sure how much effect this may have on quality of learned invariantsor proof graphs.
-                iter_to_add_existing_strengthening_conjuncts = 3
+                # Not sure how much effect this may have on quality of learned invariants or proof graphs.
+                iter_to_start_adding_existing_conjuncts = 2
 
-                if iteration >= iter_to_add_existing_strengthening_conjuncts:
+                if iteration >= iter_to_start_adding_existing_conjuncts:
                     added = 0
                     for c in self.strengthening_conjuncts:
                         # Only include strengthening conjunct if its variables are in this slice.
@@ -3315,6 +3321,7 @@ class InductiveInvGen():
             curr_obligation_expr = self.proof_graph["nodes"][curr_obligation]["expr"]
             curr_obligation_pred_tup = (curr_obligation, curr_obligation_expr, "")
             k_ctis, k_cti_traces = self.generate_ctis(props=[curr_obligation_pred_tup])
+            # k_ctis, k_cti_traces = self.generate_ctis(props=self.strengthening_conjuncts)
             count += 1
 
             # Filter CTIs by action.
@@ -3482,11 +3489,6 @@ class InductiveInvGen():
                 if len(k_ctis) == 0:
                     self.proof_graph["nodes"][curr_obligation]["discharged"] = True
 
-
-            # Render once more.
-            if self.save_dot and len(self.proof_graph["edges"]) > 0:
-                # Render updated proof graph as we go.
-                self.render_proof_graph()
 
             logging.info(f"k-ctis remaining after Round {roundi} elimination step: {len(k_ctis)} (eliminated {len(k_ctis_to_eliminate)})")
             logging.info("")
@@ -3944,11 +3946,17 @@ class InductiveInvGen():
 
             logging.info("Running invariant generation in proof tree mode.")
             self.do_invgen_proof_tree_mode()
+
+            # Render once more.
+            if self.save_dot and len(self.proof_graph["edges"]) > 0:
+                # Render updated proof graph as we go.
+                self.render_proof_graph()
+
             # print("")
             # print("Proof graph edges")
-            dot = graphviz.Digraph('round-table', comment='The Round Table')  
-            dot.graph_attr["rankdir"] = "LR"
-            dot.node_attr["fontname"] = "courier"
+            # dot = graphviz.Digraph('round-table', comment='The Round Table')  
+            # dot.graph_attr["rankdir"] = "LR"
+            # dot.node_attr["fontname"] = "courier"
             # dot.node_attr["shape"] = "box"
             
             # # Store all nodes.
