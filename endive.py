@@ -3327,7 +3327,26 @@ class InductiveInvGen():
             # k_ctis = self.generate_ctis(props=[("LemmaObligation" + str(count), curr_obligation[1])])
             curr_obligation_expr = self.proof_graph["nodes"][curr_obligation]["expr"]
             curr_obligation_pred_tup = (curr_obligation, curr_obligation_expr, "")
+
+            cobjs = list(self.get_config_constant_instances())
+            logging.info(cobjs)
+            for c in cobjs:
+                print(c)
+            # cobj = cobjs[-1]
+            # print("constant obj:", cobj)
+
+            # Start with CTIs for smallest cobj you can find.
+            # EXPERIMENTAL
+            # for c in cobjs:
+            #     print("Trying constant obj:", c)
+            #     k_ctis, k_cti_traces = self.generate_ctis(props=[curr_obligation_pred_tup], constants_obj=c)
+            #     print(f"Found {len(k_ctis)} CTIs")
+            #     if len(k_ctis) > 0:
+            #         print("constant obj:", c)
+            #         break
+                
             k_ctis, k_cti_traces = self.generate_ctis(props=[curr_obligation_pred_tup])
+
             # k_ctis, k_cti_traces = self.generate_ctis(props=self.strengthening_conjuncts)
             count += 1
 
