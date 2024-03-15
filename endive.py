@@ -3893,11 +3893,14 @@ class InductiveInvGen():
                         # Split something like 'Inv249_R3_2_I2_0'.
                         name_parts = n.partition("_")
                         label = "< " + name_parts[0]
+                        depth_str = ""
                         if len(name_parts[2]) > 0:
                             label += " <BR/> <FONT POINT-SIZE='12'>" + str(name_parts[2]) + " </FONT>"
+                        if "depth" in node:
+                            depth_str = ", d=" + str(node["depth"])
                         if "order" in node:
                             # label += "<BR/>"
-                            label += " <BR/> <FONT POINT-SIZE='12'>(" + str(node["order"]) + ") </FONT>"
+                            label += " <BR/> <FONT POINT-SIZE='12'>(" + str(node["order"]) + depth_str + ") </FONT>"
                         label += " >"
                         penwidth="3"
                         if node["discharged"]:
