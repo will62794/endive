@@ -2567,7 +2567,8 @@ class InductiveInvGen():
                                 "discharged": False, 
                                 "is_lemma": True,
                                 "expr": lemma_node[1],
-                                "order": len(all_lemma_nodes) + 1
+                                "order": len(all_lemma_nodes) + 1,
+                                "depth": self.curr_obligation_depth + 1
                             }
 
                         self.proof_graph["nodes"][action_node] = {
@@ -3216,6 +3217,8 @@ class InductiveInvGen():
         # self.lemma_obligations = [target_node]
         self.all_generated_lemmas = set()
 
+        self.curr_obligation_depth = 0
+
         # TODO: Optionally reload from file for interactive mode.
         self.proof_graph = {
             "edges": [], 
@@ -3226,7 +3229,8 @@ class InductiveInvGen():
             "discharged": False, 
             "is_lemma": True, 
             "expr": root_node[1],
-            "order": 1
+            "order": 1,
+            "depth": self.curr_obligation_depth
         }
 
         # For proof tree we look for single step inductive support lemmas.
@@ -3312,6 +3316,9 @@ class InductiveInvGen():
             #     if "is_lemma" in node and not node["discharged"]:
             #         curr_obligation = n
             #         break
+
+            # Set current depth.
+            self.curr_obligation_depth = self.proof_graph["nodes"][curr_obligation]["depth"]
 
             logging.info("Generating CTIs.")
             t0 = time.time()
