@@ -3421,7 +3421,8 @@ class InductiveInvGen():
                 k_ctis = set(limited_ctis)
             
             if len(k_ctis) == 0:
-                if roundi==0:
+                is_root_node = self.proof_graph["nodes"][curr_obligation]["order"] == 1
+                if roundi==0 and is_root_node:
                     logging.info("No initial CTIs found. Marking invariant as inductive and exiting.")
                     self.is_inductive = True
                     return
