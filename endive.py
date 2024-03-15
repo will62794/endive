@@ -67,7 +67,10 @@ class InductiveInvGen():
     def __init__(self, specdir, specname, safety, constants, state_constraint, quant_inv, model_consts, preds,
                     symmetry=False, simulate=False, simulate_depth=6, typeok="TypeOK", tlc_specific_spec=False, seed=0, num_invs=1000, num_rounds=3, num_iters=3, 
                     num_simulate_traces=10000, tlc_workers=6, quant_vars=[],java_exe="java",cached_invs=None, cached_invs_gen_time_secs=None, use_cpp_invgen=False,
-                    pregen_inv_cmd=None, opt_quant_minimize=False, try_final_minimize=False, proof_tree_mode=False, interactive_mode=False, max_num_conjuncts_per_round=10000,
+                    pregen_inv_cmd=None, opt_quant_minimize=False, try_final_minimize=False, 
+                    proof_tree_mode=False,
+                    proof_tree_mode_persistent=False, 
+                    interactive_mode=False, max_num_conjuncts_per_round=10000,
                     max_num_ctis_per_round=10000, override_num_cti_workers=None, use_apalache_ctigen=False,all_args={},spec_config=None,
                     auto_lemma_action_decomposition=False, 
                     enable_partitioned_state_caching=False,
@@ -101,6 +104,11 @@ class InductiveInvGen():
 
         self.max_proof_node_ctis = all_args["max_proof_node_ctis"]
         self.proof_tree_mode = proof_tree_mode
+
+        # In persistent mode we will save the generated proof graph on completion and also load 
+        # from a previously saved proof graph by default if one exists.
+        self.persistent_proof_tree_mode = proof_tree_mode_persistent
+
         self.proof_tree_cmd = all_args["proof_tree_cmd"]
         self.proof_struct_tag = all_args["proof_struct_tag"]
         self.interactive_mode = interactive_mode
@@ -1885,16 +1893,16 @@ class InductiveInvGen():
             first_cti_vals = first_cti.var_vals()
             print("total CTIs:", len(orig_k_ctis))
             if cache_states_with_ignored_vars is not None:
-                for c in orig_k_ctis:
-                    # print("ignore vars:", cache_states_with_ignored_vars)
-                    # print("pre-projected:")
-                    # for l in c.cti_lines:
-                        # print(l)
+                for ind,c in enumerate(orig_k_ctis):
+                    print("ignore vars:", cache_states_with_ignored_vars)
+                    print("pre-projected:")
+                    for l in c.cti_lines:
+                        print(l)
                     for sv in cache_states_with_ignored_vars:
-                        c.set_var_val(sv, first_cti_vals[sv])
-                    # print("post-projected:")
-                    # for l in c.cti_lines:
-                        # print(l)
+                        orig_k_ctis[ind].set_var_val(sv, first_cti_vals[sv])
+                    print("post-projected:")
+                    for l in c.cti_lines:
+                        print(l)
             print("total projected ctis:", len(set(orig_k_ctis)))
             orig_k_ctis = list(set(orig_k_ctis))
 
@@ -2063,7 +2071,7 @@ class InductiveInvGen():
                 # Try to do a bit of inference without resorting to existing conjuncts, and then add them back in after a round or
                 # two. 
                 # Not sure how much effect this may have on quality of learned invariants or proof graphs.
-                iter_to_start_adding_existing_conjuncts = 2
+                iter_to_start_adding_existing_conjuncts = 3
 
                 if iteration >= iter_to_start_adding_existing_conjuncts:
                     added = 0
@@ -3196,6 +3204,38 @@ class InductiveInvGen():
 
         return
 
+    def clean_proof_graph(self):
+        """ Clear out any persisted proof graphs. """
+        fname = f"{self.specdir}/{self.specname}.proofgraph.json"
+        # Delete proof graph object if exists.
+        logging.info("Cleaning proof graph file: '{fname}'")
+        try:
+            os.remove(fname)
+        except OSError:
+            pass
+
+    def persist_proof_graph(self):
+        # Save the generated proof graph to disk.
+        fname = f"{self.specdir}/{self.specname}.proofgraph.json"
+        proof_graph_object = {}
+        proof_graph_object["proof_graph"] = self.proof_graph
+        proof_graph_object["strengthening_conjuncts"] = self.strengthening_conjuncts
+        with open(fname, 'w') as f:
+            json.dump(proof_graph_object, f, indent=2)
+
+    def load_proof_graph(self):
+        # Try to load the proof graph from disk.
+        fname = f"{self.specdir}/{self.specname}.proofgraph.json"
+        try:
+            logging.info(f"Trying to load proof graph from '{fname}'")
+            with open(fname) as f:
+                proof_obj = json.load(f)
+                self.proof_graph = proof_obj["proof_graph"]
+                self.strengthening_conjuncts = proof_obj["strengthening_conjuncts"]
+                logging.info(f"Reloaded persisted proof graph from '{fname}'")
+        except Exception as e:
+            logging.info(f"No proof graph loaded from '{fname}': {e}")
+
     def do_invgen_proof_tree_mode(self):
         """ Do localized invariant synthesis based on an inductive proof graph structure."""
 
@@ -3275,6 +3315,16 @@ class InductiveInvGen():
         #     spec_obj_with_lemmas = tlaparse.parse_tla_file(self.specdir, specname)
         
         self.strengthening_conjuncts = []
+
+
+        if self.persistent_proof_tree_mode:
+            self.load_proof_graph()
+        else:
+            self.clean_proof_graph()
+
+        # Initial rendering.
+        if self.save_dot and len(self.proof_graph["edges"]) > 0:
+            self.render_proof_graph()
 
         for roundi in range(self.num_rounds):
             logging.info("### STARTING ROUND %d" % roundi)
@@ -3479,8 +3529,8 @@ class InductiveInvGen():
 
                 cache_with_ignored_vars = [v for v in self.state_vars if v not in lemma_action_coi]
 
-                self.proof_graph["edges"].append((action_node, lemma_name))
-                self.proof_graph["nodes"][action_node] = {"ctis_remaining": 1000, "coi_vars": lemma_action_coi}  # initialize with positive CTI count, to be updated later.
+                # self.proof_graph["edges"].append((action_node, lemma_name))
+                # self.proof_graph["nodes"][action_node] = {"ctis_remaining": 1000, "coi_vars": lemma_action_coi}  # initialize with positive CTI count, to be updated later.
                 
                 # Run CTI eliminatinon.
                 ret = self.eliminate_ctis(k_ctis_to_eliminate, self.num_invs, roundi, subroundi=subround, preds=preds, 
@@ -3490,6 +3540,10 @@ class InductiveInvGen():
                 if self.save_dot and len(self.proof_graph["edges"]) > 0:
                     # Render updated proof graph as we go.
                     self.render_proof_graph()
+
+                            
+                if self.persistent_proof_tree_mode:
+                    self.persist_proof_graph()
 
                 # If we did not eliminate all CTIs in this round, then exit with failure.
                 if ret == None:
@@ -4114,6 +4168,7 @@ if __name__ == "__main__":
     
     # Proof tree related commands.
     parser.add_argument('--proof_tree_mode', help='Run in inductive proof tree mode (EXPERIMENTAL).', default=False, action='store_true')
+    parser.add_argument('--persistent', help='Run in inductive proof tree mode with persistent caching/reloading. (EXPERIMENTAL).', default=False, action='store_true')
     parser.add_argument('--interactive', help='Run in interactive proof tree mode (EXPERIMENTAL).', default=False, action='store_true')
     parser.add_argument('--max_proof_node_ctis', help='Maximum number of CTIs per proof node.', type=int, default=5000)
     parser.add_argument('--proof_tree_cmd', help='Proof tree command (EXPERIMENTAL).', default=None, type=str, required=False, nargs="+")
@@ -4223,7 +4278,9 @@ if __name__ == "__main__":
                                 num_invs=num_invs, num_rounds=num_rounds, seed=seed, typeok=typeok, tlc_specific_spec=tlc_specific_spec, num_iters=numiters, 
                                 num_simulate_traces=NUM_SIMULATE_TRACES, simulate_depth=simulate_depth, tlc_workers=tlc_workers, quant_vars=quant_vars, symmetry=symmetry,
                                 simulate=simulate, java_exe=JAVA_EXE, cached_invs=cached_invs, cached_invs_gen_time_secs=cached_invs_gen_time_secs, use_cpp_invgen=use_cpp_invgen,
-                                pregen_inv_cmd=pregen_inv_cmd, opt_quant_minimize=args["opt_quant_minimize"],try_final_minimize=try_final_minimize,proof_tree_mode=args["proof_tree_mode"],
+                                pregen_inv_cmd=pregen_inv_cmd, opt_quant_minimize=args["opt_quant_minimize"],try_final_minimize=try_final_minimize,
+                                proof_tree_mode=args["proof_tree_mode"],
+                                proof_tree_mode_persistent=args["persistent"],
                                 interactive_mode=args["interactive"],
                                 max_num_conjuncts_per_round=args["max_num_conjuncts_per_round"], max_num_ctis_per_round=args["max_num_ctis_per_round"],
                                 override_num_cti_workers=args["override_num_cti_workers"],use_apalache_ctigen=args["use_apalache_ctigen"],all_args=args,
