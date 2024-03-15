@@ -4170,7 +4170,7 @@ if __name__ == "__main__":
     
     # Proof tree related commands.
     parser.add_argument('--proof_tree_mode', help='Run in inductive proof tree mode (EXPERIMENTAL).', default=False, action='store_true')
-    parser.add_argument('--persistent', help='Run in inductive proof tree mode with persistent caching/reloading. (EXPERIMENTAL).', default=False, action='store_true')
+    parser.add_argument('--persistent_mode', help='Run in inductive proof tree mode with persistent caching/reloading. (EXPERIMENTAL).', default=False, action='store_true')
     parser.add_argument('--interactive', help='Run in interactive proof tree mode (EXPERIMENTAL).', default=False, action='store_true')
     parser.add_argument('--max_proof_node_ctis', help='Maximum number of CTIs per proof node.', type=int, default=5000)
     parser.add_argument('--proof_tree_cmd', help='Proof tree command (EXPERIMENTAL).', default=None, type=str, required=False, nargs="+")
@@ -4282,7 +4282,7 @@ if __name__ == "__main__":
                                 simulate=simulate, java_exe=JAVA_EXE, cached_invs=cached_invs, cached_invs_gen_time_secs=cached_invs_gen_time_secs, use_cpp_invgen=use_cpp_invgen,
                                 pregen_inv_cmd=pregen_inv_cmd, opt_quant_minimize=args["opt_quant_minimize"],try_final_minimize=try_final_minimize,
                                 proof_tree_mode=args["proof_tree_mode"],
-                                proof_tree_mode_persistent=args["persistent"],
+                                proof_tree_mode_persistent=args["persistent_mode"],
                                 interactive_mode=args["interactive"],
                                 max_num_conjuncts_per_round=args["max_num_conjuncts_per_round"], max_num_ctis_per_round=args["max_num_ctis_per_round"],
                                 override_num_cti_workers=args["override_num_cti_workers"],use_apalache_ctigen=args["use_apalache_ctigen"],all_args=args,
