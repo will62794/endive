@@ -383,6 +383,9 @@ Alias2 == [
     nodeTS |-> nodeTS
 ]
 
+T1 == \A VARI \in H_NODES : \A VARJ \in H_NODES : nodeTS = nodeTS /\ msgsVAL = msgsVAL
+
+
 \* 
 \* Lemmas for inductive invariant.
 \* 
@@ -558,4 +561,19 @@ H_Inv1293_R0_1_0 ==
 
 
 H_Inv1534_R0_1_I1_1 == \A VARI \in aliveNodes : \A VARMVALI \in msgsVAL : ~((VARMVALI.type = "VAL") => greaterTS(VARMVALI.version, VARMVALI.tieBreaker, nodeTS[VARI].version, nodeTS[VARI].tieBreaker)) \/ ~(((VARMVALI.type = "VAL")))
+
+
+
+
+
+
+
+\* Invalid invariant.           
+H_Inv231_R1_0_I2_0 == 
+    \A VARI \in aliveNodes :
+    \A VARJ \in aliveNodes :
+    \A VARMVALI \in msgsVAL : 
+        (VARMVALI.version = nodeTS[VARI].version) \/ ((nodeTS[VARI].version >= nodeTS[VARJ].version))
+
+H_Inv26520_R4_0_I3_0 == \A VARI \in aliveNodes : \A VARJ \in aliveNodes : ~(nodeState[VARI] = "replay") \/ (~(nodeState[VARJ] = "write") \/ (~(nodeTS[VARI] = nodeTS[VARJ])))
 =============================================================================
