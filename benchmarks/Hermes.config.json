@@ -98,8 +98,8 @@
     "try_final_minimize": false,
     "max_tlc_inv_depth": 17,
     "simulation_inv_check": true,
-    "simulation_inv_check_num": 2000,
-    "simulation_inv_check_depth": 40,
+    "simulation_inv_check_num": 15000,
+    "simulation_inv_check_depth": 30,
     "simulate"  :  true,
     "local_grammars": {
         "HRcvValAction": {
