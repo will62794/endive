@@ -78,7 +78,11 @@
         "nodeLastWriter[VARI] = nodeLastWriter[VARJ]",
         "nodeLastWriter[VARI] < nodeLastWriter[VARJ]",
         "nodeLastWriter[VARI] \\in aliveNodes",
-        "nodeLastWriter[VARJ] \\in aliveNodes"
+        "nodeLastWriter[VARJ] \\in aliveNodes",
+        "nodeWriteEpochID[VARI] < epochID",
+        "nodeWriteEpochID[VARJ] < epochID",
+        "nodeWriteEpochID[VARI] = epochID",
+        "nodeWriteEpochID[VARJ] = epochID"
     ],
     "preds_alt" : [],
     "safety"  :  "HConsistent",
