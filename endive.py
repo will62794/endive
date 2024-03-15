@@ -3214,12 +3214,13 @@ class InductiveInvGen():
         except OSError:
             pass
 
-    def persist_proof_graph(self):
+    def persist_proof_graph(self, roundi):
         # Save the generated proof graph to disk.
         fname = f"{self.specdir}/{self.specname}.proofgraph.json"
         proof_graph_object = {}
         proof_graph_object["proof_graph"] = self.proof_graph
         proof_graph_object["strengthening_conjuncts"] = self.strengthening_conjuncts
+        proof_graph_object["roundi"] = roundi
         with open(fname, 'w') as f:
             json.dump(proof_graph_object, f, indent=2)
 
@@ -3542,8 +3543,9 @@ class InductiveInvGen():
                     self.render_proof_graph()
 
                             
-                if self.persistent_proof_tree_mode:
-                    self.persist_proof_graph()
+                # if self.persistent_proof_tree_mode:
+                # Persist proof graph, in case we want to reload it later.
+                self.persist_proof_graph(roundi)
 
                 # If we did not eliminate all CTIs in this round, then exit with failure.
                 if ret == None:
