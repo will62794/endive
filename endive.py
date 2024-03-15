@@ -3891,6 +3891,10 @@ class InductiveInvGen():
                         if len(self.proof_graph["nodes"][n]["coi_vars"]) > 0:
                             nlabel = n.split("_")[-1].replace("Action", "") # just show the action name.
                             coi_vars = self.proof_graph["nodes"][n]["coi_vars"]
+                            coi_str = coi
+                            # if len(coi_str) > 20:
+                                # coi_str_break_ind = coi_str.find(",", len(coi)//2 - 1)
+                                # coi_str = coi_str[:coi_str_break_ind] + "<BR/>" + coi_str[coi_str_break_ind:]
                             label = "< " + nlabel + "<BR/>" + "<FONT POINT-SIZE='10'>" + str(coi) + "<BR/>" + " (" + str(len(coi_vars)) + "/" + str(len(self.state_vars)) + " vars) </FONT>"
                             if "num_grammar_preds" in self.proof_graph["nodes"][n]:
                                 label += "<FONT POINT-SIZE='10'>|preds| = " + str(self.proof_graph["nodes"][n]["num_grammar_preds"]) + "/" + str(len(self.preds)) + " </FONT>"
