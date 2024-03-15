@@ -84,7 +84,7 @@
     "safety"  :  "HConsistent",
     "constants"  : {
         "H_NODES" : ["{33,44}" , "{33,44,55}"],
-        "H_MAX_VERSION" : ["1", "2"]
+        "H_MAX_VERSION" : ["1", "2", "3"]
     },
     "actions": [],
     "constraint"  :  "",
