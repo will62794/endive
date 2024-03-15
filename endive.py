@@ -2095,10 +2095,11 @@ class InductiveInvGen():
                 # Count the number of generated candidates that were already checked previously.
                 repeated_invs = 0
                 for ivs in invs_symb_strs:
-                    if ivs in inv_candidates_generated_in_round:
+                    if ivs in self.all_generated_inv_candidates:
                         repeated_invs += 1
-                inv_candidates_generated_in_round.update(invs_symb_strs)
-                logging.info(f"Found {repeated_invs} repeated generated invariants (total generated in round {roundi}: {len(inv_candidates_generated_in_round)}).")
+                # inv_candidates_generated_in_round.update(invs_symb_strs)
+                self.all_generated_inv_candidates.update(invs_symb_strs)
+                logging.info(f"Found {repeated_invs} repeated generated invariants (total generated in round {roundi}: {len(self.all_generated_inv_candidates)}).")
 
                 # Sort the set of invariants to give them a consistent order.
                 invs = sorted(list(invs))
@@ -3256,7 +3257,9 @@ class InductiveInvGen():
 
         # self.lemma_obligations = [("Safety", self.safety)]
         # self.lemma_obligations = [target_node]
-        self.all_generated_lemmas = set()
+
+        # The set of all generated invariant candidates across all rounds.
+        self.all_generated_inv_candidates = set()
 
         self.curr_obligation_depth = 0
 
