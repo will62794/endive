@@ -1,0 +1,633 @@
+{
+  "proof_graph": {
+    "edges": [
+      [
+        "Safety_HRcvValAction",
+        "Safety"
+      ],
+      [
+        "Inv45_R0_0_I1_0",
+        "Safety_HRcvValAction"
+      ],
+      [
+        "Safety_HRcvValAction",
+        "Safety"
+      ],
+      [
+        "Inv532_R0_0_I2_1",
+        "Safety_HRcvValAction"
+      ],
+      [
+        "Safety_HSendValsAction",
+        "Safety"
+      ],
+      [
+        "Inv532_R0_0_I2_1",
+        "Safety_HSendValsAction"
+      ],
+      [
+        "Safety_HSendValsAction",
+        "Safety"
+      ],
+      [
+        "Inv1236_R0_1_I2_0",
+        "Safety_HSendValsAction"
+      ],
+      [
+        "Safety_HSendValsAction",
+        "Safety"
+      ],
+      [
+        "Inv2082_R0_1_I2_1",
+        "Safety_HSendValsAction"
+      ],
+      [
+        "Safety_HSendValsAction",
+        "Safety"
+      ],
+      [
+        "Inv1697_R0_1_I2_2",
+        "Safety_HSendValsAction"
+      ],
+      [
+        "Safety_HSendValsAction",
+        "Safety"
+      ],
+      [
+        "Inv2896_R0_1_I3_3",
+        "Safety_HSendValsAction"
+      ],
+      [
+        "Safety_HSendValsAction",
+        "Safety"
+      ],
+      [
+        "Inv22583_R0_1_I3_4",
+        "Safety_HSendValsAction"
+      ],
+      [
+        "Inv45_R0_0_I1_0_HSendValsAction",
+        "Inv45_R0_0_I1_0"
+      ],
+      [
+        "Inv1236_R0_1_I2_0",
+        "Inv45_R0_0_I1_0_HSendValsAction"
+      ],
+      [
+        "Inv45_R0_0_I1_0_HSendValsAction",
+        "Inv45_R0_0_I1_0"
+      ],
+      [
+        "Inv2082_R0_1_I2_1",
+        "Inv45_R0_0_I1_0_HSendValsAction"
+      ],
+      [
+        "Inv45_R0_0_I1_0_HSendValsAction",
+        "Inv45_R0_0_I1_0"
+      ],
+      [
+        "Inv1697_R0_1_I2_2",
+        "Inv45_R0_0_I1_0_HSendValsAction"
+      ],
+      [
+        "Inv45_R0_0_I1_0_HSendValsAction",
+        "Inv45_R0_0_I1_0"
+      ],
+      [
+        "Inv2892_R1_0_I2_0",
+        "Inv45_R0_0_I1_0_HSendValsAction"
+      ],
+      [
+        "Inv45_R0_0_I1_0_HSendValsAction",
+        "Inv45_R0_0_I1_0"
+      ],
+      [
+        "Inv2726_R1_0_I2_1",
+        "Inv45_R0_0_I1_0_HSendValsAction"
+      ],
+      [
+        "Inv45_R0_0_I1_0_HSendValsAction",
+        "Inv45_R0_0_I1_0"
+      ],
+      [
+        "Inv9819_R1_0_I3_2",
+        "Inv45_R0_0_I1_0_HSendValsAction"
+      ],
+      [
+        "Inv532_R0_0_I2_1_HRcvValAction",
+        "Inv532_R0_0_I2_1"
+      ],
+      [
+        "Inv45_R0_0_I1_0",
+        "Inv532_R0_0_I2_1_HRcvValAction"
+      ],
+      [
+        "Inv532_R0_0_I2_1_HSendValsAction",
+        "Inv532_R0_0_I2_1"
+      ],
+      [
+        "Inv1236_R0_1_I2_0",
+        "Inv532_R0_0_I2_1_HSendValsAction"
+      ],
+      [
+        "Inv532_R0_0_I2_1_HSendValsAction",
+        "Inv532_R0_0_I2_1"
+      ],
+      [
+        "Inv2082_R0_1_I2_1",
+        "Inv532_R0_0_I2_1_HSendValsAction"
+      ],
+      [
+        "Inv532_R0_0_I2_1_HSendValsAction",
+        "Inv532_R0_0_I2_1"
+      ],
+      [
+        "Inv1697_R0_1_I2_2",
+        "Inv532_R0_0_I2_1_HSendValsAction"
+      ],
+      [
+        "Inv532_R0_0_I2_1_HSendValsAction",
+        "Inv532_R0_0_I2_1"
+      ],
+      [
+        "Inv2892_R1_0_I2_0",
+        "Inv532_R0_0_I2_1_HSendValsAction"
+      ],
+      [
+        "Inv532_R0_0_I2_1_HSendValsAction",
+        "Inv532_R0_0_I2_1"
+      ],
+      [
+        "Inv3205_R2_1_I3_0",
+        "Inv532_R0_0_I2_1_HSendValsAction"
+      ],
+      [
+        "Inv22583_R0_1_I3_4_HRcvValAction",
+        "Inv22583_R0_1_I3_4"
+      ],
+      [
+        "Inv45_R0_0_I1_0",
+        "Inv22583_R0_1_I3_4_HRcvValAction"
+      ],
+      [
+        "Inv22583_R0_1_I3_4_HRcvValAction",
+        "Inv22583_R0_1_I3_4"
+      ],
+      [
+        "Inv1236_R0_1_I2_0",
+        "Inv22583_R0_1_I3_4_HRcvValAction"
+      ],
+      [
+        "Inv22583_R0_1_I3_4_HRcvValAction",
+        "Inv22583_R0_1_I3_4"
+      ],
+      [
+        "Inv2726_R1_0_I2_1",
+        "Inv22583_R0_1_I3_4_HRcvValAction"
+      ],
+      [
+        "Inv22583_R0_1_I3_4_HRcvValAction",
+        "Inv22583_R0_1_I3_4"
+      ],
+      [
+        "Inv1697_R0_1_I2_2",
+        "Inv22583_R0_1_I3_4_HRcvValAction"
+      ],
+      [
+        "Inv22583_R0_1_I3_4_HRcvValAction",
+        "Inv22583_R0_1_I3_4"
+      ],
+      [
+        "Inv9760_R7_0_I3_0",
+        "Inv22583_R0_1_I3_4_HRcvValAction"
+      ],
+      [
+        "Inv22583_R0_1_I3_4_HSendValsAction",
+        "Inv22583_R0_1_I3_4"
+      ],
+      [
+        "Inv8830_R7_1_I3_0",
+        "Inv22583_R0_1_I3_4_HSendValsAction"
+      ],
+      [
+        "Inv22583_R0_1_I3_4_HSendValsAction",
+        "Inv22583_R0_1_I3_4"
+      ],
+      [
+        "Inv8889_R7_1_I3_1",
+        "Inv22583_R0_1_I3_4_HSendValsAction"
+      ],
+      [
+        "Inv22583_R0_1_I3_4_HSendValsAction",
+        "Inv22583_R0_1_I3_4"
+      ],
+      [
+        "Inv29747_R7_1_I4_2",
+        "Inv22583_R0_1_I3_4_HSendValsAction"
+      ],
+      [
+        "Inv2726_R1_0_I2_1_HSendValsAction",
+        "Inv2726_R1_0_I2_1"
+      ],
+      [
+        "Inv45_R0_0_I1_0",
+        "Inv2726_R1_0_I2_1_HSendValsAction"
+      ],
+      [
+        "Inv2726_R1_0_I2_1_HSendValsAction",
+        "Inv2726_R1_0_I2_1"
+      ],
+      [
+        "Inv1236_R0_1_I2_0",
+        "Inv2726_R1_0_I2_1_HSendValsAction"
+      ],
+      [
+        "Inv2726_R1_0_I2_1_HSendValsAction",
+        "Inv2726_R1_0_I2_1"
+      ],
+      [
+        "Inv30416_R9_0_I3_0",
+        "Inv2726_R1_0_I2_1_HSendValsAction"
+      ],
+      [
+        "Inv9760_R7_0_I3_0_HRcvValAction",
+        "Inv9760_R7_0_I3_0"
+      ],
+      [
+        "Inv45_R0_0_I1_0",
+        "Inv9760_R7_0_I3_0_HRcvValAction"
+      ],
+      [
+        "Inv9760_R7_0_I3_0_HSendValsAction",
+        "Inv9760_R7_0_I3_0"
+      ],
+      [
+        "Inv2082_R0_1_I2_1",
+        "Inv9760_R7_0_I3_0_HSendValsAction"
+      ],
+      [
+        "Inv9760_R7_0_I3_0_HSendValsAction",
+        "Inv9760_R7_0_I3_0"
+      ],
+      [
+        "Inv1236_R0_1_I2_0",
+        "Inv9760_R7_0_I3_0_HSendValsAction"
+      ],
+      [
+        "Inv9760_R7_0_I3_0_HSendValsAction",
+        "Inv9760_R7_0_I3_0"
+      ],
+      [
+        "Inv2892_R1_0_I2_0",
+        "Inv9760_R7_0_I3_0_HSendValsAction"
+      ],
+      [
+        "Inv9760_R7_0_I3_0_HSendValsAction",
+        "Inv9760_R7_0_I3_0"
+      ],
+      [
+        "Inv1697_R0_1_I2_2",
+        "Inv9760_R7_0_I3_0_HSendValsAction"
+      ],
+      [
+        "Inv9760_R7_0_I3_0_HSendValsAction",
+        "Inv9760_R7_0_I3_0"
+      ],
+      [
+        "Inv3098_R0_1_I3_0",
+        "Inv9760_R7_0_I3_0_HSendValsAction"
+      ]
+    ],
+    "nodes": {
+      "Safety": {
+        "discharged": true,
+        "is_lemma": true,
+        "expr": "HConsistent",
+        "order": 1,
+        "depth": 0
+      },
+      "Inv45_R0_0_I1_0": {
+        "discharged": true,
+        "is_lemma": true,
+        "expr": "\\A VARI \\in aliveNodes : \\A VARMVALI \\in msgsVAL : ~(greaterTS(VARMVALI.version, VARMVALI.tieBreaker, nodeTS[VARI].version, nodeTS[VARI].tieBreaker))",
+        "order": 2,
+        "depth": 1
+      },
+      "Safety_HRcvValAction": {
+        "ctis_remaining": 0,
+        "coi_vars": [
+          "msgsVAL",
+          "nodeTS",
+          "nodeState",
+          "aliveNodes"
+        ],
+        "num_grammar_preds": 38,
+        "is_action": true
+      },
+      "Inv532_R0_0_I2_1": {
+        "discharged": true,
+        "is_lemma": true,
+        "expr": "\\A VARI \\in aliveNodes : \\A VARJ \\in aliveNodes : (greaterOrEqualTS(nodeTS[VARI].version, nodeTS[VARI].tieBreaker, nodeTS[VARJ].version, nodeTS[VARJ].tieBreaker)) \\/ (~(nodeState[VARJ] = \"valid\"))",
+        "order": 3,
+        "depth": 1
+      },
+      "Safety_HSendValsAction": {
+        "ctis_remaining": 0,
+        "coi_vars": [
+          "nodeTS",
+          "nodeState",
+          "nodeRcvedAcks",
+          "aliveNodes"
+        ],
+        "num_grammar_preds": 34,
+        "is_action": true
+      },
+      "Inv1236_R0_1_I2_0": {
+        "discharged": true,
+        "is_lemma": true,
+        "expr": "\\A VARI \\in aliveNodes : (nodeTS[VARI].tieBreaker = VARI) \\/ (~(nodeState[VARI] = \"write\"))",
+        "order": 4,
+        "depth": 1
+      },
+      "Inv2082_R0_1_I2_1": {
+        "discharged": true,
+        "is_lemma": true,
+        "expr": "\\A VARI \\in aliveNodes : \\A VARJ \\in aliveNodes : ~(nodeTS[VARI].tieBreaker = VARJ) \\/ (~(nodeTS[VARI].version > nodeTS[VARJ].version))",
+        "order": 5,
+        "depth": 1
+      },
+      "Inv1697_R0_1_I2_2": {
+        "discharged": true,
+        "is_lemma": true,
+        "expr": "\\A VARI \\in aliveNodes : ~(nodeState[VARI] = \"invalid\") \\/ (~(nodeTS[VARI].tieBreaker = VARI))",
+        "order": 6,
+        "depth": 1
+      },
+      "Inv2896_R0_1_I3_3": {
+        "discharged": true,
+        "is_lemma": true,
+        "expr": "\\A VARI \\in aliveNodes : \\A VARJ \\in aliveNodes : (greaterOrEqualTS(nodeTS[VARI].version, nodeTS[VARI].tieBreaker, nodeTS[VARJ].version, nodeTS[VARJ].tieBreaker)) \\/ (~(VARI \\in nodeRcvedAcks[VARJ])) \\/ (~(nodeState[VARJ] = \"replay\"))",
+        "order": 7,
+        "depth": 1
+      },
+      "Inv22583_R0_1_I3_4": {
+        "discharged": true,
+        "is_lemma": true,
+        "expr": "\\A VARI \\in aliveNodes : \\A VARJ \\in aliveNodes : ~(VARI \\in nodeRcvedAcks[VARJ]) \\/ (~(nodeState[VARI] = \"valid\")) \\/ (~(nodeState[VARJ] = \"write\"))",
+        "order": 8,
+        "depth": 1
+      },
+      "Inv45_R0_0_I1_0_HSendValsAction": {
+        "ctis_remaining": 0,
+        "coi_vars": [
+          "msgsVAL",
+          "nodeTS",
+          "nodeState",
+          "nodeRcvedAcks",
+          "aliveNodes"
+        ],
+        "num_grammar_preds": 42,
+        "is_action": true
+      },
+      "Inv2892_R1_0_I2_0": {
+        "discharged": true,
+        "is_lemma": true,
+        "expr": "\\A VARI \\in aliveNodes : ~(nodeState[VARI] = \"invalid_write\") \\/ (~(nodeTS[VARI].tieBreaker = VARI))",
+        "order": 9,
+        "depth": 2
+      },
+      "Inv2726_R1_0_I2_1": {
+        "discharged": true,
+        "is_lemma": true,
+        "expr": "\\A VARI \\in aliveNodes : \\A VARMVALI \\in msgsVAL : ~(equalTS(VARMVALI.version, VARMVALI.tieBreaker, nodeTS[VARI].version, nodeTS[VARI].tieBreaker)) \\/ (~(nodeState[VARI] = \"write\"))",
+        "order": 10,
+        "depth": 2
+      },
+      "Inv9819_R1_0_I3_2": {
+        "discharged": true,
+        "is_lemma": true,
+        "expr": "\\A VARI \\in aliveNodes : \\A VARJ \\in aliveNodes : (greaterOrEqualTS(nodeTS[VARI].version, nodeTS[VARI].tieBreaker, nodeTS[VARJ].version, nodeTS[VARJ].tieBreaker)) \\/ (~(VARI \\in nodeRcvedAcks[VARJ])) \\/ (~(nodeState[VARJ] \\in {\"write\", \"replay\"}))",
+        "order": 11,
+        "depth": 2
+      },
+      "Inv532_R0_0_I2_1_HRcvValAction": {
+        "ctis_remaining": 0,
+        "coi_vars": [
+          "msgsVAL",
+          "nodeTS",
+          "nodeState",
+          "aliveNodes"
+        ],
+        "num_grammar_preds": 38,
+        "is_action": true
+      },
+      "Inv532_R0_0_I2_1_HSendValsAction": {
+        "ctis_remaining": 0,
+        "coi_vars": [
+          "nodeTS",
+          "nodeState",
+          "nodeRcvedAcks",
+          "aliveNodes"
+        ],
+        "num_grammar_preds": 34,
+        "is_action": true
+      },
+      "Inv3205_R2_1_I3_0": {
+        "discharged": true,
+        "is_lemma": true,
+        "expr": "\\A VARI \\in aliveNodes : \\A VARJ \\in aliveNodes : (greaterOrEqualTS(nodeTS[VARI].version, nodeTS[VARI].tieBreaker, nodeTS[VARJ].version, nodeTS[VARJ].tieBreaker)) \\/ (~(nodeState[VARJ] \\in {\"write\", \"replay\"})) \\/ (~(VARI \\in nodeRcvedAcks[VARJ]))",
+        "order": 12,
+        "depth": 2
+      },
+      "Inv22583_R0_1_I3_4_HRcvValAction": {
+        "ctis_remaining": 0,
+        "coi_vars": [
+          "msgsVAL",
+          "nodeTS",
+          "nodeState",
+          "nodeRcvedAcks",
+          "aliveNodes"
+        ],
+        "num_grammar_preds": 42,
+        "is_action": true
+      },
+      "Inv9760_R7_0_I3_0": {
+        "discharged": true,
+        "is_lemma": true,
+        "expr": "\\A VARI \\in aliveNodes : \\A VARJ \\in aliveNodes : (greaterOrEqualTS(nodeTS[VARI].version, nodeTS[VARI].tieBreaker, nodeTS[VARJ].version, nodeTS[VARJ].tieBreaker)) \\/ (~(VARI \\in nodeRcvedAcks[VARJ])) \\/ (~(nodeState[VARJ] \\in {\"write\", \"valid\"}))",
+        "order": 13,
+        "depth": 2
+      },
+      "Inv8830_R7_1_I3_0": {
+        "discharged": true,
+        "is_lemma": true,
+        "expr": "\\A VARI \\in aliveNodes : \\A VARJ \\in aliveNodes : (receivedAllAcks(VARI) /\\ nodeRcvedAcks = nodeRcvedAcks) \\/ (~(nodeState[VARJ] = \"replay\")) \\/ (~(VARJ \\in nodeRcvedAcks[VARI]))",
+        "order": 14,
+        "depth": 2
+      },
+      "Inv22583_R0_1_I3_4_HSendValsAction": {
+        "ctis_remaining": 0,
+        "coi_vars": [
+          "nodeState",
+          "nodeRcvedAcks",
+          "aliveNodes"
+        ],
+        "num_grammar_preds": 22,
+        "is_action": true
+      },
+      "Inv8889_R7_1_I3_1": {
+        "discharged": true,
+        "is_lemma": true,
+        "expr": "\\A VARI \\in aliveNodes : \\A VARJ \\in aliveNodes : (receivedAllAcks(VARJ) /\\ nodeRcvedAcks = nodeRcvedAcks) \\/ (~(VARI \\in nodeRcvedAcks[VARJ]) \\/ (~(nodeState[VARJ] = \"replay\")))",
+        "order": 15,
+        "depth": 2
+      },
+      "Inv29747_R7_1_I4_2": {
+        "discharged": true,
+        "is_lemma": true,
+        "expr": "\\A VARI \\in aliveNodes : \\A VARJ \\in aliveNodes : ~(VARI \\in nodeRcvedAcks[VARJ]) \\/ (~(VARJ \\in nodeRcvedAcks[VARI]) \\/ (~(nodeState[VARI] = \"write\") \\/ (~(nodeState[VARJ] \\in {\"write\", \"replay\"}))))",
+        "order": 16,
+        "depth": 2
+      },
+      "Inv2726_R1_0_I2_1_HSendValsAction": {
+        "ctis_remaining": 0,
+        "coi_vars": [
+          "msgsVAL",
+          "nodeTS",
+          "nodeState",
+          "nodeRcvedAcks",
+          "aliveNodes"
+        ],
+        "num_grammar_preds": 42,
+        "is_action": true
+      },
+      "Inv30416_R9_0_I3_0": {
+        "discharged": true,
+        "is_lemma": true,
+        "expr": "\\A VARI \\in aliveNodes : \\A VARJ \\in aliveNodes : ~(nodeState[VARI] = \"replay\") \\/ (~(nodeState[VARJ] = \"write\") \\/ (~(nodeTS[VARI] = nodeTS[VARJ])))",
+        "order": 17,
+        "depth": 3
+      },
+      "Inv9760_R7_0_I3_0_HRcvValAction": {
+        "ctis_remaining": 0,
+        "coi_vars": [
+          "msgsVAL",
+          "nodeTS",
+          "nodeState",
+          "nodeRcvedAcks",
+          "aliveNodes"
+        ],
+        "num_grammar_preds": 42,
+        "is_action": true
+      },
+      "Inv9760_R7_0_I3_0_HSendValsAction": {
+        "ctis_remaining": 0,
+        "coi_vars": [
+          "nodeTS",
+          "nodeState",
+          "nodeRcvedAcks",
+          "aliveNodes"
+        ],
+        "num_grammar_preds": 34,
+        "is_action": true
+      },
+      "Inv3098_R0_1_I3_0": {
+        "discharged": true,
+        "is_lemma": true,
+        "expr": "\\A VARI \\in aliveNodes : \\A VARJ \\in aliveNodes : (greaterOrEqualTS(nodeTS[VARI].version, nodeTS[VARI].tieBreaker, nodeTS[VARJ].version, nodeTS[VARJ].tieBreaker)) \\/ (~(nodeState[VARJ] = \"replay\")) \\/ (~(VARI \\in nodeRcvedAcks[VARJ]))",
+        "order": 18,
+        "depth": 3
+      }
+    },
+    "safety": "HConsistent",
+    "curr_node": "Inv9760_R7_0_I3_0_HSendValsAction"
+  },
+  "strengthening_conjuncts": [
+    [
+      "Inv45_R0_0_I1_0",
+      "\\A VARI \\in aliveNodes : \\A VARMVALI \\in msgsVAL : ~(greaterTS(VARMVALI.version, VARMVALI.tieBreaker, nodeTS[VARI].version, nodeTS[VARI].tieBreaker))",
+      "~(greaterTS(VARMVALI.version, VARMVALI.tieBreaker, nodeTS[VARI].version, nodeTS[VARI].tieBreaker))"
+    ],
+    [
+      "Inv532_R0_0_I2_1",
+      "\\A VARI \\in aliveNodes : \\A VARJ \\in aliveNodes : (greaterOrEqualTS(nodeTS[VARI].version, nodeTS[VARI].tieBreaker, nodeTS[VARJ].version, nodeTS[VARJ].tieBreaker)) \\/ (~(nodeState[VARJ] = \"valid\"))",
+      "(greaterOrEqualTS(nodeTS[VARI].version, nodeTS[VARI].tieBreaker, nodeTS[VARJ].version, nodeTS[VARJ].tieBreaker)) \\/ (~(nodeState[VARJ] = \"valid\"))"
+    ],
+    [
+      "Inv1236_R0_1_I2_0",
+      "\\A VARI \\in aliveNodes : (nodeTS[VARI].tieBreaker = VARI) \\/ (~(nodeState[VARI] = \"write\"))",
+      "(nodeTS[VARI].tieBreaker = VARI) \\/ (~(nodeState[VARI] = \"write\"))"
+    ],
+    [
+      "Inv2082_R0_1_I2_1",
+      "\\A VARI \\in aliveNodes : \\A VARJ \\in aliveNodes : ~(nodeTS[VARI].tieBreaker = VARJ) \\/ (~(nodeTS[VARI].version > nodeTS[VARJ].version))",
+      "~(nodeTS[VARI].tieBreaker = VARJ) \\/ (~(nodeTS[VARI].version > nodeTS[VARJ].version))"
+    ],
+    [
+      "Inv1697_R0_1_I2_2",
+      "\\A VARI \\in aliveNodes : ~(nodeState[VARI] = \"invalid\") \\/ (~(nodeTS[VARI].tieBreaker = VARI))",
+      "~(nodeState[VARI] = \"invalid\") \\/ (~(nodeTS[VARI].tieBreaker = VARI))"
+    ],
+    [
+      "Inv2896_R0_1_I3_3",
+      "\\A VARI \\in aliveNodes : \\A VARJ \\in aliveNodes : (greaterOrEqualTS(nodeTS[VARI].version, nodeTS[VARI].tieBreaker, nodeTS[VARJ].version, nodeTS[VARJ].tieBreaker)) \\/ (~(VARI \\in nodeRcvedAcks[VARJ])) \\/ (~(nodeState[VARJ] = \"replay\"))",
+      "(greaterOrEqualTS(nodeTS[VARI].version, nodeTS[VARI].tieBreaker, nodeTS[VARJ].version, nodeTS[VARJ].tieBreaker)) \\/ (~(VARI \\in nodeRcvedAcks[VARJ])) \\/ (~(nodeState[VARJ] = \"replay\"))"
+    ],
+    [
+      "Inv22583_R0_1_I3_4",
+      "\\A VARI \\in aliveNodes : \\A VARJ \\in aliveNodes : ~(VARI \\in nodeRcvedAcks[VARJ]) \\/ (~(nodeState[VARI] = \"valid\")) \\/ (~(nodeState[VARJ] = \"write\"))",
+      "~(VARI \\in nodeRcvedAcks[VARJ]) \\/ (~(nodeState[VARI] = \"valid\")) \\/ (~(nodeState[VARJ] = \"write\"))"
+    ],
+    [
+      "Inv2892_R1_0_I2_0",
+      "\\A VARI \\in aliveNodes : ~(nodeState[VARI] = \"invalid_write\") \\/ (~(nodeTS[VARI].tieBreaker = VARI))",
+      "~(nodeState[VARI] = \"invalid_write\") \\/ (~(nodeTS[VARI].tieBreaker = VARI))"
+    ],
+    [
+      "Inv2726_R1_0_I2_1",
+      "\\A VARI \\in aliveNodes : \\A VARMVALI \\in msgsVAL : ~(equalTS(VARMVALI.version, VARMVALI.tieBreaker, nodeTS[VARI].version, nodeTS[VARI].tieBreaker)) \\/ (~(nodeState[VARI] = \"write\"))",
+      "~(equalTS(VARMVALI.version, VARMVALI.tieBreaker, nodeTS[VARI].version, nodeTS[VARI].tieBreaker)) \\/ (~(nodeState[VARI] = \"write\"))"
+    ],
+    [
+      "Inv9819_R1_0_I3_2",
+      "\\A VARI \\in aliveNodes : \\A VARJ \\in aliveNodes : (greaterOrEqualTS(nodeTS[VARI].version, nodeTS[VARI].tieBreaker, nodeTS[VARJ].version, nodeTS[VARJ].tieBreaker)) \\/ (~(VARI \\in nodeRcvedAcks[VARJ])) \\/ (~(nodeState[VARJ] \\in {\"write\", \"replay\"}))",
+      "(greaterOrEqualTS(nodeTS[VARI].version, nodeTS[VARI].tieBreaker, nodeTS[VARJ].version, nodeTS[VARJ].tieBreaker)) \\/ (~(VARI \\in nodeRcvedAcks[VARJ])) \\/ (~(nodeState[VARJ] \\in {\"write\", \"replay\"}))"
+    ],
+    [
+      "Inv3205_R2_1_I3_0",
+      "\\A VARI \\in aliveNodes : \\A VARJ \\in aliveNodes : (greaterOrEqualTS(nodeTS[VARI].version, nodeTS[VARI].tieBreaker, nodeTS[VARJ].version, nodeTS[VARJ].tieBreaker)) \\/ (~(nodeState[VARJ] \\in {\"write\", \"replay\"})) \\/ (~(VARI \\in nodeRcvedAcks[VARJ]))",
+      "(greaterOrEqualTS(nodeTS[VARI].version, nodeTS[VARI].tieBreaker, nodeTS[VARJ].version, nodeTS[VARJ].tieBreaker)) \\/ (~(nodeState[VARJ] \\in {\"write\", \"replay\"})) \\/ (~(VARI \\in nodeRcvedAcks[VARJ]))"
+    ],
+    [
+      "Inv9760_R7_0_I3_0",
+      "\\A VARI \\in aliveNodes : \\A VARJ \\in aliveNodes : (greaterOrEqualTS(nodeTS[VARI].version, nodeTS[VARI].tieBreaker, nodeTS[VARJ].version, nodeTS[VARJ].tieBreaker)) \\/ (~(VARI \\in nodeRcvedAcks[VARJ])) \\/ (~(nodeState[VARJ] \\in {\"write\", \"valid\"}))",
+      "(greaterOrEqualTS(nodeTS[VARI].version, nodeTS[VARI].tieBreaker, nodeTS[VARJ].version, nodeTS[VARJ].tieBreaker)) \\/ (~(VARI \\in nodeRcvedAcks[VARJ])) \\/ (~(nodeState[VARJ] \\in {\"write\", \"valid\"}))"
+    ],
+    [
+      "Inv8830_R7_1_I3_0",
+      "\\A VARI \\in aliveNodes : \\A VARJ \\in aliveNodes : (receivedAllAcks(VARI) /\\ nodeRcvedAcks = nodeRcvedAcks) \\/ (~(nodeState[VARJ] = \"replay\")) \\/ (~(VARJ \\in nodeRcvedAcks[VARI]))",
+      "(receivedAllAcks(VARI) /\\ nodeRcvedAcks = nodeRcvedAcks) \\/ (~(nodeState[VARJ] = \"replay\")) \\/ (~(VARJ \\in nodeRcvedAcks[VARI]))"
+    ],
+    [
+      "Inv8889_R7_1_I3_1",
+      "\\A VARI \\in aliveNodes : \\A VARJ \\in aliveNodes : (receivedAllAcks(VARJ) /\\ nodeRcvedAcks = nodeRcvedAcks) \\/ (~(VARI \\in nodeRcvedAcks[VARJ]) \\/ (~(nodeState[VARJ] = \"replay\")))",
+      "(receivedAllAcks(VARJ) /\\ nodeRcvedAcks = nodeRcvedAcks) \\/ (~(VARI \\in nodeRcvedAcks[VARJ]) \\/ (~(nodeState[VARJ] = \"replay\")))"
+    ],
+    [
+      "Inv29747_R7_1_I4_2",
+      "\\A VARI \\in aliveNodes : \\A VARJ \\in aliveNodes : ~(VARI \\in nodeRcvedAcks[VARJ]) \\/ (~(VARJ \\in nodeRcvedAcks[VARI]) \\/ (~(nodeState[VARI] = \"write\") \\/ (~(nodeState[VARJ] \\in {\"write\", \"replay\"}))))",
+      "~(VARI \\in nodeRcvedAcks[VARJ]) \\/ (~(VARJ \\in nodeRcvedAcks[VARI]) \\/ (~(nodeState[VARI] = \"write\") \\/ (~(nodeState[VARJ] \\in {\"write\", \"replay\"}))))"
+    ],
+    [
+      "Inv30416_R9_0_I3_0",
+      "\\A VARI \\in aliveNodes : \\A VARJ \\in aliveNodes : ~(nodeState[VARI] = \"replay\") \\/ (~(nodeState[VARJ] = \"write\") \\/ (~(nodeTS[VARI] = nodeTS[VARJ])))",
+      "~(nodeState[VARI] = \"replay\") \\/ (~(nodeState[VARJ] = \"write\") \\/ (~(nodeTS[VARI] = nodeTS[VARJ])))"
+    ],
+    [
+      "Inv3098_R0_1_I3_0",
+      "\\A VARI \\in aliveNodes : \\A VARJ \\in aliveNodes : (greaterOrEqualTS(nodeTS[VARI].version, nodeTS[VARI].tieBreaker, nodeTS[VARJ].version, nodeTS[VARJ].tieBreaker)) \\/ (~(nodeState[VARJ] = \"replay\")) \\/ (~(VARI \\in nodeRcvedAcks[VARJ]))",
+      "(greaterOrEqualTS(nodeTS[VARI].version, nodeTS[VARI].tieBreaker, nodeTS[VARJ].version, nodeTS[VARJ].tieBreaker)) \\/ (~(nodeState[VARJ] = \"replay\")) \\/ (~(VARI \\in nodeRcvedAcks[VARJ]))"
+    ]
+  ],
+  "roundi": 0
+}
