@@ -25,6 +25,8 @@
         "nodeTS[VARI].version > nodeTS[VARJ].version",
         "nodeTS[VARI].version >= nodeTS[VARJ].version",
         "nodeTS[VARI].version < nodeTS[VARJ].version",
+        "nodeTS[VARI].tieBreaker = VARI",
+        "nodeTS[VARI].tieBreaker = VARJ",
         "nodeTS[VARI].tieBreaker = nodeTS[VARJ].tieBreaker",
         "nodeTS[VARI].tieBreaker < nodeTS[VARJ].tieBreaker",
         "nodeTS[VARI].tieBreaker > nodeTS[VARJ].tieBreaker",
