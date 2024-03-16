@@ -3484,7 +3484,8 @@ class InductiveInvGen():
                 # if len(cti_action_lemmas_with_grammars) == 0:
                 if len(cti_action_invs_found) == 0:
                     print("No more current outstanding CTI lemma actions with local grammars.")
-                    return
+                    self.proof_graph["nodes"][curr_obligation]["discharged"] = True
+                    break
 
                 # k_cti_lemma_action = random.choice(cti_action_lemmas_with_grammars)
                 k_cti_lemma_action = cti_action_invs_found[0]
