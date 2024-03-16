@@ -1,6 +1,5 @@
 {
     "preds"  :  [
-        "nodeState[VARI] = nodeState[VARJ]",
         "nodeState[VARI] = \"valid\"",
         "nodeState[VARI] = \"invalid\"",
         "nodeState[VARI] = \"invalid_write\"",
