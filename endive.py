@@ -3536,7 +3536,7 @@ class InductiveInvGen():
                 # Optional CTI action filter.
                 # action_filter = ["HRcvValAction", "HSendValsAction", "HWriteAction", "HRcvInvAction", "HRcvInvNewerAction"]
                 # hermes action filter.
-                if self.action_filter is not None
+                if self.action_filter is not None:
                     # self.action_filter = [
                     #     "HRcvValAction", 
                     #     "HSendValsAction"
