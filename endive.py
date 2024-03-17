@@ -1880,9 +1880,9 @@ class InductiveInvGen():
                 self.state_projection_cache[tuple(sorted(cache_states_with_ignored_vars))] = True
         else:
             logging.info(f"State projection cache for slice {cache_states_with_ignored_vars} was already computed.")
-        logging.info(f"state projection cache (var slices):")
-        for c in self.state_projection_cache:
-            logging.info([s for s in self.state_vars if s not in c])
+        logging.info(f"state projection cache has {len(self.state_projection_cache)} var slices.")
+        # for c in self.state_projection_cache:
+            # logging.info([s for s in self.state_vars if s not in c])
         self.end_timing_state_caching()
 
     def eliminate_ctis(self, orig_k_ctis, num_invs, roundi, subroundi=None, preds=None, preds_alt=[], 
