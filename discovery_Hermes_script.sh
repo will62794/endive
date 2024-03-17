@@ -15,4 +15,5 @@ srun python3 endive.py --spec benchmarks/Hermes \
     --debug --target_sample_time_limit_ms 10000 --target_sample_states 10000 \
     --opt_quant_minimize --k_cti_induction_depth 1 --ninvs 40000 --max_num_ctis_per_round 1000 \
     --auto_lemma_action_decomposition --save_dot --max_num_conjuncts_per_round 16 --niters 4 --override_num_cti_workers 12 \
-    --enable_partitioned_state_caching --proof_tree_mode --nrounds 45 --persistent --tlc_jar tla2tools.jar | tee logout
+    --enable_partitioned_state_caching --proof_tree_mode --nrounds 45 --persistent --tlc_jar tla2tools.jar \
+    --action_filter "HRcvValAction,HSendValsAction"

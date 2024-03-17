@@ -13,8 +13,5 @@ scp -O $scriptname neudiscovery:/home/schultz.w
 echo "Launching the script"
 ssh neudiscovery "sbatch $scriptname"
 
-# List all my running jobs on Discovery cluster.
+# Now list the running jobs on Discovery cluster.
 ssh neudiscovery "squeue -u schultz.w"
-
-# Cancel a job on Discovery cluster.
-# ssh neudiscovery "scancel <JOBID>"
