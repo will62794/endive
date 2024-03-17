@@ -6,7 +6,7 @@
 scriptname="discovery_Hermes_script.sh"
 
 # Copy the batch script to the Discovery cluster.
-echo "Copying script $scriptname to Discovery cluster..."
+echo "Copying script '$scriptname' to Discovery cluster..."
 scp -O $scriptname neudiscovery:/home/schultz.w
 
 # Launch the script.
