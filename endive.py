@@ -784,7 +784,7 @@ class InductiveInvGen():
         violated_invs = mc.runtlc_check_violated_invariants(
                                 invcheck_spec_name, 
                                 config=invcheck_cfg_filename, 
-                                tlc_workers=self.tlc_workers, 
+                                tlc_workers=tlc_workers, 
                                 cwd=workdir,
                                 java=self.java_exe,
                                 tlcjar = TLC_JAR,
