@@ -1921,6 +1921,7 @@ class InductiveInvGen():
         quant_inv_fn = self.quant_inv
 
         conjuncts_added_in_round = []
+        conjuncts_added_in_round_ctis_eliminated = []
 
         iteration = 1
         uniqid = 0
@@ -2083,8 +2084,8 @@ class InductiveInvGen():
                         if c[0] in defs:
                             conjunct_vars = set(self.spec_obj_with_lemmas.get_vars_in_def(c[0])[0])
                             var_slice_set = set(var_slice)
-                            print("conjunct_vars", c[0], conjunct_vars)
-                            print("var_slice", var_slice_set)
+                            # print("conjunct_vars", c[0], conjunct_vars)
+                            # print("var_slice", var_slice_set)
                             if set(conjunct_vars).issubset(var_slice_set):
                                 logging.info(f"Adding strengthening conjunct {c} to invs since it is in the var slice.")
                                 invs.add(c[2])
@@ -2192,14 +2193,14 @@ class InductiveInvGen():
                     main_invs_to_check = [(ind, inv) for ind,inv in enumerate(invs)]
 
                     # Don't bother doing this partitioned caching for tiny numbers of conjuncts.
-                    LARGE_PRED_GROUP_COUNT = 800 # don't bother with the overhead of this except for relatively large predicate groups.
+                    LARGE_PRED_GROUP_COUNT = 200 # don't bother with the overhead of this except for relatively large predicate groups.
                     max_pred_group_count = pred_var_counts_tups[0][0]
                     if self.enable_partitioned_state_caching and min_conjs > 1:
                         logging.info(f"Partitioned property checking enabled for projection caching.")
                         # TODO: Consider enabling this and/or computing more of these cached state projections 
                         # upfront.
-                        top_k = 8
-                        for p in pred_var_counts_tups[:top_k]:
+                        # top_k = 14
+                        for p in pred_var_counts_tups[:]:
                             # print(p)
                             if p[0] < LARGE_PRED_GROUP_COUNT:
                                 # If we reached a group that is too small, we stop, even if we haven't dont all top K.
@@ -2482,19 +2483,64 @@ class InductiveInvGen():
             #
             # Check CTI elimination for each invariant.
             #
+            # eliminated_ctis = set()
 
             logging.info(f"Checking {len(sat_invs)} satisfied invariants for CTI elimination")
+
+            # Clear out strengthening conjuncts added in this round, so we can re-compute best CTI elimination.
+            # for i in range(len(conjuncts_added_in_round)):
+                # self.strengthening_conjuncts.pop()
+
+            # conjuncts_added_in_this_round = []
+            # conjuncts_added_in_this_round_ctis_eliminated = []
+
             for i in range(len(sorted_invs)):
+
                 # Sort the remaining invariants by the number of new CTIs they eliminate.
+
+                # Re-select conjuncts from scratch, considering existing set of added conjuncts this round as well.
+
+                new_inv_cands = [(iv, len(cti_states_eliminated_by_invs[inv] - eliminated_ctis)) for iv in sorted_invs]
+                existing_inv_cands = [("EXISTING_"+str(ind), len(conjuncts_added_in_round_ctis_eliminated[ind] - eliminated_ctis)) for ind,iv in enumerate(conjuncts_added_in_round)]
+
+                # sorted_invs = sorted(new_inv_cands + existing_inv_cands, key = lambda x: x[1], reverse=True)
+                # sorted_invs = sorted(new_inv_cands, key = lambda x: x[1], reverse=True)
+                # sorted_invs = [x[0] for x in sorted_invs]
+
                 compare_fn = lambda inv: (len(cti_states_eliminated_by_invs[inv] - eliminated_ctis), -len(get_invexp_cost(inv)))
                 sorted_invs = sorted(sorted_invs, reverse=True, key=compare_fn)
+
+                
+                # If there is some new lemma that eliminates strictly more CTIs than any existing lemma, then we should prefer that instead.
+                # compare_fn_all_ctis = lambda inv: (len(cti_states_eliminated_by_invs[inv]), -len(get_invexp_cost(inv)))
+                # sorted_invs_all_ctis = sorted(sorted_invs, reverse=True, key=compare_fn_all_ctis)
+                # for s in sorted_invs_all_ctis[:10]:
+                #     print("new ctis eliminated by cand:", s, len(cti_states_eliminated_by_invs[s]))
+                # print("CTIs already eliminated")
+                # for ind,prev_conj in enumerate(conjuncts_added_in_round):
+                #     # print(prev_conj, len(conjuncts_added_in_round_ctis_eliminated[ind]))
+
+                #     top_s = sorted_invs_all_ctis[0]
+                #     prev_eliminated = conjuncts_added_in_round_ctis_eliminated[ind]
+                #     subsumes = cti_states_eliminated_by_invs[top_s].issuperset(prev_eliminated)
+                #     logging.info(f"{top_s} subsumes existing conjunct {prev_conj}: {subsumes}")
+
+                    
                 next_inv = sorted_invs.pop(0)
 
-                invi = int(next_inv.replace("Inv",""))
-                invname = "Inv%d" % invi
-                invexp = quant_inv_fn(orig_invs_sorted[invi])
+                if "EXISTING" not in next_inv:
+                    invi = int(next_inv.replace("Inv",""))
+                    invname = "Inv%d" % invi
+                    invexp = quant_inv_fn(orig_invs_sorted[invi])
+                    new_ctis_eliminated = (cti_states_eliminated_by_invs[next_inv] - eliminated_ctis)
+                    all_ctis_eliminated = (cti_states_eliminated_by_invs[next_inv])
+                else:
+                    ind =  int(next_inv.split("_")[1])
+                    invname = f"Inv_EXISTING_{ind}" 
+                    invexp = conjuncts_added_in_round[ind][1]
+                    new_ctis_eliminated = (conjuncts_added_in_round_ctis_eliminated[ind] - eliminated_ctis)
+                    all_ctis_eliminated = conjuncts_added_in_round_ctis_eliminated[ind]
 
-                new_ctis_eliminated = (cti_states_eliminated_by_invs[next_inv] - eliminated_ctis)
                 cti_states_eliminated_in_iter += len(new_ctis_eliminated)
 
                 if len(conjuncts_added_in_round) >= self.max_num_conjuncts_per_round and num_ctis_remaining > 0:
@@ -2507,8 +2553,19 @@ class InductiveInvGen():
                         # print(cti_table[cti].getActionName())
                     chosen_invs.append(next_inv)
                     eliminated_ctis = eliminated_ctis.union(new_ctis_eliminated)
-                    conjuncts_added_in_round.append(next_inv)
+                    conjuncts_added_in_round.append((next_inv, invexp))
+                    # conjuncts_added_in_this_round.append((next_inv, invexp))
+                    # conjuncts_added_in_round_ctis_eliminated.append(cti_states_eliminated_by_invs[next_inv])
+                    conjuncts_added_in_round_ctis_eliminated.append(all_ctis_eliminated)
+                    # conjuncts_added_in_this_round_ctis_eliminated.append(all_ctis_eliminated)
                     num_ctis_remaining = len(list(cti_table.keys()))-len(eliminated_ctis)
+
+                    # Check to see if this chosen invariant subsumes any existing chosen invariant i.e.
+                    # it eliminates a superset of states eliminated by a previous chosen invariant.
+                    # for ind,prev_conj in enumerate(conjuncts_added_in_round):
+                    #     prev_eliminated = conjuncts_added_in_round_ctis_eliminated[ind]
+                    #     subsumes = cti_states_eliminated_by_invs[next_inv].issuperset(prev_eliminated)
+                    #     logging.info(f"{next_inv} subsumes existing conjunct {prev_conj}: {subsumes}")
 
                     if len(chosen_invs) >= self.max_num_conjuncts_per_round:
                         logging.info(f"Moving on since reached max num conjuncts per round: {self.max_num_conjuncts_per_round}")
@@ -2520,9 +2577,14 @@ class InductiveInvGen():
             if len(chosen_invs):
                 logging.info("*** New strengthening conjuncts *** ")
                 for inv in chosen_invs:
-                    invi = int(inv.replace("Inv",""))
-                    unquant_invexp = sorted(invs)[invi]
-                    invexp = quant_inv_fn(unquant_invexp)
+                    if "EXISTING" in inv:
+                        ind = int(inv.split("_")[1])
+                        invexp = conjuncts_added_in_round[ind][1]
+                        # invexp = quant_inv_fn(unquant_invexp)
+                    else:
+                        invi = int(inv.replace("Inv",""))
+                        unquant_invexp = sorted(invs)[invi]
+                        invexp = quant_inv_fn(unquant_invexp)
                 
                     inv_suffix = ""
                     if append_inv_round_id:
@@ -2597,12 +2659,16 @@ class InductiveInvGen():
                     # print "CTIs eliminated by this invariant: %d" % len(cti_states_eliminated_by_invs[inv])
                 # Re-run the iteration if new conjuncts were discovered.
                 # Don't re-run iterations where max_conjs=1, since they are small and quick.
+                # TODO: Deal with this in the face of conjunct set re-computation on every iteration.
                 if self.rerun_iterations and max_conjs > 1:
                     iteration -= 1
 
             if len(conjuncts_added_in_round) >= self.max_num_conjuncts_per_round and num_ctis_remaining > 0:
                 logging.info(f"Exiting round since reached max num conjuncts per round: {self.max_num_conjuncts_per_round}")
                 return None
+            
+            # conjuncts_added_in_round = conjuncts_added_in_this_round
+            # conjuncts_added_in_round_ctis_eliminated = conjuncts_added_in_this_round_ctis_eliminated
 
             num_ctis_remaining = len(list(cti_table.keys()))-len(eliminated_ctis)
             num_orig_ctis = len(list(cti_table.keys()))
