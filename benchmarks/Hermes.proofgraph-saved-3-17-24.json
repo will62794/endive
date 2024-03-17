@@ -1,0 +1,2944 @@
+{
+  "proof_graph": {
+    "edges": [
+      [
+        "Safety_HRcvValAction",
+        "Safety"
+      ],
+      [
+        "Inv45_R0_0_I1_0",
+        "Safety_HRcvValAction"
+      ],
+      [
+        "Safety_HRcvValAction",
+        "Safety"
+      ],
+      [
+        "Inv532_R0_0_I2_1",
+        "Safety_HRcvValAction"
+      ],
+      [
+        "Safety_HSendValsAction",
+        "Safety"
+      ],
+      [
+        "Inv532_R0_0_I2_1",
+        "Safety_HSendValsAction"
+      ],
+      [
+        "Safety_HSendValsAction",
+        "Safety"
+      ],
+      [
+        "Inv1236_R0_1_I2_0",
+        "Safety_HSendValsAction"
+      ],
+      [
+        "Safety_HSendValsAction",
+        "Safety"
+      ],
+      [
+        "Inv2082_R0_1_I2_1",
+        "Safety_HSendValsAction"
+      ],
+      [
+        "Safety_HSendValsAction",
+        "Safety"
+      ],
+      [
+        "Inv1697_R0_1_I2_2",
+        "Safety_HSendValsAction"
+      ],
+      [
+        "Safety_HSendValsAction",
+        "Safety"
+      ],
+      [
+        "Inv2896_R0_1_I3_3",
+        "Safety_HSendValsAction"
+      ],
+      [
+        "Safety_HSendValsAction",
+        "Safety"
+      ],
+      [
+        "Inv22583_R0_1_I3_4",
+        "Safety_HSendValsAction"
+      ],
+      [
+        "Inv45_R0_0_I1_0_HSendValsAction",
+        "Inv45_R0_0_I1_0"
+      ],
+      [
+        "Inv1236_R0_1_I2_0",
+        "Inv45_R0_0_I1_0_HSendValsAction"
+      ],
+      [
+        "Inv45_R0_0_I1_0_HSendValsAction",
+        "Inv45_R0_0_I1_0"
+      ],
+      [
+        "Inv2082_R0_1_I2_1",
+        "Inv45_R0_0_I1_0_HSendValsAction"
+      ],
+      [
+        "Inv45_R0_0_I1_0_HSendValsAction",
+        "Inv45_R0_0_I1_0"
+      ],
+      [
+        "Inv1697_R0_1_I2_2",
+        "Inv45_R0_0_I1_0_HSendValsAction"
+      ],
+      [
+        "Inv45_R0_0_I1_0_HSendValsAction",
+        "Inv45_R0_0_I1_0"
+      ],
+      [
+        "Inv2892_R1_0_I2_0",
+        "Inv45_R0_0_I1_0_HSendValsAction"
+      ],
+      [
+        "Inv45_R0_0_I1_0_HSendValsAction",
+        "Inv45_R0_0_I1_0"
+      ],
+      [
+        "Inv2726_R1_0_I2_1",
+        "Inv45_R0_0_I1_0_HSendValsAction"
+      ],
+      [
+        "Inv45_R0_0_I1_0_HSendValsAction",
+        "Inv45_R0_0_I1_0"
+      ],
+      [
+        "Inv9819_R1_0_I3_2",
+        "Inv45_R0_0_I1_0_HSendValsAction"
+      ],
+      [
+        "Inv532_R0_0_I2_1_HRcvValAction",
+        "Inv532_R0_0_I2_1"
+      ],
+      [
+        "Inv45_R0_0_I1_0",
+        "Inv532_R0_0_I2_1_HRcvValAction"
+      ],
+      [
+        "Inv532_R0_0_I2_1_HSendValsAction",
+        "Inv532_R0_0_I2_1"
+      ],
+      [
+        "Inv1236_R0_1_I2_0",
+        "Inv532_R0_0_I2_1_HSendValsAction"
+      ],
+      [
+        "Inv532_R0_0_I2_1_HSendValsAction",
+        "Inv532_R0_0_I2_1"
+      ],
+      [
+        "Inv2082_R0_1_I2_1",
+        "Inv532_R0_0_I2_1_HSendValsAction"
+      ],
+      [
+        "Inv532_R0_0_I2_1_HSendValsAction",
+        "Inv532_R0_0_I2_1"
+      ],
+      [
+        "Inv1697_R0_1_I2_2",
+        "Inv532_R0_0_I2_1_HSendValsAction"
+      ],
+      [
+        "Inv532_R0_0_I2_1_HSendValsAction",
+        "Inv532_R0_0_I2_1"
+      ],
+      [
+        "Inv2892_R1_0_I2_0",
+        "Inv532_R0_0_I2_1_HSendValsAction"
+      ],
+      [
+        "Inv532_R0_0_I2_1_HSendValsAction",
+        "Inv532_R0_0_I2_1"
+      ],
+      [
+        "Inv3205_R2_1_I3_0",
+        "Inv532_R0_0_I2_1_HSendValsAction"
+      ],
+      [
+        "Inv2896_R0_1_I3_3_HCoordWriteReplayAction",
+        "Inv2896_R0_1_I3_3"
+      ],
+      [
+        "Inv1236_R0_1_I2_0",
+        "Inv2896_R0_1_I3_3_HCoordWriteReplayAction"
+      ],
+      [
+        "Inv2896_R0_1_I3_3_HCoordWriteReplayAction",
+        "Inv2896_R0_1_I3_3"
+      ],
+      [
+        "Inv532_R0_0_I2_1",
+        "Inv2896_R0_1_I3_3_HCoordWriteReplayAction"
+      ],
+      [
+        "Inv2896_R0_1_I3_3_HCoordWriteReplayAction",
+        "Inv2896_R0_1_I3_3"
+      ],
+      [
+        "Inv1768_R6_0_I2_0",
+        "Inv2896_R0_1_I3_3_HCoordWriteReplayAction"
+      ],
+      [
+        "Inv2896_R0_1_I3_3_HCoordWriteReplayAction",
+        "Inv2896_R0_1_I3_3"
+      ],
+      [
+        "Inv1818_R6_0_I2_1",
+        "Inv2896_R0_1_I3_3_HCoordWriteReplayAction"
+      ],
+      [
+        "Inv2896_R0_1_I3_3_HCoordWriteReplayAction",
+        "Inv2896_R0_1_I3_3"
+      ],
+      [
+        "Inv23272_R6_0_I3_2",
+        "Inv2896_R0_1_I3_3_HCoordWriteReplayAction"
+      ],
+      [
+        "Inv2896_R0_1_I3_3_HRcvAckAction",
+        "Inv2896_R0_1_I3_3"
+      ],
+      [
+        "Inv52_R6_1_I1_0",
+        "Inv2896_R0_1_I3_3_HRcvAckAction"
+      ],
+      [
+        "Inv2896_R0_1_I3_3_HRcvAckAction",
+        "Inv2896_R0_1_I3_3"
+      ],
+      [
+        "Inv3811_R6_1_I2_1",
+        "Inv2896_R0_1_I3_3_HRcvAckAction"
+      ],
+      [
+        "Inv2896_R0_1_I3_3_HRcvAckAction",
+        "Inv2896_R0_1_I3_3"
+      ],
+      [
+        "Inv9735_R6_1_I4_2",
+        "Inv2896_R0_1_I3_3_HRcvAckAction"
+      ],
+      [
+        "Inv22583_R0_1_I3_4_HRcvValAction",
+        "Inv22583_R0_1_I3_4"
+      ],
+      [
+        "Inv45_R0_0_I1_0",
+        "Inv22583_R0_1_I3_4_HRcvValAction"
+      ],
+      [
+        "Inv22583_R0_1_I3_4_HRcvValAction",
+        "Inv22583_R0_1_I3_4"
+      ],
+      [
+        "Inv1236_R0_1_I2_0",
+        "Inv22583_R0_1_I3_4_HRcvValAction"
+      ],
+      [
+        "Inv22583_R0_1_I3_4_HRcvValAction",
+        "Inv22583_R0_1_I3_4"
+      ],
+      [
+        "Inv1697_R0_1_I2_2",
+        "Inv22583_R0_1_I3_4_HRcvValAction"
+      ],
+      [
+        "Inv22583_R0_1_I3_4_HRcvValAction",
+        "Inv22583_R0_1_I3_4"
+      ],
+      [
+        "Inv10078_R7_0_I3_0",
+        "Inv22583_R0_1_I3_4_HRcvValAction"
+      ],
+      [
+        "Inv22583_R0_1_I3_4_HSendValsAction",
+        "Inv22583_R0_1_I3_4"
+      ],
+      [
+        "Inv8819_R7_1_I3_0",
+        "Inv22583_R0_1_I3_4_HSendValsAction"
+      ],
+      [
+        "Inv22583_R0_1_I3_4_HSendValsAction",
+        "Inv22583_R0_1_I3_4"
+      ],
+      [
+        "Inv8732_R7_1_I3_1",
+        "Inv22583_R0_1_I3_4_HSendValsAction"
+      ],
+      [
+        "Inv22583_R0_1_I3_4_HSendValsAction",
+        "Inv22583_R0_1_I3_4"
+      ],
+      [
+        "Inv30152_R7_1_I4_2",
+        "Inv22583_R0_1_I3_4_HSendValsAction"
+      ],
+      [
+        "Inv2726_R1_0_I2_1_HSendValsAction",
+        "Inv2726_R1_0_I2_1"
+      ],
+      [
+        "Inv45_R0_0_I1_0",
+        "Inv2726_R1_0_I2_1_HSendValsAction"
+      ],
+      [
+        "Inv2726_R1_0_I2_1_HSendValsAction",
+        "Inv2726_R1_0_I2_1"
+      ],
+      [
+        "Inv1236_R0_1_I2_0",
+        "Inv2726_R1_0_I2_1_HSendValsAction"
+      ],
+      [
+        "Inv2726_R1_0_I2_1_HSendValsAction",
+        "Inv2726_R1_0_I2_1"
+      ],
+      [
+        "Inv30445_R9_0_I3_0",
+        "Inv2726_R1_0_I2_1_HSendValsAction"
+      ],
+      [
+        "Inv2726_R1_0_I2_1_HWriteAction",
+        "Inv2726_R1_0_I2_1"
+      ],
+      [
+        "Inv45_R0_0_I1_0",
+        "Inv2726_R1_0_I2_1_HWriteAction"
+      ],
+      [
+        "Inv9819_R1_0_I3_2_HRcvAckAction",
+        "Inv9819_R1_0_I3_2"
+      ],
+      [
+        "Inv52_R6_1_I1_0",
+        "Inv9819_R1_0_I3_2_HRcvAckAction"
+      ],
+      [
+        "Inv9819_R1_0_I3_2_HRcvAckAction",
+        "Inv9819_R1_0_I3_2"
+      ],
+      [
+        "Inv3811_R6_1_I2_1",
+        "Inv9819_R1_0_I3_2_HRcvAckAction"
+      ],
+      [
+        "Inv9819_R1_0_I3_2_HRcvAckAction",
+        "Inv9819_R1_0_I3_2"
+      ],
+      [
+        "Inv2082_R0_1_I2_1",
+        "Inv9819_R1_0_I3_2_HRcvAckAction"
+      ],
+      [
+        "Inv3205_R2_1_I3_0_HRcvAckAction",
+        "Inv3205_R2_1_I3_0"
+      ],
+      [
+        "Inv52_R6_1_I1_0",
+        "Inv3205_R2_1_I3_0_HRcvAckAction"
+      ],
+      [
+        "Inv3205_R2_1_I3_0_HRcvAckAction",
+        "Inv3205_R2_1_I3_0"
+      ],
+      [
+        "Inv3811_R6_1_I2_1",
+        "Inv3205_R2_1_I3_0_HRcvAckAction"
+      ],
+      [
+        "Inv1818_R6_0_I2_1_NodeFailureAction",
+        "Inv1818_R6_0_I2_1"
+      ],
+      [
+        "Inv1768_R6_0_I2_0",
+        "Inv1818_R6_0_I2_1_NodeFailureAction"
+      ],
+      [
+        "Inv1818_R6_0_I2_1_NodeFailureAction",
+        "Inv1818_R6_0_I2_1"
+      ],
+      [
+        "Inv8221_R13_0_I3_0",
+        "Inv1818_R6_0_I2_1_NodeFailureAction"
+      ],
+      [
+        "Inv1818_R6_0_I2_1_NodeFailureAction",
+        "Inv1818_R6_0_I2_1"
+      ],
+      [
+        "Inv8240_R13_0_I3_1",
+        "Inv1818_R6_0_I2_1_NodeFailureAction"
+      ],
+      [
+        "Inv23272_R6_0_I3_2_HRcvAckAction",
+        "Inv23272_R6_0_I3_2"
+      ],
+      [
+        "Inv1236_R0_1_I2_0",
+        "Inv23272_R6_0_I3_2_HRcvAckAction"
+      ],
+      [
+        "Inv9735_R6_1_I4_2_HRcvInvAction",
+        "Inv9735_R6_1_I4_2"
+      ],
+      [
+        "Inv52_R6_1_I1_0",
+        "Inv9735_R6_1_I4_2_HRcvInvAction"
+      ],
+      [
+        "Inv9735_R6_1_I4_2_HRcvInvAction",
+        "Inv9735_R6_1_I4_2"
+      ],
+      [
+        "Inv66_R2_0_I1_0",
+        "Inv9735_R6_1_I4_2_HRcvInvAction"
+      ],
+      [
+        "Inv9735_R6_1_I4_2_HRcvInvAction",
+        "Inv9735_R6_1_I4_2"
+      ],
+      [
+        "Inv5308_R2_0_I2_1",
+        "Inv9735_R6_1_I4_2_HRcvInvAction"
+      ],
+      [
+        "Inv9735_R6_1_I4_2_HRcvInvAction",
+        "Inv9735_R6_1_I4_2"
+      ],
+      [
+        "Inv1236_R0_1_I2_0",
+        "Inv9735_R6_1_I4_2_HRcvInvAction"
+      ],
+      [
+        "Inv9735_R6_1_I4_2_HRcvInvAction",
+        "Inv9735_R6_1_I4_2"
+      ],
+      [
+        "Inv3811_R6_1_I2_1",
+        "Inv9735_R6_1_I4_2_HRcvInvAction"
+      ],
+      [
+        "Inv9735_R6_1_I4_2_HRcvInvAction",
+        "Inv9735_R6_1_I4_2"
+      ],
+      [
+        "Inv2082_R0_1_I2_1",
+        "Inv9735_R6_1_I4_2_HRcvInvAction"
+      ],
+      [
+        "Inv9735_R6_1_I4_2_HRcvInvAction",
+        "Inv9735_R6_1_I4_2"
+      ],
+      [
+        "Inv10247_R2_0_I3_2",
+        "Inv9735_R6_1_I4_2_HRcvInvAction"
+      ],
+      [
+        "Inv10078_R7_0_I3_0_HRcvAckAction",
+        "Inv10078_R7_0_I3_0"
+      ],
+      [
+        "Inv52_R6_1_I1_0",
+        "Inv10078_R7_0_I3_0_HRcvAckAction"
+      ],
+      [
+        "Inv10078_R7_0_I3_0_HRcvAckAction",
+        "Inv10078_R7_0_I3_0"
+      ],
+      [
+        "Inv2892_R1_0_I2_0",
+        "Inv10078_R7_0_I3_0_HRcvAckAction"
+      ],
+      [
+        "Inv10078_R7_0_I3_0_HRcvValAction",
+        "Inv10078_R7_0_I3_0"
+      ],
+      [
+        "Inv45_R0_0_I1_0",
+        "Inv10078_R7_0_I3_0_HRcvValAction"
+      ],
+      [
+        "Inv10078_R7_0_I3_0_HSendValsAction",
+        "Inv10078_R7_0_I3_0"
+      ],
+      [
+        "Inv2082_R0_1_I2_1",
+        "Inv10078_R7_0_I3_0_HSendValsAction"
+      ],
+      [
+        "Inv10078_R7_0_I3_0_HSendValsAction",
+        "Inv10078_R7_0_I3_0"
+      ],
+      [
+        "Inv1236_R0_1_I2_0",
+        "Inv10078_R7_0_I3_0_HSendValsAction"
+      ],
+      [
+        "Inv10078_R7_0_I3_0_HSendValsAction",
+        "Inv10078_R7_0_I3_0"
+      ],
+      [
+        "Inv2892_R1_0_I2_0",
+        "Inv10078_R7_0_I3_0_HSendValsAction"
+      ],
+      [
+        "Inv10078_R7_0_I3_0_HSendValsAction",
+        "Inv10078_R7_0_I3_0"
+      ],
+      [
+        "Inv1697_R0_1_I2_2",
+        "Inv10078_R7_0_I3_0_HSendValsAction"
+      ],
+      [
+        "Inv10078_R7_0_I3_0_HSendValsAction",
+        "Inv10078_R7_0_I3_0"
+      ],
+      [
+        "Inv1503_R3_2_I2_0",
+        "Inv10078_R7_0_I3_0_HSendValsAction"
+      ],
+      [
+        "Inv10078_R7_0_I3_0_HSendValsAction",
+        "Inv10078_R7_0_I3_0"
+      ],
+      [
+        "Inv2896_R0_1_I3_3",
+        "Inv10078_R7_0_I3_0_HSendValsAction"
+      ],
+      [
+        "Inv8819_R7_1_I3_0_HCoordWriteReplayAction",
+        "Inv8819_R7_1_I3_0"
+      ],
+      [
+        "Inv1818_R6_0_I2_1",
+        "Inv8819_R7_1_I3_0_HCoordWriteReplayAction"
+      ],
+      [
+        "Inv8819_R7_1_I3_0_HCoordWriteReplayAction",
+        "Inv8819_R7_1_I3_0"
+      ],
+      [
+        "Inv1768_R6_0_I2_0",
+        "Inv8819_R7_1_I3_0_HCoordWriteReplayAction"
+      ],
+      [
+        "Inv8819_R7_1_I3_0_HCoordWriteReplayAction",
+        "Inv8819_R7_1_I3_0"
+      ],
+      [
+        "Inv12797_R4_0_I3_0",
+        "Inv8819_R7_1_I3_0_HCoordWriteReplayAction"
+      ],
+      [
+        "Inv8819_R7_1_I3_0_HRcvAckAction",
+        "Inv8819_R7_1_I3_0"
+      ],
+      [
+        "Inv20394_R4_1_I3_0",
+        "Inv8819_R7_1_I3_0_HRcvAckAction"
+      ],
+      [
+        "Inv8819_R7_1_I3_0_HRcvAckAction",
+        "Inv8819_R7_1_I3_0"
+      ],
+      [
+        "Inv19215_R4_1_I3_1",
+        "Inv8819_R7_1_I3_0_HRcvAckAction"
+      ],
+      [
+        "Inv8732_R7_1_I3_1_HCoordWriteReplayAction",
+        "Inv8732_R7_1_I3_1"
+      ],
+      [
+        "Inv1768_R6_0_I2_0",
+        "Inv8732_R7_1_I3_1_HCoordWriteReplayAction"
+      ],
+      [
+        "Inv8732_R7_1_I3_1_HCoordWriteReplayAction",
+        "Inv8732_R7_1_I3_1"
+      ],
+      [
+        "Inv1818_R6_0_I2_1",
+        "Inv8732_R7_1_I3_1_HCoordWriteReplayAction"
+      ],
+      [
+        "Inv8732_R7_1_I3_1_HCoordWriteReplayAction",
+        "Inv8732_R7_1_I3_1"
+      ],
+      [
+        "Inv12658_R5_0_I3_0",
+        "Inv8732_R7_1_I3_1_HCoordWriteReplayAction"
+      ],
+      [
+        "Inv8732_R7_1_I3_1_HRcvAckAction",
+        "Inv8732_R7_1_I3_1"
+      ],
+      [
+        "Inv52_R6_1_I1_0",
+        "Inv8732_R7_1_I3_1_HRcvAckAction"
+      ],
+      [
+        "Inv8732_R7_1_I3_1_HRcvAckAction",
+        "Inv8732_R7_1_I3_1"
+      ],
+      [
+        "Inv20394_R4_1_I3_0",
+        "Inv8732_R7_1_I3_1_HRcvAckAction"
+      ],
+      [
+        "Inv30152_R7_1_I4_2_HRcvAckAction",
+        "Inv30152_R7_1_I4_2"
+      ],
+      [
+        "Inv21164_R6_0_I3_0",
+        "Inv30152_R7_1_I4_2_HRcvAckAction"
+      ],
+      [
+        "Inv30445_R9_0_I3_0_HCoordWriteReplayAction",
+        "Inv30445_R9_0_I3_0"
+      ],
+      [
+        "Inv1236_R0_1_I2_0",
+        "Inv30445_R9_0_I3_0_HCoordWriteReplayAction"
+      ],
+      [
+        "Inv30445_R9_0_I3_0_HFollowerWriteReplayAction",
+        "Inv30445_R9_0_I3_0"
+      ],
+      [
+        "Inv177_R7_1_I2_0",
+        "Inv30445_R9_0_I3_0_HFollowerWriteReplayAction"
+      ],
+      [
+        "Inv30445_R9_0_I3_0_HFollowerWriteReplayAction",
+        "Inv30445_R9_0_I3_0"
+      ],
+      [
+        "Inv259_R7_1_I2_1",
+        "Inv30445_R9_0_I3_0_HFollowerWriteReplayAction"
+      ],
+      [
+        "Inv30445_R9_0_I3_0_HWriteAction",
+        "Inv30445_R9_0_I3_0"
+      ],
+      [
+        "Inv2082_R0_1_I2_1",
+        "Inv30445_R9_0_I3_0_HWriteAction"
+      ],
+      [
+        "Inv10247_R2_0_I3_2_HCoordWriteReplayAction",
+        "Inv10247_R2_0_I3_2"
+      ],
+      [
+        "Inv66_R2_0_I1_0",
+        "Inv10247_R2_0_I3_2_HCoordWriteReplayAction"
+      ],
+      [
+        "Inv10247_R2_0_I3_2_HCoordWriteReplayAction",
+        "Inv10247_R2_0_I3_2"
+      ],
+      [
+        "Inv1236_R0_1_I2_0",
+        "Inv10247_R2_0_I3_2_HCoordWriteReplayAction"
+      ],
+      [
+        "Inv10247_R2_0_I3_2_HCoordWriteReplayAction",
+        "Inv10247_R2_0_I3_2"
+      ],
+      [
+        "Inv1818_R6_0_I2_1",
+        "Inv10247_R2_0_I3_2_HCoordWriteReplayAction"
+      ],
+      [
+        "Inv10247_R2_0_I3_2_HFollowerWriteReplayAction",
+        "Inv10247_R2_0_I3_2"
+      ],
+      [
+        "Inv66_R2_0_I1_0",
+        "Inv10247_R2_0_I3_2_HFollowerWriteReplayAction"
+      ],
+      [
+        "Inv10247_R2_0_I3_2_HFollowerWriteReplayAction",
+        "Inv10247_R2_0_I3_2"
+      ],
+      [
+        "Inv259_R7_1_I2_1",
+        "Inv10247_R2_0_I3_2_HFollowerWriteReplayAction"
+      ],
+      [
+        "Inv10247_R2_0_I3_2_HWriteAction",
+        "Inv10247_R2_0_I3_2"
+      ],
+      [
+        "Inv66_R2_0_I1_0",
+        "Inv10247_R2_0_I3_2_HWriteAction"
+      ],
+      [
+        "Inv10247_R2_0_I3_2_HWriteAction",
+        "Inv10247_R2_0_I3_2"
+      ],
+      [
+        "Inv532_R0_0_I2_1",
+        "Inv10247_R2_0_I3_2_HWriteAction"
+      ],
+      [
+        "Inv10247_R2_0_I3_2_HWriteAction",
+        "Inv10247_R2_0_I3_2"
+      ],
+      [
+        "Inv5308_R2_0_I2_1",
+        "Inv10247_R2_0_I3_2_HWriteAction"
+      ],
+      [
+        "Inv10247_R2_0_I3_2_HWriteAction",
+        "Inv10247_R2_0_I3_2"
+      ],
+      [
+        "Inv1236_R0_1_I2_0",
+        "Inv10247_R2_0_I3_2_HWriteAction"
+      ],
+      [
+        "Inv10247_R2_0_I3_2_HWriteAction",
+        "Inv10247_R2_0_I3_2"
+      ],
+      [
+        "Inv1697_R0_1_I2_2",
+        "Inv10247_R2_0_I3_2_HWriteAction"
+      ],
+      [
+        "Inv10247_R2_0_I3_2_HWriteAction",
+        "Inv10247_R2_0_I3_2"
+      ],
+      [
+        "Inv2892_R1_0_I2_0",
+        "Inv10247_R2_0_I3_2_HWriteAction"
+      ],
+      [
+        "Inv10247_R2_0_I3_2_HWriteAction",
+        "Inv10247_R2_0_I3_2"
+      ],
+      [
+        "Inv23625_R12_2_I3_0",
+        "Inv10247_R2_0_I3_2_HWriteAction"
+      ],
+      [
+        "Inv10247_R2_0_I3_2_HWriteAction",
+        "Inv10247_R2_0_I3_2"
+      ],
+      [
+        "Inv24211_R12_2_I3_1",
+        "Inv10247_R2_0_I3_2_HWriteAction"
+      ],
+      [
+        "Inv1503_R3_2_I2_0_HRcvValAction",
+        "Inv1503_R3_2_I2_0"
+      ],
+      [
+        "Inv45_R0_0_I1_0",
+        "Inv1503_R3_2_I2_0_HRcvValAction"
+      ],
+      [
+        "Inv1503_R3_2_I2_0_HSendValsAction",
+        "Inv1503_R3_2_I2_0"
+      ],
+      [
+        "Inv1236_R0_1_I2_0",
+        "Inv1503_R3_2_I2_0_HSendValsAction"
+      ],
+      [
+        "Inv1503_R3_2_I2_0_HSendValsAction",
+        "Inv1503_R3_2_I2_0"
+      ],
+      [
+        "Inv2082_R0_1_I2_1",
+        "Inv1503_R3_2_I2_0_HSendValsAction"
+      ],
+      [
+        "Inv1503_R3_2_I2_0_HSendValsAction",
+        "Inv1503_R3_2_I2_0"
+      ],
+      [
+        "Inv1697_R0_1_I2_2",
+        "Inv1503_R3_2_I2_0_HSendValsAction"
+      ],
+      [
+        "Inv1503_R3_2_I2_0_HSendValsAction",
+        "Inv1503_R3_2_I2_0"
+      ],
+      [
+        "Inv2892_R1_0_I2_0",
+        "Inv1503_R3_2_I2_0_HSendValsAction"
+      ],
+      [
+        "Inv1503_R3_2_I2_0_HSendValsAction",
+        "Inv1503_R3_2_I2_0"
+      ],
+      [
+        "Inv21647_R13_1_I3_0",
+        "Inv1503_R3_2_I2_0_HSendValsAction"
+      ],
+      [
+        "Inv12797_R4_0_I3_0_HRcvAckAction",
+        "Inv12797_R4_0_I3_0"
+      ],
+      [
+        "Inv52_R6_1_I1_0",
+        "Inv12797_R4_0_I3_0_HRcvAckAction"
+      ],
+      [
+        "Inv12797_R4_0_I3_0_HRcvAckAction",
+        "Inv12797_R4_0_I3_0"
+      ],
+      [
+        "Inv1818_R6_0_I2_1",
+        "Inv12797_R4_0_I3_0_HRcvAckAction"
+      ],
+      [
+        "Inv20394_R4_1_I3_0_HCoordWriteReplayAction",
+        "Inv20394_R4_1_I3_0"
+      ],
+      [
+        "Inv52_R6_1_I1_0",
+        "Inv20394_R4_1_I3_0_HCoordWriteReplayAction"
+      ],
+      [
+        "Inv20394_R4_1_I3_0_HCoordWriteReplayAction",
+        "Inv20394_R4_1_I3_0"
+      ],
+      [
+        "Inv1681_R0_0_I2_0",
+        "Inv20394_R4_1_I3_0_HCoordWriteReplayAction"
+      ],
+      [
+        "Inv20394_R4_1_I3_0_HCoordWriteReplayAction",
+        "Inv20394_R4_1_I3_0"
+      ],
+      [
+        "Inv1236_R0_1_I2_0",
+        "Inv20394_R4_1_I3_0_HCoordWriteReplayAction"
+      ],
+      [
+        "Inv20394_R4_1_I3_0_HCoordWriteReplayAction",
+        "Inv20394_R4_1_I3_0"
+      ],
+      [
+        "Inv3811_R6_1_I2_1",
+        "Inv20394_R4_1_I3_0_HCoordWriteReplayAction"
+      ],
+      [
+        "Inv20394_R4_1_I3_0_HFollowerWriteReplayAction",
+        "Inv20394_R4_1_I3_0"
+      ],
+      [
+        "Inv52_R6_1_I1_0",
+        "Inv20394_R4_1_I3_0_HFollowerWriteReplayAction"
+      ],
+      [
+        "Inv20394_R4_1_I3_0_HFollowerWriteReplayAction",
+        "Inv20394_R4_1_I3_0"
+      ],
+      [
+        "Inv259_R7_1_I2_1",
+        "Inv20394_R4_1_I3_0_HFollowerWriteReplayAction"
+      ],
+      [
+        "Inv20394_R4_1_I3_0_HFollowerWriteReplayAction",
+        "Inv20394_R4_1_I3_0"
+      ],
+      [
+        "Inv3811_R6_1_I2_1",
+        "Inv20394_R4_1_I3_0_HFollowerWriteReplayAction"
+      ],
+      [
+        "Inv20394_R4_1_I3_0_HFollowerWriteReplayAction",
+        "Inv20394_R4_1_I3_0"
+      ],
+      [
+        "Inv1681_R0_0_I2_0",
+        "Inv20394_R4_1_I3_0_HFollowerWriteReplayAction"
+      ],
+      [
+        "Inv20394_R4_1_I3_0_HFollowerWriteReplayAction",
+        "Inv20394_R4_1_I3_0"
+      ],
+      [
+        "Inv177_R7_1_I2_0",
+        "Inv20394_R4_1_I3_0_HFollowerWriteReplayAction"
+      ],
+      [
+        "Inv20394_R4_1_I3_0_HFollowerWriteReplayAction",
+        "Inv20394_R4_1_I3_0"
+      ],
+      [
+        "Inv4179_R0_1_I2_0",
+        "Inv20394_R4_1_I3_0_HFollowerWriteReplayAction"
+      ],
+      [
+        "Inv20394_R4_1_I3_0_HFollowerWriteReplayAction",
+        "Inv20394_R4_1_I3_0"
+      ],
+      [
+        "Inv4235_R0_1_I2_1",
+        "Inv20394_R4_1_I3_0_HFollowerWriteReplayAction"
+      ],
+      [
+        "Inv20394_R4_1_I3_0_HFollowerWriteReplayAction",
+        "Inv20394_R4_1_I3_0"
+      ],
+      [
+        "Inv2672_R0_1_I3_2",
+        "Inv20394_R4_1_I3_0_HFollowerWriteReplayAction"
+      ],
+      [
+        "Inv20394_R4_1_I3_0_HRcvInvAction",
+        "Inv20394_R4_1_I3_0"
+      ],
+      [
+        "Inv52_R6_1_I1_0",
+        "Inv20394_R4_1_I3_0_HRcvInvAction"
+      ],
+      [
+        "Inv20394_R4_1_I3_0_HRcvInvAction",
+        "Inv20394_R4_1_I3_0"
+      ],
+      [
+        "Inv66_R2_0_I1_0",
+        "Inv20394_R4_1_I3_0_HRcvInvAction"
+      ],
+      [
+        "Inv20394_R4_1_I3_0_HRcvInvAction",
+        "Inv20394_R4_1_I3_0"
+      ],
+      [
+        "Inv5311_R0_2_I2_0",
+        "Inv20394_R4_1_I3_0_HRcvInvAction"
+      ],
+      [
+        "Inv20394_R4_1_I3_0_HRcvInvAction",
+        "Inv20394_R4_1_I3_0"
+      ],
+      [
+        "Inv2082_R0_1_I2_1",
+        "Inv20394_R4_1_I3_0_HRcvInvAction"
+      ],
+      [
+        "Inv20394_R4_1_I3_0_HRcvInvAction",
+        "Inv20394_R4_1_I3_0"
+      ],
+      [
+        "Inv2285_R0_2_I2_1",
+        "Inv20394_R4_1_I3_0_HRcvInvAction"
+      ],
+      [
+        "Inv20394_R4_1_I3_0_HRcvInvAction",
+        "Inv20394_R4_1_I3_0"
+      ],
+      [
+        "Inv1236_R0_1_I2_0",
+        "Inv20394_R4_1_I3_0_HRcvInvAction"
+      ],
+      [
+        "Inv20394_R4_1_I3_0_HRcvInvAction",
+        "Inv20394_R4_1_I3_0"
+      ],
+      [
+        "Inv1697_R0_1_I2_2",
+        "Inv20394_R4_1_I3_0_HRcvInvAction"
+      ],
+      [
+        "Inv20394_R4_1_I3_0_HRcvInvAction",
+        "Inv20394_R4_1_I3_0"
+      ],
+      [
+        "Inv2892_R1_0_I2_0",
+        "Inv20394_R4_1_I3_0_HRcvInvAction"
+      ],
+      [
+        "Inv20394_R4_1_I3_0_HRcvInvAction",
+        "Inv20394_R4_1_I3_0"
+      ],
+      [
+        "Inv18602_R0_2_I3_2",
+        "Inv20394_R4_1_I3_0_HRcvInvAction"
+      ],
+      [
+        "Inv20394_R4_1_I3_0_HRcvInvAction",
+        "Inv20394_R4_1_I3_0"
+      ],
+      [
+        "Inv35173_R0_2_I3_3",
+        "Inv20394_R4_1_I3_0_HRcvInvAction"
+      ],
+      [
+        "Inv20394_R4_1_I3_0_NodeFailureAction",
+        "Inv20394_R4_1_I3_0"
+      ],
+      [
+        "Inv52_R6_1_I1_0",
+        "Inv20394_R4_1_I3_0_NodeFailureAction"
+      ],
+      [
+        "Inv19215_R4_1_I3_1_HCoordWriteReplayAction",
+        "Inv19215_R4_1_I3_1"
+      ],
+      [
+        "Inv1768_R6_0_I2_0",
+        "Inv19215_R4_1_I3_1_HCoordWriteReplayAction"
+      ],
+      [
+        "Inv19215_R4_1_I3_1_HCoordWriteReplayAction",
+        "Inv19215_R4_1_I3_1"
+      ],
+      [
+        "Inv1818_R6_0_I2_1",
+        "Inv19215_R4_1_I3_1_HCoordWriteReplayAction"
+      ],
+      [
+        "Inv19215_R4_1_I3_1_HCoordWriteReplayAction",
+        "Inv19215_R4_1_I3_1"
+      ],
+      [
+        "Inv12695_R1_0_I3_0",
+        "Inv19215_R4_1_I3_1_HCoordWriteReplayAction"
+      ],
+      [
+        "Inv19215_R4_1_I3_1_HRcvAckAction",
+        "Inv19215_R4_1_I3_1"
+      ],
+      [
+        "Inv19209_R1_1_I3_0",
+        "Inv19215_R4_1_I3_1_HRcvAckAction"
+      ],
+      [
+        "Inv19215_R4_1_I3_1_HRcvAckAction",
+        "Inv19215_R4_1_I3_1"
+      ],
+      [
+        "Inv21183_R1_1_I3_1",
+        "Inv19215_R4_1_I3_1_HRcvAckAction"
+      ],
+      [
+        "Inv12658_R5_0_I3_0_HRcvAckAction",
+        "Inv12658_R5_0_I3_0"
+      ],
+      [
+        "Inv1768_R6_0_I2_0",
+        "Inv12658_R5_0_I3_0_HRcvAckAction"
+      ],
+      [
+        "Inv21164_R6_0_I3_0_HCoordWriteReplayAction",
+        "Inv21164_R6_0_I3_0"
+      ],
+      [
+        "Inv52_R6_1_I1_0",
+        "Inv21164_R6_0_I3_0_HCoordWriteReplayAction"
+      ],
+      [
+        "Inv21164_R6_0_I3_0_HCoordWriteReplayAction",
+        "Inv21164_R6_0_I3_0"
+      ],
+      [
+        "Inv3811_R6_1_I2_1",
+        "Inv21164_R6_0_I3_0_HCoordWriteReplayAction"
+      ],
+      [
+        "Inv21164_R6_0_I3_0_HFollowerWriteReplayAction",
+        "Inv21164_R6_0_I3_0"
+      ],
+      [
+        "Inv3811_R6_1_I2_1",
+        "Inv21164_R6_0_I3_0_HFollowerWriteReplayAction"
+      ],
+      [
+        "Inv21164_R6_0_I3_0_HRcvInvAction",
+        "Inv21164_R6_0_I3_0"
+      ],
+      [
+        "Inv52_R6_1_I1_0",
+        "Inv21164_R6_0_I3_0_HRcvInvAction"
+      ],
+      [
+        "Inv21164_R6_0_I3_0_HRcvInvAction",
+        "Inv21164_R6_0_I3_0"
+      ],
+      [
+        "Inv66_R2_0_I1_0",
+        "Inv21164_R6_0_I3_0_HRcvInvAction"
+      ],
+      [
+        "Inv21164_R6_0_I3_0_HRcvInvAction",
+        "Inv21164_R6_0_I3_0"
+      ],
+      [
+        "Inv1236_R0_1_I2_0",
+        "Inv21164_R6_0_I3_0_HRcvInvAction"
+      ],
+      [
+        "Inv21164_R6_0_I3_0_HRcvInvAction",
+        "Inv21164_R6_0_I3_0"
+      ],
+      [
+        "Inv5308_R2_0_I2_1",
+        "Inv21164_R6_0_I3_0_HRcvInvAction"
+      ],
+      [
+        "Inv21164_R6_0_I3_0_HRcvInvAction",
+        "Inv21164_R6_0_I3_0"
+      ],
+      [
+        "Inv2082_R0_1_I2_1",
+        "Inv21164_R6_0_I3_0_HRcvInvAction"
+      ],
+      [
+        "Inv21164_R6_0_I3_0_HRcvInvAction",
+        "Inv21164_R6_0_I3_0"
+      ],
+      [
+        "Inv2892_R1_0_I2_0",
+        "Inv21164_R6_0_I3_0_HRcvInvAction"
+      ],
+      [
+        "Inv21164_R6_0_I3_0_HRcvInvAction",
+        "Inv21164_R6_0_I3_0"
+      ],
+      [
+        "Inv1697_R0_1_I2_2",
+        "Inv21164_R6_0_I3_0_HRcvInvAction"
+      ],
+      [
+        "Inv21164_R6_0_I3_0_HRcvInvAction",
+        "Inv21164_R6_0_I3_0"
+      ],
+      [
+        "Inv3811_R6_1_I2_1",
+        "Inv21164_R6_0_I3_0_HRcvInvAction"
+      ],
+      [
+        "Inv21164_R6_0_I3_0_HRcvInvAction",
+        "Inv21164_R6_0_I3_0"
+      ],
+      [
+        "Inv532_R0_0_I2_1",
+        "Inv21164_R6_0_I3_0_HRcvInvAction"
+      ],
+      [
+        "Inv21164_R6_0_I3_0_HRcvInvAction",
+        "Inv21164_R6_0_I3_0"
+      ],
+      [
+        "Inv5645_R3_2_I2_0",
+        "Inv21164_R6_0_I3_0_HRcvInvAction"
+      ],
+      [
+        "Inv21164_R6_0_I3_0_HRcvInvAction",
+        "Inv21164_R6_0_I3_0"
+      ],
+      [
+        "Inv2282_R3_2_I2_1",
+        "Inv21164_R6_0_I3_0_HRcvInvAction"
+      ],
+      [
+        "Inv21164_R6_0_I3_0_HRcvInvAction",
+        "Inv21164_R6_0_I3_0"
+      ],
+      [
+        "Inv9989_R3_2_I3_2",
+        "Inv21164_R6_0_I3_0_HRcvInvAction"
+      ],
+      [
+        "Inv21164_R6_0_I3_0_HRcvInvAction",
+        "Inv21164_R6_0_I3_0"
+      ],
+      [
+        "Inv18297_R3_2_I3_3",
+        "Inv21164_R6_0_I3_0_HRcvInvAction"
+      ],
+      [
+        "Inv21164_R6_0_I3_0_HRcvInvAction",
+        "Inv21164_R6_0_I3_0"
+      ],
+      [
+        "Inv6924_R3_2_I3_4",
+        "Inv21164_R6_0_I3_0_HRcvInvAction"
+      ],
+      [
+        "Inv21164_R6_0_I3_0_HRcvInvAction",
+        "Inv21164_R6_0_I3_0"
+      ],
+      [
+        "Inv16981_R3_2_I3_5",
+        "Inv21164_R6_0_I3_0_HRcvInvAction"
+      ],
+      [
+        "Inv21164_R6_0_I3_0_HRcvInvAction",
+        "Inv21164_R6_0_I3_0"
+      ],
+      [
+        "Inv34753_R3_2_I3_6",
+        "Inv21164_R6_0_I3_0_HRcvInvAction"
+      ],
+      [
+        "Inv21164_R6_0_I3_0_HWriteAction",
+        "Inv21164_R6_0_I3_0"
+      ],
+      [
+        "Inv3811_R6_1_I2_1",
+        "Inv21164_R6_0_I3_0_HWriteAction"
+      ],
+      [
+        "Inv259_R7_1_I2_1_HCoordWriteReplayAction",
+        "Inv259_R7_1_I2_1"
+      ],
+      [
+        "Inv383_R5_0_I2_0",
+        "Inv259_R7_1_I2_1_HCoordWriteReplayAction"
+      ],
+      [
+        "Inv23625_R12_2_I3_0_HCoordWriteReplayAction",
+        "Inv23625_R12_2_I3_0"
+      ],
+      [
+        "Inv1236_R0_1_I2_0",
+        "Inv23625_R12_2_I3_0_HCoordWriteReplayAction"
+      ],
+      [
+        "Inv23625_R12_2_I3_0_HFollowerWriteReplayAction",
+        "Inv23625_R12_2_I3_0"
+      ],
+      [
+        "Inv259_R7_1_I2_1",
+        "Inv23625_R12_2_I3_0_HFollowerWriteReplayAction"
+      ],
+      [
+        "Inv23625_R12_2_I3_0_HWriteAction",
+        "Inv23625_R12_2_I3_0"
+      ],
+      [
+        "Inv1503_R3_2_I2_0",
+        "Inv23625_R12_2_I3_0_HWriteAction"
+      ],
+      [
+        "Inv23625_R12_2_I3_0_HWriteAction",
+        "Inv23625_R12_2_I3_0"
+      ],
+      [
+        "Inv11488_R6_2_I3_0",
+        "Inv23625_R12_2_I3_0_HWriteAction"
+      ],
+      [
+        "Inv24211_R12_2_I3_1_HCoordWriteReplayAction",
+        "Inv24211_R12_2_I3_1"
+      ],
+      [
+        "Inv66_R2_0_I1_0",
+        "Inv24211_R12_2_I3_1_HCoordWriteReplayAction"
+      ],
+      [
+        "Inv24211_R12_2_I3_1_HCoordWriteReplayAction",
+        "Inv24211_R12_2_I3_1"
+      ],
+      [
+        "Inv2082_R0_1_I2_1",
+        "Inv24211_R12_2_I3_1_HCoordWriteReplayAction"
+      ],
+      [
+        "Inv24211_R12_2_I3_1_HCoordWriteReplayAction",
+        "Inv24211_R12_2_I3_1"
+      ],
+      [
+        "Inv1818_R6_0_I2_1",
+        "Inv24211_R12_2_I3_1_HCoordWriteReplayAction"
+      ],
+      [
+        "Inv24211_R12_2_I3_1_HFollowerWriteReplayAction",
+        "Inv24211_R12_2_I3_1"
+      ],
+      [
+        "Inv66_R2_0_I1_0",
+        "Inv24211_R12_2_I3_1_HFollowerWriteReplayAction"
+      ],
+      [
+        "Inv24211_R12_2_I3_1_HFollowerWriteReplayAction",
+        "Inv24211_R12_2_I3_1"
+      ],
+      [
+        "Inv2082_R0_1_I2_1",
+        "Inv24211_R12_2_I3_1_HFollowerWriteReplayAction"
+      ],
+      [
+        "Inv24211_R12_2_I3_1_HWriteAction",
+        "Inv24211_R12_2_I3_1"
+      ],
+      [
+        "Inv66_R2_0_I1_0",
+        "Inv24211_R12_2_I3_1_HWriteAction"
+      ],
+      [
+        "Inv24211_R12_2_I3_1_HWriteAction",
+        "Inv24211_R12_2_I3_1"
+      ],
+      [
+        "Inv2082_R0_1_I2_1",
+        "Inv24211_R12_2_I3_1_HWriteAction"
+      ],
+      [
+        "Inv24211_R12_2_I3_1_HWriteAction",
+        "Inv24211_R12_2_I3_1"
+      ],
+      [
+        "Inv1503_R3_2_I2_0",
+        "Inv24211_R12_2_I3_1_HWriteAction"
+      ],
+      [
+        "Inv21647_R13_1_I3_0_HRcvAckAction",
+        "Inv21647_R13_1_I3_0"
+      ],
+      [
+        "Inv3811_R6_1_I2_1",
+        "Inv21647_R13_1_I3_0_HRcvAckAction"
+      ],
+      [
+        "Inv1681_R0_0_I2_0_HRcvInvAction",
+        "Inv1681_R0_0_I2_0"
+      ],
+      [
+        "Inv52_R6_1_I1_0",
+        "Inv1681_R0_0_I2_0_HRcvInvAction"
+      ],
+      [
+        "Inv1681_R0_0_I2_0_HRcvInvAction",
+        "Inv1681_R0_0_I2_0"
+      ],
+      [
+        "Inv66_R2_0_I1_0",
+        "Inv1681_R0_0_I2_0_HRcvInvAction"
+      ],
+      [
+        "Inv1681_R0_0_I2_0_HRcvInvAction",
+        "Inv1681_R0_0_I2_0"
+      ],
+      [
+        "Inv1794_R9_0_I2_0",
+        "Inv1681_R0_0_I2_0_HRcvInvAction"
+      ],
+      [
+        "Inv2672_R0_1_I3_2_HRcvInvAction",
+        "Inv2672_R0_1_I3_2"
+      ],
+      [
+        "Inv52_R6_1_I1_0",
+        "Inv2672_R0_1_I3_2_HRcvInvAction"
+      ],
+      [
+        "Inv2672_R0_1_I3_2_HRcvInvAction",
+        "Inv2672_R0_1_I3_2"
+      ],
+      [
+        "Inv66_R2_0_I1_0",
+        "Inv2672_R0_1_I3_2_HRcvInvAction"
+      ],
+      [
+        "Inv2672_R0_1_I3_2_HRcvInvAction",
+        "Inv2672_R0_1_I3_2"
+      ],
+      [
+        "Inv259_R7_1_I2_1",
+        "Inv2672_R0_1_I3_2_HRcvInvAction"
+      ],
+      [
+        "Inv2672_R0_1_I3_2_HRcvInvAction",
+        "Inv2672_R0_1_I3_2"
+      ],
+      [
+        "Inv5308_R2_0_I2_1",
+        "Inv2672_R0_1_I3_2_HRcvInvAction"
+      ],
+      [
+        "Inv2672_R0_1_I3_2_HRcvInvAction",
+        "Inv2672_R0_1_I3_2"
+      ],
+      [
+        "Inv4235_R0_1_I2_1",
+        "Inv2672_R0_1_I3_2_HRcvInvAction"
+      ],
+      [
+        "Inv2672_R0_1_I3_2_HRcvInvAction",
+        "Inv2672_R0_1_I3_2"
+      ],
+      [
+        "Inv3811_R6_1_I2_1",
+        "Inv2672_R0_1_I3_2_HRcvInvAction"
+      ],
+      [
+        "Inv2672_R0_1_I3_2_HRcvInvAction",
+        "Inv2672_R0_1_I3_2"
+      ],
+      [
+        "Inv22931_R12_0_I3_0",
+        "Inv2672_R0_1_I3_2_HRcvInvAction"
+      ],
+      [
+        "Inv2672_R0_1_I3_2_HRcvInvAction",
+        "Inv2672_R0_1_I3_2"
+      ],
+      [
+        "Inv24211_R12_2_I3_1",
+        "Inv2672_R0_1_I3_2_HRcvInvAction"
+      ],
+      [
+        "Inv2672_R0_1_I3_2_HRcvInvAction",
+        "Inv2672_R0_1_I3_2"
+      ],
+      [
+        "Inv11149_R12_0_I3_1",
+        "Inv2672_R0_1_I3_2_HRcvInvAction"
+      ],
+      [
+        "Inv2672_R0_1_I3_2_HRcvInvAction",
+        "Inv2672_R0_1_I3_2"
+      ],
+      [
+        "Inv22598_R12_0_I3_2",
+        "Inv2672_R0_1_I3_2_HRcvInvAction"
+      ],
+      [
+        "Inv5311_R0_2_I2_0_HCoordWriteReplayAction",
+        "Inv5311_R0_2_I2_0"
+      ],
+      [
+        "Inv66_R2_0_I1_0",
+        "Inv5311_R0_2_I2_0_HCoordWriteReplayAction"
+      ],
+      [
+        "Inv5311_R0_2_I2_0_HCoordWriteReplayAction",
+        "Inv5311_R0_2_I2_0"
+      ],
+      [
+        "Inv5308_R2_0_I2_1",
+        "Inv5311_R0_2_I2_0_HCoordWriteReplayAction"
+      ],
+      [
+        "Inv5311_R0_2_I2_0_HFollowerWriteReplayAction",
+        "Inv5311_R0_2_I2_0"
+      ],
+      [
+        "Inv66_R2_0_I1_0",
+        "Inv5311_R0_2_I2_0_HFollowerWriteReplayAction"
+      ],
+      [
+        "Inv5311_R0_2_I2_0_HFollowerWriteReplayAction",
+        "Inv5311_R0_2_I2_0"
+      ],
+      [
+        "Inv5308_R2_0_I2_1",
+        "Inv5311_R0_2_I2_0_HFollowerWriteReplayAction"
+      ],
+      [
+        "Inv5311_R0_2_I2_0_HWriteAction",
+        "Inv5311_R0_2_I2_0"
+      ],
+      [
+        "Inv66_R2_0_I1_0",
+        "Inv5311_R0_2_I2_0_HWriteAction"
+      ],
+      [
+        "Inv5311_R0_2_I2_0_HWriteAction",
+        "Inv5311_R0_2_I2_0"
+      ],
+      [
+        "Inv5308_R2_0_I2_1",
+        "Inv5311_R0_2_I2_0_HWriteAction"
+      ]
+    ],
+    "nodes": {
+      "Safety": {
+        "discharged": true,
+        "is_lemma": true,
+        "expr": "HConsistent",
+        "order": 1,
+        "depth": 0
+      },
+      "Inv45_R0_0_I1_0": {
+        "discharged": true,
+        "is_lemma": true,
+        "expr": "\\A VARI \\in aliveNodes : \\A VARMVALI \\in msgsVAL : ~(greaterTS(VARMVALI.version, VARMVALI.tieBreaker, nodeTS[VARI].version, nodeTS[VARI].tieBreaker))",
+        "order": 2,
+        "depth": 1
+      },
+      "Safety_HRcvValAction": {
+        "ctis_remaining": 0,
+        "coi_vars": [
+          "msgsVAL",
+          "nodeTS",
+          "nodeState",
+          "aliveNodes"
+        ],
+        "num_grammar_preds": 38,
+        "is_action": true
+      },
+      "Inv532_R0_0_I2_1": {
+        "discharged": true,
+        "is_lemma": true,
+        "expr": "\\A VARI \\in aliveNodes : \\A VARJ \\in aliveNodes : (greaterOrEqualTS(nodeTS[VARI].version, nodeTS[VARI].tieBreaker, nodeTS[VARJ].version, nodeTS[VARJ].tieBreaker)) \\/ (~(nodeState[VARJ] = \"valid\"))",
+        "order": 3,
+        "depth": 1
+      },
+      "Safety_HSendValsAction": {
+        "ctis_remaining": 0,
+        "coi_vars": [
+          "nodeTS",
+          "nodeState",
+          "nodeRcvedAcks",
+          "aliveNodes"
+        ],
+        "num_grammar_preds": 34,
+        "is_action": true
+      },
+      "Inv1236_R0_1_I2_0": {
+        "discharged": true,
+        "is_lemma": true,
+        "expr": "\\A VARI \\in aliveNodes : (nodeTS[VARI].tieBreaker = VARI) \\/ (~(nodeState[VARI] = \"write\"))",
+        "order": 4,
+        "depth": 1
+      },
+      "Inv2082_R0_1_I2_1": {
+        "discharged": true,
+        "is_lemma": true,
+        "expr": "\\A VARI \\in aliveNodes : \\A VARJ \\in aliveNodes : ~(nodeTS[VARI].tieBreaker = VARJ) \\/ (~(nodeTS[VARI].version > nodeTS[VARJ].version))",
+        "order": 5,
+        "depth": 1
+      },
+      "Inv1697_R0_1_I2_2": {
+        "discharged": true,
+        "is_lemma": true,
+        "expr": "\\A VARI \\in aliveNodes : ~(nodeState[VARI] = \"invalid\") \\/ (~(nodeTS[VARI].tieBreaker = VARI))",
+        "order": 6,
+        "depth": 1
+      },
+      "Inv2896_R0_1_I3_3": {
+        "discharged": true,
+        "is_lemma": true,
+        "expr": "\\A VARI \\in aliveNodes : \\A VARJ \\in aliveNodes : (greaterOrEqualTS(nodeTS[VARI].version, nodeTS[VARI].tieBreaker, nodeTS[VARJ].version, nodeTS[VARJ].tieBreaker)) \\/ (~(VARI \\in nodeRcvedAcks[VARJ])) \\/ (~(nodeState[VARJ] = \"replay\"))",
+        "order": 7,
+        "depth": 1
+      },
+      "Inv22583_R0_1_I3_4": {
+        "discharged": true,
+        "is_lemma": true,
+        "expr": "\\A VARI \\in aliveNodes : \\A VARJ \\in aliveNodes : ~(VARI \\in nodeRcvedAcks[VARJ]) \\/ (~(nodeState[VARI] = \"valid\")) \\/ (~(nodeState[VARJ] = \"write\"))",
+        "order": 8,
+        "depth": 1
+      },
+      "Inv45_R0_0_I1_0_HSendValsAction": {
+        "ctis_remaining": 0,
+        "coi_vars": [
+          "msgsVAL",
+          "nodeTS",
+          "nodeState",
+          "nodeRcvedAcks",
+          "aliveNodes"
+        ],
+        "num_grammar_preds": 42,
+        "is_action": true
+      },
+      "Inv2892_R1_0_I2_0": {
+        "discharged": true,
+        "is_lemma": true,
+        "expr": "\\A VARI \\in aliveNodes : ~(nodeState[VARI] = \"invalid_write\") \\/ (~(nodeTS[VARI].tieBreaker = VARI))",
+        "order": 9,
+        "depth": 2
+      },
+      "Inv2726_R1_0_I2_1": {
+        "discharged": true,
+        "is_lemma": true,
+        "expr": "\\A VARI \\in aliveNodes : \\A VARMVALI \\in msgsVAL : ~(equalTS(VARMVALI.version, VARMVALI.tieBreaker, nodeTS[VARI].version, nodeTS[VARI].tieBreaker)) \\/ (~(nodeState[VARI] = \"write\"))",
+        "order": 10,
+        "depth": 2
+      },
+      "Inv9819_R1_0_I3_2": {
+        "discharged": true,
+        "is_lemma": true,
+        "expr": "\\A VARI \\in aliveNodes : \\A VARJ \\in aliveNodes : (greaterOrEqualTS(nodeTS[VARI].version, nodeTS[VARI].tieBreaker, nodeTS[VARJ].version, nodeTS[VARJ].tieBreaker)) \\/ (~(VARI \\in nodeRcvedAcks[VARJ])) \\/ (~(nodeState[VARJ] \\in {\"write\", \"replay\"}))",
+        "order": 11,
+        "depth": 2
+      },
+      "Inv532_R0_0_I2_1_HRcvValAction": {
+        "ctis_remaining": 0,
+        "coi_vars": [
+          "msgsVAL",
+          "nodeTS",
+          "nodeState",
+          "aliveNodes"
+        ],
+        "num_grammar_preds": 38,
+        "is_action": true
+      },
+      "Inv532_R0_0_I2_1_HSendValsAction": {
+        "ctis_remaining": 0,
+        "coi_vars": [
+          "nodeTS",
+          "nodeState",
+          "nodeRcvedAcks",
+          "aliveNodes"
+        ],
+        "num_grammar_preds": 34,
+        "is_action": true
+      },
+      "Inv3205_R2_1_I3_0": {
+        "discharged": true,
+        "is_lemma": true,
+        "expr": "\\A VARI \\in aliveNodes : \\A VARJ \\in aliveNodes : (greaterOrEqualTS(nodeTS[VARI].version, nodeTS[VARI].tieBreaker, nodeTS[VARJ].version, nodeTS[VARJ].tieBreaker)) \\/ (~(nodeState[VARJ] \\in {\"write\", \"replay\"})) \\/ (~(VARI \\in nodeRcvedAcks[VARJ]))",
+        "order": 12,
+        "depth": 2
+      },
+      "Inv2896_R0_1_I3_3_HCoordWriteReplayAction": {
+        "ctis_remaining": 0,
+        "coi_vars": [
+          "nodeTS",
+          "nodeState",
+          "nodeRcvedAcks",
+          "nodeWriteEpochID",
+          "aliveNodes",
+          "epochID"
+        ],
+        "num_grammar_preds": 38,
+        "is_action": true
+      },
+      "Inv1768_R6_0_I2_0": {
+        "discharged": true,
+        "is_lemma": true,
+        "expr": "\\A VARI \\in aliveNodes : (nodeWriteEpochID[VARI] < epochID) \\/ ((nodeWriteEpochID[VARI] = epochID))",
+        "order": 13,
+        "depth": 2
+      },
+      "Inv1818_R6_0_I2_1": {
+        "discharged": false,
+        "is_lemma": true,
+        "expr": "\\A VARI \\in aliveNodes : (nodeWriteEpochID[VARI] = epochID) \\/ (~(nodeState[VARI] = \"replay\"))",
+        "order": 14,
+        "depth": 2,
+        "failed": true
+      },
+      "Inv23272_R6_0_I3_2": {
+        "discharged": true,
+        "is_lemma": true,
+        "expr": "\\A VARI \\in aliveNodes : \\A VARJ \\in aliveNodes : (nodeTS[VARI].version >= nodeTS[VARJ].version) \\/ (~(nodeState[VARJ] = \"write\")) \\/ (~(VARI \\in nodeRcvedAcks[VARJ]))",
+        "order": 15,
+        "depth": 2
+      },
+      "Inv52_R6_1_I1_0": {
+        "discharged": true,
+        "is_lemma": true,
+        "expr": "\\A VARMACKI \\in msgsACK : ~(VARMACKI.epochID > epochID)",
+        "order": 16,
+        "depth": 2
+      },
+      "Inv2896_R0_1_I3_3_HRcvAckAction": {
+        "ctis_remaining": 0,
+        "coi_vars": [
+          "msgsACK",
+          "nodeTS",
+          "nodeState",
+          "nodeRcvedAcks",
+          "nodeLastWriteTS",
+          "aliveNodes",
+          "epochID"
+        ],
+        "num_grammar_preds": 50,
+        "is_action": true
+      },
+      "Inv3811_R6_1_I2_1": {
+        "discharged": true,
+        "is_lemma": true,
+        "expr": "\\A VARI \\in aliveNodes : \\A VARMACKI \\in msgsACK : ~(VARMACKI.sender = VARI) \\/ (~(greaterTS(VARMACKI.version, VARMACKI.tieBreaker, nodeTS[VARI].version, nodeTS[VARI].tieBreaker)))",
+        "order": 17,
+        "depth": 2
+      },
+      "Inv9735_R6_1_I4_2": {
+        "discharged": true,
+        "is_lemma": true,
+        "expr": "\\A VARI \\in aliveNodes : \\A VARMACKI \\in msgsACK : (VARMACKI.sender = VARI) \\/ (~(equalTS(VARMACKI.version, VARMACKI.tieBreaker, nodeLastWriteTS[VARI].version, nodeLastWriteTS[VARI].tieBreaker)) \\/ (~(nodeState[VARI] \\in {\"write\", \"replay\"}))) \\/ ((VARMACKI.version = nodeTS[VARI].version))",
+        "order": 18,
+        "depth": 2
+      },
+      "Inv22583_R0_1_I3_4_HRcvValAction": {
+        "ctis_remaining": 0,
+        "coi_vars": [
+          "msgsVAL",
+          "nodeTS",
+          "nodeState",
+          "nodeRcvedAcks",
+          "aliveNodes"
+        ],
+        "num_grammar_preds": 42,
+        "is_action": true
+      },
+      "Inv10078_R7_0_I3_0": {
+        "discharged": true,
+        "is_lemma": true,
+        "expr": "\\A VARI \\in aliveNodes : \\A VARJ \\in aliveNodes : (greaterOrEqualTS(nodeTS[VARI].version, nodeTS[VARI].tieBreaker, nodeTS[VARJ].version, nodeTS[VARJ].tieBreaker)) \\/ (~(nodeState[VARJ] \\in {\"write\", \"valid\"})) \\/ (~(VARI \\in nodeRcvedAcks[VARJ]))",
+        "order": 19,
+        "depth": 2
+      },
+      "Inv8819_R7_1_I3_0": {
+        "discharged": true,
+        "is_lemma": true,
+        "expr": "\\A VARI \\in aliveNodes : \\A VARJ \\in aliveNodes : (receivedAllAcks(VARI) /\\ nodeRcvedAcks = nodeRcvedAcks) \\/ (~(nodeState[VARJ] = \"replay\")) \\/ (~(VARJ \\in nodeRcvedAcks[VARI]))",
+        "order": 20,
+        "depth": 2
+      },
+      "Inv22583_R0_1_I3_4_HSendValsAction": {
+        "ctis_remaining": 0,
+        "coi_vars": [
+          "nodeState",
+          "nodeRcvedAcks",
+          "aliveNodes"
+        ],
+        "num_grammar_preds": 22,
+        "is_action": true
+      },
+      "Inv8732_R7_1_I3_1": {
+        "discharged": true,
+        "is_lemma": true,
+        "expr": "\\A VARI \\in aliveNodes : \\A VARJ \\in aliveNodes : (receivedAllAcks(VARI) /\\ nodeRcvedAcks = nodeRcvedAcks) \\/ (~(nodeState[VARI] = \"replay\")) \\/ (~(VARJ \\in nodeRcvedAcks[VARI]))",
+        "order": 21,
+        "depth": 2
+      },
+      "Inv30152_R7_1_I4_2": {
+        "discharged": true,
+        "is_lemma": true,
+        "expr": "\\A VARI \\in aliveNodes : \\A VARJ \\in aliveNodes : ~(VARI \\in nodeRcvedAcks[VARJ]) \\/ (~(nodeState[VARJ] = \"write\")) \\/ (~(nodeState[VARI] \\in {\"write\", \"replay\"})) \\/ (~(VARJ \\in nodeRcvedAcks[VARI]))",
+        "order": 22,
+        "depth": 2
+      },
+      "Inv2726_R1_0_I2_1_HSendValsAction": {
+        "ctis_remaining": 0,
+        "coi_vars": [
+          "msgsVAL",
+          "nodeTS",
+          "nodeState",
+          "nodeRcvedAcks",
+          "aliveNodes"
+        ],
+        "num_grammar_preds": 42,
+        "is_action": true
+      },
+      "Inv30445_R9_0_I3_0": {
+        "discharged": true,
+        "is_lemma": true,
+        "expr": "\\A VARI \\in aliveNodes : \\A VARJ \\in aliveNodes : ~(nodeState[VARI] = \"replay\") \\/ (~(nodeState[VARJ] = \"write\")) \\/ (~(nodeTS[VARI] = nodeTS[VARJ]))",
+        "order": 23,
+        "depth": 3
+      },
+      "Inv2726_R1_0_I2_1_HWriteAction": {
+        "ctis_remaining": 0,
+        "coi_vars": [
+          "msgsVAL",
+          "nodeTS",
+          "nodeState",
+          "aliveNodes"
+        ],
+        "num_grammar_preds": 38,
+        "is_action": true
+      },
+      "Inv9819_R1_0_I3_2_HRcvAckAction": {
+        "ctis_remaining": 0,
+        "coi_vars": [
+          "msgsACK",
+          "nodeTS",
+          "nodeState",
+          "nodeRcvedAcks",
+          "nodeLastWriteTS",
+          "aliveNodes",
+          "epochID"
+        ],
+        "num_grammar_preds": 50,
+        "is_action": true
+      },
+      "Inv3205_R2_1_I3_0_HRcvAckAction": {
+        "ctis_remaining": 0,
+        "coi_vars": [
+          "msgsACK",
+          "nodeTS",
+          "nodeState",
+          "nodeRcvedAcks",
+          "nodeLastWriteTS",
+          "aliveNodes",
+          "epochID"
+        ],
+        "num_grammar_preds": 50,
+        "is_action": true
+      },
+      "Inv1818_R6_0_I2_1_NodeFailureAction": {
+        "ctis_remaining": 37,
+        "coi_vars": [
+          "nodeState",
+          "nodeWriteEpochID",
+          "aliveNodes",
+          "epochID"
+        ],
+        "num_grammar_preds": 22,
+        "is_action": true
+      },
+      "Inv8221_R13_0_I3_0": {
+        "discharged": true,
+        "is_lemma": true,
+        "expr": "\\A VARI \\in aliveNodes : \\A VARJ \\in aliveNodes : (nodeWriteEpochID[VARI] < epochID) \\/ ((nodeWriteEpochID[VARJ] = epochID) \\/ (~(nodeState[VARI] = \"invalid_write\")))",
+        "order": 24,
+        "depth": 3
+      },
+      "Inv8240_R13_0_I3_1": {
+        "discharged": true,
+        "is_lemma": true,
+        "expr": "\\A VARI \\in aliveNodes : \\A VARJ \\in aliveNodes : (nodeWriteEpochID[VARI] < epochID) \\/ (~(nodeState[VARI] = \"invalid\")) \\/ ((nodeWriteEpochID[VARJ] = epochID))",
+        "order": 25,
+        "depth": 3
+      },
+      "Inv23272_R6_0_I3_2_HRcvAckAction": {
+        "ctis_remaining": 0,
+        "coi_vars": [
+          "msgsACK",
+          "nodeTS",
+          "nodeState",
+          "nodeRcvedAcks",
+          "nodeLastWriteTS",
+          "aliveNodes",
+          "epochID"
+        ],
+        "num_grammar_preds": 50,
+        "is_action": true
+      },
+      "Inv9735_R6_1_I4_2_HRcvInvAction": {
+        "ctis_remaining": 0,
+        "coi_vars": [
+          "msgsINV",
+          "msgsACK",
+          "nodeTS",
+          "nodeState",
+          "nodeLastWriteTS",
+          "aliveNodes",
+          "epochID"
+        ],
+        "num_grammar_preds": 58,
+        "is_action": true
+      },
+      "Inv66_R2_0_I1_0": {
+        "discharged": true,
+        "is_lemma": true,
+        "expr": "\\A VARMINVI \\in msgsINV : ~(VARMINVI.epochID > epochID)",
+        "order": 26,
+        "depth": 3
+      },
+      "Inv5308_R2_0_I2_1": {
+        "discharged": true,
+        "is_lemma": true,
+        "expr": "\\A VARI \\in aliveNodes : \\A VARMINVI \\in msgsINV : ~(VARMINVI.sender = VARI) \\/ (~(greaterTS(VARMINVI.version, VARMINVI.tieBreaker, nodeTS[VARI].version, nodeTS[VARI].tieBreaker)))",
+        "order": 27,
+        "depth": 3
+      },
+      "Inv10247_R2_0_I3_2": {
+        "discharged": false,
+        "is_lemma": true,
+        "expr": "\\A VARI \\in aliveNodes : \\A VARJ \\in aliveNodes : \\A VARMINVI \\in msgsINV : (VARMINVI.sender = VARJ) \\/ (~(nodeTS[VARI].tieBreaker = VARJ)) \\/ (~(VARMINVI.tieBreaker = nodeTS[VARI].tieBreaker))",
+        "order": 28,
+        "depth": 3,
+        "failed": true
+      },
+      "Inv10078_R7_0_I3_0_HRcvAckAction": {
+        "ctis_remaining": 0,
+        "coi_vars": [
+          "msgsACK",
+          "nodeTS",
+          "nodeState",
+          "nodeRcvedAcks",
+          "nodeLastWriteTS",
+          "aliveNodes",
+          "epochID"
+        ],
+        "num_grammar_preds": 50,
+        "is_action": true
+      },
+      "Inv10078_R7_0_I3_0_HRcvValAction": {
+        "ctis_remaining": 0,
+        "coi_vars": [
+          "msgsVAL",
+          "nodeTS",
+          "nodeState",
+          "nodeRcvedAcks",
+          "aliveNodes"
+        ],
+        "num_grammar_preds": 42,
+        "is_action": true
+      },
+      "Inv10078_R7_0_I3_0_HSendValsAction": {
+        "ctis_remaining": 0,
+        "coi_vars": [
+          "nodeTS",
+          "nodeState",
+          "nodeRcvedAcks",
+          "aliveNodes"
+        ],
+        "num_grammar_preds": 34,
+        "is_action": true
+      },
+      "Inv1503_R3_2_I2_0": {
+        "discharged": true,
+        "is_lemma": true,
+        "expr": "\\A VARI \\in aliveNodes : \\A VARJ \\in aliveNodes : (nodeTS[VARI].version >= nodeTS[VARJ].version) \\/ (~(nodeState[VARJ] = \"valid\"))",
+        "order": 29,
+        "depth": 3
+      },
+      "Inv8819_R7_1_I3_0_HCoordWriteReplayAction": {
+        "ctis_remaining": 0,
+        "coi_vars": [
+          "nodeState",
+          "nodeRcvedAcks",
+          "nodeWriteEpochID",
+          "aliveNodes",
+          "epochID"
+        ],
+        "num_grammar_preds": 26,
+        "is_action": true
+      },
+      "Inv12797_R4_0_I3_0": {
+        "discharged": true,
+        "is_lemma": true,
+        "expr": "\\A VARI \\in aliveNodes : \\A VARJ \\in aliveNodes : (nodeWriteEpochID[VARI] = epochID) \\/ (~(VARI \\in nodeRcvedAcks[VARJ])) \\/ ((receivedAllAcks(VARJ) /\\ nodeRcvedAcks = nodeRcvedAcks))",
+        "order": 30,
+        "depth": 3
+      },
+      "Inv20394_R4_1_I3_0": {
+        "discharged": true,
+        "is_lemma": true,
+        "expr": "\\A VARI \\in aliveNodes : \\A VARMACKI \\in msgsACK : ~(VARMACKI.epochID = epochID) \\/ (~(nodeState[VARI] = \"replay\")) \\/ (~(greaterTS(VARMACKI.version, VARMACKI.tieBreaker, nodeLastWriteTS[VARI].version, nodeLastWriteTS[VARI].tieBreaker)))",
+        "order": 31,
+        "depth": 3
+      },
+      "Inv8819_R7_1_I3_0_HRcvAckAction": {
+        "ctis_remaining": 0,
+        "coi_vars": [
+          "msgsACK",
+          "nodeState",
+          "nodeRcvedAcks",
+          "nodeLastWriteTS",
+          "aliveNodes",
+          "epochID"
+        ],
+        "num_grammar_preds": 31,
+        "is_action": true
+      },
+      "Inv19215_R4_1_I3_1": {
+        "discharged": true,
+        "is_lemma": true,
+        "expr": "\\A VARI \\in aliveNodes : \\A VARJ \\in aliveNodes : (receivedAllAcks(VARI) /\\ nodeRcvedAcks = nodeRcvedAcks) \\/ (~(VARJ \\in nodeRcvedAcks[VARI]) \\/ (~(nodeState[VARI] = \"replay\")))",
+        "order": 32,
+        "depth": 3
+      },
+      "Inv8732_R7_1_I3_1_HCoordWriteReplayAction": {
+        "ctis_remaining": 0,
+        "coi_vars": [
+          "nodeState",
+          "nodeRcvedAcks",
+          "nodeWriteEpochID",
+          "aliveNodes",
+          "epochID"
+        ],
+        "num_grammar_preds": 26,
+        "is_action": true
+      },
+      "Inv12658_R5_0_I3_0": {
+        "discharged": true,
+        "is_lemma": true,
+        "expr": "\\A VARI \\in aliveNodes : \\A VARJ \\in aliveNodes : (nodeWriteEpochID[VARI] = epochID) \\/ (~(VARJ \\in nodeRcvedAcks[VARI])) \\/ ((receivedAllAcks(VARI) /\\ nodeRcvedAcks = nodeRcvedAcks))",
+        "order": 33,
+        "depth": 3
+      },
+      "Inv8732_R7_1_I3_1_HRcvAckAction": {
+        "ctis_remaining": 0,
+        "coi_vars": [
+          "msgsACK",
+          "nodeState",
+          "nodeRcvedAcks",
+          "nodeLastWriteTS",
+          "aliveNodes",
+          "epochID"
+        ],
+        "num_grammar_preds": 31,
+        "is_action": true
+      },
+      "Inv21164_R6_0_I3_0": {
+        "discharged": true,
+        "is_lemma": true,
+        "expr": "\\A VARI \\in aliveNodes : \\A VARMACKI \\in msgsACK : ~(VARMACKI.sender = VARI) \\/ (~(nodeState[VARI] \\in {\"write\", \"replay\"})) \\/ (~(greaterTS(VARMACKI.version, VARMACKI.tieBreaker, nodeLastWriteTS[VARI].version, nodeLastWriteTS[VARI].tieBreaker)))",
+        "order": 34,
+        "depth": 3
+      },
+      "Inv30152_R7_1_I4_2_HRcvAckAction": {
+        "ctis_remaining": 0,
+        "coi_vars": [
+          "msgsACK",
+          "nodeState",
+          "nodeRcvedAcks",
+          "nodeLastWriteTS",
+          "aliveNodes",
+          "epochID"
+        ],
+        "num_grammar_preds": 31,
+        "is_action": true
+      },
+      "Inv30445_R9_0_I3_0_HCoordWriteReplayAction": {
+        "ctis_remaining": 0,
+        "coi_vars": [
+          "nodeTS",
+          "nodeState",
+          "nodeRcvedAcks",
+          "nodeWriteEpochID",
+          "aliveNodes",
+          "epochID"
+        ],
+        "num_grammar_preds": 38,
+        "is_action": true
+      },
+      "Inv177_R7_1_I2_0": {
+        "discharged": true,
+        "is_lemma": true,
+        "expr": "\\A VARI \\in aliveNodes : (nodeLastWriter[VARI] = VARI) \\/ (~(nodeState[VARI] = \"write\"))",
+        "order": 35,
+        "depth": 4
+      },
+      "Inv30445_R9_0_I3_0_HFollowerWriteReplayAction": {
+        "ctis_remaining": 0,
+        "coi_vars": [
+          "nodeTS",
+          "nodeState",
+          "nodeLastWriter",
+          "aliveNodes"
+        ],
+        "num_grammar_preds": 36,
+        "is_action": true
+      },
+      "Inv259_R7_1_I2_1": {
+        "discharged": true,
+        "is_lemma": true,
+        "expr": "\\A VARI \\in aliveNodes : \\A VARJ \\in aliveNodes : (nodeLastWriter[VARI] = VARJ) \\/ (~(nodeTS[VARI].tieBreaker = VARJ))",
+        "order": 36,
+        "depth": 4
+      },
+      "Inv30445_R9_0_I3_0_HWriteAction": {
+        "ctis_remaining": 0,
+        "coi_vars": [
+          "nodeTS",
+          "nodeState",
+          "aliveNodes"
+        ],
+        "num_grammar_preds": 30,
+        "is_action": true
+      },
+      "Inv10247_R2_0_I3_2_HCoordWriteReplayAction": {
+        "ctis_remaining": 0,
+        "coi_vars": [
+          "msgsINV",
+          "nodeTS",
+          "nodeState",
+          "nodeRcvedAcks",
+          "nodeWriteEpochID",
+          "aliveNodes",
+          "epochID"
+        ],
+        "num_grammar_preds": 49,
+        "is_action": true
+      },
+      "Inv10247_R2_0_I3_2_HFollowerWriteReplayAction": {
+        "ctis_remaining": 0,
+        "coi_vars": [
+          "msgsINV",
+          "nodeTS",
+          "nodeState",
+          "nodeLastWriter",
+          "aliveNodes",
+          "epochID"
+        ],
+        "num_grammar_preds": 47,
+        "is_action": true
+      },
+      "Inv10247_R2_0_I3_2_HWriteAction": {
+        "ctis_remaining": 33,
+        "coi_vars": [
+          "msgsINV",
+          "nodeTS",
+          "nodeState",
+          "aliveNodes",
+          "epochID"
+        ],
+        "num_grammar_preds": 41,
+        "is_action": true
+      },
+      "Inv23625_R12_2_I3_0": {
+        "discharged": true,
+        "is_lemma": true,
+        "expr": "\\A VARI \\in aliveNodes : \\A VARJ \\in aliveNodes : (nodeTS[VARI] = nodeTS[VARJ]) \\/ (~(nodeTS[VARI].tieBreaker = VARJ)) \\/ (~(nodeState[VARI] = \"replay\"))",
+        "order": 37,
+        "depth": 4
+      },
+      "Inv24211_R12_2_I3_1": {
+        "discharged": true,
+        "is_lemma": true,
+        "expr": "\\A VARI \\in aliveNodes : \\A VARJ \\in aliveNodes : \\A VARMINVI \\in msgsINV : (nodeTS[VARI].tieBreaker <= nodeTS[VARJ].tieBreaker) \\/ (~(VARMINVI.version < nodeTS[VARI].version) \\/ (~(nodeTS[VARI].tieBreaker = VARJ)))",
+        "order": 38,
+        "depth": 4
+      },
+      "Inv1503_R3_2_I2_0_HRcvValAction": {
+        "ctis_remaining": 0,
+        "coi_vars": [
+          "msgsVAL",
+          "nodeTS",
+          "nodeState",
+          "aliveNodes"
+        ],
+        "num_grammar_preds": 38,
+        "is_action": true
+      },
+      "Inv1503_R3_2_I2_0_HSendValsAction": {
+        "ctis_remaining": 0,
+        "coi_vars": [
+          "nodeTS",
+          "nodeState",
+          "nodeRcvedAcks",
+          "aliveNodes"
+        ],
+        "num_grammar_preds": 34,
+        "is_action": true
+      },
+      "Inv21647_R13_1_I3_0": {
+        "discharged": true,
+        "is_lemma": true,
+        "expr": "\\A VARI \\in aliveNodes : \\A VARJ \\in aliveNodes : (nodeTS[VARI].version >= nodeTS[VARJ].version) \\/ (~(VARI \\in nodeRcvedAcks[VARJ]) \\/ (~(nodeState[VARJ] \\in {\"write\", \"replay\"})))",
+        "order": 39,
+        "depth": 4
+      },
+      "Inv12797_R4_0_I3_0_HRcvAckAction": {
+        "ctis_remaining": 0,
+        "coi_vars": [
+          "msgsACK",
+          "nodeState",
+          "nodeRcvedAcks",
+          "nodeLastWriteTS",
+          "nodeWriteEpochID",
+          "aliveNodes",
+          "epochID"
+        ],
+        "num_grammar_preds": 35,
+        "is_action": true
+      },
+      "Inv20394_R4_1_I3_0_HCoordWriteReplayAction": {
+        "ctis_remaining": 0,
+        "coi_vars": [
+          "msgsACK",
+          "nodeTS",
+          "nodeState",
+          "nodeRcvedAcks",
+          "nodeLastWriteTS",
+          "nodeWriteEpochID",
+          "aliveNodes",
+          "epochID"
+        ],
+        "num_grammar_preds": 54,
+        "is_action": true
+      },
+      "Inv1681_R0_0_I2_0": {
+        "discharged": true,
+        "is_lemma": true,
+        "expr": "\\A VARI \\in aliveNodes : \\A VARMACKI \\in msgsACK : (greaterTS(VARMACKI.version, VARMACKI.tieBreaker, nodeLastWriteTS[VARI].version, nodeLastWriteTS[VARI].tieBreaker)) \\/ (~(greaterTS(VARMACKI.version, VARMACKI.tieBreaker, nodeTS[VARI].version, nodeTS[VARI].tieBreaker)))",
+        "order": 40,
+        "depth": 4
+      },
+      "Inv20394_R4_1_I3_0_HFollowerWriteReplayAction": {
+        "ctis_remaining": 0,
+        "coi_vars": [
+          "msgsACK",
+          "nodeTS",
+          "nodeState",
+          "nodeLastWriter",
+          "nodeLastWriteTS",
+          "aliveNodes",
+          "epochID"
+        ],
+        "num_grammar_preds": 50,
+        "is_action": true
+      },
+      "Inv4179_R0_1_I2_0": {
+        "discharged": true,
+        "is_lemma": true,
+        "expr": "\\A VARI \\in aliveNodes : ~(nodeLastWriter[VARI] = VARI) \\/ (~(nodeState[VARI] = \"invalid_write\"))",
+        "order": 41,
+        "depth": 4
+      },
+      "Inv4235_R0_1_I2_1": {
+        "discharged": true,
+        "is_lemma": true,
+        "expr": "\\A VARI \\in aliveNodes : \\A VARJ \\in aliveNodes : ~(nodeLastWriter[VARI] = VARJ) \\/ (~(nodeTS[VARI].version > nodeTS[VARJ].version))",
+        "order": 42,
+        "depth": 4
+      },
+      "Inv2672_R0_1_I3_2": {
+        "discharged": false,
+        "is_lemma": true,
+        "expr": "\\A VARI \\in aliveNodes : \\A VARMACKI \\in msgsACK : (VARMACKI.sender = VARI) \\/ (~(VARMACKI.epochID = epochID)) \\/ ((nodeLastWriter[VARI] \\in aliveNodes))",
+        "order": 43,
+        "depth": 4,
+        "failed": true
+      },
+      "Inv20394_R4_1_I3_0_HRcvInvAction": {
+        "ctis_remaining": 0,
+        "coi_vars": [
+          "msgsINV",
+          "msgsACK",
+          "nodeTS",
+          "nodeState",
+          "nodeLastWriteTS",
+          "aliveNodes",
+          "epochID"
+        ],
+        "num_grammar_preds": 58,
+        "is_action": true
+      },
+      "Inv5311_R0_2_I2_0": {
+        "discharged": true,
+        "is_lemma": true,
+        "expr": "\\A VARI \\in aliveNodes : \\A VARMINVI \\in msgsINV : ~(VARMINVI.sender = VARI) \\/ (~(greaterTS(VARMINVI.version, VARMINVI.tieBreaker, nodeLastWriteTS[VARI].version, nodeLastWriteTS[VARI].tieBreaker)))",
+        "order": 44,
+        "depth": 4
+      },
+      "Inv2285_R0_2_I2_1": {
+        "discharged": false,
+        "is_lemma": true,
+        "expr": "\\A VARI \\in aliveNodes : \\A VARMINVI \\in msgsINV : (greaterOrEqualTS(VARMINVI.version, VARMINVI.tieBreaker, nodeLastWriteTS[VARI].version, nodeLastWriteTS[VARI].tieBreaker)) \\/ (~(greaterOrEqualTS(VARMINVI.version, VARMINVI.tieBreaker, nodeTS[VARI].version, nodeTS[VARI].tieBreaker)))",
+        "order": 45,
+        "depth": 4
+      },
+      "Inv18602_R0_2_I3_2": {
+        "discharged": false,
+        "is_lemma": true,
+        "expr": "\\A VARI \\in aliveNodes : \\A VARMINVI \\in msgsINV : (greaterOrEqualTS(VARMINVI.version, VARMINVI.tieBreaker, nodeTS[VARI].version, nodeTS[VARI].tieBreaker)) \\/ (~(greaterTS(VARMINVI.version, VARMINVI.tieBreaker, nodeLastWriteTS[VARI].version, nodeLastWriteTS[VARI].tieBreaker))) \\/ (~(nodeState[VARI] \\in {\"write\", \"replay\"}))",
+        "order": 46,
+        "depth": 4
+      },
+      "Inv35173_R0_2_I3_3": {
+        "discharged": false,
+        "is_lemma": true,
+        "expr": "\\A VARI \\in aliveNodes : \\A VARMINVI \\in msgsINV : ~(equalTS(VARMINVI.version, VARMINVI.tieBreaker, nodeTS[VARI].version, nodeTS[VARI].tieBreaker)) \\/ (~(greaterTS(VARMINVI.version, VARMINVI.tieBreaker, nodeLastWriteTS[VARI].version, nodeLastWriteTS[VARI].tieBreaker)) \\/ (~(nodeState[VARI] \\in {\"write\", \"replay\"})))",
+        "order": 47,
+        "depth": 4
+      },
+      "Inv20394_R4_1_I3_0_NodeFailureAction": {
+        "ctis_remaining": 0,
+        "coi_vars": [
+          "msgsACK",
+          "nodeState",
+          "nodeLastWriteTS",
+          "aliveNodes",
+          "epochID"
+        ],
+        "num_grammar_preds": 25,
+        "is_action": true
+      },
+      "Inv19215_R4_1_I3_1_HCoordWriteReplayAction": {
+        "ctis_remaining": 0,
+        "coi_vars": [
+          "nodeState",
+          "nodeRcvedAcks",
+          "nodeWriteEpochID",
+          "aliveNodes",
+          "epochID"
+        ],
+        "num_grammar_preds": 26,
+        "is_action": true
+      },
+      "Inv12695_R1_0_I3_0": {
+        "discharged": false,
+        "is_lemma": true,
+        "expr": "\\A VARI \\in aliveNodes : \\A VARJ \\in aliveNodes : (nodeWriteEpochID[VARI] = epochID) \\/ ((receivedAllAcks(VARI) /\\ nodeRcvedAcks = nodeRcvedAcks)) \\/ (~(VARJ \\in nodeRcvedAcks[VARI]))",
+        "order": 48,
+        "depth": 4
+      },
+      "Inv19209_R1_1_I3_0": {
+        "discharged": false,
+        "is_lemma": true,
+        "expr": "\\A VARI \\in aliveNodes : \\A VARJ \\in aliveNodes : (receivedAllAcks(VARI) /\\ nodeRcvedAcks = nodeRcvedAcks) \\/ (~(VARJ \\in nodeRcvedAcks[VARI]) \\/ (~(nodeState[VARJ] = \"replay\")))",
+        "order": 49,
+        "depth": 4
+      },
+      "Inv19215_R4_1_I3_1_HRcvAckAction": {
+        "ctis_remaining": 0,
+        "coi_vars": [
+          "msgsACK",
+          "nodeState",
+          "nodeRcvedAcks",
+          "nodeLastWriteTS",
+          "aliveNodes",
+          "epochID"
+        ],
+        "num_grammar_preds": 31,
+        "is_action": true
+      },
+      "Inv21183_R1_1_I3_1": {
+        "discharged": false,
+        "is_lemma": true,
+        "expr": "\\A VARI \\in aliveNodes : \\A VARMACKI \\in msgsACK : ~(VARMACKI.sender = VARI) \\/ (~(greaterTS(VARMACKI.version, VARMACKI.tieBreaker, nodeLastWriteTS[VARI].version, nodeLastWriteTS[VARI].tieBreaker)) \\/ (~(nodeState[VARI] = \"replay\")))",
+        "order": 50,
+        "depth": 4
+      },
+      "Inv12658_R5_0_I3_0_HRcvAckAction": {
+        "ctis_remaining": 0,
+        "coi_vars": [
+          "msgsACK",
+          "nodeState",
+          "nodeRcvedAcks",
+          "nodeLastWriteTS",
+          "nodeWriteEpochID",
+          "aliveNodes",
+          "epochID"
+        ],
+        "num_grammar_preds": 35,
+        "is_action": true
+      },
+      "Inv21164_R6_0_I3_0_HCoordWriteReplayAction": {
+        "ctis_remaining": 0,
+        "coi_vars": [
+          "msgsACK",
+          "nodeTS",
+          "nodeState",
+          "nodeRcvedAcks",
+          "nodeLastWriteTS",
+          "nodeWriteEpochID",
+          "aliveNodes",
+          "epochID"
+        ],
+        "num_grammar_preds": 54,
+        "is_action": true
+      },
+      "Inv21164_R6_0_I3_0_HFollowerWriteReplayAction": {
+        "ctis_remaining": 0,
+        "coi_vars": [
+          "msgsACK",
+          "nodeTS",
+          "nodeState",
+          "nodeLastWriter",
+          "nodeLastWriteTS",
+          "aliveNodes"
+        ],
+        "num_grammar_preds": 48,
+        "is_action": true
+      },
+      "Inv21164_R6_0_I3_0_HRcvInvAction": {
+        "ctis_remaining": 0,
+        "coi_vars": [
+          "msgsINV",
+          "msgsACK",
+          "nodeTS",
+          "nodeState",
+          "nodeLastWriteTS",
+          "aliveNodes",
+          "epochID"
+        ],
+        "num_grammar_preds": 58,
+        "is_action": true
+      },
+      "Inv5645_R3_2_I2_0": {
+        "discharged": false,
+        "is_lemma": true,
+        "expr": "\\A VARI \\in aliveNodes : \\A VARMINVI \\in msgsINV : ~(equalTS(VARMINVI.version, VARMINVI.tieBreaker, nodeLastWriteTS[VARI].version, nodeLastWriteTS[VARI].tieBreaker)) \\/ (~(greaterTS(VARMINVI.version, VARMINVI.tieBreaker, nodeTS[VARI].version, nodeTS[VARI].tieBreaker)))",
+        "order": 51,
+        "depth": 4
+      },
+      "Inv2282_R3_2_I2_1": {
+        "discharged": false,
+        "is_lemma": true,
+        "expr": "\\A VARI \\in aliveNodes : \\A VARMINVI \\in msgsINV : (greaterOrEqualTS(VARMINVI.version, VARMINVI.tieBreaker, nodeLastWriteTS[VARI].version, nodeLastWriteTS[VARI].tieBreaker)) \\/ (~(equalTS(VARMINVI.version, VARMINVI.tieBreaker, nodeTS[VARI].version, nodeTS[VARI].tieBreaker)))",
+        "order": 52,
+        "depth": 4
+      },
+      "Inv9989_R3_2_I3_2": {
+        "discharged": false,
+        "is_lemma": true,
+        "expr": "\\A VARI \\in aliveNodes : \\A VARJ \\in aliveNodes : \\A VARMINVI \\in msgsINV : (VARMINVI.sender = VARJ) \\/ (~(VARMINVI.tieBreaker = nodeTS[VARI].tieBreaker)) \\/ (~(nodeTS[VARI].tieBreaker = VARJ))",
+        "order": 53,
+        "depth": 4
+      },
+      "Inv18297_R3_2_I3_3": {
+        "discharged": false,
+        "is_lemma": true,
+        "expr": "\\A VARI \\in aliveNodes : \\A VARMINVI \\in msgsINV : (greaterOrEqualTS(VARMINVI.version, VARMINVI.tieBreaker, nodeTS[VARI].version, nodeTS[VARI].tieBreaker)) \\/ (~(nodeTS[VARI].tieBreaker = VARI)) \\/ (~(greaterOrEqualTS(VARMINVI.version, VARMINVI.tieBreaker, nodeLastWriteTS[VARI].version, nodeLastWriteTS[VARI].tieBreaker)))",
+        "order": 54,
+        "depth": 4
+      },
+      "Inv6924_R3_2_I3_4": {
+        "discharged": false,
+        "is_lemma": true,
+        "expr": "\\A VARI \\in aliveNodes : \\A VARMACKI \\in msgsACK : (VARMACKI.version = nodeTS[VARI].version) \\/ (~(nodeState[VARI] = \"replay\")) \\/ (~(equalTS(VARMACKI.version, VARMACKI.tieBreaker, nodeLastWriteTS[VARI].version, nodeLastWriteTS[VARI].tieBreaker)))",
+        "order": 55,
+        "depth": 4
+      },
+      "Inv16981_R3_2_I3_5": {
+        "discharged": false,
+        "is_lemma": true,
+        "expr": "\\A VARI \\in aliveNodes : \\A VARMACKI \\in msgsACK : (greaterOrEqualTS(VARMACKI.version, VARMACKI.tieBreaker, nodeTS[VARI].version, nodeTS[VARI].tieBreaker)) \\/ (~(nodeState[VARI] \\in {\"write\", \"replay\"})) \\/ (~(greaterTS(VARMACKI.version, VARMACKI.tieBreaker, nodeLastWriteTS[VARI].version, nodeLastWriteTS[VARI].tieBreaker)))",
+        "order": 56,
+        "depth": 4
+      },
+      "Inv34753_R3_2_I3_6": {
+        "discharged": false,
+        "is_lemma": true,
+        "expr": "\\A VARI \\in aliveNodes : \\A VARMINVI \\in msgsINV : ~(VARMINVI.version < nodeTS[VARI].version) \\/ (~(greaterTS(VARMINVI.version, VARMINVI.tieBreaker, nodeLastWriteTS[VARI].version, nodeLastWriteTS[VARI].tieBreaker))) \\/ (~(nodeState[VARI] = \"replay\"))",
+        "order": 57,
+        "depth": 4
+      },
+      "Inv21164_R6_0_I3_0_HWriteAction": {
+        "ctis_remaining": 0,
+        "coi_vars": [
+          "msgsACK",
+          "nodeTS",
+          "nodeState",
+          "nodeLastWriteTS",
+          "aliveNodes"
+        ],
+        "num_grammar_preds": 42,
+        "is_action": true
+      },
+      "Inv383_R5_0_I2_0": {
+        "discharged": false,
+        "is_lemma": true,
+        "expr": "\\A VARI \\in aliveNodes : (nodeLastWriter[VARI] = VARI) \\/ (~(nodeState[VARI] \\in {\"write\", \"replay\"}))",
+        "order": 58,
+        "depth": 5
+      },
+      "Inv259_R7_1_I2_1_HCoordWriteReplayAction": {
+        "ctis_remaining": 0,
+        "coi_vars": [
+          "nodeTS",
+          "nodeState",
+          "nodeRcvedAcks",
+          "nodeLastWriter",
+          "nodeWriteEpochID",
+          "aliveNodes",
+          "epochID"
+        ],
+        "num_grammar_preds": 44,
+        "is_action": true
+      },
+      "Inv23625_R12_2_I3_0_HCoordWriteReplayAction": {
+        "ctis_remaining": 0,
+        "coi_vars": [
+          "nodeTS",
+          "nodeState",
+          "nodeRcvedAcks",
+          "nodeWriteEpochID",
+          "aliveNodes",
+          "epochID"
+        ],
+        "num_grammar_preds": 38,
+        "is_action": true
+      },
+      "Inv23625_R12_2_I3_0_HFollowerWriteReplayAction": {
+        "ctis_remaining": 0,
+        "coi_vars": [
+          "nodeTS",
+          "nodeState",
+          "nodeLastWriter",
+          "aliveNodes"
+        ],
+        "num_grammar_preds": 36,
+        "is_action": true
+      },
+      "Inv23625_R12_2_I3_0_HWriteAction": {
+        "ctis_remaining": 0,
+        "coi_vars": [
+          "nodeTS",
+          "nodeState",
+          "aliveNodes"
+        ],
+        "num_grammar_preds": 30,
+        "is_action": true
+      },
+      "Inv11488_R6_2_I3_0": {
+        "discharged": false,
+        "is_lemma": true,
+        "expr": "\\A VARI \\in aliveNodes : \\A VARJ \\in aliveNodes : (nodeState[VARJ] = \"replay\") \\/ (~(nodeTS[VARI].tieBreaker = VARJ)) \\/ (~(nodeState[VARI] = \"replay\"))",
+        "order": 59,
+        "depth": 5
+      },
+      "Inv24211_R12_2_I3_1_HCoordWriteReplayAction": {
+        "ctis_remaining": 0,
+        "coi_vars": [
+          "msgsINV",
+          "nodeTS",
+          "nodeState",
+          "nodeRcvedAcks",
+          "nodeWriteEpochID",
+          "aliveNodes",
+          "epochID"
+        ],
+        "num_grammar_preds": 49,
+        "is_action": true
+      },
+      "Inv24211_R12_2_I3_1_HFollowerWriteReplayAction": {
+        "ctis_remaining": 0,
+        "coi_vars": [
+          "msgsINV",
+          "nodeTS",
+          "nodeState",
+          "nodeLastWriter",
+          "aliveNodes",
+          "epochID"
+        ],
+        "num_grammar_preds": 47,
+        "is_action": true
+      },
+      "Inv24211_R12_2_I3_1_HWriteAction": {
+        "ctis_remaining": 0,
+        "coi_vars": [
+          "msgsINV",
+          "nodeTS",
+          "nodeState",
+          "aliveNodes",
+          "epochID"
+        ],
+        "num_grammar_preds": 41,
+        "is_action": true
+      },
+      "Inv21647_R13_1_I3_0_HRcvAckAction": {
+        "ctis_remaining": 0,
+        "coi_vars": [
+          "msgsACK",
+          "nodeTS",
+          "nodeState",
+          "nodeRcvedAcks",
+          "nodeLastWriteTS",
+          "aliveNodes",
+          "epochID"
+        ],
+        "num_grammar_preds": 50,
+        "is_action": true
+      },
+      "Inv1681_R0_0_I2_0_HRcvInvAction": {
+        "ctis_remaining": 0,
+        "coi_vars": [
+          "msgsINV",
+          "msgsACK",
+          "nodeTS",
+          "nodeLastWriteTS",
+          "aliveNodes",
+          "epochID"
+        ],
+        "num_grammar_preds": 40,
+        "is_action": true
+      },
+      "Inv1794_R9_0_I2_0": {
+        "discharged": false,
+        "is_lemma": true,
+        "expr": "\\A VARI \\in aliveNodes : \\A VARMINVI \\in msgsINV : (greaterTS(VARMINVI.version, VARMINVI.tieBreaker, nodeLastWriteTS[VARI].version, nodeLastWriteTS[VARI].tieBreaker)) \\/ (~(greaterTS(VARMINVI.version, VARMINVI.tieBreaker, nodeTS[VARI].version, nodeTS[VARI].tieBreaker)))",
+        "order": 60,
+        "depth": 5
+      },
+      "Inv2672_R0_1_I3_2_HRcvInvAction": {
+        "ctis_remaining": 1,
+        "coi_vars": [
+          "msgsINV",
+          "msgsACK",
+          "nodeTS",
+          "nodeLastWriter",
+          "aliveNodes",
+          "epochID"
+        ],
+        "num_grammar_preds": 40,
+        "is_action": true
+      },
+      "Inv22931_R12_0_I3_0": {
+        "discharged": false,
+        "is_lemma": true,
+        "expr": "\\A VARI \\in aliveNodes : \\A VARJ \\in aliveNodes : (nodeLastWriter[VARJ] \\in aliveNodes) \\/ ((nodeTS[VARI].tieBreaker = VARJ) \\/ (~(nodeLastWriter[VARI] = VARJ)))",
+        "order": 61,
+        "depth": 5
+      },
+      "Inv11149_R12_0_I3_1": {
+        "discharged": false,
+        "is_lemma": true,
+        "expr": "\\A VARI \\in aliveNodes : \\A VARMINVI \\in msgsINV : (VARMINVI.sender = VARI) \\/ (~(equalTS(VARMINVI.version, VARMINVI.tieBreaker, nodeTS[VARI].version, nodeTS[VARI].tieBreaker)) \\/ (~(nodeTS[VARI].tieBreaker = VARI)))",
+        "order": 62,
+        "depth": 5
+      },
+      "Inv22598_R12_0_I3_2": {
+        "discharged": false,
+        "is_lemma": true,
+        "expr": "\\A VARI \\in aliveNodes : \\A VARMINVI \\in msgsINV : (nodeLastWriter[VARI] \\in aliveNodes) \\/ (~(VARMINVI.sender = VARI) \\/ (~(VARMINVI.tieBreaker = nodeTS[VARI].tieBreaker)))",
+        "order": 63,
+        "depth": 5
+      },
+      "Inv5311_R0_2_I2_0_HCoordWriteReplayAction": {
+        "ctis_remaining": 0,
+        "coi_vars": [
+          "msgsINV",
+          "nodeTS",
+          "nodeState",
+          "nodeRcvedAcks",
+          "nodeLastWriteTS",
+          "nodeWriteEpochID",
+          "aliveNodes",
+          "epochID"
+        ],
+        "num_grammar_preds": 52,
+        "is_action": true
+      },
+      "Inv5311_R0_2_I2_0_HFollowerWriteReplayAction": {
+        "ctis_remaining": 0,
+        "coi_vars": [
+          "msgsINV",
+          "nodeTS",
+          "nodeState",
+          "nodeLastWriter",
+          "nodeLastWriteTS",
+          "aliveNodes",
+          "epochID"
+        ],
+        "num_grammar_preds": 50,
+        "is_action": true
+      },
+      "Inv5311_R0_2_I2_0_HWriteAction": {
+        "ctis_remaining": 0,
+        "coi_vars": [
+          "msgsINV",
+          "nodeTS",
+          "nodeState",
+          "nodeLastWriteTS",
+          "aliveNodes",
+          "epochID"
+        ],
+        "num_grammar_preds": 44,
+        "is_action": true
+      }
+    },
+    "safety": "HConsistent",
+    "curr_node": "Inv5311_R0_2_I2_0_HWriteAction"
+  },
+  "strengthening_conjuncts": [
+    [
+      "Inv45_R0_0_I1_0",
+      "\\A VARI \\in aliveNodes : \\A VARMVALI \\in msgsVAL : ~(greaterTS(VARMVALI.version, VARMVALI.tieBreaker, nodeTS[VARI].version, nodeTS[VARI].tieBreaker))",
+      "~(greaterTS(VARMVALI.version, VARMVALI.tieBreaker, nodeTS[VARI].version, nodeTS[VARI].tieBreaker))"
+    ],
+    [
+      "Inv532_R0_0_I2_1",
+      "\\A VARI \\in aliveNodes : \\A VARJ \\in aliveNodes : (greaterOrEqualTS(nodeTS[VARI].version, nodeTS[VARI].tieBreaker, nodeTS[VARJ].version, nodeTS[VARJ].tieBreaker)) \\/ (~(nodeState[VARJ] = \"valid\"))",
+      "(greaterOrEqualTS(nodeTS[VARI].version, nodeTS[VARI].tieBreaker, nodeTS[VARJ].version, nodeTS[VARJ].tieBreaker)) \\/ (~(nodeState[VARJ] = \"valid\"))"
+    ],
+    [
+      "Inv1236_R0_1_I2_0",
+      "\\A VARI \\in aliveNodes : (nodeTS[VARI].tieBreaker = VARI) \\/ (~(nodeState[VARI] = \"write\"))",
+      "(nodeTS[VARI].tieBreaker = VARI) \\/ (~(nodeState[VARI] = \"write\"))"
+    ],
+    [
+      "Inv2082_R0_1_I2_1",
+      "\\A VARI \\in aliveNodes : \\A VARJ \\in aliveNodes : ~(nodeTS[VARI].tieBreaker = VARJ) \\/ (~(nodeTS[VARI].version > nodeTS[VARJ].version))",
+      "~(nodeTS[VARI].tieBreaker = VARJ) \\/ (~(nodeTS[VARI].version > nodeTS[VARJ].version))"
+    ],
+    [
+      "Inv1697_R0_1_I2_2",
+      "\\A VARI \\in aliveNodes : ~(nodeState[VARI] = \"invalid\") \\/ (~(nodeTS[VARI].tieBreaker = VARI))",
+      "~(nodeState[VARI] = \"invalid\") \\/ (~(nodeTS[VARI].tieBreaker = VARI))"
+    ],
+    [
+      "Inv2896_R0_1_I3_3",
+      "\\A VARI \\in aliveNodes : \\A VARJ \\in aliveNodes : (greaterOrEqualTS(nodeTS[VARI].version, nodeTS[VARI].tieBreaker, nodeTS[VARJ].version, nodeTS[VARJ].tieBreaker)) \\/ (~(VARI \\in nodeRcvedAcks[VARJ])) \\/ (~(nodeState[VARJ] = \"replay\"))",
+      "(greaterOrEqualTS(nodeTS[VARI].version, nodeTS[VARI].tieBreaker, nodeTS[VARJ].version, nodeTS[VARJ].tieBreaker)) \\/ (~(VARI \\in nodeRcvedAcks[VARJ])) \\/ (~(nodeState[VARJ] = \"replay\"))"
+    ],
+    [
+      "Inv22583_R0_1_I3_4",
+      "\\A VARI \\in aliveNodes : \\A VARJ \\in aliveNodes : ~(VARI \\in nodeRcvedAcks[VARJ]) \\/ (~(nodeState[VARI] = \"valid\")) \\/ (~(nodeState[VARJ] = \"write\"))",
+      "~(VARI \\in nodeRcvedAcks[VARJ]) \\/ (~(nodeState[VARI] = \"valid\")) \\/ (~(nodeState[VARJ] = \"write\"))"
+    ],
+    [
+      "Inv2892_R1_0_I2_0",
+      "\\A VARI \\in aliveNodes : ~(nodeState[VARI] = \"invalid_write\") \\/ (~(nodeTS[VARI].tieBreaker = VARI))",
+      "~(nodeState[VARI] = \"invalid_write\") \\/ (~(nodeTS[VARI].tieBreaker = VARI))"
+    ],
+    [
+      "Inv2726_R1_0_I2_1",
+      "\\A VARI \\in aliveNodes : \\A VARMVALI \\in msgsVAL : ~(equalTS(VARMVALI.version, VARMVALI.tieBreaker, nodeTS[VARI].version, nodeTS[VARI].tieBreaker)) \\/ (~(nodeState[VARI] = \"write\"))",
+      "~(equalTS(VARMVALI.version, VARMVALI.tieBreaker, nodeTS[VARI].version, nodeTS[VARI].tieBreaker)) \\/ (~(nodeState[VARI] = \"write\"))"
+    ],
+    [
+      "Inv9819_R1_0_I3_2",
+      "\\A VARI \\in aliveNodes : \\A VARJ \\in aliveNodes : (greaterOrEqualTS(nodeTS[VARI].version, nodeTS[VARI].tieBreaker, nodeTS[VARJ].version, nodeTS[VARJ].tieBreaker)) \\/ (~(VARI \\in nodeRcvedAcks[VARJ])) \\/ (~(nodeState[VARJ] \\in {\"write\", \"replay\"}))",
+      "(greaterOrEqualTS(nodeTS[VARI].version, nodeTS[VARI].tieBreaker, nodeTS[VARJ].version, nodeTS[VARJ].tieBreaker)) \\/ (~(VARI \\in nodeRcvedAcks[VARJ])) \\/ (~(nodeState[VARJ] \\in {\"write\", \"replay\"}))"
+    ],
+    [
+      "Inv3205_R2_1_I3_0",
+      "\\A VARI \\in aliveNodes : \\A VARJ \\in aliveNodes : (greaterOrEqualTS(nodeTS[VARI].version, nodeTS[VARI].tieBreaker, nodeTS[VARJ].version, nodeTS[VARJ].tieBreaker)) \\/ (~(nodeState[VARJ] \\in {\"write\", \"replay\"})) \\/ (~(VARI \\in nodeRcvedAcks[VARJ]))",
+      "(greaterOrEqualTS(nodeTS[VARI].version, nodeTS[VARI].tieBreaker, nodeTS[VARJ].version, nodeTS[VARJ].tieBreaker)) \\/ (~(nodeState[VARJ] \\in {\"write\", \"replay\"})) \\/ (~(VARI \\in nodeRcvedAcks[VARJ]))"
+    ],
+    [
+      "Inv1768_R6_0_I2_0",
+      "\\A VARI \\in aliveNodes : (nodeWriteEpochID[VARI] < epochID) \\/ ((nodeWriteEpochID[VARI] = epochID))",
+      "(nodeWriteEpochID[VARI] < epochID) \\/ ((nodeWriteEpochID[VARI] = epochID))"
+    ],
+    [
+      "Inv1818_R6_0_I2_1",
+      "\\A VARI \\in aliveNodes : (nodeWriteEpochID[VARI] = epochID) \\/ (~(nodeState[VARI] = \"replay\"))",
+      "(nodeWriteEpochID[VARI] = epochID) \\/ (~(nodeState[VARI] = \"replay\"))"
+    ],
+    [
+      "Inv23272_R6_0_I3_2",
+      "\\A VARI \\in aliveNodes : \\A VARJ \\in aliveNodes : (nodeTS[VARI].version >= nodeTS[VARJ].version) \\/ (~(nodeState[VARJ] = \"write\")) \\/ (~(VARI \\in nodeRcvedAcks[VARJ]))",
+      "(nodeTS[VARI].version >= nodeTS[VARJ].version) \\/ (~(nodeState[VARJ] = \"write\")) \\/ (~(VARI \\in nodeRcvedAcks[VARJ]))"
+    ],
+    [
+      "Inv52_R6_1_I1_0",
+      "\\A VARMACKI \\in msgsACK : ~(VARMACKI.epochID > epochID)",
+      "~(VARMACKI.epochID > epochID)"
+    ],
+    [
+      "Inv3811_R6_1_I2_1",
+      "\\A VARI \\in aliveNodes : \\A VARMACKI \\in msgsACK : ~(VARMACKI.sender = VARI) \\/ (~(greaterTS(VARMACKI.version, VARMACKI.tieBreaker, nodeTS[VARI].version, nodeTS[VARI].tieBreaker)))",
+      "~(VARMACKI.sender = VARI) \\/ (~(greaterTS(VARMACKI.version, VARMACKI.tieBreaker, nodeTS[VARI].version, nodeTS[VARI].tieBreaker)))"
+    ],
+    [
+      "Inv9735_R6_1_I4_2",
+      "\\A VARI \\in aliveNodes : \\A VARMACKI \\in msgsACK : (VARMACKI.sender = VARI) \\/ (~(equalTS(VARMACKI.version, VARMACKI.tieBreaker, nodeLastWriteTS[VARI].version, nodeLastWriteTS[VARI].tieBreaker)) \\/ (~(nodeState[VARI] \\in {\"write\", \"replay\"}))) \\/ ((VARMACKI.version = nodeTS[VARI].version))",
+      "(VARMACKI.sender = VARI) \\/ (~(equalTS(VARMACKI.version, VARMACKI.tieBreaker, nodeLastWriteTS[VARI].version, nodeLastWriteTS[VARI].tieBreaker)) \\/ (~(nodeState[VARI] \\in {\"write\", \"replay\"}))) \\/ ((VARMACKI.version = nodeTS[VARI].version))"
+    ],
+    [
+      "Inv10078_R7_0_I3_0",
+      "\\A VARI \\in aliveNodes : \\A VARJ \\in aliveNodes : (greaterOrEqualTS(nodeTS[VARI].version, nodeTS[VARI].tieBreaker, nodeTS[VARJ].version, nodeTS[VARJ].tieBreaker)) \\/ (~(nodeState[VARJ] \\in {\"write\", \"valid\"})) \\/ (~(VARI \\in nodeRcvedAcks[VARJ]))",
+      "(greaterOrEqualTS(nodeTS[VARI].version, nodeTS[VARI].tieBreaker, nodeTS[VARJ].version, nodeTS[VARJ].tieBreaker)) \\/ (~(nodeState[VARJ] \\in {\"write\", \"valid\"})) \\/ (~(VARI \\in nodeRcvedAcks[VARJ]))"
+    ],
+    [
+      "Inv8819_R7_1_I3_0",
+      "\\A VARI \\in aliveNodes : \\A VARJ \\in aliveNodes : (receivedAllAcks(VARI) /\\ nodeRcvedAcks = nodeRcvedAcks) \\/ (~(nodeState[VARJ] = \"replay\")) \\/ (~(VARJ \\in nodeRcvedAcks[VARI]))",
+      "(receivedAllAcks(VARI) /\\ nodeRcvedAcks = nodeRcvedAcks) \\/ (~(nodeState[VARJ] = \"replay\")) \\/ (~(VARJ \\in nodeRcvedAcks[VARI]))"
+    ],
+    [
+      "Inv8732_R7_1_I3_1",
+      "\\A VARI \\in aliveNodes : \\A VARJ \\in aliveNodes : (receivedAllAcks(VARI) /\\ nodeRcvedAcks = nodeRcvedAcks) \\/ (~(nodeState[VARI] = \"replay\")) \\/ (~(VARJ \\in nodeRcvedAcks[VARI]))",
+      "(receivedAllAcks(VARI) /\\ nodeRcvedAcks = nodeRcvedAcks) \\/ (~(nodeState[VARI] = \"replay\")) \\/ (~(VARJ \\in nodeRcvedAcks[VARI]))"
+    ],
+    [
+      "Inv30152_R7_1_I4_2",
+      "\\A VARI \\in aliveNodes : \\A VARJ \\in aliveNodes : ~(VARI \\in nodeRcvedAcks[VARJ]) \\/ (~(nodeState[VARJ] = \"write\")) \\/ (~(nodeState[VARI] \\in {\"write\", \"replay\"})) \\/ (~(VARJ \\in nodeRcvedAcks[VARI]))",
+      "~(VARI \\in nodeRcvedAcks[VARJ]) \\/ (~(nodeState[VARJ] = \"write\")) \\/ (~(nodeState[VARI] \\in {\"write\", \"replay\"})) \\/ (~(VARJ \\in nodeRcvedAcks[VARI]))"
+    ],
+    [
+      "Inv30445_R9_0_I3_0",
+      "\\A VARI \\in aliveNodes : \\A VARJ \\in aliveNodes : ~(nodeState[VARI] = \"replay\") \\/ (~(nodeState[VARJ] = \"write\")) \\/ (~(nodeTS[VARI] = nodeTS[VARJ]))",
+      "~(nodeState[VARI] = \"replay\") \\/ (~(nodeState[VARJ] = \"write\")) \\/ (~(nodeTS[VARI] = nodeTS[VARJ]))"
+    ],
+    [
+      "Inv8221_R13_0_I3_0",
+      "\\A VARI \\in aliveNodes : \\A VARJ \\in aliveNodes : (nodeWriteEpochID[VARI] < epochID) \\/ ((nodeWriteEpochID[VARJ] = epochID) \\/ (~(nodeState[VARI] = \"invalid_write\")))",
+      "(nodeWriteEpochID[VARI] < epochID) \\/ ((nodeWriteEpochID[VARJ] = epochID) \\/ (~(nodeState[VARI] = \"invalid_write\")))"
+    ],
+    [
+      "Inv8240_R13_0_I3_1",
+      "\\A VARI \\in aliveNodes : \\A VARJ \\in aliveNodes : (nodeWriteEpochID[VARI] < epochID) \\/ (~(nodeState[VARI] = \"invalid\")) \\/ ((nodeWriteEpochID[VARJ] = epochID))",
+      "(nodeWriteEpochID[VARI] < epochID) \\/ (~(nodeState[VARI] = \"invalid\")) \\/ ((nodeWriteEpochID[VARJ] = epochID))"
+    ],
+    [
+      "Inv66_R2_0_I1_0",
+      "\\A VARMINVI \\in msgsINV : ~(VARMINVI.epochID > epochID)",
+      "~(VARMINVI.epochID > epochID)"
+    ],
+    [
+      "Inv5308_R2_0_I2_1",
+      "\\A VARI \\in aliveNodes : \\A VARMINVI \\in msgsINV : ~(VARMINVI.sender = VARI) \\/ (~(greaterTS(VARMINVI.version, VARMINVI.tieBreaker, nodeTS[VARI].version, nodeTS[VARI].tieBreaker)))",
+      "~(VARMINVI.sender = VARI) \\/ (~(greaterTS(VARMINVI.version, VARMINVI.tieBreaker, nodeTS[VARI].version, nodeTS[VARI].tieBreaker)))"
+    ],
+    [
+      "Inv10247_R2_0_I3_2",
+      "\\A VARI \\in aliveNodes : \\A VARJ \\in aliveNodes : \\A VARMINVI \\in msgsINV : (VARMINVI.sender = VARJ) \\/ (~(nodeTS[VARI].tieBreaker = VARJ)) \\/ (~(VARMINVI.tieBreaker = nodeTS[VARI].tieBreaker))",
+      "(VARMINVI.sender = VARJ) \\/ (~(nodeTS[VARI].tieBreaker = VARJ)) \\/ (~(VARMINVI.tieBreaker = nodeTS[VARI].tieBreaker))"
+    ],
+    [
+      "Inv1503_R3_2_I2_0",
+      "\\A VARI \\in aliveNodes : \\A VARJ \\in aliveNodes : (nodeTS[VARI].version >= nodeTS[VARJ].version) \\/ (~(nodeState[VARJ] = \"valid\"))",
+      "(nodeTS[VARI].version >= nodeTS[VARJ].version) \\/ (~(nodeState[VARJ] = \"valid\"))"
+    ],
+    [
+      "Inv12797_R4_0_I3_0",
+      "\\A VARI \\in aliveNodes : \\A VARJ \\in aliveNodes : (nodeWriteEpochID[VARI] = epochID) \\/ (~(VARI \\in nodeRcvedAcks[VARJ])) \\/ ((receivedAllAcks(VARJ) /\\ nodeRcvedAcks = nodeRcvedAcks))",
+      "(nodeWriteEpochID[VARI] = epochID) \\/ (~(VARI \\in nodeRcvedAcks[VARJ])) \\/ ((receivedAllAcks(VARJ) /\\ nodeRcvedAcks = nodeRcvedAcks))"
+    ],
+    [
+      "Inv20394_R4_1_I3_0",
+      "\\A VARI \\in aliveNodes : \\A VARMACKI \\in msgsACK : ~(VARMACKI.epochID = epochID) \\/ (~(nodeState[VARI] = \"replay\")) \\/ (~(greaterTS(VARMACKI.version, VARMACKI.tieBreaker, nodeLastWriteTS[VARI].version, nodeLastWriteTS[VARI].tieBreaker)))",
+      "~(VARMACKI.epochID = epochID) \\/ (~(nodeState[VARI] = \"replay\")) \\/ (~(greaterTS(VARMACKI.version, VARMACKI.tieBreaker, nodeLastWriteTS[VARI].version, nodeLastWriteTS[VARI].tieBreaker)))"
+    ],
+    [
+      "Inv19215_R4_1_I3_1",
+      "\\A VARI \\in aliveNodes : \\A VARJ \\in aliveNodes : (receivedAllAcks(VARI) /\\ nodeRcvedAcks = nodeRcvedAcks) \\/ (~(VARJ \\in nodeRcvedAcks[VARI]) \\/ (~(nodeState[VARI] = \"replay\")))",
+      "(receivedAllAcks(VARI) /\\ nodeRcvedAcks = nodeRcvedAcks) \\/ (~(VARJ \\in nodeRcvedAcks[VARI]) \\/ (~(nodeState[VARI] = \"replay\")))"
+    ],
+    [
+      "Inv12658_R5_0_I3_0",
+      "\\A VARI \\in aliveNodes : \\A VARJ \\in aliveNodes : (nodeWriteEpochID[VARI] = epochID) \\/ (~(VARJ \\in nodeRcvedAcks[VARI])) \\/ ((receivedAllAcks(VARI) /\\ nodeRcvedAcks = nodeRcvedAcks))",
+      "(nodeWriteEpochID[VARI] = epochID) \\/ (~(VARJ \\in nodeRcvedAcks[VARI])) \\/ ((receivedAllAcks(VARI) /\\ nodeRcvedAcks = nodeRcvedAcks))"
+    ],
+    [
+      "Inv21164_R6_0_I3_0",
+      "\\A VARI \\in aliveNodes : \\A VARMACKI \\in msgsACK : ~(VARMACKI.sender = VARI) \\/ (~(nodeState[VARI] \\in {\"write\", \"replay\"})) \\/ (~(greaterTS(VARMACKI.version, VARMACKI.tieBreaker, nodeLastWriteTS[VARI].version, nodeLastWriteTS[VARI].tieBreaker)))",
+      "~(VARMACKI.sender = VARI) \\/ (~(nodeState[VARI] \\in {\"write\", \"replay\"})) \\/ (~(greaterTS(VARMACKI.version, VARMACKI.tieBreaker, nodeLastWriteTS[VARI].version, nodeLastWriteTS[VARI].tieBreaker)))"
+    ],
+    [
+      "Inv177_R7_1_I2_0",
+      "\\A VARI \\in aliveNodes : (nodeLastWriter[VARI] = VARI) \\/ (~(nodeState[VARI] = \"write\"))",
+      "(nodeLastWriter[VARI] = VARI) \\/ (~(nodeState[VARI] = \"write\"))"
+    ],
+    [
+      "Inv259_R7_1_I2_1",
+      "\\A VARI \\in aliveNodes : \\A VARJ \\in aliveNodes : (nodeLastWriter[VARI] = VARJ) \\/ (~(nodeTS[VARI].tieBreaker = VARJ))",
+      "(nodeLastWriter[VARI] = VARJ) \\/ (~(nodeTS[VARI].tieBreaker = VARJ))"
+    ],
+    [
+      "Inv23625_R12_2_I3_0",
+      "\\A VARI \\in aliveNodes : \\A VARJ \\in aliveNodes : (nodeTS[VARI] = nodeTS[VARJ]) \\/ (~(nodeTS[VARI].tieBreaker = VARJ)) \\/ (~(nodeState[VARI] = \"replay\"))",
+      "(nodeTS[VARI] = nodeTS[VARJ]) \\/ (~(nodeTS[VARI].tieBreaker = VARJ)) \\/ (~(nodeState[VARI] = \"replay\"))"
+    ],
+    [
+      "Inv24211_R12_2_I3_1",
+      "\\A VARI \\in aliveNodes : \\A VARJ \\in aliveNodes : \\A VARMINVI \\in msgsINV : (nodeTS[VARI].tieBreaker <= nodeTS[VARJ].tieBreaker) \\/ (~(VARMINVI.version < nodeTS[VARI].version) \\/ (~(nodeTS[VARI].tieBreaker = VARJ)))",
+      "(nodeTS[VARI].tieBreaker <= nodeTS[VARJ].tieBreaker) \\/ (~(VARMINVI.version < nodeTS[VARI].version) \\/ (~(nodeTS[VARI].tieBreaker = VARJ)))"
+    ],
+    [
+      "Inv21647_R13_1_I3_0",
+      "\\A VARI \\in aliveNodes : \\A VARJ \\in aliveNodes : (nodeTS[VARI].version >= nodeTS[VARJ].version) \\/ (~(VARI \\in nodeRcvedAcks[VARJ]) \\/ (~(nodeState[VARJ] \\in {\"write\", \"replay\"})))",
+      "(nodeTS[VARI].version >= nodeTS[VARJ].version) \\/ (~(VARI \\in nodeRcvedAcks[VARJ]) \\/ (~(nodeState[VARJ] \\in {\"write\", \"replay\"})))"
+    ],
+    [
+      "Inv1681_R0_0_I2_0",
+      "\\A VARI \\in aliveNodes : \\A VARMACKI \\in msgsACK : (greaterTS(VARMACKI.version, VARMACKI.tieBreaker, nodeLastWriteTS[VARI].version, nodeLastWriteTS[VARI].tieBreaker)) \\/ (~(greaterTS(VARMACKI.version, VARMACKI.tieBreaker, nodeTS[VARI].version, nodeTS[VARI].tieBreaker)))",
+      "(greaterTS(VARMACKI.version, VARMACKI.tieBreaker, nodeLastWriteTS[VARI].version, nodeLastWriteTS[VARI].tieBreaker)) \\/ (~(greaterTS(VARMACKI.version, VARMACKI.tieBreaker, nodeTS[VARI].version, nodeTS[VARI].tieBreaker)))"
+    ],
+    [
+      "Inv4179_R0_1_I2_0",
+      "\\A VARI \\in aliveNodes : ~(nodeLastWriter[VARI] = VARI) \\/ (~(nodeState[VARI] = \"invalid_write\"))",
+      "~(nodeLastWriter[VARI] = VARI) \\/ (~(nodeState[VARI] = \"invalid_write\"))"
+    ],
+    [
+      "Inv4235_R0_1_I2_1",
+      "\\A VARI \\in aliveNodes : \\A VARJ \\in aliveNodes : ~(nodeLastWriter[VARI] = VARJ) \\/ (~(nodeTS[VARI].version > nodeTS[VARJ].version))",
+      "~(nodeLastWriter[VARI] = VARJ) \\/ (~(nodeTS[VARI].version > nodeTS[VARJ].version))"
+    ],
+    [
+      "Inv2672_R0_1_I3_2",
+      "\\A VARI \\in aliveNodes : \\A VARMACKI \\in msgsACK : (VARMACKI.sender = VARI) \\/ (~(VARMACKI.epochID = epochID)) \\/ ((nodeLastWriter[VARI] \\in aliveNodes))",
+      "(VARMACKI.sender = VARI) \\/ (~(VARMACKI.epochID = epochID)) \\/ ((nodeLastWriter[VARI] \\in aliveNodes))"
+    ],
+    [
+      "Inv5311_R0_2_I2_0",
+      "\\A VARI \\in aliveNodes : \\A VARMINVI \\in msgsINV : ~(VARMINVI.sender = VARI) \\/ (~(greaterTS(VARMINVI.version, VARMINVI.tieBreaker, nodeLastWriteTS[VARI].version, nodeLastWriteTS[VARI].tieBreaker)))",
+      "~(VARMINVI.sender = VARI) \\/ (~(greaterTS(VARMINVI.version, VARMINVI.tieBreaker, nodeLastWriteTS[VARI].version, nodeLastWriteTS[VARI].tieBreaker)))"
+    ],
+    [
+      "Inv2285_R0_2_I2_1",
+      "\\A VARI \\in aliveNodes : \\A VARMINVI \\in msgsINV : (greaterOrEqualTS(VARMINVI.version, VARMINVI.tieBreaker, nodeLastWriteTS[VARI].version, nodeLastWriteTS[VARI].tieBreaker)) \\/ (~(greaterOrEqualTS(VARMINVI.version, VARMINVI.tieBreaker, nodeTS[VARI].version, nodeTS[VARI].tieBreaker)))",
+      "(greaterOrEqualTS(VARMINVI.version, VARMINVI.tieBreaker, nodeLastWriteTS[VARI].version, nodeLastWriteTS[VARI].tieBreaker)) \\/ (~(greaterOrEqualTS(VARMINVI.version, VARMINVI.tieBreaker, nodeTS[VARI].version, nodeTS[VARI].tieBreaker)))"
+    ],
+    [
+      "Inv18602_R0_2_I3_2",
+      "\\A VARI \\in aliveNodes : \\A VARMINVI \\in msgsINV : (greaterOrEqualTS(VARMINVI.version, VARMINVI.tieBreaker, nodeTS[VARI].version, nodeTS[VARI].tieBreaker)) \\/ (~(greaterTS(VARMINVI.version, VARMINVI.tieBreaker, nodeLastWriteTS[VARI].version, nodeLastWriteTS[VARI].tieBreaker))) \\/ (~(nodeState[VARI] \\in {\"write\", \"replay\"}))",
+      "(greaterOrEqualTS(VARMINVI.version, VARMINVI.tieBreaker, nodeTS[VARI].version, nodeTS[VARI].tieBreaker)) \\/ (~(greaterTS(VARMINVI.version, VARMINVI.tieBreaker, nodeLastWriteTS[VARI].version, nodeLastWriteTS[VARI].tieBreaker))) \\/ (~(nodeState[VARI] \\in {\"write\", \"replay\"}))"
+    ],
+    [
+      "Inv35173_R0_2_I3_3",
+      "\\A VARI \\in aliveNodes : \\A VARMINVI \\in msgsINV : ~(equalTS(VARMINVI.version, VARMINVI.tieBreaker, nodeTS[VARI].version, nodeTS[VARI].tieBreaker)) \\/ (~(greaterTS(VARMINVI.version, VARMINVI.tieBreaker, nodeLastWriteTS[VARI].version, nodeLastWriteTS[VARI].tieBreaker)) \\/ (~(nodeState[VARI] \\in {\"write\", \"replay\"})))",
+      "~(equalTS(VARMINVI.version, VARMINVI.tieBreaker, nodeTS[VARI].version, nodeTS[VARI].tieBreaker)) \\/ (~(greaterTS(VARMINVI.version, VARMINVI.tieBreaker, nodeLastWriteTS[VARI].version, nodeLastWriteTS[VARI].tieBreaker)) \\/ (~(nodeState[VARI] \\in {\"write\", \"replay\"})))"
+    ],
+    [
+      "Inv12695_R1_0_I3_0",
+      "\\A VARI \\in aliveNodes : \\A VARJ \\in aliveNodes : (nodeWriteEpochID[VARI] = epochID) \\/ ((receivedAllAcks(VARI) /\\ nodeRcvedAcks = nodeRcvedAcks)) \\/ (~(VARJ \\in nodeRcvedAcks[VARI]))",
+      "(nodeWriteEpochID[VARI] = epochID) \\/ ((receivedAllAcks(VARI) /\\ nodeRcvedAcks = nodeRcvedAcks)) \\/ (~(VARJ \\in nodeRcvedAcks[VARI]))"
+    ],
+    [
+      "Inv19209_R1_1_I3_0",
+      "\\A VARI \\in aliveNodes : \\A VARJ \\in aliveNodes : (receivedAllAcks(VARI) /\\ nodeRcvedAcks = nodeRcvedAcks) \\/ (~(VARJ \\in nodeRcvedAcks[VARI]) \\/ (~(nodeState[VARJ] = \"replay\")))",
+      "(receivedAllAcks(VARI) /\\ nodeRcvedAcks = nodeRcvedAcks) \\/ (~(VARJ \\in nodeRcvedAcks[VARI]) \\/ (~(nodeState[VARJ] = \"replay\")))"
+    ],
+    [
+      "Inv21183_R1_1_I3_1",
+      "\\A VARI \\in aliveNodes : \\A VARMACKI \\in msgsACK : ~(VARMACKI.sender = VARI) \\/ (~(greaterTS(VARMACKI.version, VARMACKI.tieBreaker, nodeLastWriteTS[VARI].version, nodeLastWriteTS[VARI].tieBreaker)) \\/ (~(nodeState[VARI] = \"replay\")))",
+      "~(VARMACKI.sender = VARI) \\/ (~(greaterTS(VARMACKI.version, VARMACKI.tieBreaker, nodeLastWriteTS[VARI].version, nodeLastWriteTS[VARI].tieBreaker)) \\/ (~(nodeState[VARI] = \"replay\")))"
+    ],
+    [
+      "Inv5645_R3_2_I2_0",
+      "\\A VARI \\in aliveNodes : \\A VARMINVI \\in msgsINV : ~(equalTS(VARMINVI.version, VARMINVI.tieBreaker, nodeLastWriteTS[VARI].version, nodeLastWriteTS[VARI].tieBreaker)) \\/ (~(greaterTS(VARMINVI.version, VARMINVI.tieBreaker, nodeTS[VARI].version, nodeTS[VARI].tieBreaker)))",
+      "~(equalTS(VARMINVI.version, VARMINVI.tieBreaker, nodeLastWriteTS[VARI].version, nodeLastWriteTS[VARI].tieBreaker)) \\/ (~(greaterTS(VARMINVI.version, VARMINVI.tieBreaker, nodeTS[VARI].version, nodeTS[VARI].tieBreaker)))"
+    ],
+    [
+      "Inv2282_R3_2_I2_1",
+      "\\A VARI \\in aliveNodes : \\A VARMINVI \\in msgsINV : (greaterOrEqualTS(VARMINVI.version, VARMINVI.tieBreaker, nodeLastWriteTS[VARI].version, nodeLastWriteTS[VARI].tieBreaker)) \\/ (~(equalTS(VARMINVI.version, VARMINVI.tieBreaker, nodeTS[VARI].version, nodeTS[VARI].tieBreaker)))",
+      "(greaterOrEqualTS(VARMINVI.version, VARMINVI.tieBreaker, nodeLastWriteTS[VARI].version, nodeLastWriteTS[VARI].tieBreaker)) \\/ (~(equalTS(VARMINVI.version, VARMINVI.tieBreaker, nodeTS[VARI].version, nodeTS[VARI].tieBreaker)))"
+    ],
+    [
+      "Inv9989_R3_2_I3_2",
+      "\\A VARI \\in aliveNodes : \\A VARJ \\in aliveNodes : \\A VARMINVI \\in msgsINV : (VARMINVI.sender = VARJ) \\/ (~(VARMINVI.tieBreaker = nodeTS[VARI].tieBreaker)) \\/ (~(nodeTS[VARI].tieBreaker = VARJ))",
+      "(VARMINVI.sender = VARJ) \\/ (~(VARMINVI.tieBreaker = nodeTS[VARI].tieBreaker)) \\/ (~(nodeTS[VARI].tieBreaker = VARJ))"
+    ],
+    [
+      "Inv18297_R3_2_I3_3",
+      "\\A VARI \\in aliveNodes : \\A VARMINVI \\in msgsINV : (greaterOrEqualTS(VARMINVI.version, VARMINVI.tieBreaker, nodeTS[VARI].version, nodeTS[VARI].tieBreaker)) \\/ (~(nodeTS[VARI].tieBreaker = VARI)) \\/ (~(greaterOrEqualTS(VARMINVI.version, VARMINVI.tieBreaker, nodeLastWriteTS[VARI].version, nodeLastWriteTS[VARI].tieBreaker)))",
+      "(greaterOrEqualTS(VARMINVI.version, VARMINVI.tieBreaker, nodeTS[VARI].version, nodeTS[VARI].tieBreaker)) \\/ (~(nodeTS[VARI].tieBreaker = VARI)) \\/ (~(greaterOrEqualTS(VARMINVI.version, VARMINVI.tieBreaker, nodeLastWriteTS[VARI].version, nodeLastWriteTS[VARI].tieBreaker)))"
+    ],
+    [
+      "Inv6924_R3_2_I3_4",
+      "\\A VARI \\in aliveNodes : \\A VARMACKI \\in msgsACK : (VARMACKI.version = nodeTS[VARI].version) \\/ (~(nodeState[VARI] = \"replay\")) \\/ (~(equalTS(VARMACKI.version, VARMACKI.tieBreaker, nodeLastWriteTS[VARI].version, nodeLastWriteTS[VARI].tieBreaker)))",
+      "(VARMACKI.version = nodeTS[VARI].version) \\/ (~(nodeState[VARI] = \"replay\")) \\/ (~(equalTS(VARMACKI.version, VARMACKI.tieBreaker, nodeLastWriteTS[VARI].version, nodeLastWriteTS[VARI].tieBreaker)))"
+    ],
+    [
+      "Inv16981_R3_2_I3_5",
+      "\\A VARI \\in aliveNodes : \\A VARMACKI \\in msgsACK : (greaterOrEqualTS(VARMACKI.version, VARMACKI.tieBreaker, nodeTS[VARI].version, nodeTS[VARI].tieBreaker)) \\/ (~(nodeState[VARI] \\in {\"write\", \"replay\"})) \\/ (~(greaterTS(VARMACKI.version, VARMACKI.tieBreaker, nodeLastWriteTS[VARI].version, nodeLastWriteTS[VARI].tieBreaker)))",
+      "(greaterOrEqualTS(VARMACKI.version, VARMACKI.tieBreaker, nodeTS[VARI].version, nodeTS[VARI].tieBreaker)) \\/ (~(nodeState[VARI] \\in {\"write\", \"replay\"})) \\/ (~(greaterTS(VARMACKI.version, VARMACKI.tieBreaker, nodeLastWriteTS[VARI].version, nodeLastWriteTS[VARI].tieBreaker)))"
+    ],
+    [
+      "Inv34753_R3_2_I3_6",
+      "\\A VARI \\in aliveNodes : \\A VARMINVI \\in msgsINV : ~(VARMINVI.version < nodeTS[VARI].version) \\/ (~(greaterTS(VARMINVI.version, VARMINVI.tieBreaker, nodeLastWriteTS[VARI].version, nodeLastWriteTS[VARI].tieBreaker))) \\/ (~(nodeState[VARI] = \"replay\"))",
+      "~(VARMINVI.version < nodeTS[VARI].version) \\/ (~(greaterTS(VARMINVI.version, VARMINVI.tieBreaker, nodeLastWriteTS[VARI].version, nodeLastWriteTS[VARI].tieBreaker))) \\/ (~(nodeState[VARI] = \"replay\"))"
+    ],
+    [
+      "Inv383_R5_0_I2_0",
+      "\\A VARI \\in aliveNodes : (nodeLastWriter[VARI] = VARI) \\/ (~(nodeState[VARI] \\in {\"write\", \"replay\"}))",
+      "(nodeLastWriter[VARI] = VARI) \\/ (~(nodeState[VARI] \\in {\"write\", \"replay\"}))"
+    ],
+    [
+      "Inv11488_R6_2_I3_0",
+      "\\A VARI \\in aliveNodes : \\A VARJ \\in aliveNodes : (nodeState[VARJ] = \"replay\") \\/ (~(nodeTS[VARI].tieBreaker = VARJ)) \\/ (~(nodeState[VARI] = \"replay\"))",
+      "(nodeState[VARJ] = \"replay\") \\/ (~(nodeTS[VARI].tieBreaker = VARJ)) \\/ (~(nodeState[VARI] = \"replay\"))"
+    ],
+    [
+      "Inv1794_R9_0_I2_0",
+      "\\A VARI \\in aliveNodes : \\A VARMINVI \\in msgsINV : (greaterTS(VARMINVI.version, VARMINVI.tieBreaker, nodeLastWriteTS[VARI].version, nodeLastWriteTS[VARI].tieBreaker)) \\/ (~(greaterTS(VARMINVI.version, VARMINVI.tieBreaker, nodeTS[VARI].version, nodeTS[VARI].tieBreaker)))",
+      "(greaterTS(VARMINVI.version, VARMINVI.tieBreaker, nodeLastWriteTS[VARI].version, nodeLastWriteTS[VARI].tieBreaker)) \\/ (~(greaterTS(VARMINVI.version, VARMINVI.tieBreaker, nodeTS[VARI].version, nodeTS[VARI].tieBreaker)))"
+    ],
+    [
+      "Inv22931_R12_0_I3_0",
+      "\\A VARI \\in aliveNodes : \\A VARJ \\in aliveNodes : (nodeLastWriter[VARJ] \\in aliveNodes) \\/ ((nodeTS[VARI].tieBreaker = VARJ) \\/ (~(nodeLastWriter[VARI] = VARJ)))",
+      "(nodeLastWriter[VARJ] \\in aliveNodes) \\/ ((nodeTS[VARI].tieBreaker = VARJ) \\/ (~(nodeLastWriter[VARI] = VARJ)))"
+    ],
+    [
+      "Inv11149_R12_0_I3_1",
+      "\\A VARI \\in aliveNodes : \\A VARMINVI \\in msgsINV : (VARMINVI.sender = VARI) \\/ (~(equalTS(VARMINVI.version, VARMINVI.tieBreaker, nodeTS[VARI].version, nodeTS[VARI].tieBreaker)) \\/ (~(nodeTS[VARI].tieBreaker = VARI)))",
+      "(VARMINVI.sender = VARI) \\/ (~(equalTS(VARMINVI.version, VARMINVI.tieBreaker, nodeTS[VARI].version, nodeTS[VARI].tieBreaker)) \\/ (~(nodeTS[VARI].tieBreaker = VARI)))"
+    ],
+    [
+      "Inv22598_R12_0_I3_2",
+      "\\A VARI \\in aliveNodes : \\A VARMINVI \\in msgsINV : (nodeLastWriter[VARI] \\in aliveNodes) \\/ (~(VARMINVI.sender = VARI) \\/ (~(VARMINVI.tieBreaker = nodeTS[VARI].tieBreaker)))",
+      "(nodeLastWriter[VARI] \\in aliveNodes) \\/ (~(VARMINVI.sender = VARI) \\/ (~(VARMINVI.tieBreaker = nodeTS[VARI].tieBreaker)))"
+    ]
+  ],
+  "roundi": 13
+}
