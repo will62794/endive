@@ -74,7 +74,8 @@ class InductiveInvGen():
                     max_num_ctis_per_round=10000, override_num_cti_workers=None, use_apalache_ctigen=False,all_args={},spec_config=None,
                     auto_lemma_action_decomposition=False, 
                     enable_partitioned_state_caching=False,
-                    enable_cti_slice_projection=False):
+                    enable_cti_slice_projection=False,
+                    action_filter=None):
         self.java_exe = java_exe
         self.java_version_info = None
         
@@ -97,6 +98,10 @@ class InductiveInvGen():
         self.use_apalache_ctigen = use_apalache_ctigen
         self.do_apalache_final_induction_check = all_args["do_apalache_final_induction_check"]
         self.auto_lemma_action_decomposition = auto_lemma_action_decomposition
+        self.action_filter = action_filter
+        # Actions specified in comma-separated list.
+        if self.action_filter is not None:
+            self.action_filter = self.action_filter.split(",")
 
         # Ensure a reasonable default timeout on these checks for now.
         # See https://apalache.informal.systems/docs/apalache/tuning.html#timeouts for more details.
@@ -3527,8 +3532,28 @@ class InductiveInvGen():
                         cti_action_invs_found.add((kcti.inv_name, kcti.action_name))
                 logging.info(f"{len(cti_action_invs_found)} distinct k-CTI lemma-action proof obligations found:")
                 cti_action_invs_found = sorted(cti_action_invs_found) # for consistent odering of proof obligations.
-                # Ignore failed obligations when selecting here.
-                # cti_action_invs_found = [c for c in cti_action_invs_found if c not in failed_obligations]
+
+                # Optional CTI action filter.
+                # action_filter = ["HRcvValAction", "HSendValsAction", "HWriteAction", "HRcvInvAction", "HRcvInvNewerAction"]
+                # hermes action filter.
+                if self.action_filter is not None
+                    # self.action_filter = [
+                    #     "HRcvValAction", 
+                    #     "HSendValsAction"
+                    #     "HWriteAction", 
+                    #     "HRcvInvAction", 
+                    #     "HCoordWriteReplayAction", 
+                    #     "NodeFailureAction", 
+                    #     "HFollowerWriteReplayAction", 
+                    #     "HReadAction",
+
+                    #     # Last 2 actions to add.
+                    #     "HRcvAckAction"
+                    #     # "HRcvInvNewerAction"
+                    # ]
+                    # cti_action_invs_found = [c for c in cti_action_invs_found if c[1] in action_filter]
+                    cti_action_invs_found = [c for c in cti_action_invs_found if c[1] in self.action_filter]
+
                 for kcti in cti_action_invs_found:
                     logging.info(f" - {kcti}")
                 # if len(failed_obligations) > 0:
@@ -4258,6 +4283,7 @@ if __name__ == "__main__":
     parser.add_argument('--save_dot', help='Save proof graphs in DOT and TeX info.', default=False, action='store_true')
     parser.add_argument('--enable_partitioned_state_caching', help='Enable finer grained partitioned variable subset based state caching.', default=False, action='store_true')
     parser.add_argument('--enable_cti_slice_projection', help='Enable slicing of CTI sets.', default=False, action='store_true')
+    parser.add_argument('--action_filter', help='CTI action filter.', required=False, default=None, type=str)
 
     # Apalache related commands.
     parser.add_argument('--use_apalache_ctigen', help='Use Apalache for CTI generation (experimental).', required=False, default=False, action='store_true')
@@ -4368,7 +4394,8 @@ if __name__ == "__main__":
                                 spec_config=spec_config, 
                                 enable_partitioned_state_caching=args["enable_partitioned_state_caching"],
                                 enable_cti_slice_projection=args["enable_cti_slice_projection"],
-                                auto_lemma_action_decomposition=args["auto_lemma_action_decomposition"])
+                                auto_lemma_action_decomposition=args["auto_lemma_action_decomposition"],
+                                action_filter=args["action_filter"])
 
 
     # Only do invariant generation, cache the invariants, and then exit.
