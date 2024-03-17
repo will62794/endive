@@ -4225,6 +4225,7 @@ if __name__ == "__main__":
     parser.add_argument('--simulate_depth', help='Maximum depth of counterexample to induction (CTI) traces to search for.', required=False, type=int, default=DEFAULT_SIMULATE_DEPTH)
     parser.add_argument('--tlc_workers', help='Number of TLC worker threads to use when checking candidate invariants.', required=False, type=int, default=DEFAULT_TLC_WORKERS)
     parser.add_argument('--java_exe', help='Path to Java binary.', required=False, type=str, default=JAVA_EXE)
+    parser.add_argument('--tlc_jar', help='Path to Java binary.', required=False, type=str, default=TLC_JAR)
     parser.add_argument('--debug', help='Output debug info to log.', default=False, action='store_true')
     parser.add_argument('--cache_invs', help='Save generated invariants to the given file.', default=None, type=str)
     parser.add_argument('--cache_num_conjuncts', help='Number of conjuncts in generated invariants to be cached.', required=False, default=2, type=int)
@@ -4300,6 +4301,7 @@ if __name__ == "__main__":
 
     # Set Java binary path.
     JAVA_EXE = args["java_exe"]
+    TLC_JAR = args["tlc_jar"]
     spec_config_file = os.path.join(specdir, specname) + ".config.json"
     fcfg = open(spec_config_file)
     spec_config = json.load(fcfg)
