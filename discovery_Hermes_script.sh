@@ -1,6 +1,6 @@
 #!/bin/bash
 #SBATCH -J HermesJob               # Job name
-#SBATCH --partition express    # Partition name
+#SBATCH --partition short    # Partition name
 #SBATCH -N 1                   # Number of nodes
 #SBATCH -n 1                   # Number of tasks
 #SBATCH --cpus-per-task 48                  # Number of cores
