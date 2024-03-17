@@ -16,4 +16,4 @@ srun python3 endive.py --spec benchmarks/Hermes \
     --opt_quant_minimize --k_cti_induction_depth 1 --ninvs 40000 --max_num_ctis_per_round 1000 \
     --auto_lemma_action_decomposition --save_dot --max_num_conjuncts_per_round 16 --niters 4 --override_num_cti_workers 12 \
     --enable_partitioned_state_caching --proof_tree_mode --nrounds 45 --tlc_jar tla2tools.jar \
-    --action_filter "HRcvValAction,HSendValsAction,HWriteAction,HRcvInvAction"
+    --action_filter "HRcvValAction,HSendValsAction,HWriteAction,HRcvInvAction,HCoordWriteReplayAction,HFollowerWriteReplayAction"
