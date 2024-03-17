@@ -9,6 +9,7 @@
 
 module load OpenJDK/19.0.1
 cd endive
+git pull --rebase
 srun python3 endive.py --spec benchmarks/Hermes \
     --seed 2444 --num_simulate_traces 30000 --tlc_workers 7 \
     --debug --target_sample_time_limit_ms 10000 --target_sample_states 10000 \
