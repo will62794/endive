@@ -1853,8 +1853,13 @@ class InductiveInvGen():
         if "simulation_inv_check" in self.spec_config and self.spec_config["simulation_inv_check"]:
             # Get value from dict self.spec_config or use default value.
             depth = self.spec_config.get("simulation_inv_check_depth", 50)
-            num = self.spec_config.get("simulation_inv_check_num", 10000)
-            logging.info(f"Running state caching step in simulation with (depth={depth}, num={num})")
+            num_states = self.spec_config.get("simulation_inv_check_num_states", 100000)
+
+            # Compute the number of traces to run for each simulation worker based on the depth
+            # and total state count target.
+            num = num_states // depth // tlc_workers
+
+            logging.info(f"Running state caching step in simulation with (depth={depth}, num={num},workers={tlc_workers}) for num_states={num_states}")
             simulation_inv_tlc_flags=f"-depth {depth} -simulate num={num}"
         self.start_timing_state_caching()
 
