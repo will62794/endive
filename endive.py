@@ -90,6 +90,7 @@ class InductiveInvGen():
         self.pregen_inv_cmd = pregen_inv_cmd
 
         self.spec_config = spec_config
+        self.all_args = all_args
 
         self.seed = seed
         self.num_rounds = num_rounds
@@ -2085,7 +2086,7 @@ class InductiveInvGen():
                 # Not sure how much effect this may have on quality of learned invariants or proof graphs.
                 iter_to_start_adding_existing_conjuncts = 3
 
-                if iteration >= iter_to_start_adding_existing_conjuncts:
+                if iteration >= iter_to_start_adding_existing_conjuncts and self.all_args["include_existing_conjuncts"]:
                     added = 0
                     for c in self.strengthening_conjuncts:
                         # Only include strengthening conjunct if its variables are in this slice.
@@ -4295,6 +4296,7 @@ if __name__ == "__main__":
     parser.add_argument('--enable_partitioned_state_caching', help='Enable finer grained partitioned variable subset based state caching.', default=False, action='store_true')
     parser.add_argument('--enable_cti_slice_projection', help='Enable slicing of CTI sets.', default=False, action='store_true')
     parser.add_argument('--action_filter', help='CTI action filter.', required=False, default=None, type=str)
+    parser.add_argument('--include_existing_conjuncts', help='Whether to include existing conjuncts as invariant candidates during CTI elimination.', default=False, action='store_true')
 
     # Apalache related commands.
     parser.add_argument('--use_apalache_ctigen', help='Use Apalache for CTI generation (experimental).', required=False, default=False, action='store_true')
