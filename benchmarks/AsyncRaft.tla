@@ -33,7 +33,7 @@ Modified further by Will Schultz for safety proof experiments, August 2023.
 *)
 
 \* EXTENDS Naturals, FiniteSets, FiniteSetsExt, Sequences, Bags, TLC
-EXTENDS Naturals, FiniteSets, Sequences, TLC, Apalache
+EXTENDS Naturals, FiniteSets, Sequences, TLC
 \* , Randomization
 
 \* The set of server IDs
@@ -697,41 +697,41 @@ CInit ==
     /\ AppendEntriesRequest = "AppendEntriesRequest"
     /\ AppendEntriesResponse = "AppendEntriesResponse"
 
-ApaTypeOK ==
-    \* 
-    \* TODO: Think carefully about how to handle the bounding of these message types safely.
-    \* 
-    \* /\ requestVoteRequestMsgs \in SUBSET RequestVoteRequestType
-    /\ requestVoteRequestMsgs = Gen(7)
-    /\ \A m \in requestVoteRequestMsgs : m \in RequestVoteRequestType
-    \* /\ requestVoteResponseMsgs \in SUBSET RequestVoteResponseType
-    /\ requestVoteResponseMsgs = Gen(7)
-    /\ \A m \in requestVoteResponseMsgs : m \in RequestVoteResponseType
-    \* /\ appendEntriesResponseMsgs \in SUBSET AppendEntriesResponseType
-    /\ appendEntriesResponseMsgs = Gen(7)
-    /\ \A m \in appendEntriesResponseMsgs : m \in AppendEntriesResponseType
-    \* /\ appendEntriesRequestMsgs \in SUBSET Apa_AppendEntriesRequestType
-    /\ appendEntriesRequestMsgs = Gen(7)
-    /\ \A m \in appendEntriesRequestMsgs : m \in Apa_AppendEntriesRequestType
-    \* Encode these basic message invariants into type-correctness.
-    /\ \A m \in requestVoteRequestMsgs : m.msource # m.mdest
-    /\ \A m \in requestVoteResponseMsgs : m.msource # m.mdest
-    /\ \A m \in appendEntriesRequestMsgs : m.msource # m.mdest
-    /\ \A m \in appendEntriesResponseMsgs : m.msource # m.mdest
-    /\ currentTerm \in [Server -> Terms]
-    /\ state       \in [Server -> {Leader, Follower, Candidate}]
-    /\ votedFor    \in [Server -> ({Nil} \cup Server)]
-    /\ votesGranted \in [Server -> (SUBSET Server)]
-    /\ nextIndex  \in [Server -> [Server -> LogIndicesWithZero]]
-    /\ matchIndex \in [Server -> [Server -> LogIndicesWithZero]]    
-    \* Constrain 'log' as a bounded sequence type.
-    \* Note that this parameter size will, I believe, always need to be at least
-    \* as large as the cardinality of 'Server'.
-    /\ log = Gen(CServerInitSize)
-    /\ \A s \in Server : \A i \in DOMAIN log[s] : log[s][i] \in Terms
-    /\ \A s \in Server : Len(log[s]) <= MaxLogLen
-    /\ DOMAIN log = Server
-    /\ commitIndex     \in [Server -> LogIndicesWithZero]
+\* ApaTypeOK ==
+\*     \* 
+\*     \* TODO: Think carefully about how to handle the bounding of these message types safely.
+\*     \* 
+\*     \* /\ requestVoteRequestMsgs \in SUBSET RequestVoteRequestType
+\*     /\ requestVoteRequestMsgs = Gen(7)
+\*     /\ \A m \in requestVoteRequestMsgs : m \in RequestVoteRequestType
+\*     \* /\ requestVoteResponseMsgs \in SUBSET RequestVoteResponseType
+\*     /\ requestVoteResponseMsgs = Gen(7)
+\*     /\ \A m \in requestVoteResponseMsgs : m \in RequestVoteResponseType
+\*     \* /\ appendEntriesResponseMsgs \in SUBSET AppendEntriesResponseType
+\*     /\ appendEntriesResponseMsgs = Gen(7)
+\*     /\ \A m \in appendEntriesResponseMsgs : m \in AppendEntriesResponseType
+\*     \* /\ appendEntriesRequestMsgs \in SUBSET Apa_AppendEntriesRequestType
+\*     /\ appendEntriesRequestMsgs = Gen(7)
+\*     /\ \A m \in appendEntriesRequestMsgs : m \in Apa_AppendEntriesRequestType
+\*     \* Encode these basic message invariants into type-correctness.
+\*     /\ \A m \in requestVoteRequestMsgs : m.msource # m.mdest
+\*     /\ \A m \in requestVoteResponseMsgs : m.msource # m.mdest
+\*     /\ \A m \in appendEntriesRequestMsgs : m.msource # m.mdest
+\*     /\ \A m \in appendEntriesResponseMsgs : m.msource # m.mdest
+\*     /\ currentTerm \in [Server -> Terms]
+\*     /\ state       \in [Server -> {Leader, Follower, Candidate}]
+\*     /\ votedFor    \in [Server -> ({Nil} \cup Server)]
+\*     /\ votesGranted \in [Server -> (SUBSET Server)]
+\*     /\ nextIndex  \in [Server -> [Server -> LogIndicesWithZero]]
+\*     /\ matchIndex \in [Server -> [Server -> LogIndicesWithZero]]    
+\*     \* Constrain 'log' as a bounded sequence type.
+\*     \* Note that this parameter size will, I believe, always need to be at least
+\*     \* as large as the cardinality of 'Server'.
+\*     /\ log = Gen(CServerInitSize)
+\*     /\ \A s \in Server : \A i \in DOMAIN log[s] : log[s][i] \in Terms
+\*     /\ \A s \in Server : Len(log[s]) <= MaxLogLen
+\*     /\ DOMAIN log = Server
+\*     /\ commitIndex     \in [Server -> LogIndicesWithZero]
 
 
 ----
@@ -1399,17 +1399,28 @@ H_NoLogDivergence ==
 \*  
 
 OnePrimaryPerTermTypeOK == 
-    /\ ApaTypeOK
+    \* /\ ApaTypeOK
     /\ H_CandidateWithVotesGrantedInTermImplyNoOtherLeader
     /\ H_OnePrimaryPerTerm
 
 PrimaryHasEntriesItCreatedTypeOK == 
-    /\ ApaTypeOK
+    \* /\ ApaTypeOK
     /\ H_OnePrimaryPerTerm
     /\ H_CandidateWithVotesGrantedInTermImplyNoOtherLogsInTerm
     /\ H_PrimaryHasEntriesItCreatedAppendEntries
     /\ H_PrimaryHasEntriesItCreated
 
+
+H_Inv14_R0_0_I1_0 == \A VARI \in Server : (Len(log[VARI]) >= commitIndex[VARI])
+H_Inv780_R0_0_I2_1 == \A VARI \in Server : \A VARM \in appendEntriesRequestMsgs : ~(CanAppend(VARM, VARI)) \/ ((LogOk(VARI, VARM) /\ log = log))
+H_Inv528_R1_0_I2_0 == \A VARI \in Server : \A VARM \in appendEntriesRequestMsgs : ~((commitIndex[VARI] > 0)) \/ ~(~(LogOk(VARI, VARM) /\ log = log))
+
+H_Inv454_R0_0_I2_1 == \A VARI \in Server : \A VARM \in appendEntriesRequestMsgs : ~((commitIndex[VARI] > 0)) \/ ((LogOk(VARI, VARM) /\ log = log))
+H_Inv210_R0_1_I3_2 == 
+    \A VARI \in Server : 
+    \A VARJ \in Server : 
+    \A VARLOGINDI \in LogIndices : 
+        ((currentTerm[VARI] <= currentTerm[VARJ])) \/ (~((state[VARJ] = Leader)) \/ (~(VARLOGINDI \in DOMAIN log[VARI] /\ Agree(VARI, VARLOGINDI) \in Quorum)))
 ------------------------------------------------------------------------------------------------------------------------
 
 \* 
@@ -1537,4 +1548,51 @@ PrimaryHasEntriesItCreatedTypeOK ==
     \* /\ ~\E s,t \in Server : s # t /\ log[s] # <<>> /\ log[t] # <<>>
     \* [][~AcceptAppendEntriesRequestTruncateAction]_vars
     \* ~\E s \in Server : state[s] = Leader
+
+
+
+\* The set of servers that agree up through index.
+AgreeCopy(i, index) == {i} \cup {k \in Server : matchIndex[i][k] >= index }
+
+AgreeIndexes(i) == {index \in DOMAIN log[i] : Agree(i, index) \in Quorum}
+
+\* ACTION: AdvanceCommitIndex ---------------------------------
+\* Leader i advances its commitIndex.
+\* This is done as a separate step from handling AppendEntries responses,
+\* in part to minimize atomic regions, and in part so that leaders of
+\* single-server clusters are able to mark entries committed.
+AdvanceCommitIndexCopy(i) ==
+    /\ state[i] = Leader
+    /\ LET \* The maximum indexes for which a quorum agrees
+           agreeIndexes == AgreeIndexes(i)
+           \* New value for commitIndex'[i]
+           newCommitIndex ==
+              IF /\ agreeIndexes /= {}
+                 /\ log[i][Max(agreeIndexes)] = currentTerm[i]
+              THEN Max(agreeIndexes)
+              ELSE commitIndex[i]
+       IN 
+          /\ commitIndex[i] < newCommitIndex \* only enabled if it actually advances
+          /\ commitIndex' = [commitIndex EXCEPT ![i] = newCommitIndex]
+    /\ UNCHANGED <<appendEntriesRequestMsgs, appendEntriesResponseMsgs, currentTerm, state, votedFor, votesGranted, nextIndex, matchIndex, log, requestVoteRequestMsgs, requestVoteResponseMsgs>>
+
+H_NoLogDivergenceCopy ==
+    \A s1, s2 \in Server :
+        (s1 # s2) =>
+            \A index \in ((DOMAIN log[s1]) \cap (DOMAIN log[s2])) : 
+                \* If an index is covered by a commitIndex in both logs, then the 
+                \* entry must be the same between the two servers.
+                (index < commitIndex[s1] /\ index < commitIndex[s2]) =>
+                    log[s1][index] = log[s2][index]
+
+
+
+
+
+
+
+
+
+
+
 ===============================================================================
