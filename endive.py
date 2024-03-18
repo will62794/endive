@@ -3316,6 +3316,27 @@ class InductiveInvGen():
         except Exception as e:
             logging.info(f"No proof graph loaded from '{fname}': {e}")
 
+    def auto_check_simulation_bound(self):
+        # Prototype of auto-tuning simulation bounds.
+        # TODO: Would need to make simulation work properly with checkAllInvariants mode I think.
+        logging.info("Checking simulation bound for all invariants.")
+        logging.info("Generating %d candidate invariants." % num_invs)
+        use_pred_identifiers = self.use_fast_pred_eval
+        boolean_style = "tla"
+        ninvs = 10000
+        all_invs = mc.generate_invs(
+            self.preds, ninvs, min_num_conjuncts=2, max_num_conjuncts=2,quant_vars=self.quant_vars, 
+            boolean_style = boolean_style,
+            use_pred_identifiers=use_pred_identifiers)
+        invs = all_invs["raw_invs"]
+        depth = 30
+        for num in [10,100,200,1000,2000,8000]:
+            simulation_inv_tlc_flags=f"-depth {depth} -simulate num={num}"
+            main_sat_invs = self.check_invariants(invs, tlc_workers=tlc_workers, tlc_flags=simulation_inv_tlc_flags)
+            # sat_invs = set([f"Inv{iv[0]}" for iv in main_sat_invs])
+            logging.info(f"Found {len(main_sat_invs)} sat invariants. (num={num})")
+                    
+
     def do_invgen_proof_tree_mode(self):
         """ Do localized invariant synthesis based on an inductive proof graph structure."""
 
