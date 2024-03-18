@@ -3419,6 +3419,8 @@ class InductiveInvGen():
         
         self.strengthening_conjuncts = []
 
+        # self.auto_check_simulation_bound()
+
 
         if self.persistent_proof_tree_mode:
             self.load_proof_graph()
