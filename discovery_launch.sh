@@ -1,9 +1,11 @@
 #!/bin/sh
 #
-# Run Hermes batch script on Discovery cluster.
+# Run batch script on Discovery cluster.
 #
 
-scriptname="discovery_Hermes_script.sh"
+specname=$1
+echo "Launching '$specname' script."
+scriptname="discovery_${specname}_script.sh"
 
 # Copy the batch script to the Discovery cluster.
 echo "Copying script '$scriptname' to Discovery cluster..."
@@ -14,4 +16,5 @@ echo "Launching the script"
 ssh neudiscovery "sbatch $scriptname"
 
 # Now list the running jobs on Discovery cluster.
-ssh neudiscovery "squeue -u schultz.w"
+# ssh neudiscovery "squeue -u schultz.w"
+./discovery_job_status.sh

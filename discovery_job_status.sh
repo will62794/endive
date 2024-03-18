@@ -1,7 +1,8 @@
 #!/bin/sh
 
 # Show detailed info on all jobs for my username.
-ssh neudiscovery 'squeue -u schultz.w'
+# ssh neudiscovery 'squeue -u schultz.w'
+ssh neudiscovery 'squeue -o "%.18i %.9P %.20j %.8u %.2t %.10M %.6D %R" -u schultz.w'
 
 # If "detailed" argument is passed then run the below command:
 if [ "$1" = "detailed" ]; then
