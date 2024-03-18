@@ -30,7 +30,8 @@ GEN_TLA_DIR="gen_tla"
 LATEST_TLC_JAR = "tla2tools_2.18.jar"
 
 # Use local custom built TLC for now.
-TLC_JAR = "../../tlaplus/tlatools/org.lamport.tlatools/dist/tla2tools.jar"
+# TLC_JAR = "../../tlaplus/tlatools/org.lamport.tlatools/dist/tla2tools.jar"
+TLC_JAR = "tla2tools-checkall.jar"
 
 def chunks(seq, n_chunks):
     """ Splits a given iterable into n evenly (as possible) sized chunks."""
