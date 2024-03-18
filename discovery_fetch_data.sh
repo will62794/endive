@@ -6,6 +6,8 @@ mkdir -p discovery_data
 
 scp -O -r neudiscovery:/home/schultz.w/endive_logs discovery_data
 
-# Also fetch Hermes proof stuff.
+# Also fetch Hermes,AsyncRaft proof stuff.
 scp -O -r neudiscovery:/home/schultz.w/endive/benchmarks/Hermes_ind-proof-tree discovery_data
 scp -O -r neudiscovery:/home/schultz.w/endive/benchmarks/Hermes_ind-proof-tree.pdf discovery_data
+scp -O -r neudiscovery:/home/schultz.w/benchmarking/AsyncRaft/endive/benchmarks/AsyncRaft_ind-proof-tree discovery_data
+scp -O -r neudiscovery:/home/schultz.w/benchmarking/AsyncRaft/endive/benchmarks/AsyncRaft_ind-proof-tree.pdf discovery_data
