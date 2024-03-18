@@ -96,14 +96,14 @@ SumFnRange(f) == IF DOMAIN f = {} THEN 0 ELSE
   LET x == CHOOSE x \in DOMAIN f : TRUE
     IN f[x] + SumFnRange([k \in (DOMAIN f) \ {x} |-> f[k]])
 
-CTICost == 
-    SumFnRange([s \in Server |-> Cardinality(votesGranted[s])]) +
-    SumFnRange([s \in Server |-> Len(log[s])]) +
-    SumFnRange(currentTerm) + 
-    SumFnRange(commitIndex) + 
-    Cardinality(requestVoteRequestMsgs \cup requestVoteResponseMsgs) + 
-    Cardinality(appendEntriesRequestMsgs \cup appendEntriesResponseMsgs) + 
-    SumFnRange([s \in Server |-> IF state[s] \in {Follower,Candidate} THEN 0 ELSE 1])
+CTICost == 0
+    \* SumFnRange([s \in Server |-> Cardinality(votesGranted[s])]) +
+    \* SumFnRange([s \in Server |-> Len(log[s])]) +
+    \* SumFnRange(currentTerm) + 
+    \* SumFnRange(commitIndex) + 
+    \* Cardinality(requestVoteRequestMsgs \cup requestVoteResponseMsgs) + 
+    \* Cardinality(appendEntriesRequestMsgs \cup appendEntriesResponseMsgs) + 
+    \* SumFnRange([s \in Server |-> IF state[s] \in {Follower,Candidate} THEN 0 ELSE 1])
 
 
 ===============================================================================
