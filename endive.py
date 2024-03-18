@@ -3635,11 +3635,17 @@ class InductiveInvGen():
 
                 # self.proof_graph["edges"].append((action_node, lemma_name))
                 # self.proof_graph["nodes"][action_node] = {"ctis_remaining": 1000, "coi_vars": lemma_action_coi}  # initialize with positive CTI count, to be updated later.
-                
+                tstart = time.time()
+
                 # Run CTI eliminatinon.
                 ret = self.eliminate_ctis(k_ctis_to_eliminate, self.num_invs, roundi, tlc_workers=self.tlc_workers, subroundi=subround, preds=preds, 
                                             append_inv_round_id=True, cache_states_with_ignored_vars=cache_with_ignored_vars)
                 subround += 1
+
+                # Update timing spent on proof node.
+                if action_node in self.proof_graph["nodes"]:
+                    self.proof_graph["nodes"][action_node]["time_spent"] = time.time() - tstart
+
 
                 if self.save_dot and len(self.proof_graph["edges"]) > 0:
                     # Render updated proof graph as we go.
@@ -4078,6 +4084,8 @@ class InductiveInvGen():
                             label = "< " + nlabel + "<BR/>" + "<FONT POINT-SIZE='10'>" + str(coi) + "<BR/>" + " (" + str(len(coi_vars)) + "/" + str(len(self.state_vars)) + " vars) </FONT>"
                             if "num_grammar_preds" in self.proof_graph["nodes"][n]:
                                 label += "<FONT POINT-SIZE='10'>|preds| = " + str(self.proof_graph["nodes"][n]["num_grammar_preds"]) + "/" + str(len(self.preds)) + " </FONT>"
+                            if "time_spent" in node:
+                                label += "<FONT POINT-SIZE='10'> (" + "{0:.2f}".format(self.proof_graph["nodes"][n]["time_spent"]) + "s) </FONT>"
                             label += ">"
                             fontsize="14pt"
                     if "is_lemma" in node:
