@@ -3613,6 +3613,7 @@ class InductiveInvGen():
             state_vars_not_in_local_grammar = set(self.state_vars)
 
             while len(k_ctis) > 0:
+                logging.info(f"Starting subround {subround} with {len(k_ctis)} k_ctis")
 
                 k_ctis_to_eliminate = k_ctis
 
@@ -3652,19 +3653,17 @@ class InductiveInvGen():
 
                 for kcti in cti_action_invs_found:
                     logging.info(f" - {kcti}")
-                # if len(failed_obligations) > 0:
-                    # logging.info("Failed obligations being ignored:")
-                    # for f in failed_obligations:
-                        # logging.info(f" - {f}")
-
 
                 # Re-parse spec object to include definitions of any newly generate strengthening lemmas.
-                if len(self.strengthening_conjuncts) > 0:
+                # if len(self.strengthening_conjuncts) > 0:
+                if len(self.proof_graph["nodes"]) > 0:
                     specname = f"{self.specname}_lemma_parse"
                     rootpath = f"benchmarks/{specname}"
                     # self.make_check_invariants_spec([], rootpath, defs_to_add=self.strengthening_conjuncts + [curr_obligation])
                     # self.make_check_invariants_spec([], rootpath, defs_to_add=[curr_obligation_pred_tup] + self.strengthening_conjuncts)
-                    self.make_check_invariants_spec([], rootpath, defs_to_add=self.strengthening_conjuncts)
+                    node_conjuncts = [(n, self.proof_graph["nodes"][n]["expr"], "") for n in self.proof_graph["nodes"] if "is_lemma" in self.proof_graph["nodes"][n]]
+                    self.make_check_invariants_spec([], rootpath, defs_to_add=node_conjuncts)
+                    # self.make_check_invariants_spec([], rootpath, defs_to_add=self.strengthening_conjuncts)
 
                     logging.info("Re-parsing spec for any newly discovered lemma definitions.")
                     self.spec_obj_with_lemmas = tlaparse.parse_tla_file(self.specdir, specname)
@@ -3704,6 +3703,7 @@ class InductiveInvGen():
                 print("vars in action:", vars_in_action)
                 print("action updated vars:", action_updated_vars)
                 vars_in_action_non_updated,_ = self.spec_obj_with_lemmas.get_vars_in_def(k_cti_action_opname, ignore_update_expressions=True)
+                logging.info(f"Getting variables in lemma definition: {k_cti_lemma}")
                 vars_in_lemma_defs = self.spec_obj_with_lemmas.get_vars_in_def(k_cti_lemma)[0]
 
                 lemma_action_coi = self.spec_obj_with_lemmas.compute_coi(None, None, None,action_updated_vars, vars_in_action_non_updated, vars_in_lemma_defs)
@@ -3736,6 +3736,8 @@ class InductiveInvGen():
                                             append_inv_round_id=True, cache_states_with_ignored_vars=cache_with_ignored_vars)
                 subround += 1
 
+                logging.info(f"-- END CTI elimination Round {roundi}, subround {subround}. --")
+
                 # Update timing spent on proof node.
                 if action_node in self.proof_graph["nodes"]:
                     self.proof_graph["nodes"][action_node]["time_spent"] = time.time() - tstart
@@ -3758,6 +3760,7 @@ class InductiveInvGen():
                     break
                 else:
                     # Successfully eliminated all CTIs.
+                    logging.info(f"Successfully eliminated all CTIs in this subround, for obligation {curr_obligation}.")
                     pass
                     # print("Adding new proof obligations:" + str(len(self.strengthening_conjuncts)))
                     # self.lemma_obligations += self.strengthening_conjuncts
@@ -3767,6 +3770,7 @@ class InductiveInvGen():
                             # self.proof_graph["edges"].append((support_lemma,curr_obligation))
                             # self.all_generated_lemmas.add(support_lemma)
                 
+                logging.info(f"")
 
                 # Determines whether we will re-generate CTIs after every new strengthening lemma discovered.
                 k_ctis = [c for c in k_ctis if c not in k_ctis_to_eliminate]
