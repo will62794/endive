@@ -2640,7 +2640,7 @@ class InductiveInvGen():
             #
             if len(chosen_invs):
                 logging.info("*** New strengthening conjuncts *** ")
-                for inv in chosen_invs:
+                for cind,inv in enumerate(chosen_invs):
                     # if "EXISTING" in inv:
                     #     ind = int(inv.split("_")[1])
                     #     invexp = conjuncts_added_in_round[ind][1]
@@ -2661,7 +2661,7 @@ class InductiveInvGen():
                     # Add the invariant as a conjunct.
                     # If there is an existing strengthening conjunct with an identical expression, no
                     # need to add this as a new strengthening conjunct.
-                    existing_conjuncts = [c for c in self.strengthening_conjuncts if c[1] == invexp]
+                    # existing_conjuncts = [self.proof_graph["nodes"][n]["inv"] for n in self.proof_graph["nodes"] if self.proof_graph["nodes"][n] == invexp]
                     # if len(existing_conjuncts) == 0:
                     #     # self.strengthening_conjuncts.append((inv + inv_suffix, invexp, unquant_invexp))
                     #     self.strengthening_conjuncts.append((inv["inv"] + inv_suffix, invexp, unquant_invexp))
@@ -2673,17 +2673,19 @@ class InductiveInvGen():
 
                     # Save edges for inductive proof graph.
                     if self.auto_lemma_action_decomposition:
-                        if len(existing_conjuncts) > 0:
+                        # if len(existing_conjuncts) > 0:
                             # Re-use existing name.
-                            invname = existing_conjuncts[0][0]
-                        else:
-                            invname = inv["inv"] + inv_suffix
+                            # invname = existing_conjuncts[0][0]
+                        # else:
+                        invname = inv["inv"] + inv_suffix
 
                         # If there exists a proof graph node with the same expression don't add a new named node.
                         existing_lemma_nodes = [n for n in self.proof_graph["nodes"].keys() if "is_lemma" in self.proof_graph["nodes"][n] and self.proof_graph["nodes"][n]["expr"] == invexp]
                         if len(existing_lemma_nodes) > 0:
                             invname = existing_lemma_nodes[0]
                             print("existing invname: ", invname)
+                            # Update to existing invariant name.
+                            chosen_invs[cind]["inv"] = invname
 
                         lemma_node = (invname, invexp, unquant_invexp)
                         self.proof_obligation_queue.append(lemma_node)
