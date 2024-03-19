@@ -562,6 +562,11 @@ H_Inv1293_R0_1_0 ==
 
 H_Inv1534_R0_1_I1_1 == \A VARI \in aliveNodes : \A VARMVALI \in msgsVAL : ~((VARMVALI.type = "VAL") => greaterTS(VARMVALI.version, VARMVALI.tieBreaker, nodeTS[VARI].version, nodeTS[VARI].tieBreaker)) \/ ~(((VARMVALI.type = "VAL")))
 
+H_Inv16595_R17_0_I3 == 
+    \A VARI \in aliveNodes : 
+    \A VARMINVI \in msgsINV : 
+        (VARMINVI.tieBreaker = nodeTS[VARI].tieBreaker) 
+            \/ (~(equalTS(VARMINVI.version, VARMINVI.tieBreaker, nodeLastWriteTS[VARI].version, nodeLastWriteTS[VARI].tieBreaker))) \/ (~(nodeState[VARI] \in {"write", "replay"}))
 
 
 
