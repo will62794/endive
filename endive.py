@@ -1932,8 +1932,8 @@ class InductiveInvGen():
         process_local = False
         quant_inv_fn = self.quant_inv
 
+        # Keep track of all strengthening conjuncts added in this round.
         conjuncts_added_in_round = []
-        conjuncts_added_in_round_ctis_eliminated = []
 
         iteration = 1
         uniqid = 0
@@ -2726,8 +2726,9 @@ class InductiveInvGen():
                 # Re-run the iteration if new conjuncts were discovered.
                 # Don't re-run iterations where max_conjs=1, since they are small and quick.
                 # TODO: Deal with this in the face of conjunct set re-computation on every iteration.
-                if self.rerun_iterations and max_conjs > 1:
-                    iteration -= 1
+                # if self.rerun_iterations and max_conjs > 1:
+                    # iteration -= 1
+
 
             if len(conjuncts_added_in_round) >= self.max_num_conjuncts_per_round and num_ctis_remaining > 0:
                 logging.info(f"Exiting round since reached max num conjuncts per round: {self.max_num_conjuncts_per_round}")
@@ -2741,7 +2742,7 @@ class InductiveInvGen():
             duration = time.time()-tstart
             logging.info("[ End iteration {}. (took {:.2f} secs.) ]".format(iteration, duration))
             logging.info("%d original CTIs." % num_orig_ctis)
-            logging.info("%d new CTIs eliminated in this iteration." % cti_states_eliminated_in_iter)
+            logging.info("%d new CTIs eliminated in this iteration." % len(eliminated_ctis))
             logging.info("%d total CTIs eliminated." % len(eliminated_ctis))
             logging.info("%d still remaining." % num_ctis_remaining)
             self.total_num_ctis_eliminated += cti_states_eliminated_in_iter
@@ -2778,7 +2779,7 @@ class InductiveInvGen():
             # Skip to the next iteration, since we've already checked invariants for CTI elimination and
             # added any good ones as strengthening conjuncts.
             iteration +=1
-            
+
         # Failed to eliminate all CTIs.
         if num_ctis_remaining > 0:
             return None
