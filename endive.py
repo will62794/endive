@@ -2729,6 +2729,7 @@ class InductiveInvGen():
                 # if self.rerun_iterations and max_conjs > 1:
                     # iteration -= 1
 
+            self.proof_graph["curr_node"] = None
 
             if len(conjuncts_added_in_round) >= self.max_num_conjuncts_per_round and num_ctis_remaining > 0:
                 logging.info(f"Exiting round since reached max num conjuncts per round: {self.max_num_conjuncts_per_round}")
