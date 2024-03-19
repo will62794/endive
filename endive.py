@@ -2378,7 +2378,7 @@ class InductiveInvGen():
             #
             # TODO: Properly parallelize CTI elimination checking.
             #
-            MAX_INVS_PER_GROUP = 1000
+            MAX_INVS_PER_GROUP = 2000
             curr_ind = 0
             workdir = None
             if specdir != "":
@@ -2495,63 +2495,103 @@ class InductiveInvGen():
             #
             # Check CTI elimination for each invariant.
             #
-            # eliminated_ctis = set()
 
             logging.info(f"Checking {len(sat_invs)} satisfied invariants for CTI elimination")
 
-            # Clear out strengthening conjuncts added in this round, so we can re-compute best CTI elimination.
-            # for i in range(len(conjuncts_added_in_round)):
-                # self.strengthening_conjuncts.pop()
 
-            # conjuncts_added_in_this_round = []
-            # conjuncts_added_in_this_round_ctis_eliminated = []
+            # Given a list of invariants and the set of CTIs they eliminate, we
+            # want to compute a new CTI set covering that, ideally, eliminates
+            # the max number of CTIs with the smallest set of invariants. In
+            # practice, we try to do our best, by using a greedy heuristic for
+            # invariant selection.
 
-            for i in range(len(sorted_invs)):
+            new_conjuncts_to_add = []
 
+            # The set of CTIs eliminated so far in this iteration of elimination checking.
+            ctis_eliminated_this_iter = set()
+
+            conjuncts_this_iter = []
+
+            # Consider all existing conjuncts and new conjuncts as candidates for
+            # next elimination invariant to pick.
+            logging.info("Re-computing CTI elimination with both existing and new conjuncts.")
+            subiter = 0
+            while True:
+
+                # Rank all new invariant candidates based on the set of CTIs they eliminate.
+                sorter = lambda inv: (len(cti_states_eliminated_by_invs[inv] - ctis_eliminated_this_iter), -len(get_invexp_cost(inv)))
+                new_inv_cands = sorted(sorted_invs, reverse=True, key=sorter)
+
+                # Rank all existing invariant conjuncts based on the set of CTIs they eliminate.
+                existing_inv_cands = sorted(conjuncts_added_in_round, reverse=True, key = lambda conj : len(conj["ctis_eliminated"] - ctis_eliminated_this_iter))
+
+                top_new_inv_cand = new_inv_cands[0]
+                if len(existing_inv_cands) == 0:
+                    invi = int(top_new_inv_cand.replace("Inv", ""))
+                    chosen_cand = {"inv": top_new_inv_cand, "invexp": orig_invs_sorted[invi], "ctis_eliminated": cti_states_eliminated_by_invs[top_new_inv_cand]}
+                    new_ctis_eliminated = cti_states_eliminated_by_invs[top_new_inv_cand] - ctis_eliminated_this_iter
+                    logging.info("Chose new")
+                else:
+                    # Pick invariant for elimination.
+                    if len((cti_states_eliminated_by_invs[top_new_inv_cand] - ctis_eliminated_this_iter)) >= len(existing_inv_cands[0]["ctis_eliminated"] - ctis_eliminated_this_iter):
+                        invi = int(top_new_inv_cand.replace("Inv", ""))
+                        chosen_cand = {"inv": top_new_inv_cand, "invexp": orig_invs_sorted[invi], "ctis_eliminated": cti_states_eliminated_by_invs[top_new_inv_cand]}
+                        new_ctis_eliminated = cti_states_eliminated_by_invs[top_new_inv_cand] - ctis_eliminated_this_iter
+                        logging.info("Chose new")
+                    else:
+                        chosen_cand = existing_inv_cands[0]
+                        new_ctis_eliminated = existing_inv_cands[0]["ctis_eliminated"] - ctis_eliminated_this_iter
+                        logging.info("Chose existing")
+
+
+                if len(new_ctis_eliminated) > 0:
+                    logging.info(f" - Chose {chosen_cand['inv']} (elim_iter={subiter})")
+                    conjuncts_this_iter.append(chosen_cand)
+                    logging.info(f" - New CTIs eliminated in local iter: {len(new_ctis_eliminated)}")
+                    ctis_eliminated_this_iter.update(new_ctis_eliminated)
+                else:
+                    logging.info("No new CTIs eliminated. Continuing.")
+                    break
+                subiter += 1
+
+            logging.info(f"Elimination conjuncts computed this iter:")
+            for c in conjuncts_this_iter:
+                print("-", c["inv"])
+
+            # Prune out any graph nodes referring to conjuncts added earlier in this round.
+            graph_nodes_to_remove = set()
+            for c in conjuncts_added_in_round:
+                for n in self.proof_graph["nodes"]:
+                    if c["inv"] in n:
+                        graph_nodes_to_remove.add(n)
+                self.proof_graph["edges"] = [e for e in self.proof_graph["edges"] if (c["inv"] not in e[0] and c["inv"] not in e[1])]
+
+            for n in graph_nodes_to_remove:
+                logging.info(f"Pruning node {n} from proof graph.")
+                del self.proof_graph["nodes"][n]
+
+            conjuncts_added_in_round = conjuncts_this_iter
+            chosen_invs = conjuncts_this_iter
+
+            # Update global set of eliminated CTIs.
+            eliminated_ctis = ctis_eliminated_this_iter
+
+            #####################################
+            # Disable this selection logic for now
+            #
+            # for i in range(len(sorted_invs)):
+            for i in []:
                 # Sort the remaining invariants by the number of new CTIs they eliminate.
-
-                # Re-select conjuncts from scratch, considering existing set of added conjuncts this round as well.
-
-                new_inv_cands = [(iv, len(cti_states_eliminated_by_invs[inv] - eliminated_ctis)) for iv in sorted_invs]
-                existing_inv_cands = [("EXISTING_"+str(ind), len(conjuncts_added_in_round_ctis_eliminated[ind] - eliminated_ctis)) for ind,iv in enumerate(conjuncts_added_in_round)]
-
-                # sorted_invs = sorted(new_inv_cands + existing_inv_cands, key = lambda x: x[1], reverse=True)
-                # sorted_invs = sorted(new_inv_cands, key = lambda x: x[1], reverse=True)
-                # sorted_invs = [x[0] for x in sorted_invs]
-
                 compare_fn = lambda inv: (len(cti_states_eliminated_by_invs[inv] - eliminated_ctis), -len(get_invexp_cost(inv)))
                 sorted_invs = sorted(sorted_invs, reverse=True, key=compare_fn)
 
-                
-                # If there is some new lemma that eliminates strictly more CTIs than any existing lemma, then we should prefer that instead.
-                # compare_fn_all_ctis = lambda inv: (len(cti_states_eliminated_by_invs[inv]), -len(get_invexp_cost(inv)))
-                # sorted_invs_all_ctis = sorted(sorted_invs, reverse=True, key=compare_fn_all_ctis)
-                # for s in sorted_invs_all_ctis[:10]:
-                #     print("new ctis eliminated by cand:", s, len(cti_states_eliminated_by_invs[s]))
-                # print("CTIs already eliminated")
-                # for ind,prev_conj in enumerate(conjuncts_added_in_round):
-                #     # print(prev_conj, len(conjuncts_added_in_round_ctis_eliminated[ind]))
-
-                #     top_s = sorted_invs_all_ctis[0]
-                #     prev_eliminated = conjuncts_added_in_round_ctis_eliminated[ind]
-                #     subsumes = cti_states_eliminated_by_invs[top_s].issuperset(prev_eliminated)
-                #     logging.info(f"{top_s} subsumes existing conjunct {prev_conj}: {subsumes}")
-
-                    
+                compare_fn_all_ctis = lambda inv: (len(cti_states_eliminated_by_invs[inv]), -len(get_invexp_cost(inv)))
+                sorted_invs_all_ctis = sorted(sorted_invs, reverse=True, key=compare_fn_all_ctis)
                 next_inv = sorted_invs.pop(0)
 
-                if "EXISTING" not in next_inv:
-                    invi = int(next_inv.replace("Inv",""))
-                    invname = "Inv%d" % invi
-                    invexp = quant_inv_fn(orig_invs_sorted[invi])
-                    new_ctis_eliminated = (cti_states_eliminated_by_invs[next_inv] - eliminated_ctis)
-                    all_ctis_eliminated = (cti_states_eliminated_by_invs[next_inv])
-                else:
-                    ind =  int(next_inv.split("_")[1])
-                    invname = f"Inv_EXISTING_{ind}" 
-                    invexp = conjuncts_added_in_round[ind][1]
-                    new_ctis_eliminated = (conjuncts_added_in_round_ctis_eliminated[ind] - eliminated_ctis)
-                    all_ctis_eliminated = conjuncts_added_in_round_ctis_eliminated[ind]
+                ind =  int(next_inv.split("_")[1])
+                invname = f"Inv_EXISTING_{ind}" 
+                invexp = conjuncts_added_in_round[ind][1]
 
                 cti_states_eliminated_in_iter += len(new_ctis_eliminated)
 
@@ -2565,10 +2605,16 @@ class InductiveInvGen():
                         # print(cti_table[cti].getActionName())
                     chosen_invs.append(next_inv)
                     eliminated_ctis = eliminated_ctis.union(new_ctis_eliminated)
-                    conjuncts_added_in_round.append((next_inv, invexp))
+                    conjunct_obj = {
+                        "inv": next_inv,
+                        "invexp": invexp,
+                        "ctis_eliminated": cti_states_eliminated_by_invs[next_inv]
+                    }
+                    # conjuncts_added_in_round.append(conjunct_obj)
+                    new_conjuncts_to_add.append(conjunct_obj)
                     # conjuncts_added_in_this_round.append((next_inv, invexp))
                     # conjuncts_added_in_round_ctis_eliminated.append(cti_states_eliminated_by_invs[next_inv])
-                    conjuncts_added_in_round_ctis_eliminated.append(all_ctis_eliminated)
+                    # conjuncts_added_in_round_ctis_eliminated.append(all_ctis_eliminated)
                     # conjuncts_added_in_this_round_ctis_eliminated.append(all_ctis_eliminated)
                     num_ctis_remaining = len(list(cti_table.keys()))-len(eliminated_ctis)
 
@@ -2585,37 +2631,45 @@ class InductiveInvGen():
                 else:
                     logging.info("Moving on since no remaining invariants eliminate CTIs.")
                     break
+            ###########################
 
+
+
+            #
+            # Record the new chosen strengthening conjuncts.
+            #
             if len(chosen_invs):
                 logging.info("*** New strengthening conjuncts *** ")
                 for inv in chosen_invs:
-                    if "EXISTING" in inv:
-                        ind = int(inv.split("_")[1])
-                        invexp = conjuncts_added_in_round[ind][1]
-                        # invexp = quant_inv_fn(unquant_invexp)
-                    else:
-                        invi = int(inv.replace("Inv",""))
-                        unquant_invexp = sorted(invs)[invi]
-                        invexp = quant_inv_fn(unquant_invexp)
-                
+                    # if "EXISTING" in inv:
+                    #     ind = int(inv.split("_")[1])
+                    #     invexp = conjuncts_added_in_round[ind][1]
+                    #     # invexp = quant_inv_fn(unquant_invexp)
+                    # else:
+                    # invi = int(inv.replace("Inv",""))
+                    # unquant_invexp = sorted(invs)[invi]
+                    unquant_invexp = inv["invexp"]
+                    invexp = quant_inv_fn(unquant_invexp)
+            
                     inv_suffix = ""
                     if append_inv_round_id:
                         inv_suffix = "_" + "R" + str(roundi) 
                         if subroundi is not None:
                             inv_suffix += "_" + str(subroundi)
-                        inv_suffix += "_I" + str(iteration) + "_" + str(uniqid)
+                        inv_suffix += "_I" + str(iteration) # + "_" + str(uniqid)
                         
                     # Add the invariant as a conjunct.
                     # If there is an existing strengthening conjunct with an identical expression, no
                     # need to add this as a new strengthening conjunct.
                     existing_conjuncts = [c for c in self.strengthening_conjuncts if c[1] == invexp]
-                    if len(existing_conjuncts) == 0:
-                        self.strengthening_conjuncts.append((inv + inv_suffix, invexp, unquant_invexp))
-                        uniqid += 1
-                    else:
-                        logging.info("Skipping adding invariant as strengthening conjunct, since equivalent expression is already present.")
+                    # if len(existing_conjuncts) == 0:
+                    #     # self.strengthening_conjuncts.append((inv + inv_suffix, invexp, unquant_invexp))
+                    #     self.strengthening_conjuncts.append((inv["inv"] + inv_suffix, invexp, unquant_invexp))
+                    #     uniqid += 1
+                    # else:
+                    #     logging.info("Skipping adding invariant as strengthening conjunct, since equivalent expression is already present.")
 
-                    logging.info("%s %s", inv, invexp) #, "(eliminates %d CTIs)" % len(cti_states_eliminated_by_invs[inv])
+                    logging.info("%s %s", inv["inv"], invexp) #, "(eliminates %d CTIs)" % len(cti_states_eliminated_by_invs[inv])
 
                     # Save edges for inductive proof graph.
                     if self.auto_lemma_action_decomposition:
@@ -2623,7 +2677,7 @@ class InductiveInvGen():
                             # Re-use existing name.
                             invname = existing_conjuncts[0][0]
                         else:
-                            invname = inv + inv_suffix
+                            invname = inv["inv"] + inv_suffix
 
                         # If there exists a proof graph node with the same expression don't add a new named node.
                         existing_lemma_nodes = [n for n in self.proof_graph["nodes"].keys() if "is_lemma" in self.proof_graph["nodes"][n] and self.proof_graph["nodes"][n]["expr"] == invexp]
@@ -2692,6 +2746,21 @@ class InductiveInvGen():
             logging.info("%d still remaining." % num_ctis_remaining)
             self.total_num_ctis_eliminated += cti_states_eliminated_in_iter
             self.end_timing_ctielimcheck()
+
+            # logging.info("")
+            if num_ctis_remaining == 0:
+                # Update set of all strengthening conjuncts added in this round.
+                for c in conjuncts_added_in_round:
+                    inv_suffix = ""
+                    if append_inv_round_id:
+                        inv_suffix = "_" + "R" + str(roundi) 
+                        if subroundi is not None:
+                            inv_suffix += "_" + str(subroundi)
+                        inv_suffix += "_I" + str(iteration) # + "_" + str(uniqid)
+                    unquant_invexp = c["invexp"]
+                    invexp = quant_inv_fn(unquant_invexp)
+                    self.strengthening_conjuncts.append((c["inv"] + inv_suffix, invexp, unquant_invexp))
+                    # uniqid += 1
 
             # logging.info("")
             if len(self.strengthening_conjuncts) > 0:
