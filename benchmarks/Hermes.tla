@@ -569,6 +569,7 @@ H_Inv16595_R17_0_I3 ==
             \/ (~(equalTS(VARMINVI.version, VARMINVI.tieBreaker, nodeLastWriteTS[VARI].version, nodeLastWriteTS[VARI].tieBreaker))) \/ (~(nodeState[VARI] \in {"write", "replay"}))
 
 
+H_Inv1526_R20_0_I2 == \A VARI \in aliveNodes : (nodeWriteEpochID[VARI] = epochID) \/ (~(nodeState[VARI] = "replay"))
 
 
 
