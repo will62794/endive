@@ -3723,10 +3723,18 @@ class InductiveInvGen():
                 # we don't include that predicate.
                 #
                 # Note that the set subset operator is "<=" here.
-                preds = [p for (pi,p) in enumerate(self.preds) if vars_in_preds[pi] <= lemma_action_coi]
+                all_preds = self.preds
 
-                pct_str = "{0:.1f}".format(len(preds)/len(self.preds) * 100)
-                logging.info(f"{len(preds)}/{len(self.preds)} ({pct_str}% of) predicates being used based on COI slice filter.")
+                # Add in action specific predicates if they are given for this action.
+                if "action_local_preds" in self.spec_config and k_cti_action in self.spec_config["action_local_preds"]:
+                    action_local_preds = self.spec_config["action_local_preds"][k_cti_action]
+                    logging.info(f"Adding in {len(action_local_preds)} action local predicates for action {k_cti_action} ")
+                    all_preds += action_local_preds
+
+                preds = [p for (pi,p) in enumerate(all_preds) if vars_in_preds[pi] <= lemma_action_coi]
+
+                pct_str = "{0:.1f}".format(len(preds)/len(all_preds) * 100)
+                logging.info(f"{len(preds)}/{len(all_preds)} ({pct_str}% of) predicates being used based on COI slice filter.")
 
                 cache_with_ignored_vars = [v for v in self.state_vars if v not in lemma_action_coi]
 
