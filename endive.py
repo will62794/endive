@@ -2514,7 +2514,7 @@ class InductiveInvGen():
 
             # Consider all existing conjuncts and new conjuncts as candidates for
             # next elimination invariant to pick.
-            logging.info("Re-computing CTI elimination with both existing and new conjuncts.")
+            logging.info(f"Re-computing CTI elimination with both existing and new conjuncts (round={roundi}, subround={subroundi}).")
             subiter = 0
             while True:
 
@@ -2530,49 +2530,41 @@ class InductiveInvGen():
                     invi = int(top_new_inv_cand.replace("Inv", ""))
                     chosen_cand = {"inv": top_new_inv_cand, "invexp": orig_invs_sorted[invi], "ctis_eliminated": cti_states_eliminated_by_invs[top_new_inv_cand]}
                     new_ctis_eliminated = cti_states_eliminated_by_invs[top_new_inv_cand] - ctis_eliminated_this_iter
-                    logging.info("Chose new")
                 else:
                     # Pick invariant for elimination.
                     if len((cti_states_eliminated_by_invs[top_new_inv_cand] - ctis_eliminated_this_iter)) >= len(existing_inv_cands[0]["ctis_eliminated"] - ctis_eliminated_this_iter):
                         invi = int(top_new_inv_cand.replace("Inv", ""))
                         chosen_cand = {"inv": top_new_inv_cand, "invexp": orig_invs_sorted[invi], "ctis_eliminated": cti_states_eliminated_by_invs[top_new_inv_cand]}
                         new_ctis_eliminated = cti_states_eliminated_by_invs[top_new_inv_cand] - ctis_eliminated_this_iter
-                        logging.info("Chose new")
                     else:
                         chosen_cand = existing_inv_cands[0]
                         new_ctis_eliminated = existing_inv_cands[0]["ctis_eliminated"] - ctis_eliminated_this_iter
-                        logging.info("Chose existing")
-
 
                 if len(new_ctis_eliminated) > 0:
-                    logging.info(f" - Chose {chosen_cand['inv']} (elim_iter={subiter})")
                     conjuncts_this_iter.append(chosen_cand)
-                    logging.info(f" - New CTIs eliminated in local iter: {len(new_ctis_eliminated)}")
                     ctis_eliminated_this_iter.update(new_ctis_eliminated)
+                    ctis_left = len(orig_k_ctis) - len(ctis_eliminated_this_iter)
+                    logging.info(f" - Chose {chosen_cand['inv']} (elim_iter={subiter}, new CTIs eliminated={len(new_ctis_eliminated)}, with {ctis_left} now remaining)")
                 else:
                     logging.info("No new CTIs eliminated. Continuing.")
                     break
                 subiter += 1
 
-            logging.info(f"Elimination conjuncts computed this iter:")
-            for c in conjuncts_this_iter:
-                print("-", c["inv"])
-
             # Prune out any graph nodes referring to conjuncts added earlier in this round.
-            graph_nodes_to_remove = set()
-            for c in conjuncts_added_in_round:
-                for n in self.proof_graph["nodes"]:
-                    if c["inv"] in n:
-                        graph_nodes_to_remove.add(n)
-                keep_edge = lambda e : (c["inv"] not in e[0] and c["inv"] not in e[1])
-                edges_to_prune = [e for e in self.proof_graph["edges"] if not keep_edge(e)]
-                for e in edges_to_prune:
-                    logging.info(f"Pruning edge {e} from proof graph.")
-                self.proof_graph["edges"] = [e for e in self.proof_graph["edges"] if keep_edge(e)]
+            # graph_nodes_to_remove = set()
+            # for c in conjuncts_added_in_round:
+            #     for n in self.proof_graph["nodes"]:
+            #         if c["inv"] in n:
+            #             graph_nodes_to_remove.add(n)
+            #     keep_edge = lambda e : (c["inv"] not in e[0] and c["inv"] not in e[1])
+            #     edges_to_prune = [e for e in self.proof_graph["edges"] if not keep_edge(e)]
+            #     for e in edges_to_prune:
+            #         logging.info(f"Pruning edge {e} from proof graph.")
+            #     self.proof_graph["edges"] = [e for e in self.proof_graph["edges"] if keep_edge(e)]
 
-            for n in graph_nodes_to_remove:
-                logging.info(f"Pruning node {n} from proof graph.")
-                del self.proof_graph["nodes"][n]
+            # for n in graph_nodes_to_remove:
+            #     logging.info(f"Pruning node {n} from proof graph.")
+            #     del self.proof_graph["nodes"][n]
 
             conjuncts_added_in_round = conjuncts_this_iter
             chosen_invs = conjuncts_this_iter
@@ -2675,60 +2667,8 @@ class InductiveInvGen():
 
                     logging.info("%s %s", inv["inv"], invexp) #, "(eliminates %d CTIs)" % len(cti_states_eliminated_by_invs[inv])
 
-                    # Save edges for inductive proof graph.
-                    if self.auto_lemma_action_decomposition:
-                        # if len(existing_conjuncts) > 0:
-                            # Re-use existing name.
-                            # invname = existing_conjuncts[0][0]
-                        # else:
-                        invname = inv["inv"] + inv_suffix
-
-                        # If there exists a proof graph node with the same expression don't add a new named node.
-                        existing_lemma_nodes = [n for n in self.proof_graph["nodes"].keys() if "is_lemma" in self.proof_graph["nodes"][n] and self.proof_graph["nodes"][n]["expr"] == invexp]
-                        if len(existing_lemma_nodes) > 0:
-                            invname = existing_lemma_nodes[0]
-                            print("existing invname: ", invname)
-                            # Update to existing invariant name.
-                            chosen_invs[cind]["inv"] = invname
-
-                        lemma_node = (invname, invexp, unquant_invexp)
-                        self.proof_obligation_queue.append(lemma_node)
-
-                        action_node = f"{orig_k_ctis[0].inv_name}_{orig_k_ctis[0].action_name}"
-                        e1 = (f"{orig_k_ctis[0].inv_name}_{orig_k_ctis[0].action_name}", f"{orig_k_ctis[0].inv_name}")
-                        e2 = (invname, f"{orig_k_ctis[0].inv_name}_{orig_k_ctis[0].action_name}")
-                        self.proof_graph["edges"].append(e1)
-                        self.proof_graph["edges"].append(e2)
-                        num_ctis_remaining = len(list(cti_table.keys()))-len(eliminated_ctis)
-                        # if action_node in self.proof_graph:
-                            # self.proof_graph[action_node].append(inv + inv_suffix)
-                        lemma_action_coi = [v for v in self.state_vars if v not in cache_states_with_ignored_vars]
-
-                        all_lemma_nodes = [n for n in self.proof_graph["nodes"].keys() if "is_lemma" in self.proof_graph["nodes"][n]]
-                        if invname not in self.proof_graph["nodes"]:
-                            self.proof_graph["nodes"][lemma_node[0]] = {
-                                "discharged": False, 
-                                "is_lemma": True,
-                                "expr": lemma_node[1],
-                                "order": len(all_lemma_nodes) + 1,
-                                "depth": self.curr_obligation_depth + 1
-                            }
-
-                        self.proof_graph["nodes"][action_node] = {
-                            "ctis_remaining": num_ctis_remaining, 
-                            "coi_vars": lemma_action_coi,
-                            "num_grammar_preds": len(preds),
-                            "is_action": True
-                        }
-                        self.proof_graph["curr_node"] = action_node
-                        # print(f"{orig_k_ctis[0].inv_name}_{orig_k_ctis[0].action_name}",  "->", f"{orig_k_ctis[0].inv_name}", "// EDGE")
-                        # print(inv + inv_suffix, "->", f"{orig_k_ctis[0].inv_name}_{orig_k_ctis[0].action_name}", "// EDGE")
-
-                        if self.save_dot and len(self.proof_graph["edges"]) > 0:
-                            # Render updated proof graph as we go.
-                            self.render_proof_graph()
-
-                    # print "CTIs eliminated by this invariant: %d" % len(cti_states_eliminated_by_invs[inv])
+          
+                # print "CTIs eliminated by this invariant: %d" % len(cti_states_eliminated_by_invs[inv])
                 # Re-run the iteration if new conjuncts were discovered.
                 # Don't re-run iterations where max_conjs=1, since they are small and quick.
                 # TODO: Deal with this in the face of conjunct set re-computation on every iteration.
@@ -2769,6 +2709,74 @@ class InductiveInvGen():
                     invexp = quant_inv_fn(unquant_invexp)
                     self.strengthening_conjuncts.append((c["inv"] + inv_suffix, invexp, unquant_invexp))
                     # uniqid += 1
+                
+                #
+                # Save edges for inductive proof graph.
+                #
+                if self.auto_lemma_action_decomposition:
+                    for cind,inv in enumerate(conjuncts_added_in_round):
+                        # invi = int(inv.replace("Inv",""))
+                        # unquant_invexp = sorted(invs)[invi]
+                        unquant_invexp = inv["invexp"]
+                        invexp = quant_inv_fn(unquant_invexp)
+                
+                        inv_suffix = ""
+                        if append_inv_round_id:
+                            inv_suffix = "_" + "R" + str(roundi) 
+                            if subroundi is not None:
+                                inv_suffix += "_" + str(subroundi)
+                            inv_suffix += "_I" + str(iteration) # + "_" + str(uniqid)
+
+                        # if len(existing_conjuncts) > 0:
+                            # Re-use existing name.
+                            # invname = existing_conjuncts[0][0]
+                        # else:
+                        invname = inv["inv"] + inv_suffix
+
+                        # If there exists a proof graph node with the same expression don't add a new named node.
+                        existing_lemma_nodes = [n for n in self.proof_graph["nodes"].keys() if "is_lemma" in self.proof_graph["nodes"][n] and self.proof_graph["nodes"][n]["expr"] == invexp]
+                        if len(existing_lemma_nodes) > 0:
+                            invname = existing_lemma_nodes[0]
+                            print("existing invname: ", invname)
+                            # Update to existing invariant name.
+                            conjuncts_added_in_round[cind]["inv"] = invname
+
+                        lemma_node = (invname, invexp, unquant_invexp)
+                        self.proof_obligation_queue.append(lemma_node)
+
+                        action_node = f"{orig_k_ctis[0].inv_name}_{orig_k_ctis[0].action_name}"
+                        e1 = (f"{orig_k_ctis[0].inv_name}_{orig_k_ctis[0].action_name}", f"{orig_k_ctis[0].inv_name}")
+                        e2 = (invname, f"{orig_k_ctis[0].inv_name}_{orig_k_ctis[0].action_name}")
+                        self.proof_graph["edges"].append(e1)
+                        self.proof_graph["edges"].append(e2)
+                        num_ctis_remaining = len(list(cti_table.keys()))-len(eliminated_ctis)
+                        # if action_node in self.proof_graph:
+                            # self.proof_graph[action_node].append(inv + inv_suffix)
+                        lemma_action_coi = [v for v in self.state_vars if v not in cache_states_with_ignored_vars]
+
+                        all_lemma_nodes = [n for n in self.proof_graph["nodes"].keys() if "is_lemma" in self.proof_graph["nodes"][n]]
+                        if invname not in self.proof_graph["nodes"]:
+                            self.proof_graph["nodes"][lemma_node[0]] = {
+                                "discharged": False, 
+                                "is_lemma": True,
+                                "expr": lemma_node[1],
+                                "order": len(all_lemma_nodes) + 1,
+                                "depth": self.curr_obligation_depth + 1
+                            }
+
+                        self.proof_graph["nodes"][action_node] = {
+                            "ctis_remaining": num_ctis_remaining, 
+                            "coi_vars": lemma_action_coi,
+                            "num_grammar_preds": len(preds),
+                            "is_action": True
+                        }
+                        self.proof_graph["curr_node"] = action_node
+                        # print(f"{orig_k_ctis[0].inv_name}_{orig_k_ctis[0].action_name}",  "->", f"{orig_k_ctis[0].inv_name}", "// EDGE")
+                        # print(inv + inv_suffix, "->", f"{orig_k_ctis[0].inv_name}_{orig_k_ctis[0].action_name}", "// EDGE")
+
+                        if self.save_dot and len(self.proof_graph["edges"]) > 0:
+                            # Render updated proof graph as we go.
+                            self.render_proof_graph()     
 
             # logging.info("")
             if len(self.strengthening_conjuncts) > 0:
