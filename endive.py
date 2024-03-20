@@ -3758,6 +3758,25 @@ class InductiveInvGen():
                 # self.proof_graph["nodes"][action_node] = {"ctis_remaining": 1000, "coi_vars": lemma_action_coi}  # initialize with positive CTI count, to be updated later.
                 tstart = time.time()
 
+
+                # TODO: Way to show progress while action node is being worked on.
+                if self.auto_lemma_action_decomposition:
+                    # Add initial lemma-action edges for the proof graph.
+                    e1 = (action_node, f"{lemma_name}")
+                    self.proof_graph["edges"].append(e1)
+                    print("ACTION NODE:", action_node)
+                    self.proof_graph["nodes"][action_node] = {
+                        "ctis_remaining": len(k_ctis_to_eliminate), 
+                        "coi_vars": list(lemma_action_coi),
+                        "num_grammar_preds": len(preds),
+                        "is_action": True
+                    }
+                    self.proof_graph["curr_node"] = action_node
+                    
+                    # Render to show progress dynamically.
+                    self.render_proof_graph()
+
+
                 # Run CTI eliminatinon.
                 ret = self.eliminate_ctis(k_ctis_to_eliminate, self.num_invs, roundi, tlc_workers=self.tlc_workers, subroundi=subround, preds=preds, 
                                             append_inv_round_id=True, cache_states_with_ignored_vars=cache_with_ignored_vars)
@@ -3784,6 +3803,7 @@ class InductiveInvGen():
                     logging.info(f"Could not eliminate all CTIs in this round. Exiting with failure and marking {curr_obligation} as failed.")
                     # Mark the proof node as failed.
                     self.proof_graph["nodes"][curr_obligation]["failed"] = True
+                    self.proof_graph["nodes"][action_node]["failed"] = True
                     break
                 else:
                     # Successfully eliminated all CTIs.
@@ -4203,6 +4223,9 @@ class InductiveInvGen():
                         if "curr_node" in self.proof_graph and self.proof_graph["curr_node"] == n and self.proof_graph["nodes"][n]["ctis_remaining"] > 0:
                             # Mark node.
                             fillcolor = "yellow"
+                        if "failed" in node and node["failed"]:
+                            # color = "red"
+                            fillcolor = "salmon"
                         if len(self.proof_graph["nodes"][n]["coi_vars"]) > 0:
                             nlabel = n.split("_")[-1].replace("Action", "") # just show the action name.
                             coi_vars = self.proof_graph["nodes"][n]["coi_vars"]
@@ -4226,8 +4249,6 @@ class InductiveInvGen():
                             label += " <BR/> <FONT POINT-SIZE='12'>" + str(name_parts[2]) + " </FONT>"
                         if "depth" in node:
                             depth_str = ", d=" + str(node["depth"])
-                        if "failed" in node:
-                            color = "red"
                         if "order" in node:
                             # label += "<BR/>"
                             label += " <BR/> <FONT POINT-SIZE='12'>(" + str(node["order"]) + depth_str + ") </FONT>"
@@ -4237,6 +4258,9 @@ class InductiveInvGen():
                             fillcolor = "green"
                         else:
                             fillcolor = "orange"
+                        if "failed" in node:
+                            # color = "red"
+                            fillcolor = "salmon"
                 else:
                     label = n
                 dot.node(n, fillcolor=fillcolor, style="filled", color=color, label=label, shape=shape, fontsize=fontsize, penwidth=penwidth)
