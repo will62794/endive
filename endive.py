@@ -2564,7 +2564,11 @@ class InductiveInvGen():
                 for n in self.proof_graph["nodes"]:
                     if c["inv"] in n:
                         graph_nodes_to_remove.add(n)
-                self.proof_graph["edges"] = [e for e in self.proof_graph["edges"] if (c["inv"] not in e[0] and c["inv"] not in e[1])]
+                keep_edge = lambda e : (c["inv"] not in e[0] and c["inv"] not in e[1])
+                edges_to_prune = [e for e in self.proof_graph["edges"] if not keep_edge(e)]
+                for e in edges_to_prune:
+                    logging.info(f"Pruning edge {e} from proof graph.")
+                self.proof_graph["edges"] = [e for e in self.proof_graph["edges"] if keep_edge(e)]
 
             for n in graph_nodes_to_remove:
                 logging.info(f"Pruning node {n} from proof graph.")
