@@ -3649,7 +3649,7 @@ class InductiveInvGen():
                     else:
                         cti_action_invs_found.add((kcti.inv_name, kcti.action_name))
                 logging.info(f"{len(cti_action_invs_found)} distinct k-CTI lemma-action proof obligations found:")
-                cti_action_invs_found = sorted(cti_action_invs_found) # for consistent odering of proof obligations.
+                cti_action_invs_found = sorted(cti_action_invs_found, key = lambda c : c[1]) # sort by action name for consistent odering of proof obligations.
 
                 # Optional CTI action filter.
                 # action_filter = ["HRcvValAction", "HSendValsAction", "HWriteAction", "HRcvInvAction", "HRcvInvNewerAction"]
