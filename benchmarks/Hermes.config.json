@@ -88,11 +88,17 @@
         "nodeWriteEpochID[VARI] < epochID",
         "nodeWriteEpochID[VARJ] < epochID",
         "nodeWriteEpochID[VARI] = epochID",
-        "nodeWriteEpochID[VARJ] = epochID"
+        "nodeWriteEpochID[VARJ] = epochID",
+        "Cardinality(aliveNodes) = 2"
     ],
     "action_local_preds":{
         "NodeFailureAction": [
-            "Cardinality(aliveNodes) > 2",
+            "Cardinality(aliveNodes) = 2"
+        ],
+        "HCoordWriteReplayAction": [
+            "Cardinality(aliveNodes) = 2"
+        ],
+        "HFollowerWriteReplayAction": [
             "Cardinality(aliveNodes) = 2"
         ]
     },
