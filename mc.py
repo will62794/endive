@@ -329,6 +329,8 @@ def generate_invs(preds, num_invs, min_num_conjuncts=2, max_num_conjuncts=2,
         symb_inv_str = fn + "(" + pred_id_var + ")"
 
         for i in range(1,num_conjuncts):
+            if len(conjuncts) == 0:
+                break
             cind = random.randint(0, len(conjuncts)-1)
             c = conjuncts[cind]
             conjuncts.remove(c)
