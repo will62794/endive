@@ -2569,6 +2569,14 @@ class InductiveInvGen():
             #     logging.info(f"Pruning node {n} from proof graph.")
             #     del self.proof_graph["nodes"][n]
 
+            curr_conjuncts = [c["inv"] for c in conjuncts_added_in_round]
+            new_conjuncts = [c["inv"] for c in conjuncts_this_iter]
+            logging.info(f"Current conjunct set computed in round (subround={subroundi}): {curr_conjuncts}")
+            logging.info(f"New conjunct set computed in round (subround={subroundi}): {new_conjuncts}")
+
+            # Mark whether we computed a new set of conjuncts in this iteration.
+            new_conjuncts_found_in_iter = sorted(curr_conjuncts) != sorted(new_conjuncts)
+
             conjuncts_added_in_round = conjuncts_this_iter
             chosen_invs = conjuncts_this_iter
 
@@ -2675,15 +2683,12 @@ class InductiveInvGen():
                 # Re-run the iteration if new conjuncts were discovered.
                 # Don't re-run iterations where max_conjs=1, since they are small and quick.
                 # TODO: Deal with this in the face of conjunct set re-computation on every iteration.
-                # if self.rerun_iterations and max_conjs > 1:
-                    # iteration -= 1
+                if self.rerun_iterations and new_conjuncts_found_in_iter and max_conjs > 1:
+                    logging.info("Re-running iteration.")
+                    iteration -= 1
 
             self.proof_graph["curr_node"] = None
 
-            if len(conjuncts_added_in_round) >= self.max_num_conjuncts_per_round and num_ctis_remaining > 0:
-                logging.info(f"Exiting round since reached max num conjuncts per round: {self.max_num_conjuncts_per_round}")
-                return None
-            
             # conjuncts_added_in_round = conjuncts_added_in_this_round
             # conjuncts_added_in_round_ctis_eliminated = conjuncts_added_in_this_round_ctis_eliminated
 
@@ -2766,6 +2771,10 @@ class InductiveInvGen():
                         if self.save_dot and len(self.proof_graph["edges"]) > 0:
                             # Render updated proof graph as we go.
                             self.render_proof_graph()     
+
+            if len(conjuncts_added_in_round) >= self.max_num_conjuncts_per_round and num_ctis_remaining > 0:
+                logging.info(f"Exiting round since reached max num conjuncts per round: {self.max_num_conjuncts_per_round}")
+                return None
 
             # logging.info("")
             if len(self.strengthening_conjuncts) > 0:
@@ -3772,7 +3781,7 @@ class InductiveInvGen():
                         "is_action": True
                     }
                     self.proof_graph["curr_node"] = action_node
-                    
+
                     # Render to show progress dynamically.
                     self.render_proof_graph()
 
