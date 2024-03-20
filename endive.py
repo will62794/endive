@@ -2575,7 +2575,8 @@ class InductiveInvGen():
             logging.info(f"New conjunct set computed in round (subround={subroundi}): {new_conjuncts}")
 
             # Mark whether we computed a new set of conjuncts in this iteration.
-            new_conjuncts_found_in_iter = sorted(curr_conjuncts) != sorted(new_conjuncts)
+            new_conjuncts_found_in_iter = len(curr_conjuncts) < len(new_conjuncts)
+            # sorted(curr_conjuncts) != sorted(new_conjuncts)
 
             conjuncts_added_in_round = conjuncts_this_iter
             chosen_invs = conjuncts_this_iter
