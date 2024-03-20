@@ -2515,6 +2515,9 @@ class InductiveInvGen():
             # Consider all existing conjuncts and new conjuncts as candidates for
             # next elimination invariant to pick.
             logging.info(f"Re-computing CTI elimination with both existing and new conjuncts (round={roundi}, subround={subroundi}).")
+            if self.auto_lemma_action_decomposition:
+                logging.info(f"CTI obligation action: {orig_k_ctis[0].action_name}.")
+
             subiter = 0
             while True:
 
