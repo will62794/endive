@@ -3456,6 +3456,14 @@ class InductiveInvGen():
 
         logging.info("Extracting variables present in each grammar predicate.")
         vars_in_preds = self.extract_vars_from_preds()
+
+        vars_in_action_local_preds = {}
+        if "action_local_preds" in self.spec_config:
+            logging.info("Extracting variables present in action-local grammar predicates.")
+            for a in self.spec_config["action_local_preds"]:
+                logging.info(f"Extracting variables in action-local grammar predicates for action '{a}'.")
+                vars_in_action_local_preds[a] = self.extract_vars_from_preds(preds=self.spec_config["action_local_preds"][a])
+
         # for p in sorted(vars_in_preds.keys()):
             # print(p, self.preds[p], vars_in_preds[p])
         
@@ -3723,18 +3731,25 @@ class InductiveInvGen():
                 # we don't include that predicate.
                 #
                 # Note that the set subset operator is "<=" here.
-                all_preds = self.preds
 
                 # Add in action specific predicates if they are given for this action.
+                action_local_preds = []
                 if "action_local_preds" in self.spec_config and k_cti_action in self.spec_config["action_local_preds"]:
                     action_local_preds = self.spec_config["action_local_preds"][k_cti_action]
-                    logging.info(f"Adding in {len(action_local_preds)} action local predicates for action {k_cti_action} ")
-                    all_preds += action_local_preds
 
-                preds = [p for (pi,p) in enumerate(all_preds) if vars_in_preds[pi] <= lemma_action_coi]
+                all_preds_unfiltered = self.preds + action_local_preds
 
-                pct_str = "{0:.1f}".format(len(preds)/len(all_preds) * 100)
-                logging.info(f"{len(preds)}/{len(all_preds)} ({pct_str}% of) predicates being used based on COI slice filter.")
+                # Filter preds.
+                preds = [p for (pi,p) in enumerate(self.preds) if vars_in_preds[pi].issubset(lemma_action_coi)]
+                action_local_preds_filtered = [p for (pi,p) in enumerate(action_local_preds) if vars_in_action_local_preds[k_cti_action][pi].issubset(lemma_action_coi)]
+
+                # Add in action local predicates.
+                logging.info(f"Adding in {len(action_local_preds)} action local predicates for action '{k_cti_action}'.")
+                preds = preds + action_local_preds_filtered
+
+
+                pct_str = "{0:.1f}".format(len(preds)/len(all_preds_unfiltered) * 100)
+                logging.info(f"{len(preds)}/{len(all_preds_unfiltered)} ({pct_str}% of) predicates being used based on COI slice filter.")
 
                 cache_with_ignored_vars = [v for v in self.state_vars if v not in lemma_action_coi]
 
@@ -3835,11 +3850,15 @@ class InductiveInvGen():
 #     cache_with_ignored_vars = state_vars_not_in_local_grammar
 #
 
-    def extract_vars_from_preds(self):
+    def extract_vars_from_preds(self, preds=None):
         """ Compute the set of variables that appears in each grammar predicate."""
 
         # For each predicate, parse the set of state variables that appear in that predicate.
-        pred_invs = [p for p in self.preds]
+        if preds is None:
+            pred_invs = [p for p in self.preds]
+        else:
+            pred_invs = preds
+
         # print(f"{len(pred_invs)} Predicates:")
         # for p in pred_invs:
         #     print(p)
