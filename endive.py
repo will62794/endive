@@ -2701,7 +2701,7 @@ class InductiveInvGen():
             # logging.info("")
             if num_ctis_remaining == 0:
                 # Update set of all strengthening conjuncts added in this round.
-                for c in conjuncts_added_in_round:
+                for cind,c in enumerate(conjuncts_added_in_round):
                     inv_suffix = ""
                     if append_inv_round_id:
                         inv_suffix = "_" + "R" + str(roundi) 
@@ -2710,42 +2710,28 @@ class InductiveInvGen():
                         inv_suffix += "_I" + str(iteration) # + "_" + str(uniqid)
                     unquant_invexp = c["invexp"]
                     invexp = quant_inv_fn(unquant_invexp)
-                    self.strengthening_conjuncts.append((c["inv"] + inv_suffix, invexp, unquant_invexp))
                     # uniqid += 1
                 
-                #
-                # Save edges for inductive proof graph.
-                #
-                if self.auto_lemma_action_decomposition:
-                    for cind,inv in enumerate(conjuncts_added_in_round):
-                        # invi = int(inv.replace("Inv",""))
-                        # unquant_invexp = sorted(invs)[invi]
-                        unquant_invexp = inv["invexp"]
-                        invexp = quant_inv_fn(unquant_invexp)
-                
-                        inv_suffix = ""
-                        if append_inv_round_id:
-                            inv_suffix = "_" + "R" + str(roundi) 
-                            if subroundi is not None:
-                                inv_suffix += "_" + str(subroundi)
-                            inv_suffix += "_I" + str(iteration) # + "_" + str(uniqid)
+                    invname = c["inv"] + inv_suffix
 
-                        # if len(existing_conjuncts) > 0:
-                            # Re-use existing name.
-                            # invname = existing_conjuncts[0][0]
-                        # else:
-                        invname = inv["inv"] + inv_suffix
+                    # If there exists a proof graph node with the same expression don't add a new named node.
+                    existing_lemma_nodes = [n for n in self.proof_graph["nodes"].keys() if "is_lemma" in self.proof_graph["nodes"][n] and self.proof_graph["nodes"][n]["expr"] == invexp]
+                    if len(existing_lemma_nodes) > 0:
+                        invname = existing_lemma_nodes[0]
+                        print("existing invname: ", invname)
+                        # Update to existing invariant name.
+                        # conjuncts_added_in_round[cind]["inv"] = invname
+                        logging.info("Skipping adding invariant as strengthening conjunct, since equivalent expression is already present.")
+                    else:
+                        self.strengthening_conjuncts.append((invname, invexp, unquant_invexp))
 
-                        # If there exists a proof graph node with the same expression don't add a new named node.
-                        existing_lemma_nodes = [n for n in self.proof_graph["nodes"].keys() if "is_lemma" in self.proof_graph["nodes"][n] and self.proof_graph["nodes"][n]["expr"] == invexp]
-                        if len(existing_lemma_nodes) > 0:
-                            invname = existing_lemma_nodes[0]
-                            print("existing invname: ", invname)
-                            # Update to existing invariant name.
-                            conjuncts_added_in_round[cind]["inv"] = invname
+                    #
+                    # Save edges for inductive proof graph.
+                    #
+                    if self.auto_lemma_action_decomposition:
 
                         lemma_node = (invname, invexp, unquant_invexp)
-                        self.proof_obligation_queue.append(lemma_node)
+                        # self.proof_obligation_queue.append(lemma_node)
 
                         action_node = f"{orig_k_ctis[0].inv_name}_{orig_k_ctis[0].action_name}"
                         e1 = (f"{orig_k_ctis[0].inv_name}_{orig_k_ctis[0].action_name}", f"{orig_k_ctis[0].inv_name}")
