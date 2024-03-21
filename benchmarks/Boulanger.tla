@@ -265,15 +265,20 @@ e4(self) == /\ pc[self] = "e4"
                   /\ pc' = [pc EXCEPT ![self] = "w1"]
             /\ UNCHANGED << num, max, nxt, previous >>
 
-w1(self) == /\ pc[self] = "w1"
-            /\ IF unchecked[self] # {}
-                  THEN /\ \E i \in unchecked[self] : nxt' = [nxt EXCEPT ![self] = i]
-                       /\ ~ flag[nxt'[self]]
-                       /\ previous' = [previous EXCEPT ![self] = -1]
-                       /\ pc' = [pc EXCEPT ![self] = "w2"]
-                  ELSE /\ pc' = [pc EXCEPT ![self] = "cs"]
-                       /\ UNCHANGED << nxt, previous >>
-            /\ UNCHANGED << num, flag, unchecked, max >>
+w1(self) == 
+    /\ pc[self] = "w1"
+    /\ unchecked[self] # {}
+    /\ \E i \in unchecked[self] : nxt' = [nxt EXCEPT ![self] = i]
+    /\ ~flag[nxt'[self]]
+    /\ previous' = [previous EXCEPT ![self] = -1]
+    /\ pc' = [pc EXCEPT ![self] = "w2"]
+    /\ UNCHANGED << num, flag, unchecked, max >>
+
+w1Neg(self) == 
+    /\ pc[self] = "w1"
+    /\ ~(unchecked[self] # {})
+    /\ pc' = [pc EXCEPT ![self] = "cs"]
+    /\ UNCHANGED << num, flag, unchecked, max, nxt, previous >>
 
 w2Cond(self) == 
     \/ num[nxt[self]] = 0
@@ -321,6 +326,7 @@ e3Action ==   TRUE /\ \E self \in Procs : e3(self)
 e3MaxAction ==   TRUE /\ \E self \in Procs : e3Max(self) 
 e4Action ==   TRUE /\ \E self \in Procs : e4(self)
 w1Action ==   TRUE /\ \E self \in Procs : w1(self) 
+w1NegAction ==   TRUE /\ \E self \in Procs : w1Neg(self) 
 w2Action ==   TRUE /\ \E self \in Procs : w2(self) 
 w2PrevAction ==   TRUE /\ \E self \in Procs : w2Prev(self) 
 csAction ==   TRUE /\ \E self \in Procs : cs(self) 
@@ -336,6 +342,7 @@ Next ==
     \/ e3MaxAction
     \/ e4Action
     \/ w1Action
+    \/ w1NegAction
     \/ w2Action
     \/ w2PrevAction
     \/ csAction
@@ -426,6 +433,8 @@ CTICost == 0
     \* SumFnRange(num) + 
     \* SumFnRange([pi \in Procs |-> Cardinality(unchecked[pi])])
     
+
+H_Inv410_R6_0_I1 == \A VARI \in Procs : ~(nxt[VARI] = VARI) \/ (~(pc[VARI] = "w2"))
 
 
 =============================================================================
