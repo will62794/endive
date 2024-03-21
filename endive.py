@@ -4159,7 +4159,7 @@ class InductiveInvGen():
                         if len(name_parts[2]) > 0:
                             label += " <BR/> <FONT POINT-SIZE='12'>" + str(name_parts[2]) + " </FONT>"
                         if "depth" in node:
-                            depth_str = ", d=" + str(node["depth"])
+                            depth_str = ",d=" + str(node["depth"])
                         if "order" in node:
                             # label += "<BR/>"
                             label += " <BR/> <FONT POINT-SIZE='12'>(" + str(node["order"]) + depth_str + ") </FONT>"
