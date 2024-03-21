@@ -8,8 +8,8 @@ echo "Launching '$specname' script."
 scriptname="discovery_${specname}_script.sh"
 
 # Copy the batch script to the Discovery cluster.
-echo "Copying script '$scriptname' to Discovery cluster..."
-scp -O $scriptname neudiscovery:/home/schultz.w
+echo "Copying script 'discovery_scripts/$scriptname' to Discovery cluster..."
+scp -O discovery_scripts/$scriptname neudiscovery:/home/schultz.w
 
 # Launch the script.
 echo "Launching the script"
