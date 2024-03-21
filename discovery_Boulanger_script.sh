@@ -1,12 +1,12 @@
 #!/bin/bash
-#SBATCH -J Hermes_endive_Job               # Job name
+#SBATCH -J Boulanger_endive_Job               # Job name
 #SBATCH --partition short    # Partition name
 #SBATCH --time=12:00:00       # Time limit.
 #SBATCH -N 1                   # Number of nodes
 #SBATCH -n 1                   # Number of tasks
 #SBATCH --cpus-per-task 36                  # Number of cores
-#SBATCH -o endive_logs/Hermes/Hermes_output_%j.txt       # Standard output file
-#SBATCH -e endive_logs/Hermes/Hermes_error_%j.txt        # Standard error file
+#SBATCH -o endive_logs/Boulanger/Boulanger_output_%j.txt       # Standard output file
+#SBATCH -e endive_logs/Boulanger/Boulanger_error_%j.txt        # Standard error file
 
 module load OpenJDK/19.0.1
 cd endive
