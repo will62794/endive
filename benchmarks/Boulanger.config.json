@@ -21,6 +21,8 @@
         "VARI \\in unchecked[VARJ]",
         "unchecked[VARI] = 1..(VARI-1)",
         "unchecked[VARJ] = 1..(VARI-1)",
+        "\\E UI \\in unchecked[VARI] : nxt = [nxt EXCEPT ![VARI] = UI]",
+        "\\E UI \\in unchecked[VARJ] : nxt = [nxt EXCEPT ![VARJ] = UI]",
         "nxt[VARI] = VARJ",
         "nxt[VARI] = VARI",
         "nxt[VARI] < nxt[VARI]",
