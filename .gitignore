@@ -80,3 +80,5 @@ subsumption_graphs/
 *extract_preds*
 *lemma_parse*
 discovery_data/
+*proofgraph.json*
+*_ind-proof-tree
