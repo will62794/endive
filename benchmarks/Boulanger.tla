@@ -230,7 +230,7 @@ e2(self) == /\ pc[self] = "e2"
             /\ pc' = [pc EXCEPT ![self] = "e2"]
             /\ UNCHANGED << num, flag, nxt, previous >>
 
-e2_unchecked_empty(self) == 
+e2UncheckedEmpty(self) == 
             /\ pc[self] = "e2"
             /\ unchecked[self] = {}
             /\ pc' = [pc EXCEPT ![self] = "e3"]
@@ -303,7 +303,7 @@ p(self) == ncs(self) \/ e1(self) \/ e2(self) \/ e3(self) \/ e4(self)
 ncsAction ==  TRUE /\ \E self \in Procs : ncs(self) 
 e1Action ==   TRUE /\ \E self \in Procs : e1(self) 
 e2Action ==   TRUE /\ \E self \in Procs : e2(self) 
-e2UncheckedEmptyAction ==   TRUE /\ \E self \in Procs : e2_unchecked_empty(self) 
+e2UncheckedEmptyAction ==   TRUE /\ \E self \in Procs : e2UncheckedEmpty(self) 
 e3Action ==   TRUE /\ \E self \in Procs : e3(self) 
 e3MaxAction ==   TRUE /\ \E self \in Procs : e3Max(self) 
 e4Action ==   TRUE /\ \E self \in Procs : e4(self)
