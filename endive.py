@@ -3627,25 +3627,13 @@ class InductiveInvGen():
             #         break
                 
             k_ctis, k_cti_traces = self.generate_ctis(props=[curr_obligation_pred_tup])
-
-            # k_ctis, k_cti_traces = self.generate_ctis(props=self.strengthening_conjuncts)
             count += 1
-
-            # Filter CTIs by action.
-            # k_ctis = [c for c in k_ctis if c.action_name == target_action]
 
             # for kcti in k_ctis:
                 # print(str(kcti))
             logging.info("Number of total unique k-CTIs found: {}. (took {:.2f} secs)".format(len(k_ctis), (time.time()-t0)))
 
             subround = 0
-            
-            # Limit number of CTIs if necessary.
-            if len(k_ctis) > self.MAX_NUM_CTIS_PER_ROUND:
-                logging.info(f"Limiting num k-CTIs to {self.MAX_NUM_CTIS_PER_ROUND} of {len(k_ctis)} total found.")
-                # Sort CTIS first to ensure we always select a consistent subset.
-                limited_ctis = sorted(list(k_ctis))[:self.MAX_NUM_CTIS_PER_ROUND]
-                k_ctis = set(limited_ctis)
             
             if len(k_ctis) == 0:
                 is_root_node = self.proof_graph["nodes"][curr_obligation]["order"] == 1
@@ -3747,6 +3735,12 @@ class InductiveInvGen():
                 k_ctis_to_eliminate = [c for c in k_ctis if cti_filter(c)]
                 # k_ctis_remaining = [c for c in k_ctis if not cti_filter(c)]
                 logging.info(f"Have {len(k_ctis_to_eliminate)} total k-CTIs after filtering to {k_cti_lemma_action}.")
+
+                # Limit number of CTIs if necessary.
+                if len(k_ctis_to_eliminate) > self.MAX_NUM_CTIS_PER_ROUND:
+                    logging.info(f"Limiting num k-CTIs to {self.MAX_NUM_CTIS_PER_ROUND} of {len(k_ctis_to_eliminate)}.")
+                    # Sort CTIS first to ensure we always select a consistent subset.
+                    limited_ctis = k_ctis_to_eliminate[:self.MAX_NUM_CTIS_PER_ROUND]
 
 
                 logging.info(f"Computing COI for {(k_cti_lemma, k_cti_action)}")
