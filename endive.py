@@ -3868,6 +3868,9 @@ class InductiveInvGen():
                 if len(k_ctis) == 0:
                     self.proof_graph["nodes"][curr_obligation]["discharged"] = True
 
+            if self.save_dot and len(self.proof_graph["edges"]) > 0:
+                # Render updated proof graph as we go.
+                self.render_proof_graph()
             self.persist_proof_graph(roundi)
 
             logging.info(f"k-ctis remaining after Round {roundi} elimination step: {len(k_ctis)} (eliminated {len(k_ctis_to_eliminate)})")
