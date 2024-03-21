@@ -231,7 +231,7 @@ e2(self) == /\ pc[self] = "e2"
                 /\ IF num[i] > max[self]
                         THEN /\ max' = [max EXCEPT ![self] = num[i]]
                         ELSE /\ TRUE
-                            /\ max' = max
+                             /\ max' = max
             /\ pc' = [pc EXCEPT ![self] = "e2"]
             /\ UNCHANGED << num, flag, nxt, previous >>
 
