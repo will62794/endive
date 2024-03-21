@@ -572,6 +572,9 @@ H_Inv16595_R17_0_I3 ==
 H_Inv1526_R20_0_I2 == \A VARI \in aliveNodes : (nodeWriteEpochID[VARI] = epochID) \/ (~(nodeState[VARI] = "replay"))
 
 
+H_Inv40_R8_1_I2 == 
+    \A VARI \in aliveNodes : 
+        (Cardinality(aliveNodes) = 2) \/ (~(nodeState[VARI] = "replay"))
 
 
 \* Invalid invariant.           
@@ -581,5 +584,51 @@ H_Inv231_R1_0_I2_0 ==
     \A VARMVALI \in msgsVAL : 
         (VARMVALI.version = nodeTS[VARI].version) \/ ((nodeTS[VARI].version >= nodeTS[VARJ].version))
 
-H_Inv26520_R4_0_I3_0 == \A VARI \in aliveNodes : \A VARJ \in aliveNodes : ~(nodeState[VARI] = "replay") \/ (~(nodeState[VARJ] = "write") \/ (~(nodeTS[VARI] = nodeTS[VARJ])))
+H_Inv26520_R4_0_I3_0 == 
+    \A VARI \in aliveNodes : 
+    \A VARJ \in aliveNodes : 
+        ~(nodeState[VARI] = "replay") \/ (~(nodeState[VARJ] = "write") \/ (~(nodeTS[VARI] = nodeTS[VARJ])))
+
+H_Inv32587_R4_0_I4_1 == \A VARI \in aliveNodes : \A VARJ \in aliveNodes : ~(VARI \in nodeRcvedAcks[VARJ]) \/ (~(nodeTS[VARI].tieBreaker = nodeTS[VARJ].tieBreaker)) \/ (~(nodeState[VARJ] \in {"write", "replay"})) \/ (~(nodeState[VARI] = "write"))
+
+H_Inv45_R0_0_I1_0 == \A VARI \in aliveNodes : \A VARMVALI \in msgsVAL : ~(greaterTS(VARMVALI.version, VARMVALI.tieBreaker, nodeTS[VARI].version, nodeTS[VARI].tieBreaker))
+
+H_Inv18827_R21_0_I3_0 == \A VARI \in aliveNodes : \A VARMINVI \in msgsINV : (VARMINVI.version = nodeTS[VARI].version) \/ (~(equalTS(VARMINVI.version, VARMINVI.tieBreaker, nodeLastWriteTS[VARI].version, nodeLastWriteTS[VARI].tieBreaker))) \/ (~(nodeState[VARI] = "write"))
+
+H_Inv3300_R3_0_I2 == \A VARI \in aliveNodes : (nodeTS[VARI] = nodeLastWriteTS[VARI]) \/ (~(nodeState[VARI] \in {"write", "replay"}))
+
+
+H_Inv10205_R1_0_I3 == \A VARI \in aliveNodes : \A VARJ \in aliveNodes : (greaterOrEqualTS(nodeTS[VARI].version, nodeTS[VARI].tieBreaker, nodeTS[VARJ].version, nodeTS[VARJ].tieBreaker)) \/ (~(receivedAllAcks(VARJ) /\ nodeRcvedAcks = nodeRcvedAcks)) \/ (~(nodeState[VARJ] = "replay"))
+
+
+
+\* H_Inv331_R0_0_I1 == \A VARI \in aliveNodes : \A VARMVALI \in msgsVAL : (VARMVALI.version < nodeTS[VARI].version) \/ (~(greaterTS(VARMVALI.version, VARMVALI.tieBreaker, nodeTS[VARI].version, nodeTS[VARI].tieBreaker)))
+\* H_Inv2095_R0_0_I1 == \A VARI \in aliveNodes : \A VARJ \in aliveNodes : (nodeTS[VARI].version >= nodeTS[VARJ].version) \/ (~(nodeState[VARJ] = "valid"))
+\* H_Inv3592_R0_1_I3 == \A VARI \in aliveNodes : \A VARJ \in aliveNodes : (greaterOrEqualTS(nodeTS[VARI].version, nodeTS[VARI].tieBreaker, nodeTS[VARJ].version, nodeTS[VARJ].tieBreaker)) \/ ((nodeState[VARJ] = "invalid")) \/ (~(nodeState[VARJ] = "valid"))
+\* H_Inv4008_R0_1_I3 == \A VARI \in aliveNodes : \A VARJ \in aliveNodes : (greaterOrEqualTS(nodeTS[VARI].version, nodeTS[VARI].tieBreaker, nodeTS[VARJ].version, nodeTS[VARJ].tieBreaker)) \/ (~(VARI \in nodeRcvedAcks[VARJ]) \/ (~(nodeState[VARJ] \in {"write", "replay"})))
+\* H_Inv10583_R1_0_I3 == \A VARI \in aliveNodes : \A VARJ \in aliveNodes : (greaterOrEqualTS(nodeTS[VARI].version, nodeTS[VARI].tieBreaker, nodeTS[VARJ].version, nodeTS[VARJ].tieBreaker)) \/ (~(VARI \in nodeRcvedAcks[VARJ])) \/ (~(nodeState[VARJ] \in {"write", "replay"}))
+\* H_Inv47_R2_0_I1 == \A VARI \in aliveNodes : \A VARMVALI \in msgsVAL : ~(greaterTS(VARMVALI.version, VARMVALI.tieBreaker, nodeTS[VARI].version, nodeTS[VARI].tieBreaker))
+\* H_Inv22799_R2_1_I3 == \A VARI \in aliveNodes : \A VARJ \in aliveNodes : (nodeTS[VARI].version >= nodeTS[VARJ].version) \/ (~(nodeState[VARJ] \in {"write", "replay"})) \/ (~(VARI \in nodeRcvedAcks[VARJ]))
+\* H_Inv3293_R4_0_I2 == \A VARI \in aliveNodes : (nodeTS[VARI] = nodeLastWriteTS[VARI]) \/ (~(nodeState[VARI] \in {"write", "replay"}))
+\* H_Inv10919_R6_0_I3 == \A VARI \in aliveNodes : \A VARJ \in aliveNodes : (greaterOrEqualTS(nodeTS[VARI].version, nodeTS[VARI].tieBreaker, nodeTS[VARJ].version, nodeTS[VARJ].tieBreaker)) \/ (~(nodeState[VARJ] \in {"write", "replay"}) \/ (~(receivedAllAcks(VARJ) /\ nodeRcvedAcks = nodeRcvedAcks)))
+
+
+\* H_Inv331_R0_0_I1 == \A VARI \in aliveNodes : \A VARMVALI \in msgsVAL : (VARMVALI.version < nodeTS[VARI].version) \/ (~(greaterTS(VARMVALI.version, VARMVALI.tieBreaker, nodeTS[VARI].version, nodeTS[VARI].tieBreaker)))
+\* H_Inv2095_R0_0_I1 == \A VARI \in aliveNodes : \A VARJ \in aliveNodes : (nodeTS[VARI].version >= nodeTS[VARJ].version) \/ (~(nodeState[VARJ] = "valid"))
+\* H_Inv3592_R0_1_I3 == \A VARI \in aliveNodes : \A VARJ \in aliveNodes : (greaterOrEqualTS(nodeTS[VARI].version, nodeTS[VARI].tieBreaker, nodeTS[VARJ].version, nodeTS[VARJ].tieBreaker)) \/ ((nodeState[VARJ] = "invalid")) \/ (~(nodeState[VARJ] = "valid"))
+\* H_Inv4008_R0_1_I3 == \A VARI \in aliveNodes : \A VARJ \in aliveNodes : (greaterOrEqualTS(nodeTS[VARI].version, nodeTS[VARI].tieBreaker, nodeTS[VARJ].version, nodeTS[VARJ].tieBreaker)) \/ (~(VARI \in nodeRcvedAcks[VARJ]) \/ (~(nodeState[VARJ] \in {"write", "replay"})))
+\* H_Inv47_R2_0_I1 == \A VARI \in aliveNodes : \A VARMVALI \in msgsVAL : ~(greaterTS(VARMVALI.version, VARMVALI.tieBreaker, nodeTS[VARI].version, nodeTS[VARI].tieBreaker))
+\* H_Inv3301_R4_0_I2 == \A VARI \in aliveNodes : (nodeTS[VARI] = nodeLastWriteTS[VARI]) \/ (~(nodeState[VARI] \in {"write", "replay"}))
+
+
+H_Inv331_R0_0_I1 == \A VARI \in aliveNodes : \A VARMVALI \in msgsVAL : (VARMVALI.version < nodeTS[VARI].version) \/ (~(greaterTS(VARMVALI.version, VARMVALI.tieBreaker, nodeTS[VARI].version, nodeTS[VARI].tieBreaker)))
+H_Inv614_R0_0_I1 == \A VARI \in aliveNodes : \A VARJ \in aliveNodes : (greaterOrEqualTS(nodeTS[VARI].version, nodeTS[VARI].tieBreaker, nodeTS[VARJ].version, nodeTS[VARJ].tieBreaker)) \/ (~(nodeState[VARJ] = "valid"))
+H_Inv3592_R0_1_I3 == \A VARI \in aliveNodes : \A VARJ \in aliveNodes : (greaterOrEqualTS(nodeTS[VARI].version, nodeTS[VARI].tieBreaker, nodeTS[VARJ].version, nodeTS[VARJ].tieBreaker)) \/ ((nodeState[VARJ] = "invalid")) \/ (~(nodeState[VARJ] = "valid"))
+H_Inv4008_R0_1_I3 == \A VARI \in aliveNodes : \A VARJ \in aliveNodes : (greaterOrEqualTS(nodeTS[VARI].version, nodeTS[VARI].tieBreaker, nodeTS[VARJ].version, nodeTS[VARJ].tieBreaker)) \/ (~(VARI \in nodeRcvedAcks[VARJ]) \/ (~(nodeState[VARJ] \in {"write", "replay"})))
+H_Inv47_R2_0_I1 == \A VARI \in aliveNodes : \A VARMVALI \in msgsVAL : ~(greaterTS(VARMVALI.version, VARMVALI.tieBreaker, nodeTS[VARI].version, nodeTS[VARI].tieBreaker))
+H_Inv3301_R4_0_I1 == \A VARI \in aliveNodes : (nodeTS[VARI] = nodeLastWriteTS[VARI]) \/ (~(nodeState[VARI] \in {"write", "replay"}))
+H_Inv4655_R4_0_I1 == \A VARI \in aliveNodes : \A VARMACKI \in msgsACK : ~(VARMACKI.sender = VARI) \/ (~(greaterTS(VARMACKI.version, VARMACKI.tieBreaker, nodeTS[VARI].version, nodeTS[VARI].tieBreaker)))
+
+\* Inv4216_R0_1_I3 == \A VARI \in aliveNodes : \A VARJ \in aliveNodes : (greaterOrEqualTS(nodeTS[VARI].version, nodeTS[VARI].tieBreaker, nodeTS[VARJ].version, nodeTS[VARJ].tieBreaker)) \/ (~(nodeState[VARJ] \in {"write", "replay"})) \/ (~(receivedAllAcks(VARJ) /\ nodeRcvedAcks = nodeRcvedAcks))
+
 =============================================================================
