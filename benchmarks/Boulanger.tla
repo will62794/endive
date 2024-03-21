@@ -400,15 +400,15 @@ H_L8 == \A i \in Procs : (  /\ pc[i] = "w2"
 H_L9 == \A i \in Procs : (pc[i] = "cs") => \A j \in Procs \ {i} : Before(i, j)
 
 
-\* Sum the elements in the range of a function.
-RECURSIVE SumFnRange(_)
-SumFnRange(f) == IF DOMAIN f = {} THEN 0 ELSE
-  LET x == CHOOSE x \in DOMAIN f : TRUE
-    IN f[x] + SumFnRange([k \in (DOMAIN f) \ {x} |-> f[k]])
+\* \* Sum the elements in the range of a function.
+\* RECURSIVE SumFnRange(_)
+\* SumFnRange(f) == IF DOMAIN f = {} THEN 0 ELSE
+\*   LET x == CHOOSE x \in DOMAIN f : TRUE
+    \* IN f[x] + SumFnRange([k \in (DOMAIN f) \ {x} |-> f[k]])
 
-CTICost == 
-    SumFnRange(num) + 
-    SumFnRange([pi \in Procs |-> Cardinality(unchecked[pi])])
+CTICost == 0
+    \* SumFnRange(num) + 
+    \* SumFnRange([pi \in Procs |-> Cardinality(unchecked[pi])])
     
 
 

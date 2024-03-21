@@ -1,18 +1,28 @@
 {
     "preds"  :  [
-        "(currentTerm[VARI] > currentTerm[VARJ])",
-        "(currentTerm[VARJ] > currentTerm[VARI])",
-
-        "(currentTerm[VARI] >= currentTerm[VARJ])",
-        "(currentTerm[VARJ] >= currentTerm[VARI])",
-
-        "(currentTerm[VARI] <= currentTerm[VARJ])",
-        "(currentTerm[VARJ] <= currentTerm[VARI])",
-
-        "(currentTerm[VARI] = currentTerm[VARJ])",
-    
-        "(state[VARI] = Primary)",
-        "(state[VARJ] = Primary)"
+        "num[VARI] > num[VARJ]",
+        "flag[VARI]",
+        "flag[VARJ]",
+        "pc[VARI] = \"e1\"",
+        "pc[VARI] = \"e2\"",
+        "pc[VARI] = \"e3\"",
+        "pc[VARI] = \"e4\"",
+        "pc[VARI] = \"cs\"",
+        "pc[VARI] = \"cs\"",
+        "pc[VARI] = \"w1\"",
+        "pc[VARI] = \"w2\"",
+        "unchecked[VARI] = {}",
+        "unchecked[VARJ] = {}",
+        "VARI \\in unchecked[VARJ]",
+        "unchecked[VARI] = 1..(VARI-1)",
+        "unchecked[VARJ] = 1..(VARI-1)",
+        "nxt[VARI] = VARJ",
+        "nxt[VARI] = VARI",
+        "nxt[VARI] < nxt[VARI]",
+        "previous[VARI] = -1",
+        "previous[VARI] = VARJ",
+        "previous[VARI] = previous[VARJ]",
+        "previous[VARI] < previous[VARJ]"
     ],
     "preds_alt" : [],
     "safety"  :  "H_MutualExclusion",
@@ -31,8 +41,11 @@
         "csAction",
         "exitAction"
     ],
-    "constraint"  :  "",
-    "quant_inv"  :  "",
+    "simulation_inv_check": true,
+    "simulation_inv_check_num_states": 2000000,
+    "simulation_inv_check_depth": 60,
+    "constraint"  :  "StateConstraint",
+    "quant_inv"  :  "\\A VARI \\in Procs : \\A VARJ \\in Procs : ",
     "quant_inv_alt"  :  null,
     "quant_vars": ["VARI", "VARJ"],
     "model_consts"  :  "",
