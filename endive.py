@@ -3826,7 +3826,7 @@ class InductiveInvGen():
                                             append_inv_round_id=True, cache_states_with_ignored_vars=cache_with_ignored_vars)
                 subround += 1
 
-                logging.info(f"-- END CTI elimination Round {roundi}, subround {subround}. --")
+                logging.info(f"[ END CTI elimination Round {roundi}, subround {subround}. ]")
 
                 # Update timing spent on proof node.
                 if action_node in self.proof_graph["nodes"]:
