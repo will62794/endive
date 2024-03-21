@@ -25,6 +25,7 @@ from proofs import *
 from mc import CTI,Trace,State
 
 DEBUG = False
+MAC_FAST_JAVA_EXE = "/usr/local/zulu15.32.15-ca-jdk15.0.3-macosx_aarch64/bin/java"
 JAVA_EXE="java"
 GEN_TLA_DIR="gen_tla"
 LATEST_TLC_JAR = "tla2tools_2.18.jar"
@@ -4321,6 +4322,12 @@ if __name__ == "__main__":
     DEFAULT_NUM_SIMULATE_TRACES = 800
     DEFAULT_SIMULATE_DEPTH = 8
     DEFAULT_TLC_WORKERS = 6
+
+    # Use default faster Java on Mac if it exists.
+
+    if os.path.exists(MAC_FAST_JAVA_EXE):
+        print(f"Setting default Java to fast Mac version: '{MAC_FAST_JAVA_EXE}'")
+        JAVA_EXE = MAC_FAST_JAVA_EXE
 
     # Parse command line arguments.
     parser = argparse.ArgumentParser(description='')
