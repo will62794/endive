@@ -209,15 +209,20 @@ ncs(self) == /\ pc[self] = "ncs"
              /\ pc' = [pc EXCEPT ![self] = "e1"]
              /\ UNCHANGED << num, flag, unchecked, max, nxt, previous >>
 
-e1(self) == /\ pc[self] = "e1"
-            /\ \/ /\ flag' = [flag EXCEPT ![self] = ~ flag[self]]
-                  /\ pc' = [pc EXCEPT ![self] = "e1"]
-                  /\ UNCHANGED <<unchecked, max>>
-               \/ /\ flag' = [flag EXCEPT ![self] = TRUE]
-                  /\ unchecked' = [unchecked EXCEPT ![self] = Procs \ {self}]
-                  /\ max' = [max EXCEPT ![self] = 0]
-                  /\ pc' = [pc EXCEPT ![self] = "e2"]
-            /\ UNCHANGED << num, nxt, previous >>
+e1(self) == 
+    /\ pc[self] = "e1"
+    /\ flag' = [flag EXCEPT ![self] = ~ flag[self]]
+    /\ pc' = [pc EXCEPT ![self] = "e1"]
+    /\ UNCHANGED <<unchecked, max>>
+    /\ UNCHANGED << num, nxt, previous >>
+
+e1MaxUpdate(self) == 
+    /\ pc[self] = "e1"
+    /\ flag' = [flag EXCEPT ![self] = TRUE]
+    /\ unchecked' = [unchecked EXCEPT ![self] = Procs \ {self}]
+    /\ max' = [max EXCEPT ![self] = 0]
+    /\ pc' = [pc EXCEPT ![self] = "e2"]
+    /\ UNCHANGED << num, nxt, previous >>
 
 e2(self) == /\ pc[self] = "e2"
             /\ unchecked[self] # {}
@@ -270,20 +275,27 @@ w1(self) == /\ pc[self] = "w1"
                        /\ UNCHANGED << nxt, previous >>
             /\ UNCHANGED << num, flag, unchecked, max >>
 
-w2(self) == /\ pc[self] = "w2"
-            /\ IF \/ num[nxt[self]] = 0
-                  \/ <<num[self], self>> \prec <<num[nxt[self]], nxt[self]>>
-                  \/  /\ previous[self] # -1
-                      /\ num[nxt[self]] # previous[self]
-                  THEN /\ unchecked' = [unchecked EXCEPT ![self] = unchecked[self] \ {nxt[self]}]
-                       /\ IF unchecked'[self] = {}
-                             THEN /\ pc' = [pc EXCEPT ![self] = "cs"]
-                             ELSE /\ pc' = [pc EXCEPT ![self] = "w1"]
-                       /\ UNCHANGED previous
-                  ELSE /\ previous' = [previous EXCEPT ![self] = num[nxt[self]]]
-                       /\ pc' = [pc EXCEPT ![self] = "w2"]
-                       /\ UNCHANGED unchecked
-            /\ UNCHANGED << num, flag, max, nxt >>
+w2Cond(self) == 
+    \/ num[nxt[self]] = 0
+    \/ <<num[self], self>> \prec <<num[nxt[self]], nxt[self]>>
+    \/ /\ previous[self] # -1
+       /\ num[nxt[self]] # previous[self]
+
+w2(self) == 
+    /\ pc[self] = "w2"
+    /\ w2Cond(self)
+    /\ unchecked' = [unchecked EXCEPT ![self] = unchecked[self] \ {nxt[self]}]
+    /\ IF unchecked'[self] = {}
+        THEN /\ pc' = [pc EXCEPT ![self] = "cs"]
+        ELSE /\ pc' = [pc EXCEPT ![self] = "w1"]
+    /\ UNCHANGED << num, flag, max, nxt, previous >>
+
+w2Prev(self) == 
+    /\ pc[self] = "w2"
+    /\ ~w2Cond(self)
+    /\ previous' = [previous EXCEPT ![self] = num[nxt[self]]]
+    /\ pc' = [pc EXCEPT ![self] = "w2"]
+    /\ UNCHANGED << num, flag, max, nxt, unchecked >>
 
 cs(self) == /\ pc[self] = "cs"
             /\ TRUE
@@ -302,6 +314,7 @@ p(self) == ncs(self) \/ e1(self) \/ e2(self) \/ e3(self) \/ e4(self)
 
 ncsAction ==  TRUE /\ \E self \in Procs : ncs(self) 
 e1Action ==   TRUE /\ \E self \in Procs : e1(self) 
+e1MaxUpdateAction ==   TRUE /\ \E self \in Procs : e1MaxUpdate(self) 
 e2Action ==   TRUE /\ \E self \in Procs : e2(self) 
 e2UncheckedEmptyAction ==   TRUE /\ \E self \in Procs : e2UncheckedEmpty(self) 
 e3Action ==   TRUE /\ \E self \in Procs : e3(self) 
@@ -309,12 +322,14 @@ e3MaxAction ==   TRUE /\ \E self \in Procs : e3Max(self)
 e4Action ==   TRUE /\ \E self \in Procs : e4(self)
 w1Action ==   TRUE /\ \E self \in Procs : w1(self) 
 w2Action ==   TRUE /\ \E self \in Procs : w2(self) 
+w2PrevAction ==   TRUE /\ \E self \in Procs : w2Prev(self) 
 csAction ==   TRUE /\ \E self \in Procs : cs(self) 
 exitAction == TRUE /\ \E self \in Procs : exit(self)
 
 Next == 
     \/ ncsAction
     \/ e1Action
+    \/ e1MaxUpdateAction
     \/ e2Action
     \/ e2UncheckedEmptyAction
     \/ e3Action
@@ -322,6 +337,7 @@ Next ==
     \/ e4Action
     \/ w1Action
     \/ w2Action
+    \/ w2PrevAction
     \/ csAction
     \/ exitAction
 

@@ -1,6 +1,7 @@
 {
     "preds"  :  [
         "num[VARI] > num[VARJ]",
+        "num[VARI] = num[VARJ]",
         "flag[VARI]",
         "flag[VARJ]",
         "pc[VARI] = \"e1\"",
@@ -22,7 +23,12 @@
         "previous[VARI] = -1",
         "previous[VARI] = VARJ",
         "previous[VARI] = previous[VARJ]",
-        "previous[VARI] < previous[VARJ]"
+        "previous[VARI] < previous[VARJ]",
+        "max[VARI] = 0",
+        "max[VARI] = max[VARJ]",
+        "max[VARI] = num[VARI]",
+        "max[VARI] = num[VARJ]",
+        "max[VARI] < max[VARJ]"
     ],
     "preds_alt" : [],
     "safety"  :  "H_MutualExclusion",
