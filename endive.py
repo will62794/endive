@@ -1950,8 +1950,9 @@ class InductiveInvGen():
             max_depth = self.spec_config["max_tlc_inv_depth"]
 
 
-        self.cache_projected_states(cache_states_with_ignored_vars, max_depth=max_depth, tlc_workers=tlc_workers)
-        logging.info("Finished initial state caching.")
+        if self.auto_lemma_action_decomposition:
+            self.cache_projected_states(cache_states_with_ignored_vars, max_depth=max_depth, tlc_workers=tlc_workers)
+            logging.info("Finished initial state caching.")
 
         inv_candidates_generated_in_round = set()
 
@@ -2008,7 +2009,9 @@ class InductiveInvGen():
                     quant_inv_fn = quant_inv_alt
                     preds = preds + preds_alt
 
-            var_slice_str = "{" + ",".join(var_slice) + "}"
+            var_slice_str = "None"
+            if var_slice is not None:
+                var_slice_str = "{" + ",".join(var_slice) + "}"
             logging.info("\n>>> (Round %d, sub-round %d) Iteration %d (num_conjs=(min=%d,max=%d),process_local=%s,var_slice=%s)" % (roundi, subroundi, iteration,min_conjs,max_conjs,process_local,str(var_slice_str))) 
 
             logging.info("Starting iteration %d of eliminate_ctis (min_conjs=%d, max_conjs=%d)" % (iteration,min_conjs,max_conjs))
@@ -2086,7 +2089,7 @@ class InductiveInvGen():
                 # Not sure how much effect this may have on quality of learned invariants or proof graphs.
                 iter_to_start_adding_existing_conjuncts = 2
 
-                if iteration >= iter_to_start_adding_existing_conjuncts and self.all_args["include_existing_conjuncts"]:
+                if self.proof_tree_mode and iteration >= iter_to_start_adding_existing_conjuncts and self.all_args["include_existing_conjuncts"]:
                     added = 0
                     for c in self.strengthening_conjuncts:
                         # Only include strengthening conjunct if its variables are in this slice.
@@ -2106,13 +2109,13 @@ class InductiveInvGen():
 
                 invs_symb_strs = all_invs["pred_invs"]
                 # Count the number of generated candidates that were already checked previously.
-                repeated_invs = 0
-                for ivs in invs_symb_strs:
-                    if ivs in self.all_generated_inv_candidates:
-                        repeated_invs += 1
+                # repeated_invs = 0
+                # for ivs in invs_symb_strs:
+                #     if ivs in self.all_generated_inv_candidates:
+                #         repeated_invs += 1
                 # inv_candidates_generated_in_round.update(invs_symb_strs)
-                self.all_generated_inv_candidates.update(invs_symb_strs)
-                logging.info(f"Found {repeated_invs} repeated generated invariants (total generated in round {roundi}: {len(self.all_generated_inv_candidates)}).")
+                # self.all_generated_inv_candidates.update(invs_symb_strs)
+                # logging.info(f"Found {repeated_invs} repeated generated invariants (total generated in round {roundi}: {len(self.all_generated_inv_candidates)}).")
 
                 # Sort the set of invariants to give them a consistent order.
                 invs = sorted(list(invs))
@@ -2188,17 +2191,18 @@ class InductiveInvGen():
                         max_depth = self.spec_config["max_tlc_inv_depth"]
 
 
-                    print("predicate var counts:")
-                    pred_var_counts_tups = [(pred_var_set_counts[p],p) for p in pred_var_set_counts]
-                    pred_var_counts_tups = sorted(pred_var_counts_tups, reverse=True)
-                    for p in sorted(pred_var_counts_tups, reverse=True):
-                        print(p)
+                    if self.enable_partitioned_state_caching:
+                        print("predicate var counts:")
+                        pred_var_counts_tups = [(pred_var_set_counts[p],p) for p in pred_var_set_counts]
+                        pred_var_counts_tups = sorted(pred_var_counts_tups, reverse=True)
+                        for p in sorted(pred_var_counts_tups, reverse=True):
+                            print(p)
 
                     invcheck_start = time.time()
 
                     #
                     # Consider the top few predicate var counts and test projected property checking.
-                    # EXPERIMENTAL
+                    # (EXPERIMENTAL)
                     #
                     # TODO: May still be some work to ensure correctness here.
                     partition_sat_invs = set()
@@ -2206,7 +2210,6 @@ class InductiveInvGen():
 
                     # Don't bother doing this partitioned caching for tiny numbers of conjuncts.
                     LARGE_PRED_GROUP_COUNT = 200 # don't bother with the overhead of this except for relatively large predicate groups.
-                    max_pred_group_count = pred_var_counts_tups[0][0]
                     if self.enable_partitioned_state_caching and min_conjs > 1:
                         logging.info(f"Partitioned property checking enabled for projection caching.")
                         # TODO: Consider enabling this and/or computing more of these cached state projections 
@@ -2260,8 +2263,25 @@ class InductiveInvGen():
                         cache_load = True
 
                     if len(invs) > 0:
+                        # If we are not caching, then use simulation for checking invariants here, if specified.
+                        tlc_flags = "" 
+                        if "simulation_inv_check" in self.spec_config and self.spec_config["simulation_inv_check"] and not cache_load:
+                            # Get value from dict self.spec_config or use default value.
+                            depth = self.spec_config.get("simulation_inv_check_depth", 50)
+                            num_states = self.spec_config.get("simulation_inv_check_num_states", 100000)
+
+                            # Compute the number of traces to run for each simulation worker based on the depth
+                            # and total state count target.
+                            num = num_states // depth // tlc_workers
+
+                            logging.info(f"Will check invariants in simulation with (depth={depth}, num={num},workers={tlc_workers}) for num_states={num_states}")
+                            simulation_inv_tlc_flags=f"-depth {depth} -simulate num={num}"
+                            tlc_flags = simulation_inv_tlc_flags
+
                         # sat_invs = self.check_invariants(invs, tlc_workers=tlc_workers, max_depth=max_depth, cache_state_load=cache_load, cache_with_ignored=cache_states_with_ignored_vars)
-                        main_sat_invs = self.check_invariants([mi[1] for mi in main_invs_to_check], tlc_workers=tlc_workers, max_depth=max_depth, cache_state_load=cache_load, cache_with_ignored=cache_states_with_ignored_vars)
+                        main_sat_invs = self.check_invariants([mi[1] for mi in main_invs_to_check], tlc_workers=tlc_workers, 
+                                                              max_depth=max_depth, cache_state_load=cache_load, 
+                                                              cache_with_ignored=cache_states_with_ignored_vars, tlc_flags=tlc_flags)
                         main_invs_to_check_sat = [m for (mind,m) in enumerate(main_invs_to_check) if f"Inv{mind}" in main_sat_invs]
                         sat_invs = set([f"Inv{iv[0]}" for iv in main_invs_to_check_sat])
                     
@@ -2688,7 +2708,8 @@ class InductiveInvGen():
                     logging.info("Re-running iteration.")
                     iteration -= 1
 
-            self.proof_graph["curr_node"] = None
+            if self.proof_tree_mode:
+                self.proof_graph["curr_node"] = None
 
             # conjuncts_added_in_round = conjuncts_added_in_this_round
             # conjuncts_added_in_round_ctis_eliminated = conjuncts_added_in_this_round_ctis_eliminated
@@ -2720,21 +2741,33 @@ class InductiveInvGen():
                 
                     invname = c["inv"] + inv_suffix
 
-                    # If there exists a proof graph node with the same expression don't add a new named node.
-                    existing_lemma_nodes = [n for n in self.proof_graph["nodes"].keys() if "is_lemma" in self.proof_graph["nodes"][n] and self.proof_graph["nodes"][n]["expr"] == invexp]
-                    if len(existing_lemma_nodes) > 0:
-                        invname = existing_lemma_nodes[0]
-                        print("existing invname: ", invname)
-                        # Update to existing invariant name.
-                        # conjuncts_added_in_round[cind]["inv"] = invname
-                        logging.info("Skipping adding invariant as strengthening conjunct, since equivalent expression is already present.")
-                    else:
+                    # # If there exists a proof graph node with the same expression don't add a new named node.
+                    # existing_lemma_nodes = [n for n in self.proof_graph["nodes"].keys() if "is_lemma" in self.proof_graph["nodes"][n] and self.proof_graph["nodes"][n]["expr"] == invexp]
+                    # if len(existing_lemma_nodes) > 0:
+                    #     invname = existing_lemma_nodes[0]
+                    #     print("existing invname: ", invname)
+                    #     # Update to existing invariant name.
+                    #     # conjuncts_added_in_round[cind]["inv"] = invname
+                    #     logging.info("Skipping adding invariant as strengthening conjunct, since equivalent expression is already present.")
+                    # else:
+                    if not self.proof_tree_mode:
                         self.strengthening_conjuncts.append((invname, invexp, unquant_invexp))
 
                     #
                     # Save edges for inductive proof graph.
                     #
-                    if self.auto_lemma_action_decomposition:
+                    if self.proof_tree_mode and self.auto_lemma_action_decomposition:
+
+                        # If there exists a proof graph node with the same expression don't add a new named node.
+                        existing_lemma_nodes = [n for n in self.proof_graph["nodes"].keys() if "is_lemma" in self.proof_graph["nodes"][n] and self.proof_graph["nodes"][n]["expr"] == invexp]
+                        if len(existing_lemma_nodes) > 0:
+                            invname = existing_lemma_nodes[0]
+                            print("existing invname: ", invname)
+                            # Update to existing invariant name.
+                            # conjuncts_added_in_round[cind]["inv"] = invname
+                            logging.info("Skipping adding invariant as strengthening conjunct, since equivalent expression is already present.")
+                        else:
+                            self.strengthening_conjuncts.append((invname, invexp, unquant_invexp))
 
                         lemma_node = (invname, invexp, unquant_invexp)
                         # self.proof_obligation_queue.append(lemma_node)
@@ -3931,25 +3964,6 @@ class InductiveInvGen():
             logging.info(f"Pre-generating invariants with command '{self.pregen_inv_cmd}'")
             self.pre_generate_invs()
 
-        vars_in_preds = {}
-        if self.auto_lemma_action_decomposition:
-            logging.info("Extracting variables present in each grammar predicate.")
-            vars_in_preds = self.extract_vars_from_preds()
-            # for p in sorted(vars_in_preds.keys()):
-                # print(p, self.preds[p], vars_in_preds[p])
-            
-            # Save proof graph as well for diagnosis.
-            self.proof_graph = {"edges": [], "nodes": {}, "safety": self.safety}
-
-            # Maintain a potential list of lemma-action proof obligations that could not be discharged
-            # successfully after some number of iteration attempts.
-            failed_obligations = set()
-
-            #
-            # Optionally try parsing all actions first to make sure no parsing errors.
-            #
-            # self.check_all_actions_parse()
-
         #
         # Check valuation of all predicates on reachable states.
         # (EXPERIMENTAL)
@@ -4000,116 +4014,12 @@ class InductiveInvGen():
                 logging.info(f"Total k-CTIs remaining at sub-round: {len(k_ctis)}")
 
                 k_ctis_to_eliminate = k_ctis
-                # k_ctis_remaining = []
 
-                cti_action_invs_found = set()
-
-                # Break down CTIs by lemma-action pair.
-                for kcti in k_ctis_to_eliminate:
-                    # print(str(kcti))
-                    if kcti.inv_name == "Safety":
-                        cti_action_invs_found.add((self.safety, kcti.action_name))
-                    else:
-                        cti_action_invs_found.add((kcti.inv_name, kcti.action_name))
-                logging.info(f"{len(cti_action_invs_found)} distinct k-CTI lemma-action proof obligations found:")
-                cti_action_invs_found = sorted(cti_action_invs_found) # for consistent odering of proof obligations.
-                # Ignore failed obligations when selecting here.
-                cti_action_invs_found = [c for c in cti_action_invs_found if c not in failed_obligations]
-                for kcti in cti_action_invs_found:
-                    logging.info(f" - {kcti}")
-                if len(failed_obligations) > 0:
-                    logging.info("Failed obligations being ignored:")
-                    for f in failed_obligations:
-                        logging.info(f" - {f}")
-
-                #
-                # Lemma-action specific technique.
-                #
-                    
-                spec_obj_with_lemmas = self.tla_spec_obj
-
-                cache_with_ignored_vars = None
                 preds = self.preds
-                if self.auto_lemma_action_decomposition:
-                    # Pick one of these CTI lemma/action obligations.
-                    # cti_action_lemmas_with_grammars = [
-                    #     c for c in cti_action_invs_found 
-                    #         if c[1] in self.spec_config["local_grammars"] and c[0] in self.spec_config["local_grammars"][c[1]]
-                    # ]
-
-                    # Re-parse spec object to include definitions of any newly generate strengthening lemmas.
-                    if len(self.strengthening_conjuncts) > 0:
-                        specname = f"{self.specname}_lemma_parse"
-                        rootpath = f"benchmarks/{specname}"
-                        self.make_check_invariants_spec([], rootpath, defs_to_add=self.strengthening_conjuncts)
-
-                        logging.info("Re-parsing spec for any newly discovered lemma definitions.")
-                        spec_obj_with_lemmas = tlaparse.parse_tla_file(self.specdir, specname)
-
-                    defs = spec_obj_with_lemmas.get_all_user_defs(level="1")
-                    # for d in defs:
-                        # print(d)
-
-                    # if len(cti_action_lemmas_with_grammars) == 0:
-                    if len(cti_action_invs_found) == 0:
-                        print("No more current outstanding CTI lemma actions with local grammars.")
-                        return
-
-                    # k_cti_lemma_action = random.choice(cti_action_lemmas_with_grammars)
-                    k_cti_lemma_action = cti_action_invs_found[0]
-                    (k_cti_lemma, k_cti_action) = k_cti_lemma_action
-                    print(f"Chose {k_cti_lemma_action} proof obligation")
-
-                    lemma_name = "Safety" if k_cti_lemma == self.safety else k_cti_lemma
-                    action_node = f"{lemma_name}_{k_cti_action}"
-                    
-                    # Filter CTIs based on this choice.
-                    cti_filter = lambda c  : (c.inv_name == k_cti_lemma or (c.inv_name == "Safety" and k_cti_lemma == self.safety)) and c.action_name == k_cti_action
-                    k_ctis_to_eliminate = [c for c in k_ctis if cti_filter(c)]
-                    # k_ctis_remaining = [c for c in k_ctis if not cti_filter(c)]
-                    logging.info(f"Have {len(k_ctis_to_eliminate)} total k-CTIs after filtering to {k_cti_lemma_action}.")
-
-
-                    logging.info(f"Computing COI for {(k_cti_lemma, k_cti_action)}")
-                    # actions_real_defs = [a.replace("Action", "") for a in actions]
-                    lemma_action_coi = {}
-
-                    k_cti_action_opname = k_cti_action.replace("Action", "")
-                    ret = spec_obj_with_lemmas.get_vars_in_def(k_cti_action_opname)
-                    vars_in_action,action_updated_vars = ret
-                    print("vars in action:", vars_in_action)
-                    print("action updated vars:", action_updated_vars)
-                    vars_in_action_non_updated,_ = spec_obj_with_lemmas.get_vars_in_def(k_cti_action_opname, ignore_update_expressions=True)
-                    vars_in_lemma_defs = spec_obj_with_lemmas.get_vars_in_def(k_cti_lemma)[0]
-
-                    lemma_action_coi = spec_obj_with_lemmas.compute_coi(None, None, None,action_updated_vars, vars_in_action_non_updated, vars_in_lemma_defs)
-                    print("Lemma-action COI")
-                    print(lemma_action_coi)
-                    # for ind,p in enumerate(self.preds):
-                        # print(p, vars_in_preds[ind], lemma_action_coi)
-
-                    #
-                    # Filter predicates based on this COI.
-                    #
-                    # We select only predicates that contain variable sets that are a subset of the COI.
-                    # If they, for example, contain a variable set with some variables in the COI and some not, then
-                    # we don't include that predicate.
-                    #
-                    # Note that the set subset operator is "<=" here.
-                    preds = [p for (pi,p) in enumerate(self.preds) if vars_in_preds[pi] <= lemma_action_coi]
-
-                    pct_str = "{0:.1f}".format(len(preds)/len(self.preds) * 100)
-                    logging.info(f"{len(preds)}/{len(self.preds)} ({pct_str}% of) predicates being used based on COI slice filter.")
-
-                    cache_with_ignored_vars = [v for v in self.state_vars if v not in lemma_action_coi]
-
-                    self.proof_graph["edges"].append((action_node, lemma_name))
-                    self.proof_graph["nodes"][action_node] = {"ctis_remaining": 1000, "coi_vars": lemma_action_coi}  # initialize with positive CTI count, to be updated later.
-
 
                 self.total_num_cti_elimination_rounds = (roundi + 1)
                 # ret = self.eliminate_ctis(k_ctis, self.num_invs, roundi, preds=preds, cache_states_with_ignored_vars=cache_with_ignored_vars)
-                ret = self.eliminate_ctis(k_ctis_to_eliminate, self.num_invs, roundi, subroundi=subround, preds=preds, cache_states_with_ignored_vars=cache_with_ignored_vars)
+                ret = self.eliminate_ctis(k_ctis_to_eliminate, self.num_invs, roundi, subroundi=subround, preds=preds)
                 subround += 1
 
                 if self.auto_lemma_action_decomposition and self.save_dot and len(self.proof_graph["edges"]) > 0:
@@ -4118,21 +4028,12 @@ class InductiveInvGen():
                 
                 # If we did not eliminate all CTIs in this round, then exit with failure.
                 if ret == None:
-                    if self.auto_lemma_action_decomposition:
-                        # If we were unable to eliminate this batch of CTIs, we can still continue and try to target a different 
-                        # proof obligation in the next round, simply marking this proof obligation as failed.
-                        obl = (k_cti_lemma, k_cti_action)
-                        failed_obligations.add(obl)
-                        elim_round_failed = False
-                        logging.info(f"Could not eliminate all CTIs in this round (Round {roundi}) for obligation {obl}. Marking it as failed and trying another.")
-                    else:
-                        logging.info(f"Could not eliminate all CTIs in this round (Round {roundi}). Exiting with failure.")
-                        elim_round_failed = True
-                        break
+                    logging.info(f"Could not eliminate all CTIs in this round (Round {roundi}). Exiting with failure.")
+                    elim_round_failed = True
+                    break
 
                 # Determines whether we will re-generate CTIs after every new strengthening lemma discovered.
                 k_ctis = [c for c in k_ctis if c not in k_ctis_to_eliminate]
-                # k_ctis = []
 
                 logging.info(f"k-ctis remaining after Round {roundi} elimination step: {len(k_ctis)} (eliminated {len(k_ctis_to_eliminate)})")
                 logging.info("")
@@ -4458,7 +4359,7 @@ if __name__ == "__main__":
     parser.add_argument('--enable_partitioned_state_caching', help='Enable finer grained partitioned variable subset based state caching.', default=False, action='store_true')
     parser.add_argument('--enable_cti_slice_projection', help='Enable slicing of CTI sets.', default=False, action='store_true')
     parser.add_argument('--action_filter', help='CTI action filter.', required=False, default=None, type=str)
-    parser.add_argument('--include_existing_conjuncts', help='Whether to include existing conjuncts as invariant candidates during CTI elimination.', default=False, action='store_true')
+    parser.add_argument('--include_existing_conjuncts', help='Whether to include existing conjuncts as invariant candidates during CTI elimination.', default=True, action='store_true')
 
     # Apalache related commands.
     parser.add_argument('--use_apalache_ctigen', help='Use Apalache for CTI generation (experimental).', required=False, default=False, action='store_true')
