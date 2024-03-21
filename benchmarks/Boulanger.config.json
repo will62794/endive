@@ -2,6 +2,7 @@
     "preds"  :  [
         "num[VARI] > num[VARJ]",
         "num[VARI] = num[VARJ]",
+        "num[VARI] = 0",
         "num[VARI] = 1",
         "\\E NK \\in Nats : num[VARI] = NK",
         "flag[VARI]",
