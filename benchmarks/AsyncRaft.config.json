@@ -49,7 +49,8 @@
         "H_CommitIndexCoveredOnQuorum /\\ commitIndex = commitIndex /\\ log = log",
         "IsPrefix(log[VARI], log[VARJ])",
         "IsPrefix(log[VARJ], log[VARI])",
-        "commitIndex[VARI] \\in DOMAIN log[VARI] /\\ commitIndex[VARI] \\in DOMAIN log[VARJ] /\\ log[VARJ][commitIndex[VARI]] = log[VARI][commitIndex[VARI]]"
+        "commitIndex[VARI] \\in DOMAIN log[VARI] /\\ commitIndex[VARI] \\in DOMAIN log[VARJ] /\\ log[VARJ][commitIndex[VARI]] = log[VARI][commitIndex[VARI]]",
+        "H_LogMatching /\\ log = log"
     ],
     "preds_alt" : [],
     "safety"  :  "H_NoLogDivergence",
