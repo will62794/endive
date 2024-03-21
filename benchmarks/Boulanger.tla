@@ -316,7 +316,9 @@ Next ==
     \/ ncsAction
     \/ e1Action
     \/ e2Action
+    \/ e2UncheckedEmptyAction
     \/ e3Action
+    \/ e3MaxAction
     \/ e4Action
     \/ w1Action
     \/ w2Action
@@ -328,6 +330,9 @@ Spec == /\ Init /\ [][Next]_vars
 
 
 NextUnchanged == UNCHANGED vars
+
+Max(S) == CHOOSE x \in S : \A y \in S : y <= x
+StateConstraint == \A process \in Procs : num[process] < Max(Nats)
 
 (***************************************************************************)
 (* MutualExclusion asserts that two distinct processes are in their        *)
