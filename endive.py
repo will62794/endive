@@ -2229,8 +2229,8 @@ class InductiveInvGen():
 
                             invs_to_check = [(ind, inv) for ind,inv in enumerate(invs) if pred_var_sets_for_invs[ind] == predvar_set]
 
-                            var_slice = [s for s in self.state_vars if s not in ignored]
-                            logging.info(f"Running partitioned state caching step with {len(ignored)} ignored vars (slice={var_slice}), num invs to check: {len(invs_to_check)}")
+                            partition_var_slice = [s for s in self.state_vars if s not in ignored]
+                            logging.info(f"Running partitioned state caching step with {len(ignored)} ignored vars (slice={partition_var_slice}), num invs to check: {len(invs_to_check)}")
                             
                             # Do the caching run.
                             self.cache_projected_states(ignored, max_depth=max_depth, tlc_workers=tlc_workers)
