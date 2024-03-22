@@ -4115,7 +4115,7 @@ class InductiveInvGen():
         else:
             logging.info("Not fully done. Discovered invariant is not inductive.")
 
-    def render_proof_graph(self):
+    def render_proof_graph(self, save_tex=False):
         dot = graphviz.Digraph(f'{self.specname}-proof-graph', comment='The Round Table', strict=True)  
         #  dot.graph_attr["rankdir"] = "LR"
         dot.node_attr["fontname"] = "courier"
@@ -4189,6 +4189,19 @@ class InductiveInvGen():
 
         logging.info(f"Rendering proof graph ({len(self.proof_graph['edges'])} edges)")
         dot.render(self.specdir + "/" + self.specname + "_ind-proof-tree")
+
+        if save_tex:
+            old_stdout = sys.stdout # backup current stdout
+            sys.stdout = open(os.devnull, "w")
+            tex_out_file = self.specdir + "/" + self.specname + "_ind-proof-tree.tex"
+            figpreamble=f"""
+            \Large
+            """
+            texcode = dot2tex.dot2tex(dot.source, debug=False, output="dot2tex.log", format='tikz', figpreamble=figpreamble, autosize=True, crop=False, figonly=True, texmode="math")
+            sys.stdout = old_stdout # reset old stdout
+            f = open(tex_out_file, 'w')
+            f.write(texcode)
+            f.close()
 
     def run(self):
         tstart = time.time()
