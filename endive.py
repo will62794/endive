@@ -4508,6 +4508,9 @@ if __name__ == "__main__":
     logging.info("Total number of invariants checked: %d", indgen.get_total_num_invs_checked())
     logging.info("CTI generation duration: %f secs.", indgen.get_ctigen_duration())
     logging.info("State caching duration: %f secs.", indgen.get_state_cache_duration())
+    if indgen.proof_tree_mode:
+        logging.info("Re-parsing duration: %f secs.", indgen.reparsing_duration_secs)
+    logging.info("State caching duration: %f secs.", indgen.get_state_cache_duration())
     logging.info("Invariant checking duration: %f secs.", indgen.get_invcheck_duration())
     logging.info("CTI elimination checks duration: %f secs.", indgen.get_ctielimcheck_duration())
     logging.info("Total duration: {:.2f} secs.".format(((time.time() - tstart))))
