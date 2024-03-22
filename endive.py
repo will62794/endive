@@ -4025,6 +4025,12 @@ class InductiveInvGen():
                 ret = self.eliminate_ctis(k_ctis_to_eliminate, self.num_invs, roundi, subroundi=subround, preds=preds)
                 subround += 1
 
+
+                if self.auto_lemma_action_decomposition and self.save_dot and len(self.proof_graph["edges"]) > 0:
+                    # Render updated proof graph as we go.
+                    self.render_proof_graph()
+                
+                
                 if self.auto_lemma_action_decomposition and self.save_dot and len(self.proof_graph["edges"]) > 0:
                     # Render updated proof graph as we go.
                     self.render_proof_graph()
