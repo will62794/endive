@@ -3557,8 +3557,6 @@ class InductiveInvGen():
         
         self.strengthening_conjuncts = []
 
-        # self.auto_check_simulation_bound()
-
 
         if self.persistent_proof_tree_mode:
             self.load_proof_graph()
@@ -4034,16 +4032,6 @@ class InductiveInvGen():
                 # ret = self.eliminate_ctis(k_ctis, self.num_invs, roundi, preds=preds, cache_states_with_ignored_vars=cache_with_ignored_vars)
                 ret = self.eliminate_ctis(k_ctis_to_eliminate, self.num_invs, roundi, subroundi=subround, preds=preds)
                 subround += 1
-
-
-                if self.auto_lemma_action_decomposition and self.save_dot and len(self.proof_graph["edges"]) > 0:
-                    # Render updated proof graph as we go.
-                    self.render_proof_graph()
-                
-                
-                if self.auto_lemma_action_decomposition and self.save_dot and len(self.proof_graph["edges"]) > 0:
-                    # Render updated proof graph as we go.
-                    self.render_proof_graph()
                 
                 # If we did not eliminate all CTIs in this round, then exit with failure.
                 if ret == None:
@@ -4222,6 +4210,9 @@ class InductiveInvGen():
             except Exception as e:
                 print("ERROR: error parsing TLA+ spec:", e)
                 self.tla_spec_obj = None
+
+        # self.auto_check_simulation_bound()
+        # return
 
         if self.proof_tree_mode:
 
