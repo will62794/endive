@@ -3438,21 +3438,31 @@ class InductiveInvGen():
         # Prototype of auto-tuning simulation bounds.
         # TODO: Would need to make simulation work properly with checkAllInvariants mode I think.
         logging.info("Checking simulation bound for all invariants.")
-        logging.info("Generating %d candidate invariants." % num_invs)
         use_pred_identifiers = self.use_fast_pred_eval
         boolean_style = "tla"
-        ninvs = 10000
+        ninvs = 4000
+        logging.info("Generating %d candidate invariants." % ninvs)
         all_invs = mc.generate_invs(
-            self.preds, ninvs, min_num_conjuncts=2, max_num_conjuncts=2,quant_vars=self.quant_vars, 
+            self.preds, ninvs, min_num_conjuncts=2, max_num_conjuncts=3,quant_vars=self.quant_vars, 
             boolean_style = boolean_style,
             use_pred_identifiers=use_pred_identifiers)
         invs = all_invs["raw_invs"]
-        depth = 30
-        for num in [10,100,200,1000,2000,8000]:
+        depth = 35
+        sat_inv_table = []
+        logging.info("CHECKING SIMULATION INV BOUNDS\n---------------------")
+        # nums = [10,100,200,1000,2000,8000]
+        nums = [10,25,50,75,100,125,150,200,250,300,350,500]
+        for num in nums:
             simulation_inv_tlc_flags=f"-depth {depth} -simulate num={num}"
+            logging.info(f"(depth={depth},num={num})")
             main_sat_invs = self.check_invariants(invs, tlc_workers=tlc_workers, tlc_flags=simulation_inv_tlc_flags)
             # sat_invs = set([f"Inv{iv[0]}" for iv in main_sat_invs])
             logging.info(f"Found {len(main_sat_invs)} sat invariants. (num={num})")
+            logging.info("\n= = = = =\n")
+            sat_inv_table.append(len(main_sat_invs))
+        print("sat inv counts:")
+        for ind,num in enumerate(nums):
+            print(num, ",", sat_inv_table[ind])
                     
 
     def do_invgen_proof_tree_mode(self):
