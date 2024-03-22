@@ -3469,6 +3469,8 @@ class InductiveInvGen():
         # target_action = "HSendValsAction"
         # target_action = "HRcvValAction"
 
+        self.reparsing_duration_secs = 0
+
         # Start with the root safety property.
         root_node = ("Safety", self.safety, "")
 
@@ -3710,7 +3712,10 @@ class InductiveInvGen():
                     # self.make_check_invariants_spec([], rootpath, defs_to_add=self.strengthening_conjuncts)
 
                     logging.info("Re-parsing spec for any newly discovered lemma definitions.")
+                    s1 = time.time()
                     self.spec_obj_with_lemmas = tlaparse.parse_tla_file(self.specdir, specname)
+                    self.reparsing_duration_secs += (time.time() - s1)
+                    logging.info("Done re-parsing. Total time spent parsing so far: {:.2f}s".format(self.reparsing_duration_secs))
 
                 defs = self.spec_obj_with_lemmas.get_all_user_defs(level="1")
                 # for d in defs:
