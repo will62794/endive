@@ -3558,6 +3558,8 @@ class InductiveInvGen():
         
         self.strengthening_conjuncts = []
 
+        self.latest_roundi = 0
+
 
         if self.persistent_proof_tree_mode:
             self.load_proof_graph()
@@ -3571,6 +3573,7 @@ class InductiveInvGen():
         for roundi in range(self.num_rounds):
             logging.info("### STARTING ROUND %d" % roundi)
             logging.info("Num remaining lemma obligations %d" % len(self.proof_obligation_queue))
+            self.latest_roundi = roundi
             if len(self.proof_obligation_queue) == 0:
                 logging.info("No remaining lemma obligations. Stopping now!")
                 return
@@ -4227,6 +4230,7 @@ class InductiveInvGen():
 
         # self.auto_check_simulation_bound()
         # return
+        self.latest_roundi = 0
 
         if self.proof_tree_mode:
 
@@ -4243,6 +4247,7 @@ class InductiveInvGen():
             if self.save_dot and len(self.proof_graph["edges"]) > 0:
                 # Render updated proof graph as we go.
                 self.render_proof_graph()
+                self.persist_proof_graph(self.latest_roundi)
 
             # print("")
             # print("Proof graph edges")
