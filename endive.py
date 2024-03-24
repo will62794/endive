@@ -2797,7 +2797,8 @@ class InductiveInvGen():
                             "ctis_remaining": num_ctis_remaining, 
                             "coi_vars": lemma_action_coi,
                             "num_grammar_preds": len(preds),
-                            "is_action": True
+                            "is_action": True,
+                            "discharged": num_ctis_remaining == 0
                         }
                         self.proof_graph["curr_node"] = action_node
                         # print(f"{orig_k_ctis[0].inv_name}_{orig_k_ctis[0].action_name}",  "->", f"{orig_k_ctis[0].inv_name}", "// EDGE")
@@ -3440,7 +3441,7 @@ class InductiveInvGen():
         logging.info("Checking simulation bound for all invariants.")
         use_pred_identifiers = self.use_fast_pred_eval
         boolean_style = "tla"
-        ninvs = 4000
+        ninvs = 1000
         logging.info("Generating %d candidate invariants." % ninvs)
         all_invs = mc.generate_invs(
             self.preds, ninvs, min_num_conjuncts=2, max_num_conjuncts=3,quant_vars=self.quant_vars, 
@@ -3451,7 +3452,8 @@ class InductiveInvGen():
         sat_inv_table = []
         logging.info("CHECKING SIMULATION INV BOUNDS\n---------------------")
         # nums = [10,100,200,1000,2000,8000]
-        state_nums = [1000,2000,5000,7500,10000,15000,25000,30000,40000,50000,75000,90000]
+        # state_nums = [1000,2000,5000,7500,10000,15000,25000,30000,40000,50000,75000,90000]
+        state_nums = [10000,50000,100000,200000]
         for state_num in state_nums:
             num = state_num // tlc_workers // depth
             simulation_inv_tlc_flags=f"-depth {depth} -simulate num={num}"
@@ -3824,7 +3826,8 @@ class InductiveInvGen():
                         "ctis_remaining": len(k_ctis_to_eliminate), 
                         "coi_vars": list(lemma_action_coi),
                         "num_grammar_preds": len(preds),
-                        "is_action": True
+                        "is_action": True,
+                        "discharged": False
                     }
                     self.proof_graph["curr_node"] = action_node
 
