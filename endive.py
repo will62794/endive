@@ -3759,7 +3759,7 @@ class InductiveInvGen():
                 if len(k_ctis_to_eliminate) > self.MAX_NUM_CTIS_PER_ROUND:
                     logging.info(f"Limiting num k-CTIs to {self.MAX_NUM_CTIS_PER_ROUND} of {len(k_ctis_to_eliminate)}.")
                     # Sort CTIS first to ensure we always select a consistent subset.
-                    limited_ctis = k_ctis_to_eliminate[:self.MAX_NUM_CTIS_PER_ROUND]
+                    k_ctis_to_eliminate = k_ctis_to_eliminate[:self.MAX_NUM_CTIS_PER_ROUND]
 
 
                 logging.info(f"Computing COI for {(k_cti_lemma, k_cti_action)}")
