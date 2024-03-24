@@ -45,9 +45,10 @@ VARIABLES
   \* @type: Set( { type: Str, rm: RM } );
   msgsPrepared,
   \* @type: Set( { type: Str } );
-  msgsAbortCommit
+  msgsCommit,
+  msgsAbort
 
-vars == <<rmState, tmState, tmPrepared, msgsPrepared, msgsAbortCommit>>
+vars == <<rmState, tmState, tmPrepared, msgsPrepared, msgsCommit, msgsAbort>>
 
     (***********************************************************************)
     (* In the protocol, processes communicate with one another by sending  *)
@@ -73,7 +74,8 @@ TypeOK ==
   /\ tmState \in {"init", "committed", "aborted"}
   /\ tmPrepared \in SUBSET RM
   /\ msgsPrepared \in SUBSET [type : {"Prepared"}, rm : RM]
-  /\ msgsAbortCommit \in SUBSET [type : {"Commit", "Abort"}]
+  /\ msgsCommit \in SUBSET [type : {"Commit"}]
+  /\ msgsAbort \in SUBSET [type : {"Abort"}]
 
 ApaTypeOK ==  
   (*************************************************************************)
@@ -83,7 +85,8 @@ ApaTypeOK ==
   /\ tmState \in {"init", "committed", "aborted"}
   /\ tmPrepared \in SUBSET RM
   /\ msgsPrepared \in SUBSET [type : {"Prepared"}, rm : RM]
-  /\ msgsAbortCommit \in SUBSET [type : {"Commit", "Abort"}]
+  /\ msgsCommit \in SUBSET [type : {"Commit"}]
+  /\ msgsAbort \in SUBSET [type : {"Abort"}]
 
 
 Init ==   
@@ -94,7 +97,8 @@ Init ==
   /\ tmState = "init"
   /\ tmPrepared   = {}
   /\ msgsPrepared = {}
-  /\ msgsAbortCommit = {}
+  /\ msgsCommit = {}
+  /\ msgsAbort = {}
 -----------------------------------------------------------------------------
 (***************************************************************************)
 (* We now define the actions that may be performed by the processes, first *)
@@ -107,7 +111,7 @@ TMRcvPrepared(rm) ==
   /\ tmState = "init"
   /\ [type |-> "Prepared", rm |-> rm] \in msgsPrepared
   /\ tmPrepared' = tmPrepared \cup {rm}
-  /\ UNCHANGED <<rmState, tmState, msgsPrepared, msgsAbortCommit>>
+  /\ UNCHANGED <<rmState, tmState, msgsPrepared, msgsCommit, msgsAbort>>
 
 TMCommit ==
   (*************************************************************************)
@@ -117,8 +121,8 @@ TMCommit ==
   /\ tmState = "init"
   /\ tmPrepared = RM
   /\ tmState' = "committed"
-  /\ msgsAbortCommit' = msgsAbortCommit \cup {[type |-> "Commit"]}
-  /\ UNCHANGED <<rmState, tmPrepared, msgsPrepared>>
+  /\ msgsCommit' = msgsCommit \cup {[type |-> "Commit"]}
+  /\ UNCHANGED <<rmState, tmPrepared, msgsPrepared, msgsAbort>>
 
 TMAbort ==
   (*************************************************************************)
@@ -126,8 +130,8 @@ TMAbort ==
   (*************************************************************************)
   /\ tmState = "init"
   /\ tmState' = "aborted"
-  /\ msgsAbortCommit' = msgsAbortCommit \cup {[type |-> "Abort"]}
-  /\ UNCHANGED <<rmState, tmPrepared, msgsPrepared>>
+  /\ msgsAbort' = msgsAbort \cup {[type |-> "Abort"]}
+  /\ UNCHANGED <<rmState, tmPrepared, msgsPrepared, msgsCommit>>
 
 RMPrepare(rm) == 
   (*************************************************************************)
@@ -136,7 +140,7 @@ RMPrepare(rm) ==
   /\ rmState[rm] = "working"
   /\ rmState' = [rmState EXCEPT ![rm] = "prepared"]
   /\ msgsPrepared' = msgsPrepared \cup {[type |-> "Prepared", rm |-> rm]}
-  /\ UNCHANGED <<tmState, tmPrepared, msgsAbortCommit>>
+  /\ UNCHANGED <<tmState, tmPrepared, msgsCommit, msgsAbort>>
   
 RMChooseToAbort(rm) ==
   (*************************************************************************)
@@ -145,23 +149,23 @@ RMChooseToAbort(rm) ==
   (*************************************************************************)
   /\ rmState[rm] = "working"
   /\ rmState' = [rmState EXCEPT ![rm] = "aborted"]
-  /\ UNCHANGED <<tmState, tmPrepared, msgsPrepared, msgsAbortCommit>>
+  /\ UNCHANGED <<tmState, tmPrepared, msgsPrepared, msgsCommit, msgsAbort>>
 
 RMRcvCommitMsg(rm) ==
   (*************************************************************************)
   (* Resource manager $rm$ is told by the TM to commit.                    *)
   (*************************************************************************)
-  /\ [type |-> "Commit"] \in msgsAbortCommit
+  /\ [type |-> "Commit"] \in msgsCommit
   /\ rmState' = [rmState EXCEPT ![rm] = "committed"]
-  /\ UNCHANGED <<tmState, tmPrepared, msgsPrepared, msgsAbortCommit>>
+  /\ UNCHANGED <<tmState, tmPrepared, msgsPrepared, msgsCommit, msgsAbort>>
 
 RMRcvAbortMsg(rm) ==
   (*************************************************************************)
   (* Resource manager $rm$ is told by the TM to abort.                     *)
   (*************************************************************************)
-  /\ [type |-> "Abort"] \in msgsAbortCommit
+  /\ [type |-> "Abort"] \in msgsAbort
   /\ rmState' = [rmState EXCEPT ![rm] = "aborted"]
-  /\ UNCHANGED <<tmState, tmPrepared, msgsPrepared, msgsAbortCommit>>
+  /\ UNCHANGED <<tmState, tmPrepared, msgsPrepared, msgsCommit, msgsAbort>>
 
 
 TMRcvPreparedAction == TRUE /\ \E rm \in RM : TMRcvPrepared(rm) 
@@ -202,6 +206,8 @@ Symmetry == Permutations(RM)
 
 \* START_PROOF
 
+msgsAbortCommit == msgsAbort \cup msgsCommit
+
 H_TCConsistent ==  
   (*************************************************************************)
   (* A state predicate asserting that two RMs have not arrived at          *)
@@ -210,7 +216,7 @@ H_TCConsistent ==
   \A rm1, rm2 \in RM : ~ (rmState[rm1] = "aborted" /\ rmState[rm2] = "committed")
 
 H_CommitMsgImpliesNoAbortMsg ==  
-    ([type |-> "Commit"] \in msgsAbortCommit) => ~([type |-> "Abort"] \in msgsAbortCommit)
+    ([type |-> "Commit"] \in msgsCommit) => ~([type |-> "Abort"] \in msgsAbort)
 
 H_CommitMsgImpliesNoRMAborted == 
     \A rmi \in RM : ~([type |-> "Commit"] \in msgsAbortCommit) \/ (~(rmState[rmi] = "aborted"))
@@ -330,5 +336,21 @@ CTICost ==
     \* Consider initial TM states as lower cost.
     IF tmState = "init" THEN 0 ELSE 1
 
+H_Inv13_R0_1_I1_0 == \A VARRMI \in RM : ~(rmState[VARRMI] = "committed")
+
+\* Inv328_R2_0_I1_0_def == ~(tmState = "init") \/ (~([type |-> "Commit"] \in msgsAbortCommit))
+\* Inv435_R2_1_I1_0_def == \A VARRMI \in RM : ~(tmPrepared = tmPrepared \cup {VARRMI}) \/ (~(rmState[VARRMI] = "working"))
+\* Inv264_R2_1_I1_1_def == \A VARRMI \in RM : ~([type |-> "Prepared", rm |-> VARRMI] \in msgsPrepared) \/ (~(rmState[VARRMI] = "working"))
+\* Inv450_R2_2_I1_0_def == \A VARRMJ \in RM : ~(tmPrepared = tmPrepared \cup {VARRMJ}) \/ (([type |-> "Prepared", rm |-> VARRMJ] \in msgsPrepared))
+\* Inv2408_R2_2_I3_1_def == \A VARRMJ \in RM : (rmState[VARRMJ] = "prepared") \/ (~([type |-> "Prepared", rm |-> VARRMJ] \in msgsPrepared) \/ ~((tmState = "init")))
+\* Inv46_R2_3_I1_0_def == ~(tmState = "init") \/ ~(([type |-> "Commit"] \in msgsAbortCommit))
+\* 
+
+
+H_Inv103_R0_0_I1 == \A VARRMI \in RM : \A VARRMJ \in RM : ~(rmState[VARRMI] = "working") \/ (~(rmState[VARRMJ] = "committed"))
+H_Inv137_R0_1_I1 == \A VARRMI \in RM : ~([type |-> "Abort"] \in msgsAbortCommit) \/ (~(rmState[VARRMI] = "committed"))
+H_Inv135_R1_0_I1 == ~([type |-> "Abort"] \in msgsAbortCommit) \/ (~([type |-> "Commit"] \in msgsAbortCommit))
+H_Inv36_R3_0_I1 == ~([type |-> "Commit"] \in msgsAbortCommit) \/ (~(tmState = "init"))
+H_Inv90_R3_1_I1 == ~([type |-> "Abort"] \in msgsAbortCommit) \/ (~(tmState = "init"))
 
 =============================================================================
