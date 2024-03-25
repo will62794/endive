@@ -406,7 +406,9 @@ def runtlc(spec,config=None,tlc_workers=6,cwd=None,tlcjar="tla2tools-checkall.ja
     if cache_state_load:
         cacheFlags = f"-cacheStates load"
     if cache_with_ignored is not None:
-        cacheFlags += f" -cacheStatesIgnoreVars {','.join(cache_with_ignored)}"
+        # Ignored var sets are specified in the command line arg like: v1,v2|v1,v3,v4|v1,v5
+        cacheWithIgnoredVarSets = "|".join([",".join(cvars) for cvars in cache_with_ignored])
+        cacheFlags += f' -cacheStatesIgnoreVars "{cacheWithIgnoredVarSets}"'
 
     cmd = java + (f' -Djava.io.tmpdir="{dirpath}" -cp {tlcjar} tlc2.TLC {tlc_flags} {cacheFlags} -maxDepth {max_depth} -maxSetSize {TLC_MAX_SET_SIZE} -metadir {metadir_path} -noGenerateSpecTE -checkAllInvariants -deadlock -continue -workers {tlc_workers}')
     if config:
