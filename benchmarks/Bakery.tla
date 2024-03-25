@@ -47,7 +47,7 @@
 (* by initializing the variables to arbitrarily chosen type-correct        *)
 (* values.                                                                 *)
 (***************************************************************************)
-EXTENDS Naturals
+EXTENDS Naturals, TLC
 
 (***************************************************************************)
 (* We first declare N to be the number of processes, and we assume that N  *)
@@ -228,8 +228,8 @@ Next ==
     \/ csAction
     \/ exitAction
 
-Spec == /\ Init /\ [][Next]_vars
-        /\ \A self \in Procs : WF_vars((pc[self] # "ncs") /\ p(self))
+\* Spec == /\ Init /\ [][Next]_vars
+        \* /\ \A self \in Procs : WF_vars((pc[self] # "ncs") /\ p(self))
 
 NextUnchanged == UNCHANGED vars
 
@@ -253,6 +253,8 @@ TypeOK == /\ num \in [Procs -> Nat]
 
 Max(S) == CHOOSE x \in S : \A y \in S : y <= x
 StateConstraint == \A process \in Procs : num[process] < Max(Nat)
+
+CTICost == 0
 
 =============================================================================
 \* Modification History

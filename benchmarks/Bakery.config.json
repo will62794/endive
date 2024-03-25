@@ -4,7 +4,7 @@
         "num[VARI] = num[VARJ]",
         "num[VARI] = 0",
         "num[VARI] = 1",
-        "\\E NK \\in Nats : num[VARI] = NK",
+        "\\E NK \\in Nat : num[VARI] = NK",
         "flag[VARI]",
         "flag[VARJ]",
         "flag[nxt[VARI]]",
@@ -48,7 +48,7 @@
     "safety"  :  "H_MutualExclusion",
     "constants"  : {
         "N": ["1", "2", "3"],
-        "Nats": ["{0,1,2,3}"]
+        "Nat": ["{0,1,2,3}"]
     },
     "actions": [
         "ncsAction",
