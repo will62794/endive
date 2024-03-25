@@ -5,7 +5,7 @@
 #SBATCH --constraint="[broadwell|cascadelake]"       # Newer processors.
 #SBATCH -N 1                   # Number of nodes
 #SBATCH -n 1                   # Number of tasks
-#SBATCH --cpus-per-task 36                  # Number of cores
+#SBATCH --cpus-per-task 32                  # Number of cores
 #SBATCH -o endive_logs/Boulanger/Boulanger_output_%j.txt       # Standard output file
 #SBATCH -e endive_logs/Boulanger/Boulanger_error_%j.txt        # Standard error file
 
@@ -19,11 +19,16 @@ cd $specname
 git clone -b ind-tree https://github.com/will62794/endive.git
 cd endive
 git pull --rebase
+
+for seed in 1 2
+do
+echo "---\n--- Running '$specname' benchmark with seed $seed ---\n---"
 srun python3 endive.py --spec benchmarks/$specname \
-    --seed 2444 --num_simulate_traces 100000 --tlc_workers 32 \
-    --debug --target_sample_time_limit_ms 10000 --target_sample_states 30000 \
+    --seed $seed --num_simulate_traces 200000 --tlc_workers 24 \
+    --debug --target_sample_time_limit_ms 10000 --target_sample_states 200000 \
     --opt_quant_minimize --k_cti_induction_depth 1 --override_num_cti_workers 8 \
-    --ninvs 40000 --max_num_ctis_per_round 2000 \
+    --ninvs 40000 --max_num_ctis_per_round 5000 \
     --save_dot --max_num_conjuncts_per_round 8 --niters 4 \
     --auto_lemma_action_decomposition --enable_partitioned_state_caching --proof_tree_mode \
     --nrounds 45
+done
