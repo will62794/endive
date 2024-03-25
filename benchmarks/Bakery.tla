@@ -47,7 +47,7 @@
 (* by initializing the variables to arbitrarily chosen type-correct        *)
 (* values.                                                                 *)
 (***************************************************************************)
-EXTENDS Naturals, TLAPS
+EXTENDS Naturals
 
 (***************************************************************************)
 (* We first declare N to be the number of processes, and we assume that N  *)
@@ -237,8 +237,7 @@ NextUnchanged == UNCHANGED vars
 (* MutualExclusion asserts that two distinct processes are in their        *)
 (* critical sections.                                                      *)
 (***************************************************************************)
-H_MutualExclusion == \A i,j \in Procs : (i # j) => ~ /\ pc[i] = "cs"
-                                                   /\ pc[j] = "cs"
+H_MutualExclusion == \A i,j \in Procs : (i # j) => ~ (pc[i] = "cs" /\ pc[j] = "cs")
 -----------------------------------------------------------------------------
 (***************************************************************************)
 (* The Inductive Invariant                                                 *)
@@ -251,6 +250,9 @@ TypeOK == /\ num \in [Procs -> Nat]
           /\ max \in [Procs -> Nat]
           /\ nxt \in [Procs -> Procs]
           /\ pc \in [Procs -> {"ncs", "e1", "e2", "e3", "e4", "w1", "w2", "cs", "exit"}]             
+
+Max(S) == CHOOSE x \in S : \A y \in S : y <= x
+StateConstraint == \A process \in Procs : num[process] < Max(Nat)
 
 =============================================================================
 \* Modification History
