@@ -68,7 +68,7 @@
         "exitAction"
     ],
     "simulation_inv_check": true,
-    "simulation_inv_check_num_states": 2000000,
+    "simulation_inv_check_num_states": 3000000,
     "simulation_inv_check_depth": 60,
     "constraint"  :  "StateConstraint",
     "quant_inv"  :  "\\A VARI \\in Procs : \\A VARJ \\in Procs : ",
