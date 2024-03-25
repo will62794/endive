@@ -79,5 +79,14 @@
     "typeok"  :  "TypeOK",
     "tlc_specific_spec": false,
     "try_final_minimize": false,
-    "simulate"  :  true
+    "simulate"  :  true,
+    "tlaps_proof_config": {
+        "assumes": [
+        ],
+        "lemma_def_expands": {
+            "Safety": ["H_MutualExclusion"]
+        },
+        "action_def_expands":{
+        }
+    }
 }
