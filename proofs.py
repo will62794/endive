@@ -333,9 +333,9 @@ class StructuredProofNode():
         out_str = ""
         out_str += f"THEOREM TRUE\n"
 
-        assumes_str = ",".join(assumes_list)
-
-        out_str += f"""  <1>. USE {assumes_str}\n"""
+        if len(assumes_list) > 0:
+            assumes_str = ",".join(assumes_list)
+            out_str += f"""  <1>. USE {assumes_str}\n"""
 
         # Export obligations for all actions.
         for (ind,a) in enumerate(actions):
@@ -402,7 +402,7 @@ class StructuredProof():
                 if c.expr not in seen:
                     self.walk_proof_graph(c, visit_fn, seen, all_nodes=all_nodes)
 
-    def to_tlaps_proof_skeleton(self, tlaps_proof_config):
+    def to_tlaps_proof_skeleton(self, tlaps_proof_config, add_lemma_defs=None):
         """ Export proof graph obligations to TLAPS proof structure."""
         modname = self.specname + "_IndDecompProof"
         f = open("benchmarks/" + modname + ".tla", 'w')
@@ -427,6 +427,10 @@ class StructuredProof():
         
         assumes_name_list = []
 
+        if add_lemma_defs is not None:
+            for (name,expr) in add_lemma_defs:
+                spec_lines += f"{name} == {expr}\n"
+
         assume_spec_lines = ""
         if "assumes" in tlaps_proof_config:
             for ind,assume in enumerate(tlaps_proof_config["assumes"]):
@@ -439,10 +443,10 @@ class StructuredProof():
         for n in nodes:
             if len(n.children.keys()) == 0:
                 continue
-            for a in n.children:
-                if a in self.lemma_action_coi:
-                    slicevars = self.lemma_action_coi[a][n.expr]
-                    all_var_slices.append(slicevars)
+            # for a in n.children:
+                # if a in self.lemma_action_coi:
+                    # slicevars = self.lemma_action_coi[a][n.expr]
+                    # all_var_slices.append(slicevars)
 
             if n.expr == self.root.expr:
                 proof_obligation_lines += "\n\* (ROOT SAFETY PROP)"

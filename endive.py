@@ -3507,7 +3507,8 @@ class InductiveInvGen():
             "is_lemma": True, 
             "expr": root_node[1],
             "order": 1,
-            "depth": self.curr_obligation_depth
+            "depth": self.curr_obligation_depth,
+            "is_root": True
         }
 
         # For proof tree we look for single step inductive support lemmas.
@@ -4218,6 +4219,28 @@ class InductiveInvGen():
             f.write(texcode)
             f.close()
 
+    def proof_graph_get_support_nodes(self, node):
+        """ Get all support nodes for a given node of the auto-generated proof graph. """
+        support_nodes = {}
+        action_nodes = [e[0] for e in self.proof_graph["edges"] if e[1] == node]
+        # Safety_RMChooseToAbortAction
+        for a in action_nodes:
+            action = a.split("_")[-1]
+            action_incoming_nodes = [e[0] for e in self.proof_graph["edges"] if e[1] == a]
+            support_nodes[action] = action_incoming_nodes
+        return support_nodes
+
+    def proof_graph_to_structured_proof(self, start_node):
+        """ Convert auto-generated proof graph into a StructuredProof object. """
+
+        # Get all children of this graph node i.e. all incoming edges.
+        root_proof_node = StructuredProofNode("L_" + start_node, start_node)
+        support_nodes = self.proof_graph_get_support_nodes(start_node)
+        # print("SUPPORT:", support_nodes)
+        for action in support_nodes:
+            root_proof_node.children[action] = [self.proof_graph_to_structured_proof(child) for child in support_nodes[action]] 
+        return root_proof_node
+
     def run(self):
         tstart = time.time()
 
@@ -4236,6 +4259,11 @@ class InductiveInvGen():
                 self.spec_defs = tla_spec_obj.get_all_user_defs(level="1")
                 self.tla_spec_obj = tla_spec_obj
                 self.state_vars = self.tla_spec_obj.get_all_vars()
+                self.actions = []
+                for udef in self.tla_spec_obj.get_all_user_defs(level="2"):
+                    if udef.endswith("Action"):
+                        self.actions.append(udef)
+
             except Exception as e:
                 print("ERROR: error parsing TLA+ spec:", e)
                 self.tla_spec_obj = None
@@ -4251,6 +4279,8 @@ class InductiveInvGen():
                 logging.info("Running in interactive proof tree mode.")
                 self.run_interactive_mode()
                 return
+            
+
 
             logging.info("Running invariant generation in proof tree mode.")
             self.do_invgen_proof_tree_mode()
@@ -4260,6 +4290,21 @@ class InductiveInvGen():
                 # Render updated proof graph as we go.
                 self.render_proof_graph()
                 self.persist_proof_graph(self.latest_roundi)
+
+                # Also save TLAPS obligations for proof graph.
+                structured_proof_root = self.proof_graph_to_structured_proof("Safety")
+                structured_proof = StructuredProof(structured_proof_root, 
+                                    specname = self.specname, 
+                                    actions=self.actions, 
+                                    # nodes=nodes, 
+                                    safety=self.safety)
+                proof_config = {}
+                if "tlaps_proof_config" in self.spec_config:
+                    proof_config = self.spec_config["tlaps_proof_config"]
+                lemma_nodes = [n for n in self.proof_graph["nodes"] if "is_lemma" in self.proof_graph["nodes"][n]]
+                structured_proof.to_tlaps_proof_skeleton(proof_config, add_lemma_defs=[(n, self.proof_graph["nodes"][n]["expr"]) for n in lemma_nodes])
+            
+                
 
             # print("")
             # print("Proof graph edges")
