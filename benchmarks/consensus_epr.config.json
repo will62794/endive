@@ -20,18 +20,16 @@
         "leader[VARK]",
         "VALI \\in decided[VARI]",
         "VALI \\in decided[VARJ]",
-        "VALI \\in decided[VARK]",
         "decided[VARI] = {}",
         "decided[VARJ] = {}",
-        "VARQJ \\subseteq votes[VARI]",
-        "VARQJ \\subseteq votes[VARJ]",
         "VARQJ = votes[VARI]",
-        "VARQJ = votes[VARJ]"
+        "VARQJ = votes[VARJ]",
+        "H_UniqueLeaders /\\ leader = leader"
     ],
     "preds_alt" : [],
     "safety"  :  "H_NoConflictingValues",
     "constants"  :  {
-        "Node": ["{n1}", "{n1,n2}", "{n1,n2}"],
+        "Node": ["{n1}", "{n1,n2}", "{n1,n2,n3}"],
         "Value": ["{v1}","{v1,v2}"],
         "n1": "n1",
         "n2": "n2",
@@ -42,8 +40,8 @@
         "v2": "v2"
     },
     "constraint"  :  "",
-    "simulation_inv_check": true,
-    "simulation_inv_check_num_states": 100000,
+    "simulation_inv_check": false,
+    "simulation_inv_check_num_states": 500000,
     "simulation_inv_check_depth": 20,
     "quant_inv"  :  "\\A VARI \\in Node : \\A VARJ \\in Node : \\A VARK \\in Node : \\E VARQJ \\in Quorum : \\A VALI \\in Value : ",
     "quant_inv_alt"  :  null,
