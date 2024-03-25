@@ -10,6 +10,7 @@
 #SBATCH -e endive_logs/Hermes/Hermes_error_%j.txt        # Standard error file
 
 specname="Hermes"
+lscpu # log CPU info.
 module load OpenJDK/19.0.1
 mkdir -p benchmarking
 cd benchmarking

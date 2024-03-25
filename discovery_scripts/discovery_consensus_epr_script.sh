@@ -10,6 +10,7 @@
 #SBATCH -e endive_logs/consensus_epr/consensus_epr_error_%j.txt        # Standard error file
 
 specname="consensus_epr"
+lscpu # log CPU info.
 module load OpenJDK/19.0.1
 mkdir -p benchmarking
 cd benchmarking
