@@ -10,4 +10,5 @@ scp -O -r neudiscovery:/home/schultz.w/endive_logs discovery_data
 scp -O -r "neudiscovery:/home/schultz.w/endive/benchmarks/Hermes_ind-proof-tree-sd*.pdf" discovery_data
 scp -O -r "neudiscovery:/home/schultz.w/benchmarking/AsyncRaft/endive/benchmarks/AsyncRaft_ind-proof-tree-sd*.pdf" discovery_data
 scp -O -r "neudiscovery:/home/schultz.w/benchmarking/Boulanger/endive/benchmarks/Boulanger_ind-proof-tree-sd*.pdf" discovery_data
+scp -O -r "neudiscovery:/home/schultz.w/benchmarking/Bakery/endive/benchmarks/Bakery_ind-proof-tree-sd*.pdf" discovery_data
 scp -O -r "neudiscovery:/home/schultz.w/benchmarking/consensus_epr/endive/benchmarks/consensus_epr_ind-proof-tree-sd*.pdf" discovery_data
