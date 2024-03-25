@@ -16,7 +16,7 @@ cd benchmarking
 mkdir -p $specname
 cd $specname
 # Clone if not already cloned.
-git clone -b ind-tree https://github.com/will62794/endive.git
+git clone --depth 1 -b ind-tree https://github.com/will62794/endive.git
 cd endive
 git pull --rebase
 srun python3 endive.py --spec benchmarks/$specname \
