@@ -4230,15 +4230,18 @@ class InductiveInvGen():
             support_nodes[action] = action_incoming_nodes
         return support_nodes
 
-    def proof_graph_to_structured_proof(self, start_node):
+    def proof_graph_to_structured_proof(self, start_node, seen=[]):
         """ Convert auto-generated proof graph into a StructuredProof object. """
 
         # Get all children of this graph node i.e. all incoming edges.
         root_proof_node = StructuredProofNode("L_" + start_node, start_node)
         support_nodes = self.proof_graph_get_support_nodes(start_node)
+        seen.append(start_node)
         # print("SUPPORT:", support_nodes)
         for action in support_nodes:
-            root_proof_node.children[action] = [self.proof_graph_to_structured_proof(child) for child in support_nodes[action]] 
+            # print(support_nodes[action])
+            children_to_add = [c for c in support_nodes[action] if c not in seen]
+            root_proof_node.children[action] = [self.proof_graph_to_structured_proof(child, seen=seen) for child in children_to_add] 
         return root_proof_node
 
     def run(self):
