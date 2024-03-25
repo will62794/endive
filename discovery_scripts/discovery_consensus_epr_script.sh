@@ -2,7 +2,7 @@
 #SBATCH -J consensus_epr_endive_Job               # Job name
 #SBATCH --partition short    # Partition name
 #SBATCH --time=12:00:00       # Time limit.
-#SBATCH --constraint=cascadelake       # Newer processors.
+#SBATCH --constraint="[broadwell|cascadelake]"       # Newer processors.
 #SBATCH -N 1                   # Number of nodes
 #SBATCH -n 1                   # Number of tasks
 #SBATCH --cpus-per-task 36                  # Number of cores
@@ -16,7 +16,7 @@ cd benchmarking
 mkdir -p $specname
 cd $specname
 # Clone if not already cloned.
-git clone -b ind-tree https://github.com/will62794/endive.git
+git clone --depth 1 -b ind-tree https://github.com/will62794/endive.git
 cd endive
 git pull --rebase
 srun python3 endive.py --spec benchmarks/$specname \
