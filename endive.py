@@ -4414,6 +4414,7 @@ if __name__ == "__main__":
 
     # Create directory for generated files if needed.
     os.system(f"mkdir -p {os.path.join(specdir, GEN_TLA_DIR)}")
+    os.system(f"mkdir -p {os.path.join(specdir, STATECACHE_DIR)}")
 
     # Initialize command line args.
     num_invs = args["ninvs"]
