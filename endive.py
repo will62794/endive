@@ -28,6 +28,7 @@ DEBUG = False
 MAC_FAST_JAVA_EXE = "/usr/local/zulu15.32.15-ca-jdk15.0.3-macosx_aarch64/bin/java"
 JAVA_EXE="java"
 GEN_TLA_DIR="gen_tla"
+STATECACHE_DIR="statecache"
 LATEST_TLC_JAR = "tla2tools_2.18.jar"
 
 # Use local custom built TLC for now.
@@ -3650,6 +3651,14 @@ class InductiveInvGen():
             logging.info("Number of total unique k-CTIs found: {}. (took {:.2f} secs)".format(len(k_ctis), (time.time()-t0)))
 
             subround = 0
+
+            # Limit number of CTIs if necessary.
+            if len(k_ctis) > self.MAX_NUM_CTIS_PER_ROUND:
+                logging.info(f"Limiting num k-CTIs to {self.MAX_NUM_CTIS_PER_ROUND} of {len(k_ctis)} total found.")
+                # Sort CTIS to give a consistent order first, and then shuffle to ensure sample diversity.
+                sorted_k_ctis = sorted(list(k_ctis))
+                random.shuffle(sorted_k_ctis)
+                k_ctis = set(sorted_k_ctis[:self.MAX_NUM_CTIS_PER_ROUND])
             
             if len(k_ctis) == 0:
                 is_root_node = self.proof_graph["nodes"][curr_obligation]["order"] == 1
@@ -3756,10 +3765,10 @@ class InductiveInvGen():
                 logging.info(f"Have {len(k_ctis_to_eliminate)} total k-CTIs after filtering to {k_cti_lemma_action}.")
 
                 # Limit number of CTIs if necessary.
-                if len(k_ctis_to_eliminate) > self.MAX_NUM_CTIS_PER_ROUND:
-                    logging.info(f"Limiting num k-CTIs to {self.MAX_NUM_CTIS_PER_ROUND} of {len(k_ctis_to_eliminate)}.")
-                    # Sort CTIS first to ensure we always select a consistent subset.
-                    k_ctis_to_eliminate = k_ctis_to_eliminate[:self.MAX_NUM_CTIS_PER_ROUND]
+                # if len(k_ctis_to_eliminate) > self.MAX_NUM_CTIS_PER_ROUND:
+                #     logging.info(f"Limiting num k-CTIs to {self.MAX_NUM_CTIS_PER_ROUND} of {len(k_ctis_to_eliminate)}.")
+                #     # Sort CTIS first to ensure we always select a consistent subset.
+                #     k_ctis_to_eliminate = k_ctis_to_eliminate[:self.MAX_NUM_CTIS_PER_ROUND]
 
 
                 logging.info(f"Computing COI for {(k_cti_lemma, k_cti_action)}")
