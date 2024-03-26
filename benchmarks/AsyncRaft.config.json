@@ -49,6 +49,8 @@
         "AgreeIndexes(VARI) # {} /\\ log[VARI][Max(AgreeIndexes(VARI))] = currentTerm[VARI] /\\ matchIndex = matchIndex",
         "AgreeIndexes(VARI) # {} /\\ commitIndex[VARI] > Max(AgreeIndexes(VARI)) /\\ matchIndex = matchIndex",
         "AgreeIndexes(VARI) # {} /\\ commitIndex[VARI] = Max(AgreeIndexes(VARI)) /\\ matchIndex = matchIndex",
+        "Len(log[VARI]) >= matchIndex[VARI][VARJ]",
+        "Len(log[VARI]) > matchIndex[VARI][VARJ]",
         "H_CommitIndexCoveredOnQuorum /\\ commitIndex = commitIndex /\\ log = log",
         "IsPrefix(log[VARI], log[VARJ])",
         "IsPrefix(log[VARJ], log[VARI])",
