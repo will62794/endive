@@ -1856,6 +1856,9 @@ class InductiveInvGen():
 
 
     def cache_projected_states(self, cache_states_with_ignored_var_sets, max_depth=2**30, tlc_workers=6):
+        # Ensure references to variable slice sets are always sorted to maintain consistent order.
+        cache_states_with_ignored_var_sets = sorted([tuple(sorted(c)) for c in cache_states_with_ignored_var_sets])
+
         logging.info(f"Running state caching step with {len(cache_states_with_ignored_var_sets)} ignored var sets: {cache_states_with_ignored_var_sets}")
         dummy_inv = "3 > 2"
         simulation_inv_tlc_flags = ""
@@ -1874,9 +1877,6 @@ class InductiveInvGen():
 
         # Option to memoize state projection cache computations.
         self.memoize_state_projection_caches = True
-
-        # Ensure references to variable slice sets are always sorted to maintain consistent order.
-        cache_states_with_ignored_var_sets = [tuple(sorted(c)) for c in cache_states_with_ignored_var_sets]
 
         cache_states_with_ignored_var_sets_new = [c for c in cache_states_with_ignored_var_sets if c not in self.state_projection_cache]
         if len(cache_states_with_ignored_var_sets_new) == 0:
@@ -2232,7 +2232,7 @@ class InductiveInvGen():
                         ignored_var_subsets = []
                         for p in pred_var_counts_tups[:]:
                             predvar_set = p[1]
-                            ignored = [svar for svar in self.state_vars if svar not in predvar_set]
+                            ignored = tuple(sorted([svar for svar in self.state_vars if svar not in predvar_set]))
                             ignored_var_subsets.append(ignored)
                         self.cache_projected_states(ignored_var_subsets, max_depth=max_depth, tlc_workers=tlc_workers)
 
