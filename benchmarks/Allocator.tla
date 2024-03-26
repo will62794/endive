@@ -34,7 +34,8 @@ VARIABLES
   requests,    \* pending requests per client
   holding,     \* resources currently held by the client
   (** communication network between clients and allocator **)
-  network      \* set of messages in transit
+  network,      \* set of messages in transit
+  requestMsgs
 
 \* Sched == INSTANCE SchedulingAllocator
 
@@ -67,6 +68,11 @@ Messages ==
    clt : Clients,
    rsrc : SUBSET Resources]
 
+RequestMessages ==
+  [type : {"request"}, 
+   clt : Clients,
+   rsrc : SUBSET Resources]
+
 SeqOf(S, n) == UNION {[1..m -> S] : m \in 0..n}
 BoundedSeq(S, n) == SeqOf(S, n)
 
@@ -77,6 +83,7 @@ TypeOK ==
   /\ requests \in [Clients -> SUBSET Resources]
   /\ holding \in [Clients -> SUBSET Resources]
   /\ network \in SUBSET Messages
+  /\ requestMsgs \in SUBSET RequestMessages
 
 TypeOKRandom ==
   /\ unsat \in [Clients -> SUBSET Resources]
@@ -85,6 +92,7 @@ TypeOKRandom ==
   /\ requests \in [Clients -> SUBSET Resources]
   /\ holding \in [Clients -> SUBSET Resources]
   /\ network \in RandomSetOfSubsets(4, 2, Messages)
+  /\ requestMsgs \in RandomSetOfSubsets(4, 2, RequestMessages)
 -------------------------------------------------------------------------
 
 (* Initially, no resources have been requested or allocated. *)
@@ -95,6 +103,7 @@ Init ==
   /\ requests = [c \in Clients |-> {}]
   /\ holding = [c \in Clients |-> {}]
   /\ network = {}
+  /\ requestMsgs = {}
 
 (* A client c may request a set of resources provided that it has      *)
 (* neither pending requests nor holds any resources. The request is    *)
@@ -102,18 +111,18 @@ Init ==
 Request(c,S) ==
   /\ requests[c] = {} /\ holding[c] = {}
   /\ S # {} /\ requests' = [requests EXCEPT ![c] = S]
-  /\ network' = network \cup {[type |-> "request", clt |-> c, rsrc |-> S]}
-  /\ UNCHANGED <<unsat,alloc,sched,holding>>
+  /\ requestMsgs' = requestMsgs \cup {[type |-> "request", clt |-> c, rsrc |-> S]}
+  /\ UNCHANGED <<unsat,alloc,sched,holding, network>>
 
 (* Reception of a request message from a client by the allocator.      *)
 (* The allocator updates its data structures and inserts the client    *)
 (* into the pool of clients with pending requests.                     *)
 RReq(m) ==
-  /\ m \in network /\ m.type = "request"
+  /\ m \in requestMsgs /\ m.type = "request"
   /\ alloc[m.clt] = {}   \** don't handle request messages prematurely(!)
   /\ unsat' = [unsat EXCEPT ![m.clt] = m.rsrc]
-  /\ network' = network \ {m}
-  /\ UNCHANGED <<alloc,sched,requests,holding>>
+  /\ requestMsgs' = requestMsgs \ {m}
+  /\ UNCHANGED <<alloc,sched,requests,holding, network>>
 
 (* Allocation of a set of available resources to a client that has     *)
 (* requested them (the entire request does not have to be filled).     *)
@@ -128,7 +137,7 @@ Allocate(c,S) ==
   /\ alloc' = [alloc EXCEPT ![c] = @ \cup S]
   /\ unsat' = [unsat EXCEPT ![c] = @ \ S]
   /\ network' = network \cup {[type |-> "allocate", clt |-> c, rsrc |-> S]}
-  /\ UNCHANGED <<requests,holding>>
+  /\ UNCHANGED <<requests,holding, requestMsgs>>
 
 (* Reception of an allocation message by a client.                     *)
 RAlloc(m) ==
@@ -136,7 +145,7 @@ RAlloc(m) ==
   /\ holding' = [holding EXCEPT ![m.clt] = @ \cup m.rsrc]
   /\ requests' = [requests EXCEPT ![m.clt] = @ \ m.rsrc]
   /\ network' = network \ {m}
-  /\ UNCHANGED <<unsat,alloc,sched>>
+  /\ UNCHANGED <<unsat,alloc,sched, requestMsgs>>
 
 (* Client c returns a set of resources that it holds. It may do so     *)
 (* even before its full request has been honored.                      *)
@@ -144,14 +153,14 @@ Return(c,S) ==
   /\ S # {} /\ S \subseteq holding[c]
   /\ holding' = [holding EXCEPT ![c] = @ \ S]
   /\ network' = network \cup {[type |-> "return", clt |-> c, rsrc |-> S]}
-  /\ UNCHANGED <<unsat,alloc,sched,requests>>
+  /\ UNCHANGED <<unsat,alloc,sched,requests, requestMsgs>>
 
 (* Reception of a return message by the allocator.                     *)
 RRet(m) ==
   /\ m \in network /\ m.type = "return"
   /\ alloc' = [alloc EXCEPT ![m.clt] = @ \ m.rsrc]
   /\ network' = network \ {m}
-  /\ UNCHANGED <<unsat,sched,requests,holding>>
+  /\ UNCHANGED <<unsat,sched,requests,holding, requestMsgs>>
 
 (* The allocator extends its schedule by adding the processes from     *)
 (* the pool (that have outstanding requests but that have not yet been *)
@@ -159,7 +168,7 @@ RRet(m) ==
 Schedule == 
   /\ toSchedule # {}
   /\ \E sq \in PermSeqs(toSchedule) : sched' = sched \circ sq
-  /\ UNCHANGED <<unsat,alloc,requests,holding,network>>
+  /\ UNCHANGED <<unsat,alloc,requests,holding,network,requestMsgs>>
 
 RequestAction == \E c \in Clients, S \in SUBSET Resources : Request(c,S) 
 AllocateAction == \E c \in Clients, S \in SUBSET Resources : Allocate(c,S)
@@ -188,7 +197,7 @@ Next ==
     \/ RRetAction
     \/ ScheduleAction
 
-vars == <<unsat,alloc,sched,requests,holding,network>>
+vars == <<unsat,alloc,sched,requests,holding,network,requestMsgs>>
 
 -------------------------------------------------------------------------
 
@@ -224,7 +233,7 @@ PrevResources(i) ==
   \cup (UNION {alloc[c] : c \in UnscheduledClients})
 
 RequestsInTransit(c) ==  \** requests sent by c but not yet received
-  { msg.rsrc : msg \in {m \in network : m.type = "request" /\ m.clt = c} }
+  { msg.rsrc : msg \in {m \in requestMsgs : m.type = "request" /\ m.clt = c} }
 
 AllocsInTransit(c) ==  \** allocations sent to c but not yet received
   { msg.rsrc : msg \in {m \in network : m.type = "allocate" /\ m.clt = c} }
@@ -259,7 +268,7 @@ Invariant ==  \** a lower-level invariant
                   \cup UNION ReturnsInTransit(c)
 
 (* correctness properties in terms of clients' variables *)
-ResourceMutex ==
+H_ResourceMutex ==
   \A c1,c2 \in Clients : holding[c1] \cap holding[c2] # {} => c1 = c2
 
 ClientsWillReturn ==
@@ -270,6 +279,10 @@ ClientsWillObtain ==
 
 InfOftenSatisfied == 
   \A c \in Clients : []<>(requests[c] = {})
+
+
+NextUnchanged == UNCHANGED vars
+CTICost == 0
 
 -------------------------------------------------------------------------
 
