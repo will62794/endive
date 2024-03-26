@@ -2,17 +2,15 @@
     "preds"  :  [
         "(currentTerm[VARI] > currentTerm[VARJ])",
         "(currentTerm[VARJ] > currentTerm[VARI])",
-
         "(currentTerm[VARI] >= currentTerm[VARJ])",
         "(currentTerm[VARJ] >= currentTerm[VARI])",
-
         "(currentTerm[VARI] <= currentTerm[VARJ])",
         "(currentTerm[VARJ] <= currentTerm[VARI])",
-
         "(currentTerm[VARI] = currentTerm[VARJ])",
-    
         "(state[VARI] = Primary)",
-        "(state[VARJ] = Primary)"
+        "(state[VARI] = Secondary)",
+        "(state[VARJ] = Primary)",
+        "(state[VARJ] = Secondary)"
     ],
     "preds_alt" : [],
     "safety"  :  "H_StateMachineSafety",
