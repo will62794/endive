@@ -103,7 +103,7 @@
         ]
     },
     "preds_alt" : [],
-    "safety"  :  "HConsistent",
+    "safety"  :  "Target",
     "constants"  : {
         "H_NODES" : ["{33,44}" , "{33,44,55}"],
         "H_MAX_VERSION" : ["1", "2", "3"]
@@ -387,21 +387,10 @@
 
     "tlaps_proof_config": {
         "assumes": [
-            "IsFiniteSet(Server)",
-            "Nil \\notin Server",
-            "(Leader # Follower) /\\ (Leader # Candidate)",
-            "(Follower # Candidate)",
-            "Server = Server",
-            "Quorum \\subseteq Server",
-            "MaxLogLen \\in Nat",
-            "MaxTerm \\in Nat"
         ],
         "lemma_def_expands": {
-            "H_RequestVoteQuorumInTermImpliesNoOtherLogsInTerm": ["ExistsRequestVoteResponseQuorum"]
         },
         "action_def_expands":{
-            "HandleRequestVoteRequestAction": ["LastTerm","RequestVoteRequestType","RequestVoteResponseType","Terms","LogIndicesWithZero"],
-            "HandleRequestVoteResponseAction": ["LastTerm","RequestVoteRequestType","RequestVoteResponseType","Terms","LogIndicesWithZero"]
         }
     }
 }
