@@ -429,6 +429,16 @@ def runtlc(spec,config=None,tlc_workers=6,cwd=None,tlcjar="tla2tools-checkall.ja
             line_str = ""
         else:
             line_str += new_stdout
+    # check exit code of subproc.
+    retcode = subproc.wait()
+    if retcode != 0:
+        logging.error(f"!!!!!!!! TLC exited with non-zero exit code: {retcode}. May indicate underlying error. !!!!!!!!")
+        logging.error("Logging last 15 lines of TLC output:")
+        logging.error("------")
+        for last in tlc_lines[-15:]:
+            logging.error(last)
+        logging.error("------")
+        raise Exception(f"TLC exited with non-zero exit code: {retcode}.")
     return tlc_lines
 
 # Run TLC on spec to check all invariants and return the set 
