@@ -433,9 +433,9 @@ def runtlc(spec,config=None,tlc_workers=6,cwd=None,tlcjar="tla2tools-checkall.ja
     retcode = subproc.wait()
     if retcode != 0:
         logging.error(f"!!!!!!!! TLC exited with non-zero exit code: {retcode}. May indicate underlying error. !!!!!!!!")
-        logging.error("Logging last 15 lines of TLC output:")
+        logging.error("Logging last 25 lines of TLC output:")
         logging.error("------")
-        for last in tlc_lines[-15:]:
+        for last in tlc_lines[-25:]:
             logging.error(last)
         logging.error("------")
         raise Exception(f"TLC exited with non-zero exit code: {retcode}.")
