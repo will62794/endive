@@ -33,7 +33,7 @@
         "\\E UI \\in unchecked[VARJ] : nxt[VARJ] = UI",
         "nxt[VARI] = VARJ",
         "nxt[VARI] = VARI",
-        "nxt[VARI] < nxt[VARI]",
+        "nxt[VARI] < nxt[VARJ]",
         "previous[VARI] = -1",
         "previous[VARI] = VARJ",
         "previous[VARI] = previous[VARJ]",
