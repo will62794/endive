@@ -173,7 +173,7 @@ Schedule ==
 RequestAction == \E c \in Clients, S \in SUBSET Resources : Request(c,S) 
 AllocateAction == \E c \in Clients, S \in SUBSET Resources : Allocate(c,S)
 ReturnAction == \E c \in Clients, S \in SUBSET Resources : Return(c,S)
-RReqAction == \E m \in network : RReq(m)
+RReqAction == \E m \in requestMsgs : RReq(m)
 RAllocAction == \E m \in network : RAlloc(m)
 RRetAction == \E m \in network : RRet(m)
 ScheduleAction == Schedule
@@ -283,6 +283,9 @@ InfOftenSatisfied ==
 
 NextUnchanged == UNCHANGED vars
 CTICost == 0
+
+
+H_Inv1_R0_0_I1 == \A VARCI \in Clients : (holding[VARCI] = {})
 
 -------------------------------------------------------------------------
 
