@@ -35,6 +35,7 @@ VARIABLES
   holding,     \* resources currently held by the client
   (** communication network between clients and allocator **)
   network,      \* set of messages in transit
+  allocMsgs,
   requestMsgs
 
 \* Sched == INSTANCE SchedulingAllocator
@@ -73,6 +74,11 @@ RequestMessages ==
    clt : Clients,
    rsrc : SUBSET Resources]
 
+AllocateMessages ==
+  [type : {"allocate"}, 
+   clt : Clients,
+   rsrc : SUBSET Resources]
+
 SeqOf(S, n) == UNION {[1..m -> S] : m \in 0..n}
 BoundedSeq(S, n) == SeqOf(S, n)
 
@@ -84,6 +90,7 @@ TypeOK ==
   /\ holding \in [Clients -> SUBSET Resources]
   /\ network \in SUBSET Messages
   /\ requestMsgs \in SUBSET RequestMessages
+  /\ allocMsgs \in SUBSET AllocateMessages
 
 TypeOKRandom ==
   /\ unsat \in [Clients -> SUBSET Resources]
@@ -93,6 +100,7 @@ TypeOKRandom ==
   /\ holding \in [Clients -> SUBSET Resources]
   /\ network \in RandomSetOfSubsets(4, 2, Messages)
   /\ requestMsgs \in RandomSetOfSubsets(4, 2, RequestMessages)
+  /\ allocMsgs \in RandomSetOfSubsets(4, 2, AllocateMessages)
 -------------------------------------------------------------------------
 
 (* Initially, no resources have been requested or allocated. *)
@@ -104,6 +112,7 @@ Init ==
   /\ holding = [c \in Clients |-> {}]
   /\ network = {}
   /\ requestMsgs = {}
+  /\ allocMsgs = {}
 
 (* A client c may request a set of resources provided that it has      *)
 (* neither pending requests nor holds any resources. The request is    *)
@@ -112,7 +121,7 @@ Request(c,S) ==
   /\ requests[c] = {} /\ holding[c] = {}
   /\ S # {} /\ requests' = [requests EXCEPT ![c] = S]
   /\ requestMsgs' = requestMsgs \cup {[type |-> "request", clt |-> c, rsrc |-> S]}
-  /\ UNCHANGED <<unsat,alloc,sched,holding, network>>
+  /\ UNCHANGED <<unsat,alloc,sched,holding, network, allocMsgs>>
 
 (* Reception of a request message from a client by the allocator.      *)
 (* The allocator updates its data structures and inserts the client    *)
@@ -122,7 +131,7 @@ RReq(m) ==
   /\ alloc[m.clt] = {}   \** don't handle request messages prematurely(!)
   /\ unsat' = [unsat EXCEPT ![m.clt] = m.rsrc]
   /\ requestMsgs' = requestMsgs \ {m}
-  /\ UNCHANGED <<alloc,sched,requests,holding, network>>
+  /\ UNCHANGED <<alloc,sched,requests,holding, network, allocMsgs>>
 
 (* Allocation of a set of available resources to a client that has     *)
 (* requested them (the entire request does not have to be filled).     *)
@@ -136,16 +145,16 @@ Allocate(c,S) ==
         /\ sched' = IF S = unsat[c] THEN Drop(sched,i) ELSE sched
   /\ alloc' = [alloc EXCEPT ![c] = @ \cup S]
   /\ unsat' = [unsat EXCEPT ![c] = @ \ S]
-  /\ network' = network \cup {[type |-> "allocate", clt |-> c, rsrc |-> S]}
-  /\ UNCHANGED <<requests,holding, requestMsgs>>
+  /\ allocMsgs' = allocMsgs \cup {[type |-> "allocate", clt |-> c, rsrc |-> S]}
+  /\ UNCHANGED <<requests,holding, requestMsgs, network>>
 
 (* Reception of an allocation message by a client.                     *)
 RAlloc(m) ==
-  /\ m \in network /\ m.type = "allocate"
+  /\ m \in allocMsgs /\ m.type = "allocate"
   /\ holding' = [holding EXCEPT ![m.clt] = @ \cup m.rsrc]
   /\ requests' = [requests EXCEPT ![m.clt] = @ \ m.rsrc]
-  /\ network' = network \ {m}
-  /\ UNCHANGED <<unsat,alloc,sched, requestMsgs>>
+  /\ allocMsgs' = allocMsgs \ {m}
+  /\ UNCHANGED <<unsat,alloc,sched, requestMsgs, network>>
 
 (* Client c returns a set of resources that it holds. It may do so     *)
 (* even before its full request has been honored.                      *)
@@ -153,14 +162,14 @@ Return(c,S) ==
   /\ S # {} /\ S \subseteq holding[c]
   /\ holding' = [holding EXCEPT ![c] = @ \ S]
   /\ network' = network \cup {[type |-> "return", clt |-> c, rsrc |-> S]}
-  /\ UNCHANGED <<unsat,alloc,sched,requests, requestMsgs>>
+  /\ UNCHANGED <<unsat,alloc,sched,requests, requestMsgs, allocMsgs>>
 
 (* Reception of a return message by the allocator.                     *)
 RRet(m) ==
   /\ m \in network /\ m.type = "return"
   /\ alloc' = [alloc EXCEPT ![m.clt] = @ \ m.rsrc]
   /\ network' = network \ {m}
-  /\ UNCHANGED <<unsat,sched,requests,holding, requestMsgs>>
+  /\ UNCHANGED <<unsat,sched,requests,holding, requestMsgs, allocMsgs>>
 
 (* The allocator extends its schedule by adding the processes from     *)
 (* the pool (that have outstanding requests but that have not yet been *)
@@ -168,13 +177,13 @@ RRet(m) ==
 Schedule == 
   /\ toSchedule # {}
   /\ \E sq \in PermSeqs(toSchedule) : sched' = sched \circ sq
-  /\ UNCHANGED <<unsat,alloc,requests,holding,network,requestMsgs>>
+  /\ UNCHANGED <<unsat,alloc,requests,holding,network,requestMsgs, allocMsgs>>
 
 RequestAction == \E c \in Clients, S \in SUBSET Resources : Request(c,S) 
 AllocateAction == \E c \in Clients, S \in SUBSET Resources : Allocate(c,S)
 ReturnAction == \E c \in Clients, S \in SUBSET Resources : Return(c,S)
 RReqAction == \E m \in requestMsgs : RReq(m)
-RAllocAction == \E m \in network : RAlloc(m)
+RAllocAction == \E m \in allocMsgs : RAlloc(m)
 RRetAction == \E m \in network : RRet(m)
 ScheduleAction == Schedule
 
@@ -197,7 +206,7 @@ Next ==
     \/ RRetAction
     \/ ScheduleAction
 
-vars == <<unsat,alloc,sched,requests,holding,network,requestMsgs>>
+vars == <<unsat,alloc,sched,requests,holding,network,requestMsgs,allocMsgs>>
 
 -------------------------------------------------------------------------
 
