@@ -1978,6 +1978,7 @@ class InductiveInvGen():
             logging.info("Finished initial state caching.")
 
         inv_candidates_generated_in_round = set()
+        num_ctis_remaining = None
 
         while iteration <= self.num_iters:
             tstart = time.time()
@@ -2864,7 +2865,7 @@ class InductiveInvGen():
             iteration +=1
 
         # Failed to eliminate all CTIs.
-        if num_ctis_remaining > 0:
+        if (num_ctis_remaining is None) or num_ctis_remaining > 0:
             return None
         return self.strengthening_conjuncts
     
