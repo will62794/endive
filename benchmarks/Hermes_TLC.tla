@@ -41,9 +41,12 @@ VALMessageRandom(r) == [
 \* RequestVoteResponseTypeSampled == UNION { kOrSmallerSubset(2, RequestVoteResponseTypeOp({t})) : t \in Terms }
 
 TypeOKRandom ==  \* The type correctness invariant
-    /\ msgsINV \in RandomSetOfSubsets(4, 2, INVMessage) \* {INVMessageRandom(0),INVMessageRandom(0)}
-    /\ msgsVAL \in RandomSetOfSubsets(4, 2, VALMessage) \* SUBSET {VALMessageRandom(0),VALMessageRandom(0)}
-    /\ msgsACK \in RandomSetOfSubsets(4, 2, ACKMessage) \* SUBSET {ACKMessageRandom(0),ACKMessageRandom(0)}
+    \* /\ msgsINV \in RandomSetOfSubsets(4, 2, INVMessage) \* {INVMessageRandom(0),INVMessageRandom(0)}
+    \* /\ msgsVAL \in RandomSetOfSubsets(4, 2, VALMessage) \* SUBSET {VALMessageRandom(0),VALMessageRandom(0)}
+    \* /\ msgsACK \in RandomSetOfSubsets(4, 2, ACKMessage) \* SUBSET {ACKMessageRandom(0),ACKMessageRandom(0)}
+    /\ msgsINV \in SUBSET {INVMessageRandom(0),INVMessageRandom(0)}
+    /\ msgsVAL \in SUBSET {VALMessageRandom(0),VALMessageRandom(0)}
+    /\ msgsACK \in SUBSET {ACKMessageRandom(0),ACKMessageRandom(0)}
     /\ nodeRcvedAcks \in [H_NODES -> SUBSET H_NODES]
     /\ \A n \in H_NODES: nodeRcvedAcks[n] \subseteq (H_NODES \ {n})
     /\  nodeLastWriter  \in [H_NODES -> H_NODES]
