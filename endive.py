@@ -1260,6 +1260,17 @@ class InductiveInvGen():
             for line in lines:  
                 logging.info("[TLC output] " + line)      
             return set()
+        
+        # Check for bad exit code.
+        retcode = subproc.wait()
+        if retcode == 151:
+            logging.error(f"!!!!!!!! TLC exited with abnormal exit code: {retcode}. May indicate underlying error. !!!!!!!!")
+            logging.error("Logging last 25 lines of TLC output:")
+            logging.error("------")
+            for last in lines[-25:]:
+                logging.error(last)
+            logging.error("------")
+            raise Exception(f"TLC exited with non-zero exit code: {retcode}.")
 
         (parsed_ctis, parsed_cti_traces) = self.parse_ctis(lines)     
         return (parsed_ctis,parsed_cti_traces)       
