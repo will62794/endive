@@ -21,7 +21,7 @@ git clone -b ind-tree https://github.com/will62794/endive.git
 cd endive
 git pull --rebase
 
-for seed in 1 2
+for seed in 1 2 3
 do
 echo "---"
 echo "--- Running '$specname' benchmark with seed $seed ---"
