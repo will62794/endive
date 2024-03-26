@@ -1875,7 +1875,10 @@ class InductiveInvGen():
         # Option to memoize state projection cache computations.
         self.memoize_state_projection_caches = True
 
-        cache_states_with_ignored_var_sets_new = [c for c in cache_states_with_ignored_var_sets if tuple(sorted(c)) not in self.state_projection_cache]
+        # Ensure references to variable slice sets are always sorted to maintain consistent order.
+        cache_states_with_ignored_var_sets = [tuple(sorted(c)) for c in cache_states_with_ignored_var_sets]
+
+        cache_states_with_ignored_var_sets_new = [c for c in cache_states_with_ignored_var_sets if c not in self.state_projection_cache]
         if len(cache_states_with_ignored_var_sets_new) == 0:
             logging.info(f"State projection caches for all {len(cache_states_with_ignored_var_sets)} slices were already computed.")
         else:
@@ -1888,7 +1891,7 @@ class InductiveInvGen():
 
             if self.memoize_state_projection_caches:
                 for c in cache_states_with_ignored_var_sets_new:
-                    self.state_projection_cache[tuple(sorted(c))] = True
+                    self.state_projection_cache[c] = True
         # else:
             # logging.info(f"State projection cache for slice {cache_states_with_ignored_vars} was already computed.")
         logging.info(f"state projection cache has {len(self.state_projection_cache)} var slices.")
@@ -2241,7 +2244,7 @@ class InductiveInvGen():
                                 break  
 
                             predvar_set = p[1]
-                            ignored = [svar for svar in self.state_vars if svar not in predvar_set]
+                            ignored = sorted([svar for svar in self.state_vars if svar not in predvar_set])
                             # print(ignored)
 
                             invs_to_check = [(ind, inv) for ind,inv in enumerate(invs) if pred_var_sets_for_invs[ind] == predvar_set]
@@ -2299,7 +2302,7 @@ class InductiveInvGen():
                         # We now always pass a list of ignored var sets to the model checker.
                         cache_states_with_ignored_vars_arg = cache_states_with_ignored_vars
                         if cache_states_with_ignored_vars is not None:
-                            cache_states_with_ignored_vars_arg = [cache_states_with_ignored_vars]
+                            cache_states_with_ignored_vars_arg = [sorted(cache_states_with_ignored_vars)]
                         main_sat_invs = self.check_invariants([mi[1] for mi in main_invs_to_check], tlc_workers=tlc_workers, 
                                                               max_depth=max_depth, cache_state_load=cache_load, 
                                                               cache_with_ignored=cache_states_with_ignored_vars_arg, tlc_flags=tlc_flags)
