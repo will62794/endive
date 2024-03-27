@@ -523,6 +523,7 @@ AcceptAppendEntriesRequestLearnCommit(m) ==
 \* m.mterm = currentTerm[i].
 \* @type: ({ mtype: Str, mterm: Int, msuccess: Bool, mmatchIndex: Int, msource: SERVER, mdest: SERVER }) => Bool;
 HandleAppendEntriesResponse(m) ==
+    /\ m \in appendEntriesResponseMsgs
     /\ m.mtype = AppendEntriesResponse
     /\ m.mterm = currentTerm[m.mdest]
     /\ LET i     == m.mdest
