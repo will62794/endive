@@ -4188,7 +4188,7 @@ class InductiveInvGen():
                         shape = "box"
                         num_ctis_left = self.proof_graph["nodes"][n]["ctis_remaining"]
                         fillcolor = lightgreen if num_ctis_left == 0 else "orange"
-                        coi = "{" + ",".join(self.proof_graph["nodes"][n]["coi_vars"]) + "}"
+                        coi = "{" + ",".join(sorted(self.proof_graph["nodes"][n]["coi_vars"])) + "}"
                         if "curr_node" in self.proof_graph and self.proof_graph["curr_node"] == n and self.proof_graph["nodes"][n]["ctis_remaining"] > 0:
                             # Mark node.
                             fillcolor = "yellow"
@@ -4197,7 +4197,7 @@ class InductiveInvGen():
                             fillcolor = "salmon"
                         if len(self.proof_graph["nodes"][n]["coi_vars"]) > 0:
                             nlabel = n.split("_")[-1].replace("Action", "") # just show the action name.
-                            coi_vars = self.proof_graph["nodes"][n]["coi_vars"]
+                            coi_vars = sorted(self.proof_graph["nodes"][n]["coi_vars"])
                             coi_str = coi
                             # if len(coi_str) > 20:
                                 # coi_str_break_ind = coi_str.find(",", len(coi)//2 - 1)
