@@ -183,20 +183,18 @@ RRcvInv(n) ==  \* Process a received invalidation
               /\ UNCHANGED <<rKeyState, rKeyVersion, rKeyLastWriter>>
         /\ UNCHANGED <<rAliveNodes, rKeySharers, rKeyRcvedACKs, rNodeEpochID, rEpochID>>
             
-RRcvVal(n) ==   \* Process a received validation
-    \E m \in rMsgs: 
-        /\ rKeyState[n] /= "valid"
-        /\ m.type        = "VAL"
-        /\ m.epochID     = rEpochID
-        /\ m.version     = rKeyVersion[n]
-        /\ rKeyState'    = [rKeyState EXCEPT ![n] = "valid"]
-        /\ UNCHANGED <<rMsgs, rKeyVersion, rKeyLastWriter, rKeySharers, 
-                       rAliveNodes, rKeyRcvedACKs, rNodeEpochID, rEpochID>>
+RRcvVal(n, m) ==   \* Process a received validation
+    /\ rKeyState[n] /= "valid"
+    /\ m.type        = "VAL"
+    /\ m.epochID     = rEpochID
+    /\ m.version     = rKeyVersion[n]
+    /\ rKeyState'    = [rKeyState EXCEPT ![n] = "valid"]
+    /\ UNCHANGED <<rMsgs, rKeyVersion, rKeyLastWriter, rKeySharers, rAliveNodes, rKeyRcvedACKs, rNodeEpochID, rEpochID>>
                        
-RReaderActions(n) ==  \* Actions of a write follower
-    \/ RRead(n)          
-    \/ RRcvInv(n)
-    \/ RRcvVal(n) 
+\* RReaderActions(n) ==  \* Actions of a write follower
+\*     \/ RRead(n)          
+\*     \/ RRcvInv(n)
+\*     \/ RRcvVal(n) 
     
 -------------------------------------------------------------------------------------                       
 
@@ -283,7 +281,7 @@ RReplayActions(n) ==
     
 
 RRcvInvAction == \E n \in rAliveNodes : RRcvInv(n)
-RRcvValAction == \E n \in rAliveNodes : RRcvVal(n)
+RRcvValAction == \E n \in rAliveNodes : \E m \in rMsgs : RRcvVal(n, m)
 RReadAction == \E n \in rAliveNodes : RRead(n)
 RWriteAction == \E n \in rAliveNodes : RWrite(n)
 RRcvAckAction == \E n \in rAliveNodes : RRcvAck(n)
