@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH -J AsyncRaft_endive_Job               # Job name
 #SBATCH --partition short    # Partition name
-#SBATCH --time=12:00:00       # Time limit.
+#SBATCH --time=16:00:00       # Time limit.
 #SBATCH --constraint="[broadwell|cascadelake]"       # Newer processors.
 #SBATCH -N 1                   # Number of nodes
 #SBATCH -n 1                   # Number of tasks
