@@ -55,7 +55,16 @@
         "IsPrefix(log[VARI], log[VARJ])",
         "IsPrefix(log[VARJ], log[VARI])",
         "commitIndex[VARI] \\in DOMAIN log[VARI] /\\ commitIndex[VARI] \\in DOMAIN log[VARJ] /\\ log[VARJ][commitIndex[VARI]] = log[VARI][commitIndex[VARI]]",
-        "H_LogMatching /\\ log = log"
+        "H_LogMatching /\\ log = log",
+        "Len(log[VARMAERES.msource]) >= VARMAERES.mmatchIndex",
+        "Len(log[VARMAERES.mdest]) >= VARMAERES.mmatchIndex",
+        "log[VARMAERES.msource][VARMAERES.mmatchIndex] = log[VARMAERES.mdest][VARMAERES.mmatchIndex]",
+        "VARMAERES.mterm = currentTerm[VARMAERES.mdest]",
+        "VARMAERES.mterm = currentTerm[VARMAERES.msource]",
+        "VARMAERES.mterm > currentTerm[VARMAERES.msource]",
+        "VARMAERES.mterm = currentTerm[VARI]",
+        "matchIndex[VARI][VARJ] = VARMAERES.mmatchIndex",
+        "VARMAERES.msuccess"
     ],
     "preds_alt" : [],
     "safety"  :  "H_NoLogDivergence",
@@ -77,7 +86,7 @@
         "MaxNumVoteMsgs": ["0"]
     },
     "constraint"  :  "StateConstraint",
-    "quant_inv": "\\A VARI \\in Server : \\A VARJ \\in Server : \\E VARQ \\in Quorum : \\A VARM \\in appendEntriesRequestMsgs : \\A VARREQVM \\in requestVoteRequestMsgs : \\A VARLOGINDI \\in LogIndices : ",
+    "quant_inv": "\\A VARI \\in Server : \\A VARJ \\in Server : \\E VARQ \\in Quorum : \\A VARM \\in appendEntriesRequestMsgs : \\A VARMAERES \\in appendEntriesResponseMsgs : \\A VARREQVM \\in requestVoteRequestMsgs : \\A VARLOGINDI \\in LogIndices : ",
     "quant_vars": ["VARI", "VARJ", "VARIND", "VARM", "VARLOGINDI"],
     "model_consts"  :  "CONSTANT n1,n2,n3",
     "max_tlc_inv_depth": 17,
