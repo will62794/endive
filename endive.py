@@ -99,6 +99,7 @@ class InductiveInvGen():
         self.num_iters = num_iters
         self.num_invs = num_invs
         self.tlc_workers = tlc_workers
+        self.n_cti_elimination_workers = all_args["cti_elimination_workers"]
         self.use_apalache_ctigen = use_apalache_ctigen
         self.do_apalache_final_induction_check = all_args["do_apalache_final_induction_check"]
         self.auto_lemma_action_decomposition = auto_lemma_action_decomposition
@@ -2442,7 +2443,7 @@ class InductiveInvGen():
 
 
             # Run CTI elimination checking in parallel.
-            n_tlc_workers = 4
+            n_tlc_workers = self.n_cti_elimination_workers
             # inv_chunks = list(chunks(sat_invs, n_tlc_workers))
             cti_chunks = list(chunks(list(orig_k_ctis), n_tlc_workers))
 
@@ -4444,6 +4445,7 @@ if __name__ == "__main__":
     DEFAULT_NUM_SIMULATE_TRACES = 800
     DEFAULT_SIMULATE_DEPTH = 8
     DEFAULT_TLC_WORKERS = 6
+    DEFAULT_CTI_ELIMINATION_WORKERS = 3
 
     # Use default faster Java on Mac if it exists.
 
@@ -4461,6 +4463,7 @@ if __name__ == "__main__":
     parser.add_argument('--num_simulate_traces', help='The maximum number of traces TLC will generate when searching for counterexamples to inductions (CTIs).', required=False, type=int, default=DEFAULT_NUM_SIMULATE_TRACES)
     parser.add_argument('--simulate_depth', help='Maximum depth of counterexample to induction (CTI) traces to search for.', required=False, type=int, default=DEFAULT_SIMULATE_DEPTH)
     parser.add_argument('--tlc_workers', help='Number of TLC worker threads to use when checking candidate invariants.', required=False, type=int, default=DEFAULT_TLC_WORKERS)
+    parser.add_argument('--cti_elimination_workers', help='Number of TLC worker threads to use when checking CTI elimination.', required=False, type=int, default=DEFAULT_CTI_ELIMINATION_WORKERS)
     parser.add_argument('--java_exe', help='Path to Java binary.', required=False, type=str, default=JAVA_EXE)
     parser.add_argument('--tlc_jar', help='Path to Java binary.', required=False, type=str, default=TLC_JAR)
     parser.add_argument('--debug', help='Output debug info to log.', default=False, action='store_true')
