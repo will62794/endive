@@ -89,7 +89,10 @@
         "VARMAERES.mterm > currentTerm[VARMAERES.msource]",
         "VARMAERES.mterm = currentTerm[VARI]",
         "matchIndex[VARI][VARJ] = VARMAERES.mmatchIndex",
-        "VARMAERES.msuccess"
+        "VARMAERES.msuccess",
+        "H_LogMatchingBetweenAppendEntriesMsgs",
+        "H_LogMatchingInAppendEntriesMsgsLeaders",
+        "H_LogMatchingAppendEntries"
     ],
     "preds_alt" : [],
     "safety"  :  "H_NoLogDivergence",
