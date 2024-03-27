@@ -123,6 +123,7 @@ class InductiveInvGen():
         self.proof_struct_tag = all_args["proof_struct_tag"]
         self.interactive_mode = interactive_mode
         self.max_num_conjuncts_per_round = max_num_conjuncts_per_round
+        self.max_duration_secs_per_iter = all_args["max_duration_secs_per_iter"]
         self.override_num_cti_workers = override_num_cti_workers
         self.k_cti_induction_depth = all_args["k_cti_induction_depth"]
 
@@ -2736,6 +2737,12 @@ class InductiveInvGen():
 
                     logging.info("%s %s", inv["inv"], invexp) #, "(eliminates %d CTIs)" % len(cti_states_eliminated_by_invs[inv])
 
+
+                curr_duration = time.time() - tstart
+                if curr_duration > self.max_duration_secs_per_iter:
+                    logging.info(f"Exiting iteration since we exceeded max duration per iteration of {self.max_duration_secs_per_iter}s.")
+                    break
+
           
                 # print "CTIs eliminated by this invariant: %d" % len(cti_states_eliminated_by_invs[inv])
                 # Re-run the iteration if new conjuncts were discovered.
@@ -4476,6 +4483,7 @@ if __name__ == "__main__":
     parser.add_argument('--try_final_minimize', help='Attempt to minimize the final discovered invariant.', required=False, default=False, action='store_true')
     parser.add_argument('--results_dir', help='Directory to save results.', required=False, type=str, default="results")
     parser.add_argument('--max_num_conjuncts_per_round', help='Max number of conjuncts to learn per round.', type=int, default=10000)
+    parser.add_argument('--max_duration_secs_per_iter', help='Max number of seconds to spend on each iteration.', type=int, default=10000)
     parser.add_argument('--max_num_ctis_per_round', help='Max number of CTIs per round.', type=int, default=10000)
     parser.add_argument('--override_num_cti_workers', help='Max number of TLC workers for CTI generation.', type=int, default=None)
     parser.add_argument('--k_cti_induction_depth', help='CTI k-induction depth.', type=int, default=1)
