@@ -91,7 +91,7 @@
         "VARMAERES.msuccess"
     ],
     "preds_alt" : [],
-    "safety"  :  "H_OnePrimaryPerTerm",
+    "safety"  :  "H_NoLogDivergence",
     "constants"  : {
         "n1" : "n1",
         "n2" : "n2",
