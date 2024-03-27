@@ -29,7 +29,7 @@
     "tlc_specific_spec": true,
     "try_final_minimize": false,
     "max_tlc_inv_depth": 17,
-    "simulation_inv_check": true,
+    "simulation_inv_check": false,
     "simulation_inv_check_num_states": 2500000,
     "simulation_inv_check_depth": 35,
     "simulate"  :  true,
