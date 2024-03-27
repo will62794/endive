@@ -184,6 +184,7 @@ RRcvInv(n) ==  \* Process a received invalidation
         /\ UNCHANGED <<rAliveNodes, rKeySharers, rKeyRcvedACKs, rNodeEpochID, rEpochID>>
             
 RRcvVal(n, m) ==   \* Process a received validation
+    /\ m \in rMsgs
     /\ rKeyState[n] /= "valid"
     /\ m.type        = "VAL"
     /\ m.epochID     = rEpochID
@@ -228,13 +229,13 @@ RRcvAck(n) ==   \* Process a received acknowledment
 
 RSendVals(n) == \* Send validations once received acknowledments from all alive nodes
     /\ rKeyState[n]     \in   {"write", "replay"}
-    /\ RAllACKsRcved(n)
+    \* /\ RAllACKsRcved(n)
+    /\ (rAliveNodes \ {n}) \subseteq rKeyRcvedACKs[n]
     /\ rKeyState'         =   [rKeyState EXCEPT![n] = "valid"]
-    /\ RSend([type        |-> "VAL", 
-              epochID     |-> rEpochID,
-              version     |-> rKeyVersion[n]])
-    /\ UNCHANGED <<rKeyRcvedACKs, rKeyVersion, rKeyLastWriter, 
-                   rAliveNodes, rKeySharers, rNodeEpochID, rEpochID>>
+    /\ rMsgs' = rMsgs \cup {([type        |-> "VAL", 
+                              epochID     |-> rEpochID,
+                              version     |-> rKeyVersion[n]])}
+    /\ UNCHANGED <<rKeyRcvedACKs, rKeyVersion, rKeyLastWriter, rAliveNodes, rKeySharers, rNodeEpochID, rEpochID>>
 
 ROwnerActions(n) ==   \* Actions of a read/write coordinator 
     \/ RRead(n)          

@@ -1,13 +1,21 @@
 {
     "preds"  :  [
         "rKeyState[VARI] = \"valid\"",
-        "rKeyState[VARI] = \"owner\"",
+        "rKeyState[VARI] = \"invalid\"",
         "rKeyState[VARI] = \"write\"",
+        "rKeyState[VARI] = \"replay\"",
         "rKeyState[VARJ] = \"valid\"",
-        "rKeyState[VARJ] = \"owner\"",
+        "rKeyState[VARJ] = \"invalid\"",
         "rKeyState[VARJ] = \"write\"",
+        "rKeyState[VARJ] = \"replay\"",
         "rKeyVersion[VARI] = rKeyVersion[VARJ]",
-        "rKeyVersion[VARI] > rKeyVersion[VARJ]"
+        "rKeyVersion[VARI] > rKeyVersion[VARJ]",
+        "rKeyVersion[VARI] <= rKeyVersion[VARJ]",
+        "VARM.type = \"VAL\" /\\ VARM.version = rKeyVersion[VARI]",
+        "VARM.type = \"VAL\" /\\ VARM.version > rKeyVersion[VARI]",
+        "VARM.type = \"VAL\" /\\ VARM.version = rKeyVersion[VARJ]",
+        "(rAliveNodes \\ {VARI}) \\subseteq rKeyRcvedACKs[VARI]",
+        "(rAliveNodes \\ {VARJ}) \\subseteq rKeyRcvedACKs[VARJ]"
     ],
     "action_local_preds":{
     },
@@ -20,7 +28,7 @@
     },
     "actions": [],
     "constraint"  :  "",
-    "quant_inv"  :  "\\A VARI \\in rAliveNodes : \\A VARJ \\in rAliveNodes : ",
+    "quant_inv"  :  "\\A VARI \\in rAliveNodes : \\A VARJ \\in rAliveNodes : \\A VARM \\in rMsgs : ",
     "quant_inv_alt"  :  null,
     "quant_vars": ["VARI", "VARJ", "VARMVALI", "VARMACKI", "VARMINVI"],
     "model_consts"  :  "",
