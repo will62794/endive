@@ -16,7 +16,10 @@
         "VARM.type = \"VAL\" /\\ VARM.version = rKeyVersion[VARJ]",
         "(rAliveNodes \\ {VARI}) \\subseteq rKeyRcvedACKs[VARI]",
         "(rAliveNodes \\ {VARJ}) \\subseteq rKeyRcvedACKs[VARJ]",
-        "\\E kk,mm \\in rAliveNodes: kk /= VARI /\\ mm /= VARI /\\ mm /= kk"
+        "VARJ \\in rKeyRcvedACKs[VARJ]",
+        "VARJ \\in rKeyRcvedACKs[VARI]",
+        "\\E kk,mm \\in rAliveNodes: kk /= VARI /\\ mm /= VARI /\\ mm /= kk",
+        "Cardinality(rAliveNodes) > 2"
     ],
     "action_local_preds":{
     },
