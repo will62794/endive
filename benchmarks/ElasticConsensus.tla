@@ -4,7 +4,7 @@ TLA+ Model of an improved Zen consensus algorithm with reconfiguration capabilit
 
 -------------------------------- MODULE ElasticConsensus -----------------------------------
 \* Imported modules used in this specification
-EXTENDS Naturals, FiniteSets, Sequences, TLC
+EXTENDS Naturals, FiniteSets, Sequences, TLC, Randomization
 
 ----
 
@@ -55,6 +55,9 @@ VARIABLE electionWon
 VARIABLE publishPermitted
 VARIABLE publishVotes
 
+vars == <<messages, firstUncommittedSlot, currentTerm, currentConfiguration, currentClusterState,
+          lastAcceptedTerm, lastAcceptedValue, joinVotes, electionWon, publishPermitted, publishVotes>>
+
 ----
 
 \* set of valid configurations (i.e. the set of all non-empty subsets of Nodes)
@@ -80,6 +83,78 @@ Init == /\ messages = {}
         /\ electionWon = [n \in Nodes |-> FALSE]
         /\ publishPermitted = [n \in Nodes |-> FALSE]
         /\ publishVotes = [n \in Nodes |-> {}]
+
+
+JoinMessage == 
+    [method : {Join},
+     source : Nodes,
+     dest : Nodes,
+     slot : Nat,
+     term : Nat,
+     laTerm : Nat]
+    
+PublishRequestMessage ==
+    [method : PublishRequest,
+     source : Nodes,
+     dest : Nodes,
+     slot : Nat,
+     term : Nat,
+     value : [type : {"Reconfigure", "ApplyCSDiff"}, val : Values]]
+
+PublishResponseMessage ==
+    [method : PublishResponse,
+     source : Nodes,
+     dest : Nodes,
+     success : BOOLEAN,
+     term : Nat,
+     slot : Nat]
+
+CommitMessage == 
+    [method : Commit,
+     source : Nodes,
+     dest : Nodes,
+     slot : Nat,
+     term : Nat]
+
+CatchupMessage == 
+    [method : Catchup,
+     slot : Nat,
+     config : ValidConfigs,
+     state : Values]
+
+TypeOK ==
+    /\ messages \in SUBSET [method : {"Join", "PublishRequest", "PublishResponse", "Commit", "Catchup"},
+                             source : Nodes,
+                             dest : Nodes,
+                             slot : Nat,
+                             term : Nat,
+                             laTerm : Nat,
+                             value : [type : {"Reconfigure", "ApplyCSDiff"}, val : Values]]
+    /\ firstUncommittedSlot \in [Nodes -> Nat]
+    /\ currentTerm \in [Nodes -> Nat]
+    /\ currentConfiguration \in [Nodes -> ValidConfigs]
+    /\ currentClusterState \in [Nodes -> Values]
+    /\ lastAcceptedTerm \in [Nodes -> Nat \cup {Nil}]
+    /\ lastAcceptedValue \in [Nodes -> Values \cup {Nil}]
+    /\ joinVotes \in [Nodes -> SUBSET Nodes]
+    /\ electionWon \in [Nodes -> BOOLEAN]
+    /\ publishPermitted \in [Nodes -> BOOLEAN]
+    /\ publishVotes \in [Nodes -> SUBSET Nodes]
+
+TypeOKRandom ==
+    \* /\ messages \in SUBSET CommitMessage
+    /\ messages \in RandomSetOfSubsets(4, 2, JoinMessage)
+    /\ firstUncommittedSlot \in [Nodes -> Nat]
+    /\ currentTerm \in [Nodes -> Nat]
+    /\ currentConfiguration \in [Nodes -> ValidConfigs]
+    /\ currentClusterState \in [Nodes -> Values]
+    /\ lastAcceptedTerm \in [Nodes -> Nat \cup {Nil}]
+    /\ lastAcceptedValue \in [Nodes -> Values \cup {Nil}]
+    /\ joinVotes \in [Nodes -> SUBSET Nodes]
+    /\ electionWon \in [Nodes -> BOOLEAN]
+    /\ publishPermitted \in [Nodes -> BOOLEAN]
+    /\ publishVotes \in [Nodes -> SUBSET Nodes]
+
 
 \* Send join request from node n to node nm for term t
 HandleStartJoin(n, nm, t) ==
@@ -343,5 +418,8 @@ StateConstraint ==
   /\ Cardinality(messages) <= MaxMessages
 
 Symmetry == Permutations(Nodes) \cup Permutations(Values)
+
+CTICost == 0
+NextUnchanged == UNCHANGED vars
 
 ====================================================================================================
