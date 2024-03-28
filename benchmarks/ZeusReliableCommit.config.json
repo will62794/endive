@@ -45,6 +45,9 @@
         "rKeyRcvedACKs[VARI] = {}",
         "\\E kk,mm \\in rAliveNodes: kk /= VARI /\\ mm /= VARI /\\ mm /= kk",
         "Cardinality(rAliveNodes) > 2",
+        "VARMINV.sender = VARI",
+        "VARMINV.version = rKeyVersion[VARI]",
+        "VARMINV.version > rKeyVersion[VARI]",
         "VARMINV.version <= rKeyVersion[VARJ]",
         "VARMINV.sender \\in rKeyRcvedACKs[VARI]",
         "VARMINV.sender \\in rKeyRcvedACKs[VARJ]"
