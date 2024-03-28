@@ -14,7 +14,9 @@ CONSTANTS R_NODES,
           R_MAX_EPOCH,
           R_MAX_VERSION
   
-VARIABLES rMsgs,
+VARIABLES rMsgsINV,
+          rMsgsVAL,
+          rMsgsACK,
           rKeyState,
           rKeySharers,
           rKeyVersion,
@@ -24,7 +26,7 @@ VARIABLES rMsgs,
           rAliveNodes,
           rEpochID
           
-vars == << rMsgs, rKeyState, rKeySharers, rKeyVersion, rKeyRcvedACKs, 
+vars == << rMsgsINV, rMsgsVAL, rMsgsACK, rKeyState, rKeySharers, rKeyVersion, rKeyRcvedACKs, 
            rKeyLastWriter, rNodeEpochID, rAliveNodes, rEpochID >>
 -----------------------------------------------------------------------------
 \* The consistent invariant: all alive nodes in valid state should have the same value / TS  
@@ -62,17 +64,28 @@ ROnwerHighestVersionInvariant ==  \* owner has the highest version among alive n
 
 -----------------------------------------------------------------------------
 
-RMessage ==  \* Messages exchanged by the Protocol   
-    [type: {"INV", "ACK"}, sender    : R_NODES,
-                           epochID   : 0..R_MAX_EPOCH,
-                           version   : 0..R_MAX_VERSION] 
-        \union
-    [type: {"VAL"},        epochID   : 0..R_MAX_EPOCH,
-                           version   : 0..R_MAX_VERSION] 
+RMessageINV ==  \* Messages exchanged by the Protocol   
+    [type: {"INV"}, 
+     sender    : R_NODES,
+     epochID   : 0..R_MAX_EPOCH,
+     version   : 0..R_MAX_VERSION] 
+
+RMessageACK ==  \* Messages exchanged by the Protocol   
+    [type: {"ACK"}, 
+     sender    : R_NODES,
+     epochID   : 0..R_MAX_EPOCH,
+     version   : 0..R_MAX_VERSION] 
+
+RMessageVAL == [type: {"VAL"},        
+                epochID   : 0..R_MAX_EPOCH,
+                version   : 0..R_MAX_VERSION] 
     
     
 TypeOK ==  \* The type correctness invariant
-    /\  rMsgs           \subseteq RMessage
+    \* /\  rMsgs           \subseteq RMessageINV
+    \* /\  rMsgsINV        \subseteq RMessageINV
+    \* /\  rMsgs           \subseteq RMessageACK
+    \* /\  rMsgs           \subseteq RMessageVAL
     /\  rAliveNodes     \subseteq R_NODES
     /\  \A n \in R_NODES: rKeyRcvedACKs[n] \subseteq (R_NODES \ {n})
     /\  rNodeEpochID    \in [R_NODES -> 0..R_MAX_EPOCH]
@@ -83,7 +96,9 @@ TypeOK ==  \* The type correctness invariant
     
 
 Init == \* The initial predicate
-    /\  rMsgs           = {}
+    /\  rMsgsINV           = {}
+    /\  rMsgsVAL          = {}
+    /\  rMsgsACK           = {}
     /\  rEpochID        = 0
     /\  rAliveNodes     = R_NODES
     /\  rKeyVersion     = [n \in R_NODES |-> 0] 
@@ -99,7 +114,7 @@ Init == \* The initial predicate
 RNoChanges_in_membership == UNCHANGED <<rAliveNodes, rEpochID>>
     
 RNoChanges_but_membership ==
-    UNCHANGED <<rMsgs, rKeyState, rKeyVersion, 
+    UNCHANGED <<rMsgsINV, rMsgsVAL, rMsgsACK, rKeyState, rKeyVersion, 
                 rKeyRcvedACKs, rKeyLastWriter, 
                 rKeySharers, rNodeEpochID>>
 
@@ -111,7 +126,7 @@ RNoChanges ==
 \* A buffer maintaining all network messages. Messages are only appended to 
 \* this variable (not \* removed once delivered) intentionally to check 
 \* protocol's tolerance in dublicates and reorderings 
-RSend(m) == rMsgs' = rMsgs \union {m}
+\* RSend(m) == rMsgs' = rMsgs \union {m}
 
 \* Check if all acknowledgments for a write have been received                                                  
 RAllACKsRcved(n) == (rAliveNodes \ {n}) \subseteq rKeyRcvedACKs[n]
@@ -137,7 +152,7 @@ RNewOwner(n) ==
              /\  rKeySharers[k]  = "reader"      \* and there is not alive owner
           \/ /\  rKeySharers[k]  = "non-sharer"  \* and there is not alive owner
     /\ rKeySharers'              = [rKeySharers    EXCEPT ![n] = "owner"]
-    /\ UNCHANGED <<rMsgs, rKeyState, rKeyVersion, rKeyRcvedACKs, 
+    /\ UNCHANGED <<rMsgsINV, rMsgsVAL, rMsgsACK, rKeyState, rKeyVersion, rKeyRcvedACKs, 
                    rKeyLastWriter, rAliveNodes, rNodeEpochID, rEpochID>>
        
 ROverthrowOwner(n) ==
@@ -148,7 +163,7 @@ ROverthrowOwner(n) ==
         /\ rKeySharers[k] = "owner"
         /\ rKeySharers'   = [rKeySharers EXCEPT ![n] = "owner",
                                                 ![k] = "reader"]
-        /\ UNCHANGED <<rMsgs, rKeyState, rKeyVersion, rKeyRcvedACKs,
+        /\ UNCHANGED <<rMsgsINV, rMsgsVAL, rMsgsACK, rKeyState, rKeyVersion, rKeyRcvedACKs,
                        rKeyLastWriter, rAliveNodes, rNodeEpochID, rEpochID>>
 
 RGetOwnership(n) ==
@@ -163,17 +178,16 @@ RRead(n) ==  \* Execute a read
     /\ rKeyState[n]    = "valid"
     /\ RNoChanges
 
-RRcvInv(n) ==  \* Process a received invalidation
- \E m \in rMsgs: 
+RRcvInv(n, m) ==  \* Process a received invalidation
         /\ m.type     = "INV"
         /\ m.epochID  = rEpochID
         /\ m.sender  /= n
         /\ m.sender  \in rAliveNodes
         \* always acknowledge a received invalidation (irrelevant to the timestamp)
-        /\ RSend([type       |-> "ACK",
+        /\ rMsgsACK' = rMsgsACK \cup {([type       |-> "ACK",
                   epochID    |-> rEpochID,
                   sender     |-> n,   
-                  version    |-> m.version])
+                  version    |-> m.version])}
         /\ \/ m.version        > rKeyVersion[n]
               /\ rKeyState[n]   \in {"valid", "invalid", "replay"}
               /\ rKeyState'      = [rKeyState EXCEPT ![n] = "invalid"]
@@ -181,16 +195,16 @@ RRcvInv(n) ==  \* Process a received invalidation
               /\ rKeyLastWriter' = [rKeyLastWriter EXCEPT ![n] = m.sender]
            \/ m.version         <= rKeyVersion[n]
               /\ UNCHANGED <<rKeyState, rKeyVersion, rKeyLastWriter>>
-        /\ UNCHANGED <<rAliveNodes, rKeySharers, rKeyRcvedACKs, rNodeEpochID, rEpochID>>
+        /\ UNCHANGED <<rMsgsINV, rMsgsVAL, rAliveNodes, rKeySharers, rKeyRcvedACKs, rNodeEpochID, rEpochID>>
             
 RRcvVal(n, m) ==   \* Process a received validation
-    /\ m \in rMsgs
+    /\ m \in rMsgsVAL
     /\ rKeyState[n] /= "valid"
     /\ m.type        = "VAL"
     /\ m.epochID     = rEpochID
     /\ m.version     = rKeyVersion[n]
     /\ rKeyState'    = [rKeyState EXCEPT ![n] = "valid"]
-    /\ UNCHANGED <<rMsgs, rKeyVersion, rKeyLastWriter, rKeySharers, rAliveNodes, rKeyRcvedACKs, rNodeEpochID, rEpochID>>
+    /\ UNCHANGED <<rMsgsINV, rMsgsVAL, rMsgsACK, rKeyVersion, rKeyLastWriter, rKeySharers, rAliveNodes, rKeyRcvedACKs, rNodeEpochID, rEpochID>>
                        
 \* RReaderActions(n) ==  \* Actions of a write follower
 \*     \/ RRead(n)          
@@ -208,40 +222,38 @@ RWrite(n) ==
     /\  rKeyRcvedACKs'    =    [rKeyRcvedACKs   EXCEPT ![n] = {}]
     /\  rKeyState'        =    [rKeyState       EXCEPT ![n] = "write"]
     /\  rKeyVersion'      =    [rKeyVersion     EXCEPT ![n] = rKeyVersion[n] + 1]
-    /\  RSend([type        |-> "INV",
+    /\  rMsgsINV' = rMsgsINV \cup {([type        |-> "INV",
                epochID     |-> rEpochID,
                sender      |-> n,
-               version     |-> rKeyVersion[n] + 1])              
-    /\ UNCHANGED <<rAliveNodes, rKeySharers, rNodeEpochID, rEpochID>>
+               version     |-> rKeyVersion[n] + 1])}              
+    /\ UNCHANGED <<rMsgsVAL, rMsgsACK, rAliveNodes, rKeySharers, rNodeEpochID, rEpochID>>
 
-RRcvAck(n) ==   \* Process a received acknowledment
-    \E m \in rMsgs: 
-        /\ m.type         =     "ACK"
-        /\ m.epochID      =     rEpochID
-        /\ m.sender      /=     n
-        /\ m.version      =     rKeyVersion[n]
-        /\ m.sender      \notin rKeyRcvedACKs[n]
-        /\ rKeyState[n]  \in    {"write", "replay"}
-        /\ rKeyRcvedACKs' =     [rKeyRcvedACKs    EXCEPT ![n] = 
-                                             rKeyRcvedACKs[n] \union {m.sender}]
-        /\ UNCHANGED <<rMsgs, rKeyState, rKeyVersion, rKeyLastWriter, 
-                       rAliveNodes, rKeySharers, rNodeEpochID, rEpochID>>
+RRcvAck(n, m) ==   \* Process a received acknowledment
+    /\ m \in rMsgsACK
+    /\ m.type         =     "ACK"
+    /\ m.epochID      =     rEpochID
+    /\ m.sender      /=     n
+    /\ m.version      =     rKeyVersion[n]
+    /\ m.sender      \notin rKeyRcvedACKs[n]
+    /\ rKeyState[n]  \in    {"write", "replay"}
+    /\ rKeyRcvedACKs' =     [rKeyRcvedACKs    EXCEPT ![n] = rKeyRcvedACKs[n] \union {m.sender}]
+    /\ UNCHANGED <<rMsgsINV, rMsgsVAL, rMsgsACK, rKeyState, rKeyVersion, rKeyLastWriter, rAliveNodes, rKeySharers, rNodeEpochID, rEpochID>>
 
 RSendVals(n) == \* Send validations once received acknowledments from all alive nodes
     /\ rKeyState[n]     \in   {"write", "replay"}
     \* /\ RAllACKsRcved(n)
     /\ (rAliveNodes \ {n}) \subseteq rKeyRcvedACKs[n]
     /\ rKeyState'         =   [rKeyState EXCEPT![n] = "valid"]
-    /\ rMsgs' = rMsgs \cup {([type        |-> "VAL", 
+    /\ rMsgsVAL' = rMsgsVAL \cup {([type        |-> "VAL", 
                               epochID     |-> rEpochID,
                               version     |-> rKeyVersion[n]])}
-    /\ UNCHANGED <<rKeyRcvedACKs, rKeyVersion, rKeyLastWriter, rAliveNodes, rKeySharers, rNodeEpochID, rEpochID>>
+    /\ UNCHANGED <<rMsgsINV, rMsgsACK, rKeyRcvedACKs, rKeyVersion, rKeyLastWriter, rAliveNodes, rKeySharers, rNodeEpochID, rEpochID>>
 
-ROwnerActions(n) ==   \* Actions of a read/write coordinator 
-    \/ RRead(n)          
-    \/ RWrite(n)         
-    \/ RRcvAck(n)
-    \/ RSendVals(n) 
+\* ROwnerActions(n) ==   \* Actions of a read/write coordinator 
+    \* \/ RRead(n)          
+    \* \/ RWrite(n)         
+    \* \/ RRcvAck(n)
+    \* \/ RSendVals(n) 
     
 ------------------------------------------------------------------------------------- 
     
@@ -249,29 +261,43 @@ RWriteReplay(n) == \* Execute a write-replay
     /\  rKeyLastWriter'  =    [rKeyLastWriter   EXCEPT ![n] = n]
     /\  rKeyRcvedACKs'   =    [rKeyRcvedACKs    EXCEPT ![n] = {}]
     /\  rKeyState'       =    [rKeyState        EXCEPT ![n] = "replay"]
-    /\  RSend([type       |-> "INV",
+    /\  rMsgsINV' = rMsgsINV \cup {([type       |-> "INV",
                sender     |-> n,
                epochID    |-> rEpochID,
-               version    |-> rKeyVersion[n]])
-    /\  UNCHANGED <<rKeyVersion, rKeySharers, rAliveNodes, rNodeEpochID, rEpochID>>
+               version    |-> rKeyVersion[n]])}
+    /\  UNCHANGED <<rMsgsVAL, rMsgsACK, rKeyVersion, rKeySharers, rAliveNodes, rNodeEpochID, rEpochID>>
 
 RLocalWriteReplay(n) == 
     /\ rNodeEpochID[n] < rEpochID
     /\ \/ rKeySharers[n] = "owner" 
        \/ rKeyState[n]   = "replay"
-    /\  RWriteReplay(n)
+    /\  rKeyLastWriter'  =    [rKeyLastWriter   EXCEPT ![n] = n]
+    /\  rKeyRcvedACKs'   =    [rKeyRcvedACKs    EXCEPT ![n] = {}]
+    /\  rKeyState'       =    [rKeyState        EXCEPT ![n] = "replay"]
+    /\  rMsgsINV' = rMsgsINV \cup {([type       |-> "INV",
+               sender     |-> n,
+               epochID    |-> rEpochID,
+               version    |-> rKeyVersion[n]])}
+    /\  UNCHANGED <<rMsgsVAL, rMsgsACK, rKeyVersion, rKeySharers, rAliveNodes, rNodeEpochID, rEpochID>>
     
 RFailedNodeWriteReplay(n) ==
     /\ rNodeEpochID[n] < rEpochID
     /\  ~RIsAlive(rKeyLastWriter[n])
     /\  rKeyState[n]     = "invalid"
-    /\  RWriteReplay(n)
+    /\  rKeyLastWriter'  =    [rKeyLastWriter   EXCEPT ![n] = n]
+    /\  rKeyRcvedACKs'   =    [rKeyRcvedACKs    EXCEPT ![n] = {}]
+    /\  rKeyState'       =    [rKeyState        EXCEPT ![n] = "replay"]
+    /\  rMsgsINV' = rMsgsINV \cup {([type       |-> "INV",
+               sender     |-> n,
+               epochID    |-> rEpochID,
+               version    |-> rKeyVersion[n]])}
+    /\  UNCHANGED <<rMsgsVAL, rMsgsACK, rKeyVersion, rKeySharers, rAliveNodes, rNodeEpochID, rEpochID>>
 
 RUpdateLocalEpochID(n) ==
     /\ rNodeEpochID[n] < rEpochID
     /\ rKeyState[n]    = "valid" 
     /\ rNodeEpochID'   = [rNodeEpochID EXCEPT![n] = rEpochID]
-    /\ UNCHANGED <<rMsgs, rKeyState, rKeyVersion, rKeyRcvedACKs, 
+    /\ UNCHANGED <<rMsgsINV, rMsgsVAL, rMsgsACK, rKeyState, rKeyVersion, rKeyRcvedACKs, 
                    rKeyLastWriter, rKeySharers, rAliveNodes, rEpochID>>
 
 RReplayActions(n) ==
@@ -281,11 +307,11 @@ RReplayActions(n) ==
        \/ RUpdateLocalEpochID(n)
     
 
-RRcvInvAction == \E n \in rAliveNodes : RRcvInv(n)
-RRcvValAction == \E n \in rAliveNodes : \E m \in rMsgs : RRcvVal(n, m)
+RRcvInvAction == \E n \in rAliveNodes, m \in rMsgsINV : RRcvInv(n, m)
+RRcvValAction == \E n \in rAliveNodes : \E m \in rMsgsVAL : RRcvVal(n, m)
 RReadAction == \E n \in rAliveNodes : RRead(n)
 RWriteAction == \E n \in rAliveNodes : RWrite(n)
-RRcvAckAction == \E n \in rAliveNodes : RRcvAck(n)
+RRcvAckAction == \E n \in rAliveNodes, m \in rMsgsACK : RRcvAck(n, m)
 RSendValsAction == \E n \in rAliveNodes : RSendVals(n)
 RLocalWriteReplayAction == \E n \in rAliveNodes : RLocalWriteReplay(n)
 RFailedNodeWriteReplayAction == \E n \in rAliveNodes : RFailedNodeWriteReplay(n)
@@ -327,4 +353,13 @@ THEOREM Spec => Invariants
 
 CTICost == 0
 NextUnchanged == UNCHANGED vars
+
+\* 
+\* Other lemmas.
+\* 
+
+H_Inv1442_R0_1_I3 == 
+    \A VARI \in rAliveNodes : 
+    \A VARJ \in rAliveNodes : 
+        (rKeyState[VARI] = "invalid") \/ (~((rAliveNodes \ {VARI}) \subseteq rKeyRcvedACKs[VARI])) \/ ((rKeyVersion[VARI] <= rKeyVersion[VARJ]))
 =============================================================================

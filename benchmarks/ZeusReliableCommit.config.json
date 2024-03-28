@@ -32,7 +32,7 @@
     },
     "actions": [],
     "constraint"  :  "",
-    "quant_inv"  :  "\\A VARI \\in rAliveNodes : \\A VARJ \\in rAliveNodes : \\A VARM \\in rMsgs : ",
+    "quant_inv"  :  "\\A VARI \\in rAliveNodes : \\A VARJ \\in rAliveNodes : \\A VARM \\in rMsgsVAL : ",
     "quant_inv_alt"  :  null,
     "quant_vars": ["VARI", "VARJ", "VARMVALI", "VARMACKI", "VARMINVI"],
     "model_consts"  :  "",

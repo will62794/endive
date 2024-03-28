@@ -3,7 +3,9 @@
 EXTENDS ZeusReliableCommit, TLC, Randomization, FiniteSets
 
 TypeOKRandom ==  \* The type correctness invariant
-    /\  rMsgs           \in RandomSetOfSubsets(4, 1, RMessage)
+    /\  rMsgsINV            \in RandomSetOfSubsets(4, 1, RMessageINV)
+    /\  rMsgsVAL            \in RandomSetOfSubsets(4, 1, RMessageVAL)
+    /\  rMsgsACK            \in RandomSetOfSubsets(4, 1, RMessageACK)
     /\  rAliveNodes     \in SUBSET R_NODES
     /\  rKeyRcvedACKs \in [R_NODES -> SUBSET R_NODES]
     /\  \A n \in R_NODES: rKeyRcvedACKs[n] \subseteq (R_NODES \ {n})
