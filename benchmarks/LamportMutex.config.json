@@ -4,7 +4,13 @@
         "clock[VARI] = clock[VARJ]",
         "VARI \\in ack[VARI]",
         "VARI \\in ack[VARJ]",
-        "ack[VARI] = {}"
+        "ack[VARI] = {}",
+        "VARI \\in crit",
+        "req[VARI][VARJ] = 0",
+        "req[VARI][VARJ] > 0",
+        "req[VARI][VARJ] = Head(network[VARJ][VARI]).clock",
+        "req[VARI][VARJ] = Head(network[VARI][VARJ]).clock",
+        "beats(VARI,VARJ)"
     ],
     "action_local_preds":{
     },
@@ -14,7 +20,7 @@
         "N": "3",
         "MaxNat": "7",
         "maxClock": "6",
-        "Nat": "NatOverride"
+        "Nats": "{0,1,2,3,4,5}"
     },
     "actions": [],
     "constraint"  :  "ClockConstraint",
@@ -23,8 +29,7 @@
     "quant_vars": ["VARI", "VARJ", "VARMVAL", "VARMACK", "VARMINV"],
     "model_consts"  :  "",
     "symmetry" : false,
-    "typeok"  :  "TypeOKRandom",
-    "tlc_specific_spec": true,
+    "typeok"  :  "TypeOK",
     "try_final_minimize": false,
     "max_tlc_inv_depth": 17,
     "simulation_inv_check": false,

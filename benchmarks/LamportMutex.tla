@@ -5,7 +5,7 @@
 (* L. Lamport:  Time, Clocks and the Ordering of Events in a Distributed   *)
 (* System. CACM 21(7):558-565, 1978.                                       *)
 (***************************************************************************)
-EXTENDS Naturals, Sequences
+EXTENDS Naturals, Sequences, TLC
 
 (***************************************************************************)
 (* The parameter N represents the number of processes.                     *)
@@ -13,12 +13,14 @@ EXTENDS Naturals, Sequences
 (* keep the state space finite.                                            *)
 (***************************************************************************)
 CONSTANT N, maxClock
+CONSTANT Nats
 
 ASSUME NType == N \in Nat
 ASSUME maxClockType == maxClock \in Nat
 
 Proc == 1 .. N
-Clock == Nat \ {0}
+\* Clock == Nat \ {0}
+Clock == Nats \ {0}
 (***************************************************************************)
 (* For model checking, add ClockConstraint as a state constraint to ensure *)
 (* a finite state space and override the definition of Clock by            *)
@@ -39,6 +41,9 @@ ReqMessage(c) == [type |-> "req", clock |-> c]
 AckMessage == [type |-> "ack", clock |-> 0]
 RelMessage == [type |-> "rel", clock |-> 0]
 
+SeqOf(S, n) == UNION {[1..m -> S] : m \in 0..n}
+BoundedSeq(S, n) == SeqOf(S, n)
+
 Message == {AckMessage, RelMessage} \union {ReqMessage(c) : c \in Clock}
 
 (***************************************************************************)
@@ -48,11 +53,11 @@ TypeOK ==
      (* clock[p] is the local clock of process p *)
   /\ clock \in [Proc -> Clock]
      (* req[p][q] stores the clock associated with request from q received by p, 0 if none *)
-  /\ req \in [Proc -> [Proc -> Nat]]
+  /\ req \in [Proc -> [Proc -> Nats]]
      (* ack[p] stores the processes that have ack'ed p's request *)
   /\ ack \in [Proc -> SUBSET Proc]
      (* network[p][q]: queue of messages from p to q -- pairwise FIFO communication *)
-  /\ network \in [Proc -> [Proc -> Seq(Message)]]
+  /\ network \in [Proc -> [Proc -> BoundedSeq(Message, 1)]]
      (* set of processes in critical section: should be empty or singleton *)
   /\ crit \in SUBSET Proc
 
@@ -183,6 +188,9 @@ Mutex == \A p,q \in crit : p = q
 
 CONSTANT MaxNat
 NatOverride == 0 .. MaxNat
+
+CTICost == 0
+NextUnchanged == UNCHANGED vars
 
 ==============================================================================
 ==============================================================================
