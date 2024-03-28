@@ -125,9 +125,10 @@ isAlive(n) == n \in aliveNodes
 NodeFailure(n) == \* Emulate a node failure
     \* Make sure that there are atleast 3 alive nodes before killing a node
     /\ Cardinality(aliveNodes) > 2
-    /\ aliveNodes' = aliveNodes \ {n}
-    /\ epochID'     = epochID + 1
-    /\ UNCHANGED <<msgsINV, msgsACK, msgsVAL, nodeState, nodeTS, nodeLastWriter, nodeLastWriteTS, nodeRcvedAcks, nodeWriteEpochID>>
+    /\ nodeRcvedAcks' = [k \in H_NODES |-> {}]
+    /\ aliveNodes'    = aliveNodes \ {n}
+    /\ epochID'       = epochID + 1
+    /\ UNCHANGED <<msgsINV, msgsACK, msgsVAL, nodeState, nodeTS, nodeLastWriter, nodeLastWriteTS, nodeWriteEpochID>>
 
 h_upd_not_aliveNodes ==
     /\  UNCHANGED <<aliveNodes, epochID, nodeWriteEpochID>>
