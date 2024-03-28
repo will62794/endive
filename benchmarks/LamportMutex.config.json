@@ -8,8 +8,8 @@
         "VARI \\in crit",
         "req[VARI][VARJ] = 0",
         "req[VARI][VARJ] > 0",
-        "req[VARI][VARJ] = Head(network[VARJ][VARI]).clock",
-        "req[VARI][VARJ] = Head(network[VARI][VARJ]).clock",
+        "network[VARJ][VARI] # <<>> /\\ req[VARI][VARJ] = Head(network[VARJ][VARI]).clock",
+        "network[VARI][VARJ] # <<>> /\\ req[VARI][VARJ] = Head(network[VARI][VARJ]).clock",
         "beats(VARI,VARJ)"
     ],
     "action_local_preds":{
@@ -20,7 +20,7 @@
         "N": "3",
         "MaxNat": "7",
         "maxClock": "6",
-        "Nats": "{0,1,2,3,4,5}"
+        "Nats": "{0,1,2,3,4,5,6,7}"
     },
     "actions": [],
     "constraint"  :  "ClockConstraint",
