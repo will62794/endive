@@ -1,0 +1,43 @@
+{
+    "preds"  :  [
+        "clock[VARI] < clock[VARJ]",
+        "clock[VARI] = clock[VARJ]",
+        "VARI \\in ack[VARI]",
+        "VARI \\in ack[VARJ]",
+        "ack[VARI] = {}"
+    ],
+    "action_local_preds":{
+    },
+    "preds_alt" : [],
+    "safety"  :  "Mutex",
+    "constants"  : {
+        "N": "3",
+        "MaxNat": "7",
+        "maxClock": "6",
+        "Nat": "NatOverride"
+    },
+    "actions": [],
+    "constraint"  :  "ClockConstraint",
+    "quant_inv"  :  "\\A VARI \\in Proc : \\A VARJ \\in Proc : ",
+    "quant_inv_alt"  :  null,
+    "quant_vars": ["VARI", "VARJ", "VARMVAL", "VARMACK", "VARMINV"],
+    "model_consts"  :  "",
+    "symmetry" : false,
+    "typeok"  :  "TypeOKRandom",
+    "tlc_specific_spec": true,
+    "try_final_minimize": false,
+    "max_tlc_inv_depth": 17,
+    "simulation_inv_check": false,
+    "simulation_inv_check_num_states": 2500000,
+    "simulation_inv_check_depth": 35,
+    "simulate"  :  true,
+    "tlaps_proof_config": {
+        "assumes": [
+        ],
+        "lemma_def_expands": {
+            "Safety": ["RConsistentInvariant"]
+        },
+        "action_def_expands":{
+        }
+    }
+}

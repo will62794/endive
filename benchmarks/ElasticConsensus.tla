@@ -262,18 +262,31 @@ RestartNode(n) ==
   /\ UNCHANGED <<messages, firstUncommittedSlot, currentTerm, currentConfiguration, 
                  currentClusterState, lastAcceptedTerm, lastAcceptedValue>>
 
-\* next-step relation
+
+
+HandleStartJoinAction == \E n, nm \in Nodes : HandleStartJoin(n, nm, currentTerm[n] + 1)
+HandleJoinRequestAction == \E m \in messages : HandleJoinRequest(m.dest, m)
+ClientRequestAction == \E n \in Nodes : \E v \in Values : ClientRequest(n, v)
+HandlePublishRequestAction == \E m \in messages : HandlePublishRequest(m.dest, m)
+HandlePublishResponseAction == \E m \in messages : HandlePublishResponse(m.dest, m)
+HandleCommitRequestAction == \E m \in messages : HandleCommitRequest(m.dest, m)
+RestartNodeAction == \E n \in Nodes : RestartNode(n)
+ChangeVotersAction == \E n \in Nodes : \E vs \in ValidConfigs : ChangeVoters(n, vs)
+SendCatchupResponseAction == \E n \in Nodes : SendCatchupResponse(n)
+HandleCatchupResponseAction == \E n \in Nodes : \E m \in messages : HandleCatchupResponse(n, m)
+
+ \* next-step relation
 Next ==
-  \/ \E n, nm \in Nodes : HandleStartJoin(n, nm, currentTerm[n] + 1)
-  \/ \E m \in messages : HandleJoinRequest(m.dest, m)
-  \/ \E n \in Nodes : \E v \in Values : ClientRequest(n, v)
-  \/ \E m \in messages : HandlePublishRequest(m.dest, m)
-  \/ \E m \in messages : HandlePublishResponse(m.dest, m)
-  \/ \E m \in messages : HandleCommitRequest(m.dest, m)
-  \/ \E n \in Nodes : RestartNode(n)
-  \/ \E n \in Nodes : \E vs \in ValidConfigs : ChangeVoters(n, vs)
-  \/ \E n \in Nodes : SendCatchupResponse(n)
-  \/ \E n \in Nodes : \E m \in messages : HandleCatchupResponse(n, m)
+    \/ HandleStartJoinAction
+    \/ HandleJoinRequestAction
+    \/ ClientRequestAction
+    \/ HandlePublishRequestAction
+    \/ HandlePublishResponseAction
+    \/ HandleCommitRequestAction
+    \/ RestartNodeAction
+    \/ ChangeVotersAction
+    \/ SendCatchupResponseAction
+    \/ HandleCatchupResponseAction
 
 ----
 
