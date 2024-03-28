@@ -15,7 +15,8 @@
         "VARM.type = \"VAL\" /\\ VARM.version > rKeyVersion[VARI]",
         "VARM.type = \"VAL\" /\\ VARM.version = rKeyVersion[VARJ]",
         "(rAliveNodes \\ {VARI}) \\subseteq rKeyRcvedACKs[VARI]",
-        "(rAliveNodes \\ {VARJ}) \\subseteq rKeyRcvedACKs[VARJ]"
+        "(rAliveNodes \\ {VARJ}) \\subseteq rKeyRcvedACKs[VARJ]",
+        "\\E kk,mm \\in rAliveNodes: kk /= VARI /\\ mm /= VARI /\\ mm /= kk"
     ],
     "action_local_preds":{
     },
