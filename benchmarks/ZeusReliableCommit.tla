@@ -179,6 +179,7 @@ RRead(n) ==  \* Execute a read
     /\ RNoChanges
 
 RRcvInv(n, m) ==  \* Process a received invalidation
+        /\ m \in rMsgsINV
         /\ m.type     = "INV"
         /\ m.epochID  = rEpochID
         /\ m.sender  /= n
