@@ -2595,7 +2595,7 @@ class InductiveInvGen():
                     new_ctis_eliminated = cti_states_eliminated_by_invs[top_new_inv_cand] - ctis_eliminated_this_iter
                 else:
                     # Pick invariant for elimination.
-                    if len((cti_states_eliminated_by_invs[top_new_inv_cand] - ctis_eliminated_this_iter)) >= len(existing_inv_cands[0]["ctis_eliminated"] - ctis_eliminated_this_iter):
+                    if len((cti_states_eliminated_by_invs[top_new_inv_cand] - ctis_eliminated_this_iter)) > len(existing_inv_cands[0]["ctis_eliminated"] - ctis_eliminated_this_iter):
                         invi = int(top_new_inv_cand.replace("Inv", ""))
                         chosen_cand = {"inv": top_new_inv_cand, "invexp": orig_invs_sorted[invi], "ctis_eliminated": cti_states_eliminated_by_invs[top_new_inv_cand]}
                         new_ctis_eliminated = cti_states_eliminated_by_invs[top_new_inv_cand] - ctis_eliminated_this_iter
