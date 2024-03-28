@@ -8,7 +8,7 @@
 \*  R_MAX_EPOCH = 4
 \*  R_MAX_VERSION = 4
 
-EXTENDS Integers
+EXTENDS Integers, FiniteSets
 
 CONSTANTS R_NODES,
           R_MAX_EPOCH,
@@ -355,6 +355,13 @@ THEOREM Spec => Invariants
 CTICost == 0
 NextUnchanged == UNCHANGED vars
 
+H_Safety == 
+    /\ RConsistentInvariant
+    /\ RSingleOnwerInvariant
+    /\ ROnwerOnlyWriterInvariant
+    /\ RMaxVersionDistanceInvariant
+    /\ ROnwerHighestVersionInvariant
+
 \* 
 \* Other lemmas.
 \* 
@@ -363,4 +370,31 @@ H_Inv1442_R0_1_I3 ==
     \A VARI \in rAliveNodes : 
     \A VARJ \in rAliveNodes : 
         (rKeyState[VARI] = "invalid") \/ (~((rAliveNodes \ {VARI}) \subseteq rKeyRcvedACKs[VARI])) \/ ((rKeyVersion[VARI] <= rKeyVersion[VARJ]))
+
+
+H_Inv2933_R0_1_I3 == 
+    \A VARI \in rAliveNodes : 
+    \A VARJ \in rAliveNodes : 
+        (~(VARJ \in rKeyRcvedACKs[VARI])) \/ (rKeyState[VARI] = "invalid") \/ ((rKeyVersion[VARI] <= rKeyVersion[VARJ]))
+
+A_Inv741 == \A VARI \in rAliveNodes : ~(Cardinality(rAliveNodes) > 2) \/ (~(rKeyState[VARI] = "replay")) 
+A_Inv766 == \A VARI \in rAliveNodes : \A VARJ \in rAliveNodes : ~(VARI # VARJ /\ rKeyState[VARI] = "write") \/ (~(rKeyState[VARJ] = "write"))
+
+H1 == 
+    \A VARI \in rAliveNodes : 
+    \* \A VARJ \in rAliveNodes : 
+    \A VARMINV \in rMsgsINV : 
+        \* (rKeyState[VARI] = "valid") => (VARMINV.version <= rKeyVersion[VARI]) 
+        (rKeyState[VARI] = "valid" /\ rKeySharers[VARI] = "owner") => (VARMINV.version <= rKeyVersion[VARI]) 
+
+H_Inv1205_R0_2_I1 == 
+    /\ \A VARI \in rAliveNodes : 
+       \A VARMINV \in rMsgsINV : 
+            (rKeyState[VARI] = "write") => (VARMINV.version <= rKeyVersion[VARI]) 
+    \* /\ H1
+
+
+H_Inv57_R0_2_I1 == \A VARMINV \in rMsgsINV : ~(VARMINV.version > rKeyVersion[VARMINV.sender])
+
+RInv274 == \A VARMINV \in rMsgsINV : (VARMINV.epochID < rEpochID) \/ ((VARMINV.epochID = rEpochID))
 =============================================================================
