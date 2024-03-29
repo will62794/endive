@@ -2255,7 +2255,7 @@ class InductiveInvGen():
                     main_invs_to_check = [(ind, inv) for ind,inv in enumerate(invs)]
 
                     # Don't bother doing this partitioned caching for tiny numbers of conjuncts.
-                    LARGE_PRED_GROUP_COUNT = 200 # don't bother with the overhead of this except for relatively large predicate groups.
+                    LARGE_PRED_GROUP_COUNT = 100 # don't bother with the overhead of this except for relatively large predicate groups.
                     if self.enable_partitioned_state_caching and min_conjs > 1:
                         logging.info(f"Partitioned property checking enabled for projection caching.")
                         # TODO: Consider enabling this and/or computing more of these cached state projections 
