@@ -159,10 +159,21 @@ ReceiveRelease(p,q) ==
 (* Next-state relation.                                                    *)
 (***************************************************************************)
 
+RequestAction == \E p \in Proc : Request(p) 
+EnterAction == \E p \in Proc : Enter(p)
+ExitAction == \E p \in Proc : Exit(p)
+ReceiveRequestAction == \E p \in Proc : \E q \in Proc \ {p} : ReceiveRequest(p,q)
+ReceiveAckAction == \E p \in Proc : \E q \in Proc \ {p} : ReceiveAck(p,q)
+ReceiveReleaseAction == \E p \in Proc : \E q \in Proc \ {p} : ReceiveRelease(p,q)
+
 Next ==
-  \/ \E p \in Proc : Request(p) \/ Enter(p) \/ Exit(p)
-  \/ \E p \in Proc : \E q \in Proc \ {p} : 
-        ReceiveRequest(p,q) \/ ReceiveAck(p,q) \/ ReceiveRelease(p,q)
+    \/ RequestAction
+    \/ EnterAction
+    \/ ExitAction
+    \/ ReceiveRequestAction
+    \/ ReceiveAckAction
+    \/ ReceiveReleaseAction
+
 
 vars == <<req, network, clock, ack, crit>>
 
