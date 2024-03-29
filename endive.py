@@ -133,6 +133,8 @@ class InductiveInvGen():
         self.save_dot = all_args["save_dot"]
         self.enable_partitioned_state_caching = enable_partitioned_state_caching
         self.enable_cti_slice_projection = enable_cti_slice_projection
+        self.disable_state_cache_slicing = all_args["disable_state_cache_slicing"]
+        self.disable_grammar_slicing = all_args["disable_grammar_slicing"]
 
 
         # Set an upper limit on CTIs per round to avoid TLC getting overwhelmend. Hope is that 
@@ -3860,11 +3862,20 @@ class InductiveInvGen():
                 logging.info(f"Adding in {len(action_local_preds)} action local predicates for action '{k_cti_action}'.")
                 preds = preds + action_local_preds_filtered
 
+                # If we have disabled grammar slicing, then we just forcibly use all predicates.
+                if self.disable_grammar_slicing:
+                    logging.info("Grammar slicing disabled, so we are using all predicates.")
+                    preds = all_preds_unfiltered
 
                 pct_str = "{0:.1f}".format(len(preds)/len(all_preds_unfiltered) * 100)
                 logging.info(f"{len(preds)}/{len(all_preds_unfiltered)} ({pct_str}% of) predicates being used based on COI slice filter.")
 
                 cache_with_ignored_vars = [v for v in self.state_vars if v not in lemma_action_coi]
+
+                # If we explicitly disable slicing here, then we just always use the full set of variables.
+                if self.disable_state_cache_slicing:
+                    logging.info("State cache slicing disabled, so we are just using the all vars in the slice.")
+                    cache_with_ignored_vars = []
 
                 # self.proof_graph["edges"].append((action_node, lemma_name))
                 # self.proof_graph["nodes"][action_node] = {"ctis_remaining": 1000, "coi_vars": lemma_action_coi}  # initialize with positive CTI count, to be updated later.
@@ -4491,6 +4502,9 @@ if __name__ == "__main__":
     parser.add_argument('--override_num_cti_workers', help='Max number of TLC workers for CTI generation.', type=int, default=None)
     parser.add_argument('--k_cti_induction_depth', help='CTI k-induction depth.', type=int, default=1)
     parser.add_argument('--auto_lemma_action_decomposition', help='Automatically split inductive proof obligations by action and lemmas.', required=False, default=False, action='store_true')
+    parser.add_argument('--disable_state_cache_slicing', help='Disable slicing of state caches.', required=False, default=False, action='store_true')# how to make one argument exclusive with another?
+    parser.add_argument('--disable_grammar_slicing', help='Disable slicing of grammars.', required=False, default=False, action='store_true')# how to make one argument exclusive with another?
+    
     
     # Proof tree related commands.
     parser.add_argument('--proof_tree_mode', help='Run in inductive proof tree mode (EXPERIMENTAL).', default=False, action='store_true')
@@ -4523,6 +4537,9 @@ if __name__ == "__main__":
     # Create directory for generated files if needed.
     os.system(f"mkdir -p {os.path.join(specdir, GEN_TLA_DIR)}")
     os.system(f"mkdir -p {os.path.join(specdir, STATECACHE_DIR)}")
+
+    # Can't disable state cache slicing if we have enabled partitioned state caching.
+    assert not (args["disable_state_cache_slicing"] and args["enable_partitioned_state_caching"]), "Can't disable state cache slicing if partitioned state caching is enabled."
 
     # Initialize command line args.
     num_invs = args["ninvs"]
