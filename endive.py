@@ -2133,7 +2133,7 @@ class InductiveInvGen():
                 # Try to do a bit of inference without resorting to existing conjuncts, and then add them back in after a round or
                 # two. 
                 # Not sure how much effect this may have on quality of learned invariants or proof graphs.
-                iter_to_start_adding_existing_conjuncts = 2
+                iter_to_start_adding_existing_conjuncts = 1
 
                 if self.proof_tree_mode and iteration >= iter_to_start_adding_existing_conjuncts and self.all_args["include_existing_conjuncts"]:
                     added = 0
