@@ -5,7 +5,7 @@
 
 specname=$1
 echo "Launching '$specname' script."
-scriptname="discovery_${specname}_script.sh"
+scriptname="discovery_${specname}.script"
 
 # Copy the batch script to the Discovery cluster.
 echo "Copying script 'discovery_scripts/$scriptname' to Discovery cluster..."
