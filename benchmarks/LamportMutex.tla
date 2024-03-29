@@ -5,7 +5,7 @@
 (* L. Lamport:  Time, Clocks and the Ordering of Events in a Distributed   *)
 (* System. CACM 21(7):558-565, 1978.                                       *)
 (***************************************************************************)
-EXTENDS Naturals, Sequences, TLC
+EXTENDS Naturals, Sequences, TLC, Randomization
 
 (***************************************************************************)
 (* The parameter N represents the number of processes.                     *)
@@ -57,7 +57,7 @@ TypeOK ==
      (* ack[p] stores the processes that have ack'ed p's request *)
   /\ ack \in [Proc -> SUBSET Proc]
      (* network[p][q]: queue of messages from p to q -- pairwise FIFO communication *)
-  /\ network \in [Proc -> [Proc -> BoundedSeq(Message, 1)]]
+  /\ network \in [Proc -> [Proc -> RandomSubset(4, BoundedSeq(Message, 2))]]
      (* set of processes in critical section: should be empty or singleton *)
   /\ crit \in SUBSET Proc
 
