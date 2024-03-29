@@ -40,7 +40,7 @@
     "quant_vars": ["VARI", "VARJ", "VARMVAL", "VARMACK", "VARMINV"],
     "model_consts"  :  "",
     "symmetry" : false,
-    "typeok"  :  "TypeOK",
+    "typeok"  :  "TypeOKRandom",
     "try_final_minimize": false,
     "max_tlc_inv_depth": 100,
     "simulation_inv_check": false,
