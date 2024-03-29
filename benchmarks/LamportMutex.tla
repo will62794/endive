@@ -186,9 +186,6 @@ BoundedNetwork == \A p,q \in Proc : Len(network[p][q]) <= 3
 (***************************************************************************)
 Mutex == \A p,q \in crit : p = q
 
-CONSTANT MaxNat
-NatOverride == 0 .. MaxNat
-
 CTICost == 0
 NextUnchanged == UNCHANGED vars
 
