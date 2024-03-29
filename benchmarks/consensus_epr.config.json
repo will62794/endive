@@ -47,7 +47,7 @@
     "quant_inv_alt"  :  null,
     "quant_vars": ["VARI", "VARJ", "VARK", "VALI", "VARQJ"],
     "model_consts"  :  "CONSTANT n1,n2,n3,v1,v2",
-    "symmetry" : true,
+    "symmetry" : false,
     "typeok"  :  "TypeOK",
     "simulate"  :  true,
     "tlc_specific_spec": true,
