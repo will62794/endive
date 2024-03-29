@@ -33,6 +33,5 @@ srun python3 endive.py --spec benchmarks/$specname \
     --cti_elimination_workers 8 \
     --ninvs 40000 --max_num_ctis_per_round 5000 \
     --save_dot --max_num_conjuncts_per_round 16 --niters 4 \
-    --auto_lemma_action_decomposition --enable_partitioned_state_caching --proof_tree_mode \
     --nrounds 45
 done
