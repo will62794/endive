@@ -4103,7 +4103,7 @@ class InductiveInvGen():
 
                 self.total_num_cti_elimination_rounds = (roundi + 1)
                 # ret = self.eliminate_ctis(k_ctis, self.num_invs, roundi, preds=preds, cache_states_with_ignored_vars=cache_with_ignored_vars)
-                ret = self.eliminate_ctis(k_ctis_to_eliminate, self.num_invs, roundi, subroundi=subround, preds=preds)
+                ret = self.eliminate_ctis(k_ctis_to_eliminate, self.num_invs, roundi, subroundi=subround, preds=preds, tlc_workers=self.tlc_workers)
                 subround += 1
                 
                 # If we did not eliminate all CTIs in this round, then exit with failure.
