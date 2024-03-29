@@ -57,6 +57,18 @@ TypeOK ==
      (* ack[p] stores the processes that have ack'ed p's request *)
   /\ ack \in [Proc -> SUBSET Proc]
      (* network[p][q]: queue of messages from p to q -- pairwise FIFO communication *)
+  /\ network \in [Proc -> [Proc -> Seq(Message)]]
+     (* set of processes in critical section: should be empty or singleton *)
+  /\ crit \in SUBSET Proc
+
+TypeOKRandom ==
+     (* clock[p] is the local clock of process p *)
+  /\ clock \in [Proc -> Clock]
+     (* req[p][q] stores the clock associated with request from q received by p, 0 if none *)
+  /\ req \in [Proc -> [Proc -> Nats]]
+     (* ack[p] stores the processes that have ack'ed p's request *)
+  /\ ack \in [Proc -> SUBSET Proc]
+     (* network[p][q]: queue of messages from p to q -- pairwise FIFO communication *)
   /\ network \in [Proc -> [Proc -> RandomSubset(4, BoundedSeq(Message, 2))]]
      (* set of processes in critical section: should be empty or singleton *)
   /\ crit \in SUBSET Proc
