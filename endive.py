@@ -13,6 +13,7 @@ import tempfile
 import uuid
 import pickle
 import itertools
+import datetime
 
 import graphviz
 
@@ -4589,6 +4590,10 @@ if __name__ == "__main__":
         if k != "local_grammars":
             logging.info(f"{k}: {spec_config[k]}")
 
+    # Print out the command line args.
+    logging.info("Command line args: " + str(sys.argv[1:]))
+
+
     # Read pre-cached invariants from a file if specified.
     cached_invs = None
     cached_invs_gen_time_secs = None
@@ -4601,6 +4606,10 @@ if __name__ == "__main__":
 
     tstart = time.time()
     logging.info("Starting invariant discovery for spec '%s' and safety property '%s' with %d seed predicates. DEBUG=%s" % (specname, safety, len(preds), DEBUG))
+    
+    # Log the date.
+    now = datetime.datetime.now()
+    logging.info("Current date: " + now.strftime("%Y-%m-%d %H:%M:%S"))
 
     # Generate an inductive invariant.
     indgen = InductiveInvGen(specdir, specname, safety, constants, constraint, quant_inv, model_consts, preds, 
