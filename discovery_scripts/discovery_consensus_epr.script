@@ -26,7 +26,7 @@ echo "---"
 echo "--- Running '$specname' benchmark with seed $seed ---"
 echo "---"
 
-srun -o /home/schultz.w/endive_logs/${specname}_baseline/${specname}_baseline_output_%j.txt \
+srun -o /home/schultz.w/endive_logs/${specname}/${specname}_output_%j_${seed}.txt \
     python3 endive.py --spec benchmarks/$specname \
     --seed $seed --num_simulate_traces 50000 --tlc_workers 28 \
     --debug --target_sample_time_limit_ms 10000 --target_sample_states 50000 \
@@ -42,7 +42,7 @@ echo "---"
 echo "--- Running '$specname' benchmark with seed $seed (BASELINE) ---"
 echo "---"
 
-srun -o /home/schultz.w/endive_logs/${specname}_baseline/${specname}_baseline_output_%j.txt \
+srun -o /home/schultz.w/endive_logs/${specname}_baseline/${specname}_baseline_output_%j_${seed}.txt \
         python3 endive.py --spec benchmarks/$specname \
         --seed $seed --num_simulate_traces 50000 --tlc_workers 28 \
         --debug --target_sample_time_limit_ms 10000 --target_sample_states 50000 \

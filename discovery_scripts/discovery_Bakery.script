@@ -19,14 +19,14 @@ git clone -b ind-tree https://github.com/will62794/endive.git
 cd endive
 git pull --rebase
 
-for seed in 1 2 3
+for seed in 2
 do
 
 echo "---"
 echo "--- Running '$specname' benchmark with seed $seed ---"
 echo "---"
 
-srun -o /home/schultz.w/endive_logs/${specname}/${specname}_output_%j.txt \
+srun -o /home/schultz.w/endive_logs/${specname}/${specname}_output_%j_${seed}.txt \
     python3 endive.py --spec benchmarks/$specname \
     --seed $seed --num_simulate_traces 200000 --tlc_workers 28 \
     --debug --target_sample_time_limit_ms 10000 --target_sample_states 200000 \
