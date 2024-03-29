@@ -28,7 +28,7 @@
         "rm3" : "rm3"
     },
     "constraint"  :  "",
-    "simulation_inv_check": true,
+    "simulation_inv_check": false,
     "simulation_inv_check_num_states": 70000,
     "simulation_inv_check_depth": 20,
     "quant_inv"  :  "\\A VARRMI \\in RM : \\A VARRMJ \\in RM : ",
@@ -37,5 +37,15 @@
     "model_consts"  :  "CONSTANT rm1,rm2,rm3",
     "symmetry" : true,
     "typeok"  :  "TypeOK",
-    "simulate"  :  true      
+    "simulate"  :  true,
+    "tlaps_proof_config": {
+        "assumes": [
+        ],
+        "lemma_def_expands": {
+            "Safety": ["H_TCConsistent"]
+
+        },
+        "action_def_expands":{
+        }
+    }    
 }
