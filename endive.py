@@ -14,6 +14,7 @@ import uuid
 import pickle
 import itertools
 import datetime
+from itertools import chain, combinations
 
 import graphviz
 
@@ -35,6 +36,13 @@ LATEST_TLC_JAR = "tla2tools_2.18.jar"
 # Use local custom built TLC for now.
 # TLC_JAR = "../../tlaplus/tlatools/org.lamport.tlatools/dist/tla2tools.jar"
 TLC_JAR = "tla2tools-checkall.jar"
+
+def powerset(iterable, min_size=0):
+    "powerset([1,2,3]) --> () (1,) (2,) (3,) (1,2) (1,3) (2,3) (1,2,3)"
+    s = list(iterable)
+    subsets = list(chain.from_iterable(combinations(s, r) for r in range(len(s)+1)))
+    return [subset for subset in subsets if len(subset) >= min_size]
+
 
 def chunks(seq, n_chunks):
     """ Splits a given iterable into n evenly (as possible) sized chunks."""
@@ -1979,8 +1987,15 @@ class InductiveInvGen():
 
 
         if self.auto_lemma_action_decomposition:
-            self.cache_projected_states([cache_states_with_ignored_vars], max_depth=max_depth, tlc_workers=tlc_workers)
-            logging.info("Finished initial state caching.")
+            # If the number of state variables isn't too large, just try to cache all subsets up front.
+            SMALL_VAR_COUNT = 6
+            if len(self.state_vars) <= SMALL_VAR_COUNT:
+                all_var_sets = list(powerset(self.state_vars))
+                logging.info(f"Caching all {len(all_var_sets)} var sets upfront, since only {len(self.state_vars)} total state vars.")
+                self.cache_projected_states(all_var_sets, max_depth=max_depth, tlc_workers=tlc_workers)
+            else:
+                self.cache_projected_states([cache_states_with_ignored_vars], max_depth=max_depth, tlc_workers=tlc_workers)
+                logging.info("Finished initial state caching.")
 
         inv_candidates_generated_in_round = set()
         num_ctis_remaining = None
