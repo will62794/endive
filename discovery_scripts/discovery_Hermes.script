@@ -6,8 +6,6 @@
 #SBATCH -N 1                   # Number of nodes
 #SBATCH -n 1                   # Number of tasks
 #SBATCH --cpus-per-task 32                  # Number of cores
-#SBATCH -o endive_logs/Hermes/Hermes_output_%j.txt       # Standard output file
-#SBATCH -e endive_logs/Hermes/Hermes_error_%j.txt        # Standard error file
 
 specname="Hermes"
 lscpu # log CPU info.
