@@ -4528,6 +4528,8 @@ if __name__ == "__main__":
     parser.add_argument('--niters', help='Maximum number of invariant generation iterations to run in each CTI elimination round.', required=False, type=int, default=3)
     parser.add_argument('--nrounds', help='Maximum number of CTI elimination rounds to run.', required=False, type=int, default=3)
     parser.add_argument('--seed', help='Seed for RNG.', required=False, default=0, type=int)
+    parser.add_argument('--safety', help='Safety property to verify (will override safety prop in config).', required=False, default=None, type=str)
+    
     parser.add_argument('--num_simulate_traces', help='The maximum number of traces TLC will generate when searching for counterexamples to inductions (CTIs).', required=False, type=int, default=DEFAULT_NUM_SIMULATE_TRACES)
     parser.add_argument('--simulate_depth', help='Maximum depth of counterexample to induction (CTI) traces to search for.', required=False, type=int, default=DEFAULT_SIMULATE_DEPTH)
     parser.add_argument('--tlc_workers', help='Number of TLC worker threads to use when checking candidate invariants.', required=False, type=int, default=DEFAULT_TLC_WORKERS)
@@ -4543,6 +4545,7 @@ if __name__ == "__main__":
     parser.add_argument('--opt_quant_minimize', help='Enable quantifier minimization optimization for faster invariant checking.', required=False, default=False, action='store_true')
     parser.add_argument('--try_final_minimize', help='Attempt to minimize the final discovered invariant.', required=False, default=False, action='store_true')
     parser.add_argument('--results_dir', help='Directory to save results.', required=False, type=str, default="results")
+    
     parser.add_argument('--max_num_conjuncts_per_round', help='Max number of conjuncts to learn per round.', type=int, default=10000)
     parser.add_argument('--max_duration_secs_per_round', help='Max number of seconds to spend on each iteration.', type=int, default=10000)
     parser.add_argument('--max_num_ctis_per_round', help='Max number of CTIs per round.', type=int, default=10000)
@@ -4591,6 +4594,7 @@ if __name__ == "__main__":
     # Initialize command line args.
     num_invs = args["ninvs"]
     seed = args["seed"] 
+    safety_arg = args["safety"]
     numiters = args["niters"] 
     num_rounds = args["nrounds"] 
     NUM_SIMULATE_TRACES = args["num_simulate_traces"] 
@@ -4628,6 +4632,12 @@ if __name__ == "__main__":
     preds = spec_config["preds"]
     # preds_alt = spec_config["preds_alt"]    
     safety = spec_config["safety"]
+
+    # Override safety prop in config with command line arg, if one is given.
+    if safety_arg is not None:
+        logging.info(f"Overriding safety property in config with command line arg: '{safety_arg}'")
+        safety = safety_arg
+
     # TODO: Make 'constants' parameter a list of lines.
     constants = spec_config["constants"]
 
@@ -4653,6 +4663,8 @@ if __name__ == "__main__":
     for k in spec_config:
         if k != "local_grammars":
             logging.info(f"{k}: {spec_config[k]}")
+        if k == "safety":
+            logging.info(f" 'safety' overriden with command line arg: '{safety_arg}'")
 
     # Print out the command line args.
     logging.info("Command line args: " + str(sys.argv[1:]))
