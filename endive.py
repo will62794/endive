@@ -4340,6 +4340,14 @@ class InductiveInvGen():
                 for udef in self.tla_spec_obj.get_all_user_defs(level="2"):
                     if udef.endswith("Action"):
                         self.actions.append(udef)
+                        action_vars,action_vars_coi = self.tla_spec_obj.get_vars_in_def(udef)
+                        updated_vars = list(action_vars_coi.keys())
+                        logging.info(f"Action '{udef}':")
+                        logging.info(f"  - {len(action_vars)} vars in action : {str(action_vars)}")
+                        logging.info(f"  - updated vars ({len(updated_vars)}): {updated_vars}")
+                        # logging.info(action_vars_coi)
+                        # for a in action_vars_coi:
+                            # logging.info(f"  COI of updated action var {a}: " + str(action_vars_coi[a]))
 
             except Exception as e:
                 print("ERROR: error parsing TLA+ spec:", e)
