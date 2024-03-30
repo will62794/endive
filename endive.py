@@ -2163,13 +2163,13 @@ class InductiveInvGen():
 
                 invs_symb_strs = all_invs["pred_invs"]
                 # Count the number of generated candidates that were already checked previously.
-                # repeated_invs = 0
-                # for ivs in invs_symb_strs:
-                #     if ivs in self.all_generated_inv_candidates:
-                #         repeated_invs += 1
+                repeated_invs = 0
+                for ivs in invs_symb_strs:
+                    if ivs in self.all_generated_inv_candidates:
+                        repeated_invs += 1
                 # inv_candidates_generated_in_round.update(invs_symb_strs)
-                # self.all_generated_inv_candidates.update(invs_symb_strs)
-                # logging.info(f"Found {repeated_invs} repeated generated invariants (total generated in round {roundi}: {len(self.all_generated_inv_candidates)}).")
+                self.all_generated_inv_candidates.update(invs_symb_strs)
+                logging.info(f"Found {repeated_invs} repeated generated invariants (total generated in round {roundi}: {len(self.all_generated_inv_candidates)}).")
 
                 # Sort the set of invariants to give them a consistent order.
                 invs = sorted(list(invs))
