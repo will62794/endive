@@ -431,7 +431,12 @@ def runtlc(spec,config=None,tlc_workers=6,cwd=None,tlcjar="tla2tools-checkall.ja
             line_str += new_stdout
     # check exit code of subproc.
     retcode = subproc.wait()
-    # Ignore 255 codes for now.
+
+    # logging.info("++++++++++++++++++++++")
+    # for last in tlc_lines[-28:]:
+        # logging.info(last)
+    # logging.info("++++++++++++++++++++++")
+    
     if retcode != 0 and retcode != 255:
         logging.error(f"!!!!!!!! TLC exited with non-zero exit code: {retcode}. May indicate underlying error. !!!!!!!!")
         logging.error("Logging last 25 lines of TLC output:")
@@ -457,6 +462,12 @@ def runtlc_check_violated_invariants(spec,config=None, tlc_workers=6, cwd=None, 
         res = re.match(".*Invariant (Inv.*) is violated",l)
         invname = res.group(1)
         invs_violated.add(invname)
+    for l in greplines("Slice.*total unique", lines):
+        res = re.match("Slice_(.*) (.*) -> total unique simulation cached states. (.*)",l)
+        slice_ind = res.group(1)
+        slice_ignore_vars = sorted(res.group(2).split(","))
+        slice_size = int(res.group(3))
+        print("slice_stats:", slice_ind, slice_ignore_vars, slice_size)
     return invs_violated
 
 
