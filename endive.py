@@ -3464,10 +3464,14 @@ class InductiveInvGen():
             logging.info("No proof tree command specified. Terminating.")
 
         return
+    
+    def proofgraph_filename(self):
+        fname = f"{self.specdir}/{self.specname}_{self.seed}.proofgraph.json"
+        return fname
 
     def clean_proof_graph(self):
         """ Clear out any persisted proof graphs. """
-        fname = f"{self.specdir}/{self.specname}.proofgraph.json"
+        fname = self.proofgraph_filename()
         # Delete proof graph object if exists.
         logging.info("Cleaning proof graph file: '{fname}'")
         try:
@@ -3477,7 +3481,7 @@ class InductiveInvGen():
 
     def persist_proof_graph(self, roundi):
         # Save the generated proof graph to disk.
-        fname = f"{self.specdir}/{self.specname}.proofgraph.json"
+        fname = self.proofgraph_filename()
         proof_graph_object = {}
         proof_graph_object["proof_graph"] = self.proof_graph
         proof_graph_object["strengthening_conjuncts"] = self.strengthening_conjuncts
@@ -3487,7 +3491,7 @@ class InductiveInvGen():
 
     def load_proof_graph(self):
         # Try to load the proof graph from disk.
-        fname = f"{self.specdir}/{self.specname}.proofgraph.json"
+        fname = self.proofgraph_filename()
         try:
             logging.info(f"Trying to load proof graph from '{fname}'")
             with open(fname) as f:
