@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH -J Bakery_endive_Job               # Job name
 #SBATCH --partition short    # Partition name
-#SBATCH --time=12:00:00       # Time limit.
+#SBATCH --time=16:00:00       # Time limit.
 #SBATCH --constraint="[broadwell|cascadelake]"       # Newer processors.
 #SBATCH -N 1                   # Number of nodes
 #SBATCH -n 1                   # Number of tasks
@@ -33,11 +33,14 @@ common_flags+=" --opt_quant_minimize --k_cti_induction_depth 1"
 common_flags+=" --ninvs 40000 --max_num_ctis_per_round 2000"
 common_flags+=" --save_dot --max_num_conjuncts_per_round 16 --niters 4 --nrounds 45"
 
-srun -o /home/schultz.w/endive_logs/${specname}/${specname}_output_%j_${seed}.txt \
+# Set 6 hour time limit for these jobs.
+time_limit="06:00:00"
+
+srun --time=$time_limit -o /home/schultz.w/endive_logs/${specname}/${specname}_output_%j_${seed}.txt \
     python3 endive.py --spec benchmarks/$specname \
     $common_flags --auto_lemma_action_decomposition --enable_partitioned_state_caching --proof_tree_mode 
 
-srun -o /home/schultz.w/endive_logs/${specname}_baseline/${specname}_baseline_output_%j_${seed}.txt \
+srun --time=$time_limit -o /home/schultz.w/endive_logs/${specname}_baseline/${specname}_baseline_output_%j_${seed}.txt \
     python3 endive.py --spec benchmarks/$specname \
     $common_flags 
 

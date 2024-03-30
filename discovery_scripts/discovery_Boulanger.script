@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH -J Boulanger_endive_Job               # Job name
 #SBATCH --partition short    # Partition name
-#SBATCH --time=12:00:00       # Time limit.
+#SBATCH --time=16:00:00       # Time limit.
 #SBATCH --constraint="[broadwell|cascadelake]"       # Newer processors.
 #SBATCH -N 1                   # Number of nodes
 #SBATCH -n 1                   # Number of tasks
@@ -44,15 +44,18 @@ common_flags+=" --opt_quant_minimize --k_cti_induction_depth 1"
 common_flags+=" --ninvs $ninvs --max_num_ctis_per_round $max_num_ctis_per_round"
 common_flags+=" --save_dot --max_num_conjuncts_per_round 16 --niters 4 --nrounds $nrounds"
 
+# Set 6 hour time limit for these jobs.
+time_limit="06:00:00"
+
 # All optimizations.
 prepare_workdir "${specname}_${seed}"
-srun --ntasks=1 -o /home/schultz.w/endive_logs/${specname}/${specname}_output_%j_${seed}.txt \
+srun --time=$time_limit --ntasks=1 -o /home/schultz.w/endive_logs/${specname}/${specname}_output_%j_${seed}.txt \
     python3 endive.py --spec benchmarks/$specname \
     $common_flags --auto_lemma_action_decomposition --enable_partitioned_state_caching --proof_tree_mode
 
 # Baseline run.
 prepare_workdir "${specname}_baseline_$seed"
-srun --ntasks=1 -o /home/schultz.w/endive_logs/${specname}_baseline/${specname}_baseline_output_%j_${seed}.txt \
+srun --time=$time_limit --ntasks=1 -o /home/schultz.w/endive_logs/${specname}_baseline/${specname}_baseline_output_%j_${seed}.txt \
     python3 endive.py --spec benchmarks/$specname \
     $common_flags
 
