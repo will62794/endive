@@ -957,14 +957,13 @@ H_RequestVoteResponseMsgsInTermUnique ==
 \* there can't be a vote response message from that server to some other server R # S.
 H_VoteGrantedImpliesVoteResponseMsgConsistent ==
     \A s,t \in Server : 
+    \A m \in requestVoteResponseMsgs :
         ( /\ state[s] \in {Candidate,Leader}
           /\ t \in votesGranted[s]) =>
-            ~\E m \in requestVoteResponseMsgs :
-                /\ m.mtype = RequestVoteResponse
-                /\ m.mterm = currentTerm[s]
-                /\ m.msource = t
-                /\ m.mdest # s
-                /\ m.mvoteGranted
+                ~(/\ m.mterm = currentTerm[s]
+                  /\ m.msource = t
+                  /\ m.mdest # s
+                  /\ m.mvoteGranted)
 
 \* If a node has granted its vote to some node in term T, then the granting
 \* node must be safe at term T.
