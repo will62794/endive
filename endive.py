@@ -2001,7 +2001,7 @@ class InductiveInvGen():
         num_ctis_remaining = None
 
         t_round_begin = time.time()
-
+        num_iter_repeats = 0
         while iteration <= self.num_iters:
             tstart = time.time()
 
@@ -2061,6 +2061,13 @@ class InductiveInvGen():
             logging.info("\n>>> (Round %d, sub-round %d) Iteration %d (num_conjs=(min=%d,max=%d),process_local=%s,var_slice=%s)" % (roundi, subroundi, iteration,min_conjs,max_conjs,process_local,str(var_slice_str))) 
 
             logging.info("Starting iteration %d of eliminate_ctis (min_conjs=%d, max_conjs=%d)" % (iteration,min_conjs,max_conjs))
+            
+            # Make the seed at each iteration and round fixed so that
+            # sampling amounts in one round don't affect randomness in
+            # later rounds.
+            new_seed = (self.seed*1000) + (roundi*100) + (iteration*10) + num_iter_repeats
+            logging.info(f"Re-seeding iteration with {new_seed} = {self.seed} + (roundi={roundi} * 100) + (iter={iteration}*10) + num_iter_repeats={num_iter_repeats}")
+            random.seed(new_seed)
 
             sat_invs = set()
 
@@ -2171,7 +2178,7 @@ class InductiveInvGen():
                 pred_var_set_counts = {}
                 pred_var_sets_for_invs = []
                 for xinv in invs:
-                    # print("generated pred:",xinv)
+                    # print("generated pred:",quant_inv_fn(xinv))
                     def svar_in_inv(v, i):
                         # avoid variables with shared substrings.
                         qi = self.quant_inv(i)
@@ -2724,6 +2731,7 @@ class InductiveInvGen():
             #
             # Record the new chosen strengthening conjuncts.
             #
+            iter_repeat = False
             if len(chosen_invs):
                 logging.info("*** New strengthening conjuncts *** ")
                 for cind,inv in enumerate(chosen_invs):
@@ -2771,9 +2779,15 @@ class InductiveInvGen():
                 if self.rerun_iterations and new_conjuncts_found_in_iter and max_conjs > 1:
                     logging.info("Re-running iteration.")
                     iteration -= 1
+                    iter_repeat = True
 
             if self.proof_tree_mode:
                 self.proof_graph["curr_node"] = None
+            
+            if iter_repeat:
+                num_iter_repeats += 1
+            else:
+                num_iter_repeats = 0
 
             # conjuncts_added_in_round = conjuncts_added_in_this_round
             # conjuncts_added_in_round_ctis_eliminated = conjuncts_added_in_this_round_ctis_eliminated
