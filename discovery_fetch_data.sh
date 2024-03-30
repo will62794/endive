@@ -14,4 +14,6 @@ scp -O -r "neudiscovery:/home/schultz.w/benchmarking/Bakery/endive/benchmarks/Ba
 scp -O -r "neudiscovery:/home/schultz.w/benchmarking/consensus_epr/endive/benchmarks/consensus_epr_ind-proof-tree-sd*.pdf" discovery_data
 scp -O -r "neudiscovery:/home/schultz.w/benchmarking/ZeusReliableCommit/endive/benchmarks/ZeusReliableCommit_ind-proof-tree-sd*.pdf" discovery_data
 
+scp -O -r "neudiscovery:/home/schultz.w/benchmarking/Boulanger/endive/benchmarks/Boulanger*proofgraph.json" discovery_data
+
 ./discovery_job_status.sh
