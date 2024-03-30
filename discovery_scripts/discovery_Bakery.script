@@ -5,7 +5,7 @@
 #SBATCH --constraint="[broadwell|cascadelake]"       # Newer processors.
 #SBATCH -N 1                   # Number of nodes
 #SBATCH -n 1                   # Number of tasks
-#SBATCH --cpus-per-task 32                  # Number of cores
+#SBATCH --cpus-per-task 28                  # Number of cores
 
 specname="Bakery"
 lscpu # log CPU info.
@@ -27,7 +27,7 @@ echo "--- Running '$specname' benchmark with seed $seed ---"
 echo "---"
 
 num_cti_workers=8
-common_flags=" --seed $seed --tlc_workers 28 --override_num_cti_workers $num_cti_workers"
+common_flags=" --seed $seed --tlc_workers 24 --override_num_cti_workers $num_cti_workers"
 common_flags+=" --debug --target_sample_time_limit_ms 10000 --num_simulate_traces 200000 --target_sample_states 200000"
 common_flags+=" --opt_quant_minimize --k_cti_induction_depth 1"
 common_flags+=" --ninvs 40000 --max_num_ctis_per_round 2000"

@@ -5,7 +5,7 @@
 #SBATCH --constraint="[broadwell|cascadelake]"       # Newer processors.
 #SBATCH -N 1                   # Number of nodes
 #SBATCH -n 1                   # Number of tasks
-#SBATCH --cpus-per-task 32                  # Number of cores
+#SBATCH --cpus-per-task 28                  # Number of cores
 
 specname="consensus_epr"
 lscpu # log CPU info.
@@ -29,7 +29,7 @@ target_sample_states=30000
 num_simulate_traces=50000
 num_cti_workers=8
 
-common_flags=" --seed $seed --tlc_workers 28 --debug --override_num_cti_workers $num_cti_workers"
+common_flags=" --seed $seed --tlc_workers 24 --debug --override_num_cti_workers $num_cti_workers"
 common_flags+=" --target_sample_time_limit_ms 10000 --num_simulate_traces $num_simulate_traces --target_sample_states $target_sample_states"
 common_flags+=" --opt_quant_minimize --k_cti_induction_depth 1"
 common_flags+=" --ninvs $ninvs --max_num_ctis_per_round $max_num_ctis_per_round"
