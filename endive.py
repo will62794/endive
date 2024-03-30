@@ -1936,21 +1936,21 @@ class InductiveInvGen():
         # TODO: Can we also project CTIs onto variable slice for faster CTI elimination checking? (3/13/24)
         # orig_k_ctis
         if self.enable_cti_slice_projection:
-            logging.info("Projecting CTIs onto variable slice for faster CTI elimination checking.")
+            logging.info(f"Projecting {len(orig_k_ctis)} CTIs onto variable slice for faster CTI elimination checking.")
             first_cti = orig_k_ctis[0]
             first_cti_vals = first_cti.var_vals()
             print("total CTIs:", len(orig_k_ctis))
             if cache_states_with_ignored_vars is not None:
                 for ind,c in enumerate(orig_k_ctis):
-                    print("ignore vars:", cache_states_with_ignored_vars)
-                    print("pre-projected:")
-                    for l in c.cti_lines:
-                        print(l)
+                    # print("ignore vars:", cache_states_with_ignored_vars)
+                    # print("pre-projected:")
+                    # for l in c.cti_lines:
+                    #     print(l)
                     for sv in cache_states_with_ignored_vars:
                         orig_k_ctis[ind].set_var_val(sv, first_cti_vals[sv])
-                    print("post-projected:")
-                    for l in c.cti_lines:
-                        print(l)
+                    # print("post-projected:")
+                    # for l in c.cti_lines:
+                        # print(l)
             print("total projected ctis:", len(set(orig_k_ctis)))
             orig_k_ctis = list(set(orig_k_ctis))
 
