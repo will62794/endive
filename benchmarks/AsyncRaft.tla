@@ -1590,9 +1590,36 @@ H_NoLogDivergenceCopy ==
 
 
 
+H_Inv598_R0_0_I2 == \A VARI \in Server : ((state[VARI] = Leader)) \/ ((H_LogMatching /\ log = log))
 
 
+H_Inv23387_R3_1_I3 == \A VARI \in Server : \A VARJ \in Server : \A VARLOGINDI \in LogIndices : (VARLOGINDI \in DOMAIN log[VARI] /\ VARLOGINDI \in DOMAIN log[VARJ] /\ log[VARI][VARLOGINDI] = log[VARJ][VARLOGINDI]) \/ (~(VARLOGINDI \in DOMAIN log[VARI] /\ Agree(VARI, VARLOGINDI) \in Quorum /\ matchIndex = matchIndex)) \/ (~((state[VARJ] = Leader)))
+Inv9969_R2_0_I3 == \A VARI \in Server : \A VARJ \in Server : (IsPrefix(log[VARJ], log[VARI])) \/ (~((state[VARI] = Leader))) \/ (~(\E INDK \in DOMAIN log[VARJ] : log[VARJ][INDK] = currentTerm[VARI]))
 
+
+H_Inv1276_R0_1_I2 == \A VARI \in Server : \A VARJ \in Server : (IsPrefix(log[VARI], log[VARJ])) \/ ((Len(log[VARI]) > matchIndex[VARI][VARJ]))
+
+
+Inv2209_R1_0_I2 == \A VARI \in Server : \A VARJ \in Server : \A VARM \in appendEntriesRequestMsgs : (IsPrefix(log[VARI], log[VARJ])) \/ ((LogOk(VARI, VARM) /\ log = log))
+Inv3504_R1_1_I3 == \A VARI \in Server : \A VARJ \in Server : \A VARLOGINDI \in LogIndices : ((currentTerm[VARI] = currentTerm[VARJ])) \/ ((IsPrefix(log[VARJ], log[VARI])) \/ (~(VARLOGINDI \in DOMAIN log[VARI] /\ Agree(VARI, VARLOGINDI) \in Quorum /\ matchIndex = matchIndex)))
+
+
+H_Inv16024_R4_2_I3 == 
+    \A VARI \in Server : 
+    \A VARJ \in Server : 
+    \A VARLOGINDI \in LogIndices : 
+        (VARLOGINDI \in DOMAIN log[VARI] /\ log[VARI][VARLOGINDI] = currentTerm[VARI]) \/ (~((currentTerm[VARJ] > currentTerm[VARI])) \/ (~(VARLOGINDI \in DOMAIN log[VARI])))
+
+
+H_Inv20_R0_0_I1 == (H_CandidateWithVotesGrantedInTermImplyNoOtherLeader /\ state = state /\ votesGranted = votesGranted /\ currentTerm = currentTerm)
+H_Inv21_R1_0_I1 == (H_VotesCantBeGrantedTwiceToCandidatesInSameTerm)
+H_Inv1680_R1_1_I1 == \A VARI \in Server : \A VARJ \in Server : (VARI \in votesGranted[VARI]) \/ (~(VARJ \in votesGranted[VARI]))
+H_Inv2516_R1_1_I1 == \A VARI \in Server : (votesGranted[VARI] \in Quorum) \/ (~((state[VARI] = Leader)))
+
+H_Inv29138_R5_0_I3 == 
+    \A VARI \in Server : \A VARJ \in Server : 
+    \A VARREQVRES \in requestVoteResponseMsgs : 
+        ~((currentTerm[VARI] > currentTerm[VARJ])) \/ (~(VARREQVRES.msource = VARJ) \/ (~(VARREQVRES.mterm = currentTerm[VARI])))
 
 
 ===============================================================================

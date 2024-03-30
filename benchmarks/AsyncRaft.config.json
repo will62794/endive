@@ -40,6 +40,8 @@
         "VARREQVRES.mdest = VARJ",
         "VARREQVRES.mvoteGranted",
         "VARREQVRES.mterm = currentTerm[VARREQVRES.mdest]",
+        "VARREQVRES.mterm = currentTerm[VARREQVRES.msource]",
+        "currentTerm[VARREQVRES.msource] >= VARREQVRES.mterm",
         "VARREQVRES.msource \\in votesGranted[VARREQVRES.mdest]",
         "VARI \\in votesGranted[VARREQVRES.mdest]",
         "VARI \\in votesGranted[VARREQVRES.msource]",
