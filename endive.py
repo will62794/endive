@@ -2004,6 +2004,7 @@ class InductiveInvGen():
         num_iter_repeats = 0
         while iteration <= self.num_iters:
             tstart = time.time()
+            self.latest_elimination_iter = iteration
 
             # TODO: Possibly use these for optimization later on.
             self.sat_invs_in_iteration = set()
@@ -3933,6 +3934,7 @@ class InductiveInvGen():
                     # Render to show progress dynamically.
                     self.render_proof_graph()
 
+                self.latest_elimination_iter = 1
 
                 # Run CTI eliminatinon.
                 ret = self.eliminate_ctis(k_ctis_to_eliminate, self.num_invs, roundi, tlc_workers=self.tlc_workers, subroundi=subround, preds=preds, 
@@ -3944,6 +3946,7 @@ class InductiveInvGen():
                 # Update timing spent on proof node.
                 if action_node in self.proof_graph["nodes"]:
                     self.proof_graph["nodes"][action_node]["time_spent"] = time.time() - tstart
+                    self.proof_graph["nodes"][action_node]["latest_elimination_iter"] = self.latest_elimination_iter
 
 
                 if self.save_dot and len(self.proof_graph["edges"]) > 0:
@@ -4259,9 +4262,12 @@ class InductiveInvGen():
                                 # coi_str = coi_str[:coi_str_break_ind] + "<BR/>" + coi_str[coi_str_break_ind:]
                             label = "< " + nlabel + "<BR/>" + "<FONT POINT-SIZE='10'>" + str(coi) + "<BR/>" + " (" + str(len(coi_vars)) + "/" + str(len(self.state_vars)) + " vars) </FONT>"
                             if "num_grammar_preds" in self.proof_graph["nodes"][n]:
-                                label += "<FONT POINT-SIZE='10'>|preds| = " + str(self.proof_graph["nodes"][n]["num_grammar_preds"]) + "/" + str(len(self.preds)) + " </FONT>"
+                                label += "<FONT POINT-SIZE='10'>|preds|=" + str(self.proof_graph["nodes"][n]["num_grammar_preds"]) + "/" + str(len(self.preds)) + "</FONT>"
                             if "time_spent" in node:
                                 label += "<FONT POINT-SIZE='10'> (" + "{0:.2f}".format(self.proof_graph["nodes"][n]["time_spent"]) + "s) </FONT>"
+                            if "latest_elimination_iter" in node:
+                                latest_iter = self.proof_graph["nodes"][n]["latest_elimination_iter"]
+                                label += f"<FONT POINT-SIZE='10'>(iters={latest_iter}) </FONT>"
                             label += ">"
                             fontsize="14pt"
                     if "is_lemma" in node:

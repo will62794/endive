@@ -64,8 +64,8 @@ AppendEntriesResponseTypeBounded == [
     mdest        : Server
 ]
 
-RequestVoteRequestTypeSampled == RandomSetOfSubsets(3, 3, RequestVoteRequestTypeBounded) 
-RequestVoteResponseTypeSampled == RandomSetOfSubsets(3, 3, RequestVoteResponseTypeBounded)  
+RequestVoteRequestTypeSampled == RandomSetOfSubsets(3, 2, RequestVoteRequestTypeBounded) 
+RequestVoteResponseTypeSampled == RandomSetOfSubsets(3, 2, RequestVoteResponseTypeBounded)  
 AppendEntriesRequestTypeSampled == RandomSetOfSubsets(2, 2, AppendEntriesRequestTypeBounded) \cup RandomSetOfSubsets(3, 3, AppendEntriesRequestTypeBounded)
 AppendEntriesResponseTypeSampled == RandomSetOfSubsets(1, 1, AppendEntriesResponseTypeBounded) \cup RandomSetOfSubsets(2, 2, AppendEntriesResponseTypeBounded) \cup RandomSetOfSubsets(3, 3, AppendEntriesResponseTypeBounded)  
 
