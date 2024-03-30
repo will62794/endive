@@ -18,6 +18,14 @@ from itertools import chain, combinations
 
 TLC_MAX_SET_SIZE = 10 ** 8
 
+def mean(lst):
+    return sum(lst) / len(lst)
+
+def median(lst):
+    n = len(lst)
+    s = sorted(lst)
+    return (s[n//2] + s[~n//2]) / 2
+
 def powerset(iterable):
     "powerset([1,2,3]) --> () (1,) (2,) (3,) (1,2) (1,3) (2,3) (1,2,3)"
     s = list(iterable)
@@ -462,12 +470,16 @@ def runtlc_check_violated_invariants(spec,config=None, tlc_workers=6, cwd=None, 
         res = re.match(".*Invariant (Inv.*) is violated",l)
         invname = res.group(1)
         invs_violated.add(invname)
+    slice_sizes = []
     for l in greplines("Slice.*total unique", lines):
-        res = re.match("Slice_(.*) (.*) -> total unique simulation cached states. (.*)",l)
+        res = re.match("Slice_(.*) (.*) -> total unique cached states. (.*)",l)
         slice_ind = res.group(1)
         slice_ignore_vars = sorted(res.group(2).split(","))
         slice_size = int(res.group(3))
         print("slice_stats:", slice_ind, slice_ignore_vars, slice_size)
+        slice_sizes.append(slice_size)
+    if len(slice_sizes) > 0:
+        print(f"slice_stats (agg): min={min(slice_sizes)}, max={max(slice_sizes)}, mean={mean(slice_sizes)}, median={median(slice_sizes)}")
     return invs_violated
 
 
