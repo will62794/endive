@@ -30,7 +30,6 @@
         "VARJ \\in votesGranted[VARI]",
         "VARI \\in votesGranted[VARJ]",
         "votesGranted[VARI] \\cap votesGranted[VARJ] = {}",
-        "H_CandidateWithVotesGrantedInTermImplyNoOtherLeader /\\ state = state /\\ votesGranted = votesGranted /\\ currentTerm = currentTerm",
         "VARREQVRES.mterm = currentTerm[VARI]",
         "VARREQVRES.mterm = currentTerm[VARJ]",
         "VARREQVRES.msource = VARI",
