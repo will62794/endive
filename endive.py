@@ -4097,6 +4097,8 @@ class InductiveInvGen():
 
         elim_round_failed = False
 
+        self.all_generated_inv_candidates = set()
+
         # Stores map of state variables projections of the state space that we have already cached.
         self.state_projection_cache = {}
 
