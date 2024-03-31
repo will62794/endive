@@ -323,15 +323,28 @@ class StructuredProofNode():
             "cmd": apa_cmd
         }
 
-    def to_tlaps_proof_obligation(self, actions, action_def_expands, lemma_def_expands, assumes_list):
+    def to_tlaps_proof_obligation(self, actions, action_def_expands, lemma_def_expands, assumes_list, theorem_name=None):
         """ Export this node and support lemmas as TLAPS proof obligation skeleton."""
         # "THEOREM IndAuto /\ Next => IndAuto'"
         
         typeok = "TypeOK"
         land = " /\\ "
 
+        # Collect all support lemmas across all actions.
+        all_support_lemmas = []
+        for (ind,a) in enumerate(actions):
+            if a in self.children:
+                all_support_lemmas += [c.expr for c in self.children[a]]
+
         out_str = ""
-        out_str += f"THEOREM TRUE\n"
+        top_level_goal_anteced = [typeok] + all_support_lemmas + [self.expr]
+        top_level_goal_anteced_str = land.join(top_level_goal_anteced)
+        theorem_name_str = ""
+        if theorem_name is not None:
+            theorem_name_str = f"{theorem_name} =="
+        # Make the top level goal as proving this target lemma inductive, using all support lemmas
+        # concatenated from all actions.
+        out_str += f"THEOREM {theorem_name_str} {top_level_goal_anteced_str} /\\ Next => {self.expr}'\n"
 
         if len(assumes_list) > 0:
             assumes_str = ",".join(assumes_list)
@@ -357,7 +370,7 @@ class StructuredProofNode():
             out_str += f"""  <1>{ind+1}. {supports_conj_str}{land}{a} => {self.expr}'\n"""
             out_str += f"       BY DEF {','.join(defs_list)}\n" 
             out_str += ""
-        out_str += f"<1>{len(actions)+1}. " + "QED BY " + ",".join([f"<1>{ind}" for ind in range(1, len(actions)+1)])
+        out_str += f"<1>{len(actions)+1}. " + "QED BY " + (",".join([f"<1>{ind}" for ind in range(1, len(actions)+1)])) + " DEF Next"
         out_str += "\n"
         return out_str
 
@@ -431,6 +444,11 @@ class StructuredProof():
             for (name,expr) in add_lemma_defs:
                 spec_lines += f"{name} == {expr}\n"
 
+        spec_lines += "\nIndGlobal == \n"
+        spec_lines += f"  /\\ TypeOK\n"
+        for n in nodes:
+            spec_lines += f"  /\\ {n.expr}\n"
+
         assume_spec_lines = ""
         if "assumes" in tlaps_proof_config:
             for ind,assume in enumerate(tlaps_proof_config["assumes"]):
@@ -438,11 +456,15 @@ class StructuredProof():
                 assume_spec_lines += f"ASSUME {name} == {assume}\n"
                 assumes_name_list.append(name)
 
+        # Create a separate node for TypeOK to include as proof obligation.
+        typeok_node = StructuredProofNode("H_TypeOK", "TypeOK")
+        nodes = [typeok_node] + nodes
+
         all_var_slices = []
         proof_obligation_lines = ""
-        for n in nodes:
-            if len(n.children.keys()) == 0:
-                continue
+        for ind,n in enumerate(nodes):
+            # if len(n.children.keys()) == 0:
+                # continue
             # for a in n.children:
                 # if a in self.lemma_action_coi:
                     # slicevars = self.lemma_action_coi[a][n.expr]
@@ -451,7 +473,11 @@ class StructuredProof():
             if n.expr == self.root.expr:
                 proof_obligation_lines += "\n\* (ROOT SAFETY PROP)"
             proof_obligation_lines += f"\n\*** {n.expr}\n"
-            proof_obligation_lines += n.to_tlaps_proof_obligation(self.actions, tlaps_proof_config["action_def_expands"], tlaps_proof_config["lemma_def_expands"], assumes_name_list)
+            proof_obligation_lines += n.to_tlaps_proof_obligation(self.actions, 
+                                                                  tlaps_proof_config["action_def_expands"], 
+                                                                  tlaps_proof_config["lemma_def_expands"], 
+                                                                  assumes_name_list,
+                                                                  theorem_name=f"L_{ind}")
             proof_obligation_lines += "\n"
 
         var_slice_sizes = [len(s) for s in all_var_slices]
@@ -461,6 +487,7 @@ class StructuredProof():
             mean_slice_size = 0
 
         # Add lines to the spec.
+        spec_lines += "\n\n"
         spec_lines += f"\* mean in-degree: {mean_in_degree}\n"
         spec_lines += f"\* median in-degree: {median_in_degree}\n"
         spec_lines += f"\* max in-degree: {max(in_degrees)}\n"
@@ -473,6 +500,11 @@ class StructuredProof():
 
         # Add proof obligation lines.
         spec_lines += proof_obligation_lines
+
+        # For a sanity check, add as a top level theorem the property that the conjunction of lemma nodes
+        # is inductive.
+        spec_lines += "\nTHEOREM IndGlobal /\\ Next => IndGlobal'\n"
+        spec_lines += "  BY " + ",".join([f"L_{ind}" for ind,n in enumerate(nodes)]) + " DEF Next, IndGlobal\n"
 
         spec_lines += "\n"
         spec_lines += "===="
