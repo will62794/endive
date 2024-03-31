@@ -26,7 +26,6 @@
         "(state[VARJ] \\in {Leader,Candidate} /\\ VARI # VARJ)",
         "votesGranted[VARI] \\in Quorum",
         "votesGranted[VARJ] \\in Quorum",
-        "H_VotesCantBeGrantedTwiceToCandidatesInSameTerm",
         "VARI \\in votesGranted[VARI]",
         "VARJ \\in votesGranted[VARI]",
         "VARI \\in votesGranted[VARJ]",
