@@ -776,7 +776,7 @@ class TLASpec:
 def parse_tla_file(workdir, specname):
     xml_out_file = f"{specname}.xml"
     tlc_binary = "tla2tools-checkall.jar"
-    cmd = f"java -cp {tlc_binary} tla2sany.xml.XMLExporter {specname}.tla > {xml_out_file}"
+    cmd = f"java -cp {tlc_binary} tla2sany.xml.XMLExporter -o {specname}.tla > {xml_out_file}"
 
     print("XML export command: " + cmd)
     subproc = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, cwd=workdir)
