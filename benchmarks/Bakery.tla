@@ -251,11 +251,21 @@ TypeOK == /\ num \in [Procs -> Nat]
           /\ nxt \in [Procs -> Procs]
           /\ pc \in [Procs -> {"ncs", "e1", "e2", "e3", "e4", "w1", "w2", "cs", "exit"}]             
 
-Max(S) == CHOOSE x \in S : \A y \in S : y <= x
-StateConstraint == \A process \in Procs : num[process] < Max(Nat)
+\* Max(S) == CHOOSE x \in S : \A y \in S : y <= x
+\* StateConstraint == \A process \in Procs : num[process] < Max(Nat)
 
 CTICost == 0
 
+H_Inv1145_R0_0_I1 == \A VARI \in Procs : (unchecked[VARI] = {}) \/ (~(pc[VARI] = "cs"))
+H_Inv623_R0_0_I1 == \A VARI \in Procs : (pc[VARI] = "cs") \/ (~(VARI \in unchecked[VARI]))
+H_Inv1361_R0_0_I1 == \A VARI \in Procs : ~(flag[VARI]) \/ (~(pc[VARI] = "w1"))
+H_Inv1354_R0_0_I1 == \A VARI \in Procs : ~(flag[VARI]) \/ (~(pc[VARI] = "cs"))
+H_Inv19_R2_0_I1 == \A VARI \in Procs : ~(VARI \in unchecked[VARI])
+H_Inv1459_R3_0_I1 == \A VARI \in Procs : ~(flag[VARI]) \/ (~(pc[VARI] = "w2"))
+
+\* Inv1145_R0_0_I1 == \A VARI \in Procs : (unchecked[VARI] = {}) \/ (~(pc[VARI] = "cs"))
+\* Inv1454_R0_0_I1 == \A VARI \in Procs : ~(nxt[VARI] = VARI) \/ (~(pc[VARI] = "cs"))
+\* Inv21195_R4_0_I3 == \A VARI \in Procs : ~(nxt[VARI] = VARI) \/ (~(unchecked[VARI] = {})) \/ (~(pc[VARI] = "w1"))
 =============================================================================
 \* Modification History
 \* Last modified Tue Dec 18 13:48:46 PST 2018 by lamport
