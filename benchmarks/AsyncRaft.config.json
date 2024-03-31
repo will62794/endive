@@ -14,6 +14,7 @@
         "(state[VARJ] = Follower)",
         "(state[VARJ] = Candidate)",
         "(state[VARI] = Leader /\\ VARI # VARJ)",
+        "(state[VARI] = Candidate /\\ VARI # VARJ)",
         "(state[VARI] \\in {Leader,Candidate})",
         "(state[VARI] \\in {Follower,Candidate})",
         "(state[VARI] \\in {Leader,Candidate} /\\ VARJ \\in votesGranted[VARI])",
