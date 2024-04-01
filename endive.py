@@ -3505,6 +3505,13 @@ class InductiveInvGen():
         except OSError:
             pass
 
+    def proof_graph_lemma_nodes(self):
+        lemma_nodes = [n for n in self.proof_graph["nodes"] if "is_lemma" in self.proof_graph["nodes"][n]]
+        return lemma_nodes
+    
+    def proof_graph_failed_lemma_nodes(self):
+        return [n for n in self.proof_graph["nodes"].keys() if "is_lemma" in self.proof_graph["nodes"][n] and "failed" in self.proof_graph["nodes"][n]]
+
     def persist_proof_graph(self, roundi):
         # Save the generated proof graph to disk.
         fname = self.proofgraph_filename()
@@ -3516,10 +3523,12 @@ class InductiveInvGen():
         proof_graph_object["num_iters"] = self.num_iters
         proof_graph_object["seed"] = self.seed
         proof_graph_object["stats"] = {
-            "state_cache_duration": indgen.get_state_cache_duration(),
-            "invcheck_duration": indgen.get_invcheck_duration(),
-            "ctielimcheck_duration": indgen.get_ctielimcheck_duration(),
-            "total_duration": time.time() - self.invgen_tstart,
+            "num_lemma_nodes": len(self.proof_graph_lemma_nodes()),
+            "num_failed_lemma_nodes": len(self.proof_graph_failed_lemma_nodes()),
+            "state_cache_duration_secs": indgen.get_state_cache_duration(),
+            "invcheck_duration_secs": indgen.get_invcheck_duration(),
+            "ctielimcheck_duration_secs": indgen.get_ctielimcheck_duration(),
+            "total_duration_secs": time.time() - self.invgen_tstart,
             "date": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         }
         with open(fname, 'w') as f:
