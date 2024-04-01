@@ -7,18 +7,18 @@
 
 args=$@
 
-# Copy all scripts.
+# Copy setup scripts.
 echo "Copying scripts in 'discovery_scripts' to Discovery cluster..."
-scp -O discovery_scripts/*.sh neudiscovery:/home/schultz.w
-scp -O discovery_scripts/*.script neudiscovery:/home/schultz.w
+scp -O discovery_scripts/bm_setup.sh neudiscovery:/home/schultz.w
 
 for specname in $args
 do
-    echo "Launching '$specname' script."
     scriptname="discovery_${specname}.script"
+    echo "Copying '$specname' script."
+    scp -O discovery_scripts/$scriptname neudiscovery:/home/schultz.w
 
     # Launch the script.
-    echo "Launching the script"
+    echo "Launching '$specname' script."
     jobname="${specname}_endive_Job"
     outfile="/scratch/schultz.w/endive_logs/${specname}_job_output.txt"
     ssh neudiscovery "sbatch -J $jobname -o $outfile $scriptname"
