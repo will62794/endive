@@ -1,22 +1,28 @@
 #!/bin/sh
 #
-# Run batch script on Discovery cluster.
+# Run benchmark batch script on Discovery cluster.
+#
+# Can run with ./discovery_launch.sh <specname1> <specname2> ...
 #
 
-specname=$1
-echo "Launching '$specname' script."
-scriptname="discovery_${specname}.script"
+args=$@
 
-# Copy the batch script to the Discovery cluster.
-echo "Copying script 'discovery_scripts/$scriptname' to Discovery cluster..."
+# Copy all scripts.
+echo "Copying scripts in 'discovery_scripts' to Discovery cluster..."
 scp -O discovery_scripts/*.sh neudiscovery:/home/schultz.w
-scp -O discovery_scripts/$scriptname neudiscovery:/home/schultz.w
+scp -O discovery_scripts/*.script neudiscovery:/home/schultz.w
 
-# Launch the script.
-echo "Launching the script"
-jobname="${specname}_endive_Job"
-outfile="/scratch/schultz.w/endive_logs/${specname}_job_output.txt"
-ssh neudiscovery "sbatch -J $jobname -o $outfile $scriptname"
+for specname in $args
+do
+    echo "Launching '$specname' script."
+    scriptname="discovery_${specname}.script"
+
+    # Launch the script.
+    echo "Launching the script"
+    jobname="${specname}_endive_Job"
+    outfile="/scratch/schultz.w/endive_logs/${specname}_job_output.txt"
+    ssh neudiscovery "sbatch -J $jobname -o $outfile $scriptname"
+done
 
 # Now list the running jobs on Discovery cluster.
 # ssh neudiscovery "squeue -u schultz.w"
