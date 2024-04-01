@@ -2284,16 +2284,23 @@ class InductiveInvGen():
 
                         for p in pred_var_counts_tups[:]:
                             # print(p)
-                            if p[0] < LARGE_PRED_GROUP_COUNT and p[0] > 0:
+                            if p[0] < LARGE_PRED_GROUP_COUNT:
                                 # If we reached a group that is too small, we stop, even if we haven't dont all top K.
                                 logging.info(f"Exiting partitioned state caching loop due to small group size: {p}.")
                                 break  
-
+                                
                             predvar_set = p[1]
                             ignored = sorted([svar for svar in self.state_vars if svar not in predvar_set])
                             # print(ignored)
 
                             invs_to_check = [(ind, inv) for ind,inv in enumerate(invs) if pred_var_sets_for_invs[ind] == predvar_set]
+
+                            # If var count is empty, then just remove these and don't check them, since they should be constant expressions.
+                            if len(predvar_set) == 0:
+                                invs_to_check_names = set([iv[1] for iv in invs_to_check])
+                                main_invs_to_check = [mi for mi in main_invs_to_check if mi[1] not in invs_to_check_names]
+                                logging.info(f"Skipping group of {p[0]} invs with empty var slice.")
+                                continue
 
                             partition_var_slice = [s for s in self.state_vars if s not in ignored]
                             logging.info(f"Running partitioned state caching step with {len(ignored)} ignored vars (slice={partition_var_slice}), num invs to check: {len(invs_to_check)}")
