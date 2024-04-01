@@ -7,7 +7,7 @@ mkdir -p discovery_data
 scp -O -r neudiscovery:/scratch/schultz.w/endive_logs discovery_data
 
 bmdir="/scratch/schultz.w/benchmarking"
-local_dir="discovery_data/proof_trees"
+local_dir="discovery_data/proof_graphs"
 mkdir -p $local_dir
 
 # Also fetch Hermes,AsyncRaft proof stuff.
@@ -19,6 +19,7 @@ scp -O -r "neudiscovery:$bmdir/Bakery/endive/benchmarks/Bakery_ind-proof-tree-sd
 scp -O -r "neudiscovery:$bmdir/consensus_epr/endive/benchmarks/consensus_epr_ind-proof-tree-sd*.pdf" $local_dir
 scp -O -r "neudiscovery:$bmdir/LamportMutex/endive/benchmarks/LamportMutex_ind-proof-tree-sd*.pdf" $local_dir
 scp -O -r "neudiscovery:$bmdir/TwoPhase/endive/benchmarks/TwoPhase_ind-proof-tree-sd*.pdf" $local_dir
+scp -O -r "neudiscovery:$bmdir/TwoPhase/endive/benchmarks/TwoPhase*proofgraph*.json" $local_dir
 scp -O -r "neudiscovery:$bmdir/ZeusReliableCommit/endive/benchmarks/ZeusReliableCommit_ind-proof-tree-sd*.pdf" $local_dir
 
 scp -O -r "neudiscovery:$bmdir/Boulanger/endive/benchmarks/Boulanger*proofgraph.json" $local_dir

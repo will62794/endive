@@ -3492,7 +3492,7 @@ class InductiveInvGen():
         return
     
     def proofgraph_filename(self):
-        fname = f"{self.specdir}/{self.specname}_{self.seed}.proofgraph.json"
+        fname = f"{self.specdir}/{self.specname}.sd{self.seed}.proofgraph.json"
         return fname
 
     def clean_proof_graph(self):
@@ -3512,6 +3512,15 @@ class InductiveInvGen():
         proof_graph_object["proof_graph"] = self.proof_graph
         proof_graph_object["strengthening_conjuncts"] = self.strengthening_conjuncts
         proof_graph_object["roundi"] = roundi
+        proof_graph_object["num_rounds"] = self.num_rounds
+        proof_graph_object["num_iters"] = self.num_iters
+        proof_graph_object["seed"] = self.seed
+        proof_graph_object["stats"] = {
+            "state_cache_duration": indgen.get_state_cache_duration(),
+            "invcheck_duration": indgen.get_invcheck_duration(),
+            "ctielimcheck_duration": indgen.get_ctielimcheck_duration(),
+            "total_duration": time.time() - self.invgen_tstart
+        }
         with open(fname, 'w') as f:
             json.dump(proof_graph_object, f, indent=2)
 
@@ -3587,6 +3596,8 @@ class InductiveInvGen():
         self.all_generated_inv_candidates = set()
 
         self.curr_obligation_depth = 0
+
+        self.invgen_tstart = time.time()
 
         # TODO: Optionally reload from file for interactive mode.
         self.proof_graph = {
