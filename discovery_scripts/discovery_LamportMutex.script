@@ -47,6 +47,7 @@ srun -o /scratch/schultz.w/endive_logs/${specname}/${specname}_output_${seed}.tx
 done
 
 # Run one baseline.
+seed=1
 srun -o /scratch/schultz.w/endive_logs/${specname}_baseline/${specname}_baseline_output_${seed}.txt \
     python3 endive.py --spec benchmarks/$specname \
-    $common_flags --seed 1
+    $common_flags --seed $seed
