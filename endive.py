@@ -3502,7 +3502,7 @@ class InductiveInvGen():
         return
     
     def proofgraph_filename(self):
-        fname = f"{self.specdir}/{self.specname}.sd{self.seed}.proofgraph.json"
+        fname = f"{self.specdir}/{self.specname}_ind-proof-tree-sd{self.seed}.proofgraph.json"
         return fname
 
     def clean_proof_graph(self):
