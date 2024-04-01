@@ -18,6 +18,7 @@
         "leader[VARI]",
         "leader[VARJ]",
         "leader[VARK]",
+        "VARI = VARJ /\\ leader = leader",
         "VALI \\in decided[VARI]",
         "VALI \\in decided[VARJ]",
         "decided[VARI] = {}",
