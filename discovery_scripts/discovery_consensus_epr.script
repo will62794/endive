@@ -30,7 +30,7 @@ for seed in 1 2
 do
 
 # All optimizations.
-srun -o /scratch/schultz.w/endive_logs/${specname}/${specname}_output_%j_${seed}.txt \
+srun -o /scratch/schultz.w/endive_logs/${specname}/${specname}_output_${seed}.txt \
     python3 endive.py --spec benchmarks/$specname \
     $common_flags --seed $seed --proof_tree_mode --auto_lemma_action_decomposition --enable_partitioned_state_caching
 
@@ -47,6 +47,6 @@ srun -o /scratch/schultz.w/endive_logs/${specname}/${specname}_output_%j_${seed}
 done
 
 # Run one baseline.
-srun -o /scratch/schultz.w/endive_logs/${specname}_baseline/${specname}_baseline_output_%j_${seed}.txt \
+srun -o /scratch/schultz.w/endive_logs/${specname}_baseline/${specname}_baseline_output_${seed}.txt \
     python3 endive.py --spec benchmarks/$specname \
     $common_flags --seed 1
