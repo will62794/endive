@@ -6,17 +6,24 @@ mkdir -p discovery_data
 
 scp -O -r neudiscovery:/scratch/schultz.w/endive_logs discovery_data
 
-# Also fetch Hermes,AsyncRaft proof stuff.
-scp -O -r "neudiscovery:/scratch/schultz.w/benchmarking/Hermes/endive/benchmarks/Hermes_ind-proof-tree-sd*.pdf" discovery_data
-scp -O -r "neudiscovery:/scratch/schultz.w/benchmarking/AsyncRaft/endive/benchmarks/AsyncRaft_ind-proof-tree-sd*.pdf" discovery_data
-scp -O -r "neudiscovery:/scratch/schultz.w/benchmarking/AsyncRaft_OnePrimaryPerTerm_2/endive/benchmarks/AsyncRaft_ind-proof-tree-sd2.pdf" discovery_data/AsyncRaft_OnePrimaryPerTerm_ind-proof-tree-sd2.pdf
-scp -O -r "neudiscovery:/scratch/schultz.w/benchmarking/Boulanger/endive/benchmarks/Boulanger_ind-proof-tree-sd*.pdf" discovery_data
-scp -O -r "neudiscovery:/scratch/schultz.w/benchmarking/Bakery/endive/benchmarks/Bakery_ind-proof-tree-sd*.pdf" discovery_data
-scp -O -r "neudiscovery:/scratch/schultz.w/benchmarking/consensus_epr/endive/benchmarks/consensus_epr_ind-proof-tree-sd*.pdf" discovery_data
-scp -O -r "neudiscovery:/scratch/schultz.w/benchmarking/LamportMutex/endive/benchmarks/LamportMutex_ind-proof-tree-sd*.pdf" discovery_data
-scp -O -r "neudiscovery:/scratch/schultz.w/benchmarking/TwoPhase/endive/benchmarks/TwoPhase_ind-proof-tree-sd*.pdf" discovery_data
-scp -O -r "neudiscovery:/scratch/schultz.w/benchmarking/ZeusReliableCommit/endive/benchmarks/ZeusReliableCommit_ind-proof-tree-sd*.pdf" discovery_data
+bmdir="/scratch/schultz.w/benchmarking"
+local_dir="discovery_data/proof_trees"
+mkdir -p $local_dir
 
-scp -O -r "neudiscovery:/scratch/schultz.w/benchmarking/Boulanger/endive/benchmarks/Boulanger*proofgraph.json" discovery_data
+# Also fetch Hermes,AsyncRaft proof stuff.
+scp -O -r "neudiscovery:$bmdir/Hermes/endive/benchmarks/Hermes_ind-proof-tree-sd*.pdf" $local_dir
+scp -O -r "neudiscovery:$bmdir/AsyncRaft/endive/benchmarks/AsyncRaft_ind-proof-tree-sd*.pdf" $local_dir
+scp -O -r "neudiscovery:$bmdir/AsyncRaft_OnePrimaryPerTerm_2/endive/benchmarks/AsyncRaft_ind-proof-tree-sd2.pdf" $local_dir/AsyncRaft_OnePrimaryPerTerm_ind-proof-tree-sd2.pdf
+scp -O -r "neudiscovery:$bmdir/Boulanger/endive/benchmarks/Boulanger_ind-proof-tree-sd*.pdf" $local_dir
+scp -O -r "neudiscovery:$bmdir/Bakery/endive/benchmarks/Bakery_ind-proof-tree-sd*.pdf" $local_dir
+scp -O -r "neudiscovery:$bmdir/consensus_epr/endive/benchmarks/consensus_epr_ind-proof-tree-sd*.pdf" $local_dir
+scp -O -r "neudiscovery:$bmdir/LamportMutex/endive/benchmarks/LamportMutex_ind-proof-tree-sd*.pdf" $local_dir
+scp -O -r "neudiscovery:$bmdir/TwoPhase/endive/benchmarks/TwoPhase_ind-proof-tree-sd*.pdf" $local_dir
+scp -O -r "neudiscovery:$bmdir/ZeusReliableCommit/endive/benchmarks/ZeusReliableCommit_ind-proof-tree-sd*.pdf" $local_dir
+
+scp -O -r "neudiscovery:$bmdir/Boulanger/endive/benchmarks/Boulanger*proofgraph.json" $local_dir
+
+# Also fetch data to paper directory for stats used there.
+
 
 ./discovery_job_status.sh

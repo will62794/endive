@@ -15,7 +15,7 @@ scp -O discovery_scripts/$scriptname neudiscovery:/home/schultz.w
 # Launch the script.
 echo "Launching the script"
 jobname="${specname}_endive_Job"
-outfile="/scratch/schultz.w/endive_logs/${specname}_job_output_%j.txt"
+outfile="/scratch/schultz.w/endive_logs/${specname}_job_output.txt"
 ssh neudiscovery "sbatch -J $jobname -o $outfile $scriptname"
 
 # Now list the running jobs on Discovery cluster.
