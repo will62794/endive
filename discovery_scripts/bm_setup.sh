@@ -1,11 +1,11 @@
 #!/bin/bash
-specname=$1
+specname_arg=$1
 
 lscpu # log CPU info.
 module load OpenJDK/19.0.1
 
 # Create work directory.
-bmdir="/scratch/schultz.w/benchmarking/$specname"
+bmdir="/scratch/schultz.w/benchmarking/$specname_arg"
 mkdir -p $bmdir
 cd $bmdir
 

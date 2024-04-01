@@ -36,8 +36,19 @@ srun -o /scratch/schultz.w/endive_logs/${specname}/${specname}_output_${seed}.tx
 
 done
 
+
 # Run one baseline.
-seed=1
-srun -o /scratch/schultz.w/endive_logs/${specname}_baseline/${specname}_baseline_output_${seed}.txt \
+# seed=1
+# srun -o /scratch/schultz.w/endive_logs/${specname}_baseline/${specname}_baseline_output_${seed}.txt \
+#     python3 endive.py --spec benchmarks/$specname \
+#     $common_flags --seed $seed
+
+
+# One version with broken grammar
+cd /home/schultz.w
+source bm_setup.sh "${specname}_broken_grammar"
+config_file="benchmarks/LamportMutex_broken_grammar.config.json"
+seed=3
+srun -o /scratch/schultz.w/endive_logs/${specname}_broken_grammar/${specname}_broken_grammar_output_${seed}.txt \
     python3 endive.py --spec benchmarks/$specname \
-    $common_flags --seed $seed
+    $common_flags --config_file $config_file --seed $seed --proof_tree_mode --auto_lemma_action_decomposition --enable_partitioned_state_caching
