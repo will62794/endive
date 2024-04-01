@@ -15,8 +15,8 @@ bms="TwoPhase consensus_epr LamportMutex Hermes ZeusReliableCommit Boulanger Bak
 for bm in $bms
 do
     # Fetch rendered proof tree and proof graph object.
-    scp -O -r "neudiscovery:$bmdir/$bm/endive/benchmarks/$bm_ind-proof-tree-sd*.pdf" $local_dir
-    scp -O -r "neudiscovery:$bmdir/$bm/endive/benchmarks/$bm*proofgraph*.json" $local_dir
+    scp -O -r "neudiscovery:$bmdir/$bm/endive/benchmarks/${bm}_ind-proof-tree-sd*.pdf" $local_dir
+    scp -O -r "neudiscovery:$bmdir/$bm/endive/benchmarks/${bm}*proofgraph*.json" $local_dir
 done
 
 # Also fetch this other one.
