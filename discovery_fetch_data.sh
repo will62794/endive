@@ -4,6 +4,7 @@
 #
 mkdir -p discovery_data
 
+echo "Fetching logs"
 scp -O -r neudiscovery:/scratch/schultz.w/endive_logs discovery_data
 
 bmdir="/scratch/schultz.w/benchmarking"
@@ -12,10 +13,12 @@ mkdir -p $local_dir
 
 # Fetch proof graph stuff.
 bms="TwoPhase consensus_epr LamportMutex Hermes ZeusReliableCommit Boulanger Bakery AsyncRaft"
+echo "Fetching proof graphs."
 for bm in $bms
 do
     # Fetch rendered proof tree and proof graph object.
-    scp -O -r "neudiscovery:$bmdir/$bm/endive/benchmarks/${bm}_ind-proof-tree-sd*.pdf" $local_dir
+    scp -O -r "neudiscovery:$bmdir/$bm/endive/benchmarks/${bm}_ind-proof-tree-sd*" $local_dir
+    # TODO: Should be able to remove this second copy after proof grap renaming.
     scp -O -r "neudiscovery:$bmdir/$bm/endive/benchmarks/${bm}*proofgraph*.json" $local_dir
 done
 
