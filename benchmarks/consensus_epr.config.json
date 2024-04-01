@@ -23,8 +23,7 @@
         "decided[VARI] = {}",
         "decided[VARJ] = {}",
         "VARQJ = votes[VARI]",
-        "VARQJ = votes[VARJ]",
-        "H_UniqueLeaders /\\ leader = leader"
+        "VARQJ = votes[VARJ]"
     ],
     "preds_alt" : [],
     "safety"  :  "H_NoConflictingValues",
