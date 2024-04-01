@@ -1,5 +1,4 @@
 #!/bin/bash
-#SBATCH -J Boulanger_endive_Job               # Job name
 #SBATCH --partition short    # Partition name
 #SBATCH --time=16:00:00       # Time limit.
 #SBATCH --constraint="[broadwell|cascadelake]"       # Newer processors.
@@ -8,21 +7,8 @@
 #SBATCH --cpus-per-task 28                  # Number of cores
 
 specname="Boulanger"
-lscpu # log CPU info.
-module load OpenJDK/19.0.1
-mkdir -p benchmarking
-cd benchmarking
 
-# A function to create a directory with 1 argument name.
-function prepare_workdir {
-    cd /home/schultz.w/benchmarking
-    mkdir -p "$1"
-    cd "$1"
-    # Clone if not already cloned.
-    git clone -b ind-tree https://github.com/will62794/endive.git
-    cd endive
-    git pull --rebase
-}
+source bm_setup.sh $specname
 
 for seed in 2
 do
