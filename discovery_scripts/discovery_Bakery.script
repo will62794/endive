@@ -16,15 +16,15 @@ common_flags+=" --opt_quant_minimize --k_cti_induction_depth 1"
 common_flags+=" --ninvs $ninvs --max_num_ctis_per_round $max_num_ctis_per_round"
 common_flags+=" --save_dot --max_num_conjuncts_per_round 16 --niters 4 --nrounds $nrounds"
 
-for seed in 1 2
+for seed in 2 1
 do
 
 # Set a time limit for these jobs.
 time_limit="08:00:00"
 
-srun --seed $seed --time=$time_limit -o /scratch/schultz.w/endive_logs/${specname}/${specname}_output_${seed}.txt \
+srun --time=$time_limit -o /scratch/schultz.w/endive_logs/${specname}/${specname}_output_${seed}.txt \
     python3 endive.py --spec benchmarks/$specname \
-    $common_flags --auto_lemma_action_decomposition --enable_partitioned_state_caching --proof_tree_mode 
+    $common_flags --seed $seed --auto_lemma_action_decomposition --enable_partitioned_state_caching --proof_tree_mode 
 
 # srun --time=$time_limit -o /scratch/schultz.w/endive_logs/${specname}_baseline/${specname}_baseline_output_%j_${seed}.txt \
     # python3 endive.py --spec benchmarks/$specname \
