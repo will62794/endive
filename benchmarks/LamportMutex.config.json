@@ -8,7 +8,7 @@
         "VARI # VARJ /\\ ack = ack",
         "ack[VARI] = {}",
         "ack[VARI] = Proc",
-        "\\A VOTHER \\in Proc \\ {VARI} : beats(VARI,VOTHER)",
+        "\\A VOTHER \\in Proc \\ {VARI} : beats(VARI,VOTHER) /\\ req = req",
         "VARI \\in crit",
         "VARJ \\in crit",
         "req[VARI][VARJ] = 0",
@@ -22,7 +22,7 @@
         "network[VARI][VARJ] # <<>> /\\ req[VARI][VARJ] = Head(network[VARI][VARJ]).clock",
         "network[VARI][VARJ] # <<>> /\\ Head(network[VARI][VARJ]).type = \"ack\"",
         "network[VARI][VARJ] # <<>> /\\ Head(network[VARI][VARJ]).type = \"rel\"",
-        "beats(VARI,VARJ)"
+        "beats(VARI,VARJ) /\\ req = req"
     ],
     "action_local_preds":{
     },
