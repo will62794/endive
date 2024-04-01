@@ -10,7 +10,7 @@ specname="Boulanger"
 
 source bm_setup.sh $specname
 
-common_flags=" --seed $seed --tlc_workers $tlc_workers --override_num_cti_workers $num_cti_workers --cti_elimination_workers=$cti_elimination_workers"
+common_flags=" --tlc_workers $tlc_workers --override_num_cti_workers $num_cti_workers --cti_elimination_workers=$cti_elimination_workers"
 common_flags+=" --debug --target_sample_time_limit_ms 10000 --num_simulate_traces $num_simulate_traces --target_sample_states $target_sample_states"
 common_flags+=" --opt_quant_minimize --k_cti_induction_depth 1"
 common_flags+=" --ninvs $ninvs --max_num_ctis_per_round $max_num_ctis_per_round"
@@ -22,7 +22,7 @@ do
 # Set 8 hour time limit for these jobs.
 time_limit="08:00:00"
 
-srun --time=$time_limit -o /scratch/schultz.w/endive_logs/${specname}/${specname}_output_%j_${seed}.txt \
+srun --time=$time_limit -o /scratch/schultz.w/endive_logs/${specname}/${specname}_output_${seed}.txt \
     python3 endive.py --spec benchmarks/$specname \
     $common_flags --seed $seed --auto_lemma_action_decomposition --enable_partitioned_state_caching --proof_tree_mode 
 
