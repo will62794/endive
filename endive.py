@@ -1986,7 +1986,9 @@ class InductiveInvGen():
             max_depth = self.spec_config["max_tlc_inv_depth"]
 
 
-        if self.auto_lemma_action_decomposition:
+        # Upfront caching run for this round. If we are doing partitioned state caching, don't bother doing
+        # this caching step upfront, since we will do it below when first trying to check invariants.
+        if self.auto_lemma_action_decomposition and not self.enable_partitioned_state_caching:
             # If the number of state variables isn't too large, just try to cache all subsets up front.
             SMALL_VAR_COUNT = 5
             if len(self.state_vars) <= SMALL_VAR_COUNT:
@@ -1996,6 +1998,8 @@ class InductiveInvGen():
             else:
                 self.cache_projected_states([cache_states_with_ignored_vars], max_depth=max_depth, tlc_workers=tlc_workers)
                 logging.info("Finished initial state caching.")
+        else:
+            logging.info("Skipping initial state caching step for round since we are running with partitioned state caching.")
 
         inv_candidates_generated_in_round = set()
         num_ctis_remaining = None
@@ -2263,8 +2267,8 @@ class InductiveInvGen():
                     main_invs_to_check = [(ind, inv) for ind,inv in enumerate(invs)]
 
                     # Don't bother doing this partitioned caching for tiny numbers of conjuncts.
-                    LARGE_PRED_GROUP_COUNT = 100 # don't bother with the overhead of this except for relatively large predicate groups.
-                    if self.enable_partitioned_state_caching and min_conjs > 1:
+                    LARGE_PRED_GROUP_COUNT = 0 # don't bother with the overhead of this except for relatively large predicate groups.
+                    if self.enable_partitioned_state_caching and min_conjs > 0:
                         logging.info(f"Partitioned property checking enabled for projection caching.")
                         # TODO: Consider enabling this and/or computing more of these cached state projections 
                         # upfront.
@@ -2280,7 +2284,7 @@ class InductiveInvGen():
 
                         for p in pred_var_counts_tups[:]:
                             # print(p)
-                            if p[0] < LARGE_PRED_GROUP_COUNT:
+                            if p[0] < LARGE_PRED_GROUP_COUNT and p[0] > 0:
                                 # If we reached a group that is too small, we stop, even if we haven't dont all top K.
                                 logging.info(f"Exiting partitioned state caching loop due to small group size: {p}.")
                                 break  
@@ -2325,7 +2329,7 @@ class InductiveInvGen():
                     if cache_states_with_ignored_vars is not None:
                         cache_load = True
 
-                    if len(invs) > 0:
+                    if len(main_invs_to_check) > 0:
                         # If we are not caching, then use simulation for checking invariants here, if specified.
                         tlc_flags = "" 
                         if "simulation_inv_check" in self.spec_config and self.spec_config["simulation_inv_check"] and not cache_load:
