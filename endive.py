@@ -4589,6 +4589,7 @@ if __name__ == "__main__":
     parser.add_argument('--opt_quant_minimize', help='Enable quantifier minimization optimization for faster invariant checking.', required=False, default=False, action='store_true')
     parser.add_argument('--try_final_minimize', help='Attempt to minimize the final discovered invariant.', required=False, default=False, action='store_true')
     parser.add_argument('--results_dir', help='Directory to save results.', required=False, type=str, default="results")
+    parser.add_argument('--config_file', help='Config file override.', required=False, type=str, default=None)
     
     parser.add_argument('--max_num_conjuncts_per_round', help='Max number of conjuncts to learn per round.', type=int, default=10000)
     parser.add_argument('--max_duration_secs_per_round', help='Max number of seconds to spend on each iteration.', type=int, default=10000)
@@ -4669,6 +4670,11 @@ if __name__ == "__main__":
     JAVA_EXE = args["java_exe"]
     TLC_JAR = args["tlc_jar"]
     spec_config_file = os.path.join(specdir, specname) + ".config.json"
+
+    # Allow overriding config file with custom one.
+    if args["config_file"] is not None:
+        spec_config_file = args["config_file"]
+
     fcfg = open(spec_config_file)
     spec_config = json.load(fcfg)
 

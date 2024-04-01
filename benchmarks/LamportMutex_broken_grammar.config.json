@@ -1,0 +1,70 @@
+{
+    "preds"  :  [
+        "clock[VARI] < clock[VARJ]",
+        "clock[VARI] = clock[VARJ]",
+        "VARI \\in ack[VARI]",
+        "VARI \\in ack[VARJ]",
+        "VARI # VARJ /\\ crit = crit",
+        "VARI # VARJ /\\ ack = ack",
+        "ack[VARI] = {}",
+        "ack[VARI] = Proc",
+        "\\A VOTHER \\in Proc \\ {VARI} : beats(VARI,VOTHER) /\\ req = req",
+        "VARI \\in crit",
+        "VARJ \\in crit",
+        "req[VARI][VARJ] = 0",
+        "req[VARI][VARJ] > 0",
+        "req[VARI][VARJ] > req[VARJ][VARJ]",
+        "req[VARI][VARJ] > req[VARI][VARK]",
+        "req[VARI][VARJ] = req[VARI][VARK]",
+        "network[VARI][VARJ] # <<>>",
+        "network[VARJ][VARI] # <<>>",
+        "network[VARJ][VARI] # <<>> /\\ req[VARI][VARJ] = Head(network[VARJ][VARI]).clock",
+        "network[VARJ][VARI] # <<>> /\\ req[VARI][VARJ] > Head(network[VARJ][VARI]).clock",
+        "network[VARI][VARJ] # <<>> /\\ req[VARI][VARJ] = Head(network[VARI][VARJ]).clock",
+        "network[VARI][VARJ] # <<>> /\\ req[VARI][VARJ] > Head(network[VARI][VARJ]).clock",
+        "network[VARI][VARJ] # <<>> /\\ req[VARJ][VARI] > Head(network[VARI][VARJ]).clock",
+        "req[VARI][VARI] = network[VARI][VARJ][VARRINDI].clock",
+        "req[VARJ][VARI] = network[VARI][VARJ][VARRINDI].clock",
+        "req[VARJ][VARI] > network[VARI][VARJ][VARRINDI].clock",
+        "network[VARI][VARJ][VARRINDI].type = \"ack\"",
+        "network[VARI][VARJ][VARRINDI].type = \"rel\"",
+        "network[VARI][VARJ][VARRINDI].type = \"req\"",
+        "network[VARI][VARJ][VARRINDI].clock = clock[VARI]",
+        "network[VARI][VARJ][VARRINDI].clock > clock[VARI]",
+        "network[VARI][VARJ] # <<>> /\\ Head(network[VARI][VARJ]).type = \"ack\"",
+        "network[VARI][VARJ] # <<>> /\\ Head(network[VARI][VARJ]).type = \"rel\"",
+        "beats(VARI,VARJ) /\\ req = req"
+    ],
+    "action_local_preds":{
+    },
+    "preds_alt" : [],
+    "safety"  :  "Mutex",
+    "constants"  : {
+        "N": "3",
+        "maxClock": "7",
+        "Nats": "{0,1,2,3,4,5,6,7}"
+    },
+    "actions": [],
+    "constraint"  :  "ClockConstraint",
+    "quant_inv"  :  "\\A VARI \\in Proc : \\A VARJ \\in Proc : \\A VARK \\in Proc : \\A VARRINDI \\in DOMAIN network[VARI][VARJ] : ",
+    "quant_inv_alt"  :  null,
+    "quant_vars": ["VARI", "VARJ", "VARMVAL", "VARMACK", "VARMINV"],
+    "model_consts"  :  "",
+    "symmetry" : false,
+    "typeok"  :  "TypeOKRandom",
+    "try_final_minimize": false,
+    "max_tlc_inv_depth": 100,
+    "simulation_inv_check": false,
+    "simulation_inv_check_num_states": 2500000,
+    "simulation_inv_check_depth": 35,
+    "simulate"  :  true,
+    "tlaps_proof_config": {
+        "assumes": [
+        ],
+        "lemma_def_expands": {
+            "Safety": ["RConsistentInvariant"]
+        },
+        "action_def_expands":{
+        }
+    }
+}
