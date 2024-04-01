@@ -3519,7 +3519,8 @@ class InductiveInvGen():
             "state_cache_duration": indgen.get_state_cache_duration(),
             "invcheck_duration": indgen.get_invcheck_duration(),
             "ctielimcheck_duration": indgen.get_ctielimcheck_duration(),
-            "total_duration": time.time() - self.invgen_tstart
+            "total_duration": time.time() - self.invgen_tstart,
+            "date": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         }
         with open(fname, 'w') as f:
             json.dump(proof_graph_object, f, indent=2)
