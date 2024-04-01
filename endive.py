@@ -1989,17 +1989,17 @@ class InductiveInvGen():
         # Upfront caching run for this round. If we are doing partitioned state caching, don't bother doing
         # this caching step upfront, since we will do it below when first trying to check invariants.
         if self.auto_lemma_action_decomposition and not self.enable_partitioned_state_caching:
-            # If the number of state variables isn't too large, just try to cache all subsets up front.
-            SMALL_VAR_COUNT = 5
-            if len(self.state_vars) <= SMALL_VAR_COUNT:
-                all_var_sets = list(powerset(self.state_vars))
-                logging.info(f"Caching all {len(all_var_sets)} var sets upfront, since only {len(self.state_vars)} total state vars.")
-                self.cache_projected_states(all_var_sets, max_depth=max_depth, tlc_workers=tlc_workers)
-            else:
-                self.cache_projected_states([cache_states_with_ignored_vars], max_depth=max_depth, tlc_workers=tlc_workers)
-                logging.info("Finished initial state caching.")
+            self.cache_projected_states([cache_states_with_ignored_vars], max_depth=max_depth, tlc_workers=tlc_workers)
+            logging.info("Finished initial state caching.")
         else:
             logging.info("Skipping initial state caching step for round since we are running with partitioned state caching.")
+
+        # If we are partitioned state caching, though, and we have small var count, then cache upfront.
+        SMALL_VAR_COUNT = 5
+        if self.auto_lemma_action_decomposition and self.enable_partitioned_state_caching and len(self.state_vars) <= SMALL_VAR_COUNT:
+            all_var_sets = list(powerset(self.state_vars))
+            logging.info(f"Caching all {len(all_var_sets)} var sets upfront, since only {len(self.state_vars)} total state vars.")
+            self.cache_projected_states(all_var_sets, max_depth=max_depth, tlc_workers=tlc_workers)
 
         inv_candidates_generated_in_round = set()
         num_ctis_remaining = None
