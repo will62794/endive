@@ -2678,8 +2678,17 @@ class InductiveInvGen():
             conjuncts_added_in_round = conjuncts_this_iter
             chosen_invs = conjuncts_this_iter
 
+            new_ctis_were_eliminated_this_iter = False
+            if len(ctis_eliminated_this_iter) > len(eliminated_ctis):
+                logging.info("NEW CTIs eliminated in this iteration.")
+                logging.info(f"-- Existing set of eliminated CTIs ({len(curr_conjuncts)} conjuncts) -> {len(eliminated_ctis)}")
+                logging.info(f"-- New set of eliminated CTIs      ({len(new_conjuncts)} conjuncts) -> {len(ctis_eliminated_this_iter)}")
+                new_ctis_were_eliminated_this_iter = True
+
+
             # Update global set of eliminated CTIs.
             eliminated_ctis = ctis_eliminated_this_iter
+
 
             #####################################
             # Disable this selection logic for now
@@ -2788,7 +2797,8 @@ class InductiveInvGen():
                 # Re-run the iteration if new conjuncts were discovered.
                 # Don't re-run iterations where max_conjs=1, since they are small and quick.
                 # TODO: Deal with this in the face of conjunct set re-computation on every iteration.
-                if self.rerun_iterations and new_conjuncts_found_in_iter and max_conjs > 1:
+                # if self.rerun_iterations and new_conjuncts_found_in_iter and max_conjs > 1:
+                if self.rerun_iterations and new_ctis_were_eliminated_this_iter and max_conjs > 1:
                     logging.info("Re-running iteration.")
                     iteration -= 1
                     iter_repeat = True
