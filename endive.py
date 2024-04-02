@@ -37,6 +37,14 @@ LATEST_TLC_JAR = "tla2tools_2.18.jar"
 # TLC_JAR = "../../tlaplus/tlatools/org.lamport.tlatools/dist/tla2tools.jar"
 TLC_JAR = "tla2tools-checkall.jar"
 
+def mean(lst):
+    return sum(lst) / len(lst)
+
+def median(lst):
+    n = len(lst)
+    s = sorted(lst)
+    return (s[n//2] + s[~n//2]) / 2
+
 def powerset(iterable, min_size=0):
     "powerset([1,2,3]) --> () (1,) (2,) (3,) (1,2) (1,3) (2,3) (1,2,3)"
     s = list(iterable)
@@ -803,7 +811,7 @@ class InductiveInvGen():
 
         workdir = None if self.specdir == "" else self.specdir
 
-        violated_invs = mc.runtlc_check_violated_invariants(
+        ret = mc.runtlc_check_violated_invariants(
                                 invcheck_spec_name, 
                                 config=invcheck_cfg_filename, 
                                 tlc_workers=tlc_workers, 
@@ -813,9 +821,21 @@ class InductiveInvGen():
                                 max_depth=max_depth,
                                 cache_with_ignored=cache_with_ignored,
                                 cache_state_load = cache_state_load, tlc_flags=tlc_flags)
+        invs_violated = ret["invs_violated"]
+        slice_stats = ret["slice_stats"]
+        for (ind,ignore_vars,size) in slice_stats:
+            slice_vars = [s for s in self.state_vars if s not in ignore_vars]
+            full_str = ""
+            if sorted(slice_vars) == sorted(self.state_vars):
+                full_str = "(FULL state space)"
+            print("slice_stats:", ind, slice_vars, size, full_str)
+            
+        slice_sizes = [s[2] for s in slice_stats]
+        if len(slice_sizes) > 0:
+            print(f"slice_stats (agg): min={min(slice_sizes)}, max={max(slice_sizes)}, mean={mean(slice_sizes)}, median={median(slice_sizes)}")
         sat_invs = set()
         if not skip_checking:
-            sat_invs = (all_inv_names - violated_invs)
+            sat_invs = (all_inv_names - invs_violated)
             logging.info(f"Found {len(sat_invs)} / {len(invs)} candidate invariants satisfied in {round(time.time()-ta,2)}s.")
         if cache_with_ignored:
             logging.info(f"Finished state caching run in {round(time.time()-ta,2)}s.")
@@ -1995,7 +2015,7 @@ class InductiveInvGen():
             logging.info("Skipping initial state caching step for round since we are running with partitioned state caching.")
 
         # If we are partitioned state caching, though, and we have small var count, then cache upfront.
-        SMALL_VAR_COUNT = 5
+        SMALL_VAR_COUNT = 6
         if self.auto_lemma_action_decomposition and self.enable_partitioned_state_caching and len(self.state_vars) <= SMALL_VAR_COUNT:
             all_var_sets = list(powerset(self.state_vars))
             logging.info(f"Caching all {len(all_var_sets)} var sets upfront, since only {len(self.state_vars)} total state vars.")

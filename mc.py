@@ -471,16 +471,19 @@ def runtlc_check_violated_invariants(spec,config=None, tlc_workers=6, cwd=None, 
         invname = res.group(1)
         invs_violated.add(invname)
     slice_sizes = []
+    slice_stats = []
     for l in greplines("Slice.*total unique", lines):
         res = re.match("Slice_(.*) (.*) -> total unique cached states. (.*)",l)
         slice_ind = res.group(1)
         slice_ignore_vars = sorted(res.group(2).split(","))
         slice_size = int(res.group(3))
-        print("slice_stats:", slice_ind, slice_ignore_vars, slice_size)
+        # print("slice_stats:", slice_ind, slice_ignore_vars, slice_size)
         slice_sizes.append(slice_size)
-    if len(slice_sizes) > 0:
-        print(f"slice_stats (agg): min={min(slice_sizes)}, max={max(slice_sizes)}, mean={mean(slice_sizes)}, median={median(slice_sizes)}")
-    return invs_violated
+        slice_stats.append((slice_ind, slice_ignore_vars, slice_size))
+    return {
+        "invs_violated": invs_violated,
+        "slice_stats": slice_stats
+    }
 
 
 class State():
