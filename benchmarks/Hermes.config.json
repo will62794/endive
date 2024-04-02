@@ -67,6 +67,7 @@
         "VARMACKI.sender  \\in nodeRcvedAcks[VARJ]",
         "VARMINVI.sender = VARI",
         "VARMINVI.sender = VARJ",
+        "VARMINVI.sender \\in aliveNodes",
         "VARMINVI.version = nodeTS[VARI].version",
         "VARMINVI.version = nodeTS[VARJ].version",
         "VARMINVI.version < nodeTS[VARI].version",
