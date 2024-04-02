@@ -1,0 +1,17 @@
+#!/bin/bash
+#SBATCH --partition short    # Partition name
+#SBATCH --time=12:00:00       # Time limit.
+#SBATCH --constraint="[broadwell|cascadelake]"       # Newer processors.
+#SBATCH -N 1                   # Number of nodes
+#SBATCH -n 1                   # Number of tasks
+#SBATCH --cpus-per-task 28                  # Number of cores
+
+specname="consensus_epr"
+
+# One version with broken grammar
+source bm_setup.sh "${specname}_broken_grammar"
+config_file="benchmarks/consensus_epr_broken_grammar.config.json"
+seed=3
+srun -o /scratch/schultz.w/endive_logs/${specname}_broken_grammar/${specname}_broken_grammar_output_${seed}.txt \
+    python3 endive.py --spec benchmarks/$specname \
+    $common_flags --config_file $config_file --seed $seed --proof_tree_mode --auto_lemma_action_decomposition --enable_partitioned_state_caching

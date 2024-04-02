@@ -1,0 +1,17 @@
+#!/bin/bash
+#SBATCH --partition short    # Partition name
+#SBATCH --time=12:00:00       # Time limit.
+#SBATCH --constraint="[broadwell|cascadelake]"       # Newer processors.
+#SBATCH -N 1                   # Number of nodes
+#SBATCH -n 1                   # Number of tasks
+#SBATCH --cpus-per-task 28                  # Number of cores
+
+specname="consensus_epr"
+
+# Run one baseline.
+source bm_setup.sh "${specname}_baseline"
+seed=1
+srun -o /scratch/schultz.w/endive_logs/${specname}_baseline/${specname}_baseline_output_${seed}.txt \
+    python3 endive.py --spec benchmarks/$specname \
+    $common_flags --seed $seed
+
