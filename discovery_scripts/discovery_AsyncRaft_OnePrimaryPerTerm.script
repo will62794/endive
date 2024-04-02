@@ -7,17 +7,16 @@
 #SBATCH --cpus-per-task 28                  # Number of cores
 #SBATCH --array=1,2,3,4
 
-specname="Boulanger"
+specname="AsyncRaft"
 
 # All optimizations.
 seed=$SLURM_ARRAY_TASK_ID
-source /home/schultz.w/bm_setup.sh "${specname}_${seed}"
-srun -o /scratch/schultz.w/endive_logs/${specname}/${specname}_output_${seed}.txt \
+source /home/schultz.w/bm_setup.sh "${specname}_OnePrimaryPerTerm_${seed}"
+srun -o /scratch/schultz.w/endive_logs/${specname}_OnePrimaryPerTerm/${specname}_OnePrimaryPerTerm_output_${seed}.txt \
     python3 endive.py --spec benchmarks/$specname \
-    $common_flags --seed $seed --proof_tree_mode --auto_lemma_action_decomposition --enable_partitioned_state_caching
+    $common_flags --seed $seed --proof_tree_mode --auto_lemma_action_decomposition --enable_partitioned_state_caching --safety "H_OnePrimaryPerTerm"
 
-# Run one baseline.
-# seed=1
-# srun -o /scratch/schultz.w/endive_logs/${specname}_baseline/${specname}_baseline_output_${seed}.txt \
+# srun -o /home/schultz.w/endive_logs/${specname}_baseline/${specname}_baseline_output_%j_${seed}.txt \
 #     python3 endive.py --spec benchmarks/$specname \
-#     $common_flags --seed $seed
+#     $common_flags 
+
