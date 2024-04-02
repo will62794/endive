@@ -5,24 +5,21 @@
 #SBATCH -N 1                   # Number of nodes
 #SBATCH -n 1                   # Number of tasks
 #SBATCH --cpus-per-task 28                  # Number of cores
+#SBATCH --array=1,2,3
 
 specname="Hermes"
 
-source bm_setup.sh $specname
+# source bm_setup.sh $specname
 
-for seed in 1 2
-do
-
-common_flags=" --seed $seed --tlc_workers $tlc_workers --override_num_cti_workers $num_cti_workers --cti_elimination_workers=$cti_elimination_workers"
-common_flags+=" --debug --target_sample_time_limit_ms 10000 --num_simulate_traces $num_simulate_traces --target_sample_states $target_sample_states"
-common_flags+=" --opt_quant_minimize --k_cti_induction_depth 1"
-common_flags+=" --ninvs $ninvs --max_num_ctis_per_round $max_num_ctis_per_round"
-common_flags+=" --save_dot --max_num_conjuncts_per_round 16 --niters 4 --nrounds $nrounds"
+# for seed in 1 2
+# do
 
 # All optimizations.
+seed=$SLURM_ARRAY_TASK_ID
+source /home/schultz.w/bm_setup.sh "${specname}_${seed}"
 srun -o /scratch/schultz.w/endive_logs/${specname}/${specname}_output_${seed}.txt \
     python3 endive.py --spec benchmarks/$specname \
-    $common_flags --proof_tree_mode --auto_lemma_action_decomposition --enable_partitioned_state_caching
+    $common_flags --seed $seed --proof_tree_mode --auto_lemma_action_decomposition --enable_partitioned_state_caching
 
 # # No state slicing.
 # srun -o /home/schultz.w/endive_logs/${specname}_baseline/${specname}_nostateslice_output_%j_${seed}.txt \
@@ -34,10 +31,11 @@ srun -o /scratch/schultz.w/endive_logs/${specname}/${specname}_output_${seed}.tx
 #     python3 endive.py --spec benchmarks/$specname \
 #     $common_flags --proof_tree_mode --auto_lemma_action_decomposition --disable_grammar_slicing
 
-done
+# done
 
 # Run one baseline.
-seed=1
-srun -o /scratch/schultz.w/endive_logs/${specname}_baseline/${specname}_baseline_output_${seed}.txt \
-    python3 endive.py --spec benchmarks/$specname \
-    $common_flags --seed $seed
+# seed=1
+# time_limit="06:00:00"
+# srun --time=$time_limit -o /scratch/schultz.w/endive_logs/${specname}_baseline/${specname}_baseline_output_${seed}.txt \
+#     python3 endive.py --spec benchmarks/$specname \
+#     $common_flags --seed $seed
