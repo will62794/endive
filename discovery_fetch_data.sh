@@ -28,5 +28,6 @@ scp -O -r "neudiscovery:$bmdir/AsyncRaft_OnePrimaryPerTerm_2/endive/benchmarks/A
 scp -O -r "neudiscovery:$bmdir/AsyncRaft_OnePrimaryPerTerm_3/endive/benchmarks/AsyncRaft_ind-proof-tree-sd3.pdf" $local_dir/AsyncRaft_OnePrimaryPerTerm_ind-proof-tree-sd3.pdf
 scp -O -r "neudiscovery:$bmdir/LamportMutex_broken_grammar/endive/benchmarks/LamportMutex_ind-proof-tree-sd3.pdf" $local_dir/LamportMutex_broken_grammar_ind-proof-tree-sd3.pdf
 scp -O -r "neudiscovery:$bmdir/consensus_epr_broken_grammar/endive/benchmarks/consensus_epr_ind-proof-tree-sd3.pdf" $local_dir/consensus_epr_broken_grammar_ind-proof-tree-sd3.pdf
+scp -O -r "neudiscovery:$bmdir/consensus_epr_broken_grammar_2/endive/benchmarks/consensus_epr_ind-proof-tree-sd3.pdf" $local_dir/consensus_epr_broken_grammar_2_ind-proof-tree-sd3.pdf
 
 ./discovery_job_status.sh
