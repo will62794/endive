@@ -824,7 +824,7 @@ class InductiveInvGen():
         invs_violated = ret["invs_violated"]
         slice_stats = ret["slice_stats"]
         # Print slices sorted by size.
-        for (ind,ignore_vars,size) in sorted(slice_stats, key = lambda s : s[2]):
+        for (ind,ignore_vars,size) in sorted(slice_stats, key = lambda s : s[2], reverse=True):
             slice_vars = [s for s in self.state_vars if s not in ignore_vars]
             full_str = ""
             if sorted(slice_vars) == sorted(self.state_vars):
