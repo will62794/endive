@@ -45,8 +45,8 @@
     "safety"  :  "Mutex",
     "constants"  : {
         "N": "3",
-        "maxClock": "7",
-        "Nats": "{0,1,2,3,4,5,6,7}"
+        "maxClock": "3",
+        "Nats": "{0,1,2,3}"
     },
     "actions": [],
     "constraint"  :  "ClockConstraint",
