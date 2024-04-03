@@ -10,7 +10,7 @@ specname="LamportMutex"
 
 # One version with broken grammar
 # Put a reasonable time limit on this one since we expect failure.
-time_limit="01:00:00"
+time_limit="03:00:00"
 source /home/schultz.w/bm_setup.sh "${specname}_broken_grammar"
 config_file="benchmarks/LamportMutex_broken_grammar.config.json"
 seed=3
