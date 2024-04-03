@@ -3564,6 +3564,7 @@ class InductiveInvGen():
             "invcheck_duration_secs": indgen.get_invcheck_duration(),
             "ctielimcheck_duration_secs": indgen.get_ctielimcheck_duration(),
             "total_duration_secs": time.time() - self.invgen_tstart,
+            "num_preds": len(self.preds),
             "date": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         }
         with open(fname, 'w') as f:

@@ -30,6 +30,7 @@ done
 for seed in 1 2 3 4
 do
 scp -O -r "neudiscovery:$bmdir/AsyncRaft_OnePrimaryPerTerm_$seed/endive/benchmarks/AsyncRaft_ind-proof-tree-sd$seed.pdf" $local_dir/AsyncRaft_OnePrimaryPerTerm_ind-proof-tree-sd$seed.pdf
+scp -O -r "neudiscovery:$bmdir/AsyncRaft_LogMatching_$seed/endive/benchmarks/AsyncRaft_ind-proof-tree-sd$seed.pdf" $local_dir/AsyncRaft_LogMatching_ind-proof-tree-sd$seed.pdf
 done
 
 scp -O -r "neudiscovery:$bmdir/LamportMutex_broken_grammar/endive/benchmarks/LamportMutex_ind-proof-tree-sd3.pdf" $local_dir/LamportMutex_broken_grammar_ind-proof-tree-sd3.pdf
