@@ -285,7 +285,17 @@ THEOREM L_7 == TypeOK /\ Inv1578_R0_0_I1 /\ Next => Inv1578_R0_0_I1'
        BY DEF TypeOK,e4Action,e4,Inv1578_R0_0_I1
   \* (Inv1578_R0_0_I1,w1Action)
   <1>6. TypeOK /\ Inv1578_R0_0_I1 /\ w1Action => Inv1578_R0_0_I1'
-       BY DEF TypeOK,w1Action,w1,Inv1578_R0_0_I1
+    <2> SUFFICES ASSUME TypeOK,
+                        Inv1578_R0_0_I1,
+                        TRUE,
+                        NEW self \in Procs,
+                        w1(self),
+                        NEW VARI \in Procs'
+                 PROVE  (~(nxt[VARI] = VARI) \/ (~(pc[VARI] = "w2")))'
+      BY DEF Inv1578_R0_0_I1, w1Action
+    <2> QED
+      BY DEF TypeOK,w1Action,w1,Inv1578_R0_0_I1,Procs
+       
   \* (Inv1578_R0_0_I1,w2Action)
   <1>7. TypeOK /\ Inv1578_R0_0_I1 /\ w2Action => Inv1578_R0_0_I1'
        BY DEF TypeOK,w2Action,w2,Inv1578_R0_0_I1
@@ -425,7 +435,7 @@ THEOREM L_11 == TypeOK /\ Inv520_R10_0_I1 /\ Inv521_R8_0_I1 /\ Next => Inv521_R8
        BY DEF TypeOK,Inv520_R10_0_I1,exitAction,exit,Inv521_R8_0_I1
 <1>10. QED BY <1>1,<1>2,<1>3,<1>4,<1>5,<1>6,<1>7,<1>8,<1>9 DEF Next
 
-
+ASSUME A1 == N \in Nat
 \*** Inv520_R10_0_I1
 THEOREM L_12 == TypeOK /\ Inv520_R10_0_I1 /\ Next => Inv520_R10_0_I1'
   \* (Inv520_R10_0_I1,ncsAction)
@@ -451,7 +461,13 @@ THEOREM L_12 == TypeOK /\ Inv520_R10_0_I1 /\ Next => Inv520_R10_0_I1'
        BY DEF TypeOK,w2Action,w2,Inv520_R10_0_I1
   \* (Inv520_R10_0_I1,csAction)
   <1>8. TypeOK /\ Inv520_R10_0_I1 /\ csAction => Inv520_R10_0_I1'
-       BY DEF TypeOK,csAction,cs,Inv520_R10_0_I1
+    <2> SUFFICES ASSUME TypeOK /\ Inv520_R10_0_I1 /\ csAction,
+                        NEW VARI \in Procs'
+                 PROVE  ((unchecked[VARI] = {}) \/ (~(pc[VARI] = "exit")))'
+      BY DEF Inv520_R10_0_I1
+    <2> QED
+      BY A1 DEF TypeOK,csAction,cs,Inv520_R10_0_I1,Procs
+       
   \* (Inv520_R10_0_I1,exitAction)
   <1>9. TypeOK /\ Inv520_R10_0_I1 /\ exitAction => Inv520_R10_0_I1'
        BY DEF TypeOK,exitAction,exit,Inv520_R10_0_I1
@@ -467,5 +483,6 @@ THEOREM IndGlobal /\ Next => IndGlobal'
 \* Inv21195_R4_0_I3 == \A VARI \in Procs : ~(nxt[VARI] = VARI) \/ (~(unchecked[VARI] = {})) \/ (~(pc[VARI] = "w1"))
 =============================================================================
 \* Modification History
+\* Last modified Wed Apr 03 02:50:54 EDT 2024 by willyschultz
 \* Last modified Tue Dec 18 13:48:46 PST 2018 by lamport
 \* Created Thu Nov 21 15:54:32 PST 2013 by lamport

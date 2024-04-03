@@ -86,6 +86,7 @@ THEOREM L_0 == TypeOK /\ TypeOK /\ Next => TypeOK'
 
 
 \* (ROOT SAFETY PROP)
+ASSUME A1 == Nats \subseteq Nat /\ N \in Nat
 \*** Safety
 THEOREM L_1 == TypeOK /\ Inv7190_R0_0_I2 /\ Inv1976_R0_1_I1 /\ Inv2245_R0_1_I1 /\ Safety /\ Next => Safety'
   \* (Safety,ncsAction)
@@ -120,7 +121,7 @@ THEOREM L_1 == TypeOK /\ Inv7190_R0_0_I2 /\ Inv1976_R0_1_I1 /\ Inv2245_R0_1_I1 /
        BY DEF TypeOK,Inv7190_R0_0_I2,w1NegAction,w1Neg,Safety,H_MutualExclusion
   \* (Safety,w2Action)
   <1>11. TypeOK /\ Inv1976_R0_1_I1 /\ Inv2245_R0_1_I1 /\ Safety /\ w2Action => Safety'
-       BY DEF TypeOK,Inv1976_R0_1_I1,Inv2245_R0_1_I1,w2Action,w2,Safety,H_MutualExclusion
+       BY A1 DEF TypeOK,Inv1976_R0_1_I1,Inv2245_R0_1_I1,w2Action,w2,Safety,H_MutualExclusion,Procs,w2Cond,\prec
   \* (Safety,w2PrevAction)
   <1>12. TypeOK /\ Safety /\ w2PrevAction => Safety'
        BY DEF TypeOK,w2PrevAction,w2Prev,Safety,H_MutualExclusion
@@ -565,5 +566,6 @@ THEOREM IndGlobal /\ Next => IndGlobal'
 \* Inv21195_R4_0_I3 == \A VARI \in Procs : ~(nxt[VARI] = VARI) \/ (~(unchecked[VARI] = {})) \/ (~(pc[VARI] = "w1"))
 =============================================================================
 \* Modification History
+\* Last modified Wed Apr 03 02:55:37 EDT 2024 by willyschultz
 \* Last modified Tue Dec 18 13:48:46 PST 2018 by lamport
 \* Created Thu Nov 21 15:54:32 PST 2013 by lamport
