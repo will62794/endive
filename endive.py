@@ -2084,7 +2084,7 @@ class InductiveInvGen():
             var_slice_str = "None"
             if var_slice is not None:
                 var_slice_str = "{" + ",".join(var_slice) + "}"
-            logging.info("\n>>> (Round %d, sub-round %d) Iteration %d (num_conjs=(min=%d,max=%d),process_local=%s,var_slice=%s)" % (roundi, subroundi, iteration,min_conjs,max_conjs,process_local,str(var_slice_str))) 
+            logging.info("\n>>> (Round %d, sub-round %d) Iteration %d (num_conjs=(min=%d,max=%d),num_orig_k_ctis=%d,var_slice=%s)" % (roundi, subroundi, iteration,min_conjs,max_conjs,len(orig_k_ctis),str(var_slice_str))) 
 
             logging.info("Starting iteration %d of eliminate_ctis (min_conjs=%d, max_conjs=%d)" % (iteration,min_conjs,max_conjs))
             
