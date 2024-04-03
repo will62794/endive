@@ -27,7 +27,7 @@ done
 # Also fetch these other ones.
 #
 
-for seed in 1 2 3 4
+for seed in 1 2 3 4 5 6
 do
 scp -O -r "neudiscovery:$bmdir/AsyncRaft_OnePrimaryPerTerm_$seed/endive/benchmarks/AsyncRaft_ind-proof-tree-sd$seed.pdf" $local_dir/AsyncRaft_OnePrimaryPerTerm_ind-proof-tree-sd$seed.pdf
 scp -O -r "neudiscovery:$bmdir/AsyncRaft_LogMatching_$seed/endive/benchmarks/AsyncRaft_ind-proof-tree-sd$seed.pdf" $local_dir/AsyncRaft_LogMatching_ind-proof-tree-sd$seed.pdf

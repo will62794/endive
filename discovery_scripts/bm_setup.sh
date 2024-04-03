@@ -38,3 +38,5 @@ common_flags+=" --debug --target_sample_time_limit_ms 10000 --num_simulate_trace
 common_flags+=" --opt_quant_minimize --k_cti_induction_depth 1"
 common_flags+=" --ninvs $ninvs --max_num_ctis_per_round $max_num_ctis_per_round"
 common_flags+=" --save_dot --max_num_conjuncts_per_round 16 --niters 4 --nrounds $nrounds"
+
+time_limit_large="08:00:00"
