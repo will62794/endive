@@ -22,10 +22,15 @@ do
     # scp -O -r "neudiscovery:$bmdir/$bm/endive/benchmarks/${bm}*proofgraph*.json" $local_dir
 done
 
-# Also fetch this other one.
-scp -O -r "neudiscovery:$bmdir/AsyncRaft_OnePrimaryPerTerm_1/endive/benchmarks/AsyncRaft_ind-proof-tree-sd1.pdf" $local_dir/AsyncRaft_OnePrimaryPerTerm_ind-proof-tree-sd1.pdf
-scp -O -r "neudiscovery:$bmdir/AsyncRaft_OnePrimaryPerTerm_2/endive/benchmarks/AsyncRaft_ind-proof-tree-sd2.pdf" $local_dir/AsyncRaft_OnePrimaryPerTerm_ind-proof-tree-sd2.pdf
-scp -O -r "neudiscovery:$bmdir/AsyncRaft_OnePrimaryPerTerm_3/endive/benchmarks/AsyncRaft_ind-proof-tree-sd3.pdf" $local_dir/AsyncRaft_OnePrimaryPerTerm_ind-proof-tree-sd3.pdf
+#
+# Also fetch these other ones.
+#
+
+for seed in 1 2 3 4
+do
+scp -O -r "neudiscovery:$bmdir/AsyncRaft_OnePrimaryPerTerm_$seed/endive/benchmarks/AsyncRaft_ind-proof-tree-sd$seed.pdf" $local_dir/AsyncRaft_OnePrimaryPerTerm_ind-proof-tree-sd$seed.pdf
+done
+
 scp -O -r "neudiscovery:$bmdir/LamportMutex_broken_grammar/endive/benchmarks/LamportMutex_ind-proof-tree-sd3.pdf" $local_dir/LamportMutex_broken_grammar_ind-proof-tree-sd3.pdf
 scp -O -r "neudiscovery:$bmdir/consensus_epr_broken_grammar/endive/benchmarks/consensus_epr_ind-proof-tree-sd3.pdf" $local_dir/consensus_epr_broken_grammar_ind-proof-tree-sd3.pdf
 scp -O -r "neudiscovery:$bmdir/consensus_epr_broken_grammar_2/endive/benchmarks/consensus_epr_ind-proof-tree-sd3.pdf" $local_dir/consensus_epr_broken_grammar_2_ind-proof-tree-sd3.pdf
