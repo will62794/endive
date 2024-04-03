@@ -67,30 +67,29 @@ ROnwerHighestVersionInvariant ==  \* owner has the highest version among alive n
 RMessageINV ==  \* Messages exchanged by the Protocol   
     [type: {"INV"}, 
      sender    : R_NODES,
-     epochID   : 0..R_MAX_EPOCH,
-     version   : 0..R_MAX_VERSION] 
+     epochID   : Nat,
+     version   : Nat] 
 
 RMessageACK ==  \* Messages exchanged by the Protocol   
     [type: {"ACK"}, 
      sender    : R_NODES,
-     epochID   : 0..R_MAX_EPOCH,
-     version   : 0..R_MAX_VERSION] 
+     epochID   : Nat,
+     version   : Nat] 
 
 RMessageVAL == [type: {"VAL"},        
-                epochID   : 0..R_MAX_EPOCH,
-                version   : 0..R_MAX_VERSION] 
+                epochID   : Nat,
+                version   : Nat] 
     
     
 TypeOK ==  \* The type correctness invariant
-    \* /\  rMsgs           \subseteq RMessageINV
-    \* /\  rMsgsINV        \subseteq RMessageINV
-    \* /\  rMsgs           \subseteq RMessageACK
-    \* /\  rMsgs           \subseteq RMessageVAL
+    /\  rMsgsINV        \subseteq RMessageINV
+    /\  rMsgsACK           \subseteq RMessageACK
+    /\  rMsgsVAL           \subseteq RMessageVAL
     /\  rAliveNodes     \subseteq R_NODES
     /\  \A n \in R_NODES: rKeyRcvedACKs[n] \subseteq (R_NODES \ {n})
-    /\  rNodeEpochID    \in [R_NODES -> 0..R_MAX_EPOCH]
+    /\  rNodeEpochID    \in [R_NODES -> Nat]
     /\  rKeyLastWriter  \in [R_NODES -> R_NODES]
-    /\  rKeyVersion     \in [R_NODES -> 0..R_MAX_VERSION]
+    /\  rKeyVersion     \in [R_NODES -> Nat]
     /\  rKeySharers     \in [R_NODES -> {"owner", "reader", "non-sharer"}]
     /\  rKeyState       \in [R_NODES -> {"valid", "invalid", "write", "replay"}]
     

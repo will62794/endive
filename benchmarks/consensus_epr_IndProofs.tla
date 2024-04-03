@@ -279,4 +279,277 @@ THEOREM IndAuto /\ Next => IndAuto'
   <1>10. QED
     BY <1>1, <1>2, <1>3, <1>4, <1>5, <1>6, <1>7, <1>8, <1>9 DEF IndAuto
 
+
+==============================================================
+==============================================================
+==============================================================
+
+\* DISCOVERY 2024
+
+
+\* Proof Graph Stats
+\* ==================
+\* num proof graph nodes: 10
+\* num proof obligations: 50
+Safety == H_NoConflictingValues
+Inv254_R0_0_I2 == \A VARI \in Node : \A VARJ \in Node : (decided[VARI] = {}) \/ (~(decided[VARJ] = {}) \/ (~(leader[VARJ])))
+Inv1054_R1_0_I2 == \A VARI \in Node : \A VARJ \in Node : \A VARK \in Node : (NodesEq(VARI, VARK)) \/ (~(VARJ \in votes[VARI])) \/ (~(VARJ \in votes[VARK]))
+Inv367_R1_0_I2 == \A VARI \in Node : \E VARQJ \in Quorum : (VARQJ = votes[VARI]) \/ ((decided[VARI] = {}))
+Inv210_R1_1_I2 == \A VARI \in Node : \A VARJ \in Node : (VARI = VARJ /\ leader = leader) \/ (~(leader[VARJ])) \/ (~(leader[VARI]))
+Inv1248_R2_0_I2 == \A VARI \in Node : \A VARJ \in Node : \A VARK \in Node : (NodesEq(VARI, VARK)) \/ (~(<<VARJ,VARI>> \in vote_msg) \/ (~(VARJ \in votes[VARK])))
+Inv389_R3_0_I1 == \A VARI \in Node : \E VARQJ \in Quorum : (VARQJ = votes[VARI]) \/ (~(leader[VARI]))
+Inv1435_R5_0_I2 == \A VARI \in Node : \A VARJ \in Node : \A VARK \in Node : (NodesEq(VARJ, VARK)) \/ (~(<<VARI,VARJ>> \in vote_msg)) \/ (~(<<VARI,VARK>> \in vote_msg))
+Inv368_R5_1_I1 == \A VARI \in Node : \A VARJ \in Node : (voted[VARI]) \/ (~(VARI \in votes[VARJ]))
+Inv362_R7_0_I1 == \A VARI \in Node : \A VARJ \in Node : (voted[VARI]) \/ (~(<<VARI,VARJ>> \in vote_msg))
+
+IndGlobal == 
+  /\ TypeOK
+  /\ Safety
+  /\ Inv254_R0_0_I2
+  /\ Inv1054_R1_0_I2
+  /\ Inv1248_R2_0_I2
+  /\ Inv1435_R5_0_I2
+  /\ Inv362_R7_0_I1
+  /\ Inv368_R5_1_I1
+  /\ Inv367_R1_0_I2
+  /\ Inv389_R3_0_I1
+  /\ Inv210_R1_1_I2
+
+
+\* mean in-degree: 0.9
+\* median in-degree: 1
+\* max in-degree: 3
+\* min in-degree: 0
+\* mean variable slice size: 0
+
+
+\*** TypeOK
+THEOREM L_0 == TypeOK /\ TypeOK /\ Next => TypeOK'
+  \* (TypeOK,SendRequestVoteAction)
+  <1>1. TypeOK /\ TypeOK /\ SendRequestVoteAction => TypeOK'
+       BY DEF TypeOK,SendRequestVoteAction,SendRequestVote,TypeOK
+  \* (TypeOK,SendVoteAction)
+  <1>2. TypeOK /\ TypeOK /\ SendVoteAction => TypeOK'
+       BY DEF TypeOK,SendVoteAction,SendVote,TypeOK
+  \* (TypeOK,RecvVoteAction)
+  <1>3. TypeOK /\ TypeOK /\ RecvVoteAction => TypeOK'
+       BY DEF TypeOK,RecvVoteAction,RecvVote,TypeOK
+  \* (TypeOK,BecomeLeaderAction)
+  <1>4. TypeOK /\ TypeOK /\ BecomeLeaderAction => TypeOK'
+       BY DEF TypeOK,BecomeLeaderAction,BecomeLeader,TypeOK
+  \* (TypeOK,DecideAction)
+  <1>5. TypeOK /\ TypeOK /\ DecideAction => TypeOK'
+       BY DEF TypeOK,DecideAction,Decide,TypeOK
+<1>6. QED BY <1>1,<1>2,<1>3,<1>4,<1>5 DEF Next
+
+
+\* (ROOT SAFETY PROP)
+\*** Safety
+THEOREM L_1 == TypeOK /\ Inv254_R0_0_I2 /\ Safety /\ Next => Safety'
+  \* (Safety,SendRequestVoteAction)
+  <1>1. TypeOK /\ Safety /\ SendRequestVoteAction => Safety'
+       BY DEF TypeOK,SendRequestVoteAction,SendRequestVote,Safety,H_NoConflictingValues
+  \* (Safety,SendVoteAction)
+  <1>2. TypeOK /\ Safety /\ SendVoteAction => Safety'
+       BY DEF TypeOK,SendVoteAction,SendVote,Safety,H_NoConflictingValues
+  \* (Safety,RecvVoteAction)
+  <1>3. TypeOK /\ Safety /\ RecvVoteAction => Safety'
+       BY DEF TypeOK,RecvVoteAction,RecvVote,Safety,H_NoConflictingValues
+  \* (Safety,BecomeLeaderAction)
+  <1>4. TypeOK /\ Safety /\ BecomeLeaderAction => Safety'
+       BY DEF TypeOK,BecomeLeaderAction,BecomeLeader,Safety,H_NoConflictingValues
+  \* (Safety,DecideAction)
+  <1>5. TypeOK /\ Inv254_R0_0_I2 /\ Safety /\ DecideAction => Safety'
+       BY DEF TypeOK,Inv254_R0_0_I2,DecideAction,Decide,Safety,H_NoConflictingValues
+<1>6. QED BY <1>1,<1>2,<1>3,<1>4,<1>5 DEF Next
+
+
+\*** Inv254_R0_0_I2
+THEOREM L_2 == TypeOK /\ Inv1054_R1_0_I2 /\ Inv367_R1_0_I2 /\ Inv210_R1_1_I2 /\ Inv254_R0_0_I2 /\ Next => Inv254_R0_0_I2'
+  \* (Inv254_R0_0_I2,SendRequestVoteAction)
+  <1>1. TypeOK /\ Inv254_R0_0_I2 /\ SendRequestVoteAction => Inv254_R0_0_I2'
+       BY DEF TypeOK,SendRequestVoteAction,SendRequestVote,Inv254_R0_0_I2
+  \* (Inv254_R0_0_I2,SendVoteAction)
+  <1>2. TypeOK /\ Inv254_R0_0_I2 /\ SendVoteAction => Inv254_R0_0_I2'
+       BY DEF TypeOK,SendVoteAction,SendVote,Inv254_R0_0_I2
+  \* (Inv254_R0_0_I2,RecvVoteAction)
+  <1>3. TypeOK /\ Inv254_R0_0_I2 /\ RecvVoteAction => Inv254_R0_0_I2'
+       BY DEF TypeOK,RecvVoteAction,RecvVote,Inv254_R0_0_I2
+  \* (Inv254_R0_0_I2,BecomeLeaderAction)
+  <1>4. TypeOK /\ Inv1054_R1_0_I2 /\ Inv367_R1_0_I2 /\ Inv254_R0_0_I2 /\ BecomeLeaderAction => Inv254_R0_0_I2'
+       BY DEF TypeOK,Inv1054_R1_0_I2,Inv367_R1_0_I2,BecomeLeaderAction,BecomeLeader,Inv254_R0_0_I2
+  \* (Inv254_R0_0_I2,DecideAction)
+  <1>5. TypeOK /\ Inv210_R1_1_I2 /\ Inv254_R0_0_I2 /\ DecideAction => Inv254_R0_0_I2'
+       BY DEF TypeOK,Inv210_R1_1_I2,DecideAction,Decide,Inv254_R0_0_I2
+<1>6. QED BY <1>1,<1>2,<1>3,<1>4,<1>5 DEF Next
+
+
+\*** Inv1054_R1_0_I2
+THEOREM L_3 == TypeOK /\ Inv1248_R2_0_I2 /\ Inv1054_R1_0_I2 /\ Next => Inv1054_R1_0_I2'
+  \* (Inv1054_R1_0_I2,SendRequestVoteAction)
+  <1>1. TypeOK /\ Inv1054_R1_0_I2 /\ SendRequestVoteAction => Inv1054_R1_0_I2'
+       BY DEF TypeOK,SendRequestVoteAction,SendRequestVote,Inv1054_R1_0_I2
+  \* (Inv1054_R1_0_I2,SendVoteAction)
+  <1>2. TypeOK /\ Inv1054_R1_0_I2 /\ SendVoteAction => Inv1054_R1_0_I2'
+       BY DEF TypeOK,SendVoteAction,SendVote,Inv1054_R1_0_I2
+  \* (Inv1054_R1_0_I2,RecvVoteAction)
+  <1>3. TypeOK /\ Inv1248_R2_0_I2 /\ Inv1054_R1_0_I2 /\ RecvVoteAction => Inv1054_R1_0_I2'
+       BY DEF TypeOK,Inv1248_R2_0_I2,RecvVoteAction,RecvVote,Inv1054_R1_0_I2
+  \* (Inv1054_R1_0_I2,BecomeLeaderAction)
+  <1>4. TypeOK /\ Inv1054_R1_0_I2 /\ BecomeLeaderAction => Inv1054_R1_0_I2'
+       BY DEF TypeOK,BecomeLeaderAction,BecomeLeader,Inv1054_R1_0_I2
+  \* (Inv1054_R1_0_I2,DecideAction)
+  <1>5. TypeOK /\ Inv1054_R1_0_I2 /\ DecideAction => Inv1054_R1_0_I2'
+       BY DEF TypeOK,DecideAction,Decide,Inv1054_R1_0_I2
+<1>6. QED BY <1>1,<1>2,<1>3,<1>4,<1>5 DEF Next
+
+
+\*** Inv1248_R2_0_I2
+THEOREM L_4 == TypeOK /\ Inv368_R5_1_I1 /\ Inv1435_R5_0_I2 /\ Inv1248_R2_0_I2 /\ Next => Inv1248_R2_0_I2'
+  \* (Inv1248_R2_0_I2,SendRequestVoteAction)
+  <1>1. TypeOK /\ Inv1248_R2_0_I2 /\ SendRequestVoteAction => Inv1248_R2_0_I2'
+       BY DEF TypeOK,SendRequestVoteAction,SendRequestVote,Inv1248_R2_0_I2
+  \* (Inv1248_R2_0_I2,SendVoteAction)
+  <1>2. TypeOK /\ Inv368_R5_1_I1 /\ Inv1248_R2_0_I2 /\ SendVoteAction => Inv1248_R2_0_I2'
+       BY DEF TypeOK,Inv368_R5_1_I1,SendVoteAction,SendVote,Inv1248_R2_0_I2
+  \* (Inv1248_R2_0_I2,RecvVoteAction)
+  <1>3. TypeOK /\ Inv1435_R5_0_I2 /\ Inv1248_R2_0_I2 /\ RecvVoteAction => Inv1248_R2_0_I2'
+       BY DEF TypeOK,Inv1435_R5_0_I2,RecvVoteAction,RecvVote,Inv1248_R2_0_I2
+  \* (Inv1248_R2_0_I2,BecomeLeaderAction)
+  <1>4. TypeOK /\ Inv1248_R2_0_I2 /\ BecomeLeaderAction => Inv1248_R2_0_I2'
+       BY DEF TypeOK,BecomeLeaderAction,BecomeLeader,Inv1248_R2_0_I2
+  \* (Inv1248_R2_0_I2,DecideAction)
+  <1>5. TypeOK /\ Inv1248_R2_0_I2 /\ DecideAction => Inv1248_R2_0_I2'
+       BY DEF TypeOK,DecideAction,Decide,Inv1248_R2_0_I2
+<1>6. QED BY <1>1,<1>2,<1>3,<1>4,<1>5 DEF Next
+
+
+\*** Inv1435_R5_0_I2
+THEOREM L_5 == TypeOK /\ Inv362_R7_0_I1 /\ Inv1435_R5_0_I2 /\ Next => Inv1435_R5_0_I2'
+  \* (Inv1435_R5_0_I2,SendRequestVoteAction)
+  <1>1. TypeOK /\ Inv1435_R5_0_I2 /\ SendRequestVoteAction => Inv1435_R5_0_I2'
+       BY DEF TypeOK,SendRequestVoteAction,SendRequestVote,Inv1435_R5_0_I2
+  \* (Inv1435_R5_0_I2,SendVoteAction)
+  <1>2. TypeOK /\ Inv362_R7_0_I1 /\ Inv1435_R5_0_I2 /\ SendVoteAction => Inv1435_R5_0_I2'
+       BY DEF TypeOK,Inv362_R7_0_I1,SendVoteAction,SendVote,Inv1435_R5_0_I2
+  \* (Inv1435_R5_0_I2,RecvVoteAction)
+  <1>3. TypeOK /\ Inv1435_R5_0_I2 /\ RecvVoteAction => Inv1435_R5_0_I2'
+       BY DEF TypeOK,RecvVoteAction,RecvVote,Inv1435_R5_0_I2
+  \* (Inv1435_R5_0_I2,BecomeLeaderAction)
+  <1>4. TypeOK /\ Inv1435_R5_0_I2 /\ BecomeLeaderAction => Inv1435_R5_0_I2'
+       BY DEF TypeOK,BecomeLeaderAction,BecomeLeader,Inv1435_R5_0_I2
+  \* (Inv1435_R5_0_I2,DecideAction)
+  <1>5. TypeOK /\ Inv1435_R5_0_I2 /\ DecideAction => Inv1435_R5_0_I2'
+       BY DEF TypeOK,DecideAction,Decide,Inv1435_R5_0_I2
+<1>6. QED BY <1>1,<1>2,<1>3,<1>4,<1>5 DEF Next
+
+
+\*** Inv362_R7_0_I1
+THEOREM L_6 == TypeOK /\ Inv362_R7_0_I1 /\ Next => Inv362_R7_0_I1'
+  \* (Inv362_R7_0_I1,SendRequestVoteAction)
+  <1>1. TypeOK /\ Inv362_R7_0_I1 /\ SendRequestVoteAction => Inv362_R7_0_I1'
+       BY DEF TypeOK,SendRequestVoteAction,SendRequestVote,Inv362_R7_0_I1
+  \* (Inv362_R7_0_I1,SendVoteAction)
+  <1>2. TypeOK /\ Inv362_R7_0_I1 /\ SendVoteAction => Inv362_R7_0_I1'
+       BY DEF TypeOK,SendVoteAction,SendVote,Inv362_R7_0_I1
+  \* (Inv362_R7_0_I1,RecvVoteAction)
+  <1>3. TypeOK /\ Inv362_R7_0_I1 /\ RecvVoteAction => Inv362_R7_0_I1'
+       BY DEF TypeOK,RecvVoteAction,RecvVote,Inv362_R7_0_I1
+  \* (Inv362_R7_0_I1,BecomeLeaderAction)
+  <1>4. TypeOK /\ Inv362_R7_0_I1 /\ BecomeLeaderAction => Inv362_R7_0_I1'
+       BY DEF TypeOK,BecomeLeaderAction,BecomeLeader,Inv362_R7_0_I1
+  \* (Inv362_R7_0_I1,DecideAction)
+  <1>5. TypeOK /\ Inv362_R7_0_I1 /\ DecideAction => Inv362_R7_0_I1'
+       BY DEF TypeOK,DecideAction,Decide,Inv362_R7_0_I1
+<1>6. QED BY <1>1,<1>2,<1>3,<1>4,<1>5 DEF Next
+
+
+\*** Inv368_R5_1_I1
+THEOREM L_7 == TypeOK /\ Inv368_R5_1_I1 /\ Next => Inv368_R5_1_I1'
+  \* (Inv368_R5_1_I1,SendRequestVoteAction)
+  <1>1. TypeOK /\ Inv368_R5_1_I1 /\ SendRequestVoteAction => Inv368_R5_1_I1'
+       BY DEF TypeOK,SendRequestVoteAction,SendRequestVote,Inv368_R5_1_I1
+  \* (Inv368_R5_1_I1,SendVoteAction)
+  <1>2. TypeOK /\ Inv368_R5_1_I1 /\ SendVoteAction => Inv368_R5_1_I1'
+       BY DEF TypeOK,SendVoteAction,SendVote,Inv368_R5_1_I1
+  \* (Inv368_R5_1_I1,RecvVoteAction)
+  <1>3. TypeOK /\ Inv368_R5_1_I1 /\ RecvVoteAction => Inv368_R5_1_I1'
+       BY DEF TypeOK,RecvVoteAction,RecvVote,Inv368_R5_1_I1
+  \* (Inv368_R5_1_I1,BecomeLeaderAction)
+  <1>4. TypeOK /\ Inv368_R5_1_I1 /\ BecomeLeaderAction => Inv368_R5_1_I1'
+       BY DEF TypeOK,BecomeLeaderAction,BecomeLeader,Inv368_R5_1_I1
+  \* (Inv368_R5_1_I1,DecideAction)
+  <1>5. TypeOK /\ Inv368_R5_1_I1 /\ DecideAction => Inv368_R5_1_I1'
+       BY DEF TypeOK,DecideAction,Decide,Inv368_R5_1_I1
+<1>6. QED BY <1>1,<1>2,<1>3,<1>4,<1>5 DEF Next
+
+
+\*** Inv367_R1_0_I2
+THEOREM L_8 == TypeOK /\ Inv389_R3_0_I1 /\ Inv367_R1_0_I2 /\ Next => Inv367_R1_0_I2'
+  \* (Inv367_R1_0_I2,SendRequestVoteAction)
+  <1>1. TypeOK /\ Inv367_R1_0_I2 /\ SendRequestVoteAction => Inv367_R1_0_I2'
+       BY DEF TypeOK,SendRequestVoteAction,SendRequestVote,Inv367_R1_0_I2
+  \* (Inv367_R1_0_I2,SendVoteAction)
+  <1>2. TypeOK /\ Inv367_R1_0_I2 /\ SendVoteAction => Inv367_R1_0_I2'
+       BY DEF TypeOK,SendVoteAction,SendVote,Inv367_R1_0_I2
+  \* (Inv367_R1_0_I2,RecvVoteAction)
+  <1>3. TypeOK /\ Inv367_R1_0_I2 /\ RecvVoteAction => Inv367_R1_0_I2'
+       BY DEF TypeOK,RecvVoteAction,RecvVote,Inv367_R1_0_I2
+  \* (Inv367_R1_0_I2,BecomeLeaderAction)
+  <1>4. TypeOK /\ Inv367_R1_0_I2 /\ BecomeLeaderAction => Inv367_R1_0_I2'
+       BY DEF TypeOK,BecomeLeaderAction,BecomeLeader,Inv367_R1_0_I2
+  \* (Inv367_R1_0_I2,DecideAction)
+  <1>5. TypeOK /\ Inv389_R3_0_I1 /\ Inv367_R1_0_I2 /\ DecideAction => Inv367_R1_0_I2'
+       BY DEF TypeOK,Inv389_R3_0_I1,DecideAction,Decide,Inv367_R1_0_I2
+<1>6. QED BY <1>1,<1>2,<1>3,<1>4,<1>5 DEF Next
+
+
+\*** Inv389_R3_0_I1
+THEOREM L_9 == TypeOK /\ Inv389_R3_0_I1 /\ Next => Inv389_R3_0_I1'
+  \* (Inv389_R3_0_I1,SendRequestVoteAction)
+  <1>1. TypeOK /\ Inv389_R3_0_I1 /\ SendRequestVoteAction => Inv389_R3_0_I1'
+       BY DEF TypeOK,SendRequestVoteAction,SendRequestVote,Inv389_R3_0_I1
+  \* (Inv389_R3_0_I1,SendVoteAction)
+  <1>2. TypeOK /\ Inv389_R3_0_I1 /\ SendVoteAction => Inv389_R3_0_I1'
+       BY DEF TypeOK,SendVoteAction,SendVote,Inv389_R3_0_I1
+  \* (Inv389_R3_0_I1,RecvVoteAction)
+  <1>3. TypeOK /\ Inv389_R3_0_I1 /\ RecvVoteAction => Inv389_R3_0_I1'
+       BY DEF TypeOK,RecvVoteAction,RecvVote,Inv389_R3_0_I1
+  \* (Inv389_R3_0_I1,BecomeLeaderAction)
+  <1>4. TypeOK /\ Inv389_R3_0_I1 /\ BecomeLeaderAction => Inv389_R3_0_I1'
+       BY DEF TypeOK,BecomeLeaderAction,BecomeLeader,Inv389_R3_0_I1
+  \* (Inv389_R3_0_I1,DecideAction)
+  <1>5. TypeOK /\ Inv389_R3_0_I1 /\ DecideAction => Inv389_R3_0_I1'
+       BY DEF TypeOK,DecideAction,Decide,Inv389_R3_0_I1
+<1>6. QED BY <1>1,<1>2,<1>3,<1>4,<1>5 DEF Next
+
+
+\*** Inv210_R1_1_I2
+THEOREM L_10 == TypeOK /\ Inv210_R1_1_I2 /\ Next => Inv210_R1_1_I2'
+  \* (Inv210_R1_1_I2,SendRequestVoteAction)
+  <1>1. TypeOK /\ Inv210_R1_1_I2 /\ SendRequestVoteAction => Inv210_R1_1_I2'
+       BY DEF TypeOK,SendRequestVoteAction,SendRequestVote,Inv210_R1_1_I2
+  \* (Inv210_R1_1_I2,SendVoteAction)
+  <1>2. TypeOK /\ Inv210_R1_1_I2 /\ SendVoteAction => Inv210_R1_1_I2'
+       BY DEF TypeOK,SendVoteAction,SendVote,Inv210_R1_1_I2
+  \* (Inv210_R1_1_I2,RecvVoteAction)
+  <1>3. TypeOK /\ Inv210_R1_1_I2 /\ RecvVoteAction => Inv210_R1_1_I2'
+       BY DEF TypeOK,RecvVoteAction,RecvVote,Inv210_R1_1_I2
+  \* (Inv210_R1_1_I2,BecomeLeaderAction)
+  <1>4. TypeOK /\ Inv210_R1_1_I2 /\ BecomeLeaderAction => Inv210_R1_1_I2'
+       BY DEF TypeOK,BecomeLeaderAction,BecomeLeader,Inv210_R1_1_I2
+  \* (Inv210_R1_1_I2,DecideAction)
+  <1>5. TypeOK /\ Inv210_R1_1_I2 /\ DecideAction => Inv210_R1_1_I2'
+       BY DEF TypeOK,DecideAction,Decide,Inv210_R1_1_I2
+<1>6. QED BY <1>1,<1>2,<1>3,<1>4,<1>5 DEF Next
+
+
+THEOREM IndGlobal /\ Next => IndGlobal'
+  BY L_0,L_1,L_2,L_3,L_4,L_5,L_6,L_7,L_8,L_9,L_10 DEF Next, IndGlobal
+
+
+
+
+
+
 ====

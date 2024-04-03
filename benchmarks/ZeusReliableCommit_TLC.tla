@@ -2,10 +2,26 @@
 
 EXTENDS ZeusReliableCommit, TLC, Randomization, FiniteSets
 
+RMessageINVBound ==  \* Messages exchanged by the Protocol   
+    [type: {"INV"}, 
+     sender    : R_NODES,
+     epochID   : 0..R_MAX_EPOCH,
+     version   : 0..R_MAX_VERSION] 
+
+RMessageACKBound ==  \* Messages exchanged by the Protocol   
+    [type: {"ACK"}, 
+     sender    : R_NODES,
+     epochID   : 0..R_MAX_EPOCH,
+     version   : 0..R_MAX_VERSION] 
+
+RMessageVALBound == [type: {"VAL"},        
+                epochID   : 0..R_MAX_EPOCH,
+                version   : 0..R_MAX_VERSION] 
+
 TypeOKRandom ==  \* The type correctness invariant
-    /\  rMsgsINV            \in RandomSetOfSubsets(4, 1, RMessageINV)
-    /\  rMsgsVAL            \in RandomSetOfSubsets(4, 1, RMessageVAL)
-    /\  rMsgsACK            \in RandomSetOfSubsets(4, 1, RMessageACK)
+    /\  rMsgsINV            \in RandomSetOfSubsets(4, 1, RMessageINVBound)
+    /\  rMsgsVAL            \in RandomSetOfSubsets(4, 1, RMessageVALBound)
+    /\  rMsgsACK            \in RandomSetOfSubsets(4, 1, RMessageACKBound)
     /\  rAliveNodes     \in SUBSET R_NODES
     /\  rKeyRcvedACKs \in [R_NODES -> SUBSET R_NODES]
     /\  \A n \in R_NODES: rKeyRcvedACKs[n] \subseteq (R_NODES \ {n})
