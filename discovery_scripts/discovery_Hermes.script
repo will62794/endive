@@ -9,11 +9,6 @@
 
 specname="Hermes"
 
-# source bm_setup.sh $specname
-
-# for seed in 1 2
-# do
-
 # All optimizations.
 seed=$SLURM_ARRAY_TASK_ID
 source /home/schultz.w/bm_setup.sh "${specname}_${seed}"
