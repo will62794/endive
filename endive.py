@@ -2208,13 +2208,17 @@ class InductiveInvGen():
                     def svar_in_inv(v, i):
                         # avoid variables with shared substrings.
                         qi = self.quant_inv(i)
-                        return f"{v}[" in qi or f"{v} " in qi or f"{v}:" in qi
+                        # TODO: Eventually we should parse these invariants and extract vars,
+                        # or retain the variable sets when we randomly generate them from atomic predicates,
+                        # but for now we just hack it and have a few rules for checking which variables appear in a predicate.
+                        return (f"{v}[" in qi) or (f"{v} " in qi) or (f"{v}:" in qi) or (f"{v})" in qi) or (qi.endswith(v))
                     svars = []
                     for s in self.state_vars:
                         if svar_in_inv(s, xinv):
                             svars.append(s)
                     k = tuple(sorted(svars))
                     pred_var_sets_for_invs.append(k)
+                    # print("pred var set for inv:", k, xinv)
                     if k in pred_var_set_counts:
                         pred_var_set_counts[tuple(sorted(svars))] += 1
                     else:
