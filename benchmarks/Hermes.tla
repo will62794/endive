@@ -33,7 +33,7 @@ INVMessage == [
     type: {"INV"}, 
     sender    : H_NODES,
     epochID   : 0..(Cardinality(H_NODES) - 1),
-    version   : 0..H_MAX_VERSION,  
+    version   : Nat,  
     tieBreaker: H_NODES
 ] 
 
@@ -45,7 +45,7 @@ ACKMessage == [
     type: {"ACK"}, 
     sender    : H_NODES,
     epochID   : 0..(Cardinality(H_NODES) - 1),
-    version   : 0..H_MAX_VERSION,  
+    version   : Nat,  
     tieBreaker: H_NODES
 ]
 
@@ -54,26 +54,26 @@ ACKMessage == [
 VALMessage == [
     type: {"VAL"},        \* optimization: epochID is not required for VALs
                           \* epochID   : 0..(Cardinality(H_NODES) - 1),
-    version   : 0..H_MAX_VERSION, 
+    version   : Nat, 
     tieBreaker: H_NODES    
 ]
 
 Message ==  INVMessage \cup ACKMessage \cup VALMessage
 
 TypeOK ==  \* The type correctness invariant
-    /\ msgsINV \in Message
+    /\ msgsINV \in INVMessage
     /\ msgsVAL \in VALMessage
-    /\ msgsACK \in VALMessage
+    /\ msgsACK \in ACKMessage
     /\ nodeRcvedAcks \in [H_NODES -> SUBSET H_NODES]
     /\ \A n \in H_NODES: nodeRcvedAcks[n] \subseteq (H_NODES \ {n})
     /\  nodeLastWriter  \in [H_NODES -> H_NODES]
-    /\  nodeLastWriteTS \in [H_NODES -> [version : 0..H_MAX_VERSION, tieBreaker: H_NODES ]]
-    /\  nodeTS          \in [H_NODES -> [version : 0..H_MAX_VERSION, tieBreaker: H_NODES ]]
+    /\  nodeLastWriteTS \in [H_NODES -> [version : Nat, tieBreaker: H_NODES ]]
+    /\  nodeTS          \in [H_NODES -> [version : Nat, tieBreaker: H_NODES ]]
     /\  nodeState       \in [H_NODES -> {"valid", "invalid", "invalid_write", "write", "replay"}]
     \*  membership and epoch id related
     /\  aliveNodes      \in SUBSET H_NODES
-    /\  epochID         \in 0..(Cardinality(H_NODES) - 1)
-    /\  nodeWriteEpochID \in [H_NODES -> 0..(Cardinality(H_NODES) - 1)]
+    /\  epochID         \in Nat
+    /\  nodeWriteEpochID \in [H_NODES -> Nat]
 
 Init == \* The initial predicate
     /\  msgsINV            = {}
