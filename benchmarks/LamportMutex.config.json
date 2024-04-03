@@ -69,6 +69,10 @@
             "Safety": ["Mutex"]
         },
         "action_def_expands":{
+            "EnterAction": ["beats"],
+            "ExitAction": ["beats", "Broadcast"],
+            "ReceiveAckAction": ["beats"],
+            "ReceiveReleaseAction": ["beats"]
         }
     }
 }
