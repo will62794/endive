@@ -5,13 +5,14 @@
 #SBATCH -N 1                   # Number of nodes
 #SBATCH -n 1                   # Number of tasks
 #SBATCH --cpus-per-task 28                  # Number of cores
+#SBATCH --array=1,2,3,4
 
 specname="LamportMutex"
+seed=$SLURM_ARRAY_TASK_ID
 
 # Run one baseline.
-source bm_setup.sh "${specname}_baseline"
-seed=1
-srun --time=$time_limit_large -o /scratch/schultz.w/endive_logs/${specname}_baseline/${specname}_baseline_output_${seed}.txt \
+source bm_setup.sh "${specname}_baseline_${seed}"
+srun --time=$time_limit_large -o /scratch/schultz.w/endive_logs/${specname}_baseline_${seed}/${specname}_baseline_${seed}_output_${seed}.txt \
     python3 endive.py --spec benchmarks/$specname \
     $common_flags --seed $seed
 
