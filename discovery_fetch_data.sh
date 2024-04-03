@@ -18,6 +18,7 @@ for bm in $bms
 do
     # Fetch rendered proof tree and proof graph object.
     scp -O -r "neudiscovery:$bmdir/${bm}_[0-9]/endive/benchmarks/${bm}_ind-proof-tree-sd*" $local_dir
+    scp -O -r "neudiscovery:$bmdir/${bm}_[0-9]/endive/benchmarks/${bm}_IndDecompProof*.tla" $local_dir
     # TODO: Should be able to remove this second copy after proof grap renaming.
     # scp -O -r "neudiscovery:$bmdir/$bm/endive/benchmarks/${bm}*proofgraph*.json" $local_dir
 done

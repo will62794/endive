@@ -4480,7 +4480,7 @@ class InductiveInvGen():
                 if "tlaps_proof_config" in self.spec_config:
                     proof_config = self.spec_config["tlaps_proof_config"]
                 lemma_nodes = [n for n in self.proof_graph["nodes"] if "is_lemma" in self.proof_graph["nodes"][n]]
-                structured_proof.to_tlaps_proof_skeleton(proof_config, add_lemma_defs=[(n, self.proof_graph["nodes"][n]["expr"]) for n in lemma_nodes])
+                structured_proof.to_tlaps_proof_skeleton(proof_config, add_lemma_defs=[(n, self.proof_graph["nodes"][n]["expr"]) for n in lemma_nodes], seed=self.seed)
             
                 
 

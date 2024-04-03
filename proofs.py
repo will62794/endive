@@ -415,9 +415,12 @@ class StructuredProof():
                 if c.expr not in seen:
                     self.walk_proof_graph(c, visit_fn, seen, all_nodes=all_nodes)
 
-    def to_tlaps_proof_skeleton(self, tlaps_proof_config, add_lemma_defs=None):
+    def to_tlaps_proof_skeleton(self, tlaps_proof_config, add_lemma_defs=None, seed=None):
         """ Export proof graph obligations to TLAPS proof structure."""
-        modname = self.specname + "_IndDecompProof"
+        seed_str = ""
+        if seed is not None:
+            seed_str = f"_{seed}"
+        modname = self.specname + f"_IndDecompProof{seed_str}"
         f = open("benchmarks/" + modname + ".tla", 'w')
         spec_lines = f"---- MODULE {modname} ----\n"
         spec_lines += f"EXTENDS {self.specname}\n"
