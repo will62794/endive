@@ -9,9 +9,8 @@
 specname="Bakery"
 
 # Run one baseline.
-time_limit="08:00:00"
 source bm_setup.sh "${specname}_baseline"
 seed=1
-srun --time-limit $time_limit -o /scratch/schultz.w/endive_logs/${specname}_baseline/${specname}_baseline_output_${seed}.txt \
+srun --time=$time_limit_large -o /scratch/schultz.w/endive_logs/${specname}_baseline/${specname}_baseline_output_${seed}.txt \
     python3 endive.py --spec benchmarks/$specname \
     $common_flags --seed $seed
