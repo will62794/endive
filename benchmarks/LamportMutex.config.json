@@ -66,7 +66,7 @@
         "assumes": [
         ],
         "lemma_def_expands": {
-            "Safety": ["RConsistentInvariant"]
+            "Safety": ["Mutex"]
         },
         "action_def_expands":{
         }
