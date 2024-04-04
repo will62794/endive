@@ -4524,8 +4524,8 @@ class InductiveInvGen():
                     if len(errors_found) == 0:
                         print(f"~~~~~ DONE! Checked {len(lemma_nodes)} total lemma nodes and no CTIs were found.")
                     else:
-                        print(f"!!! Done checking nodes, found errors! {len(errors_found)} nodes with CTIs.")
-                        print("Lemma nodes with CTIs:")
+                        print(f"!!! Done checking nodes, found errors! {len(errors_found)} / {len(lemma_nodes)} nodes with CTIs.")
+                        print(f"{len(errors_found)} lemma nodes with CTIs:")
                         for e in errors_found:
                             print(e)
 
