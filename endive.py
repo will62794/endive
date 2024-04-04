@@ -4500,6 +4500,7 @@ class InductiveInvGen():
                 structured_proof.to_tlaps_proof_skeleton(proof_config, add_lemma_defs=[(n, self.proof_graph["nodes"][n]["expr"]) for n in lemma_nodes], seed=self.seed)
             
                 if self.check_proof_graph:
+                    errors_found = []
                     for n in lemma_nodes:
                         support_nodes = self.proof_graph_get_support_nodes(n)
                         defs_to_add = [(nd, self.proof_graph["nodes"][nd]["expr"]) for nd in lemma_nodes if nd != n]
@@ -4518,8 +4519,15 @@ class InductiveInvGen():
                         print(f"Found {len(k_ctis)} k-CTIS")
                         if len(k_ctis) > 0:
                             print(f"ERROR, found CTIs for lemma node {n}")
-                            raise Exception(f"Found CTIs for lemma node {n}.")
-                    print(f"~~~~~ DONE! Checked {len(lemma_nodes)} total lemma nodes and no CTIs were found.")
+                            errors_found.append(n)
+                            # raise Exception(f"Found CTIs for lemma node {n}.")
+                    if len(errors_found) == 0:
+                        print(f"~~~~~ DONE! Checked {len(lemma_nodes)} total lemma nodes and no CTIs were found.")
+                    else:
+                        print(f"!!! Done checking nodes, found errors! {len(errors_found)} nodes with CTIs.")
+                        print("Lemma nodes with CTIs:")
+                        for e in errors_found:
+                            print(e)
 
                 
 
