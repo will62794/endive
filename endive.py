@@ -2490,13 +2490,15 @@ class InductiveInvGen():
             logging.info(f"Total number of unique checked invariants so far: {len(self.all_checked_invs)}")
 
 
-            #############
             #
             # For each invariant we generated, we want to see what set of CTIs it removes, so that we 
             # can better decide which invariant to pick as a new strengthening conjunct. That's the goal
             # of the prototype code below.
             #
-            ############
+
+            #################################################################
+            # Compute CTI elimination for each invariant.
+            #################################################################
 
             logging.info(f"Checking which invariants eliminate CTIs ({len(orig_k_ctis)} total CTIs).")
 
@@ -2630,9 +2632,9 @@ class InductiveInvGen():
             chosen_invs = []
             cti_states_eliminated_in_iter = 0
 
-            #
-            # Check CTI elimination for each invariant.
-            #
+            #################################################################
+            # Select strengthening lemmas based on CTI elimination.
+            #################################################################
 
             logging.info(f"Checking {len(sat_invs)} satisfied invariants for CTI elimination")
 
