@@ -132,6 +132,8 @@ class InductiveInvGen():
         self.max_proof_node_ctis = all_args["max_proof_node_ctis"]
         self.proof_tree_mode = proof_tree_mode
 
+        self.check_proof_graph = all_args["check_proof_graph"]
+
         # In persistent mode we will save the generated proof graph on completion and also load 
         # from a previously saved proof graph by default if one exists.
         self.persistent_proof_tree_mode = proof_tree_mode_persistent
@@ -1088,7 +1090,9 @@ class InductiveInvGen():
                                         props=None, depth=None, view=None, 
                                         action=None, typeok=None, constants_obj=None, 
                                         sampling_target_num_init_states=15000,
-                                        sampling_target_time_limit_ms=8000):
+                                        sampling_target_time_limit_ms=8000,
+                                        defs_to_add=None,
+                                        pre_props=None):
         """ Starts a single instance of TLC to generate CTIs.
         
         Will generate CTIs for the conjunction of all predicates given in 'props'.
@@ -1109,6 +1113,10 @@ class InductiveInvGen():
             suffix = "_TLC"
         invcheck_tla_indcheck += f"EXTENDS {self.specname}{suffix}\n\n"
 
+        if defs_to_add is not None:
+            for d in defs_to_add:
+                invcheck_tla_indcheck += f"{d[0]} == {d[1]}\n"
+
         # We shouldn't need model constants for CTI generation.
         # invcheck_tla_indcheck += self.model_consts + "\n"
 
@@ -1126,6 +1134,10 @@ class InductiveInvGen():
         strengthening_conjuncts_str = ""
         for cinvname,cinvexp,_ in props:
             strengthening_conjuncts_str += "    /\\ %s\n" % cinvname
+
+        if pre_props is not None:
+            for cinvname,cinvexp,_ in pre_props:
+                strengthening_conjuncts_str += "    /\\ %s\n" % cinvname
 
         # Add definition of current inductive invariant candidate.
         invcheck_tla_indcheck += "InvStrengthened ==\n"
@@ -1328,7 +1340,7 @@ class InductiveInvGen():
                     (parsed_ctis, parsed_cti_traces) = self.generate_ctis_tlc_run_await(cti_subproc["proc"]) 
                     all_ctis.update(parsed_ctis)
 
-    def generate_ctis(self, props=None, reseed=False, depth=None, view=None, actions=None, typeok_override=None, constants_obj=None):
+    def generate_ctis(self, props=None, reseed=False, depth=None, view=None, actions=None, typeok_override=None, constants_obj=None, defs_to_add=None, pre_props=None):
         """ Generate CTIs for use in counterexample elimination. """
 
         # Re-set random seed to ensure consistent RNG initial state.
@@ -1383,7 +1395,9 @@ class InductiveInvGen():
                                         view=view, 
                                         action=action, 
                                         typeok=typeok_override,
-                                        constants_obj=constants_obj)
+                                        constants_obj=constants_obj,
+                                        defs_to_add=defs_to_add,
+                                        pre_props=pre_props)
                     
                     proc_obj = {"action": action, "proc": cti_subproc}
                     cti_subprocs.append(proc_obj)
@@ -1407,7 +1421,9 @@ class InductiveInvGen():
                                     typeok=typeok_override,
                                     constants_obj=constants_obj,
                                     sampling_target_num_init_states=target_sample_states // num_cti_worker_procs,
-                                    sampling_target_time_limit_ms=target_sample_time_limit_ms)
+                                    sampling_target_time_limit_ms=target_sample_time_limit_ms,
+                                    defs_to_add=defs_to_add,
+                                    pre_props=pre_props)
                 
                 cti_subprocs.append({"proc": cti_subproc})
 
@@ -4483,6 +4499,26 @@ class InductiveInvGen():
                 lemma_nodes = [n for n in self.proof_graph["nodes"] if "is_lemma" in self.proof_graph["nodes"][n]]
                 structured_proof.to_tlaps_proof_skeleton(proof_config, add_lemma_defs=[(n, self.proof_graph["nodes"][n]["expr"]) for n in lemma_nodes], seed=self.seed)
             
+                if self.check_proof_graph:
+                    for n in lemma_nodes:
+                        support_nodes = self.proof_graph_get_support_nodes(n)
+                        defs_to_add = [(nd, self.proof_graph["nodes"][nd]["expr"]) for nd in lemma_nodes if nd != n]
+
+                        all_support_nodes = []
+                        for a in support_nodes:
+                            all_support_nodes += support_nodes[a]
+                        pre_props =  [(n, self.proof_graph["nodes"][n]["expr"], "") for n in all_support_nodes]
+                        print("\n==============================")
+                        print("==============================")
+                        print("Checking lemma node:", n)
+                        for p in pre_props:
+                            print("pre:", p)
+                        k_ctis, k_cti_traces = self.generate_ctis(props=[(n, self.proof_graph["nodes"][n]["expr"], "")], pre_props=pre_props, defs_to_add=defs_to_add)
+                        print(f"Found {len(k_ctis)} k-CTIS")
+                        if len(k_ctis) > 0:
+                            print(f"ERROR, found CTIs for lemma node {n}")
+                            raise Exception(f"Found CTIs for lemma node {n}.")
+
                 
 
             # print("")
@@ -4646,6 +4682,7 @@ if __name__ == "__main__":
     parser.add_argument('--use_apalache_ctigen', help='Use Apalache for CTI generation (experimental).', required=False, default=False, action='store_true')
     parser.add_argument('--do_apalache_final_induction_check', help='Do final induction check with Apalache (experimental).', required=False, default=False, action='store_true')
     parser.add_argument('--apalache_smt_timeout_secs', help='Apalache SMT timeout. (experimental).', required=False, type=int, default=15)
+    parser.add_argument('--check_proof_graph', help='Check proof graph inductive obligations.', default=False, action='store_true')
     
 
     args = vars(parser.parse_args())
