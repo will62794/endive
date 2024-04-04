@@ -4069,6 +4069,14 @@ class InductiveInvGen():
                 if len(k_ctis) == 0:
                     self.proof_graph["nodes"][curr_obligation]["discharged"] = True
 
+                    # Re-check if we have eliminated all CTIs.
+                    k_ctis_from_recheck = self.check_proof_node(curr_obligation)
+                    if len(k_ctis_from_recheck) > 0:
+                        # TODO: Consider some policy here i.e. like re-running the round or something with more CTIs or something.
+                        logging.info(f"!!!!!!!!!!!! WARNING, still have {len(k_ctis_from_recheck)} CTIs remaining after elimination step at {curr_obligation}.")
+                    else:
+                        logging.info(f"Re-checked proof obligation at node {curr_obligation} and looks good. All CTIs eliminated.")
+
             if self.save_dot and len(self.proof_graph["edges"]) > 0:
                 # Render updated proof graph as we go.
                 self.render_proof_graph()
@@ -4427,6 +4435,25 @@ class InductiveInvGen():
             children_to_add = [c for c in support_nodes[action] if c not in seen]
             root_proof_node.children[action] = [self.proof_graph_to_structured_proof(child, seen=seen) for child in children_to_add] 
         return root_proof_node
+    
+    def check_proof_node(self, n):
+        """ Check inductive proof obligation for a current proof graph node. Returns set of k-ctis"""
+        lemma_nodes = [n for n in self.proof_graph["nodes"] if "is_lemma" in self.proof_graph["nodes"][n]]
+        support_nodes = self.proof_graph_get_support_nodes(n)
+        defs_to_add = [(nd, self.proof_graph["nodes"][nd]["expr"]) for nd in lemma_nodes if nd != n]
+
+        all_support_nodes = []
+        for a in support_nodes:
+            all_support_nodes += support_nodes[a]
+        pre_props =  [(n, self.proof_graph["nodes"][n]["expr"], "") for n in all_support_nodes]
+        # print("\n==============================")
+        # print("==============================")
+        logging.info("Checking lemma node:", n)
+        # print("---------------------------")
+        for p in pre_props:
+            logging.info(f" pre: {p}")
+        k_ctis, k_cti_traces = self.generate_ctis(props=[(n, self.proof_graph["nodes"][n]["expr"], "")], pre_props=pre_props, defs_to_add=defs_to_add)
+        return k_ctis
 
     def run(self):
         tstart = time.time()
@@ -4502,20 +4529,11 @@ class InductiveInvGen():
                 if self.check_proof_graph:
                     errors_found = []
                     for n in lemma_nodes:
-                        support_nodes = self.proof_graph_get_support_nodes(n)
-                        defs_to_add = [(nd, self.proof_graph["nodes"][nd]["expr"]) for nd in lemma_nodes if nd != n]
-
-                        all_support_nodes = []
-                        for a in support_nodes:
-                            all_support_nodes += support_nodes[a]
-                        pre_props =  [(n, self.proof_graph["nodes"][n]["expr"], "") for n in all_support_nodes]
                         print("\n==============================")
                         print("==============================")
-                        print("Checking lemma node:", n)
+                        print("Proof graph checking of lemma node:", n)
                         print("---------------------------")
-                        for p in pre_props:
-                            print("pre:", p)
-                        k_ctis, k_cti_traces = self.generate_ctis(props=[(n, self.proof_graph["nodes"][n]["expr"], "")], pre_props=pre_props, defs_to_add=defs_to_add)
+                        k_ctis = self.check_proof_node(n)
                         print(f"Found {len(k_ctis)} k-CTIS")
                         if len(k_ctis) > 0:
                             print(f"ERROR, found CTIs for lemma node {n}")
