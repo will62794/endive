@@ -96,7 +96,6 @@
         "IsPrefix(log[VARI], log[VARJ])",
         "IsPrefix(log[VARJ], log[VARI])",
         "commitIndex[VARI] \\in DOMAIN log[VARI] /\\ commitIndex[VARI] \\in DOMAIN log[VARJ] /\\ log[VARJ][commitIndex[VARI]] = log[VARI][commitIndex[VARI]]",
-        "H_LogMatching /\\ log = log",
         "Len(log[VARMAERES.msource]) >= VARMAERES.mmatchIndex",
         "Len(log[VARMAERES.mdest]) >= VARMAERES.mmatchIndex",
         "log[VARMAERES.msource][VARMAERES.mmatchIndex] = log[VARMAERES.mdest][VARMAERES.mmatchIndex]",
