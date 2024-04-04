@@ -846,7 +846,7 @@ ExistsRequestVoteResponseQuorum(T, dest) ==
 \* there can be no logs that exist in term T.
 \* TODO: Fix this to get a correct statement here.
 H_SuccessfulRequestVoteQuorumInTermImpliesNoLogsInTerm ==
-    \A t \in Nat :  \* TODO: Replace 'Nat' with 'Terms'?
+    \A t \in Terms :  \* TODO: Replace 'Nat' with 'Terms'?
     \E dest \in Server : 
         (/\ ExistsRequestVoteResponseQuorum(t, dest)
          /\ (~\E l \in Server : state[l] = Leader /\ currentTerm[l] = t)) => 
