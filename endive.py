@@ -2737,6 +2737,7 @@ class InductiveInvGen():
             # Disable this selection logic for now
             #
             # for i in range(len(sorted_invs)):
+            """
             for i in []:
                 # Sort the remaining invariants by the number of new CTIs they eliminate.
                 compare_fn = lambda inv: (len(cti_states_eliminated_by_invs[inv] - eliminated_ctis), -len(get_invexp_cost(inv)))
@@ -2788,6 +2789,7 @@ class InductiveInvGen():
                 else:
                     logging.info("Moving on since no remaining invariants eliminate CTIs.")
                     break
+            """
             ###########################
 
 
