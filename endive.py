@@ -3822,7 +3822,7 @@ class InductiveInvGen():
             #         print("constant obj:", c)
             #         break
                 
-            k_ctis, k_cti_traces = self.generate_ctis(props=[curr_obligation_pred_tup])
+            k_ctis, k_cti_traces = self.generate_ctis(props=[curr_obligation_pred_tup], specname_tag=curr_obligation)
             count += 1
 
             # for kcti in k_ctis:
