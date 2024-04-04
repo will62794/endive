@@ -1971,7 +1971,9 @@ class InductiveInvGen():
 
     def eliminate_ctis(self, orig_k_ctis, num_invs, roundi, subroundi=None, preds=None, preds_alt=[], 
                        quant_inv_alt=None, tlc_workers=6, specdir=None, append_inv_round_id=True,
-                       cache_states_with_ignored_vars=None):
+                       cache_states_with_ignored_vars=None,
+                       proof_graph_node=None,
+                       proof_graph_action=None):
         """ Check which of the given satisfied invariants eliminate CTIs. """
         
         if preds is None:
@@ -2960,6 +2962,50 @@ class InductiveInvGen():
                         if self.save_dot and len(self.proof_graph["edges"]) > 0:
                             # Render updated proof graph as we go.
                             self.render_proof_graph()     
+                
+                #
+                # Double check CTI elimination for this node.
+                #
+                if self.proof_tree_mode and self.auto_lemma_action_decomposition:
+                    action_node = f"{proof_graph_node}_{proof_graph_action}"
+
+                    logging.info(f"Re-checking CTIs at node {proof_graph_node}, action={proof_graph_action}.")
+                    k_ctis_rechecked = self.check_proof_node(proof_graph_node, action_filter=[proof_graph_action])
+                    # Print some CTIs.
+                    n_to_show = 10
+                    logging.info(f"Sample of {n_to_show} newly found CTIs")
+                    for c in k_ctis_rechecked[:n_to_show]:
+                        print(c.action_name, c)
+                    if len(k_ctis_rechecked) > 0:
+                        # TODO: Re-run round with these CTIs?
+                        logging.info(f" !! Still have {len(k_ctis_rechecked)} CTIs remaining for proof node ({proof_graph_node}, {proof_graph_action}).")
+                        self.proof_graph["nodes"][action_node]["ctis_remaining"] = len(k_ctis_rechecked)
+                        self.proof_graph["nodes"][action_node]["discharged"] = False
+
+                        if len(k_ctis_rechecked) > self.MAX_NUM_CTIS_PER_ROUND:
+                            # Sample max num CTIs to ensure some diversity.
+                            ctis_sampled = random.sample(list(k_ctis_rechecked), self.MAX_NUM_CTIS_PER_ROUND)
+                            logging.info(f"Limiting re-checked CTI set to {self.MAX_NUM_CTIS_PER_ROUND} of {len(k_ctis_rechecked)} total found.")
+                            k_ctis_rechecked = ctis_sampled
+
+                        num_ctis_remaining = len(k_ctis_rechecked)
+                        # Add in newly discovered CTIs and start round back from first iteration. Existing conjuncts found so far will be maintained.
+                        logging.info(f"Adding in {len(k_ctis_rechecked)} newly found CTIs and re-running round.")
+                        orig_k_ctis += list(k_ctis_rechecked)
+
+                        # Update the CTI table as well.
+                        for cti in k_ctis_rechecked:
+                            hashed = str(hash(cti))
+                            cti_table[hashed] = cti
+
+                        iteration = 0 # will get incremented below to initial iteration below.
+
+                        if self.save_dot and len(self.proof_graph["edges"]) > 0:
+                            # Update rendered graph status.
+                            self.render_proof_graph()
+                    else:
+                        logging.info(f"Re-checked node {proof_graph_node},action={proof_graph_action} without any CTIs found. All looks good.")
+
 
             if len(conjuncts_added_in_round) >= self.max_num_conjuncts_per_round and num_ctis_remaining > 0:
                 logging.info(f"Exiting round since reached max num conjuncts per round: {self.max_num_conjuncts_per_round}")
@@ -4033,9 +4079,13 @@ class InductiveInvGen():
 
                 self.latest_elimination_iter = 1
 
-                # Run CTI eliminatinon.
+                #
+                # Run CTI elimination.
+                #
                 ret = self.eliminate_ctis(k_ctis_to_eliminate, self.num_invs, roundi, tlc_workers=self.tlc_workers, subroundi=subround, preds=preds, 
-                                            append_inv_round_id=True, cache_states_with_ignored_vars=cache_with_ignored_vars)
+                                            append_inv_round_id=True, cache_states_with_ignored_vars=cache_with_ignored_vars,
+                                            proof_graph_node=curr_obligation,
+                                            proof_graph_action=k_cti_action)
                 subround += 1
 
                 logging.info(f"[ END CTI elimination Round {roundi}, subround {subround}. ]")
@@ -4452,21 +4502,24 @@ class InductiveInvGen():
     
     def check_proof_node(self, n, action_filter=None):
         """ Check inductive proof obligation for a current proof graph node. Returns set of k-ctis"""
-        lemma_nodes = [n for n in self.proof_graph["nodes"] if "is_lemma" in self.proof_graph["nodes"][n]]
+        lemma_nodes = [l for l in self.proof_graph["nodes"] if "is_lemma" in self.proof_graph["nodes"][l]]
+        # print("PROOF GRAPH EDGES:", self.proof_graph["edges"])
+        # print("PROOF GRAPH NODES:", list(self.proof_graph["nodes"].keys()))
         support_nodes = self.proof_graph_get_support_nodes(n)
         defs_to_add = [(nd, self.proof_graph["nodes"][nd]["expr"]) for nd in lemma_nodes if nd != n]
 
         all_support_nodes = []
         for a in support_nodes:
-            all_support_nodes += support_nodes[a]
-        pre_props =  [(n, self.proof_graph["nodes"][n]["expr"], "") for n in all_support_nodes]
-        # print("\n==============================")
-        # print("==============================")
-        logging.info(f"Checking lemma node: {n}")
-        # print("---------------------------")
+            if action_filter is not None and a not in action_filter:
+                continue
+            else:
+                all_support_nodes += support_nodes[a]
+        pre_props =  [(x, self.proof_graph["nodes"][n]["expr"], "") for x in all_support_nodes]
+        logging.info(f"Checking lemma proof node: {n}")
         for p in pre_props:
             logging.info(f" pre: {p}")
-        k_ctis, k_cti_traces = self.generate_ctis(props=[(n, self.proof_graph["nodes"][n]["expr"], "")], pre_props=pre_props, defs_to_add=defs_to_add, specname_tag=n)
+        props = [(n, self.proof_graph["nodes"][n]["expr"], "")]
+        k_ctis, k_cti_traces = self.generate_ctis(props=props, pre_props=pre_props, defs_to_add=defs_to_add, specname_tag=n)
         if action_filter is not None:
             k_ctis = [c for c in k_ctis if c.action_name in action_filter]
 
