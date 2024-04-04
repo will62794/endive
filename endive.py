@@ -4511,6 +4511,7 @@ class InductiveInvGen():
                         print("\n==============================")
                         print("==============================")
                         print("Checking lemma node:", n)
+                        print("---------------------------")
                         for p in pre_props:
                             print("pre:", p)
                         k_ctis, k_cti_traces = self.generate_ctis(props=[(n, self.proof_graph["nodes"][n]["expr"], "")], pre_props=pre_props, defs_to_add=defs_to_add)
