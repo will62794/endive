@@ -4069,6 +4069,7 @@ class InductiveInvGen():
                 if len(k_ctis) == 0:
                     self.proof_graph["nodes"][curr_obligation]["discharged"] = True
 
+                    logging.info("Re-checking inductive proof obligation after we eliminated all known CTIs in this round.")
                     # Re-check if we have eliminated all CTIs.
                     k_ctis_from_recheck = self.check_proof_node(curr_obligation)
                     if len(k_ctis_from_recheck) > 0:
