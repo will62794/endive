@@ -4519,15 +4519,15 @@ class InductiveInvGen():
                         print(f"Found {len(k_ctis)} k-CTIS")
                         if len(k_ctis) > 0:
                             print(f"ERROR, found CTIs for lemma node {n}")
-                            errors_found.append(n)
+                            errors_found.append((n, k_ctis))
                             # raise Exception(f"Found CTIs for lemma node {n}.")
                     if len(errors_found) == 0:
                         print(f"~~~~~ DONE! Checked {len(lemma_nodes)} total lemma nodes and no CTIs were found.")
                     else:
                         print(f"!!! Done checking nodes, found errors! {len(errors_found)} / {len(lemma_nodes)} nodes with CTIs.")
                         print(f"{len(errors_found)} lemma nodes with CTIs:")
-                        for e in errors_found:
-                            print(" - ", e)
+                        for e,ctis in errors_found:
+                            print(" - ", e, "num_ctis:", len(ctis))
 
                 
 
