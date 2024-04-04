@@ -1092,7 +1092,8 @@ class InductiveInvGen():
                                         sampling_target_num_init_states=15000,
                                         sampling_target_time_limit_ms=8000,
                                         defs_to_add=None,
-                                        pre_props=None):
+                                        pre_props=None,
+                                        specname_tag=None):
         """ Starts a single instance of TLC to generate CTIs.
         
         Will generate CTIs for the conjunction of all predicates given in 'props'.
@@ -1106,8 +1107,12 @@ class InductiveInvGen():
         tag = uuid.uuid4().hex[:8]
         ctiseed = random.randint(0,10000)
 
+        specname_tag_str = ""
+        if specname_tag is not None:
+            specname_tag_str = "_" + specname_tag
+
         # Generate spec for generating CTIs.
-        invcheck_tla_indcheck=f"---- MODULE {self.specname}_CTIGen_{ctiseed} ----\n"
+        invcheck_tla_indcheck=f"---- MODULE {self.specname}_CTIGen_{ctiseed}{specname_tag_str} ----\n"
         suffix = ""
         if self.tlc_specific_spec and not self.use_apalache_ctigen:
             suffix = "_TLC"
@@ -1183,8 +1188,8 @@ class InductiveInvGen():
 
         invcheck_tla_indcheck += "===="
 
-        indchecktlafile = f"{os.path.join(self.specdir, GEN_TLA_DIR)}/{self.specname}_CTIGen_{ctiseed}.tla"
-        indchecktlafilename = f"{GEN_TLA_DIR}/{self.specname}_CTIGen_{ctiseed}.tla"
+        indchecktlafile = f"{os.path.join(self.specdir, GEN_TLA_DIR)}/{self.specname}_CTIGen_{ctiseed}{specname_tag_str}.tla"
+        indchecktlafilename = f"{GEN_TLA_DIR}/{self.specname}_CTIGen_{ctiseed}{specname_tag_str}.tla"
         f = open(indchecktlafile,'w')
         f.write(invcheck_tla_indcheck)
         f.close()
@@ -1194,13 +1199,13 @@ class InductiveInvGen():
         
         indcheckcfg_name = f"{self.specname}_CTIGen_{ctiseed}"
 
-        def indcheckcfgfile(tag=None):
-            tag_str = "_" + tag if tag is not  None else ""
-            return os.path.join(self.specdir, f"{GEN_TLA_DIR}/{indcheckcfg_name}{tag_str}.cfg")
+        def indcheckcfgfile(local_tag=None):
+            local_tag_str = "_" + local_tag if local_tag is not  None else ""
+            return os.path.join(self.specdir, f"{GEN_TLA_DIR}/{indcheckcfg_name}{local_tag_str}{specname_tag_str}.cfg")
         
-        def indcheckcfgfilename(tag=None):
-            tag_str = "_" + tag if tag is not  None else ""
-            return f"{GEN_TLA_DIR}/{indcheckcfg_name}{tag_str}.cfg"
+        def indcheckcfgfilename(local_tag=None):
+            local_tag_str = "_" + local_tag if local_tag is not  None else ""
+            return f"{GEN_TLA_DIR}/{indcheckcfg_name}{local_tag_str}{specname_tag_str}.cfg"
 
         invcheck_tla_indcheck_cfg = "INIT IndCand\n"
         if action is None:
@@ -1340,7 +1345,9 @@ class InductiveInvGen():
                     (parsed_ctis, parsed_cti_traces) = self.generate_ctis_tlc_run_await(cti_subproc["proc"]) 
                     all_ctis.update(parsed_ctis)
 
-    def generate_ctis(self, props=None, reseed=False, depth=None, view=None, actions=None, typeok_override=None, constants_obj=None, defs_to_add=None, pre_props=None):
+    def generate_ctis(self, props=None, reseed=False, depth=None, view=None, actions=None, typeok_override=None, constants_obj=None, 
+                      defs_to_add=None, pre_props=None,
+                      specname_tag=None):
         """ Generate CTIs for use in counterexample elimination. """
 
         # Re-set random seed to ensure consistent RNG initial state.
@@ -1397,7 +1404,8 @@ class InductiveInvGen():
                                         typeok=typeok_override,
                                         constants_obj=constants_obj,
                                         defs_to_add=defs_to_add,
-                                        pre_props=pre_props)
+                                        pre_props=pre_props,
+                                        specname_tag=specname_tag)
                     
                     proc_obj = {"action": action, "proc": cti_subproc}
                     cti_subprocs.append(proc_obj)
@@ -1423,7 +1431,8 @@ class InductiveInvGen():
                                     sampling_target_num_init_states=target_sample_states // num_cti_worker_procs,
                                     sampling_target_time_limit_ms=target_sample_time_limit_ms,
                                     defs_to_add=defs_to_add,
-                                    pre_props=pre_props)
+                                    pre_props=pre_props,
+                                    specname_tag=specname_tag)
                 
                 cti_subprocs.append({"proc": cti_subproc})
 
@@ -4441,7 +4450,7 @@ class InductiveInvGen():
             root_proof_node.children[action] = [self.proof_graph_to_structured_proof(child, seen=seen) for child in children_to_add] 
         return root_proof_node
     
-    def check_proof_node(self, n):
+    def check_proof_node(self, n, action_filter=None):
         """ Check inductive proof obligation for a current proof graph node. Returns set of k-ctis"""
         lemma_nodes = [n for n in self.proof_graph["nodes"] if "is_lemma" in self.proof_graph["nodes"][n]]
         support_nodes = self.proof_graph_get_support_nodes(n)
@@ -4457,7 +4466,10 @@ class InductiveInvGen():
         # print("---------------------------")
         for p in pre_props:
             logging.info(f" pre: {p}")
-        k_ctis, k_cti_traces = self.generate_ctis(props=[(n, self.proof_graph["nodes"][n]["expr"], "")], pre_props=pre_props, defs_to_add=defs_to_add)
+        k_ctis, k_cti_traces = self.generate_ctis(props=[(n, self.proof_graph["nodes"][n]["expr"], "")], pre_props=pre_props, defs_to_add=defs_to_add, specname_tag=n)
+        if action_filter is not None:
+            k_ctis = [c for c in k_ctis if c.action_name in action_filter]
+
         return k_ctis
 
     def run(self):
