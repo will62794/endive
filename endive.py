@@ -4448,7 +4448,7 @@ class InductiveInvGen():
         pre_props =  [(n, self.proof_graph["nodes"][n]["expr"], "") for n in all_support_nodes]
         # print("\n==============================")
         # print("==============================")
-        logging.info("Checking lemma node:", n)
+        logging.info(f"Checking lemma node: {n}")
         # print("---------------------------")
         for p in pre_props:
             logging.info(f" pre: {p}")
