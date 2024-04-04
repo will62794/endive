@@ -4527,7 +4527,7 @@ class InductiveInvGen():
                         print(f"!!! Done checking nodes, found errors! {len(errors_found)} / {len(lemma_nodes)} nodes with CTIs.")
                         print(f"{len(errors_found)} lemma nodes with CTIs:")
                         for e in errors_found:
-                            print(e)
+                            print(" - ", e)
 
                 
 
