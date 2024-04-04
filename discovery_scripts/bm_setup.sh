@@ -24,12 +24,12 @@ rm -rf benchmarks/states
 #
 
 tlc_workers=24
-num_cti_workers=4
+num_cti_workers=16
 cti_elimination_workers=8
 
 nrounds=45
 ninvs=80000
-max_num_ctis_per_round=5000
+max_num_ctis_per_round=10000
 target_sample_states=200000
 num_simulate_traces=200000
 
