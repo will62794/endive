@@ -1,0 +1,19 @@
+#!/bin/bash
+#SBATCH --partition short    # Partition name
+#SBATCH --time=16:00:00       # Time limit.
+#SBATCH --constraint="[broadwell|cascadelake]"       # Newer processors.
+#SBATCH -N 1                   # Number of nodes
+#SBATCH -n 1                   # Number of tasks
+#SBATCH --cpus-per-task 28                  # Number of cores
+#SBATCH --array=1,2,3,4,5,6
+
+specname="AsyncRaft"
+
+# All optimizations.
+seed=$SLURM_ARRAY_TASK_ID
+source /home/schultz.w/bm_setup.sh "${specname}_PrimaryHasEntriesItCreated_${seed}"
+srun -o /scratch/schultz.w/endive_logs/${specname}_PrimaryHasEntriesItCreated/${specname}_PrimaryHasEntriesItCreated_output_${seed}.txt \
+    python3 endive.py --spec benchmarks/$specname \
+    $common_flags --seed $seed --proof_tree_mode --auto_lemma_action_decomposition --enable_partitioned_state_caching --safety "H_PrimaryHasEntriesItCreated"
+
+
