@@ -4519,6 +4519,7 @@ class InductiveInvGen():
                         if len(k_ctis) > 0:
                             print(f"ERROR, found CTIs for lemma node {n}")
                             raise Exception(f"Found CTIs for lemma node {n}.")
+                    print(f"~~~~~ DONE! Checked {len(lemma_nodes)} total lemma nodes and no CTIs were found.")
 
                 
 
