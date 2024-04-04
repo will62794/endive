@@ -108,7 +108,7 @@
         "H_SuccessfulRequestVoteQuorumInTermImpliesNoLogsInTerm /\\ state = state /\\ currentTerm = currentTerm /\\ requestVoteResponseMsgs = requestVoteResponseMsgs",
         "H_RequestVoteQuorumInTermImpliesNoAppendEntryLogsInTerm /\\ appendEntriesRequestMsgs = appendEntriesRequestMsgs /\\ state = state /\\ requestVoteResponseMsgs = requestVoteResponseMsgs /\\ currentTerm = currentTerm",
         "H_LogEntryInTermImpliesSafeAtTermAppendEntries /\\ appendEntriesRequestMsgs = appendEntriesRequestMsgs /\\ currentTerm = currentTerm /\\ state = state",
-        "H_LogEntryInTermImpliesSafeAtTerm /\\ currentTerm = currentTerm /\\ log = log /\\ state = state /\\ votedFor",
+        "H_LogEntryInTermImpliesSafeAtTerm /\\ currentTerm = currentTerm /\\ log = log /\\ state = state /\\ votedFor = votedFor",
         "H_RequestVoteQuorumInTermImpliesNoOtherLeadersInTerm /\\ state = state /\\ currentTerm = currentTerm /\\ requestVoteResponseMsgs = requestVoteResponseMsgs"
     ],
     "preds_alt" : [],
