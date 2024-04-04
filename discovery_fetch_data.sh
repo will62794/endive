@@ -29,9 +29,12 @@ done
 
 for seed in 1 2 3 4 5 6
 do
-scp -O -r "neudiscovery:$bmdir/AsyncRaft_OnePrimaryPerTerm_$seed/endive/benchmarks/AsyncRaft_ind-proof-tree-sd$seed.pdf" $local_dir/AsyncRaft_OnePrimaryPerTerm_ind-proof-tree-sd$seed.pdf
-scp -O -r "neudiscovery:$bmdir/AsyncRaft_OnePrimaryPerTerm_$seed/endive/benchmarks/AsyncRaft_IndDecompProof_$seed.tla" $local_dir/AsyncRaft_OnePrimaryPerTerm_IndDecompProof_$seed.tla
-scp -O -r "neudiscovery:$bmdir/AsyncRaft_LogMatching_$seed/endive/benchmarks/AsyncRaft_ind-proof-tree-sd$seed.pdf" $local_dir/AsyncRaft_LogMatching_ind-proof-tree-sd$seed.pdf
+    for tag in "OnePrimaryPerTerm" "PrimaryHasEntriesItCreated" "LogMatching"
+    do
+    scp -O -r "neudiscovery:$bmdir/AsyncRaft_${tag}_$seed/endive/benchmarks/AsyncRaft_ind-proof-tree-sd$seed.pdf" $local_dir/AsyncRaft_${tag}_ind-proof-tree-sd$seed.pdf
+    scp -O -r "neudiscovery:$bmdir/AsyncRaft_${tag}_$seed/endive/benchmarks/AsyncRaft_IndDecompProof_$seed.tla" $local_dir/AsyncRaft_${tag}_IndDecompProof_$seed.tla
+    # scp -O -r "neudiscovery:$bmdir/AsyncRaft_LogMatching_$seed/endive/benchmarks/AsyncRaft_ind-proof-tree-sd$seed.pdf" $local_dir/AsyncRaft_LogMatching_ind-proof-tree-sd$seed.pdf
+    done
 done
 
 scp -O -r "neudiscovery:$bmdir/LamportMutex_broken_grammar/endive/benchmarks/LamportMutex_ind-proof-tree-sd3.pdf" $local_dir/LamportMutex_broken_grammar_ind-proof-tree-sd3.pdf
