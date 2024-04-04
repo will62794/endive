@@ -1,0 +1,53 @@
+{
+    "preds"  :  [
+        "\\A VVn1,VVn2 \\in Node : leader[VVn1] /\\ leader[VVn2] => VVn1 = VVn2",
+        "\\A VVn \\in Node : decided[VVn] # {} => leader[VVn]",
+        "\\A VVn \\in Node : leader[VVn] => \\E VVQ \\in Quorum : votes[VVn] = VVQ",
+        "\\A VVn,VVni,VVnj \\in Node : ~(VVni # VVnj /\\ VVn \\in votes[VVni] /\\ VVn \\in votes[VVnj])",
+        "\\A VVni,VVnj \\in Node : VVnj \\in votes[VVni] => <<VVnj,VVni>> \\in vote_msg",
+        "\\A VVmi,VVmj \\in vote_msg : (VVmi[1] = VVmj[1]) => VVmi = VVmj",
+        "\\A VVmi \\in vote_msg : voted[VVmi[1]]"
+    ],
+    "preds_alt" : [],
+    "safety"  :  "H_NoConflictingValues",
+    "constants"  :  {
+        "Node": ["{n1}", "{n1,n2}", "{n1,n2,n3}"],
+        "Value": ["{v1}","{v1,v2}"],
+        "n1": "n1",
+        "n2": "n2",
+        "n3": "n3",
+        "n4": "n4",
+        "n5": "n5",
+        "v1": "v1",
+        "v2": "v2"
+    },
+    "constraint"  :  "",
+    "simulation_inv_check": false,
+    "simulation_inv_check_num_states": 500000,
+    "simulation_inv_check_depth": 20,
+    "quant_inv"  :  "\\A VARI \\in Node : \\A VARJ \\in Node : \\A VARK \\in Node : \\E VARQJ \\in Quorum : \\A VALI \\in Value : ",
+    "quant_inv_alt"  :  null,
+    "quant_vars": ["VARI", "VARJ", "VARK", "VALI", "VARQJ"],
+    "model_consts"  :  "CONSTANT n1,n2,n3,v1,v2",
+    "symmetry" : false,
+    "typeok"  :  "TypeOK",
+    "simulate"  :  true,
+    "tlc_specific_spec": true,
+    "actions":[
+        "SendRequestVoteAction",
+        "SendVoteAction",
+        "RecvVoteAction",
+        "BecomeLeaderAction",
+        "DecideAction"
+    ],
+    "tlaps_proof_config": {
+        "assumes": [
+        ],
+        "lemma_def_expands": {
+            "Safety": ["H_NoConflictingValues"]
+
+        },
+        "action_def_expands":{
+        }
+    }      
+}
