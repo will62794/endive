@@ -400,11 +400,55 @@ Before(i,j) == /\ num[i] > 0
                   \/ /\ num[i] = 1
                      /\ i < j
 
-(***************************************************************************)
-(* Inv is the complete inductive invariant.                                *)
-(***************************************************************************)  
-Inv == 
-    /\ TypeOK 
+
+Inv == /\ TRUE
+       /\ \A i \in Procs : 
+             /\ (pc[i] \in {"ncs", "e1", "e2"}) => (num[i] = 0)
+             /\ (pc[i] \in {"e4", "w1", "w2", "cs"}) => (num[i] # 0)
+             /\ (pc[i] \in {"e2", "e3"}) => flag[i] 
+             /\ (pc[i] = "w2") => (nxt[i] # i)
+             /\ (pc[i] \in {"e2", "w1", "w2"}) => i \notin unchecked[i]
+             /\ (pc[i] \in {"w1", "w2"}) => \A j \in (Procs \ unchecked[i]) \ {i} : Before(i, j)
+             /\ /\ pc[i] = "w2"
+                /\ \/ (pc[nxt[i]] = "e2") /\ (i \notin unchecked[nxt[i]])
+                   \/ pc[nxt[i]] = "e3"
+                => max[nxt[i]] >= num[i]
+             /\ /\ pc[i] = "w2"
+                /\ previous[i] # -1 
+                /\ previous[i] # num[nxt[i]]
+                /\ pc[nxt[i]] \in {"e4", "w1", "w2", "cs"}
+                => Before(i, nxt[i])             
+             /\ (pc[i] = "cs") => \A j \in Procs \ {i} : Before(i, j)
+
+
+LInv1 == /\ TRUE
+       /\ \A i \in Procs : 
+             /\ (pc[i] \in {"ncs", "e1", "e2"}) => (num[i] = 0)
+
+LInv2 == /\ TRUE
+       /\ \A i \in Procs : 
+             /\ (pc[i] \in {"e4", "w1", "w2", "cs"}) => (num[i] # 0)
+
+\* Inv == /\ TRUE
+    \*    /\ \A i \in Procs : 
+LInv3 == \A i \in Procs : (pc[i] \in {"ncs", "e1", "e2"}) => (num[i] = 0)
+LInv4 == \A i \in Procs : (pc[i] \in {"e4", "w1", "w2", "cs"}) => (num[i] # 0)
+LInv5 == \A i \in Procs : (pc[i] \in {"e2", "e3"}) => flag[i] 
+LInv6 == \A i \in Procs : (pc[i] = "w2") => (nxt[i] # i)
+LInv7 == \A i \in Procs : (pc[i] \in {"e2", "w1", "w2"}) => i \notin unchecked[i]
+LInv8 == \A i \in Procs : (pc[i] \in {"w1", "w2"}) => \A j \in (Procs \ unchecked[i]) \ {i} : Before(i, j)
+LInv9 == \A i \in Procs :
+             /\ (/\ pc[i] = "w2"
+                 /\ \/ (pc[nxt[i]] = "e2") /\ (i \notin unchecked[nxt[i]])
+                    \/ pc[nxt[i]] = "e3")
+                => max[nxt[i]] >= num[i]
+LInv15 == \A i \in Procs :
+             /\ (/\ pc[i] = "w2"
+                 /\ previous[i] # -1 
+                 /\ previous[i] # num[nxt[i]]
+                 /\ pc[nxt[i]] \in {"e4", "w1", "w2", "cs"}) => Before(i, nxt[i])             
+             
+LInv13 == \A i \in Procs : (pc[i] = "cs") => \A j \in Procs \ {i} : Before(i, j)
 
 H_L1 == \A i \in Procs : (pc[i] \in {"ncs", "e1", "e2"}) => (num[i] = 0)
 H_L2 == \A i \in Procs : (pc[i] \in {"e4", "w1", "w2", "cs"}) => (num[i] # 0)
@@ -436,6 +480,44 @@ CTICost == 0
 
 H_Inv410_R6_0_I1 == \A VARI \in Procs : ~(nxt[VARI] = VARI) \/ (~(pc[VARI] = "w2"))
 
+
+
+\* H_Inv1683_R2_0_I1 == \A VARI \in Procs : \A VARJ \in Procs : ~(num[VARI] > num[VARJ]) \/ (~(pc[VARI] = "e2"))
+
+\* H_Inv460 == \A VARI \in Procs : (unchecked[VARI] = {}) \/ (~(pc[VARI] = "cs"))
+\* H_Inv87 == \A VARI \in Procs : (pc[VARI] = "cs") \/ (~(VARI \in unchecked[VARI]))
+\* H_Inv465 == \A VARI \in Procs : (unchecked[VARI] = {}) \/ (~(pc[VARI] = "exit"))
+\* H_Inv464 == \A VARI \in Procs : (unchecked[VARI] = {}) \/ (~(pc[VARI] = "e4"))
+\* H_Inv461 == \A VARI \in Procs : (unchecked[VARI] = {}) \/ (~(pc[VARI] = "e1"))
+
+\* H_Inv7123_R0_0_I3 == \A VARI \in Procs : \A VARJ \in Procs : ~(pc[VARI] = "cs") \/ (~(pc[VARJ] = "w1") \/ (~(unchecked[VARJ] = {})))
+\* H_Inv1003_R0_1_I2 == \A VARI \in Procs : (nxt[VARI] < nxt[VARI]) \/ ((pc[VARI] = "cs"))
+\* H_Inv835_R1_0_I1 == \A VARI \in Procs : (unchecked[VARI] = {}) \/ (~(pc[VARI] = "cs"))
+\* H_Inv839_R1_0_I1 == \A VARI \in Procs : (unchecked[VARI] = {}) \/ (~(pc[VARI] = "e4"))
+\* H_Inv1000_R1_0_I1 == \A VARI \in Procs : ~(num[VARI] = 0) \/ (~(pc[VARI] = "w1"))
+\* H_Inv250_R1_0_I1 == \A VARI \in Procs : (num[VARI] = 1) \/ (~(VARI \in unchecked[VARI]))
+
+\* H_Inv19 ==  \A VARI \in Procs : ~(VARI \in unchecked[VARI])
+
+
+\* H_Inv105_R0_0_I2 == \A VARI \in Procs : (pc[VARI] = "e1") \/ ((pc[VARI] = "e2"))
+
+
+H_Inv7123_R0_0_I3 == \A VARI \in Procs : \A VARJ \in Procs : ~(pc[VARI] = "cs") \/ (~(pc[VARJ] = "w1") \/ (~(unchecked[VARJ] = {})))
+H_Inv2239_R0_1_I1 == \A VARI \in Procs : (unchecked[VARI] = {}) \/ (~(pc[VARI] = "cs"))
+H_Inv1976_R0_1_I1 == \A VARI \in Procs : (previous[VARI] = -1) \/ (~(nxt[VARI] = VARI))
+H_Inv2670_R0_1_I1 == \A VARI \in Procs : ~(num[VARI] = 0) \/ (~(pc[VARI] = "w2"))
+H_Inv3027_R0_1_I1 == \A VARI \in Procs : ~(pc[VARI] = "w2") \/ (~(unchecked[VARI] = {}))
+H_Inv839_R1_0_I1 == \A VARI \in Procs : (unchecked[VARI] = {}) \/ (~(pc[VARI] = "e4"))
+H_Inv1000_R1_0_I1 == \A VARI \in Procs : ~(num[VARI] = 0) \/ (~(pc[VARI] = "w1"))
+H_Inv250_R1_0_I1 == \A VARI \in Procs : (num[VARI] = 1) \/ (~(VARI \in unchecked[VARI]))
+H_Inv6161_R1_1_I3 == \A VARI \in Procs : (unchecked[VARI] = 1..(VARI-1)) \/ (~(pc[VARI] = "w1") \/ (~(unchecked[VARI] = {})))
+H_Inv1216_R1_2_I1 == \A VARI \in Procs : (pc[VARI] = "cs") \/ (~(VARI \in unchecked[VARI]))
+H_Inv2672_R1_2_I1 == \A VARI \in Procs : ~(num[VARI] = 0) \/ (~(pc[VARI] \in {"w1","w2"}))
+H_Inv1783_R3_0_I1 == \A VARI \in Procs : ~(nxt[VARI] = VARI) \/ (~(pc[VARI] = "w2"))
+H_Inv464_R6_0_I2 == \A VARI \in Procs : (unchecked[VARI] = {}) \/ (~(pc[VARI] = "e3"))
+H_Inv555_R7_0_I1 == \A VARI \in Procs : ~(num[VARI] = 0) \/ (~(pc[VARI] = "e4"))
+H_Inv26_R8_0_I1 == \A VARI \in Procs : ~(VARI \in unchecked[VARI])
 
 =============================================================================
 \* Modification History

@@ -173,15 +173,20 @@ e4(self) == /\ pc[self] = "e4"
                   /\ pc' = [pc EXCEPT ![self] = "w1"]
             /\ UNCHANGED << num, max, nxt >>
 
-w1(self) == /\ pc[self] = "w1"
-            /\ IF unchecked[self] # {}
-                  THEN /\ \E i \in unchecked[self]:
-                            nxt' = [nxt EXCEPT ![self] = i]
-                       /\ ~ flag[nxt'[self]]
-                       /\ pc' = [pc EXCEPT ![self] = "w2"]
-                  ELSE /\ pc' = [pc EXCEPT ![self] = "cs"]
-                       /\ nxt' = nxt
-            /\ UNCHANGED << num, flag, unchecked, max >>
+w1a(self) == 
+    /\ pc[self] = "w1"
+    /\ unchecked[self] # {}
+    /\ \E i \in unchecked[self]: nxt' = [nxt EXCEPT ![self] = i]
+    /\ ~ flag[nxt'[self]]
+    /\ pc' = [pc EXCEPT ![self] = "w2"]
+    /\ UNCHANGED << num, flag, unchecked, max >>
+
+w1b(self) == 
+    /\ pc[self] = "w1"
+    /\ ~(unchecked[self] # {})
+    /\ pc' = [pc EXCEPT ![self] = "cs"]
+    /\ nxt' = nxt
+    /\ UNCHANGED << num, flag, unchecked, max >>
 
 w2(self) == /\ pc[self] = "w2"
             /\ \/ num[nxt[self]] = 0
@@ -204,7 +209,7 @@ exit(self) == /\ pc[self] = "exit"
               /\ UNCHANGED << flag, unchecked, max, nxt >>
 
 p(self) == ncs(self) \/ e1(self) \/ e2(self) \/ e3(self) \/ e4(self)
-              \/ w1(self) \/ w2(self) \/ cs(self) \/ exit(self)
+              \/ w1a(self) \/ w1b(self) \/ w2(self) \/ cs(self) \/ exit(self)
 
 
 ncsAction ==  TRUE /\ \E self \in Procs : ncs(self) 
@@ -212,7 +217,8 @@ e1Action ==   TRUE /\ \E self \in Procs : e1(self)
 e2Action ==   TRUE /\ \E self \in Procs : e2(self) 
 e3Action ==   TRUE /\ \E self \in Procs : e3(self) 
 e4Action ==   TRUE /\ \E self \in Procs : e4(self)
-w1Action ==   TRUE /\ \E self \in Procs : w1(self) 
+w1aAction ==   TRUE /\ \E self \in Procs : w1a(self) 
+w1bAction ==   TRUE /\ \E self \in Procs : w1b(self) 
 w2Action ==   TRUE /\ \E self \in Procs : w2(self) 
 csAction ==   TRUE /\ \E self \in Procs : cs(self) 
 exitAction == TRUE /\ \E self \in Procs : exit(self)
@@ -223,7 +229,8 @@ Next ==
     \/ e2Action
     \/ e3Action
     \/ e4Action
-    \/ w1Action
+    \/ w1aAction
+    \/ w1bAction
     \/ w2Action
     \/ csAction
     \/ exitAction
@@ -263,6 +270,38 @@ H_Inv1354_R0_0_I1 == \A VARI \in Procs : ~(flag[VARI]) \/ (~(pc[VARI] = "cs"))
 H_Inv19_R2_0_I1 == \A VARI \in Procs : ~(VARI \in unchecked[VARI])
 H_Inv1459_R3_0_I1 == \A VARI \in Procs : ~(flag[VARI]) \/ (~(pc[VARI] = "w2"))
 
+H_Inv29181 == 
+    \A VARI \in Procs : 
+    \A VARJ \in Procs : 
+        ((pc[VARI] = "cs") /\ ((pc[VARJ] = "w1"))) => (unchecked[VARJ] # {})
+
+
+Before(i,j) == /\ num[i] > 0
+               /\ \/ pc[j] \in {"ncs", "e1", "exit"}
+                  \/ /\ pc[j] = "e2"
+                     /\ \/ i \in unchecked[j]
+                        \/ max[j] >= num[i]
+                  \/ /\ pc[j] = "e3"
+                     /\ max[j] >= num[i]
+                  \/ /\ pc[j] \in {"e4", "w1", "w2"}
+                     /\ <<num[i],i>> \prec <<num[j],j>>
+                     /\ (pc[j] \in {"w1", "w2"}) => (i \in unchecked[j])
+
+Inv == /\ TypeOK 
+       /\ \A i \in Procs : 
+\*             /\ (pc[i] \in {"ncs", "e1", "e2"}) => (num[i] = 0)
+             /\ (pc[i] \in {"e4", "w1", "w2", "cs"}) => (num[i] # 0)
+             /\ (pc[i] \in {"e2", "e3"}) => flag[i] 
+             /\ (pc[i] = "w2") => (nxt[i] # i)
+             /\ pc[i] \in {(*"e2",*) "w1", "w2"} => i \notin unchecked[i]
+             /\ (pc[i] \in {"w1", "w2"}) =>
+                   \A j \in (Procs \ unchecked[i]) \ {i} : Before(i, j)
+             /\ /\ (pc[i] = "w2")
+                /\ \/ (pc[nxt[i]] = "e2") /\ (i \notin unchecked[nxt[i]])
+                   \/ pc[nxt[i]] = "e3"
+                => max[nxt[i]] >= num[i]
+             /\ (pc[i] = "cs") => \A j \in Procs \ {i} : Before(i, j)
+Ind1 == Inv /\ H_MutualExclusion
 \* Inv1145_R0_0_I1 == \A VARI \in Procs : (unchecked[VARI] = {}) \/ (~(pc[VARI] = "cs"))
 \* Inv1454_R0_0_I1 == \A VARI \in Procs : ~(nxt[VARI] = VARI) \/ (~(pc[VARI] = "cs"))
 \* Inv21195_R4_0_I3 == \A VARI \in Procs : ~(nxt[VARI] = VARI) \/ (~(unchecked[VARI] = {})) \/ (~(pc[VARI] = "w1"))
