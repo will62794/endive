@@ -114,20 +114,7 @@ NextUnchanged == UNCHANGED vars
 \* Helper lemmas.
 \* 
 
-\* H_NoConflictingValues == 
-\*     \A n1,n2 \in Node, v1,v2 \in Value : 
-\*         (v1 \in decided[n1] /\ v2 \in decided[n2]) => (v1 = v2)
-
-H_UniqueLeaders == \A n1,n2 \in Node : leader[n1] /\ leader[n2] => n1 = n2
-H_DecidedImpliesLeader == \A n \in Node : decided[n] # {} => leader[n]
-
-H_LeaderHasQuorum == \A n \in Node : leader[n] => \E Q \in Quorum : votes[n] = Q
-H_NodesCantVoteTwice == \A n,ni,nj \in Node : ~(ni # nj /\ n \in votes[ni] /\ n \in votes[nj])
-
-H_VoteRecordedImpliesVoteMsg == \A ni,nj \in Node : nj \in votes[ni] => <<nj,ni>> \in vote_msg
-H_NodesCantSendVotesToDifferentNodes == \A mi,mj \in vote_msg : (mi[1] = mj[1]) => mi = mj
-
-H_VoteMsgImpliesNodeVoted == \A mi \in vote_msg : voted[mi[1]]
+NodesEq(VI, VJ) == VI = VJ /\ votes = votes
 
 
 ====
