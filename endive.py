@@ -2045,7 +2045,7 @@ class InductiveInvGen():
         # If we are partitioned state caching, though, and we have small var count, then cache upfront.
         # Otherwise cache a sampled set.
         SMALL_VAR_COUNT = 5
-        if self.auto_lemma_action_decomposition and self.enable_partitioned_state_caching:
+        if self.auto_lemma_action_decomposition and self.enable_partitioned_state_caching and len(self.state_vars) <= SMALL_VAR_COUNT:
             all_var_sets = list(powerset(self.state_vars))
             all_var_sets_count = len(all_var_sets)
             if len(self.state_vars) > SMALL_VAR_COUNT:
