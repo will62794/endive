@@ -309,7 +309,7 @@ RReplayActions(n) ==
 
 RRcvInvAction == \E n \in rAliveNodes, m \in rMsgsINV : RRcvInv(n, m)
 RRcvValAction == \E n \in rAliveNodes : \E m \in rMsgsVAL : RRcvVal(n, m)
-RReadAction == \E n \in rAliveNodes : RRead(n)
+\* RReadAction == \E n \in rAliveNodes : RRead(n)
 RWriteAction == \E n \in rAliveNodes : RWrite(n)
 RRcvAckAction == \E n \in rAliveNodes, m \in rMsgsACK : RRcvAck(n, m)
 RSendValsAction == \E n \in rAliveNodes : RSendVals(n)
@@ -324,7 +324,7 @@ RNodeFailureAction == \E n \in rAliveNodes : RNodeFailure(n)
 Next == \* Modeling protocol (Owner and Reader actions while emulating failures)
     \/ RRcvInvAction
     \/ RRcvValAction
-    \/ RReadAction          
+    \* \/ RReadAction          
     \/ RWriteAction         
     \/ RRcvAckAction
     \/ RSendValsAction
