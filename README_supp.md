@@ -17,7 +17,7 @@ This repository also contains binaries for the TLC model checker, so you will no
 As an example can run the `TwoPhase` benchmark from our paper by running the following command from the root directory of this repository:
 
 ```
-python3 endive.py --spec benchmarks/Bakery --seed 2 --num_simulate_traces 100000 --tlc_workers 6 --debug --target_sample_time_limit_ms 20000 --target_sample_states 100000  --opt_quant_minimize --k_cti_induction_depth 1 --ninvs 30000 --max_num_ctis_per_round 5000 --save_dot --niters 4 --max_num_conjuncts_per_round 20 --override_num_cti_workers 4 --nrounds 45  --proof_tree_mode --auto_lemma_action_decomposition --enable_partitioned_state_caching
+python3 scimitar.py --spec benchmarks/TwoPhase --seed 2 --num_simulate_traces 100000 --tlc_workers 4 --debug --target_sample_time_limit_ms 20000 --target_sample_states 100000  --opt_quant_minimize --k_cti_induction_depth 1 --ninvs 30000 --max_num_ctis_per_round 5000 --save_dot --niters 4 --max_num_conjuncts_per_round 20 --override_num_cti_workers 4 --nrounds 45  --proof_tree_mode --auto_lemma_action_decomposition --enable_partitioned_state_caching
 ```
 
 You should see the tool running and you can also inspect the `benchmarks/TwoPhase_ind-proof-tree-sd2.pdf` file as it runs to see the proof graph being constructed dynamically. When it completes, it should have produced a complete proof graph for the safety proeprty of the TwoPhase specification.
