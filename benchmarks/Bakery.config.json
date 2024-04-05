@@ -11,6 +11,8 @@
         "flag[nxt[VARJ]]",
         "VARI # VARJ /\\ pc = pc",
         "pc[VARI] = \"ncs\"",
+        "pc[VARI] \\in {\"ncs\",\"e1\",\"exit\"}",
+        "pc[VARJ] \\in {\"ncs\",\"e1\",\"exit\"}",
         "pc[VARI] = \"exit\"",
         "pc[VARI] = \"e1\"",
         "pc[VARI] = \"e2\"",
@@ -19,6 +21,8 @@
         "pc[VARI] = \"cs\"",
         "pc[VARI] = \"w1\"",
         "pc[VARI] \\in {\"w1\",\"w2\"}",
+        "pc[VARI] \\in {\"e4\",\"w1\",\"w2\"}",
+        "pc[VARJ] \\in {\"e4\",\"w1\",\"w2\"}",
         "pc[VARI] = \"w2\"",
         "pc[VARJ] = \"ncs\"",
         "pc[VARJ] = \"exit\"",
@@ -59,7 +63,10 @@
         "num[nxt[VARI]] = 0",
         "<<num[VARI], VARI>> \\prec <<num[nxt[VARI]], nxt[VARI]>>",
         "<<num[VARI], VARI>> \\prec <<num[nxt[VARJ]], nxt[VARJ]>>",
-        "<<num[VARI],VARI>> \\prec <<num[VARJ],VARJ>>"
+        "<<num[VARI],VARI>> \\prec <<num[VARJ],VARJ>>",
+        "C_Inv6817_R0_0_I3 /\\ unchecked = unchecked /\\ pc = pc",
+        "C_Inv7304_R0_1_I2 /\\ unchecked = unchecked /\\ pc = pc",
+        "C_Inv24941_R0_1_I2 /\\ num = num /\\ pc = pc"
     ],
     "preds_alt" : [],
     "safety"  :  "H_MutualExclusion",
@@ -78,6 +85,7 @@
         "csAction",
         "exitAction"
     ],
+    "max_tlc_inv_depth": 32,
     "simulation_inv_check": false,
     "simulation_inv_check_num_states": 2000000,
     "simulation_inv_check_depth": 60,
