@@ -270,6 +270,17 @@ H_Inv1354_R0_0_I1 == \A VARI \in Procs : ~(flag[VARI]) \/ (~(pc[VARI] = "cs"))
 H_Inv19_R2_0_I1 == \A VARI \in Procs : ~(VARI \in unchecked[VARI])
 H_Inv1459_R3_0_I1 == \A VARI \in Procs : ~(flag[VARI]) \/ (~(pc[VARI] = "w2"))
 
+Inv11936_R0_0_I2 == \A VARI \in Procs : \A VARJ \in Procs : (VARJ \in unchecked[VARI]) \/ (~(pc[VARI] = "w1")) \/ (~(pc[VARJ] = "cs"))
+
+H_Inv9660_R0_0_I2 == \A VARI \in Procs : \A VARJ \in Procs : (VARJ \in unchecked[VARI]) \/ (~(pc[VARJ] = "cs")) \/ (~(pc[VARI] = "w1"))
+
+
+H_Inv20379_R0_0_I2 == \A VARI \in Procs : \A VARJ \in Procs : (pc[VARJ] = "e2") \/ ((pc[VARJ] \in {"w1","w2"})) \/ (~(VARI \in unchecked[VARJ]))
+H_Inv3134_R0_0_I2 == \A VARI \in Procs : \A VARJ \in Procs : (<<num[VARI],VARI>> \prec <<num[VARJ],VARJ>>) \/ (~(pc[VARJ] \in {"w1","w2"})) \/ (~(pc[VARI] = "cs"))
+H_Inv24963_R0_0_I2 == \A VARI \in Procs : \A VARJ \in Procs : ~(VARI \in (Procs \ unchecked[VARJ])) \/ (~(pc[VARI] = "cs") \/ (~(pc[VARJ] = "w2")))
+H_Inv56_R0_0_I2 == \A VARI \in Procs : ~(VARI \in unchecked[VARI])
+H_Inv4175_R0_0_I1 == \A VARI \in Procs : ~(num[VARI] = 0) \/ (~(pc[VARI] = "cs"))
+
 H_Inv29181 == 
     \A VARI \in Procs : 
     \A VARJ \in Procs : 
@@ -279,13 +290,50 @@ H_Inv29181 ==
 Before(i,j) == /\ num[i] > 0
                /\ \/ pc[j] \in {"ncs", "e1", "exit"}
                   \/ /\ pc[j] = "e2"
-                     /\ \/ i \in unchecked[j]
-                        \/ max[j] >= num[i]
+                    \*  /\ \/ i \in unchecked[j]
+                        \* \/ max[j] >= num[i]
                   \/ /\ pc[j] = "e3"
-                     /\ max[j] >= num[i]
+                    \*  /\ max[j] >= num[i]
                   \/ /\ pc[j] \in {"e4", "w1", "w2"}
-                     /\ <<num[i],i>> \prec <<num[j],j>>
+                    \*  /\ <<num[i],i>> \prec <<num[j],j>>
                      /\ (pc[j] \in {"w1", "w2"}) => (i \in unchecked[j])
+
+B2 == \A i \in Procs : \A j \in (Procs \ unchecked[i]) \ {i} : num[i] > 0
+B3 == 
+\A i \in Procs : \A j \in (Procs \ unchecked[i]) \ {i} :
+    /\ \/ pc[j] \in {"ncs", "e1", "exit"}
+       \/ /\ pc[j] = "e2"
+        \*  /\ \/ i \in unchecked[j]
+            \* \/ max[j] >= num[i]
+       \/ /\ pc[j] = "e3"
+        \*  /\ max[j] >= num[i]
+       \/ /\ pc[j] \in {"e4", "w1", "w2"}
+        \*  /\ <<num[i],i>> \prec <<num[j],j>>
+          /\ (pc[j] \in {"w1", "w2"}) => (i \in unchecked[j])
+
+
+
+L1 == \A i \in Procs : (pc[i] \in {"e4", "w1", "w2", "cs"}) => (num[i] # 0)
+L2 == \A i \in Procs : (pc[i] \in {"e2", "e3"}) => flag[i] 
+L3 == \A i \in Procs : (pc[i] = "w2") => (nxt[i] # i)
+L4 == \A i \in Procs : pc[i] \in {(*"e2",*) "w1", "w2"} => i \notin unchecked[i]
+L5 == \A i \in Procs : (pc[i] \in {"w1", "w2"}) => \A j \in (Procs \ unchecked[i]) \ {i} : Before(i, j)
+L6 == \A i \in Procs :
+             /\ /\ (pc[i] = "w2")
+                /\ \/ (pc[nxt[i]] = "e2") /\ (i \notin unchecked[nxt[i]])
+                   \/ pc[nxt[i]] = "e3"
+                => max[nxt[i]] >= num[i]
+L7 ==\A i \in Procs : (pc[i] = "cs") => \A j \in Procs \ {i} : Before(i, j)
+
+
+C_Inv6817_R0_0_I3 == \A VARI \in Procs : \A VARJ \in Procs : (VARI \in unchecked[VARJ]) \/ (~(VARJ \in (Procs \ unchecked[VARI]) \ {VARI})) \/ (~(pc[VARJ] \in {"w1","w2"})) \/ (~(pc[VARI] = "w1"))
+C_Inv7304_R0_1_I2 == \A VARI \in Procs : \A VARJ \in Procs : (VARJ \in (Procs \ unchecked[VARI])) \/ ((pc[VARI] = "e2")) \/ ((pc[VARI] \in {"w1","w2"}))
+C_Inv24941_R0_1_I2 == \A VARI \in Procs : \A VARJ \in Procs : ~(<<num[VARI],VARI>> \prec <<num[VARJ],VARJ>>) \/ (~(pc[VARI] \in {"w1","w2"}) \/ (~(pc[VARJ] = "cs")))
+C_Inv61_R0_1_I2 == \A VARI \in Procs : ~(VARI \in unchecked[VARI])
+C_Inv4833_R0_1_I2 == \A VARI \in Procs : ~(num[VARI] = 0) \/ (~(pc[VARI] = "cs"))
+C_Inv5027_R0_1_I2 == \A VARI \in Procs : ~(nxt[VARI] = VARI) \/ (~(pc[VARI] = "cs"))
+
+
 
 Inv == /\ TypeOK 
        /\ \A i \in Procs : 
@@ -294,8 +342,7 @@ Inv == /\ TypeOK
              /\ (pc[i] \in {"e2", "e3"}) => flag[i] 
              /\ (pc[i] = "w2") => (nxt[i] # i)
              /\ pc[i] \in {(*"e2",*) "w1", "w2"} => i \notin unchecked[i]
-             /\ (pc[i] \in {"w1", "w2"}) =>
-                   \A j \in (Procs \ unchecked[i]) \ {i} : Before(i, j)
+             /\ (pc[i] \in {"w1", "w2"}) => \A j \in (Procs \ unchecked[i]) \ {i} : Before(i, j)
              /\ /\ (pc[i] = "w2")
                 /\ \/ (pc[nxt[i]] = "e2") /\ (i \notin unchecked[nxt[i]])
                    \/ pc[nxt[i]] = "e3"
