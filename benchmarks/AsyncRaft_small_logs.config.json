@@ -136,7 +136,8 @@
         "currentTerm[VARJ] >= currentTerm[VARI]",
         "(currentTerm[VARI] = currentTerm[VARJ])",
         "votedFor[VARI] = VARJ",
-        "votedFor[VARJ] = VARI"
+        "votedFor[VARJ] = VARI",
+        "(state[VARI] \\in {Leader,Candidate} /\\ VARJ \\in votesGranted[VARI])"
     ],
     "preds_alt" : [],
     "safety"  :  "H_LogMatching",
