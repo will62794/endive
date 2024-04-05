@@ -2043,10 +2043,14 @@ class InductiveInvGen():
             logging.info("Skipping initial state caching step for round since we are running with partitioned state caching.")
 
         # If we are partitioned state caching, though, and we have small var count, then cache upfront.
+        # Otherwise cache a sampled set.
         SMALL_VAR_COUNT = 5
-        if self.auto_lemma_action_decomposition and self.enable_partitioned_state_caching and len(self.state_vars) <= SMALL_VAR_COUNT:
+        if self.auto_lemma_action_decomposition and self.enable_partitioned_state_caching:
             all_var_sets = list(powerset(self.state_vars))
-            logging.info(f"Caching all {len(all_var_sets)} var sets upfront, since only {len(self.state_vars)} total state vars.")
+            all_var_sets_count = len(all_var_sets)
+            if len(self.state_vars) > SMALL_VAR_COUNT:
+                all_var_sets = random.sample(all_var_sets, 2**SMALL_VAR_COUNT)
+            logging.info(f"Caching {len(all_var_sets)} var sets upfront out of {all_var_sets_count} total, since {len(self.state_vars)} total state vars.")
             self.cache_projected_states(all_var_sets, max_depth=max_depth, tlc_workers=tlc_workers)
 
         inv_candidates_generated_in_round = set()
