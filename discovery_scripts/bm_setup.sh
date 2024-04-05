@@ -2,6 +2,7 @@
 specname_arg=$1
 
 lscpu # log CPU info.
+echo "Loading Java"
 module load OpenJDK/19.0.1
 
 # Create work directory.
