@@ -93,8 +93,8 @@
         "exitAction"
     ],
     "max_tlc_inv_depth": 28,
-    "simulation_inv_check": false,
-    "simulation_inv_check_num_states": 2000000,
+    "simulation_inv_check": true,
+    "simulation_inv_check_num_states": 1000000,
     "simulation_inv_check_depth": 60,
     "constraint"  :  "",
     "quant_inv"  :  "\\A VARI \\in Procs : \\A VARJ \\in Procs : ",
