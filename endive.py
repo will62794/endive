@@ -2972,7 +2972,7 @@ class InductiveInvGen():
                 #
                 if self.proof_tree_mode and self.auto_lemma_action_decomposition:
                     action_node = f"{proof_graph_node}_{proof_graph_action}"
-
+                    logging.info("------")
                     logging.info(f"Re-checking CTIs at node {proof_graph_node}, action={proof_graph_action}.")
                     k_ctis_rechecked = self.check_proof_node(proof_graph_node, action_filter=[proof_graph_action])
                     # Print some CTIs.
