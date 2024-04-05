@@ -106,7 +106,9 @@
         "VARMAERES.mterm = currentTerm[VARI]",
         "matchIndex[VARI][VARJ] = VARMAERES.mmatchIndex",
         "VARMAERES.msuccess",
-        "H_VoteGrantedImpliesNodeSafeAtTerm2 /\\ state = state /\\ currentTerm = currentTerm /\\ votesGranted = votesGranted /\\ votedFor = votedFor"
+        "H_VoteGrantedImpliesNodeSafeAtTerm2 /\\ state = state /\\ currentTerm = currentTerm /\\ votesGranted = votesGranted /\\ votedFor = votedFor",
+        "H_RequestVoteResponseTermsMatchSource /\\ requestVoteResponseMsgs = requestVoteResponseMsgs /\\ currentTerm = currentTerm",
+        "H_RequestVoteResponseTermsMatchSource2 /\\ requestVoteResponseMsgs = requestVoteResponseMsgs /\\ currentTerm = currentTerm /\\ votedFor = votedFor"
     ],
     "preds"  :  [
         "H_CandidateWithVotesGrantedInTermImplyNoOtherLeader /\\ state = state /\\ votesGranted = votesGranted /\\ currentTerm = currentTerm",
@@ -117,8 +119,6 @@
         "H_RequestVoteResponseMsgsInTermUnique /\\ requestVoteResponseMsgs = requestVoteResponseMsgs",
         "H_VoteInGrantedImpliesVotedFor /\\ state = state /\\ votesGranted = votesGranted /\\ currentTerm = currentTerm /\\ votedFor = votedFor",
         "H_VoteInGrantedImpliesVotedFor2 /\\ state = state /\\ votesGranted = votesGranted /\\ currentTerm = currentTerm",
-        "H_RequestVoteResponseTermsMatchSource /\\ requestVoteResponseMsgs = requestVoteResponseMsgs /\\ currentTerm = currentTerm",
-        "H_RequestVoteResponseTermsMatchSource2 /\\ requestVoteResponseMsgs = requestVoteResponseMsgs /\\ currentTerm = currentTerm /\\ votedFor = votedFor",
         "(state[VARI] = Leader)",
         "(state[VARI] = Follower)",
         "(state[VARI] = Candidate)",
@@ -137,7 +137,11 @@
         "(currentTerm[VARI] = currentTerm[VARJ])",
         "votedFor[VARI] = VARJ",
         "votedFor[VARJ] = VARI",
-        "(state[VARI] \\in {Leader,Candidate} /\\ VARJ \\in votesGranted[VARI])"
+        "(state[VARI] \\in {Leader,Candidate} /\\ VARJ \\in votesGranted[VARI])",
+        "currentTerm[VARREQVRES.msource] >= VARREQVRES.mterm",
+        "currentTerm[VARREQVRES.msource] = VARREQVRES.mterm",
+        "votedFor[VARREQVRES.msource] = VARREQVRES.mdest",
+        "VARREQVRES.mvoteGranted"
     ],
     "preds_alt" : [],
     "safety"  :  "H_LogMatching",
