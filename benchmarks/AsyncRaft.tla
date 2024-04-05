@@ -353,11 +353,11 @@ HandleRequestVoteRequest(m) ==
     /\ m.mterm <= currentTerm[m.mdest]
     /\ LET  i     == m.mdest
             j     == m.msource
-            logOk == \/ m.mlastLogTerm > LastTerm(log[i])
-                     \/ /\ m.mlastLogTerm = LastTerm(log[i])
-                        /\ m.mlastLogIndex >= Len(log[i])
+            \* logOk == \/ m.mlastLogTerm > LastTerm(log[i])
+            \*          \/ /\ m.mlastLogTerm = LastTerm(log[i])
+            \*             /\ m.mlastLogIndex >= Len(log[i])
             grant == /\ m.mterm = currentTerm[i]
-                     /\ logOk
+                    \*  /\ logOk
                      /\ votedFor[i] \in {Nil, j} 
                      IN
             /\ votedFor' = [votedFor EXCEPT ![i] = IF grant THEN j ELSE votedFor[i]]
@@ -917,8 +917,11 @@ H_RequestVoteResponseTermsMatchSource ==
     \A m \in requestVoteResponseMsgs :
         m.mtype = RequestVoteResponse => 
             /\ currentTerm[m.msource] >= m.mterm
-            /\ (m.mvoteGranted /\ (currentTerm[m.msource] = m.mterm)) => votedFor[m.msource] = m.mdest
 
+H_RequestVoteResponseTermsMatchSource2 ==
+    \A m \in requestVoteResponseMsgs :
+        m.mtype = RequestVoteResponse => 
+            /\ (m.mvoteGranted /\ (currentTerm[m.msource] = m.mterm)) => votedFor[m.msource] = m.mdest
 
 \* If a candidate C has garnered a set of granted votes in term T, 
 \* then all of those voters must be at term T or newer, and if they
@@ -928,6 +931,11 @@ H_CandidateWithVotesGrantedInTermImplyVotersSafeAtTerm ==
         (state[s] = Candidate) =>
             \A v \in votesGranted[s] : 
                 /\ currentTerm[v] >= currentTerm[s]
+
+H_CandidateWithVotesGrantedInTermImplyVotersSafeAtTerm2 ==
+    \A s \in Server : 
+        (state[s] = Candidate) =>
+            \A v \in votesGranted[s] : 
                 /\ currentTerm[v] = currentTerm[s] => votedFor[v] = s
 
 \* H_CandidateWithVotesGrantedInTermImplyVotedForSafeAtTerm ==
@@ -943,6 +951,11 @@ H_VoteInGrantedImpliesVotedFor ==
         (/\ state[s] = Candidate
          /\ t \in votesGranted[s]) => 
             /\ currentTerm[t] >= currentTerm[s]
+
+H_VoteInGrantedImpliesVotedFor2 == 
+    \A s,t \in Server :
+        (/\ state[s] = Candidate
+         /\ t \in votesGranted[s]) => 
             /\ currentTerm[t] = currentTerm[s] => votedFor[t] = s
 
 \* A node can't have sent a RequestVoteResponse ack to two different servers in the same term.
@@ -972,6 +985,12 @@ H_VoteGrantedImpliesNodeSafeAtTerm ==
         state[s] \in {Candidate,Leader} => 
         (\A t \in votesGranted[s] : 
             /\ currentTerm[t] >= currentTerm[s]
+        )
+
+H_VoteGrantedImpliesNodeSafeAtTerm2 == 
+    \A s \in Server : 
+        state[s] \in {Candidate,Leader} => 
+        (\A t \in votesGranted[s] : 
             /\ currentTerm[t] = currentTerm[s] => votedFor[t] = s
         )
 
@@ -1622,4 +1641,16 @@ H_Inv29138_R5_0_I3 ==
         ~((currentTerm[VARI] > currentTerm[VARJ])) \/ (~(VARREQVRES.msource = VARJ) \/ (~(VARREQVRES.mterm = currentTerm[VARI])))
 
 
+H_Inv21386_R0_1_I3 == \A VARI \in Server : \A VARJ \in Server : (IsPrefix(log[VARJ], log[VARI])) \/ (~((state[VARI] = Leader))) \/ (~(\E INDK \in DOMAIN log[VARJ] : log[VARJ][INDK] = currentTerm[VARI]))
+
+
+H_Inv23832 == 
+    \A VARI \in Server : 
+    \A VARJ \in Server : 
+        \/ ((state[VARJ] = Follower)) 
+        \/ ((votesGranted[VARI] \cap votesGranted[VARJ] = {}) \/ (~((state[VARI] = Candidate /\ VARI # VARJ /\ currentTerm[VARI] = currentTerm[VARJ]))))
+
+LLInv15_R3_0_I1 == ~(H_CandidateWithVotesGrantedInTermImplyVotersSafeAtTerm /\ state = state /\ currentTerm = currentTerm /\ votedFor = votedFor)
+
+Anv14_R2_0_I1 == \A VARI \in Server : ((state[VARI] = Leader))
 ===============================================================================
