@@ -1,13 +1,20 @@
-#!/bin/sh
+#!/bin/bash
 
 #
 # Parameters for benchmarking runs.
 #
 
-# Consider adjusting these parameters to suit the resource limits of the target machine.
-tlc_workers=24
-num_cti_workers=16
-cti_elimination_workers=8
+
+# If argument is not given, use default values for parallelism.
+if [ $# -eq 0 ]; then
+    tlc_workers=24
+    num_cti_workers=16
+    cti_elimination_workers=8
+else
+    tlc_workers=$1
+    num_cti_workers=$1
+    cti_elimination_workers=$1
+fi
 
 nrounds=45
 ninvs=80000
@@ -20,8 +27,7 @@ common_flags+=" --debug --target_sample_time_limit_ms 10000 --num_simulate_trace
 common_flags+=" --opt_quant_minimize --k_cti_induction_depth 1"
 common_flags+=" --ninvs $ninvs --max_num_ctis_per_round $max_num_ctis_per_round"
 common_flags+=" --save_dot --max_num_conjuncts_per_round 16 --niters 4 --nrounds $nrounds"
-common_flags+="--proof_tree_mode --auto_lemma_action_decomposition --enable_partitioned_state_caching"
-
+common_flags+=" --proof_tree_mode --auto_lemma_action_decomposition --enable_partitioned_state_caching"
 
 seed=1
 
@@ -30,10 +36,6 @@ python3 scimitar.py --spec benchmarks/SimpleConsensus $common_flags --seed $seed
 python3 scimitar.py --spec benchmarks/ZeusReliableCommit $common_flags --seed $seed
 python3 scimitar.py --spec benchmarks/Hermes $common_flags --seed $seed
 python3 scimitar.py --spec benchmarks/Bakery $common_flags --seed $seed
-python3 scimitar.py --spec benchmarks/Boulanger $common_flags --seed $seed
 
 # AsyncRaft, ElectionSafety.
 python3 scimitar.py --spec benchmarks/AsyncRaft $common_flags --seed $seed --safety H_OnePrimaryPerTerm
-
-# AsyncRaft, PrimaryHasEntriesItCreated.
-python3 scimitar.py --spec benchmarks/AsyncRaft $common_flags --seed $seed --safety H_PrimaryHasEntriesItCreated

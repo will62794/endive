@@ -2996,6 +2996,8 @@ class InductiveInvGen():
                         # Add in newly discovered CTIs and start round back from first iteration. Existing conjuncts found so far will be maintained.
                         logging.info(f"Adding in {len(k_ctis_rechecked)} newly found CTIs and re-running round.")
                         orig_k_ctis += list(k_ctis_rechecked)
+                        iter_repeat = True
+                        num_iter_repeats += 10
 
                         # Update the CTI table as well.
                         for cti in k_ctis_rechecked:

@@ -32,7 +32,7 @@ wait
 # Also fetch these other ones.
 #
 
-for tag in "OnePrimaryPerTerm" "PrimaryHasEntriesItCreated"
+for tag in "OnePrimaryPerTerm" "PrimaryHasEntriesItCreated" "OnePrimaryPerTerm_broken"
 do
     for seed in 1 2 3 4 5 6 7 8
     do
