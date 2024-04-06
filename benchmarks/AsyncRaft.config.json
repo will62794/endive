@@ -134,7 +134,7 @@
     "model_consts"  :  "CONSTANT n1,n2,n3",
     "max_tlc_inv_depth": 17,
     "simulation_inv_check": true,
-    "simulation_inv_check_num_states": 2500000,
+    "simulation_inv_check_num_states": 10000000,
     "simulation_inv_check_depth": 40,
     "symmetry" : true,
     "typeok"  :  "TypeOKRandom",
@@ -158,50 +158,6 @@
         "AcceptAppendEntriesRequestLearnCommitAction",
         "HandleAppendEntriesResponseAction"
     ],
-    "local_grammars": {
-        "AcceptAppendEntriesRequestTruncateAction": {
-            "H_LeaderMatchIndexValid": {
-                "quant_inv": "\\A VS \\in Server : \\A VIND \\in DOMAIN log[VS] : \\A VM \\in appendEntriesMsgs : ",
-                "quant_vars": ["VS", "VIND", "VM"],
-                "preds":[
-                    "state[VS] = Leader",
-                    "state[VS] \\in { Follower, Candidate }",
-                    "VM.mtype = AppendEntriesRequest /\\ Len(log[VS]) >= (VM.mprevLogIndex + 1)",
-                    "VM.mtype = AppendEntriesRequest /\\ VM.mentries # << >>",
-                    "VM.mtype = AppendEntriesRequest /\\ (VM.mprevLogIndex + 1) \\in DOMAIN log[VS] /\\ VM.mentries # << >> /\\ VM.mentries[1] > log[VS][(VM.mprevLogIndex + 1)]"
-                ],
-                "max_depth": 20
-            }
-        },
-        "RequestVoteAction": {
-            "H_LogEntryInTermImpliesSafeAtTermCandidateAppendEntries": {
-                "quant_inv": "\\A VS \\in Server : \\A VM \\in appendEntriesRequestMsgs : ",
-                "quant_vars": ["VS", "VIND", "VM"],
-                "preds":[
-                    "state[VS] = Leader",
-                    "state[VS] \\in { Follower, Candidate }",
-                    "VM.mtype = AppendEntriesRequest /\\ VM.mentries # << >>"
-                ],
-                "max_depth": 20
-            }
-        },
-        "BecomeLeaderAction": {
-            "H_LogMatchingInAppendEntriesMsgsLeaders": {
-                "quant_inv": "\\A VS \\in Server : \\A VIND \\in DOMAIN log[VS] : \\A VM \\in appendEntriesRequestMsgs : \\E VQ \\in Quorum : \\A VN \\in VQ :",
-                "quant_vars": ["VS", "VIND", "VM", "VQ", "VN"],
-                "preds":[
-                    "state[VS] = Leader",
-                    "state[VS] \\in { Follower, Candidate }",
-                    "votesGranted[VS] \\in Quorum",
-                    "currentTerm[VN] >= currentTerm[VS]",
-                    "VM.mtype = AppendEntriesRequest /\\ Len(log[VS]) >= (VM.mprevLogIndex + 1)",
-                    "VM.mtype = AppendEntriesRequest /\\ VM.mentries # << >>",
-                    "VM.mtype = AppendEntriesRequest /\\ (VM.mprevLogIndex + 1) \\in DOMAIN log[VS] /\\ VM.mentries # << >> /\\ VM.mentries[1] > log[VS][(VM.mprevLogIndex + 1)]"
-                ],
-                "max_depth": 19                
-            }
-        }
-    },
     "tlaps_proof_config": {
         "assumes": [
             "IsFiniteSet(Server)",
