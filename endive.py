@@ -153,6 +153,7 @@ class InductiveInvGen():
         self.enable_cti_slice_projection = enable_cti_slice_projection
         self.disable_state_cache_slicing = all_args["disable_state_cache_slicing"]
         self.disable_grammar_slicing = all_args["disable_grammar_slicing"]
+        self.enable_pred_weight_tuning = all_args["enable_pred_weight_tuning"]
 
 
         # Set an upper limit on CTIs per round to avoid TLC getting overwhelmend. Hope is that 
@@ -2696,8 +2697,11 @@ class InductiveInvGen():
 
                 # Print out top 10 candidates by elimination.
                 preds_in_top_cands = set()
-                top_k = 8
+                top_k = 15
+                # Out of all computed predicates that eliminate some CTIs, for each predicate, compute the proportion
+                # CTI eliminating invariants that it appeared in.
                 if subiter>=0:
+                    # for ind,iv in enumerate(new_inv_cands[:top_k]):
                     for ind,iv in enumerate(new_inv_cands[:top_k]):
                         # Don't consider invariants that don't eliminate any CTIs.
                         if len(cti_states_eliminated_by_invs[iv]) == 0:
@@ -2761,6 +2765,16 @@ class InductiveInvGen():
             new_conjuncts = [c["inv"] for c in conjuncts_this_iter]
             logging.info(f"Current conjunct set computed in round (subround={subroundi}): {curr_conjuncts}")
             logging.info(f"New conjunct set computed in round (subround={subroundi}): {new_conjuncts}")
+
+            if len(preds_in_top_cands_agg) > 0:
+                print(f"Number of distinct predicates in top {top_k} candidates across iters: {len(preds_in_top_cands_agg)} out of {len(preds)} total in this slice pred set.", )
+            # enable_pred_weight_tuning = False
+            if self.enable_pred_weight_tuning:
+                logging.info("Predicate weight tuning enabled. Tuning predicates based on learned preds in this iteration.")
+                for top_p in preds_in_top_cands_agg:
+                    # Increase this predicate's weight as we go in this round.
+                    curr_pred_weights[top_p] = curr_pred_weights[top_p] * 1.5
+
 
             # Mark whether we computed a new set of conjuncts in this iteration.
             new_conjuncts_found_in_iter = len(curr_conjuncts) < len(new_conjuncts)
@@ -3062,6 +3076,10 @@ class InductiveInvGen():
             if num_ctis_remaining == 0:
                 logging.info(f"~~~ DONE! We have eliminated all CTIs of this round. ~~~")
                 return self.strengthening_conjuncts
+
+            # TODO: Optimization thought: if we learn some conjuncts in an early round, but don't eliminate all CTIs
+            # we might consider more heavily weighting the predicates used in the conjuncts learned in that early round in
+            # the later round.
 
             # Skip to the next iteration, since we've already checked invariants for CTI elimination and
             # added any good ones as strengthening conjuncts.
@@ -3838,7 +3856,8 @@ class InductiveInvGen():
             self.render_proof_graph()
 
         for roundi in range(self.num_rounds):
-            logging.info("### STARTING ROUND %d" % roundi)
+            logging.info("###### STARTING ROUND %d" % roundi)
+            logging.info("#####################################")
             logging.info("Num remaining lemma obligations %d" % len(self.proof_obligation_queue))
             self.latest_roundi = roundi
             if len(self.proof_obligation_queue) == 0:
@@ -3871,9 +3890,19 @@ class InductiveInvGen():
                 logging.info("All proof obligations discharged.")
                 break
 
+            next_depth_n = sorted(undischarged, key = lambda n : self.proof_graph["nodes"][n]["depth"])[0]
+            next_depth = self.proof_graph["nodes"][next_depth_n]["depth"]
+            undischarged_nodes_at_next_depth = [n for n in undischarged if self.proof_graph["nodes"][n]["depth"] == next_depth]
+
             # Choose next most recently added obligation.
+
+            # curr_obligation = undischarged_nodes_at_next_depth[0]
+            # curr_obligation = random.choice(undischarged_nodes_at_next_depth)
+
             curr_obligation = sorted(undischarged, key = lambda n : self.proof_graph["nodes"][n]["order"])[0]
-            # for n in self.proof_graph["nodes"]:
+            # for n in undischarged:
+                # print("undischarged:", n, self.proof_graph["nodes"][n])
+
             #     node = self.proof_graph["nodes"][n]
             #     if "is_lemma" in node and not node["discharged"]:
             #         curr_obligation = n
@@ -3946,7 +3975,7 @@ class InductiveInvGen():
             state_vars_not_in_local_grammar = set(self.state_vars)
 
             while len(k_ctis) > 0:
-                logging.info(f"Starting subround {subround} with {len(k_ctis)} k_ctis")
+                logging.info(f" ## Starting subround {subround} with {len(k_ctis)} k_ctis")
 
                 k_ctis_to_eliminate = k_ctis
 
@@ -3961,6 +3990,7 @@ class InductiveInvGen():
                         cti_action_invs_found.add((kcti.inv_name, kcti.action_name))
                 logging.info(f"{len(cti_action_invs_found)} distinct k-CTI lemma-action proof obligations found:")
                 cti_action_invs_found = sorted(cti_action_invs_found, key = lambda c : c[1]) # sort by action name for consistent odering of proof obligations.
+                # random.shuffle(cti_action_invs_found)
 
                 # Optional CTI action filter.
                 # action_filter = ["HRcvValAction", "HSendValsAction", "HWriteAction", "HRcvInvAction", "HRcvInvNewerAction"]
@@ -4007,6 +4037,17 @@ class InductiveInvGen():
 
                     # Render to show progress dynamically.
                     self.render_proof_graph()
+
+                # If some of these CTI actions for this node have already been marked as failed, ignore them 
+                # as well.
+                def cti_action_inv_is_failed(c):
+                    (l,a) = c
+                    l_lemma_name = "Safety" if l == self.safety else l
+                    l_action_node = f"{l_lemma_name}_{a}"
+                    return "failed" in self.proof_graph["nodes"][l_action_node] and self.proof_graph["nodes"][l_action_node]["failed"]
+
+                cti_action_invs_found = [c for c in cti_action_invs_found if not cti_action_inv_is_failed(c)]
+
 
                 # Re-parse spec object to include definitions of any newly generate strengthening lemmas.
                 # if len(self.strengthening_conjuncts) > 0:
@@ -4093,6 +4134,8 @@ class InductiveInvGen():
 
                 # Filter preds.
                 preds = [p for (pi,p) in enumerate(self.preds) if vars_in_preds[pi].issubset(lemma_action_coi)]
+                # does set A intersect set B?
+                # preds = [p for (pi,p) in enumerate(self.preds) if len(vars_in_preds[pi].intersection(lemma_action_coi))>0]
                 action_local_preds_filtered = [p for (pi,p) in enumerate(action_local_preds) if vars_in_action_local_preds[k_cti_action][pi].issubset(lemma_action_coi)]
 
                 # Add in action local predicates.
@@ -4169,9 +4212,14 @@ class InductiveInvGen():
                 if ret == None:
                     logging.info(f"Could not eliminate all CTIs in this round. Exiting with failure and marking {curr_obligation} as failed.")
                     # Mark the proof node as failed.
-                    self.proof_graph["nodes"][curr_obligation]["failed"] = True
                     self.proof_graph["nodes"][action_node]["failed"] = True
+                    # self.proof_graph["nodes"][curr_obligation]["failed"] = True
                     break
+
+                    # Only mark a lemma node as failed if all of its action nodes are failed too.
+                    # supports = self.proof_graph_get_support_nodes(curr_obligation)
+                    # if all([self.proof_graph["nodes"][s]["failed"] for s in supports]):
+                        # self.proof_graph["nodes"][curr_obligation]["failed"] = True
                 else:
                     # Successfully eliminated all CTIs.
                     logging.info(f"Successfully eliminated all CTIs in this subround, for obligation {curr_obligation}.")
@@ -4461,6 +4509,8 @@ class InductiveInvGen():
                     num_ctis_left = 0
                     node = self.proof_graph["nodes"][n]
                     if "is_action" in node:
+                        nlabel = n.split("_")[-1].replace("Action", "") # just show the action name.
+                        label = nlabel
                         shape = "box"
                         num_ctis_left = self.proof_graph["nodes"][n]["ctis_remaining"]
                         fillcolor = lightgreen if num_ctis_left == 0 else "orange"
@@ -4472,7 +4522,6 @@ class InductiveInvGen():
                             # color = "red"
                             fillcolor = "salmon"
                         if len(self.proof_graph["nodes"][n]["coi_vars"]) > 0:
-                            nlabel = n.split("_")[-1].replace("Action", "") # just show the action name.
                             coi_vars = sorted(self.proof_graph["nodes"][n]["coi_vars"])
                             coi_str = coi
                             # if len(coi_str) > 20:
@@ -4819,6 +4868,8 @@ if __name__ == "__main__":
     parser.add_argument('--auto_lemma_action_decomposition', help='Automatically split inductive proof obligations by action and lemmas.', required=False, default=False, action='store_true')
     parser.add_argument('--disable_state_cache_slicing', help='Disable slicing of state caches.', required=False, default=False, action='store_true')# how to make one argument exclusive with another?
     parser.add_argument('--disable_grammar_slicing', help='Disable slicing of grammars.', required=False, default=False, action='store_true')# how to make one argument exclusive with another?
+    # Add arg for pred weight tuning flag.
+    parser.add_argument('--enable_pred_weight_tuning', help='Enable predicate weight tuning.', required=False, default=False, action='store_true')
     
     
     # Proof tree related commands.
