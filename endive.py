@@ -3954,6 +3954,27 @@ class InductiveInvGen():
                 for kcti in cti_action_invs_found:
                     logging.info(f" - {kcti}")
 
+                # Way to show progress while action node is being worked on.
+                if self.auto_lemma_action_decomposition:
+                    for (l,a) in cti_action_invs_found:
+                        l_lemma_name = "Safety" if l == self.safety else l
+                        l_action_node = f"{l_lemma_name}_{a}"
+                        # Add initial lemma-action edges for the proof graph.
+                        e1 = (l_action_node, f"{l_lemma_name}")
+                        if e1 not in self.proof_graph["edges"]:
+                            self.proof_graph["edges"].append(e1)
+                        if l_action_node not in self.proof_graph["nodes"]:
+                            self.proof_graph["nodes"][l_action_node] = {
+                                "ctis_remaining": len([c for c in k_ctis_to_eliminate if c.action_name == a]), 
+                                "coi_vars": [],
+                                "num_grammar_preds": len(preds),
+                                "is_action": True,
+                                "discharged": False
+                            }
+
+                    # Render to show progress dynamically.
+                    self.render_proof_graph()
+
                 # Re-parse spec object to include definitions of any newly generate strengthening lemmas.
                 # if len(self.strengthening_conjuncts) > 0:
                 if len(self.proof_graph["nodes"]) > 0:
