@@ -36,7 +36,6 @@
         "pc[VARJ] = \"w1\"",
         "pc[VARJ] \\in {\"w1\",\"w2\"}",
         "pc[VARJ] = \"w2\"",
-        "(pc[VARJ] \\in {\"w1\",\"w2\"}) /\\ (pc[VARI] = \"w1\")",
         "(pc[nxt[VARI]] = \"w2\")",
         "unchecked[VARI] = {}",
         "unchecked[VARJ] = {}",

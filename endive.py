@@ -2774,6 +2774,7 @@ class InductiveInvGen():
                 for top_p in preds_in_top_cands_agg:
                     # Increase this predicate's weight as we go in this round.
                     curr_pred_weights[top_p] = curr_pred_weights[top_p] * 1.5
+                    # curr_pred_weights[top_p] = curr_pred_weights[top_p] * 2.5
 
 
             # Mark whether we computed a new set of conjuncts in this iteration.
@@ -2938,7 +2939,10 @@ class InductiveInvGen():
                     action_node = f"{orig_k_ctis[0].inv_name}_{orig_k_ctis[0].action_name}"
                     self.proof_graph["nodes"][action_node]["ctis_remaining"] = num_ctis_remaining
                     self.proof_graph["nodes"][action_node]["total_initial_ctis"] = len(orig_k_ctis)
-                    self.proof_graph["nodes"][action_node]["latest_elimination_iter"] = iteration
+                    if "latest_elimination_iter" in self.proof_graph["nodes"][action_node]:
+                        self.proof_graph["nodes"][action_node]["latest_elimination_iter"] = max(iteration, self.proof_graph["nodes"][action_node]["latest_elimination_iter"])
+                    else:
+                        self.proof_graph["nodes"][action_node]["latest_elimination_iter"] = iteration
                     self.proof_graph["curr_node"] = action_node
                     if self.save_dot and len(self.proof_graph["edges"]) > 0:
                         # Render updated proof graph as we go.
