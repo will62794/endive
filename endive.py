@@ -4554,6 +4554,8 @@ class InductiveInvGen():
                             if "latest_elimination_iter" in node:
                                 latest_iter = self.proof_graph["nodes"][n]["latest_elimination_iter"]
                                 label += f"<FONT POINT-SIZE='10'> (iters={latest_iter}) </FONT>"
+                            if "time_spent" in node:
+                                label += "<FONT POINT-SIZE='10'> (" + "{0:.2f}".format(self.proof_graph["nodes"][n]["time_spent"]) + "s) </FONT>"
                             label += ">"
                             fontsize="14pt"
                     if "is_lemma" in node:
