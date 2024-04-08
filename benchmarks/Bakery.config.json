@@ -36,7 +36,10 @@
         "pc[VARJ] = \"w1\"",
         "pc[VARJ] \\in {\"w1\",\"w2\"}",
         "pc[VARJ] = \"w2\"",
+        "(pc[VARJ] \\in {\"w1\",\"w2\"}) /\\ (pc[VARI] = \"w1\")",
         "(pc[nxt[VARI]] = \"w2\")",
+        "unchecked[VARI] = {}",
+        "unchecked[VARJ] = {}",
         "unchecked[VARI] = Procs",
         "unchecked[VARI] = Procs \\ {VARI}",
         "unchecked[VARJ] = Procs \\ {VARJ}",
@@ -69,10 +72,8 @@
     ],
     "action_local_preds":{
         "w1bAction": [
-            "C_Inv6817_R0_0_I3 /\\ unchecked = unchecked /\\ pc = pc"
         ],
         "w2Action":[
-            "C_Inv7304_R0_1_I2 /\\ unchecked = unchecked /\\ pc = pc"
         ]
     },
     "preds_alt" : [],
