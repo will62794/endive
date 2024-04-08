@@ -2683,11 +2683,35 @@ class InductiveInvGen():
                 logging.info(f"CTI obligation action: {orig_k_ctis[0].action_name}.")
 
             subiter = 0
+            preds_in_top_cands_agg = set()
             while True:
 
                 # Rank all new invariant candidates based on the set of CTIs they eliminate.
                 sorter = lambda inv: (len(cti_states_eliminated_by_invs[inv] - ctis_eliminated_this_iter), -len(get_invexp_cost(inv)))
                 new_inv_cands = sorted(sorted_invs, reverse=True, key=sorter)
+
+                # if max_conjs == 1:
+                #     for iv in new_inv_cands:
+                #         print("CTIs eliminated by:", iv, len(cti_states_eliminated_by_invs[iv]))
+
+                # Print out top 10 candidates by elimination.
+                preds_in_top_cands = set()
+                top_k = 8
+                if subiter>=0:
+                    for ind,iv in enumerate(new_inv_cands[:top_k]):
+                        # Don't consider invariants that don't eliminate any CTIs.
+                        if len(cti_states_eliminated_by_invs[iv]) == 0:
+                            continue
+                        invi = int(iv.replace("Inv", ""))
+                        invexp = orig_invs_sorted[invi]
+                        print(f"({ind}) CTIs eliminated by:", iv, len(cti_states_eliminated_by_invs[iv]), invexp)
+
+                        preds_in_cand = [p for p in preds if p in invexp]
+                        print("Set of predicates appearing in invexp:", preds_in_cand)
+                        preds_in_top_cands.update(preds_in_cand)
+                    preds_in_top_cands_agg.update(preds_in_top_cands)
+                    if len(preds_in_top_cands) > 0:
+                        print(f"Number of distinct predicates in top {top_k} candidates: {len(preds_in_top_cands)} out of {len(preds)} total in this slice pred set.", )
 
                 # Rank all existing invariant conjuncts based on the set of CTIs they eliminate.
                 existing_inv_cands = sorted(conjuncts_added_in_round, reverse=True, key = lambda conj : len(conj["ctis_eliminated"] - ctis_eliminated_this_iter))
