@@ -2932,6 +2932,18 @@ class InductiveInvGen():
             self.total_num_ctis_eliminated += cti_states_eliminated_in_iter
             self.end_timing_ctielimcheck()
 
+            if num_ctis_remaining > 0:
+                # Update CTIs remaining as we go.
+                if self.proof_tree_mode and self.auto_lemma_action_decomposition:
+                    action_node = f"{orig_k_ctis[0].inv_name}_{orig_k_ctis[0].action_name}"
+                    self.proof_graph["nodes"][action_node]["ctis_remaining"] = num_ctis_remaining
+                    self.proof_graph["nodes"][action_node]["total_initial_ctis"] = len(orig_k_ctis)
+                    self.proof_graph["nodes"][action_node]["latest_elimination_iter"] = iteration
+                    self.proof_graph["curr_node"] = action_node
+                    if self.save_dot and len(self.proof_graph["edges"]) > 0:
+                        # Render updated proof graph as we go.
+                        self.render_proof_graph()     
+
             # logging.info("")
             if num_ctis_remaining == 0:
                 # Update set of all strengthening conjuncts added in this round.
@@ -3001,6 +3013,7 @@ class InductiveInvGen():
 
                         self.proof_graph["nodes"][action_node] = {
                             "ctis_remaining": num_ctis_remaining, 
+                            "total_initial_ctis": len(orig_k_ctis), 
                             "coi_vars": lemma_action_coi,
                             "num_grammar_preds": len(preds),
                             "is_action": True,
@@ -4532,9 +4545,15 @@ class InductiveInvGen():
                                 label += "<FONT POINT-SIZE='10'>|preds|=" + str(self.proof_graph["nodes"][n]["num_grammar_preds"]) + "/" + str(len(self.preds)) + "</FONT>"
                             if "time_spent" in node:
                                 label += "<FONT POINT-SIZE='10'> (" + "{0:.2f}".format(self.proof_graph["nodes"][n]["time_spent"]) + "s) </FONT>"
+                            label += "<BR/>"
+                            if "ctis_remaining" in node:
+                                total_ctis_str = ""
+                                if "total_initial_ctis" in self.proof_graph["nodes"][n]:
+                                    total_ctis_str = "/" + str(self.proof_graph["nodes"][n]["total_initial_ctis"])
+                                label += f"<FONT POINT-SIZE='10'> (ctis_left={num_ctis_left}{total_ctis_str})</FONT>"
                             if "latest_elimination_iter" in node:
                                 latest_iter = self.proof_graph["nodes"][n]["latest_elimination_iter"]
-                                label += f"<FONT POINT-SIZE='10'>(iters={latest_iter}) </FONT>"
+                                label += f"<FONT POINT-SIZE='10'> (iters={latest_iter}) </FONT>"
                             label += ">"
                             fontsize="14pt"
                     if "is_lemma" in node:
