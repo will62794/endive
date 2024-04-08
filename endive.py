@@ -2056,6 +2056,10 @@ class InductiveInvGen():
         inv_candidates_generated_in_round = set()
         num_ctis_remaining = None
 
+        # Optionally weight predicates based on what we learn as we go.
+        # Start off with equal weighting.
+        curr_pred_weights = {p:1.0 for p in preds}
+
         t_round_begin = time.time()
         num_iter_repeats = 0
         while iteration <= self.num_iters:
@@ -2180,12 +2184,17 @@ class InductiveInvGen():
                 logging.info("Generating %d candidate invariants." % num_invs)
                 use_pred_identifiers = self.use_fast_pred_eval
                 boolean_style = "pyeda" if self.use_fast_pred_eval else "tla"
+                # pred_weights = [1 for p in preds]
+                print("Current predicate weighting:")
+                for p in curr_pred_weights:
+                    print(f"{p}: {curr_pred_weights[p]}")
                 all_invs = mc.generate_invs(
                     preds, num_invs, min_num_conjuncts=min_conjs, max_num_conjuncts=max_conjs, 
                     process_local=process_local, quant_vars=self.quant_vars, 
                     boolean_style = boolean_style,
                     use_pred_identifiers=use_pred_identifiers,
-                    invs_avoid_set=inv_candidates_generated_in_round)
+                    invs_avoid_set=inv_candidates_generated_in_round,
+                    pred_weights=[curr_pred_weights[p] for p in preds],)
                 
                 invs = all_invs["raw_invs"]
 

@@ -284,7 +284,8 @@ def compute_subsumption_ordering(invs, num_samples_to_check=None):
    
 def generate_invs(preds, num_invs, min_num_conjuncts=2, max_num_conjuncts=2, 
                     process_local=False, boolean_style="tla", quant_vars=[], use_pred_identifiers=False,
-                    invs_avoid_set=set()):
+                    invs_avoid_set=set(),
+                    pred_weights=None):
     """ Generate 'num_invs' random invariants with the specified number of conjuncts. """
     # Pick some random conjunct.
     # OR and negations should be functionally complete
@@ -310,6 +311,19 @@ def generate_invs(preds, num_invs, min_num_conjuncts=2, max_num_conjuncts=2,
     # Assign a numeric id to each predicate.
     pred_id = {p:k for (k,p) in enumerate(preds)}
 
+    weights_by_pred = {}
+    if pred_weights is not None:
+        weights_by_pred = {p:pred_weights[ind] for ind,p in enumerate(preds)}
+
+    def select_next_conjunct_ind(conjs):
+        # Select next conjunct, weighting appropriately if specified.
+        if pred_weights is not None:
+            conjunct_weights = [weights_by_pred[c] for ind,c in enumerate(conjs)]
+            cind = random.choices(range(len(conjs)), weights=conjunct_weights, k=1)[0]
+        else:
+            cind = random.randint(0, len(conjs)-1)
+        return cind        
+
     invs = []
     invs_symb = []
     invs_symb_strs = []
@@ -319,7 +333,8 @@ def generate_invs(preds, num_invs, min_num_conjuncts=2, max_num_conjuncts=2,
         num_conjuncts = random.randint(min_num_conjuncts, max_num_conjuncts)
         
         # Select first atomic term of overall predicate.
-        cind = random.randint(0, len(conjuncts)-1)
+        cind = select_next_conjunct_ind(conjuncts)
+        # cind = random.randint(0, len(conjuncts)-1)
         c = conjuncts[cind]
         conjuncts.remove(c)
 
@@ -339,7 +354,14 @@ def generate_invs(preds, num_invs, min_num_conjuncts=2, max_num_conjuncts=2,
         for i in range(1,num_conjuncts):
             if len(conjuncts) == 0:
                 break
-            cind = random.randint(0, len(conjuncts)-1)
+            # # Select next conjunct, weighting appropriately if specified.
+            # if pred_weights is not None:
+            #     conjunct_weights = [weights_by_pred[c] for ind,c in enumerate(conjuncts)]
+            #     cind = random.choices(range(len(conjuncts)), weights=conjunct_weights, k=1)[0]
+            # else:
+            #     cind = random.randint(0, len(conjuncts)-1)
+            cind = select_next_conjunct_ind(conjuncts)
+
             c = conjuncts[cind]
             conjuncts.remove(c)
             op = ""
