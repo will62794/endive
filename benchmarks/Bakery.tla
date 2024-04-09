@@ -142,18 +142,22 @@ e1(self) == /\ pc[self] = "e1"
                   /\ pc' = [pc EXCEPT ![self] = "e2"]
             /\ UNCHANGED << num, nxt >>
 
-e2(self) == /\ pc[self] = "e2"
-            /\ IF unchecked[self] # {}
-                  THEN /\ \E i \in unchecked[self]:
-                            /\ unchecked' = [unchecked EXCEPT ![self] = unchecked[self] \ {i}]
-                            /\ IF num[i] > max[self]
-                                  THEN /\ max' = [max EXCEPT ![self] = num[i]]
-                                  ELSE /\ TRUE
-                                       /\ max' = max
-                       /\ pc' = [pc EXCEPT ![self] = "e2"]
-                  ELSE /\ pc' = [pc EXCEPT ![self] = "e3"]
-                       /\ UNCHANGED << unchecked, max >>
-            /\ UNCHANGED << num, flag, nxt >>
+e2a(self) == 
+    /\ pc[self] = "e2"
+    /\ unchecked[self] # {}
+    /\ \E i \in unchecked[self]:
+        /\ unchecked' = [unchecked EXCEPT ![self] = unchecked[self] \ {i}]
+        /\ IF num[i] > max[self]
+            THEN /\ max' = [max EXCEPT ![self] = num[i]]
+            ELSE /\ max' = max
+    /\ pc' = [pc EXCEPT ![self] = "e2"]
+    /\ UNCHANGED << num, flag, nxt >>
+
+e2b(self) == 
+    /\ pc[self] = "e2"
+    /\ unchecked[self] = {}
+    /\ pc' = [pc EXCEPT ![self] = "e3"]
+    /\ UNCHANGED << num, flag, nxt, unchecked, max >>
 
 e3(self) == /\ pc[self] = "e3"
             /\ \/ /\ \E k \in Nat:
@@ -207,13 +211,14 @@ exit(self) == /\ pc[self] = "exit"
                     /\ pc' = [pc EXCEPT ![self] = "ncs"]
               /\ UNCHANGED << flag, unchecked, max, nxt >>
 
-p(self) == ncs(self) \/ e1(self) \/ e2(self) \/ e3(self) \/ e4(self)
+p(self) == ncs(self) \/ e1(self) \/ e2a(self) \/ e2b(self) \/ e3(self) \/ e4(self)
               \/ w1a(self) \/ w1b(self) \/ w2(self) \/ cs(self) \/ exit(self)
 
 
 ncsAction ==  TRUE /\ \E self \in Procs : ncs(self) 
 e1Action ==   TRUE /\ \E self \in Procs : e1(self) 
-e2Action ==   TRUE /\ \E self \in Procs : e2(self) 
+e2aAction ==   TRUE /\ \E self \in Procs : e2a(self) 
+e2bAction ==   TRUE /\ \E self \in Procs : e2b(self) 
 e3Action ==   TRUE /\ \E self \in Procs : e3(self) 
 e4Action ==   TRUE /\ \E self \in Procs : e4(self)
 w1aAction ==   TRUE /\ \E self \in Procs : w1a(self) 
@@ -225,7 +230,8 @@ exitAction == TRUE /\ \E self \in Procs : exit(self)
 Next == 
     \/ ncsAction
     \/ e1Action
-    \/ e2Action
+    \/ e2aAction
+    \/ e2bAction
     \/ e3Action
     \/ e4Action
     \/ w1aAction
