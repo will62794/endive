@@ -91,7 +91,7 @@ class InductiveInvGen():
                     proof_tree_mode=False,
                     proof_tree_mode_persistent=False, 
                     interactive_mode=False, max_num_conjuncts_per_round=10000,
-                    max_num_ctis_per_round=10000, override_num_cti_workers=None, use_apalache_ctigen=False,all_args={},spec_config=None,
+                    max_num_ctis_per_round=10000, num_ctigen_workers=None, use_apalache_ctigen=False,all_args={},spec_config=None,
                     auto_lemma_action_decomposition=False, 
                     enable_partitioned_state_caching=False,
                     enable_cti_slice_projection=False,
@@ -143,7 +143,7 @@ class InductiveInvGen():
         self.interactive_mode = interactive_mode
         self.max_num_conjuncts_per_round = max_num_conjuncts_per_round
         self.max_duration_secs_per_round = all_args["max_duration_secs_per_round"]
-        self.override_num_cti_workers = override_num_cti_workers
+        self.num_ctigen_workers = num_ctigen_workers
         self.k_cti_induction_depth = all_args["k_cti_induction_depth"]
 
         self.target_sample_states = all_args["target_sample_states"]
@@ -1247,7 +1247,7 @@ class InductiveInvGen():
 
         # Use a single worker here, since we prefer to parallelize at the TLC
         # process level for probabilistic CTI generation.
-        num_ctigen_tlc_workers = 1
+        num_ctigen_tlc_workers = self.num_ctigen_workers
 
         # Limit simulate depth for now just to avoid very long traces.
         simulate_flag = ""
@@ -1256,7 +1256,7 @@ class InductiveInvGen():
             traces_per_worker = num_traces_per_worker
             simulate_flag = "-simulate num=%d" % traces_per_worker
 
-        logging.debug(f"Using fixed TLC process '-workers={num_ctigen_tlc_workers}' count to ensure reproducible CTI generation.")
+        logging.debug(f"Using fixed TLC process '-workers={self.num_ctigen_workers}' count to ensure reproducible CTI generation.")
         dirpath = tempfile.mkdtemp()
 
         # Apalache run.
@@ -1286,7 +1286,7 @@ class InductiveInvGen():
             simulate_depth = self.k_cti_induction_depth
         
         sampling_args = f"-Dtlc2.tool.impl.Tool.autoInitStatesSampling=true -Dtlc2.tool.impl.Tool.autoInitSamplingTimeLimitMS={sampling_target_time_limit_ms} -Dtlc2.tool.impl.Tool.autoInitSamplingTargetNumInitStates={sampling_target_num_init_states}"
-        args = (dirpath, sampling_args, "tla2tools-checkall.jar", mc.TLC_MAX_SET_SIZE, simulate_flag, simulate_depth, ctiseed, tag, num_ctigen_tlc_workers, indcheckcfgfilename(action), indchecktlafilename)
+        args = (dirpath, sampling_args, "tla2tools-checkall.jar", mc.TLC_MAX_SET_SIZE, simulate_flag, simulate_depth, ctiseed, tag, self.num_ctigen_workers, indcheckcfgfilename(action), indchecktlafilename)
         cmd = self.java_exe + ' -Xss16M -Djava.io.tmpdir="%s" %s -cp %s tlc2.TLC -maxSetSize %d %s -depth %d -seed %d -noGenerateSpecTE -metadir states/indcheckrandom_%s -continue -deadlock -workers %d -config %s %s' % args
         logging.debug("TLC command: " + cmd)
         workdir = None
@@ -1363,16 +1363,22 @@ class InductiveInvGen():
         # potential set of random initial states. We run each CTI generation process
         # in parallel, using a separate TLC instance.
         self.start_timing_ctigen()
-        num_cti_worker_procs = 4
+        # num_cti_worker_procs = 4
 
-        # Only allow alternate CTI worker count if explicitly overridden from command line.
-        if self.override_num_cti_workers:
-            num_cti_worker_procs = self.override_num_cti_workers
+        # # Only allow alternate CTI worker count if explicitly overridden from command line.
+        # if self.num_ctigen_workers:
+        #     num_cti_worker_procs = self.num_ctigen_workers
+
+        # Now we parallelize CTI generation inside each TLC instance, so we just start up 1 TLC instance with multiple worker threads here.
+        num_cti_worker_procs = 1
 
         if self.use_apalache_ctigen:
             num_cti_worker_procs = 1
         cti_subprocs = []
-        num_traces_per_tlc_instance = self.num_simulate_traces // num_cti_worker_procs
+        # num_traces_per_tlc_instance = self.num_simulate_traces // num_cti_worker_procs
+
+        # We now compute trace count based on the number of TLC workers, since we are not parallelizing across multiple TLC instances now.
+        num_traces_per_tlc_instance = self.num_simulate_traces // self.num_ctigen_workers
 
         # Break down CTIs by action in this case.
         if actions is not None:
@@ -4886,7 +4892,7 @@ if __name__ == "__main__":
     parser.add_argument('--max_num_conjuncts_per_round', help='Max number of conjuncts to learn per round.', type=int, default=10000)
     parser.add_argument('--max_duration_secs_per_round', help='Max number of seconds to spend on each iteration.', type=int, default=10000)
     parser.add_argument('--max_num_ctis_per_round', help='Max number of CTIs per round.', type=int, default=10000)
-    parser.add_argument('--override_num_cti_workers', help='Max number of TLC workers for CTI generation.', type=int, default=None)
+    parser.add_argument('--num_ctigen_workers', help='Max number of TLC workers for CTI generation.', type=int, default=None)
     parser.add_argument('--k_cti_induction_depth', help='CTI k-induction depth.', type=int, default=1)
     parser.add_argument('--auto_lemma_action_decomposition', help='Automatically split inductive proof obligations by action and lemmas.', required=False, default=False, action='store_true')
     parser.add_argument('--disable_state_cache_slicing', help='Disable slicing of state caches.', required=False, default=False, action='store_true')# how to make one argument exclusive with another?
@@ -5044,7 +5050,7 @@ if __name__ == "__main__":
                                 proof_tree_mode_persistent=args["persistent_mode"],
                                 interactive_mode=args["interactive"],
                                 max_num_conjuncts_per_round=args["max_num_conjuncts_per_round"], max_num_ctis_per_round=args["max_num_ctis_per_round"],
-                                override_num_cti_workers=args["override_num_cti_workers"],use_apalache_ctigen=args["use_apalache_ctigen"],all_args=args,
+                                num_ctigen_workers=args["num_ctigen_workers"],use_apalache_ctigen=args["use_apalache_ctigen"],all_args=args,
                                 spec_config=spec_config, 
                                 enable_partitioned_state_caching=args["enable_partitioned_state_caching"],
                                 enable_cti_slice_projection=args["enable_cti_slice_projection"],
