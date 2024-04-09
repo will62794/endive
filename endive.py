@@ -2067,8 +2067,13 @@ class InductiveInvGen():
         # Start off with equal weighting.
         curr_pred_weights = {p:1.0 for p in preds}
 
+        # Number of invariants to run and check at once, even if less than the max number of invariants
+        # we will try during an iteration.
+        NUM_INVS_PER_ITER_GROUP = 10000
+
         t_round_begin = time.time()
         num_iter_repeats = 0
+        num_invs_generated_per_iter = {}
         while iteration <= self.num_iters:
             tstart = time.time()
             self.latest_elimination_iter = iteration
@@ -2076,6 +2081,9 @@ class InductiveInvGen():
             # TODO: Possibly use these for optimization later on.
             self.sat_invs_in_iteration = set()
             self.invs_checked_in_iteration = set()
+
+            if iteration not in num_invs_generated_per_iter:
+                num_invs_generated_per_iter[iteration] = 0
 
             # On first iteration, look for smallest predicates.
             if iteration == 1:
@@ -2188,7 +2196,7 @@ class InductiveInvGen():
                 self.start_timing_invcheck()
 
                 # Generate and check random set of invariants.
-                logging.info("Generating %d candidate invariants." % num_invs)
+                logging.info("Generating %d candidate invariants (%d/%d) so far." % (NUM_INVS_PER_ITER_GROUP, num_invs_generated_per_iter[iteration] + NUM_INVS_PER_ITER_GROUP, num_invs))
                 use_pred_identifiers = self.use_fast_pred_eval
                 boolean_style = "pyeda" if self.use_fast_pred_eval else "tla"
                 # pred_weights = [1 for p in preds]
@@ -2196,12 +2204,17 @@ class InductiveInvGen():
                 for p in curr_pred_weights:
                     print(f"{p}: {curr_pred_weights[p]}")
                 all_invs = mc.generate_invs(
-                    preds, num_invs, min_num_conjuncts=min_conjs, max_num_conjuncts=max_conjs, 
+                    preds, NUM_INVS_PER_ITER_GROUP, min_num_conjuncts=min_conjs, max_num_conjuncts=max_conjs, 
                     process_local=process_local, quant_vars=self.quant_vars, 
                     boolean_style = boolean_style,
                     use_pred_identifiers=use_pred_identifiers,
                     invs_avoid_set=inv_candidates_generated_in_round,
                     pred_weights=[curr_pred_weights[p] for p in preds],)
+                
+                if iteration in num_invs_generated_per_iter:
+                    num_invs_generated_per_iter[iteration] += NUM_INVS_PER_ITER_GROUP
+                else:
+                    num_invs_generated_per_iter[iteration] = NUM_INVS_PER_ITER_GROUP
                 
                 invs = all_invs["raw_invs"]
 
@@ -2919,6 +2932,9 @@ class InductiveInvGen():
                     logging.info("Re-running iteration.")
                     iteration -= 1
                     iter_repeat = True
+
+            if num_invs_generated_per_iter[iteration] < num_invs:
+                iter_repeat = True
 
             if self.proof_tree_mode:
                 self.proof_graph["curr_node"] = None
