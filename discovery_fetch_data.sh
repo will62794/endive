@@ -2,6 +2,8 @@
 #
 # Download logs and other data from Discovery server.
 #
+set -e
+
 mkdir -p discovery_data
 
 echo "Fetching logs"
