@@ -2645,6 +2645,8 @@ class InductiveInvGen():
                         if len(cti_states_eliminated_by_invs[inv]):
                             invi = int(inv.replace("Inv",""))
                             invexp = quant_inv_fn(sorted(invs)[invi])
+                elim_duration = time.time() - elim_start
+                logging.info("CTI elimination chunk check finished in {:.2f} seconds.".format(elim_duration))
 
                 curr_ind += MAX_INVS_PER_GROUP
 
