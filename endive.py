@@ -2569,6 +2569,7 @@ class InductiveInvGen():
                 tlc_procs = []
 
                 # Create the TLA+ specs and configs for checking each chunk.
+                elim_start = time.time()
                 for ci,cti_chunk in enumerate(cti_chunks):
 
                     # Build and save the TLA+ spec.
