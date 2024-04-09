@@ -25,6 +25,7 @@
         "pc[VARI] \\in {\"w1\",\"w2\"}",
         "pc[VARI] \\in {\"e4\",\"w1\",\"w2\"}",
         "pc[VARJ] \\in {\"e4\",\"w1\",\"w2\"}",
+        "((pc[VARJ] \\in {\"w1\",\"w2\"}) /\\ (pc[VARI] = \"w1\"))",
         "pc[VARI] = \"w2\"",
         "pc[VARJ] = \"ncs\"",
         "pc[VARJ] = \"exit\"",
