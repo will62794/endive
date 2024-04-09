@@ -2108,7 +2108,7 @@ class InductiveInvGen():
                     preds = preds + preds_alt
 
             if iteration==5:
-                num_conjs = init_conjs + 4
+                num_conjs = init_conjs + 3
                 (min_conjs, max_conjs) = (num_conjs, num_conjs)
                 process_local=False
                 if quant_inv_alt:
