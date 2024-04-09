@@ -4926,6 +4926,8 @@ if __name__ == "__main__":
 
     # Create directory for generated files if needed.
     os.system(f"mkdir -p {os.path.join(specdir, GEN_TLA_DIR)}")
+    # Clean and create statecache.
+    os.system(f"rm -rf {os.path.join(specdir, STATECACHE_DIR)}")
     os.system(f"mkdir -p {os.path.join(specdir, STATECACHE_DIR)}")
 
     # Can't disable state cache slicing if we have enabled partitioned state caching.
