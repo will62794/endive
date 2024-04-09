@@ -183,10 +183,9 @@ w1a(self) ==
 
 w1b(self) == 
     /\ pc[self] = "w1"
-    /\ ~(unchecked[self] # {})
+    /\ (unchecked[self] = {})
     /\ pc' = [pc EXCEPT ![self] = "cs"]
-    /\ nxt' = nxt
-    /\ UNCHANGED << num, flag, unchecked, max >>
+    /\ UNCHANGED << num, flag, unchecked, max, nxt >>
 
 w2(self) == /\ pc[self] = "w2"
             /\ \/ num[nxt[self]] = 0
