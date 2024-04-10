@@ -137,6 +137,7 @@ class InductiveInvGen():
         self.max_proof_node_ctis = all_args["max_proof_node_ctis"]
         self.proof_tree_mode = proof_tree_mode
 
+        self.reprove_failed_nodes = all_args["reprove_failed_nodes"]
         self.check_proof_graph = all_args["check_proof_graph"]
 
         # In persistent mode we will save the generated proof graph on completion and also load 
@@ -2277,14 +2278,16 @@ class InductiveInvGen():
 
 
                 invs_symb_strs = all_invs["pred_invs"]
-                # Count the number of generated candidates that were already checked previously.
-                repeated_invs = 0
-                for ivs in invs_symb_strs:
-                    if ivs in self.all_generated_inv_candidates:
-                        repeated_invs += 1
+               
                 # inv_candidates_generated_in_round.update(invs_symb_strs)
                 self.all_generated_inv_candidates.update(invs_symb_strs)
-                logging.info(f"Found {repeated_invs} repeated generated invariants (total generated in round {roundi}: {len(self.all_generated_inv_candidates)}).")
+
+                #  # Count the number of generated candidates that were already checked previously.
+                # repeated_invs = 0
+                # for ivs in invs_symb_strs:
+                #     if ivs in self.all_generated_inv_candidates:
+                #         repeated_invs += 1
+                # logging.info(f"Found {repeated_invs} repeated generated invariants (total generated in round {roundi}: {len(self.all_generated_inv_candidates)}).")
 
                 # Sort the set of invariants to give them a consistent order.
                 invs = sorted(list(invs))
@@ -3946,6 +3949,17 @@ class InductiveInvGen():
         if self.save_dot and len(self.proof_graph["edges"]) > 0:
             self.render_proof_graph()
 
+        if self.persistent_proof_tree_mode and self.reprove_failed_nodes:
+            logging.info("Attempting to re-prove failed nodes after loading proof graph.")
+            # Mark each node to be re-proven as un discharged and non-failed.
+            for n in self.proof_graph["nodes"]:
+                node = self.proof_graph["nodes"][n]
+                if "failed" in node and node["failed"]:
+                    logging.info(f"Marking node as un-failed: {n}")
+                    self.proof_graph["nodes"][n]["discharged"] = False
+                    # Delete key.
+                    self.proof_graph["nodes"][n]["failed"] = False
+
         for roundi in range(self.num_rounds):
             logging.info("###### STARTING ROUND %d" % roundi)
             logging.info("#####################################")
@@ -3972,7 +3986,7 @@ class InductiveInvGen():
             undischarged = [n for n in self.proof_graph["nodes"].keys() if valid_proof_node(self.proof_graph["nodes"][n])]
             logging.info(f"Remaining, undischarged lemma obligations: {len(undischarged)}")
 
-            failed = [n for n in self.proof_graph["nodes"].keys() if "failed" in self.proof_graph["nodes"][n]]
+            failed = [n for n in self.proof_graph["nodes"].keys() if "failed" in self.proof_graph["nodes"][n] and self.proof_graph["nodes"][n]["failed"]]
             logging.info(f"Failed lemma obligations: {len(failed)}")
             for f in failed:
                 print(" - ", f)
@@ -4304,7 +4318,7 @@ class InductiveInvGen():
                     logging.info(f"Could not eliminate all CTIs in this round. Exiting with failure and marking {curr_obligation} as failed.")
                     # Mark the proof node as failed.
                     self.proof_graph["nodes"][action_node]["failed"] = True
-                    # self.proof_graph["nodes"][curr_obligation]["failed"] = True
+                    self.proof_graph["nodes"][curr_obligation]["failed"] = True
                     break
 
                     # Only mark a lemma node as failed if all of its action nodes are failed too.
@@ -4989,6 +5003,7 @@ if __name__ == "__main__":
     parser.add_argument('--enable_cti_slice_projection', help='Enable slicing of CTI sets.', default=False, action='store_true')
     parser.add_argument('--action_filter', help='CTI action filter.', required=False, default=None, type=str)
     parser.add_argument('--include_existing_conjuncts', help='Whether to include existing conjuncts as invariant candidates during CTI elimination.', default=True, action='store_true')
+    parser.add_argument('--reprove_failed_nodes', help='Try to reprove failed nodes in loaded proof graph.', default=False, action='store_true')
 
     # Apalache related commands.
     parser.add_argument('--use_apalache_ctigen', help='Use Apalache for CTI generation (experimental).', required=False, default=False, action='store_true')
