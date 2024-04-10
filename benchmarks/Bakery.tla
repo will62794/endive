@@ -132,15 +132,19 @@ ncs(self) == /\ pc[self] = "ncs"
              /\ pc' = [pc EXCEPT ![self] = "e1"]
              /\ UNCHANGED << num, flag, unchecked, max, nxt >>
 
-e1(self) == /\ pc[self] = "e1"
-            /\ \/ /\ flag' = [flag EXCEPT ![self] = ~ flag[self]]
-                  /\ pc' = [pc EXCEPT ![self] = "e1"]
-                  /\ UNCHANGED <<unchecked, max>>
-               \/ /\ flag' = [flag EXCEPT ![self] = TRUE]
-                  /\ unchecked' = [unchecked EXCEPT ![self] = Procs \ {self}]
-                  /\ max' = [max EXCEPT ![self] = 0]
-                  /\ pc' = [pc EXCEPT ![self] = "e2"]
-            /\ UNCHANGED << num, nxt >>
+e1a(self) == 
+    /\ pc[self] = "e1"
+    /\ flag' = [flag EXCEPT ![self] = ~ flag[self]]
+    /\ pc' = [pc EXCEPT ![self] = "e1"]
+    /\ UNCHANGED << num, nxt, unchecked, max >>
+
+e1b(self) == 
+    /\ pc[self] = "e1"
+    /\ flag' = [flag EXCEPT ![self] = TRUE]
+    /\ unchecked' = [unchecked EXCEPT ![self] = Procs \ {self}]
+    /\ max' = [max EXCEPT ![self] = 0]
+    /\ pc' = [pc EXCEPT ![self] = "e2"]
+    /\ UNCHANGED << num, nxt >>
 
 e2a(self) == 
     /\ pc[self] = "e2"
@@ -215,12 +219,13 @@ exit(self) == /\ pc[self] = "exit"
                     /\ pc' = [pc EXCEPT ![self] = "ncs"]
               /\ UNCHANGED << flag, unchecked, max, nxt >>
 
-p(self) == ncs(self) \/ e1(self) \/ e2a(self) \/ e2b(self) \/ e3(self) \/ e4a(self) \/ e4b(self)
+p(self) == ncs(self) \/ e1a(self) \/ e1b(self) \/ e2a(self) \/ e2b(self) \/ e3(self) \/ e4a(self) \/ e4b(self)
               \/ w1a(self) \/ w1b(self) \/ w2(self) \/ cs(self) \/ exit(self)
 
 
 ncsAction ==  TRUE /\ \E self \in Procs : ncs(self) 
-e1Action ==   TRUE /\ \E self \in Procs : e1(self) 
+e1aAction ==   TRUE /\ \E self \in Procs : e1a(self) 
+e1bAction ==   TRUE /\ \E self \in Procs : e1b(self) 
 e2aAction ==   TRUE /\ \E self \in Procs : e2a(self) 
 e2bAction ==   TRUE /\ \E self \in Procs : e2b(self) 
 e3Action ==   TRUE /\ \E self \in Procs : e3(self) 
@@ -234,7 +239,8 @@ exitAction == TRUE /\ \E self \in Procs : exit(self)
 
 Next == 
     \/ ncsAction
-    \/ e1Action
+    \/ e1aAction
+    \/ e1bAction
     \/ e2aAction
     \/ e2bAction
     \/ e3Action
