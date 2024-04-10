@@ -2075,6 +2075,7 @@ class InductiveInvGen():
         num_iter_repeats = 0
         num_invs_generated_per_iter = {}
         self.invs_checked_in_iteration = {}
+        self.num_sampled_invs_in_iteration = {}
 
         while iteration <= self.num_iters:
             tstart = time.time()
@@ -2084,6 +2085,9 @@ class InductiveInvGen():
             self.sat_invs_in_iteration = set()
             if iteration not in self.invs_checked_in_iteration:
                 self.invs_checked_in_iteration[iteration] = set()
+
+            if iteration not in self.num_sampled_invs_in_iteration:
+                self.num_sampled_invs_in_iteration[iteration] = 0
 
             if iteration not in num_invs_generated_per_iter:
                 num_invs_generated_per_iter[iteration] = 0
@@ -2213,6 +2217,7 @@ class InductiveInvGen():
                     use_pred_identifiers=use_pred_identifiers,
                     invs_avoid_set=inv_candidates_generated_in_round,
                     pred_weights=[curr_pred_weights[p] for p in preds],)
+                self.num_sampled_invs_in_iteration[iteration] += NUM_INVS_PER_ITER_GROUP
                 
                 invs = all_invs["raw_invs"]
 
@@ -2599,10 +2604,10 @@ class InductiveInvGen():
             cti_chunks = list(chunks(list(orig_k_ctis), n_tlc_workers))
 
             self.start_timing_ctielimcheck()
+            logging.info("[--- BEGIN CTI ELIMINATION ---]")
 
             while curr_ind < len(sat_invs):
                 sat_invs_group = sat_invs[curr_ind:(curr_ind+MAX_INVS_PER_GROUP)]
-                logging.info("[ BEGIN CTI ELIMINATION ]")
                 logging.info("Checking invariant group of size %d (starting invariant=%d) for CTI elimination." % (len(sat_invs_group), curr_ind))
                 tlc_procs = []
 
@@ -2959,7 +2964,7 @@ class InductiveInvGen():
                     iter_repeat = True
 
             # We still haven't maxed out max number of invariants generated for this iteration.
-            if num_invs_generated_per_iter[iteration] < num_invs:
+            if self.num_sampled_invs_in_iteration[iteration] < num_invs:
                 if not iter_repeat:
                     iteration -= 1
                     iter_repeat = True
