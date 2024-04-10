@@ -4684,7 +4684,7 @@ class InductiveInvGen():
         suffix = ""
         if include_seed:
             suffix = f"-sd{self.seed}"
-        dot.render(self.specdir + "/" + self.specname + "_ind-proof-tree" + suffix)
+        dot.render(self.specdir + "/" + self.specname + "_ind-proof-tree" + suffix, quiet=True)
 
         if save_tex:
             old_stdout = sys.stdout # backup current stdout
