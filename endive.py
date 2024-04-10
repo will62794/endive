@@ -4585,11 +4585,11 @@ class InductiveInvGen():
                                 total_ctis_str = ""
                                 if "total_initial_ctis" in self.proof_graph["nodes"][n]:
                                     total_ctis_str = "/" + str(self.proof_graph["nodes"][n]["total_initial_ctis"])
-                                label += f"<FONT POINT-SIZE='10'> (ctis={num_ctis_left}{total_ctis_str})</FONT>"
+                                label += f"<FONT POINT-SIZE='10'> (ctis={num_ctis_left}{total_ctis_str}) </FONT>"
                             if "num_invs_generated_per_iter" in node:
                                 num_invs_generated = node["num_invs_generated_per_iter"]
                                 total = sum([num_invs_generated[i] for i in num_invs_generated])
-                                label += f"<FONT POINT-SIZE='10'>(invs={total}) </FONT>"
+                                label += f"<FONT POINT-SIZE='10'>(invs={total})</FONT>"
                             if "time_spent" in node:
                                 label += "<FONT POINT-SIZE='10'> (" + "{0:.2f}".format(self.proof_graph["nodes"][n]["time_spent"]) + "s) </FONT>"
                             label += ">"
