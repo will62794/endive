@@ -198,6 +198,7 @@ class InductiveInvGen():
 
         # The set of all generated invariants discovered so far.
         self.all_sat_invs = set()
+        self.all_violated_invs = set()
         self.all_checked_invs = set()
 
         # Is the conjunction of the safety property and the current set of
@@ -2231,6 +2232,8 @@ class InductiveInvGen():
                 # This will cause these conjuncts to be checked again, but that's okay for now, since we will
                 # choose them first over new invariants if they are useful, below during CTI elimination.
                 # TODO: May consider cleaner ways for re-using existing strengthening conjuncts.
+                invs = set([x for x in invs if quant_inv_fn(x) not in self.all_violated_invs])
+                logging.info(f"Reduced to {len(invs)} candidate invariants after removing known violated invariants.")
 
                 # Try to do a bit of inference without resorting to existing conjuncts, and then add them back in after a round or
                 # two. 
@@ -2558,12 +2561,15 @@ class InductiveInvGen():
         
             # Cache all generated invariants so we don't need to unnecessarily re-generate them
             # in future rounds.
+            violated_invs = [f"Inv{ind}" for ind,iv in enumerate(orig_invs_sorted) if f"Inv{ind}" not in sat_invs]
             self.all_sat_invs = self.all_sat_invs.union(set(map(get_invexp, list(sat_invs))))
+            self.all_violated_invs = self.all_violated_invs.union(set(map(get_invexp, list(violated_invs))))
             self.all_checked_invs = self.all_checked_invs.union(set(map(quant_inv_fn, list(invs))))
             self.invs_checked_in_iteration[iteration] = self.invs_checked_in_iteration[iteration].union(set(map(quant_inv_fn, list(invs))))
             logging.info(f"Total number of unique checked invariants so far this iteration: {len(self.invs_checked_in_iteration[iteration])}")
             logging.info(f"Total number sampled so far this iteration: {self.num_sampled_invs_in_iteration[iteration]}")
             logging.info(f"Total number of unique satisfied invariants generated so far: {len(self.all_sat_invs)}")
+            logging.info(f"Total number of unique violated invariants generated so far: {len(self.all_violated_invs)}")
             logging.info(f"Total number of unique checked invariants so far: {len(self.all_checked_invs)}")
 
 
