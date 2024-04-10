@@ -86,7 +86,7 @@
     "preds_alt" : [],
     "safety"  :  "H_MutualExclusion",
     "constants"  : {
-        "N": ["1", "2", "2"],
+        "N": ["1", "2", "3"],
         "Nat": ["{0,1,2,3}"]
     },
     "actions": [
