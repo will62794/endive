@@ -1,21 +1,33 @@
 #!/bin/bash
 #SBATCH --partition short    # Partition name
 #SBATCH --time=08:00:00       # Time limit.
-#SBATCH --constraint="[broadwell|cascadelake]"       # Newer processors.
 #SBATCH -N 1                   # Number of nodes
 #SBATCH -n 1                   # Number of tasks
 #SBATCH --cpus-per-task 28                  # Number of cores
-#SBATCH --array=1,2,3,4,5
+#SBATCH --array=1,2,3,4,5,6,7,8
 
 specname="Bakery"
+
+nrounds=45
+ninvs=80000
+max_num_ctis_per_round=500
+target_sample_states=200000
+num_simulate_traces=200000
+
+common_flags=" --tlc_workers $tlc_workers --num_ctigen_workers $num_ctigen_workers --cti_elimination_workers=$cti_elimination_workers"
+common_flags+=" --debug --target_sample_time_limit_ms 10000 --num_simulate_traces $num_simulate_traces --target_sample_states $target_sample_states"
+common_flags+=" --opt_quant_minimize --k_cti_induction_depth 1"
+common_flags+=" --ninvs $ninvs --max_num_ctis_per_round $max_num_ctis_per_round"
+common_flags+=" --save_dot --max_num_conjuncts_per_round 20 --niters 4 --nrounds $nrounds"
 
 # All optimizations.
 seed=$SLURM_ARRAY_TASK_ID
 source /home/schultz.w/bm_setup.sh "${specname}_${seed}"
 srun -o /scratch/schultz.w/endive_logs/${specname}/${specname}_output_${seed}.txt \
     python3 endive.py --spec benchmarks/$specname \
-    $common_flags --seed $seed --proof_tree_mode --auto_lemma_action_decomposition --enable_partitioned_state_caching
-
+    $common_flags --seed $seed --proof_tree_mode --auto_lemma_action_decomposition --enable_partitioned_state_caching --enable_pred_weight_tuning
+    
+    
 # srun --time=$time_limit -o /scratch/schultz.w/endive_logs/${specname}_baseline/${specname}_baseline_output_%j_${seed}.txt \
     # python3 endive.py --spec benchmarks/$specname \
     # $common_flags 
