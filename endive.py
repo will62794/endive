@@ -117,6 +117,11 @@ class InductiveInvGen():
         self.num_invs = num_invs
         self.tlc_workers = tlc_workers
         self.n_cti_elimination_workers = all_args["cti_elimination_workers"]
+        
+        # Number of invariants to run and check at once, even if less than the max number of invariants
+        # we will try during an iteration.
+        self.num_invs_per_iter_group = all_args["ninvs_per_iter_group"]
+
         self.use_apalache_ctigen = use_apalache_ctigen
         self.do_apalache_final_induction_check = all_args["do_apalache_final_induction_check"]
         self.auto_lemma_action_decomposition = auto_lemma_action_decomposition
@@ -2068,10 +2073,6 @@ class InductiveInvGen():
         # Start off with equal weighting.
         curr_pred_weights = {p:1.0 for p in preds}
 
-        # Number of invariants to run and check at once, even if less than the max number of invariants
-        # we will try during an iteration.
-        NUM_INVS_PER_ITER_GROUP = 10000
-
         t_round_begin = time.time()
         num_iter_repeats = 0
         num_invs_generated_per_iter = {}
@@ -2203,22 +2204,25 @@ class InductiveInvGen():
             else:
                 self.start_timing_invcheck()
 
+                # pred_weights = [1 for p in preds]
+                if self.enable_pred_weight_tuning:
+                    print("Current predicate weighting:")
+                    for p in curr_pred_weights:
+                        print(f"{p}: {curr_pred_weights[p]}")
+
                 # Generate and check random set of invariants.
-                logging.info("Generating %d candidate invariants (%d/%d) so far." % (NUM_INVS_PER_ITER_GROUP, num_invs_generated_per_iter[iteration] + NUM_INVS_PER_ITER_GROUP, num_invs))
+                logging.info("Generating %d candidate invariants (%d/%d) so far." % (self.num_invs_per_iter_group, num_invs_generated_per_iter[iteration] + self.num_invs_per_iter_group, num_invs))
                 use_pred_identifiers = self.use_fast_pred_eval
                 boolean_style = "pyeda" if self.use_fast_pred_eval else "tla"
-                # pred_weights = [1 for p in preds]
-                print("Current predicate weighting:")
-                for p in curr_pred_weights:
-                    print(f"{p}: {curr_pred_weights[p]}")
+
                 all_invs = mc.generate_invs(
-                    preds, NUM_INVS_PER_ITER_GROUP, min_num_conjuncts=min_conjs, max_num_conjuncts=max_conjs, 
+                    preds, self.num_invs_per_iter_group, min_num_conjuncts=min_conjs, max_num_conjuncts=max_conjs, 
                     process_local=process_local, quant_vars=self.quant_vars, 
                     boolean_style = boolean_style,
                     use_pred_identifiers=use_pred_identifiers,
                     invs_avoid_set=inv_candidates_generated_in_round,
                     pred_weights=[curr_pred_weights[p] for p in preds],)
-                self.num_sampled_invs_in_iteration[iteration] += NUM_INVS_PER_ITER_GROUP
+                self.num_sampled_invs_in_iteration[iteration] += self.num_invs_per_iter_group
                 
                 invs = all_invs["raw_invs"]
 
@@ -4924,6 +4928,7 @@ if __name__ == "__main__":
     DEFAULT_SIMULATE_DEPTH = 8
     DEFAULT_TLC_WORKERS = 6
     DEFAULT_CTI_ELIMINATION_WORKERS = 1
+    DEFAULT_NUM_INVS_PER_ITER = 10000
 
     # Use default faster Java on Mac if it exists.
 
@@ -4939,7 +4944,8 @@ if __name__ == "__main__":
     parser.add_argument('--nrounds', help='Maximum number of CTI elimination rounds to run.', required=False, type=int, default=3)
     parser.add_argument('--seed', help='Seed for RNG.', required=False, default=0, type=int)
     parser.add_argument('--safety', help='Safety property to verify (will override safety prop in config).', required=False, default=None, type=str)
-    
+    parser.add_argument('--ninvs_per_iter_group', help='Number of invariants to sample in one batch during an iteration.', required=False, default=DEFAULT_NUM_INVS_PER_ITER, type=int)
+
     parser.add_argument('--num_simulate_traces', help='The maximum number of traces TLC will generate when searching for counterexamples to inductions (CTIs).', required=False, type=int, default=DEFAULT_NUM_SIMULATE_TRACES)
     parser.add_argument('--simulate_depth', help='Maximum depth of counterexample to induction (CTI) traces to search for.', required=False, type=int, default=DEFAULT_SIMULATE_DEPTH)
     parser.add_argument('--tlc_workers', help='Number of TLC worker threads to use when checking candidate invariants.', required=False, type=int, default=DEFAULT_TLC_WORKERS)
