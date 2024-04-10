@@ -2221,6 +2221,12 @@ class InductiveInvGen():
                 
                 invs = all_invs["raw_invs"]
 
+                # Remove any invariants that we already checked.
+                orig_size = len(invs)
+                invs = set([x for x in invs if quant_inv_fn(x) not in self.invs_checked_in_iteration[iteration]])
+                num_new_uniq_invs = len(invs)
+                logging.info(f"Reduced to {len(invs)} / {orig_size} original candidate invariants after removing previously generated ones this iteration.")
+
                 # Add in existing strengthening conjuncts to the set of invariants to consider.
                 # This will cause these conjuncts to be checked again, but that's okay for now, since we will
                 # choose them first over new invariants if they are useful, below during CTI elimination.
@@ -2249,10 +2255,6 @@ class InductiveInvGen():
                                 added += 1
                     logging.info(f"Added {added}/{len(self.strengthening_conjuncts)} existing strengthening conjuncts to candidate invariant set.")
 
-                # Remove any invariants that we already checked.
-                orig_size = len(invs)
-                invs = set([x for x in invs if quant_inv_fn(x) not in self.invs_checked_in_iteration[iteration]])
-                logging.info(f"Reduced to {len(invs)} / {orig_size} original candidate invariants after removing previously generated ones this iteration.")
 
                 #
                 # TODO: Properly avoid checking candidates if we already checked them before, even if some other round.
@@ -2347,7 +2349,8 @@ class InductiveInvGen():
                     #     print(e)
 
 
-                if len(invs)==0:
+                # if len(invs)==0:
+                if num_new_uniq_invs==0:
                     logging.info("No new candidate invariants generated. Continuing.")
                     iteration += 1
                     continue
@@ -2558,9 +2561,10 @@ class InductiveInvGen():
             self.all_sat_invs = self.all_sat_invs.union(set(map(get_invexp, list(sat_invs))))
             self.all_checked_invs = self.all_checked_invs.union(set(map(quant_inv_fn, list(invs))))
             self.invs_checked_in_iteration[iteration] = self.invs_checked_in_iteration[iteration].union(set(map(quant_inv_fn, list(invs))))
+            logging.info(f"Total number of unique checked invariants so far this iteration: {len(self.invs_checked_in_iteration[iteration])}")
+            logging.info(f"Total number sampled so far this iteration: {self.num_sampled_invs_in_iteration[iteration]}")
             logging.info(f"Total number of unique satisfied invariants generated so far: {len(self.all_sat_invs)}")
             logging.info(f"Total number of unique checked invariants so far: {len(self.all_checked_invs)}")
-            logging.info(f"Total number of unique checked invariants so far this iteration: {len(self.invs_checked_in_iteration[iteration])}")
 
 
             #
