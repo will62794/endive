@@ -4874,7 +4874,7 @@ if __name__ == "__main__":
     DEFAULT_NUM_SIMULATE_TRACES = 800
     DEFAULT_SIMULATE_DEPTH = 8
     DEFAULT_TLC_WORKERS = 6
-    DEFAULT_CTI_ELIMINATION_WORKERS = 3
+    DEFAULT_CTI_ELIMINATION_WORKERS = 1
 
     # Use default faster Java on Mac if it exists.
 
