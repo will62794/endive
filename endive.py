@@ -2933,8 +2933,11 @@ class InductiveInvGen():
                     iteration -= 1
                     iter_repeat = True
 
+            # We still haven't maxed out max number of invariants generated for this iteration.
             if num_invs_generated_per_iter[iteration] < num_invs:
-                iter_repeat = True
+                if not iter_repeat:
+                    iteration -= 1
+                    iter_repeat = True
 
             if self.proof_tree_mode:
                 self.proof_graph["curr_node"] = None
