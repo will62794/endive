@@ -2967,6 +2967,7 @@ class InductiveInvGen():
                     action_node = f"{orig_k_ctis[0].inv_name}_{orig_k_ctis[0].action_name}"
                     self.proof_graph["nodes"][action_node]["ctis_remaining"] = num_ctis_remaining
                     self.proof_graph["nodes"][action_node]["total_initial_ctis"] = len(orig_k_ctis)
+                    self.proof_graph["nodes"][action_node]["num_invs_generated_per_iter"] = num_invs_generated_per_iter
                     if "latest_elimination_iter" in self.proof_graph["nodes"][action_node]:
                         self.proof_graph["nodes"][action_node]["latest_elimination_iter"] = max(iteration, self.proof_graph["nodes"][action_node]["latest_elimination_iter"])
                     else:
@@ -3048,6 +3049,7 @@ class InductiveInvGen():
                             "total_initial_ctis": len(orig_k_ctis), 
                             "coi_vars": lemma_action_coi,
                             "num_grammar_preds": len(preds),
+                            "num_invs_generated_per_iter": num_invs_generated_per_iter,
                             "is_action": True,
                             "discharged": num_ctis_remaining == 0
                         }
@@ -4575,15 +4577,19 @@ class InductiveInvGen():
                             label = "< " + nlabel + "<BR/>" + "<FONT POINT-SIZE='10'>" + str(coi) + "<BR/>" + " (" + str(len(coi_vars)) + "/" + str(len(self.state_vars)) + " vars) </FONT>"
                             if "num_grammar_preds" in self.proof_graph["nodes"][n]:
                                 label += "<FONT POINT-SIZE='10'>|preds|=" + str(self.proof_graph["nodes"][n]["num_grammar_preds"]) + "/" + str(len(self.preds)) + "</FONT>"
+                            if "latest_elimination_iter" in node:
+                                latest_iter = self.proof_graph["nodes"][n]["latest_elimination_iter"]
+                                label += f"<FONT POINT-SIZE='10'> (iters={latest_iter}) </FONT>"
                             label += "<BR/>"
                             if "ctis_remaining" in node:
                                 total_ctis_str = ""
                                 if "total_initial_ctis" in self.proof_graph["nodes"][n]:
                                     total_ctis_str = "/" + str(self.proof_graph["nodes"][n]["total_initial_ctis"])
-                                label += f"<FONT POINT-SIZE='10'> (ctis_left={num_ctis_left}{total_ctis_str})</FONT>"
-                            if "latest_elimination_iter" in node:
-                                latest_iter = self.proof_graph["nodes"][n]["latest_elimination_iter"]
-                                label += f"<FONT POINT-SIZE='10'> (iters={latest_iter}) </FONT>"
+                                label += f"<FONT POINT-SIZE='10'> (ctis={num_ctis_left}{total_ctis_str})</FONT>"
+                            if "num_invs_generated_per_iter" in node:
+                                num_invs_generated = node["num_invs_generated_per_iter"]
+                                total = sum([num_invs_generated[i] for i in num_invs_generated])
+                                label += f"<FONT POINT-SIZE='10'>(invs={total}) </FONT>"
                             if "time_spent" in node:
                                 label += "<FONT POINT-SIZE='10'> (" + "{0:.2f}".format(self.proof_graph["nodes"][n]["time_spent"]) + "s) </FONT>"
                             label += ">"
