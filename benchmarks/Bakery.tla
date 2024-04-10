@@ -168,14 +168,18 @@ e3(self) == /\ pc[self] = "e3"
                   /\ pc' = [pc EXCEPT ![self] = "e4"]
             /\ UNCHANGED << flag, unchecked, max, nxt >>
 
-e4(self) == /\ pc[self] = "e4"
-            /\ \/ /\ flag' = [flag EXCEPT ![self] = ~ flag[self]]
-                  /\ pc' = [pc EXCEPT ![self] = "e4"]
-                  /\ UNCHANGED unchecked
-               \/ /\ flag' = [flag EXCEPT ![self] = FALSE]
-                  /\ unchecked' = [unchecked EXCEPT ![self] = Procs \ {self}]
-                  /\ pc' = [pc EXCEPT ![self] = "w1"]
-            /\ UNCHANGED << num, max, nxt >>
+e4a(self) == 
+    /\ pc[self] = "e4"
+    /\ flag' = [flag EXCEPT ![self] = ~ flag[self]]
+    /\ pc' = [pc EXCEPT ![self] = "e4"]
+    /\ UNCHANGED << num, max, nxt, unchecked >>
+
+e4b(self) == 
+    /\ pc[self] = "e4"
+    /\ flag' = [flag EXCEPT ![self] = FALSE]
+    /\ unchecked' = [unchecked EXCEPT ![self] = Procs \ {self}]
+    /\ pc' = [pc EXCEPT ![self] = "w1"]
+    /\ UNCHANGED << num, max, nxt >>
 
 w1a(self) == 
     /\ pc[self] = "w1"
@@ -211,7 +215,7 @@ exit(self) == /\ pc[self] = "exit"
                     /\ pc' = [pc EXCEPT ![self] = "ncs"]
               /\ UNCHANGED << flag, unchecked, max, nxt >>
 
-p(self) == ncs(self) \/ e1(self) \/ e2a(self) \/ e2b(self) \/ e3(self) \/ e4(self)
+p(self) == ncs(self) \/ e1(self) \/ e2a(self) \/ e2b(self) \/ e3(self) \/ e4a(self) \/ e4b(self)
               \/ w1a(self) \/ w1b(self) \/ w2(self) \/ cs(self) \/ exit(self)
 
 
@@ -220,7 +224,8 @@ e1Action ==   TRUE /\ \E self \in Procs : e1(self)
 e2aAction ==   TRUE /\ \E self \in Procs : e2a(self) 
 e2bAction ==   TRUE /\ \E self \in Procs : e2b(self) 
 e3Action ==   TRUE /\ \E self \in Procs : e3(self) 
-e4Action ==   TRUE /\ \E self \in Procs : e4(self)
+e4aAction ==   TRUE /\ \E self \in Procs : e4a(self)
+e4bAction ==   TRUE /\ \E self \in Procs : e4b(self)
 w1aAction ==   TRUE /\ \E self \in Procs : w1a(self) 
 w1bAction ==   TRUE /\ \E self \in Procs : w1b(self) 
 w2Action ==   TRUE /\ \E self \in Procs : w2(self) 
@@ -233,7 +238,8 @@ Next ==
     \/ e2aAction
     \/ e2bAction
     \/ e3Action
-    \/ e4Action
+    \/ e4aAction
+    \/ e4bAction
     \/ w1aAction
     \/ w1bAction
     \/ w2Action
