@@ -2074,13 +2074,16 @@ class InductiveInvGen():
         t_round_begin = time.time()
         num_iter_repeats = 0
         num_invs_generated_per_iter = {}
+        self.invs_checked_in_iteration = {}
+
         while iteration <= self.num_iters:
             tstart = time.time()
             self.latest_elimination_iter = iteration
 
             # TODO: Possibly use these for optimization later on.
             self.sat_invs_in_iteration = set()
-            self.invs_checked_in_iteration = set()
+            if iteration not in self.invs_checked_in_iteration:
+                self.invs_checked_in_iteration[iteration] = set()
 
             if iteration not in num_invs_generated_per_iter:
                 num_invs_generated_per_iter[iteration] = 0
@@ -2211,11 +2214,6 @@ class InductiveInvGen():
                     invs_avoid_set=inv_candidates_generated_in_round,
                     pred_weights=[curr_pred_weights[p] for p in preds],)
                 
-                if iteration in num_invs_generated_per_iter:
-                    num_invs_generated_per_iter[iteration] += NUM_INVS_PER_ITER_GROUP
-                else:
-                    num_invs_generated_per_iter[iteration] = NUM_INVS_PER_ITER_GROUP
-                
                 invs = all_invs["raw_invs"]
 
                 # Add in existing strengthening conjuncts to the set of invariants to consider.
@@ -2245,6 +2243,24 @@ class InductiveInvGen():
                                 invs.add(c[2])
                                 added += 1
                     logging.info(f"Added {added}/{len(self.strengthening_conjuncts)} existing strengthening conjuncts to candidate invariant set.")
+
+                # Remove any invariants that we already checked.
+                orig_size = len(invs)
+                invs = set([x for x in invs if quant_inv_fn(x) not in self.invs_checked_in_iteration[iteration]])
+                logging.info(f"Reduced to {len(invs)} / {orig_size} original candidate invariants after removing previously generated ones this iteration.")
+
+                #
+                # TODO: Properly avoid checking candidates if we already checked them before, even if some other round.
+                #
+                # already_sat_invs = set([x for x in invs if quant_inv_fn(x) in self.all_sat_invs])
+                # invs = invs.difference(already_sat_invs)
+                # logging.info(f"Reduced to {len(invs)} candidate invariants after removing known, satisfied invariants.")
+
+                if iteration in num_invs_generated_per_iter:
+                    num_invs_generated_per_iter[iteration] += len(invs)
+                else:
+                    num_invs_generated_per_iter[iteration] = len(invs)
+
 
                 invs_symb_strs = all_invs["pred_invs"]
                 # Count the number of generated candidates that were already checked previously.
@@ -2324,6 +2340,12 @@ class InductiveInvGen():
                     dot.render(f"subsumption_graphs/subsumption_graph_R{roundi}_I{iteration}_conjs{min_conjs}", format="pdf")
                     # for e in subsumption_edges:
                     #     print(e)
+
+
+                if len(invs)==0:
+                    logging.info("No new candidate invariants generated. Continuing.")
+                    iteration += 1
+                    continue
 
 
                 # Check all generated candidate invariants.
@@ -2530,8 +2552,10 @@ class InductiveInvGen():
             # in future rounds.
             self.all_sat_invs = self.all_sat_invs.union(set(map(get_invexp, list(sat_invs))))
             self.all_checked_invs = self.all_checked_invs.union(set(map(quant_inv_fn, list(invs))))
+            self.invs_checked_in_iteration[iteration] = self.invs_checked_in_iteration[iteration].union(set(map(quant_inv_fn, list(invs))))
             logging.info(f"Total number of unique satisfied invariants generated so far: {len(self.all_sat_invs)}")
             logging.info(f"Total number of unique checked invariants so far: {len(self.all_checked_invs)}")
+            logging.info(f"Total number of unique checked invariants so far this iteration: {len(self.invs_checked_in_iteration[iteration])}")
 
 
             #
@@ -2578,6 +2602,7 @@ class InductiveInvGen():
 
             while curr_ind < len(sat_invs):
                 sat_invs_group = sat_invs[curr_ind:(curr_ind+MAX_INVS_PER_GROUP)]
+                logging.info("[ BEGIN CTI ELIMINATION ]")
                 logging.info("Checking invariant group of size %d (starting invariant=%d) for CTI elimination." % (len(sat_invs_group), curr_ind))
                 tlc_procs = []
 
