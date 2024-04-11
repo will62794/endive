@@ -2766,21 +2766,26 @@ class InductiveInvGen():
 
                 # Print out top 10 candidates by elimination.
                 preds_in_top_cands = set()
-                top_k = 15
+                top_k = 1
                 # Out of all computed predicates that eliminate some CTIs, for each predicate, compute the proportion
                 # CTI eliminating invariants that it appeared in.
                 if subiter>=0:
                     # for ind,iv in enumerate(new_inv_cands[:top_k]):
-                    for ind,iv in enumerate(new_inv_cands[:top_k]):
+                    top_num_eliminated = len(cti_states_eliminated_by_invs[new_inv_cands[0]] - ctis_eliminated_this_iter)
+                    all_top_equiv_k = [civ for civ in new_inv_cands if len(cti_states_eliminated_by_invs[civ] - ctis_eliminated_this_iter) == top_num_eliminated]
+                    # for ind,iv in enumerate(new_inv_cands[:top_k]):
+                    all_top_equiv_k = all_top_equiv_k[:3]
+                    for ind,iv in enumerate(all_top_equiv_k):
                         # Don't consider invariants that don't eliminate any CTIs.
-                        if len(cti_states_eliminated_by_invs[iv]) == 0:
+                        new_ctis_eliminated_by_inv = cti_states_eliminated_by_invs[iv] - ctis_eliminated_this_iter
+                        if len(new_ctis_eliminated_by_inv) == 0:
                             continue
                         invi = int(iv.replace("Inv", ""))
                         invexp = orig_invs_sorted[invi]
-                        print(f"({ind}) CTIs eliminated by:", iv, len(cti_states_eliminated_by_invs[iv]), invexp)
 
                         preds_in_cand = [p for p in preds if p in invexp]
-                        print("Set of predicates appearing in invexp:", preds_in_cand)
+                        # print("Set of predicates appearing in invexp:", preds_in_cand)
+                        print(f"({ind}) Num CTIs eliminated by {iv}:", len(new_ctis_eliminated_by_inv), "|", invexp, f"(preds={preds_in_cand})")
                         preds_in_top_cands.update(preds_in_cand)
                     preds_in_top_cands_agg.update(preds_in_top_cands)
                     if len(preds_in_top_cands) > 0:
