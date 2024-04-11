@@ -2790,7 +2790,7 @@ class InductiveInvGen():
 
                         preds_in_cand = [p for p in preds if p in invexp]
                         # print("Set of predicates appearing in invexp:", preds_in_cand)
-                        print(f"({ind}) Num CTIs eliminated by {iv}:", len(new_ctis_eliminated_by_inv), "|", invexp, f"(preds={preds_in_cand})")
+                        print(f"({ind}) Num CTIs eliminated by {iv}:", len(new_ctis_eliminated_by_inv), "|", invexp, f"-> (preds={preds_in_cand})")
                         preds_in_top_cands.update(preds_in_cand)
                     preds_in_top_cands_agg.update(preds_in_top_cands)
                     if len(preds_in_top_cands) > 0:
@@ -4328,8 +4328,12 @@ class InductiveInvGen():
                     logging.info(f"Could not eliminate all CTIs in this round. Exiting with failure and marking {curr_obligation} as failed.")
                     # Mark the proof node as failed.
                     self.proof_graph["nodes"][action_node]["failed"] = True
-                    self.proof_graph["nodes"][curr_obligation]["failed"] = True
-                    break
+
+                    # Only mark this node as failed if all its action nodes are failed.
+                    supports = self.proof_graph_get_my_action_nodes(curr_obligation)
+                    if all(["failed" in self.proof_graph["nodes"][s] and self.proof_graph["nodes"][s]["failed"] for s in supports]):
+                        self.proof_graph["nodes"][curr_obligation]["failed"] = True
+                        break
 
                     # Only mark a lemma node as failed if all of its action nodes are failed too.
                     # supports = self.proof_graph_get_support_nodes(curr_obligation)
@@ -4708,6 +4712,12 @@ class InductiveInvGen():
             f = open(tex_out_file, 'w')
             f.write(texcode)
             f.close()
+
+    def proof_graph_get_my_action_nodes(self, node):
+        """ Get all action nodes for a given node of the auto-generated proof graph. """
+        support_nodes = {}
+        action_nodes = [e[0] for e in self.proof_graph["edges"] if e[1] == node]
+        return action_nodes
 
     def proof_graph_get_support_nodes(self, node):
         """ Get all support nodes for a given node of the auto-generated proof graph. """
