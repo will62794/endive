@@ -2230,7 +2230,6 @@ class InductiveInvGen():
                 # Remove any invariants that we already checked.
                 orig_size = len(invs)
                 invs = set([x for x in invs if quant_inv_fn(x) not in self.invs_checked_in_iteration[iteration]])
-                num_new_uniq_invs = len(invs)
                 logging.info(f"Reduced to {len(invs)} / {orig_size} original candidate invariants after removing previously generated ones this iteration.")
 
                 # Add in existing strengthening conjuncts to the set of invariants to consider.
@@ -2239,6 +2238,7 @@ class InductiveInvGen():
                 # TODO: May consider cleaner ways for re-using existing strengthening conjuncts.
                 invs = set([x for x in invs if quant_inv_fn(x) not in self.all_violated_invs])
                 logging.info(f"Reduced to {len(invs)} candidate invariants after removing known violated invariants.")
+                num_new_uniq_invs = len(invs)
 
                 # Try to do a bit of inference without resorting to existing conjuncts, and then add them back in after a round or
                 # two. 
