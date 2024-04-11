@@ -2240,6 +2240,11 @@ class InductiveInvGen():
                 logging.info(f"Reduced to {len(invs)} candidate invariants after removing known violated invariants.")
                 num_new_uniq_invs = len(invs)
 
+                # TODO: Also consider avoiding checks of already known invariants if cost savings is worth it.
+                already_sat_invs = set([x for x in invs if quant_inv_fn(x) in self.all_sat_invs])
+                logging.info(f"Number of remaining, already satisfied invariants: {len(already_sat_invs)}.")
+
+
                 # Try to do a bit of inference without resorting to existing conjuncts, and then add them back in after a round or
                 # two. 
                 # Not sure how much effect this may have on quality of learned invariants or proof graphs.
