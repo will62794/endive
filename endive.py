@@ -2266,6 +2266,35 @@ class InductiveInvGen():
                 logging.info(f"Number of remaining, already satisfied invariants: {len(already_sat_invs)}.")
 
 
+                num_remaining_uneliminated = len(orig_k_ctis) - len(eliminated_ctis)
+                logging.info(f"Number of remaining, uneliminated CTIs: {num_remaining_uneliminated}.")
+
+                # Consider quick checks for invariants that actually eliminate new CTIs when remaining uneliminated CTIs are low.
+                # Check all generate invariant candidates for new CTI elimination.
+                enable_cti_quick_pre_checks = True
+                if enable_cti_quick_pre_checks:
+                    # print(orig_k_ctis)
+                    # print(eliminated_ctis)
+                    if num_remaining_uneliminated < 0.15 * len(orig_k_ctis) or num_remaining_uneliminated < 20:
+                        start = time.time()
+                        invs = sorted(list(invs))
+                        logging.info("Quick check of new CTI elimination.")
+                        ret = self.check_cti_elimination([c for c in orig_k_ctis if str(hash(c)) not in eliminated_ctis], invs, [f"Inv{i}" for i in range(len(invs))])
+                        cti_states_eliminated_by_invs = ret["eliminated"]
+                        num_eliminating_ctis = 0
+                        invs_eliminating_some_ctis = set()
+                        for c in cti_states_eliminated_by_invs:
+                            # print(c, len(cti_states_eliminated_by_invs[c]))
+                            if len(cti_states_eliminated_by_invs[c]) > 0:
+                                num_eliminating_ctis += 1
+                                invs_eliminating_some_ctis.add(c)
+                        print(f"Number that eliminated some new CTIs: {num_eliminating_ctis}/{len(invs)}")
+
+                        invs = set([x for ind,x in enumerate(invs) if f"Inv{ind}" in invs_eliminating_some_ctis])
+                        logging.info(f"Reduced to {len(invs)} candidate invariants after quick pre-check of CTI elimination.")
+                        logging.info("Quick pre-check took {:.2f} secs.".format(time.time() - start))
+                        num_new_uniq_invs = len(invs)
+
                 # Try to do a bit of inference without resorting to existing conjuncts, and then add them back in after a round or
                 # two. 
                 # Not sure how much effect this may have on quality of learned invariants or proof graphs.
