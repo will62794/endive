@@ -2865,10 +2865,13 @@ class InductiveInvGen():
 
             new_ctis_were_eliminated_this_iter = False
             if len(ctis_eliminated_this_iter) > len(eliminated_ctis):
-                logging.info("NEW CTIs eliminated in this iteration.")
-                logging.info(f"-- Existing set of eliminated CTIs ({len(curr_conjuncts)} conjuncts) -> {len(eliminated_ctis)}")
-                logging.info(f"-- New set of eliminated CTIs      ({len(new_conjuncts)} conjuncts) -> {len(ctis_eliminated_this_iter)}")
+                logging.info("NEW CTIs were eliminated in this iteration.")
                 new_ctis_were_eliminated_this_iter = True
+
+            logging.info(f"-- Eliminated CTIs (existing) ({len(curr_conjuncts)} conjuncts) -> {len(eliminated_ctis)}")
+            logging.info(f"-- Eliminated CTIs (new)      ({len(new_conjuncts)} conjuncts) -> {len(ctis_eliminated_this_iter)}")
+            num_new_ctis_eliminated = len(ctis_eliminated_this_iter) - len(eliminated_ctis)
+            logging.info(f"-- Number of new CTIs eliminated: {num_new_ctis_eliminated}")
 
 
             # Update global set of eliminated CTIs.
