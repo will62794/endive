@@ -1519,7 +1519,7 @@ class InductiveInvGen():
         for inv in sat_invs_group:
             invi = int(inv.replace("Inv",""))
             invname = "Inv%d" % invi
-            invcheck_tla_indcheck += "VARIABLE %s_val\n" % invname
+            # invcheck_tla_indcheck += "VARIABLE %s_val\n" % invname
         aux_vars = [
             "ctiId", 
             "ctiCost"
@@ -1561,15 +1561,15 @@ class InductiveInvGen():
         invcheck_tla_indcheck += "\n"
 
         # TODO: Handle case of no satisfied invariants more cleanly.
-        invcheck_tla_indcheck += "InvVals ==\n"
-        invcheck_tla_indcheck += "\t    /\\ TRUE\n"
-        for inv in sat_invs_group:
-            invcheck_tla_indcheck += "\t   " + "/\\ %s_val = %s\n" % (inv, inv)
-        invcheck_tla_indcheck += "\n"
+        # invcheck_tla_indcheck += "InvVals ==\n"
+        # invcheck_tla_indcheck += "\t    /\\ TRUE\n"
+        # for inv in sat_invs_group:
+        #     invcheck_tla_indcheck += "\t   " + "/\\ %s_val = %s\n" % (inv, inv)
+        # invcheck_tla_indcheck += "\n"
 
         invcheck_tla_indcheck += "CTICheckInit ==\n"
         invcheck_tla_indcheck += "    /\\ %s\n" % kCTIprop
-        invcheck_tla_indcheck += "    /\\ InvVals\n"
+        # invcheck_tla_indcheck += "    /\\ InvVals\n"
         # TODO: I don't think we really should have these strengthening conjuncts here (?)
         # Remove for now.
         # invcheck_tla_indcheck += strengthening_conjuncts_str
@@ -1580,8 +1580,8 @@ class InductiveInvGen():
         invcheck_tla_indcheck += "    /\\ NextUnchanged\n"
         for v in aux_vars:
             invcheck_tla_indcheck += f"    /\\ UNCHANGED {v}\n"
-        for inv in sat_invs_group:
-            invcheck_tla_indcheck += "    /\\ UNCHANGED %s_val\n" % inv
+        # for inv in sat_invs_group:
+            # invcheck_tla_indcheck += "    /\\ UNCHANGED %s_val\n" % inv
 
         # Also add alternate transition relation expression for doing bounded reachablity
         # from all CTI states.
@@ -1592,8 +1592,8 @@ class InductiveInvGen():
         invcheck_tla_indcheck += f"    /\ Next\n"
         for v in aux_vars:
             invcheck_tla_indcheck += f"    /\\ UNCHANGED {v}\n"
-        for inv in sat_invs_group:
-            invcheck_tla_indcheck += "    /\\ UNCHANGED %s_val\n" % inv
+        # for inv in sat_invs_group:
+            # invcheck_tla_indcheck += "    /\\ UNCHANGED %s_val\n" % inv
 
 
         invcheck_tla_indcheck += "===="
@@ -1614,10 +1614,10 @@ class InductiveInvGen():
         invcheck_tla_indcheck_cfg += self.get_tlc_overrides_str()
         invcheck_tla_indcheck_cfg += "\n"
         
-        # for inv in sat_invs_group:
-        #     invi = int(inv.replace("Inv",""))
-        #     invname = "Inv%d" % invi        
-        #     invcheck_tla_indcheck_cfg += ("INVARIANT %s\n" % invname)
+        for inv in sat_invs_group:
+            invi = int(inv.replace("Inv",""))
+            invname = "Inv%d" % invi        
+            invcheck_tla_indcheck_cfg += ("INVARIANT %s\n" % invname)
 
         return invcheck_tla_indcheck_cfg
 
@@ -1655,7 +1655,7 @@ class InductiveInvGen():
         # Create metadir if necessary.
         os.system("mkdir -p states")
 
-        MAX_INVS_PER_GROUP = 2000
+        MAX_INVS_PER_GROUP = 8000
         curr_ind = 0
 
         quant_inv_fn = self.quant_inv 
@@ -1735,8 +1735,9 @@ class InductiveInvGen():
                 # Create new tempdir to avoid name clashes with multiple TLC instances running concurrently.
                 def run_with_config(cfg_filename, tag=""):
                     dirpath = tempfile.mkdtemp()
-                    cmdargs = (dirpath, mc.TLC_MAX_SET_SIZE, cti_states_relative_file(ci, curr_ind, tag=tag), self.specname, ci, curr_ind, tag, cfg_filename, ctiquicktlafilename)
-                    cmd = self.java_exe + ' -Xss16M -Djava.io.tmpdir="%s" -cp tla2tools-checkall.jar tlc2.TLC -maxSetSize %d -dump json %s -noGenerateSpecTE -metadir states/ctiquick_%s_chunk%d_%d_%s -continue -checkAllInvariants -deadlock -workers 1 -config %s %s' % cmdargs
+                    # , cti_states_relative_file(ci, curr_ind, tag=tag)
+                    cmdargs = (dirpath, TLC_JAR, mc.TLC_MAX_SET_SIZE, self.specname, ci, curr_ind, tag, cfg_filename, ctiquicktlafilename)
+                    cmd = self.java_exe + ' -Xss16M -Djava.io.tmpdir="%s" -cp %s tlc2.TLC -maxSetSize %d -checkCTIElimination -noGenerateSpecTE -metadir states/ctiquick_%s_chunk%d_%d%s -continue -checkAllInvariants -deadlock -workers 1 -config %s %s' % cmdargs
                     logging.debug("TLC command: " + cmd)
                     subproc = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, cwd=workdir)
                     return subproc
@@ -1753,33 +1754,50 @@ class InductiveInvGen():
             for ci,subproc in enumerate(tlc_procs):
                 logging.info("Waiting for TLC termination " + str(ci))
 
-                subproc.wait()
+                # subproc.wait()
+                # CTI elimination logged as lines like:
+                # invariant_states_violated|Inv675|ctiId1,ctiId2,...
                 ret = subproc.stdout.read().decode(sys.stdout.encoding)
+                lines = [l for l in ret.splitlines() if "invariant_states_violated" in l]
+                for l in lines:
+                    items = l.split("|")
+                    inv = items[1]
+                    itemCtiIds = [c for c in items[2].split(",") if len(c) > 0]
+                    violated_cti_ids = set(itemCtiIds)
+                    # print(inv, len(violated_cti_ids))
+                    cti_states_eliminated_by_invs[inv].update(violated_cti_ids)
 
-                # logging.info(f"Opening CTI states JSON file: '{cti_states_file}'")
-                with open(cti_states_file(ci, curr_ind)) as fcti:
-                    text = fcti.read()
-                    cti_states = json.loads(text)["states"]
-                # print "cti states:",len(cti_states)
 
-                # Record the CTIs eliminated by each invariant.
-                for cti_state in cti_states:
-                    sval = cti_state["val"]
-                    ctiHash = sval["ctiId"]
-                    ctiCost = sval["ctiCost"]
+               # OLD JSON BASED CTI ELIMINATION CHECKING LOGIC.
+                # print(cti_states_eliminated_by_invs)
+               # for inv in sat_invs_group:
+                    #     if not sval[inv + "_val"]:
+                    #         cti_states_eliminated_by_invs[inv].add(ctiHash)
+
+                # # logging.info(f"Opening CTI states JSON file: '{cti_states_file}'")
+                # with open(cti_states_file(ci, curr_ind)) as fcti:
+                #     text = fcti.read()
+                #     cti_states = json.loads(text)["states"]
+                # # print "cti states:",len(cti_states)
+
+                # # Record the CTIs eliminated by each invariant.
+                # for cti_state in cti_states:
+                #     sval = cti_state["val"]
+                #     ctiHash = sval["ctiId"]
+                #     ctiCost = sval["ctiCost"]
 
                     # print(sval)
                     # if ctiCost == 0:
                     #     print(sval)
                     #     print(ctiCost)
 
-                    cti_costs[ctiHash] = ctiCost
+                    # cti_costs[ctiHash] = ctiCost
 
                     # for inv in sat_invs_group:
                     # for inv in inv_chunks[ci]:
-                    for inv in sat_invs_group:
-                        if not sval[inv + "_val"]:
-                            cti_states_eliminated_by_invs[inv].add(ctiHash)
+                    # for inv in sat_invs_group:
+                    #     if not sval[inv + "_val"]:
+                    #         cti_states_eliminated_by_invs[inv].add(ctiHash)
 
                 #
                 # Optionally load the states reachable from CTIs as initial states.
