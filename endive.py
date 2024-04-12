@@ -1655,7 +1655,7 @@ class InductiveInvGen():
         # Create metadir if necessary.
         os.system("mkdir -p states")
 
-        MAX_INVS_PER_GROUP = 1000
+        MAX_INVS_PER_GROUP = 2000
         curr_ind = 0
 
         quant_inv_fn = self.quant_inv 
