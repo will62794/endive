@@ -64,6 +64,7 @@ def symb_equivalence_reduction(invs, invs_symb):
     invs_unique = []
     symb_invs_unique = []
     cnf_invs_set = set()
+    start = time.time()
     for invi,inv in enumerate(invs):
         symb_inv = invs_symb[invi]
 
@@ -121,8 +122,9 @@ def symb_equivalence_reduction(invs, invs_symb):
                     num_implication_orderings += 1
                     # print("  implies:", impliesback)
         print("TOTAL IMPLICATION ORDERINGS:", num_implication_orderings)
-    print("symb inv unique:", len(symb_invs_unique))
+    # print("symb inv unique:", len(symb_invs_unique))
     print("symb inv unique:", len(invs_unique))
+    print(f"time to perform symb equiv reduction: {time.time() - start:.2f}")
     return {"invs": invs_unique, "invs_symb": symb_invs_unique}
 
 class PredExpr():
@@ -324,9 +326,13 @@ def generate_invs(preds, num_invs, min_num_conjuncts=2, max_num_conjuncts=2,
             cind = random.randint(0, len(conjs)-1)
         return cind        
 
+    start = time.time()
     invs = []
+    invs_set = set()
     invs_symb = []
     invs_symb_strs = []
+    total_gen_dur = 0
+    total_check_dur = 0
     for invi in range(num_invs):
         conjuncts = list(preds)
         # conjuncts = list(map(str, range(len(preds))))
@@ -351,6 +357,7 @@ def generate_invs(preds, num_invs, min_num_conjuncts=2, max_num_conjuncts=2,
         pred_id_var = f"x_{str(pred_id[c]).zfill(3)}"
         symb_inv_str = fn + "(" + pred_id_var + ")"
 
+        total_gen_dur_start = time.time()
         for i in range(1,num_conjuncts):
             if len(conjuncts) == 0:
                 break
@@ -392,19 +399,29 @@ def generate_invs(preds, num_invs, min_num_conjuncts=2, max_num_conjuncts=2,
             # detecting logically equivalent predicate forms.
             pred_id_var = f"x_{str(pred_id[c]).zfill(3)}"
             symb_inv_str = fn + "(" + pred_id_var + ")" + " " + fop + " " + front_neg + "(" + symb_inv_str +")"
+        total_gen_dur += time.time() - total_gen_dur_start
 
-        if inv not in invs and (symb_inv_str not in invs_avoid_set):
+        total_check_start = time.time()
+        # if inv not in invs:
+        # Use more efficient set lookup here to check against.
+        if inv not in invs_set and (symb_inv_str not in invs_avoid_set):
+            # print(inv)
             symb_expr = pyeda.inter.expr(symb_inv_str)
             # Don't add tautologies or contradictions.
-            if not symb_expr.equivalent(True) and not symb_expr.equivalent(False):
-                invs.append(inv)
-                invs_symb.append(symb_expr)
-                invs_symb_strs.append(symb_inv_str)
+            # if not symb_expr.equivalent(True) and not symb_expr.equivalent(False):
+            invs.append(inv)
+            invs_set.add(inv)
+            invs_symb.append(symb_expr)
+            invs_symb_strs.append(symb_inv_str)
+        total_check_dur += time.time() - total_check_start
 
             # print(symb_inv_str)
             # print(type(invs_symb[-1]))
 
     logging.info(f"number of invs: {len(invs)}")
+    logging.info(f"time to generate {len(invs)} invs: {time.time()-start:.2f} secs.")
+    logging.info(f"time to generate {len(invs)} invs (gendir): {total_gen_dur:.2f} secs.")
+    logging.info(f"time to generate {len(invs)} invs (checkdir): {total_check_dur:.2f} secs.")
 
     # Do CNF based equivalence reduction.
     res = symb_equivalence_reduction(invs, invs_symb)
