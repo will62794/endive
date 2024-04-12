@@ -1655,7 +1655,7 @@ class InductiveInvGen():
         # Create metadir if necessary.
         os.system("mkdir -p states")
 
-        MAX_INVS_PER_GROUP = 8000
+        MAX_INVS_PER_GROUP = 20000
         curr_ind = 0
 
         quant_inv_fn = self.quant_inv 
@@ -2242,7 +2242,6 @@ class InductiveInvGen():
                     process_local=process_local, quant_vars=self.quant_vars, 
                     boolean_style = boolean_style,
                     use_pred_identifiers=use_pred_identifiers,
-                    invs_avoid_set=inv_candidates_generated_in_round,
                     pred_weights=[curr_pred_weights[p] for p in preds],)
                 self.num_sampled_invs_in_iteration[iteration] += self.num_invs_per_iter_group
                 
@@ -2290,8 +2289,16 @@ class InductiveInvGen():
                                 invs_eliminating_some_ctis.add(c)
                         print(f"Number that eliminated some new CTIs: {num_eliminating_ctis}/{len(invs)}")
 
+                        invs_with_no_cti_elimination = set([x for ind,x in enumerate(invs) if f"Inv{ind}" not in invs_eliminating_some_ctis])
                         invs = set([x for ind,x in enumerate(invs) if f"Inv{ind}" in invs_eliminating_some_ctis])
+                        # For any invariants that do not eliminate any CTIs, add them to the "already checked in iteration" list as well.
+                        # TODO: Might this rule out these invariants from being used after re-generating CTIs, though?
+                        # Might want to consider this in future.
+                        for x in invs_with_no_cti_elimination:
+                            self.invs_checked_in_iteration[iteration].add(quant_inv_fn(x))
+
                         logging.info(f"Reduced to {len(invs)} candidate invariants after quick pre-check of CTI elimination.")
+                        logging.info(f"Added {len(invs_with_no_cti_elimination)} invariants that eliminate no CTIs to already checked list.")
                         logging.info("Quick pre-check took {:.2f} secs.".format(time.time() - start))
                         num_new_uniq_invs = len(invs)
 
@@ -4914,7 +4921,7 @@ if __name__ == "__main__":
     DEFAULT_SIMULATE_DEPTH = 8
     DEFAULT_TLC_WORKERS = 6
     DEFAULT_CTI_ELIMINATION_WORKERS = 1
-    DEFAULT_NUM_INVS_PER_ITER = 10000
+    DEFAULT_NUM_INVS_PER_ITER = 20000
 
     # Use default faster Java on Mac if it exists.
 
