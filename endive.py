@@ -1635,7 +1635,7 @@ class InductiveInvGen():
         logging.info(f"Pre-generated and cached {len(self.cached_invs)} total invariants")
         self.end_timing_invcheck()
 
-    def check_cti_elimination(self, orig_ctis, sat_invs, constants_obj=None):
+    def check_cti_elimination(self, orig_ctis, invs, sat_invs, constants_obj=None):
         """ Computes CTI elimination mapping for the given set of CTIs and invariants.
         
         That is, this function computes and returns a mapping from each invariant to the set of CTIs 
@@ -1661,14 +1661,14 @@ class InductiveInvGen():
         quant_inv_fn = self.quant_inv 
 
         # Run CTI elimination checking in parallel.
-        n_tlc_workers = 4
+        n_tlc_workers = self.n_cti_elimination_workers
         cti_chunks = list(chunks(list(orig_ctis), n_tlc_workers))
 
-        sat_invs = sat_invs + [("DUMMY_INV", "TRUE")]
+        # sat_invs = sat_invs + [("DUMMY_INV", "TRUE")]
 
         # sat_invs = sorted(sat_invs)
-        invs = sorted([x[1] for x in sat_invs])
-        sat_invs = ["Inv" + str(i) for i,x in enumerate(sat_invs)]
+        # invs = sorted([x[1] for x in sat_invs])
+        # sat_invs = ["Inv" + str(i) for i,x in enumerate(sat_invs)]
         # print("invs")
         # print(invs)
         # print("sat_invs")
@@ -1695,6 +1695,7 @@ class InductiveInvGen():
             tlc_procs_reach = []
 
             # Create the TLA+ specs and configs for checking each chunk.
+            elim_start = time.time()
             for ci,cti_chunk in enumerate(cti_chunks):
 
                 # Build and save the TLA+ spec.
@@ -1800,6 +1801,9 @@ class InductiveInvGen():
                         cti_states_reach["edges"] += edges
                     print(f"Total found states reachable from cti states in bounded depth:", len(cti_states_reach["states"]))
                     print(f"Total found edges reachable from cti states in bounded depth:", len(cti_states_reach["edges"]))
+
+            elim_duration = time.time() - elim_start
+            logging.info("CTI elimination chunk check finished in {:.2f} seconds.".format(elim_duration))
 
 
             if generate_reachable_graphs:
@@ -1920,7 +1924,6 @@ class InductiveInvGen():
                 #             print(k, sval[k])
                             
 
-
             curr_ind += MAX_INVS_PER_GROUP
         # Return various CTI info.
         # print("CTI costs:", cti_costs)
@@ -1930,8 +1933,8 @@ class InductiveInvGen():
         # Remove the last dummy invariant, which is there just to ensure we compute costs for
         # each CTI even if there are no invariants to check elimination for.
 
-        last_inv_ind = (len(sat_invs) - 1)
-        del cti_states_eliminated_by_invs["Inv" + str(last_inv_ind)]
+        # last_inv_ind = (len(sat_invs) - 1)
+        # del cti_states_eliminated_by_invs["Inv" + str(last_inv_ind)]
 
         return {
             "eliminated": cti_states_eliminated_by_invs,
@@ -2126,7 +2129,7 @@ class InductiveInvGen():
                     preds = preds + preds_alt
 
             if iteration==5:
-                num_conjs = init_conjs + 3
+                num_conjs = init_conjs + 4
                 (min_conjs, max_conjs) = (num_conjs, num_conjs)
                 process_local=False
                 if quant_inv_alt:
@@ -2605,116 +2608,15 @@ class InductiveInvGen():
             # Create metadir if necessary.
             os.system("mkdir -p states")
 
-            #
-            # Generate specs for checking CTI elimination with TLC. Note that we
-            # partition the invariants into sub groups for checking with TLC, since
-            # it can get overwhelmed when trying to check too many invariants at
-            # once.
-            #
-            # TODO: Properly parallelize CTI elimination checking.
-            #
-            MAX_INVS_PER_GROUP = 2000
-            curr_ind = 0
-            workdir = None
-            if specdir != "":
-                workdir = specdir
 
-
-            # Run CTI elimination checking in parallel.
-            n_tlc_workers = self.n_cti_elimination_workers
-            # inv_chunks = list(chunks(sat_invs, n_tlc_workers))
-            cti_chunks = list(chunks(list(orig_k_ctis), n_tlc_workers))
+            #
+            # Compute CTI elimination for each invariant.
+            #
 
             self.start_timing_ctielimcheck()
             logging.info("[--- BEGIN CTI ELIMINATION ---]")
-
-            while curr_ind < len(sat_invs):
-                sat_invs_group = sat_invs[curr_ind:(curr_ind+MAX_INVS_PER_GROUP)]
-                logging.info("Checking invariant group of size %d (starting invariant=%d) for CTI elimination." % (len(sat_invs_group), curr_ind))
-                tlc_procs = []
-
-                # Create the TLA+ specs and configs for checking each chunk.
-                elim_start = time.time()
-                for ci,cti_chunk in enumerate(cti_chunks):
-
-                    # Build and save the TLA+ spec.
-                    spec_name = f"{self.specname}_IndQuickCheck_chunk{ci}"
-                    spec_str = self.make_indquickcheck_tla_spec(spec_name, invs, sat_invs_group, cti_chunk, quant_inv_fn)
-
-                    ctiquicktlafile = f"{os.path.join(self.specdir, GEN_TLA_DIR)}/{spec_name}.tla"
-                    ctiquicktlafilename = f"{GEN_TLA_DIR}/{spec_name}.tla"
-
-                    f = open(ctiquicktlafile,'w')
-                    f.write(spec_str)
-                    f.close()
-
-                    # Generate config file.
-                    ctiquickcfgfile=f"{os.path.join(self.specdir, GEN_TLA_DIR)}/{self.specname}_CTIQuickCheck_chunk{ci}.cfg"
-                    ctiquickcfgfilename=f"{GEN_TLA_DIR}/{self.specname}_CTIQuickCheck_chunk{ci}.cfg"
-                    cfg_str = self.make_ctiquickcheck_cfg(invs, sat_invs_group, cti_chunk, quant_inv_fn)
-                    
-                    f = open(ctiquickcfgfile,'w')
-                    f.write(cfg_str)
-                    f.close()
-
-                    cti_states_file = os.path.join(self.specdir, f"states/cti_quick_check_chunk{ci}_{curr_ind}.json")
-                    cti_states_relative_file = f"states/cti_quick_check_chunk{ci}_{curr_ind}.json"
-
-                    # Run TLC.
-                    # Create new tempdir to avoid name clashes with multiple TLC instances running concurrently.
-                    dirpath = tempfile.mkdtemp()
-                    cmd = self.java_exe + ' -Xss16M -Djava.io.tmpdir="%s" -cp tla2tools-checkall.jar tlc2.TLC -maxSetSize %d -dump json %s -noGenerateSpecTE -metadir states/ctiquick_%s_chunk%d_%d -continue -checkAllInvariants -deadlock -workers 1 -config %s %s' % (dirpath, mc.TLC_MAX_SET_SIZE ,cti_states_relative_file, self.specname, ci, curr_ind, ctiquickcfgfilename, ctiquicktlafilename)
-
-                    
-                    logging.debug("TLC command: " + cmd)
-                    workdir = None if self.specdir == "" else self.specdir
-                    subproc = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, cwd=workdir)
-                    # time.sleep(0.25)
-                    tlc_procs.append(subproc)
-            
-                for ci,subproc in enumerate(tlc_procs):
-                    logging.info("Waiting for TLC termination " + str(ci))
-
-                    subproc.wait()
-                    ret = subproc.stdout.read().decode(sys.stdout.encoding)
-                    # print(ret)
-
-                    # TODO: Determine cause of flakiness when reading JSON states file.
-                    # time.sleep(0.5)
-
-                    # print ret
-                    lines = ret.splitlines()
-                    lines = mc.greplines("State.*|/\\\\", lines)
-
-                    cti_states_file = os.path.join(self.specdir, f"states/cti_quick_check_chunk{ci}_{curr_ind}.json")
-                    cti_states_relative_file = f"states/cti_quick_check_chunk{ci}_{curr_ind}.json"
-
-                    # logging.info(f"Opening CTI states JSON file: '{cti_states_file}'")
-                    fcti = open(cti_states_file)
-                    text = fcti.read()
-                    cti_states = json.loads(text)["states"]
-                    # cti_states = json.load(fcti)["states"]
-                    fcti.close()
-                    # print "cti states:",len(cti_states)
-
-                    # Record the CTIs eliminated by each invariant.
-                    for cti_state in cti_states:
-                        sval = cti_state["val"]
-                        ctiHash = sval["ctiId"]
-                        # for inv in sat_invs_group:
-                        # for inv in inv_chunks[ci]:
-                        for inv in sat_invs_group:
-                            if not sval[inv + "_val"]:
-                                cti_states_eliminated_by_invs[inv].add(ctiHash)
-
-                    for inv in cti_states_eliminated_by_invs:
-                        if len(cti_states_eliminated_by_invs[inv]):
-                            invi = int(inv.replace("Inv",""))
-                            invexp = quant_inv_fn(sorted(invs)[invi])
-                elim_duration = time.time() - elim_start
-                logging.info("CTI elimination chunk check finished in {:.2f} seconds.".format(elim_duration))
-
-                curr_ind += MAX_INVS_PER_GROUP
+            ret = self.check_cti_elimination(orig_k_ctis, invs, sat_invs)
+            cti_states_eliminated_by_invs = ret["eliminated"]
 
             # The estimated syntactic/semantic "cost" (i.e complexity) of an invariant expression.
             def get_invexp_cost(inv):
@@ -2779,7 +2681,7 @@ class InductiveInvGen():
                     top_num_eliminated = len(cti_states_eliminated_by_invs[new_inv_cands[0]] - ctis_eliminated_this_iter)
                     all_top_equiv_k = [civ for civ in new_inv_cands if len(cti_states_eliminated_by_invs[civ] - ctis_eliminated_this_iter) == top_num_eliminated]
                     # for ind,iv in enumerate(new_inv_cands[:top_k]):
-                    all_top_equiv_k = all_top_equiv_k[:3]
+                    all_top_equiv_k = all_top_equiv_k[:5]
                     for ind,iv in enumerate(all_top_equiv_k):
                         # Don't consider invariants that don't eliminate any CTIs.
                         new_ctis_eliminated_by_inv = cti_states_eliminated_by_invs[iv] - ctis_eliminated_this_iter
@@ -2790,7 +2692,7 @@ class InductiveInvGen():
 
                         preds_in_cand = [p for p in preds if p in invexp]
                         # print("Set of predicates appearing in invexp:", preds_in_cand)
-                        print(f"({ind}) Num CTIs eliminated by {iv}:", len(new_ctis_eliminated_by_inv), "|", invexp, f"-> (preds={preds_in_cand})")
+                        print(f"({ind}) Num CTIs eliminated by {iv}:", len(new_ctis_eliminated_by_inv), "|", invexp, f"- (preds={preds_in_cand})")
                         preds_in_top_cands.update(preds_in_cand)
                     preds_in_top_cands_agg.update(preds_in_top_cands)
                     if len(preds_in_top_cands) > 0:
