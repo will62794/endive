@@ -3102,7 +3102,7 @@ class InductiveInvGen():
                         self.proof_graph["nodes"][action_node]["ctis_remaining"] = len(k_ctis_rechecked)
                         self.proof_graph["nodes"][action_node]["discharged"] = False
 
-                        # TODO: Shouldn't we remove any support nodes added above after discovering that not all CTIs are eliminated?
+                        # N.B. Shouldn't we remove any support nodes added above after discovering that not all CTIs are eliminated?
                         for n in proof_lemma_nodes_added:
                             del self.proof_graph["nodes"][n]
 
