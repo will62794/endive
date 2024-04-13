@@ -2233,7 +2233,8 @@ class InductiveInvGen():
                         print(f"{p}: {curr_pred_weights[p]}")
 
                 # Generate and check random set of invariants.
-                logging.info("Generating %d candidate invariants (%d/%d) so far." % (self.num_invs_per_iter_group, num_invs_generated_per_iter[iteration] + self.num_invs_per_iter_group, num_invs))
+                self.num_sampled_invs_in_iteration[iteration] += self.num_invs_per_iter_group
+                logging.info("Generating %d candidate invariants (%d/%d) sampled so far." % (self.num_invs_per_iter_group, self.num_sampled_invs_in_iteration[iteration], num_invs))
                 use_pred_identifiers = self.use_fast_pred_eval
                 boolean_style = "pyeda" if self.use_fast_pred_eval else "tla"
 
@@ -2243,7 +2244,6 @@ class InductiveInvGen():
                     boolean_style = boolean_style,
                     use_pred_identifiers=use_pred_identifiers,
                     pred_weights=[curr_pred_weights[p] for p in preds],)
-                self.num_sampled_invs_in_iteration[iteration] += self.num_invs_per_iter_group
                 
                 invs = all_invs["raw_invs"]
 
@@ -2274,7 +2274,7 @@ class InductiveInvGen():
                 if enable_cti_quick_pre_checks:
                     # print(orig_k_ctis)
                     # print(eliminated_ctis)
-                    if num_remaining_uneliminated < 0.15 * len(orig_k_ctis) or num_remaining_uneliminated < 20:
+                    if num_remaining_uneliminated < 0.15 * len(orig_k_ctis) or num_remaining_uneliminated < 35:
                         start = time.time()
                         invs = sorted(list(invs))
                         logging.info("Quick check of new CTI elimination.")
