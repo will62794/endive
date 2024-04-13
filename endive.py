@@ -2996,6 +2996,9 @@ class InductiveInvGen():
             # logging.info("")
             if num_ctis_remaining == 0:
                 # Update set of all strengthening conjuncts added in this round.
+                strengthening_conjuncts_added = []
+                proof_lemma_nodes_added = []
+                proof_edges_added = []
                 for cind,c in enumerate(conjuncts_added_in_round):
                     inv_suffix = ""
                     if append_inv_round_id:
@@ -3036,6 +3039,7 @@ class InductiveInvGen():
                             logging.info("Skipping adding invariant as strengthening conjunct, since equivalent expression is already present.")
                         else:
                             self.strengthening_conjuncts.append((invname, invexp, unquant_invexp))
+                            strengthening_conjuncts_added.append((invname, invexp, unquant_invexp))
 
                         lemma_node = (invname, invexp, unquant_invexp)
                         # self.proof_obligation_queue.append(lemma_node)
@@ -3045,6 +3049,7 @@ class InductiveInvGen():
                         e2 = (invname, f"{orig_k_ctis[0].inv_name}_{orig_k_ctis[0].action_name}")
                         self.proof_graph["edges"].append(e1)
                         self.proof_graph["edges"].append(e2)
+                        proof_edges_added.append(e2)
                         num_ctis_remaining = len(list(cti_table.keys()))-len(eliminated_ctis)
                         # if action_node in self.proof_graph:
                             # self.proof_graph[action_node].append(inv + inv_suffix)
@@ -3059,6 +3064,7 @@ class InductiveInvGen():
                                 "order": len(all_lemma_nodes) + 1,
                                 "depth": self.curr_obligation_depth + 1
                             }
+                            proof_lemma_nodes_added.append(lemma_node[0])
 
                         self.proof_graph["nodes"][action_node] = {
                             "ctis_remaining": num_ctis_remaining, 
@@ -3095,6 +3101,16 @@ class InductiveInvGen():
                         logging.info(f" !! Still have {len(k_ctis_rechecked)} CTIs remaining for proof node ({proof_graph_node}, {proof_graph_action}).")
                         self.proof_graph["nodes"][action_node]["ctis_remaining"] = len(k_ctis_rechecked)
                         self.proof_graph["nodes"][action_node]["discharged"] = False
+
+                        # TODO: Shouldn't we remove any support nodes added above after discovering that not all CTIs are eliminated?
+                        for n in proof_lemma_nodes_added:
+                            del self.proof_graph["nodes"][n]
+
+                        for e in proof_edges_added:
+                            self.proof_graph["edges"].remove(e)
+
+                        for c in strengthening_conjuncts_added:
+                            self.strengthening_conjuncts.remove(c)
 
                         if len(k_ctis_rechecked) > self.MAX_NUM_CTIS_PER_ROUND:
                             # Sample max num CTIs to ensure some diversity.
