@@ -2275,7 +2275,8 @@ class InductiveInvGen():
                 if enable_cti_quick_pre_checks:
                     # print(orig_k_ctis)
                     # print(eliminated_ctis)
-                    if num_remaining_uneliminated < 0.15 * len(orig_k_ctis) or num_remaining_uneliminated < 35:
+                    CTI_PRE_CHECK_THRESHOLD = 50
+                    if num_remaining_uneliminated < 0.15 * len(orig_k_ctis) or num_remaining_uneliminated < CTI_PRE_CHECK_THRESHOLD:
                         start = time.time()
                         invs = sorted(list(invs))
                         logging.info("Quick check of new CTI elimination.")
@@ -2613,11 +2614,6 @@ class InductiveInvGen():
                         logging.info("%s %s %s", invname,"==",invexp)
                 self.end_timing_invcheck()
 
-            if len(sat_invs)==0:
-                logging.info("No invariants found. Continuing.")
-                iteration += 1
-                continue
-
             if self.use_fast_pred_eval:
                 orig_invs_sorted = invs
             else:
@@ -2642,6 +2638,16 @@ class InductiveInvGen():
             logging.info(f"Total number of unique violated invariants generated so far: {len(self.all_violated_invs)}")
             logging.info(f"Total number of unique checked invariants so far: {len(self.all_checked_invs)}")
 
+            if len(sat_invs)==0:
+                if self.num_sampled_invs_in_iteration[iteration] < num_invs:
+                    logging.info("No invariants found. Continuing.")
+                    # iteration -= 1
+                    iter_repeat = True
+                    num_iter_repeats += 1
+                else:
+                    logging.info("No invariants found. Continuing to next iteration.")
+                    iteration += 1
+                continue
 
             #
             # For each invariant we generated, we want to see what set of CTIs it removes, so that we 
@@ -2731,7 +2737,7 @@ class InductiveInvGen():
                 top_k = 1
                 # Out of all computed predicates that eliminate some CTIs, for each predicate, compute the proportion
                 # CTI eliminating invariants that it appeared in.
-                if subiter>=0:
+                if subiter>=0 and len(new_inv_cands) > 0:
                     # for ind,iv in enumerate(new_inv_cands[:top_k]):
                     top_num_eliminated = len(cti_states_eliminated_by_invs[new_inv_cands[0]] - ctis_eliminated_this_iter)
                     all_top_equiv_k = [civ for civ in new_inv_cands if len(cti_states_eliminated_by_invs[civ] - ctis_eliminated_this_iter) == top_num_eliminated]
