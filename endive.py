@@ -797,7 +797,10 @@ class InductiveInvGen():
         f.close()
 
     def check_invariants(self, invs, tlc_workers=6, max_depth=2**30, 
-                         skip_checking=False, cache_with_ignored=None, cache_state_load=False,
+                         skip_checking=False, 
+                         cache_with_ignored=None, 
+                         cache_with_ignore_inv_counts=None,
+                         cache_state_load=False,
                          invcheck_file_path=None, tlc_flags=""):
         """ Check which of the given invariants are valid. """
         ta = time.time()
@@ -831,6 +834,7 @@ class InductiveInvGen():
                                 tlcjar = TLC_JAR,
                                 max_depth=max_depth,
                                 cache_with_ignored=cache_with_ignored,
+                                cache_with_ignore_inv_counts=cache_with_ignore_inv_counts,
                                 cache_state_load = cache_state_load, tlc_flags=tlc_flags)
         invs_violated = ret["invs_violated"]
         slice_stats = ret["slice_stats"]
@@ -1294,7 +1298,7 @@ class InductiveInvGen():
             simulate_depth = self.k_cti_induction_depth
         
         sampling_args = f"-Dtlc2.tool.impl.Tool.autoInitStatesSampling=true -Dtlc2.tool.impl.Tool.autoInitSamplingTimeLimitMS={sampling_target_time_limit_ms} -Dtlc2.tool.impl.Tool.autoInitSamplingTargetNumInitStates={sampling_target_num_init_states}"
-        args = (dirpath, sampling_args, "tla2tools-checkall.jar", mc.TLC_MAX_SET_SIZE, simulate_flag, simulate_depth, ctiseed, tag, self.num_ctigen_workers, indcheckcfgfilename(action), indchecktlafilename)
+        args = (dirpath, sampling_args, TLC_JAR, mc.TLC_MAX_SET_SIZE, simulate_flag, simulate_depth, ctiseed, tag, self.num_ctigen_workers, indcheckcfgfilename(action), indchecktlafilename)
         cmd = self.java_exe + ' -Xss16M -Djava.io.tmpdir="%s" %s -cp %s tlc2.TLC -maxSetSize %d %s -depth %d -seed %d -noGenerateSpecTE -metadir states/indcheckrandom_%s -continue -deadlock -workers %d -config %s %s' % args
         logging.debug("TLC command: " + cmd)
         workdir = None
@@ -2441,6 +2445,8 @@ class InductiveInvGen():
                     if self.enable_partitioned_state_caching:
                         print("predicate var counts:")
                         pred_var_counts_tups = [(pred_var_set_counts[p],p) for p in pred_var_set_counts]
+                        # Filter out predicates that don't refer to any state variables.
+                        pred_var_counts_tups = [p for p in pred_var_counts_tups if len(p[1]) > 0]
                         pred_var_counts_tups = sorted(pred_var_counts_tups, reverse=True)
                         for p in sorted(pred_var_counts_tups, reverse=True):
                             print(p)
@@ -2453,7 +2459,8 @@ class InductiveInvGen():
                     #
                     # TODO: May still be some work to ensure correctness here.
                     partition_sat_invs = set()
-                    main_invs_to_check = [(ind, inv) for ind,inv in enumerate(invs)]
+                    # main_invs_to_check = [(ind, inv) for ind,inv in enumerate(invs)]
+                    main_invs_to_check = []
 
                     # Don't bother doing this partitioned caching for tiny numbers of conjuncts.
                     LARGE_PRED_GROUP_COUNT = 0 # don't bother with the overhead of this except for relatively large predicate groups.
@@ -2471,50 +2478,82 @@ class InductiveInvGen():
                             ignored_var_subsets.append(ignored)
                         self.cache_projected_states(ignored_var_subsets, max_depth=max_depth, tlc_workers=tlc_workers)
 
-                        for p in pred_var_counts_tups[:]:
-                            # print(p)
-                            if p[0] < LARGE_PRED_GROUP_COUNT:
-                                # If we reached a group that is too small, we stop, even if we haven't dont all top K.
-                                logging.info(f"Exiting partitioned state caching loop due to small group size: {p}.")
-                                break  
+                        # for p in pred_var_counts_tups[:]:
+                        #     # print(p)
+                        #     if p[0] < LARGE_PRED_GROUP_COUNT:
+                        #         # If we reached a group that is too small, we stop, even if we haven't dont all top K.
+                        #         logging.info(f"Exiting partitioned state caching loop due to small group size: {p}.")
+                        #         break  
                                 
-                            predvar_set = p[1]
-                            ignored = sorted([svar for svar in self.state_vars if svar not in predvar_set])
-                            # print(ignored)
+                        #     predvar_set = p[1]
+                        #     ignored = sorted([svar for svar in self.state_vars if svar not in predvar_set])
+                        #     # print(ignored)
 
-                            invs_to_check = [(ind, inv) for ind,inv in enumerate(invs) if pred_var_sets_for_invs[ind] == predvar_set]
+                        #     invs_to_check = [(ind, inv) for ind,inv in enumerate(invs) if pred_var_sets_for_invs[ind] == predvar_set]
 
-                            # If var count is empty, then just remove these and don't check them, since they should be constant expressions.
-                            if len(predvar_set) == 0:
-                                invs_to_check_names = set([iv[1] for iv in invs_to_check])
-                                main_invs_to_check = [mi for mi in main_invs_to_check if mi[1] not in invs_to_check_names]
-                                logging.info(f"Skipping group of {p[0]} invs with empty var slice.")
-                                continue
+                        #     # If var count is empty, then just remove these and don't check them, since they should be constant expressions.
+                        #     if len(predvar_set) == 0:
+                        #         invs_to_check_names = set([iv[1] for iv in invs_to_check])
+                        #         main_invs_to_check = [mi for mi in main_invs_to_check if mi[1] not in invs_to_check_names]
+                        #         logging.info(f"Skipping group of {p[0]} invs with empty var slice.")
+                        #         continue
 
-                            partition_var_slice = [s for s in self.state_vars if s not in ignored]
-                            logging.info(f"Running partitioned state caching step with {len(ignored)} ignored vars (slice={partition_var_slice}), num invs to check: {len(invs_to_check)}")
+                        #     partition_var_slice = [s for s in self.state_vars if s not in ignored]
+                            # logging.info(f"Running partitioned state caching step with {len(ignored)} ignored vars (slice={partition_var_slice}), num invs to check: {len(invs_to_check)}")
                             
+                            ####
+                            # Now we are checking all invariant batches in one call, below.
+                            ####
+
                             # Do the caching run.
-                            self.cache_projected_states([ignored], max_depth=max_depth, tlc_workers=tlc_workers)
+                            # self.cache_projected_states([ignored], max_depth=max_depth, tlc_workers=tlc_workers)
 
-                            # Check the invariants on the cached states.
-                            # local_sat_invs will return indices of invariants that were satisfied in the given 'invs_to_check' array.
-                            local_sat_invs = self.check_invariants([iv[1] for iv in invs_to_check], tlc_workers=tlc_workers, max_depth=max_depth, cache_with_ignored=[ignored], cache_state_load=True)
-                            logging.info(f"Found {len(local_sat_invs)} local partition sat invs.")
-                            orig_invs_to_remove = []
-                            local_invs_sat = [m for (mind,m) in enumerate(invs_to_check) if f"Inv{mind}" in local_sat_invs]
+                            # # Check the invariants on the cached states.
+                            # # local_sat_invs will return indices of invariants that were satisfied in the given 'invs_to_check' array.
+                            # local_sat_invs = self.check_invariants([iv[1] for iv in invs_to_check], 
+                            #                                        tlc_workers=tlc_workers, max_depth=max_depth, 
+                            #                                        cache_with_ignored=[ignored], 
+                            #                                        cache_with_ignore_inv_counts=[len(invs_to_check)],
+                            #                                        cache_state_load=True)
+                            # logging.info(f"Found {len(local_sat_invs)} local partition sat invs.")
+                            # orig_invs_to_remove = []
+                            # local_invs_sat = [m for (mind,m) in enumerate(invs_to_check) if f"Inv{mind}" in local_sat_invs]
 
-                            for si in local_sat_invs:
-                                invs_to_check_ind = int(si.replace("Inv", ""))
-                                inv = invs_to_check[invs_to_check_ind]
-                                orig_inv_ind = inv[0]
-                                orig_invs_to_remove.append(inv[1])
+                            # for si in local_sat_invs:
+                            #     invs_to_check_ind = int(si.replace("Inv", ""))
+                            #     inv = invs_to_check[invs_to_check_ind]
+                            #     orig_inv_ind = inv[0]
+                            #     orig_invs_to_remove.append(inv[1])
                             
-                            # These no longer need to be checked.
-                            invs_to_check_names = set([iv[1] for iv in invs_to_check])
-                            main_invs_to_check = [mi for mi in main_invs_to_check if mi[1] not in invs_to_check_names]
-                            partition_sat_invs.update(set([f"Inv{iv[0]}" for iv in local_invs_sat]))
-                    
+                            # # These no longer need to be checked.
+                            # invs_to_check_names = set([iv[1] for iv in invs_to_check])
+                            # main_invs_to_check = [mi for mi in main_invs_to_check if mi[1] not in invs_to_check_names]
+                            # partition_sat_invs.update(set([f"Inv{iv[0]}" for iv in local_invs_sat]))
+
+
+                        predvar_sets = [p[1] for p in pred_var_counts_tups]
+                        ignored_var_sets = [sorted([svar for svar in self.state_vars if svar not in predvar_set]) for predvar_set in predvar_sets]
+                        ignored_var_sets = [s for s in ignored_var_sets if len(s) > 0] # ignore predicates that don't refer to any state variables.
+                        inv_group_counts = []
+                        all_invs_to_check = []
+                        for predvar_set in predvar_sets:
+                            invs_to_check = [(ind, inv) for ind,inv in enumerate(invs) if pred_var_sets_for_invs[ind] == predvar_set]
+                            all_invs_to_check += invs_to_check
+                            inv_group_counts.append(len(invs_to_check))
+
+
+                        # Check ALL invariants at once, each pred var batch at a time.
+                        # local_sat_invs will return indices of invariants that were satisfied in the given 'all_invs_to_check' array.
+                        local_sat_invs = self.check_invariants([iv[1] for iv in all_invs_to_check], 
+                                                                tlc_workers=tlc_workers, 
+                                                                max_depth=max_depth, 
+                                                                cache_with_ignored=ignored_var_sets, 
+                                                                cache_with_ignore_inv_counts=inv_group_counts,
+                                                                cache_state_load=True)     
+                        local_invs_sat = [m for (mind,m) in enumerate(all_invs_to_check) if f"Inv{mind}" in local_sat_invs]
+                        partition_sat_invs.update(set([f"Inv{iv[0]}" for iv in local_invs_sat]))
+
+
                         logging.info(f"Found {len(partition_sat_invs)} partitioned sat invs")
 
                     # Check all candidate invariants.

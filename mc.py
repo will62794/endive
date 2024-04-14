@@ -442,7 +442,10 @@ def greplines(pattern, lines):
     return [ln for ln in lines if re.search(pattern, ln)]
 
 def runtlc(spec,config=None,tlc_workers=6,cwd=None,tlcjar="tla2tools-checkall.jar",java="java",tlc_flags="", 
-           max_depth=2**30, cache_with_ignored=None, cache_state_load=False):
+           max_depth=2**30, 
+           cache_with_ignored=None, 
+           cache_with_ignore_inv_counts=None,
+           cache_state_load=False):
     # Make a best effort to attempt to avoid collisions between different
     # instances of TLC running on the same machine.
     dirpath = tempfile.mkdtemp()
@@ -456,6 +459,9 @@ def runtlc(spec,config=None,tlc_workers=6,cwd=None,tlcjar="tla2tools-checkall.ja
         # Ignored var sets are specified in the command line arg like: v1,v2|v1,v3,v4|v1,v5
         cacheWithIgnoredVarSets = "|".join([",".join(cvars) for cvars in cache_with_ignored])
         cacheFlags += f' -cacheStatesIgnoreVars "{cacheWithIgnoredVarSets}"'
+        if cache_with_ignore_inv_counts is not None:
+            cacheWithIgnoredInvCounts = "|".join([str(c) for c in cache_with_ignore_inv_counts])
+            cacheFlags += f' -cacheStatesIgnoreVarsInvListCounts "{cacheWithIgnoredInvCounts}"'
 
     cmd = java + (f' -Djava.io.tmpdir="{dirpath}" -cp {tlcjar} tlc2.TLC {tlc_flags} {cacheFlags} -maxDepth {max_depth} -maxSetSize {TLC_MAX_SET_SIZE} -metadir {metadir_path} -noGenerateSpecTE -checkAllInvariants -deadlock -continue -workers {tlc_workers}')
     if config:
@@ -497,13 +503,19 @@ def runtlc(spec,config=None,tlc_workers=6,cwd=None,tlcjar="tla2tools-checkall.ja
 # Run TLC on spec to check all invariants and return the set 
 # of invariants that were violated.
 def runtlc_check_violated_invariants(spec,config=None, tlc_workers=6, cwd=None, tlcjar="tla2tools-checkall.jar", java="java", 
-                                     max_depth=2**30, cache_with_ignored=None, cache_state_load=False, tlc_flags=""):
+                                     max_depth=2**30, 
+                                     cache_with_ignored=None, 
+                                     cache_with_ignore_inv_counts=None,
+                                     cache_state_load=False, tlc_flags=""):
     #
     # TODO: Check for this type of error:
     # 'Error: The invariant of Inv91 is equal to FALSE'
     #
     lines = runtlc(spec,config=config,tlc_workers=tlc_workers,cwd=cwd,tlcjar=tlcjar, 
-                    java=java, max_depth=max_depth, cache_with_ignored=cache_with_ignored, cache_state_load=cache_state_load, tlc_flags=tlc_flags)
+                    java=java, max_depth=max_depth, 
+                    cache_with_ignored=cache_with_ignored, 
+                    cache_with_ignore_inv_counts=cache_with_ignore_inv_counts,
+                    cache_state_load=cache_state_load, tlc_flags=tlc_flags)
     invs_violated = set()
     for l in greplines("is violated", lines):
         res = re.match(".*Invariant (Inv.*) is violated",l)
