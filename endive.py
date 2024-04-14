@@ -27,7 +27,8 @@ from proofs import *
 from mc import CTI,Trace,State
 
 DEBUG = False
-MAC_FAST_JAVA_EXE = "/usr/local/zulu15.32.15-ca-jdk15.0.3-macosx_aarch64/bin/java"
+# MAC_FAST_JAVA_EXE = "/usr/local/zulu15.32.15-ca-jdk15.0.3-macosx_aarch64/bin/java"
+MAC_FAST_JAVA_EXE = "/usr/local/zulu22.28.93-ca-crac-jdk22.0.0-macosx_aarch64/bin/java"
 JAVA_EXE="java"
 GEN_TLA_DIR="gen_tla"
 STATECACHE_DIR="statecache"
