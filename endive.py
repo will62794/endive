@@ -2153,6 +2153,7 @@ class InductiveInvGen():
 
             if iteration==5:
                 num_conjs = init_conjs + 4
+                # Start working in some larger candidates as well.
                 (min_conjs, max_conjs) = (num_conjs, num_conjs+1)
                 process_local=False
                 if quant_inv_alt:
@@ -2160,8 +2161,8 @@ class InductiveInvGen():
                     preds = preds + preds_alt
 
             if iteration==6:
-                min_conjs = 3
-                max_conjs = 3
+                num_conjs = init_conjs + 5
+                (min_conjs, max_conjs) = (num_conjs, num_conjs+1)
                 process_local=False
                 if quant_inv_alt:
                     quant_inv_fn = quant_inv_alt
