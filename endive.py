@@ -2303,8 +2303,8 @@ class InductiveInvGen():
                         # For any invariants that do not eliminate any CTIs, add them to the "already checked in iteration" list as well.
                         # TODO: Might this rule out these invariants from being used after re-generating CTIs, though?
                         # Might want to consider this in future.
-                        for x in invs_with_no_cti_elimination:
-                            self.invs_checked_in_iteration[iteration].add(quant_inv_fn(x))
+                        # for x in invs_with_no_cti_elimination:
+                            # self.invs_checked_in_iteration[iteration].add(quant_inv_fn(x))
 
                         logging.info(f"Reduced to {len(invs)} candidate invariants after quick pre-check of CTI elimination.")
                         logging.info(f"Added {len(invs_with_no_cti_elimination)} invariants that eliminate no CTIs to already checked list.")
@@ -2689,6 +2689,10 @@ class InductiveInvGen():
                 else:
                     logging.info("No invariants found. Continuing to next iteration.")
                     iteration += 1
+                # Re-render the proof graph.
+                if self.save_dot and len(self.proof_graph["edges"]) > 0:
+                    # Render updated proof graph as we go.
+                    self.render_proof_graph()  
                 continue
 
             #
