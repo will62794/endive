@@ -308,6 +308,10 @@ H_Inv29181 ==
     \A VARJ \in Procs : 
         ((pc[VARI] = "cs") /\ ((pc[VARJ] = "w1"))) => (unchecked[VARJ] # {})
 
+H_Inv9040 == 
+    \A VARI \in Procs : \A VARJ \in Procs : 
+        (pc[VARJ] = "exit") \/ (~(VARI \in (Procs \ unchecked[VARJ])) \/ (~(pc[VARJ] \in {"w1","w2"}))) \/ (~(pc[VARI] \in {"e4","w1","w2"})) \/ (~(<<num[VARI],VARI>> \prec <<num[VARJ],VARJ>>))
+
 \* Inv1145_R0_0_I1 == \A VARI \in Procs : (unchecked[VARI] = {}) \/ (~(pc[VARI] = "cs"))
 \* Inv1454_R0_0_I1 == \A VARI \in Procs : ~(nxt[VARI] = VARI) \/ (~(pc[VARI] = "cs"))
 \* Inv21195_R4_0_I3 == \A VARI \in Procs : ~(nxt[VARI] = VARI) \/ (~(unchecked[VARI] = {})) \/ (~(pc[VARI] = "w1"))
