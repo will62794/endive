@@ -1660,7 +1660,7 @@ class InductiveInvGen():
         # Create metadir if necessary.
         os.system("mkdir -p states")
 
-        MAX_INVS_PER_GROUP = 20000
+        MAX_INVS_PER_GROUP = 50000
         curr_ind = 0
 
         quant_inv_fn = self.quant_inv 
@@ -2272,6 +2272,9 @@ class InductiveInvGen():
 
                 num_remaining_uneliminated = len(orig_k_ctis) - len(eliminated_ctis)
                 logging.info(f"Number of remaining, uneliminated CTIs: {num_remaining_uneliminated}.")
+                if num_remaining_uneliminated <= 3:
+                    uneliminated = [c for c in orig_k_ctis if str(hash(c)) not in eliminated_ctis]
+                    print(uneliminated[0])
 
                 # Consider quick checks for invariants that actually eliminate new CTIs when remaining uneliminated CTIs are low.
                 # Check all generate invariant candidates for new CTI elimination.
