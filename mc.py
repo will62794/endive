@@ -333,6 +333,7 @@ def generate_invs(preds, num_invs, min_num_conjuncts=2, max_num_conjuncts=2,
     invs_symb_strs = []
     total_gen_dur = 0
     total_check_dur = 0
+    enable_symb_equiv_reduction = False
     for invi in range(num_invs):
         conjuncts = list(preds)
         # conjuncts = list(map(str, range(len(preds))))
@@ -406,13 +407,15 @@ def generate_invs(preds, num_invs, min_num_conjuncts=2, max_num_conjuncts=2,
         # Use more efficient set lookup here to check against.
         if inv not in invs_set and (symb_inv_str not in invs_avoid_set):
             # print(inv)
-            symb_expr = pyeda.inter.expr(symb_inv_str)
             # Don't add tautologies or contradictions.
             # if not symb_expr.equivalent(True) and not symb_expr.equivalent(False):
             invs.append(inv)
             invs_set.add(inv)
-            invs_symb.append(symb_expr)
             invs_symb_strs.append(symb_inv_str)
+
+            if enable_symb_equiv_reduction:
+                symb_expr = pyeda.inter.expr(symb_inv_str)
+                invs_symb.append(symb_expr)
         total_check_dur += time.time() - total_check_start
 
             # print(symb_inv_str)
@@ -424,10 +427,11 @@ def generate_invs(preds, num_invs, min_num_conjuncts=2, max_num_conjuncts=2,
     logging.info(f"time to generate {len(invs)} invs (checkdir): {total_check_dur:.2f} secs.")
 
     # Do CNF based equivalence reduction.
-    res = symb_equivalence_reduction(invs, invs_symb)
-    invs = res["invs"]
-    invs_symb_strs = res["invs_symb"]
-    logging.info(f"number of invs post CNF based equivalence reduction: {len(invs)}")
+    if enable_symb_equiv_reduction:
+        res = symb_equivalence_reduction(invs, invs_symb)
+        invs = res["invs"]
+        invs_symb_strs = res["invs_symb"]
+        logging.info(f"number of invs post CNF based equivalence reduction: {len(invs)}")
 
     # if len(quant_vars):
         # invs = pred_symmetry_reduction(invs, quant_vars)
