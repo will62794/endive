@@ -2177,7 +2177,7 @@ class InductiveInvGen():
             # Make the seed at each iteration and round fixed so that
             # sampling amounts in one round don't affect randomness in
             # later rounds.
-            new_seed = (self.seed*1000) + (roundi*100) + (iteration*10) + num_iter_repeats
+            new_seed = (self.seed*10000) + (roundi*1000) + (iteration*100) + num_iter_repeats
             logging.info(f"Re-seeding iteration with {new_seed} = {self.seed} + (roundi={roundi} * 100) + (iter={iteration}*10) + num_iter_repeats={num_iter_repeats}")
             random.seed(new_seed)
 
