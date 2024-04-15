@@ -74,6 +74,7 @@
         "max[VARJ] < num[VARJ]",
         "max[VARI] = num[VARJ]",
         "max[VARI] < num[VARJ]",
+        "max[VARI] > num[VARJ]",
         "max[nxt[VARI]] >= num[VARI]",
         "max[VARI] < max[VARJ]",
         "max[VARJ] < max[VARI]",
