@@ -518,13 +518,13 @@ class StructuredProof():
 
         # Initiation. 
         spec_lines += "\* Initiation." 
-        spec_lines += "\nTHEOREM Init => IndGlobal'\n"
+        spec_lines += "\nTHEOREM Init => IndGlobal\n"
         init_defs = ",".join([f"{n.expr}" for ind,n in enumerate(nodes)])
         spec_lines += "    <1> USE " + ",".join(assumes_name_list) + " DEF " + ",".join(global_def_expands) + "\n"
         for ind,n in enumerate(nodes):
             # Decomposed proof obligation for each oncjunction.
             spec_lines +=  f"    <1>{ind}. Init => {n.expr} BY DEF Init, {n.expr}, IndGlobal\n"
-        spec_lines += "    <1>a. QED BY " + ",".join([f"<1>{ind}" for ind in range(len(nodes))]) + " DEF Init, IndGlobal\n"
+        spec_lines += "    <1>a. QED BY " + ",".join([f"<1>{ind}" for ind in range(len(nodes))]) + " DEF IndGlobal\n"
         spec_lines += "\n"
 
 
