@@ -1,0 +1,1591 @@
+{
+  "proof_graph": {
+    "edges": [
+      [
+        "Safety_w1bAction",
+        "Safety"
+      ],
+      [
+        "Safety_w1bAction",
+        "Safety"
+      ],
+      [
+        "Safety_w1bAction",
+        "Safety"
+      ],
+      [
+        "Inv8417_R0_0_I2",
+        "Safety_w1bAction"
+      ],
+      [
+        "Inv8417_R0_0_I2_w1bAction",
+        "Inv8417_R0_0_I2"
+      ],
+      [
+        "Inv8417_R0_0_I2_w2Action",
+        "Inv8417_R0_0_I2"
+      ],
+      [
+        "Inv8417_R0_0_I2_w1bAction",
+        "Inv8417_R0_0_I2"
+      ],
+      [
+        "Inv8417_R0_0_I2_w1bAction",
+        "Inv8417_R0_0_I2"
+      ],
+      [
+        "Inv4429_R1_0_I2",
+        "Inv8417_R0_0_I2_w1bAction"
+      ],
+      [
+        "Inv8417_R0_0_I2_w2Action",
+        "Inv8417_R0_0_I2"
+      ],
+      [
+        "Inv8417_R0_0_I2_w2Action",
+        "Inv8417_R0_0_I2"
+      ],
+      [
+        "Inv8417_R0_0_I2_w2Action",
+        "Inv8417_R0_0_I2"
+      ],
+      [
+        "Inv8417_R0_0_I2_w2Action",
+        "Inv8417_R0_0_I2"
+      ],
+      [
+        "Inv8417_R0_0_I2_w2Action",
+        "Inv8417_R0_0_I2"
+      ],
+      [
+        "Inv8417_R0_0_I2_w2Action",
+        "Inv8417_R0_0_I2"
+      ],
+      [
+        "Inv4081_R1_1_I2",
+        "Inv8417_R0_0_I2_w2Action"
+      ],
+      [
+        "Inv8417_R0_0_I2_w2Action",
+        "Inv8417_R0_0_I2"
+      ],
+      [
+        "Inv4491_R1_1_I2",
+        "Inv8417_R0_0_I2_w2Action"
+      ],
+      [
+        "Inv4429_R1_0_I2_w2Action",
+        "Inv4429_R1_0_I2"
+      ],
+      [
+        "Inv4429_R1_0_I2_w2Action",
+        "Inv4429_R1_0_I2"
+      ],
+      [
+        "Inv4429_R1_0_I2_w2Action",
+        "Inv4429_R1_0_I2"
+      ],
+      [
+        "Inv4472_R2_0_I3",
+        "Inv4429_R1_0_I2_w2Action"
+      ],
+      [
+        "Inv4429_R1_0_I2_w2Action",
+        "Inv4429_R1_0_I2"
+      ],
+      [
+        "Inv61_R2_0_I3",
+        "Inv4429_R1_0_I2_w2Action"
+      ],
+      [
+        "Inv4081_R1_1_I2_w1aAction",
+        "Inv4081_R1_1_I2"
+      ],
+      [
+        "Inv4081_R1_1_I2_w1bAction",
+        "Inv4081_R1_1_I2"
+      ],
+      [
+        "Inv4081_R1_1_I2_w1aAction",
+        "Inv4081_R1_1_I2"
+      ],
+      [
+        "Inv4081_R1_1_I2_w1aAction",
+        "Inv4081_R1_1_I2"
+      ],
+      [
+        "Inv4081_R1_1_I2_w1aAction",
+        "Inv4081_R1_1_I2"
+      ],
+      [
+        "Inv4081_R1_1_I2_w1aAction",
+        "Inv4081_R1_1_I2"
+      ],
+      [
+        "Inv4081_R1_1_I2_w1aAction",
+        "Inv4081_R1_1_I2"
+      ],
+      [
+        "Inv4081_R1_1_I2_w1aAction",
+        "Inv4081_R1_1_I2"
+      ],
+      [
+        "Inv4081_R1_1_I2_w1aAction",
+        "Inv4081_R1_1_I2"
+      ],
+      [
+        "Inv4081_R1_1_I2_w1aAction",
+        "Inv4081_R1_1_I2"
+      ],
+      [
+        "Inv4081_R1_1_I2_w1aAction",
+        "Inv4081_R1_1_I2"
+      ],
+      [
+        "Inv4081_R1_1_I2_w1aAction",
+        "Inv4081_R1_1_I2"
+      ],
+      [
+        "Inv4081_R1_1_I2_w1aAction",
+        "Inv4081_R1_1_I2"
+      ],
+      [
+        "Inv4081_R1_1_I2_w1aAction",
+        "Inv4081_R1_1_I2"
+      ],
+      [
+        "Inv4081_R1_1_I2_w1aAction",
+        "Inv4081_R1_1_I2"
+      ],
+      [
+        "Inv4081_R1_1_I2_w1aAction",
+        "Inv4081_R1_1_I2"
+      ],
+      [
+        "Inv4081_R1_1_I2_w1aAction",
+        "Inv4081_R1_1_I2"
+      ],
+      [
+        "Inv4081_R1_1_I2_w1aAction",
+        "Inv4081_R1_1_I2"
+      ],
+      [
+        "Inv4081_R1_1_I2_w1aAction",
+        "Inv4081_R1_1_I2"
+      ],
+      [
+        "Inv4081_R1_1_I2_w1aAction",
+        "Inv4081_R1_1_I2"
+      ],
+      [
+        "Inv4081_R1_1_I2_w1aAction",
+        "Inv4081_R1_1_I2"
+      ],
+      [
+        "Inv4081_R1_1_I2_w1aAction",
+        "Inv4081_R1_1_I2"
+      ],
+      [
+        "Inv4081_R1_1_I2_w1aAction",
+        "Inv4081_R1_1_I2"
+      ],
+      [
+        "Inv4081_R1_1_I2_w1aAction",
+        "Inv4081_R1_1_I2"
+      ],
+      [
+        "Inv6208_R3_0_I2",
+        "Inv4081_R1_1_I2_w1aAction"
+      ],
+      [
+        "Inv4081_R1_1_I2_w1bAction",
+        "Inv4081_R1_1_I2"
+      ],
+      [
+        "Inv4081_R1_1_I2_w1bAction",
+        "Inv4081_R1_1_I2"
+      ],
+      [
+        "Inv4472_R2_0_I3",
+        "Inv4081_R1_1_I2_w1bAction"
+      ],
+      [
+        "Inv4491_R1_1_I2_w1bAction",
+        "Inv4491_R1_1_I2"
+      ],
+      [
+        "Inv4491_R1_1_I2_w1bAction",
+        "Inv4491_R1_1_I2"
+      ],
+      [
+        "Inv4491_R1_1_I2_w1bAction",
+        "Inv4491_R1_1_I2"
+      ],
+      [
+        "Inv61_R2_0_I3",
+        "Inv4491_R1_1_I2_w1bAction"
+      ],
+      [
+        "Inv4472_R2_0_I3_w1aAction",
+        "Inv4472_R2_0_I3"
+      ],
+      [
+        "Inv4472_R2_0_I3_w2Action",
+        "Inv4472_R2_0_I3"
+      ],
+      [
+        "Inv4472_R2_0_I3_w1aAction",
+        "Inv4472_R2_0_I3"
+      ],
+      [
+        "Inv4472_R2_0_I3_w1aAction",
+        "Inv4472_R2_0_I3"
+      ],
+      [
+        "Inv4472_R2_0_I3_w1aAction",
+        "Inv4472_R2_0_I3"
+      ],
+      [
+        "Inv4472_R2_0_I3_w1aAction",
+        "Inv4472_R2_0_I3"
+      ],
+      [
+        "Inv4472_R2_0_I3_w1aAction",
+        "Inv4472_R2_0_I3"
+      ],
+      [
+        "Inv4472_R2_0_I3_w1aAction",
+        "Inv4472_R2_0_I3"
+      ],
+      [
+        "Inv4472_R2_0_I3_w1aAction",
+        "Inv4472_R2_0_I3"
+      ],
+      [
+        "Inv4472_R2_0_I3_w1aAction",
+        "Inv4472_R2_0_I3"
+      ],
+      [
+        "Inv2373_R5_0_I2",
+        "Inv4472_R2_0_I3_w1aAction"
+      ],
+      [
+        "Inv4472_R2_0_I3_w2Action",
+        "Inv4472_R2_0_I3"
+      ],
+      [
+        "Inv4472_R2_0_I3_w2Action",
+        "Inv4472_R2_0_I3"
+      ],
+      [
+        "Inv61_R2_0_I3",
+        "Inv4472_R2_0_I3_w2Action"
+      ],
+      [
+        "Inv6208_R3_0_I2_e4bAction",
+        "Inv6208_R3_0_I2"
+      ],
+      [
+        "Inv6208_R3_0_I2_w1bAction",
+        "Inv6208_R3_0_I2"
+      ],
+      [
+        "Inv6208_R3_0_I2_w2Action",
+        "Inv6208_R3_0_I2"
+      ],
+      [
+        "Inv6208_R3_0_I2_e4bAction",
+        "Inv6208_R3_0_I2"
+      ],
+      [
+        "Inv6208_R3_0_I2_e4bAction",
+        "Inv6208_R3_0_I2"
+      ],
+      [
+        "Inv1739_R7_0_I2",
+        "Inv6208_R3_0_I2_e4bAction"
+      ],
+      [
+        "Inv6208_R3_0_I2_w1bAction",
+        "Inv6208_R3_0_I2"
+      ],
+      [
+        "Inv6208_R3_0_I2_w1bAction",
+        "Inv6208_R3_0_I2"
+      ],
+      [
+        "Inv2373_R5_0_I2",
+        "Inv6208_R3_0_I2_w1bAction"
+      ],
+      [
+        "Inv6208_R3_0_I2_w2Action",
+        "Inv6208_R3_0_I2"
+      ],
+      [
+        "Inv6208_R3_0_I2_w2Action",
+        "Inv6208_R3_0_I2"
+      ],
+      [
+        "Inv4081_R1_1_I2",
+        "Inv6208_R3_0_I2_w2Action"
+      ],
+      [
+        "Inv2373_R5_0_I2_e4bAction",
+        "Inv2373_R5_0_I2"
+      ],
+      [
+        "Inv2373_R5_0_I2_w2Action",
+        "Inv2373_R5_0_I2"
+      ],
+      [
+        "Inv2373_R5_0_I2_e4bAction",
+        "Inv2373_R5_0_I2"
+      ],
+      [
+        "Inv2373_R5_0_I2_e4bAction",
+        "Inv2373_R5_0_I2"
+      ],
+      [
+        "Inv2373_R5_0_I2_e4bAction",
+        "Inv2373_R5_0_I2"
+      ],
+      [
+        "Inv2373_R5_0_I2_e4bAction",
+        "Inv2373_R5_0_I2"
+      ],
+      [
+        "Inv2373_R5_0_I2_e4bAction",
+        "Inv2373_R5_0_I2"
+      ],
+      [
+        "Inv2373_R5_0_I2_e4bAction",
+        "Inv2373_R5_0_I2"
+      ],
+      [
+        "Inv2373_R5_0_I2_e4bAction",
+        "Inv2373_R5_0_I2"
+      ],
+      [
+        "Inv2373_R5_0_I2_e4bAction",
+        "Inv2373_R5_0_I2"
+      ],
+      [
+        "Inv5016_R8_0_I3",
+        "Inv2373_R5_0_I2_e4bAction"
+      ],
+      [
+        "Inv2373_R5_0_I2_w2Action",
+        "Inv2373_R5_0_I2"
+      ],
+      [
+        "Inv2373_R5_0_I2_w2Action",
+        "Inv2373_R5_0_I2"
+      ],
+      [
+        "Inv4472_R2_0_I3",
+        "Inv2373_R5_0_I2_w2Action"
+      ],
+      [
+        "Inv2373_R5_0_I2_w2Action",
+        "Inv2373_R5_0_I2"
+      ],
+      [
+        "Inv61_R2_0_I3",
+        "Inv2373_R5_0_I2_w2Action"
+      ],
+      [
+        "Inv1739_R7_0_I2_e3bAction",
+        "Inv1739_R7_0_I2"
+      ],
+      [
+        "Inv1739_R7_0_I2_w1bAction",
+        "Inv1739_R7_0_I2"
+      ],
+      [
+        "Inv1739_R7_0_I2_e3bAction",
+        "Inv1739_R7_0_I2"
+      ],
+      [
+        "Inv1739_R7_0_I2_e3bAction",
+        "Inv1739_R7_0_I2"
+      ],
+      [
+        "Inv31710_R9_0_I2",
+        "Inv1739_R7_0_I2_e3bAction"
+      ],
+      [
+        "Inv1739_R7_0_I2_w1bAction",
+        "Inv1739_R7_0_I2"
+      ],
+      [
+        "Inv1739_R7_0_I2_w1bAction",
+        "Inv1739_R7_0_I2"
+      ],
+      [
+        "Inv5016_R8_0_I3",
+        "Inv1739_R7_0_I2_w1bAction"
+      ],
+      [
+        "Inv5016_R8_0_I3_e3bAction",
+        "Inv5016_R8_0_I3"
+      ],
+      [
+        "Inv5016_R8_0_I3_w2Action",
+        "Inv5016_R8_0_I3"
+      ],
+      [
+        "Inv5016_R8_0_I3_e3bAction",
+        "Inv5016_R8_0_I3"
+      ],
+      [
+        "Inv5016_R8_0_I3_e3bAction",
+        "Inv5016_R8_0_I3"
+      ],
+      [
+        "Inv3258_R10_0_I3",
+        "Inv5016_R8_0_I3_e3bAction"
+      ],
+      [
+        "Inv5016_R8_0_I3_w2Action",
+        "Inv5016_R8_0_I3"
+      ],
+      [
+        "Inv5016_R8_0_I3_w2Action",
+        "Inv5016_R8_0_I3"
+      ],
+      [
+        "Inv61_R2_0_I3",
+        "Inv5016_R8_0_I3_w2Action"
+      ],
+      [
+        "Inv31710_R9_0_I2_e2bAction",
+        "Inv31710_R9_0_I2"
+      ],
+      [
+        "Inv31710_R9_0_I2_w1bAction",
+        "Inv31710_R9_0_I2"
+      ],
+      [
+        "Inv31710_R9_0_I2_e2bAction",
+        "Inv31710_R9_0_I2"
+      ],
+      [
+        "Inv31710_R9_0_I2_e2bAction",
+        "Inv31710_R9_0_I2"
+      ],
+      [
+        "Inv31710_R9_0_I2_e2bAction",
+        "Inv31710_R9_0_I2"
+      ],
+      [
+        "Inv31710_R9_0_I2_e2bAction",
+        "Inv31710_R9_0_I2"
+      ],
+      [
+        "Inv31710_R9_0_I2_e2bAction",
+        "Inv31710_R9_0_I2"
+      ],
+      [
+        "Inv31710_R9_0_I2_e2bAction",
+        "Inv31710_R9_0_I2"
+      ],
+      [
+        "Inv31710_R9_0_I2_e2bAction",
+        "Inv31710_R9_0_I2"
+      ],
+      [
+        "Inv2883_R11_0_I3",
+        "Inv31710_R9_0_I2_e2bAction"
+      ],
+      [
+        "Inv31710_R9_0_I2_w1bAction",
+        "Inv31710_R9_0_I2"
+      ],
+      [
+        "Inv31710_R9_0_I2_w1bAction",
+        "Inv31710_R9_0_I2"
+      ],
+      [
+        "Inv3258_R10_0_I3",
+        "Inv31710_R9_0_I2_w1bAction"
+      ],
+      [
+        "Inv3258_R10_0_I3_e2bAction",
+        "Inv3258_R10_0_I3"
+      ],
+      [
+        "Inv3258_R10_0_I3_w2Action",
+        "Inv3258_R10_0_I3"
+      ],
+      [
+        "Inv3258_R10_0_I3_e2bAction",
+        "Inv3258_R10_0_I3"
+      ],
+      [
+        "Inv3258_R10_0_I3_w2Action",
+        "Inv3258_R10_0_I3"
+      ],
+      [
+        "Inv3258_R10_0_I3_w2Action",
+        "Inv3258_R10_0_I3"
+      ],
+      [
+        "Inv3258_R10_0_I3_w2Action",
+        "Inv3258_R10_0_I3"
+      ],
+      [
+        "Inv3258_R10_0_I3_w2Action",
+        "Inv3258_R10_0_I3"
+      ],
+      [
+        "Inv3258_R10_0_I3_w2Action",
+        "Inv3258_R10_0_I3"
+      ],
+      [
+        "Inv3811_R12_1_I2",
+        "Inv3258_R10_0_I3_w2Action"
+      ],
+      [
+        "Inv2883_R11_0_I3_w1bAction",
+        "Inv2883_R11_0_I3"
+      ],
+      [
+        "Inv2883_R11_0_I3_w1bAction",
+        "Inv2883_R11_0_I3"
+      ],
+      [
+        "Inv2883_R11_0_I3_w1bAction",
+        "Inv2883_R11_0_I3"
+      ],
+      [
+        "Inv2883_R11_0_I3_w1bAction",
+        "Inv2883_R11_0_I3"
+      ],
+      [
+        "Inv2883_R11_0_I3_w1bAction",
+        "Inv2883_R11_0_I3"
+      ],
+      [
+        "Inv2883_R11_0_I3_w1bAction",
+        "Inv2883_R11_0_I3"
+      ],
+      [
+        "Inv3811_R12_1_I2_e2bAction",
+        "Inv3811_R12_1_I2"
+      ],
+      [
+        "Inv3811_R12_1_I2_w1aAction",
+        "Inv3811_R12_1_I2"
+      ],
+      [
+        "Inv3811_R12_1_I2_e2bAction",
+        "Inv3811_R12_1_I2"
+      ],
+      [
+        "Inv3811_R12_1_I2_e2bAction",
+        "Inv3811_R12_1_I2"
+      ],
+      [
+        "Inv3811_R12_1_I2_e2bAction",
+        "Inv3811_R12_1_I2"
+      ],
+      [
+        "Inv3811_R12_1_I2_e2bAction",
+        "Inv3811_R12_1_I2"
+      ],
+      [
+        "Inv3811_R12_1_I2_e2bAction",
+        "Inv3811_R12_1_I2"
+      ],
+      [
+        "Inv3811_R12_1_I2_e2bAction",
+        "Inv3811_R12_1_I2"
+      ],
+      [
+        "Inv4045_R14_0_I4",
+        "Inv3811_R12_1_I2_e2bAction"
+      ],
+      [
+        "Inv3811_R12_1_I2_w1aAction",
+        "Inv3811_R12_1_I2"
+      ],
+      [
+        "Inv3811_R12_1_I2_w1aAction",
+        "Inv3811_R12_1_I2"
+      ],
+      [
+        "Inv36_R14_1_I1",
+        "Inv3811_R12_1_I2_w1aAction"
+      ],
+      [
+        "Inv4045_R14_0_I4_w1aAction",
+        "Inv4045_R14_0_I4"
+      ],
+      [
+        "Inv4045_R14_0_I4_w1aAction",
+        "Inv4045_R14_0_I4"
+      ],
+      [
+        "Inv4045_R14_0_I4_w1aAction",
+        "Inv4045_R14_0_I4"
+      ],
+      [
+        "Inv11_R15_0_I1",
+        "Inv4045_R14_0_I4_w1aAction"
+      ],
+      [
+        "Inv36_R14_1_I1_e2bAction",
+        "Inv36_R14_1_I1"
+      ],
+      [
+        "Inv36_R14_1_I1_e2bAction",
+        "Inv36_R14_1_I1"
+      ],
+      [
+        "Inv36_R14_1_I1_e2bAction",
+        "Inv36_R14_1_I1"
+      ],
+      [
+        "Inv11_R15_0_I1",
+        "Inv36_R14_1_I1_e2bAction"
+      ],
+      [
+        "Inv3258_R10_0_I3_e2bAction",
+        "Inv3258_R10_0_I3"
+      ],
+      [
+        "Inv3258_R10_0_I3_w2Action",
+        "Inv3258_R10_0_I3"
+      ],
+      [
+        "Inv3258_R10_0_I3_e2bAction",
+        "Inv3258_R10_0_I3"
+      ],
+      [
+        "Inv3258_R10_0_I3_e2bAction",
+        "Inv3258_R10_0_I3"
+      ],
+      [
+        "Inv1_R0_0_I0",
+        "Inv3258_R10_0_I3_e2bAction"
+      ],
+      [
+        "Inv3258_R10_0_I3_w2Action",
+        "Inv3258_R10_0_I3"
+      ],
+      [
+        "Inv3258_R10_0_I3_w2Action",
+        "Inv3258_R10_0_I3"
+      ],
+      [
+        "Inv3811_R12_1_I2",
+        "Inv3258_R10_0_I3_w2Action"
+      ],
+      [
+        "Inv1_R0_0_I0_e2aAction",
+        "Inv1_R0_0_I0"
+      ],
+      [
+        "Inv1_R0_0_I0_w2Action",
+        "Inv1_R0_0_I0"
+      ],
+      [
+        "Inv1_R0_0_I0_e2aAction",
+        "Inv1_R0_0_I0"
+      ],
+      [
+        "Inv1_R0_0_I0_e2aAction",
+        "Inv1_R0_0_I0"
+      ],
+      [
+        "Inv1_R0_0_I0_e2aAction",
+        "Inv1_R0_0_I0"
+      ],
+      [
+        "Inv1_R0_0_I0_e2aAction",
+        "Inv1_R0_0_I0"
+      ],
+      [
+        "Inv1_R0_0_I0_e2aAction",
+        "Inv1_R0_0_I0"
+      ],
+      [
+        "Inv2073_R1_0_I4",
+        "Inv1_R0_0_I0_e2aAction"
+      ],
+      [
+        "Inv1_R0_0_I0_w2Action",
+        "Inv1_R0_0_I0"
+      ],
+      [
+        "Inv1_R0_0_I0_w2Action",
+        "Inv1_R0_0_I0"
+      ],
+      [
+        "Inv4045_R14_0_I4",
+        "Inv1_R0_0_I0_w2Action"
+      ],
+      [
+        "Inv2073_R1_0_I4_w2Action",
+        "Inv2073_R1_0_I4"
+      ],
+      [
+        "Inv2073_R1_0_I4_w2Action",
+        "Inv2073_R1_0_I4"
+      ],
+      [
+        "Inv2073_R1_0_I4_w2Action",
+        "Inv2073_R1_0_I4"
+      ],
+      [
+        "Inv4045_R14_0_I4",
+        "Inv2073_R1_0_I4_w2Action"
+      ],
+      [
+        "Inv2883_R11_0_I3_w1bAction",
+        "Inv2883_R11_0_I3"
+      ],
+      [
+        "Inv2883_R11_0_I3_w1bAction",
+        "Inv2883_R11_0_I3"
+      ],
+      [
+        "Inv2883_R11_0_I3_w1bAction",
+        "Inv2883_R11_0_I3"
+      ],
+      [
+        "Inv2073_R1_0_I4",
+        "Inv2883_R11_0_I3_w1bAction"
+      ]
+    ],
+    "nodes": {
+      "Safety": {
+        "discharged": true,
+        "is_lemma": true,
+        "expr": "H_MutualExclusion",
+        "order": 1,
+        "depth": 0,
+        "is_root": true
+      },
+      "Safety_w1bAction": {
+        "ctis_remaining": 0,
+        "total_initial_ctis": 478,
+        "coi_vars": [
+          "pc",
+          "unchecked"
+        ],
+        "num_grammar_preds": 44,
+        "num_invs_generated_per_iter": {
+          "1": 88,
+          "2": 3784,
+          "3": 24795
+        },
+        "is_action": true,
+        "discharged": true,
+        "time_spent": 64.26471424102783,
+        "latest_elimination_iter": 3
+      },
+      "Inv8417_R0_0_I2": {
+        "discharged": true,
+        "is_lemma": true,
+        "expr": "\\A VARI \\in Procs : \\A VARJ \\in Procs : (VARJ \\in unchecked[VARI]) \\/ (~(pc[VARI] \\in {\"w1\",\"w2\"}) \\/ (~(pc[VARJ] = \"cs\")))",
+        "order": 2,
+        "depth": 1
+      },
+      "Inv8417_R0_0_I2_w1bAction": {
+        "ctis_remaining": 0,
+        "total_initial_ctis": 246,
+        "coi_vars": [
+          "pc",
+          "unchecked"
+        ],
+        "num_grammar_preds": 44,
+        "num_invs_generated_per_iter": {
+          "1": 8,
+          "2": 740,
+          "3": 23129
+        },
+        "is_action": true,
+        "discharged": true,
+        "time_spent": 51.56711030006409,
+        "latest_elimination_iter": 3
+      },
+      "Inv8417_R0_0_I2_w2Action": {
+        "ctis_remaining": 0,
+        "total_initial_ctis": 327,
+        "coi_vars": [
+          "num",
+          "pc",
+          "unchecked",
+          "nxt"
+        ],
+        "num_grammar_preds": 69,
+        "num_invs_generated_per_iter": {
+          "1": 62,
+          "2": 6346,
+          "3": 104177
+        },
+        "is_action": true,
+        "discharged": true,
+        "time_spent": 288.1310966014862,
+        "latest_elimination_iter": 3
+      },
+      "Inv4429_R1_0_I2": {
+        "discharged": true,
+        "is_lemma": true,
+        "expr": "\\A VARI \\in Procs : \\A VARJ \\in Procs : (VARI \\in unchecked[VARJ]) \\/ (~(((pc[VARJ] \\in {\"w1\",\"w2\"}) /\\ (pc[VARI] = \"w1\"))) \\/ (~(VARJ \\in (Procs \\ unchecked[VARI]) \\ {VARI})))",
+        "order": 3,
+        "depth": 2
+      },
+      "Inv4081_R1_1_I2": {
+        "discharged": true,
+        "is_lemma": true,
+        "expr": "\\A VARI \\in Procs : \\A VARJ \\in Procs : (<<num[VARI],VARI>> \\prec <<num[VARJ],VARJ>>) \\/ (~(pc[VARI] = \"cs\") \\/ (~(pc[VARJ] = \"w2\")))",
+        "order": 4,
+        "depth": 2
+      },
+      "Inv4491_R1_1_I2": {
+        "discharged": true,
+        "is_lemma": true,
+        "expr": "\\A VARI \\in Procs : ~(num[VARI] = 0) \\/ (~(pc[VARI] = \"cs\"))",
+        "order": 5,
+        "depth": 2
+      },
+      "Inv4429_R1_0_I2_w2Action": {
+        "ctis_remaining": 0,
+        "total_initial_ctis": 500,
+        "coi_vars": [
+          "num",
+          "pc",
+          "unchecked",
+          "nxt"
+        ],
+        "num_grammar_preds": 69,
+        "num_invs_generated_per_iter": {
+          "1": 16,
+          "2": 100,
+          "3": 250628,
+          "4": 61276
+        },
+        "is_action": true,
+        "discharged": true,
+        "time_spent": 1039.4240896701813,
+        "latest_elimination_iter": 4
+      },
+      "Inv4472_R2_0_I3": {
+        "discharged": true,
+        "is_lemma": true,
+        "expr": "\\A VARI \\in Procs : \\A VARJ \\in Procs : (VARI \\in unchecked[VARJ]) \\/ (~(pc[VARI] = \"w2\") \\/ (~(pc[VARJ] \\in {\"w1\",\"w2\"}))) \\/ (~(<<num[VARI],VARI>> \\prec <<num[VARJ],VARJ>>))",
+        "order": 6,
+        "depth": 3
+      },
+      "Inv61_R2_0_I3": {
+        "discharged": true,
+        "is_lemma": true,
+        "expr": "\\A VARI \\in Procs : ~(num[VARI] = 0) \\/ (~(pc[VARI] \\in {\"e4\",\"w1\",\"w2\"}))",
+        "order": 7,
+        "depth": 3
+      },
+      "Inv4081_R1_1_I2_w1aAction": {
+        "ctis_remaining": 0,
+        "total_initial_ctis": 449,
+        "coi_vars": [
+          "num",
+          "flag",
+          "pc",
+          "unchecked",
+          "nxt"
+        ],
+        "num_grammar_preds": 73,
+        "num_invs_generated_per_iter": {
+          "1": 40,
+          "2": 1185,
+          "3": 63544
+        },
+        "is_action": true,
+        "discharged": true,
+        "time_spent": 254.05892491340637,
+        "latest_elimination_iter": 3
+      },
+      "Inv4081_R1_1_I2_w1bAction": {
+        "ctis_remaining": 0,
+        "total_initial_ctis": 101,
+        "coi_vars": [
+          "num",
+          "pc",
+          "unchecked"
+        ],
+        "num_grammar_preds": 50,
+        "num_invs_generated_per_iter": {
+          "1": 14
+        },
+        "is_action": true,
+        "discharged": true,
+        "time_spent": 13.552842855453491,
+        "latest_elimination_iter": 1
+      },
+      "Inv6208_R3_0_I2": {
+        "discharged": true,
+        "is_lemma": true,
+        "expr": "\\A VARI \\in Procs : \\A VARJ \\in Procs : ~(<<num[VARI],VARI>> \\prec <<num[VARJ],VARJ>>) \\/ (~(pc[VARI] = \"w1\")) \\/ (~(pc[VARJ] = \"cs\"))",
+        "order": 8,
+        "depth": 3
+      },
+      "Inv4491_R1_1_I2_w1bAction": {
+        "ctis_remaining": 0,
+        "total_initial_ctis": 500,
+        "coi_vars": [
+          "num",
+          "pc",
+          "unchecked"
+        ],
+        "num_grammar_preds": 50,
+        "num_invs_generated_per_iter": {
+          "1": 14
+        },
+        "is_action": true,
+        "discharged": true,
+        "time_spent": 10.876591920852661,
+        "latest_elimination_iter": 1
+      },
+      "Inv4472_R2_0_I3_w1aAction": {
+        "ctis_remaining": 0,
+        "total_initial_ctis": 603,
+        "coi_vars": [
+          "num",
+          "flag",
+          "pc",
+          "unchecked",
+          "nxt"
+        ],
+        "num_grammar_preds": 73,
+        "num_invs_generated_per_iter": {
+          "1": 29,
+          "2": 1493,
+          "3": 36879
+        },
+        "is_action": true,
+        "discharged": true,
+        "time_spent": 141.86609888076782,
+        "latest_elimination_iter": 3
+      },
+      "Inv4472_R2_0_I3_w2Action": {
+        "ctis_remaining": 0,
+        "total_initial_ctis": 53,
+        "coi_vars": [
+          "num",
+          "pc",
+          "unchecked",
+          "nxt"
+        ],
+        "num_grammar_preds": 69,
+        "num_invs_generated_per_iter": {
+          "1": 16
+        },
+        "is_action": true,
+        "discharged": true,
+        "time_spent": 10.994346380233765,
+        "latest_elimination_iter": 1
+      },
+      "Inv2373_R5_0_I2": {
+        "discharged": true,
+        "is_lemma": true,
+        "expr": "\\A VARI \\in Procs : \\A VARJ \\in Procs : (VARI \\in unchecked[VARJ]) \\/ (~(((pc[VARJ] \\in {\"w1\",\"w2\"}) /\\ (pc[VARI] = \"w1\"))) \\/ (~(<<num[VARI],VARI>> \\prec <<num[VARJ],VARJ>>)))",
+        "order": 9,
+        "depth": 4
+      },
+      "Inv6208_R3_0_I2_e4bAction": {
+        "ctis_remaining": 0,
+        "total_initial_ctis": 248,
+        "coi_vars": [
+          "num",
+          "pc"
+        ],
+        "num_grammar_preds": 35,
+        "num_invs_generated_per_iter": {
+          "1": 9,
+          "2": 289,
+          "3": 27362
+        },
+        "is_action": true,
+        "discharged": true,
+        "time_spent": 77.82209491729736,
+        "latest_elimination_iter": 3
+      },
+      "Inv6208_R3_0_I2_w1bAction": {
+        "ctis_remaining": 0,
+        "total_initial_ctis": 28,
+        "coi_vars": [
+          "num",
+          "pc",
+          "unchecked"
+        ],
+        "num_grammar_preds": 50,
+        "num_invs_generated_per_iter": {
+          "1": 13
+        },
+        "is_action": true,
+        "discharged": true,
+        "time_spent": 14.526986598968506,
+        "latest_elimination_iter": 1
+      },
+      "Inv6208_R3_0_I2_w2Action": {
+        "ctis_remaining": 0,
+        "total_initial_ctis": 224,
+        "coi_vars": [
+          "num",
+          "pc",
+          "nxt"
+        ],
+        "num_grammar_preds": 48,
+        "num_invs_generated_per_iter": {
+          "1": 7
+        },
+        "is_action": true,
+        "discharged": true,
+        "time_spent": 14.39260745048523,
+        "latest_elimination_iter": 1
+      },
+      "Inv1739_R7_0_I2": {
+        "discharged": true,
+        "is_lemma": true,
+        "expr": "\\A VARI \\in Procs : \\A VARJ \\in Procs : (<<num[VARI],VARI>> \\prec <<num[VARJ],VARJ>>) \\/ (~(pc[VARJ] = \"e4\")) \\/ (~(pc[VARI] = \"cs\"))",
+        "order": 10,
+        "depth": 4
+      },
+      "Inv2373_R5_0_I2_e4bAction": {
+        "ctis_remaining": 0,
+        "total_initial_ctis": 353,
+        "coi_vars": [
+          "num",
+          "pc",
+          "unchecked"
+        ],
+        "num_grammar_preds": 50,
+        "num_invs_generated_per_iter": {
+          "1": 34,
+          "2": 971,
+          "3": 80603,
+          "4": 334793
+        },
+        "is_action": true,
+        "discharged": true,
+        "time_spent": 1692.1507534980774,
+        "latest_elimination_iter": 4
+      },
+      "Inv2373_R5_0_I2_w2Action": {
+        "ctis_remaining": 0,
+        "total_initial_ctis": 267,
+        "coi_vars": [
+          "num",
+          "pc",
+          "unchecked",
+          "nxt"
+        ],
+        "num_grammar_preds": 69,
+        "num_invs_generated_per_iter": {
+          "1": 18
+        },
+        "is_action": true,
+        "discharged": true,
+        "time_spent": 12.716566562652588,
+        "latest_elimination_iter": 1
+      },
+      "Inv5016_R8_0_I3": {
+        "discharged": true,
+        "is_lemma": true,
+        "expr": "\\A VARI \\in Procs : \\A VARJ \\in Procs : (VARI \\in unchecked[VARJ]) \\/ (~(pc[VARJ] \\in {\"w1\",\"w2\"})) \\/ (~(pc[VARI] \\in {\"e4\",\"w1\",\"w2\"})) \\/ (~(<<num[VARI],VARI>> \\prec <<num[VARJ],VARJ>>))",
+        "order": 11,
+        "depth": 5
+      },
+      "Inv1739_R7_0_I2_e3bAction": {
+        "ctis_remaining": 0,
+        "total_initial_ctis": 406,
+        "coi_vars": [
+          "num",
+          "pc",
+          "max"
+        ],
+        "num_grammar_preds": 46,
+        "num_invs_generated_per_iter": {
+          "1": 33,
+          "2": 2051,
+          "3": 34925
+        },
+        "is_action": true,
+        "discharged": true,
+        "time_spent": 127.35482788085938,
+        "latest_elimination_iter": 3
+      },
+      "Inv1739_R7_0_I2_w1bAction": {
+        "ctis_remaining": 0,
+        "total_initial_ctis": 94,
+        "coi_vars": [
+          "num",
+          "pc",
+          "unchecked"
+        ],
+        "num_grammar_preds": 50,
+        "num_invs_generated_per_iter": {
+          "1": 17
+        },
+        "is_action": true,
+        "discharged": true,
+        "time_spent": 14.285778522491455,
+        "latest_elimination_iter": 1
+      },
+      "Inv31710_R9_0_I2": {
+        "discharged": true,
+        "is_lemma": true,
+        "expr": "\\A VARI \\in Procs : \\A VARJ \\in Procs : ~(max[VARI] < num[VARJ]) \\/ (~(pc[VARI] = \"e3\")) \\/ (~(pc[VARJ] = \"cs\"))",
+        "order": 12,
+        "depth": 5
+      },
+      "Inv5016_R8_0_I3_e3bAction": {
+        "ctis_remaining": 0,
+        "total_initial_ctis": 339,
+        "coi_vars": [
+          "num",
+          "pc",
+          "unchecked",
+          "max"
+        ],
+        "num_grammar_preds": 61,
+        "num_invs_generated_per_iter": {
+          "1": 29,
+          "2": 633,
+          "3": 164380,
+          "4": 43930
+        },
+        "is_action": true,
+        "discharged": true,
+        "time_spent": 832.0253603458405,
+        "latest_elimination_iter": 4
+      },
+      "Inv5016_R8_0_I3_w2Action": {
+        "ctis_remaining": 0,
+        "total_initial_ctis": 161,
+        "coi_vars": [
+          "num",
+          "pc",
+          "unchecked",
+          "nxt"
+        ],
+        "num_grammar_preds": 69,
+        "num_invs_generated_per_iter": {
+          "1": 18
+        },
+        "is_action": true,
+        "discharged": true,
+        "time_spent": 12.25178837776184,
+        "latest_elimination_iter": 1
+      },
+      "Inv3258_R10_0_I3": {
+        "discharged": true,
+        "is_lemma": true,
+        "expr": "\\A VARI \\in Procs : \\A VARJ \\in Procs : (VARI \\in unchecked[VARJ]) \\/ (~(max[VARI] < num[VARJ]) \\/ (~(pc[VARJ] \\in {\"w1\",\"w2\"}))) \\/ (~(pc[VARI] = \"e3\"))",
+        "order": 13,
+        "depth": 6
+      },
+      "Inv31710_R9_0_I2_e2bAction": {
+        "ctis_remaining": 0,
+        "total_initial_ctis": 194,
+        "coi_vars": [
+          "num",
+          "pc",
+          "unchecked",
+          "max"
+        ],
+        "num_grammar_preds": 61,
+        "num_invs_generated_per_iter": {
+          "1": 43,
+          "2": 122,
+          "3": 61740,
+          "4": 75285
+        },
+        "is_action": true,
+        "discharged": true,
+        "time_spent": 826.7035889625549,
+        "latest_elimination_iter": 4
+      },
+      "Inv31710_R9_0_I2_w1bAction": {
+        "ctis_remaining": 0,
+        "total_initial_ctis": 127,
+        "coi_vars": [
+          "num",
+          "pc",
+          "unchecked",
+          "max"
+        ],
+        "num_grammar_preds": 61,
+        "num_invs_generated_per_iter": {
+          "1": 20
+        },
+        "is_action": true,
+        "discharged": true,
+        "time_spent": 12.580532312393188,
+        "latest_elimination_iter": 1
+      },
+      "Inv2883_R11_0_I3": {
+        "discharged": true,
+        "is_lemma": true,
+        "expr": "\\A VARI \\in Procs : \\A VARJ \\in Procs : (VARI \\in unchecked[VARJ]) \\/ ((max[VARJ] >= num[VARI]) \\/ (~(pc[VARI] = \"cs\")) \\/ (~(pc[VARJ] = \"e2\")))",
+        "order": 14,
+        "depth": 6
+      },
+      "Inv3258_R10_0_I3_e2bAction": {
+        "ctis_remaining": 0,
+        "total_initial_ctis": 91,
+        "coi_vars": [
+          "num",
+          "pc",
+          "unchecked",
+          "max"
+        ],
+        "num_grammar_preds": 62,
+        "num_invs_generated_per_iter": {
+          "1": 137
+        },
+        "is_action": true,
+        "discharged": true,
+        "time_spent": 11.19730806350708,
+        "latest_elimination_iter": 1
+      },
+      "Inv3258_R10_0_I3_w2Action": {
+        "ctis_remaining": 0,
+        "total_initial_ctis": 39,
+        "coi_vars": [
+          "num",
+          "pc",
+          "unchecked",
+          "max",
+          "nxt"
+        ],
+        "num_grammar_preds": 82,
+        "num_invs_generated_per_iter": {
+          "1": 61
+        },
+        "is_action": true,
+        "discharged": true,
+        "time_spent": 11.430029153823853,
+        "latest_elimination_iter": 1
+      },
+      "Inv3811_R12_1_I2": {
+        "discharged": true,
+        "is_lemma": true,
+        "expr": "\\A VARI \\in Procs : (max[nxt[VARI]] >= num[VARI]) \\/ (~((pc[nxt[VARI]] = \"e3\"))) \\/ (~(pc[VARI] = \"w2\"))",
+        "order": 15,
+        "depth": 7
+      },
+      "Inv2883_R11_0_I3_w1bAction": {
+        "ctis_remaining": 0,
+        "total_initial_ctis": 37,
+        "coi_vars": [
+          "num",
+          "pc",
+          "unchecked",
+          "max"
+        ],
+        "num_grammar_preds": 61,
+        "num_invs_generated_per_iter": {
+          "1": 15,
+          "2": 6602
+        },
+        "is_action": true,
+        "discharged": true,
+        "time_spent": 18.288655281066895,
+        "latest_elimination_iter": 2
+      },
+      "Inv3811_R12_1_I2_e2bAction": {
+        "ctis_remaining": 0,
+        "total_initial_ctis": 105,
+        "coi_vars": [
+          "num",
+          "pc",
+          "unchecked",
+          "max",
+          "nxt"
+        ],
+        "num_grammar_preds": 82,
+        "num_invs_generated_per_iter": {
+          "1": 50,
+          "2": 181,
+          "3": 170383,
+          "4": 420274,
+          "5": 18773
+        },
+        "is_action": true,
+        "discharged": true,
+        "time_spent": 2475.571428537369,
+        "latest_elimination_iter": 5
+      },
+      "Inv3811_R12_1_I2_w1aAction": {
+        "ctis_remaining": 0,
+        "total_initial_ctis": 339,
+        "coi_vars": [
+          "num",
+          "flag",
+          "pc",
+          "unchecked",
+          "max",
+          "nxt"
+        ],
+        "num_grammar_preds": 86,
+        "num_invs_generated_per_iter": {
+          "1": 38,
+          "2": 345
+        },
+        "is_action": true,
+        "discharged": true,
+        "time_spent": 33.97503399848938,
+        "latest_elimination_iter": 2
+      },
+      "Inv4045_R14_0_I4": {
+        "discharged": true,
+        "is_lemma": true,
+        "expr": "\\A VARI \\in Procs : \\A VARJ \\in Procs : (VARJ \\in unchecked[nxt[VARJ]]) \\/ ((max[nxt[VARJ]] >= num[VARJ]) \\/ ((pc[VARI] = \"e3\")) \\/ (~((pc[nxt[VARJ]] = \"e2\"))) \\/ ((pc[VARJ] = \"ncs\")) \\/ (~(pc[VARJ] = \"w2\")))",
+        "order": 16,
+        "depth": 8
+      },
+      "Inv36_R14_1_I1": {
+        "discharged": true,
+        "is_lemma": true,
+        "expr": "\\A VARI \\in Procs : (flag[VARI]) \\/ (~(pc[VARI] = \"e3\"))",
+        "order": 17,
+        "depth": 8
+      },
+      "Inv4045_R14_0_I4_w1aAction": {
+        "ctis_remaining": 0,
+        "total_initial_ctis": 235,
+        "coi_vars": [
+          "num",
+          "flag",
+          "pc",
+          "unchecked",
+          "max",
+          "nxt"
+        ],
+        "num_grammar_preds": 86,
+        "num_invs_generated_per_iter": {
+          "1": 40,
+          "2": 118
+        },
+        "is_action": true,
+        "discharged": true,
+        "time_spent": 26.906652688980103,
+        "latest_elimination_iter": 2
+      },
+      "Inv11_R15_0_I1": {
+        "discharged": true,
+        "is_lemma": true,
+        "expr": "\\A VARI \\in Procs : (flag[VARI]) \\/ (~(pc[VARI] = \"e2\"))",
+        "order": 18,
+        "depth": 9
+      },
+      "Inv36_R14_1_I1_e2bAction": {
+        "ctis_remaining": 0,
+        "total_initial_ctis": 500,
+        "coi_vars": [
+          "flag",
+          "pc",
+          "unchecked"
+        ],
+        "num_grammar_preds": 46,
+        "num_invs_generated_per_iter": {
+          "1": 10
+        },
+        "is_action": true,
+        "discharged": true,
+        "time_spent": 12.943793535232544,
+        "latest_elimination_iter": 1
+      },
+      "Inv1_R0_0_I0": {
+        "discharged": true,
+        "is_lemma": true,
+        "expr": "\\A VARI \\in Procs : \\A VARJ \\in Procs : ((VARI \\in unchecked[VARJ]) \\/ ((pc[VARJ] = \"e1\") \\/ (~(max[VARI] < num[VARJ]) \\/ (~(pc[VARI] = \"e2\"))) \\/ (~(unchecked[VARI] = {}))) \\/ (~(pc[VARJ] \\in {\"w1\",\"w2\"})))",
+        "order": 19,
+        "depth": 7
+      },
+      "Inv1_R0_0_I0_e2aAction": {
+        "ctis_remaining": 0,
+        "total_initial_ctis": 104,
+        "coi_vars": [
+          "num",
+          "pc",
+          "unchecked",
+          "max"
+        ],
+        "num_grammar_preds": 61,
+        "num_invs_generated_per_iter": {
+          "1": 49,
+          "2": 6217,
+          "3": 349111,
+          "4": 485404,
+          "5": 105739
+        },
+        "is_action": true,
+        "discharged": true,
+        "time_spent": 1446.9727442264557,
+        "latest_elimination_iter": 5
+      },
+      "Inv1_R0_0_I0_w2Action": {
+        "ctis_remaining": 0,
+        "total_initial_ctis": 2,
+        "coi_vars": [
+          "num",
+          "pc",
+          "unchecked",
+          "max",
+          "nxt"
+        ],
+        "num_grammar_preds": 82,
+        "num_invs_generated_per_iter": {
+          "1": 19
+        },
+        "is_action": true,
+        "discharged": true,
+        "time_spent": 7.04039192199707,
+        "latest_elimination_iter": 1
+      },
+      "Inv2073_R1_0_I4": {
+        "discharged": true,
+        "is_lemma": true,
+        "expr": "\\A VARI \\in Procs : \\A VARJ \\in Procs : (VARI \\in unchecked[VARJ]) \\/ (~(pc[VARJ] = \"e2\")) \\/ ((max[VARJ] >= num[VARI])) \\/ (~(pc[VARI] \\in {\"w1\",\"w2\"})) \\/ (~(VARJ \\in (Procs \\ unchecked[VARI]) \\ {VARI}))",
+        "order": 20,
+        "depth": 8
+      },
+      "Inv2073_R1_0_I4_w2Action": {
+        "ctis_remaining": 0,
+        "total_initial_ctis": 21,
+        "coi_vars": [
+          "num",
+          "pc",
+          "unchecked",
+          "max",
+          "nxt"
+        ],
+        "num_grammar_preds": 82,
+        "num_invs_generated_per_iter": {
+          "1": 21
+        },
+        "is_action": true,
+        "discharged": true,
+        "time_spent": 7.16635799407959,
+        "latest_elimination_iter": 1
+      }
+    },
+    "safety": "H_MutualExclusion",
+    "curr_node": "Inv2883_R11_0_I3_w1bAction"
+  },
+  "strengthening_conjuncts": [
+    [
+      "Inv8417_R0_0_I2",
+      "\\A VARI \\in Procs : \\A VARJ \\in Procs : (VARJ \\in unchecked[VARI]) \\/ (~(pc[VARI] \\in {\"w1\",\"w2\"}) \\/ (~(pc[VARJ] = \"cs\")))",
+      "(VARJ \\in unchecked[VARI]) \\/ (~(pc[VARI] \\in {\"w1\",\"w2\"}) \\/ (~(pc[VARJ] = \"cs\")))"
+    ],
+    [
+      "Inv4429_R1_0_I2",
+      "\\A VARI \\in Procs : \\A VARJ \\in Procs : (VARI \\in unchecked[VARJ]) \\/ (~(((pc[VARJ] \\in {\"w1\",\"w2\"}) /\\ (pc[VARI] = \"w1\"))) \\/ (~(VARJ \\in (Procs \\ unchecked[VARI]) \\ {VARI})))",
+      "(VARI \\in unchecked[VARJ]) \\/ (~(((pc[VARJ] \\in {\"w1\",\"w2\"}) /\\ (pc[VARI] = \"w1\"))) \\/ (~(VARJ \\in (Procs \\ unchecked[VARI]) \\ {VARI})))"
+    ],
+    [
+      "Inv4081_R1_1_I2",
+      "\\A VARI \\in Procs : \\A VARJ \\in Procs : (<<num[VARI],VARI>> \\prec <<num[VARJ],VARJ>>) \\/ (~(pc[VARI] = \"cs\") \\/ (~(pc[VARJ] = \"w2\")))",
+      "(<<num[VARI],VARI>> \\prec <<num[VARJ],VARJ>>) \\/ (~(pc[VARI] = \"cs\") \\/ (~(pc[VARJ] = \"w2\")))"
+    ],
+    [
+      "Inv4491_R1_1_I2",
+      "\\A VARI \\in Procs : ~(num[VARI] = 0) \\/ (~(pc[VARI] = \"cs\"))",
+      "~(num[VARI] = 0) \\/ (~(pc[VARI] = \"cs\"))"
+    ],
+    [
+      "Inv4472_R2_0_I3",
+      "\\A VARI \\in Procs : \\A VARJ \\in Procs : (VARI \\in unchecked[VARJ]) \\/ (~(pc[VARI] = \"w2\") \\/ (~(pc[VARJ] \\in {\"w1\",\"w2\"}))) \\/ (~(<<num[VARI],VARI>> \\prec <<num[VARJ],VARJ>>))",
+      "(VARI \\in unchecked[VARJ]) \\/ (~(pc[VARI] = \"w2\") \\/ (~(pc[VARJ] \\in {\"w1\",\"w2\"}))) \\/ (~(<<num[VARI],VARI>> \\prec <<num[VARJ],VARJ>>))"
+    ],
+    [
+      "Inv61_R2_0_I3",
+      "\\A VARI \\in Procs : ~(num[VARI] = 0) \\/ (~(pc[VARI] \\in {\"e4\",\"w1\",\"w2\"}))",
+      "~(num[VARI] = 0) \\/ (~(pc[VARI] \\in {\"e4\",\"w1\",\"w2\"}))"
+    ],
+    [
+      "Inv6208_R3_0_I2",
+      "\\A VARI \\in Procs : \\A VARJ \\in Procs : ~(<<num[VARI],VARI>> \\prec <<num[VARJ],VARJ>>) \\/ (~(pc[VARI] = \"w1\")) \\/ (~(pc[VARJ] = \"cs\"))",
+      "~(<<num[VARI],VARI>> \\prec <<num[VARJ],VARJ>>) \\/ (~(pc[VARI] = \"w1\")) \\/ (~(pc[VARJ] = \"cs\"))"
+    ],
+    [
+      "Inv2373_R5_0_I2",
+      "\\A VARI \\in Procs : \\A VARJ \\in Procs : (VARI \\in unchecked[VARJ]) \\/ (~(((pc[VARJ] \\in {\"w1\",\"w2\"}) /\\ (pc[VARI] = \"w1\"))) \\/ (~(<<num[VARI],VARI>> \\prec <<num[VARJ],VARJ>>)))",
+      "(VARI \\in unchecked[VARJ]) \\/ (~(((pc[VARJ] \\in {\"w1\",\"w2\"}) /\\ (pc[VARI] = \"w1\"))) \\/ (~(<<num[VARI],VARI>> \\prec <<num[VARJ],VARJ>>)))"
+    ],
+    [
+      "Inv1739_R7_0_I2",
+      "\\A VARI \\in Procs : \\A VARJ \\in Procs : (<<num[VARI],VARI>> \\prec <<num[VARJ],VARJ>>) \\/ (~(pc[VARJ] = \"e4\")) \\/ (~(pc[VARI] = \"cs\"))",
+      "(<<num[VARI],VARI>> \\prec <<num[VARJ],VARJ>>) \\/ (~(pc[VARJ] = \"e4\")) \\/ (~(pc[VARI] = \"cs\"))"
+    ],
+    [
+      "Inv5016_R8_0_I3",
+      "\\A VARI \\in Procs : \\A VARJ \\in Procs : (VARI \\in unchecked[VARJ]) \\/ (~(pc[VARJ] \\in {\"w1\",\"w2\"})) \\/ (~(pc[VARI] \\in {\"e4\",\"w1\",\"w2\"})) \\/ (~(<<num[VARI],VARI>> \\prec <<num[VARJ],VARJ>>))",
+      "(VARI \\in unchecked[VARJ]) \\/ (~(pc[VARJ] \\in {\"w1\",\"w2\"})) \\/ (~(pc[VARI] \\in {\"e4\",\"w1\",\"w2\"})) \\/ (~(<<num[VARI],VARI>> \\prec <<num[VARJ],VARJ>>))"
+    ],
+    [
+      "Inv31710_R9_0_I2",
+      "\\A VARI \\in Procs : \\A VARJ \\in Procs : ~(max[VARI] < num[VARJ]) \\/ (~(pc[VARI] = \"e3\")) \\/ (~(pc[VARJ] = \"cs\"))",
+      "~(max[VARI] < num[VARJ]) \\/ (~(pc[VARI] = \"e3\")) \\/ (~(pc[VARJ] = \"cs\"))"
+    ],
+    [
+      "Inv3258_R10_0_I3",
+      "\\A VARI \\in Procs : \\A VARJ \\in Procs : (VARI \\in unchecked[VARJ]) \\/ (~(max[VARI] < num[VARJ]) \\/ (~(pc[VARJ] \\in {\"w1\",\"w2\"}))) \\/ (~(pc[VARI] = \"e3\"))",
+      "(VARI \\in unchecked[VARJ]) \\/ (~(max[VARI] < num[VARJ]) \\/ (~(pc[VARJ] \\in {\"w1\",\"w2\"}))) \\/ (~(pc[VARI] = \"e3\"))"
+    ],
+    [
+      "Inv2883_R11_0_I3",
+      "\\A VARI \\in Procs : \\A VARJ \\in Procs : (VARI \\in unchecked[VARJ]) \\/ ((max[VARJ] >= num[VARI]) \\/ (~(pc[VARI] = \"cs\")) \\/ (~(pc[VARJ] = \"e2\")))",
+      "(VARI \\in unchecked[VARJ]) \\/ ((max[VARJ] >= num[VARI]) \\/ (~(pc[VARI] = \"cs\")) \\/ (~(pc[VARJ] = \"e2\")))"
+    ],
+    [
+      "Inv3811_R12_1_I2",
+      "\\A VARI \\in Procs : (max[nxt[VARI]] >= num[VARI]) \\/ (~((pc[nxt[VARI]] = \"e3\"))) \\/ (~(pc[VARI] = \"w2\"))",
+      "(max[nxt[VARI]] >= num[VARI]) \\/ (~((pc[nxt[VARI]] = \"e3\"))) \\/ (~(pc[VARI] = \"w2\"))"
+    ],
+    [
+      "Inv4045_R14_0_I4",
+      "\\A VARI \\in Procs : \\A VARJ \\in Procs : (VARJ \\in unchecked[nxt[VARJ]]) \\/ ((max[nxt[VARJ]] >= num[VARJ]) \\/ ((pc[VARI] = \"e3\")) \\/ (~((pc[nxt[VARJ]] = \"e2\"))) \\/ ((pc[VARJ] = \"ncs\")) \\/ (~(pc[VARJ] = \"w2\")))",
+      "(VARJ \\in unchecked[nxt[VARJ]]) \\/ ((max[nxt[VARJ]] >= num[VARJ]) \\/ ((pc[VARI] = \"e3\")) \\/ (~((pc[nxt[VARJ]] = \"e2\"))) \\/ ((pc[VARJ] = \"ncs\")) \\/ (~(pc[VARJ] = \"w2\")))"
+    ],
+    [
+      "Inv36_R14_1_I1",
+      "\\A VARI \\in Procs : (flag[VARI]) \\/ (~(pc[VARI] = \"e3\"))",
+      "(flag[VARI]) \\/ (~(pc[VARI] = \"e3\"))"
+    ],
+    [
+      "Inv11_R15_0_I1",
+      "\\A VARI \\in Procs : (flag[VARI]) \\/ (~(pc[VARI] = \"e2\"))",
+      "(flag[VARI]) \\/ (~(pc[VARI] = \"e2\"))"
+    ],
+    [
+      "Inv1_R0_0_I0",
+      "\\A VARI \\in Procs : \\A VARJ \\in Procs : ((VARI \\in unchecked[VARJ]) \\/ ((pc[VARJ] = \"e1\") \\/ (~(max[VARI] < num[VARJ]) \\/ (~(pc[VARI] = \"e2\"))) \\/ (~(unchecked[VARI] = {}))) \\/ (~(pc[VARJ] \\in {\"w1\",\"w2\"})))",
+      "((VARI \\in unchecked[VARJ]) \\/ ((pc[VARJ] = \"e1\") \\/ (~(max[VARI] < num[VARJ]) \\/ (~(pc[VARI] = \"e2\"))) \\/ (~(unchecked[VARI] = {}))) \\/ (~(pc[VARJ] \\in {\"w1\",\"w2\"})))"
+    ],
+    [
+      "Inv2073_R1_0_I4",
+      "\\A VARI \\in Procs : \\A VARJ \\in Procs : (VARI \\in unchecked[VARJ]) \\/ (~(pc[VARJ] = \"e2\")) \\/ ((max[VARJ] >= num[VARI])) \\/ (~(pc[VARI] \\in {\"w1\",\"w2\"})) \\/ (~(VARJ \\in (Procs \\ unchecked[VARI]) \\ {VARI}))",
+      "(VARI \\in unchecked[VARJ]) \\/ (~(pc[VARJ] = \"e2\")) \\/ ((max[VARJ] >= num[VARI])) \\/ (~(pc[VARI] \\in {\"w1\",\"w2\"})) \\/ (~(VARJ \\in (Procs \\ unchecked[VARI]) \\ {VARI}))"
+    ]
+  ],
+  "roundi": 1,
+  "num_rounds": 45,
+  "num_iters": 6,
+  "seed": 7,
+  "stats": {
+    "num_lemma_nodes": 20,
+    "num_failed_lemma_nodes": 0,
+    "state_cache_duration_secs": 6.1631739139556885,
+    "invcheck_duration_secs": 13.856761932373047,
+    "ctielimcheck_duration_secs": 1.1048238277435303,
+    "total_duration_secs": 29.046957969665527,
+    "num_preds": 86,
+    "date": "2024-04-17 00:35:20"
+  }
+}
