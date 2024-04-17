@@ -323,7 +323,7 @@ class StructuredProofNode():
             "cmd": apa_cmd
         }
 
-    def to_tlaps_proof_obligation(self, actions, action_def_expands, lemma_def_expands, assumes_list, theorem_name=None):
+    def to_tlaps_proof_obligation(self, actions, action_def_expands, lemma_def_expands, global_def_expands, assumes_list, theorem_name=None):
         """ Export this node and support lemmas as TLAPS proof obligation skeleton."""
         # "THEOREM IndAuto /\ Next => IndAuto'"
         
@@ -362,6 +362,7 @@ class StructuredProofNode():
         
             defs_list = [typeok] + support_set + [a, a.replace('Action', ''), self.expr]
             # If action is listed in custom proof def expands list, add those definitions here.
+            defs_list += global_def_expands
             if a in action_def_expands:
                 defs_list += action_def_expands[a]
             if self.expr in lemma_def_expands:
@@ -424,7 +425,7 @@ class StructuredProof():
         fname = "benchmarks/" + modname + ".tla"
         f = open(fname, 'w')
         spec_lines = f"---- MODULE {modname} ----\n"
-        spec_lines += f"EXTENDS {self.specname}\n"
+        spec_lines += f"EXTENDS {self.specname},TLAPS\n"
 
         nodes = []
         seen = set()
@@ -467,6 +468,9 @@ class StructuredProof():
 
         all_var_slices = []
         proof_obligation_lines = ""
+        global_def_expands = []
+        if "global_def_expands" in tlaps_proof_config:
+            global_def_expands = tlaps_proof_config["global_def_expands"]
         for ind,n in enumerate(nodes):
             # if len(n.children.keys()) == 0:
                 # continue
@@ -481,6 +485,7 @@ class StructuredProof():
             proof_obligation_lines += n.to_tlaps_proof_obligation(self.actions, 
                                                                   tlaps_proof_config["action_def_expands"], 
                                                                   tlaps_proof_config["lemma_def_expands"], 
+                                                                  global_def_expands,
                                                                   assumes_name_list,
                                                                   theorem_name=f"L_{ind}")
             proof_obligation_lines += "\n"
@@ -506,9 +511,26 @@ class StructuredProof():
         # Add proof obligation lines.
         spec_lines += proof_obligation_lines
 
+        #
         # For a sanity check, add as a top level theorem the property that the conjunction of lemma nodes
         # is inductive.
-        spec_lines += "\nTHEOREM IndGlobal /\\ Next => IndGlobal'\n"
+        #
+
+        # Initiation. 
+        spec_lines += "\* Initiation." 
+        spec_lines += "\nTHEOREM Init => IndGlobal'\n"
+        init_defs = ",".join([f"{n.expr}" for ind,n in enumerate(nodes)])
+        spec_lines += "    <1> USE " + ",".join(assumes_name_list) + " DEF " + ",".join(global_def_expands) + "\n"
+        for ind,n in enumerate(nodes):
+            # Decomposed proof obligation for each oncjunction.
+            spec_lines +=  f"    <1>{ind}. Init => {n.expr} BY DEF Init, {n.expr}, IndGlobal\n"
+        spec_lines += "    <1>a. QED BY " + ",".join([f"<1>{ind}" for ind in range(len(nodes))]) + " DEF Init, IndGlobal\n"
+        spec_lines += "\n"
+
+
+        # Consecution.
+        spec_lines += "\* Consecution.\n" 
+        spec_lines += "THEOREM IndGlobal /\\ Next => IndGlobal'\n"
         spec_lines += "  BY " + ",".join([f"L_{ind}" for ind,n in enumerate(nodes)]) + " DEF Next, IndGlobal\n"
 
         spec_lines += "\n"

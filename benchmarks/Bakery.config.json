@@ -131,6 +131,9 @@
         "assumes": [
             "N \\in Nat /\\ Procs \\subseteq Nat /\\ IsFiniteSet(Procs)"
         ],
+        "global_def_expands":[
+            "\\prec"
+        ],
         "lemma_def_expands": {
             "Safety": ["H_MutualExclusion"]
         },
