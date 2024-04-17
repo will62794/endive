@@ -1,5 +1,5 @@
 ------------------------------- MODULE Bakery_IndProofs -------------------------------
-EXTENDS Bakery, FiniteSets
+EXTENDS Bakery, FiniteSets, TLAPS, FiniteSetTheorems
 
 \* Proof Graph Stats
 \* ==================
@@ -57,9 +57,11 @@ IndGlobal ==
 \* min in-degree: 0
 \* mean variable slice size: 0
 
+ASSUME A0 == N \in Nat /\ Procs \subseteq Nat /\ IsFiniteSet(Procs)
 
 \*** TypeOK
 THEOREM L_0 == TypeOK /\ TypeOK /\ Next => TypeOK'
+  <1>. USE A0
   \* (TypeOK,ncsAction)
   <1>1. TypeOK /\ TypeOK /\ ncsAction => TypeOK'
        BY DEF TypeOK,ncsAction,ncs,TypeOK
@@ -80,13 +82,13 @@ THEOREM L_0 == TypeOK /\ TypeOK /\ Next => TypeOK'
        BY DEF TypeOK,e3aAction,e3a,TypeOK
   \* (TypeOK,e3bAction)
   <1>7. TypeOK /\ TypeOK /\ e3bAction => TypeOK'
-       BY DEF TypeOK,e3bAction,e3b,TypeOK
+       BY DEF TypeOK,e3bAction,e3b,TypeOK,\prec
   \* (TypeOK,e4aAction)
   <1>8. TypeOK /\ TypeOK /\ e4aAction => TypeOK'
        BY DEF TypeOK,e4aAction,e4a,TypeOK
   \* (TypeOK,e4bAction)
   <1>9. TypeOK /\ TypeOK /\ e4bAction => TypeOK'
-       BY DEF TypeOK,e4bAction,e4b,TypeOK
+       BY DEF TypeOK,e4bAction,e4b,TypeOK,\prec
   \* (TypeOK,w1aAction)
   <1>10. TypeOK /\ TypeOK /\ w1aAction => TypeOK'
        BY DEF TypeOK,w1aAction,w1a,TypeOK
@@ -95,7 +97,7 @@ THEOREM L_0 == TypeOK /\ TypeOK /\ Next => TypeOK'
        BY DEF TypeOK,w1bAction,w1b,TypeOK
   \* (TypeOK,w2Action)
   <1>12. TypeOK /\ TypeOK /\ w2Action => TypeOK'
-       BY DEF TypeOK,w2Action,w2,TypeOK
+       BY DEF TypeOK,w2Action,w2,TypeOK,\prec
   \* (TypeOK,csAction)
   <1>13. TypeOK /\ TypeOK /\ csAction => TypeOK'
        BY DEF TypeOK,csAction,cs,TypeOK
@@ -108,6 +110,7 @@ THEOREM L_0 == TypeOK /\ TypeOK /\ Next => TypeOK'
 \* (ROOT SAFETY PROP)
 \*** Safety
 THEOREM L_1 == TypeOK /\ Inv8417_R0_0_I2 /\ Safety /\ Next => Safety'
+  <1>. USE A0
   \* (Safety,ncsAction)
   <1>1. TypeOK /\ Safety /\ ncsAction => Safety'
        BY DEF TypeOK,ncsAction,ncs,Safety,H_MutualExclusion
@@ -119,7 +122,24 @@ THEOREM L_1 == TypeOK /\ Inv8417_R0_0_I2 /\ Safety /\ Next => Safety'
        BY DEF TypeOK,e1bAction,e1b,Safety,H_MutualExclusion
   \* (Safety,e2aAction)
   <1>4. TypeOK /\ Safety /\ e2aAction => Safety'
-       BY DEF TypeOK,e2aAction,e2a,Safety,H_MutualExclusion
+    <2> SUFFICES ASSUME TypeOK,
+                        Safety,
+                        TRUE,
+                        NEW self \in Procs,
+                        pc[self] = "e2",
+                        unchecked[self] # {},
+                        NEW i \in unchecked[self],
+                        /\ unchecked' = [unchecked EXCEPT ![self] = unchecked[self] \ {i}]
+                        /\ IF num[i] > max[self]
+                            THEN /\ max' = [max EXCEPT ![self] = num[i]]
+                            ELSE /\ max' = max,
+                        pc' = [pc EXCEPT ![self] = "e2"],
+                        UNCHANGED << num, flag, nxt >>
+                 PROVE  Safety'
+      BY DEF e2a, e2aAction
+    <2> QED
+      BY DEF TypeOK,e2aAction,e2a,Safety,H_MutualExclusion
+       
   \* (Safety,e2bAction)
   <1>5. TypeOK /\ Safety /\ e2bAction => Safety'
        BY DEF TypeOK,e2bAction,e2b,Safety,H_MutualExclusion
@@ -128,22 +148,50 @@ THEOREM L_1 == TypeOK /\ Inv8417_R0_0_I2 /\ Safety /\ Next => Safety'
        BY DEF TypeOK,e3aAction,e3a,Safety,H_MutualExclusion
   \* (Safety,e3bAction)
   <1>7. TypeOK /\ Safety /\ e3bAction => Safety'
-       BY DEF TypeOK,e3bAction,e3b,Safety,H_MutualExclusion
+    <2> SUFFICES ASSUME TypeOK,
+                        Safety,
+                        TRUE,
+                        NEW self \in Procs,
+                        pc[self] = "e3",
+                        NEW i \in {j \in Nat : j > max[self]},
+                        num' = [num EXCEPT ![self] = i],
+                        pc' = [pc EXCEPT ![self] = "e4"],
+                        UNCHANGED << flag, unchecked, max, nxt >>
+                 PROVE  Safety'
+      BY DEF e3b, e3bAction
+    <2> QED
+      BY DEF TypeOK,e3bAction,e3b,Safety,\prec,H_MutualExclusion
+       
   \* (Safety,e4aAction)
   <1>8. TypeOK /\ Safety /\ e4aAction => Safety'
        BY DEF TypeOK,e4aAction,e4a,Safety,H_MutualExclusion
   \* (Safety,e4bAction)
   <1>9. TypeOK /\ Safety /\ e4bAction => Safety'
-       BY DEF TypeOK,e4bAction,e4b,Safety,H_MutualExclusion
+       BY DEF TypeOK,e4bAction,e4b,Safety,\prec,H_MutualExclusion
   \* (Safety,w1aAction)
   <1>10. TypeOK /\ Safety /\ w1aAction => Safety'
-       BY DEF TypeOK,w1aAction,w1a,Safety,H_MutualExclusion
+    <2> SUFFICES ASSUME TypeOK,
+                        Safety,
+                        TRUE,
+                        NEW self \in Procs,
+                        pc[self] = "w1",
+                        unchecked[self] # {},
+                        NEW i \in unchecked[self],
+                        nxt' = [nxt EXCEPT ![self] = i],
+                        ~ flag[nxt'[self]],
+                        pc' = [pc EXCEPT ![self] = "w2"],
+                        UNCHANGED << num, flag, unchecked, max >>
+                 PROVE  Safety'
+      BY DEF w1a, w1aAction
+    <2> QED
+      BY DEF TypeOK,w1aAction,w1a,Safety,H_MutualExclusion
+       
   \* (Safety,w1bAction)
   <1>11. TypeOK /\ Inv8417_R0_0_I2 /\ Safety /\ w1bAction => Safety'
        BY DEF TypeOK,Inv8417_R0_0_I2,w1bAction,w1b,Safety,H_MutualExclusion
   \* (Safety,w2Action)
   <1>12. TypeOK /\ Safety /\ w2Action => Safety'
-       BY DEF TypeOK,w2Action,w2,Safety,H_MutualExclusion
+       BY DEF TypeOK,w2Action,w2,Safety,\prec,H_MutualExclusion
   \* (Safety,csAction)
   <1>13. TypeOK /\ Safety /\ csAction => Safety'
        BY DEF TypeOK,csAction,cs,Safety,H_MutualExclusion
@@ -155,6 +203,7 @@ THEOREM L_1 == TypeOK /\ Inv8417_R0_0_I2 /\ Safety /\ Next => Safety'
 
 \*** Inv8417_R0_0_I2
 THEOREM L_2 == TypeOK /\ Inv4429_R1_0_I2 /\ Inv4081_R1_1_I2 /\ Inv4491_R1_1_I2 /\ Inv8417_R0_0_I2 /\ Next => Inv8417_R0_0_I2'
+  <1>. USE A0
   \* (Inv8417_R0_0_I2,ncsAction)
   <1>1. TypeOK /\ Inv8417_R0_0_I2 /\ ncsAction => Inv8417_R0_0_I2'
        BY DEF TypeOK,ncsAction,ncs,Inv8417_R0_0_I2
@@ -175,13 +224,13 @@ THEOREM L_2 == TypeOK /\ Inv4429_R1_0_I2 /\ Inv4081_R1_1_I2 /\ Inv4491_R1_1_I2 /
        BY DEF TypeOK,e3aAction,e3a,Inv8417_R0_0_I2
   \* (Inv8417_R0_0_I2,e3bAction)
   <1>7. TypeOK /\ Inv8417_R0_0_I2 /\ e3bAction => Inv8417_R0_0_I2'
-       BY DEF TypeOK,e3bAction,e3b,Inv8417_R0_0_I2
+       BY DEF TypeOK,e3bAction,e3b,Inv8417_R0_0_I2,\prec
   \* (Inv8417_R0_0_I2,e4aAction)
   <1>8. TypeOK /\ Inv8417_R0_0_I2 /\ e4aAction => Inv8417_R0_0_I2'
        BY DEF TypeOK,e4aAction,e4a,Inv8417_R0_0_I2
   \* (Inv8417_R0_0_I2,e4bAction)
   <1>9. TypeOK /\ Inv8417_R0_0_I2 /\ e4bAction => Inv8417_R0_0_I2'
-       BY DEF TypeOK,e4bAction,e4b,Inv8417_R0_0_I2
+       BY DEF TypeOK,e4bAction,e4b,Inv8417_R0_0_I2,\prec
   \* (Inv8417_R0_0_I2,w1aAction)
   <1>10. TypeOK /\ Inv8417_R0_0_I2 /\ w1aAction => Inv8417_R0_0_I2'
        BY DEF TypeOK,w1aAction,w1a,Inv8417_R0_0_I2
@@ -190,7 +239,7 @@ THEOREM L_2 == TypeOK /\ Inv4429_R1_0_I2 /\ Inv4081_R1_1_I2 /\ Inv4491_R1_1_I2 /
        BY DEF TypeOK,Inv4429_R1_0_I2,w1bAction,w1b,Inv8417_R0_0_I2
   \* (Inv8417_R0_0_I2,w2Action)
   <1>12. TypeOK /\ Inv4081_R1_1_I2 /\ Inv4491_R1_1_I2 /\ Inv8417_R0_0_I2 /\ w2Action => Inv8417_R0_0_I2'
-       BY DEF TypeOK,Inv4081_R1_1_I2,Inv4491_R1_1_I2,w2Action,w2,Inv8417_R0_0_I2
+       BY DEF TypeOK,Inv4081_R1_1_I2,Inv4491_R1_1_I2,w2Action,w2,Inv8417_R0_0_I2,\prec
   \* (Inv8417_R0_0_I2,csAction)
   <1>13. TypeOK /\ Inv8417_R0_0_I2 /\ csAction => Inv8417_R0_0_I2'
        BY DEF TypeOK,csAction,cs,Inv8417_R0_0_I2
@@ -202,6 +251,7 @@ THEOREM L_2 == TypeOK /\ Inv4429_R1_0_I2 /\ Inv4081_R1_1_I2 /\ Inv4491_R1_1_I2 /
 
 \*** Inv4429_R1_0_I2
 THEOREM L_3 == TypeOK /\ Inv4472_R2_0_I3 /\ Inv61_R2_0_I3 /\ Inv4429_R1_0_I2 /\ Next => Inv4429_R1_0_I2'
+  <1>. USE A0
   \* (Inv4429_R1_0_I2,ncsAction)
   <1>1. TypeOK /\ Inv4429_R1_0_I2 /\ ncsAction => Inv4429_R1_0_I2'
        BY DEF TypeOK,ncsAction,ncs,Inv4429_R1_0_I2
@@ -222,13 +272,13 @@ THEOREM L_3 == TypeOK /\ Inv4472_R2_0_I3 /\ Inv61_R2_0_I3 /\ Inv4429_R1_0_I2 /\ 
        BY DEF TypeOK,e3aAction,e3a,Inv4429_R1_0_I2
   \* (Inv4429_R1_0_I2,e3bAction)
   <1>7. TypeOK /\ Inv4429_R1_0_I2 /\ e3bAction => Inv4429_R1_0_I2'
-       BY DEF TypeOK,e3bAction,e3b,Inv4429_R1_0_I2
+       BY DEF TypeOK,e3bAction,e3b,Inv4429_R1_0_I2,\prec
   \* (Inv4429_R1_0_I2,e4aAction)
   <1>8. TypeOK /\ Inv4429_R1_0_I2 /\ e4aAction => Inv4429_R1_0_I2'
        BY DEF TypeOK,e4aAction,e4a,Inv4429_R1_0_I2
   \* (Inv4429_R1_0_I2,e4bAction)
   <1>9. TypeOK /\ Inv4429_R1_0_I2 /\ e4bAction => Inv4429_R1_0_I2'
-       BY DEF TypeOK,e4bAction,e4b,Inv4429_R1_0_I2
+       BY DEF TypeOK,e4bAction,e4b,Inv4429_R1_0_I2,\prec
   \* (Inv4429_R1_0_I2,w1aAction)
   <1>10. TypeOK /\ Inv4429_R1_0_I2 /\ w1aAction => Inv4429_R1_0_I2'
        BY DEF TypeOK,w1aAction,w1a,Inv4429_R1_0_I2
@@ -237,7 +287,7 @@ THEOREM L_3 == TypeOK /\ Inv4472_R2_0_I3 /\ Inv61_R2_0_I3 /\ Inv4429_R1_0_I2 /\ 
        BY DEF TypeOK,w1bAction,w1b,Inv4429_R1_0_I2
   \* (Inv4429_R1_0_I2,w2Action)
   <1>12. TypeOK /\ Inv4472_R2_0_I3 /\ Inv61_R2_0_I3 /\ Inv4429_R1_0_I2 /\ w2Action => Inv4429_R1_0_I2'
-       BY DEF TypeOK,Inv4472_R2_0_I3,Inv61_R2_0_I3,w2Action,w2,Inv4429_R1_0_I2
+       BY DEF TypeOK,Inv4472_R2_0_I3,Inv61_R2_0_I3,w2Action,w2,Inv4429_R1_0_I2,\prec
   \* (Inv4429_R1_0_I2,csAction)
   <1>13. TypeOK /\ Inv4429_R1_0_I2 /\ csAction => Inv4429_R1_0_I2'
        BY DEF TypeOK,csAction,cs,Inv4429_R1_0_I2
@@ -249,6 +299,7 @@ THEOREM L_3 == TypeOK /\ Inv4472_R2_0_I3 /\ Inv61_R2_0_I3 /\ Inv4429_R1_0_I2 /\ 
 
 \*** Inv4472_R2_0_I3
 THEOREM L_4 == TypeOK /\ Inv2373_R5_0_I2 /\ Inv61_R2_0_I3 /\ Inv4472_R2_0_I3 /\ Next => Inv4472_R2_0_I3'
+  <1>. USE A0
   \* (Inv4472_R2_0_I3,ncsAction)
   <1>1. TypeOK /\ Inv4472_R2_0_I3 /\ ncsAction => Inv4472_R2_0_I3'
        BY DEF TypeOK,ncsAction,ncs,Inv4472_R2_0_I3
@@ -269,13 +320,13 @@ THEOREM L_4 == TypeOK /\ Inv2373_R5_0_I2 /\ Inv61_R2_0_I3 /\ Inv4472_R2_0_I3 /\ 
        BY DEF TypeOK,e3aAction,e3a,Inv4472_R2_0_I3
   \* (Inv4472_R2_0_I3,e3bAction)
   <1>7. TypeOK /\ Inv4472_R2_0_I3 /\ e3bAction => Inv4472_R2_0_I3'
-       BY DEF TypeOK,e3bAction,e3b,Inv4472_R2_0_I3
+       BY DEF TypeOK,e3bAction,e3b,Inv4472_R2_0_I3,\prec
   \* (Inv4472_R2_0_I3,e4aAction)
   <1>8. TypeOK /\ Inv4472_R2_0_I3 /\ e4aAction => Inv4472_R2_0_I3'
        BY DEF TypeOK,e4aAction,e4a,Inv4472_R2_0_I3
   \* (Inv4472_R2_0_I3,e4bAction)
   <1>9. TypeOK /\ Inv4472_R2_0_I3 /\ e4bAction => Inv4472_R2_0_I3'
-       BY DEF TypeOK,e4bAction,e4b,Inv4472_R2_0_I3
+       BY DEF TypeOK,e4bAction,e4b,Inv4472_R2_0_I3,\prec
   \* (Inv4472_R2_0_I3,w1aAction)
   <1>10. TypeOK /\ Inv2373_R5_0_I2 /\ Inv4472_R2_0_I3 /\ w1aAction => Inv4472_R2_0_I3'
        BY DEF TypeOK,Inv2373_R5_0_I2,w1aAction,w1a,Inv4472_R2_0_I3
@@ -284,7 +335,7 @@ THEOREM L_4 == TypeOK /\ Inv2373_R5_0_I2 /\ Inv61_R2_0_I3 /\ Inv4472_R2_0_I3 /\ 
        BY DEF TypeOK,w1bAction,w1b,Inv4472_R2_0_I3
   \* (Inv4472_R2_0_I3,w2Action)
   <1>12. TypeOK /\ Inv61_R2_0_I3 /\ Inv4472_R2_0_I3 /\ w2Action => Inv4472_R2_0_I3'
-       BY DEF TypeOK,Inv61_R2_0_I3,w2Action,w2,Inv4472_R2_0_I3
+       BY DEF TypeOK,Inv61_R2_0_I3,w2Action,w2,Inv4472_R2_0_I3,\prec
   \* (Inv4472_R2_0_I3,csAction)
   <1>13. TypeOK /\ Inv4472_R2_0_I3 /\ csAction => Inv4472_R2_0_I3'
        BY DEF TypeOK,csAction,cs,Inv4472_R2_0_I3
@@ -296,6 +347,7 @@ THEOREM L_4 == TypeOK /\ Inv2373_R5_0_I2 /\ Inv61_R2_0_I3 /\ Inv4472_R2_0_I3 /\ 
 
 \*** Inv2373_R5_0_I2
 THEOREM L_5 == TypeOK /\ Inv5016_R8_0_I3 /\ Inv4472_R2_0_I3 /\ Inv61_R2_0_I3 /\ Inv2373_R5_0_I2 /\ Next => Inv2373_R5_0_I2'
+  <1>. USE A0
   \* (Inv2373_R5_0_I2,ncsAction)
   <1>1. TypeOK /\ Inv2373_R5_0_I2 /\ ncsAction => Inv2373_R5_0_I2'
        BY DEF TypeOK,ncsAction,ncs,Inv2373_R5_0_I2
@@ -316,13 +368,13 @@ THEOREM L_5 == TypeOK /\ Inv5016_R8_0_I3 /\ Inv4472_R2_0_I3 /\ Inv61_R2_0_I3 /\ 
        BY DEF TypeOK,e3aAction,e3a,Inv2373_R5_0_I2
   \* (Inv2373_R5_0_I2,e3bAction)
   <1>7. TypeOK /\ Inv2373_R5_0_I2 /\ e3bAction => Inv2373_R5_0_I2'
-       BY DEF TypeOK,e3bAction,e3b,Inv2373_R5_0_I2
+       BY DEF TypeOK,e3bAction,e3b,Inv2373_R5_0_I2,\prec
   \* (Inv2373_R5_0_I2,e4aAction)
   <1>8. TypeOK /\ Inv2373_R5_0_I2 /\ e4aAction => Inv2373_R5_0_I2'
        BY DEF TypeOK,e4aAction,e4a,Inv2373_R5_0_I2
   \* (Inv2373_R5_0_I2,e4bAction)
   <1>9. TypeOK /\ Inv5016_R8_0_I3 /\ Inv2373_R5_0_I2 /\ e4bAction => Inv2373_R5_0_I2'
-       BY DEF TypeOK,Inv5016_R8_0_I3,e4bAction,e4b,Inv2373_R5_0_I2
+       BY DEF TypeOK,Inv5016_R8_0_I3,e4bAction,e4b,Inv2373_R5_0_I2,\prec
   \* (Inv2373_R5_0_I2,w1aAction)
   <1>10. TypeOK /\ Inv2373_R5_0_I2 /\ w1aAction => Inv2373_R5_0_I2'
        BY DEF TypeOK,w1aAction,w1a,Inv2373_R5_0_I2
@@ -331,7 +383,7 @@ THEOREM L_5 == TypeOK /\ Inv5016_R8_0_I3 /\ Inv4472_R2_0_I3 /\ Inv61_R2_0_I3 /\ 
        BY DEF TypeOK,w1bAction,w1b,Inv2373_R5_0_I2
   \* (Inv2373_R5_0_I2,w2Action)
   <1>12. TypeOK /\ Inv4472_R2_0_I3 /\ Inv61_R2_0_I3 /\ Inv2373_R5_0_I2 /\ w2Action => Inv2373_R5_0_I2'
-       BY DEF TypeOK,Inv4472_R2_0_I3,Inv61_R2_0_I3,w2Action,w2,Inv2373_R5_0_I2
+       BY DEF TypeOK,Inv4472_R2_0_I3,Inv61_R2_0_I3,w2Action,w2,Inv2373_R5_0_I2,\prec
   \* (Inv2373_R5_0_I2,csAction)
   <1>13. TypeOK /\ Inv2373_R5_0_I2 /\ csAction => Inv2373_R5_0_I2'
        BY DEF TypeOK,csAction,cs,Inv2373_R5_0_I2
@@ -343,6 +395,7 @@ THEOREM L_5 == TypeOK /\ Inv5016_R8_0_I3 /\ Inv4472_R2_0_I3 /\ Inv61_R2_0_I3 /\ 
 
 \*** Inv5016_R8_0_I3
 THEOREM L_6 == TypeOK /\ Inv3258_R10_0_I3 /\ Inv61_R2_0_I3 /\ Inv5016_R8_0_I3 /\ Next => Inv5016_R8_0_I3'
+  <1>. USE A0
   \* (Inv5016_R8_0_I3,ncsAction)
   <1>1. TypeOK /\ Inv5016_R8_0_I3 /\ ncsAction => Inv5016_R8_0_I3'
        BY DEF TypeOK,ncsAction,ncs,Inv5016_R8_0_I3
@@ -363,13 +416,13 @@ THEOREM L_6 == TypeOK /\ Inv3258_R10_0_I3 /\ Inv61_R2_0_I3 /\ Inv5016_R8_0_I3 /\
        BY DEF TypeOK,e3aAction,e3a,Inv5016_R8_0_I3
   \* (Inv5016_R8_0_I3,e3bAction)
   <1>7. TypeOK /\ Inv3258_R10_0_I3 /\ Inv5016_R8_0_I3 /\ e3bAction => Inv5016_R8_0_I3'
-       BY DEF TypeOK,Inv3258_R10_0_I3,e3bAction,e3b,Inv5016_R8_0_I3
+       BY DEF TypeOK,Inv3258_R10_0_I3,e3bAction,e3b,Inv5016_R8_0_I3,\prec
   \* (Inv5016_R8_0_I3,e4aAction)
   <1>8. TypeOK /\ Inv5016_R8_0_I3 /\ e4aAction => Inv5016_R8_0_I3'
        BY DEF TypeOK,e4aAction,e4a,Inv5016_R8_0_I3
   \* (Inv5016_R8_0_I3,e4bAction)
   <1>9. TypeOK /\ Inv5016_R8_0_I3 /\ e4bAction => Inv5016_R8_0_I3'
-       BY DEF TypeOK,e4bAction,e4b,Inv5016_R8_0_I3
+       BY DEF TypeOK,e4bAction,e4b,Inv5016_R8_0_I3,\prec
   \* (Inv5016_R8_0_I3,w1aAction)
   <1>10. TypeOK /\ Inv5016_R8_0_I3 /\ w1aAction => Inv5016_R8_0_I3'
        BY DEF TypeOK,w1aAction,w1a,Inv5016_R8_0_I3
@@ -378,7 +431,7 @@ THEOREM L_6 == TypeOK /\ Inv3258_R10_0_I3 /\ Inv61_R2_0_I3 /\ Inv5016_R8_0_I3 /\
        BY DEF TypeOK,w1bAction,w1b,Inv5016_R8_0_I3
   \* (Inv5016_R8_0_I3,w2Action)
   <1>12. TypeOK /\ Inv61_R2_0_I3 /\ Inv5016_R8_0_I3 /\ w2Action => Inv5016_R8_0_I3'
-       BY DEF TypeOK,Inv61_R2_0_I3,w2Action,w2,Inv5016_R8_0_I3
+       BY DEF TypeOK,Inv61_R2_0_I3,w2Action,w2,Inv5016_R8_0_I3,\prec
   \* (Inv5016_R8_0_I3,csAction)
   <1>13. TypeOK /\ Inv5016_R8_0_I3 /\ csAction => Inv5016_R8_0_I3'
        BY DEF TypeOK,csAction,cs,Inv5016_R8_0_I3
@@ -390,6 +443,7 @@ THEOREM L_6 == TypeOK /\ Inv3258_R10_0_I3 /\ Inv61_R2_0_I3 /\ Inv5016_R8_0_I3 /\
 
 \*** Inv3258_R10_0_I3
 THEOREM L_7 == TypeOK /\ Inv1_R0_0_I0 /\ Inv3811_R12_1_I2 /\ Inv3811_R12_1_I2 /\ Inv3258_R10_0_I3 /\ Next => Inv3258_R10_0_I3'
+  <1>. USE A0
   \* (Inv3258_R10_0_I3,ncsAction)
   <1>1. TypeOK /\ Inv3258_R10_0_I3 /\ ncsAction => Inv3258_R10_0_I3'
        BY DEF TypeOK,ncsAction,ncs,Inv3258_R10_0_I3
@@ -410,13 +464,13 @@ THEOREM L_7 == TypeOK /\ Inv1_R0_0_I0 /\ Inv3811_R12_1_I2 /\ Inv3811_R12_1_I2 /\
        BY DEF TypeOK,e3aAction,e3a,Inv3258_R10_0_I3
   \* (Inv3258_R10_0_I3,e3bAction)
   <1>7. TypeOK /\ Inv3258_R10_0_I3 /\ e3bAction => Inv3258_R10_0_I3'
-       BY DEF TypeOK,e3bAction,e3b,Inv3258_R10_0_I3
+       BY DEF TypeOK,e3bAction,e3b,Inv3258_R10_0_I3,\prec
   \* (Inv3258_R10_0_I3,e4aAction)
   <1>8. TypeOK /\ Inv3258_R10_0_I3 /\ e4aAction => Inv3258_R10_0_I3'
        BY DEF TypeOK,e4aAction,e4a,Inv3258_R10_0_I3
   \* (Inv3258_R10_0_I3,e4bAction)
   <1>9. TypeOK /\ Inv3258_R10_0_I3 /\ e4bAction => Inv3258_R10_0_I3'
-       BY DEF TypeOK,e4bAction,e4b,Inv3258_R10_0_I3
+       BY DEF TypeOK,e4bAction,e4b,Inv3258_R10_0_I3,\prec
   \* (Inv3258_R10_0_I3,w1aAction)
   <1>10. TypeOK /\ Inv3258_R10_0_I3 /\ w1aAction => Inv3258_R10_0_I3'
        BY DEF TypeOK,w1aAction,w1a,Inv3258_R10_0_I3
@@ -425,7 +479,7 @@ THEOREM L_7 == TypeOK /\ Inv1_R0_0_I0 /\ Inv3811_R12_1_I2 /\ Inv3811_R12_1_I2 /\
        BY DEF TypeOK,w1bAction,w1b,Inv3258_R10_0_I3
   \* (Inv3258_R10_0_I3,w2Action)
   <1>12. TypeOK /\ Inv3811_R12_1_I2 /\ Inv3811_R12_1_I2 /\ Inv3258_R10_0_I3 /\ w2Action => Inv3258_R10_0_I3'
-       BY DEF TypeOK,Inv3811_R12_1_I2,Inv3811_R12_1_I2,w2Action,w2,Inv3258_R10_0_I3
+       BY DEF TypeOK,Inv3811_R12_1_I2,Inv3811_R12_1_I2,w2Action,w2,Inv3258_R10_0_I3,\prec
   \* (Inv3258_R10_0_I3,csAction)
   <1>13. TypeOK /\ Inv3258_R10_0_I3 /\ csAction => Inv3258_R10_0_I3'
        BY DEF TypeOK,csAction,cs,Inv3258_R10_0_I3
@@ -437,6 +491,7 @@ THEOREM L_7 == TypeOK /\ Inv1_R0_0_I0 /\ Inv3811_R12_1_I2 /\ Inv3811_R12_1_I2 /\
 
 \*** Inv1_R0_0_I0
 THEOREM L_8 == TypeOK /\ Inv2073_R1_0_I4 /\ Inv4045_R14_0_I4 /\ Inv1_R0_0_I0 /\ Next => Inv1_R0_0_I0'
+  <1>. USE A0
   \* (Inv1_R0_0_I0,ncsAction)
   <1>1. TypeOK /\ Inv1_R0_0_I0 /\ ncsAction => Inv1_R0_0_I0'
        BY DEF TypeOK,ncsAction,ncs,Inv1_R0_0_I0
@@ -457,13 +512,13 @@ THEOREM L_8 == TypeOK /\ Inv2073_R1_0_I4 /\ Inv4045_R14_0_I4 /\ Inv1_R0_0_I0 /\ 
        BY DEF TypeOK,e3aAction,e3a,Inv1_R0_0_I0
   \* (Inv1_R0_0_I0,e3bAction)
   <1>7. TypeOK /\ Inv1_R0_0_I0 /\ e3bAction => Inv1_R0_0_I0'
-       BY DEF TypeOK,e3bAction,e3b,Inv1_R0_0_I0
+       BY DEF TypeOK,e3bAction,e3b,Inv1_R0_0_I0,\prec
   \* (Inv1_R0_0_I0,e4aAction)
   <1>8. TypeOK /\ Inv1_R0_0_I0 /\ e4aAction => Inv1_R0_0_I0'
        BY DEF TypeOK,e4aAction,e4a,Inv1_R0_0_I0
   \* (Inv1_R0_0_I0,e4bAction)
   <1>9. TypeOK /\ Inv1_R0_0_I0 /\ e4bAction => Inv1_R0_0_I0'
-       BY DEF TypeOK,e4bAction,e4b,Inv1_R0_0_I0
+       BY DEF TypeOK,e4bAction,e4b,Inv1_R0_0_I0,\prec
   \* (Inv1_R0_0_I0,w1aAction)
   <1>10. TypeOK /\ Inv1_R0_0_I0 /\ w1aAction => Inv1_R0_0_I0'
        BY DEF TypeOK,w1aAction,w1a,Inv1_R0_0_I0
@@ -472,7 +527,7 @@ THEOREM L_8 == TypeOK /\ Inv2073_R1_0_I4 /\ Inv4045_R14_0_I4 /\ Inv1_R0_0_I0 /\ 
        BY DEF TypeOK,w1bAction,w1b,Inv1_R0_0_I0
   \* (Inv1_R0_0_I0,w2Action)
   <1>12. TypeOK /\ Inv4045_R14_0_I4 /\ Inv1_R0_0_I0 /\ w2Action => Inv1_R0_0_I0'
-       BY DEF TypeOK,Inv4045_R14_0_I4,w2Action,w2,Inv1_R0_0_I0
+       BY DEF TypeOK,Inv4045_R14_0_I4,w2Action,w2,Inv1_R0_0_I0,\prec
   \* (Inv1_R0_0_I0,csAction)
   <1>13. TypeOK /\ Inv1_R0_0_I0 /\ csAction => Inv1_R0_0_I0'
        BY DEF TypeOK,csAction,cs,Inv1_R0_0_I0
@@ -484,6 +539,7 @@ THEOREM L_8 == TypeOK /\ Inv2073_R1_0_I4 /\ Inv4045_R14_0_I4 /\ Inv1_R0_0_I0 /\ 
 
 \*** Inv2073_R1_0_I4
 THEOREM L_9 == TypeOK /\ Inv4045_R14_0_I4 /\ Inv2073_R1_0_I4 /\ Next => Inv2073_R1_0_I4'
+  <1>. USE A0
   \* (Inv2073_R1_0_I4,ncsAction)
   <1>1. TypeOK /\ Inv2073_R1_0_I4 /\ ncsAction => Inv2073_R1_0_I4'
        BY DEF TypeOK,ncsAction,ncs,Inv2073_R1_0_I4
@@ -504,13 +560,13 @@ THEOREM L_9 == TypeOK /\ Inv4045_R14_0_I4 /\ Inv2073_R1_0_I4 /\ Next => Inv2073_
        BY DEF TypeOK,e3aAction,e3a,Inv2073_R1_0_I4
   \* (Inv2073_R1_0_I4,e3bAction)
   <1>7. TypeOK /\ Inv2073_R1_0_I4 /\ e3bAction => Inv2073_R1_0_I4'
-       BY DEF TypeOK,e3bAction,e3b,Inv2073_R1_0_I4
+       BY DEF TypeOK,e3bAction,e3b,Inv2073_R1_0_I4,\prec
   \* (Inv2073_R1_0_I4,e4aAction)
   <1>8. TypeOK /\ Inv2073_R1_0_I4 /\ e4aAction => Inv2073_R1_0_I4'
        BY DEF TypeOK,e4aAction,e4a,Inv2073_R1_0_I4
   \* (Inv2073_R1_0_I4,e4bAction)
   <1>9. TypeOK /\ Inv2073_R1_0_I4 /\ e4bAction => Inv2073_R1_0_I4'
-       BY DEF TypeOK,e4bAction,e4b,Inv2073_R1_0_I4
+       BY DEF TypeOK,e4bAction,e4b,Inv2073_R1_0_I4,\prec
   \* (Inv2073_R1_0_I4,w1aAction)
   <1>10. TypeOK /\ Inv2073_R1_0_I4 /\ w1aAction => Inv2073_R1_0_I4'
        BY DEF TypeOK,w1aAction,w1a,Inv2073_R1_0_I4
@@ -519,7 +575,7 @@ THEOREM L_9 == TypeOK /\ Inv4045_R14_0_I4 /\ Inv2073_R1_0_I4 /\ Next => Inv2073_
        BY DEF TypeOK,w1bAction,w1b,Inv2073_R1_0_I4
   \* (Inv2073_R1_0_I4,w2Action)
   <1>12. TypeOK /\ Inv4045_R14_0_I4 /\ Inv2073_R1_0_I4 /\ w2Action => Inv2073_R1_0_I4'
-       BY DEF TypeOK,Inv4045_R14_0_I4,w2Action,w2,Inv2073_R1_0_I4
+       BY DEF TypeOK,Inv4045_R14_0_I4,w2Action,w2,Inv2073_R1_0_I4,\prec
   \* (Inv2073_R1_0_I4,csAction)
   <1>13. TypeOK /\ Inv2073_R1_0_I4 /\ csAction => Inv2073_R1_0_I4'
        BY DEF TypeOK,csAction,cs,Inv2073_R1_0_I4
@@ -531,6 +587,7 @@ THEOREM L_9 == TypeOK /\ Inv4045_R14_0_I4 /\ Inv2073_R1_0_I4 /\ Next => Inv2073_
 
 \*** Inv4045_R14_0_I4
 THEOREM L_10 == TypeOK /\ Inv11_R15_0_I1 /\ Inv4045_R14_0_I4 /\ Next => Inv4045_R14_0_I4'
+  <1>. USE A0
   \* (Inv4045_R14_0_I4,ncsAction)
   <1>1. TypeOK /\ Inv4045_R14_0_I4 /\ ncsAction => Inv4045_R14_0_I4'
        BY DEF TypeOK,ncsAction,ncs,Inv4045_R14_0_I4
@@ -542,7 +599,33 @@ THEOREM L_10 == TypeOK /\ Inv11_R15_0_I1 /\ Inv4045_R14_0_I4 /\ Next => Inv4045_
        BY DEF TypeOK,e1bAction,e1b,Inv4045_R14_0_I4
   \* (Inv4045_R14_0_I4,e2aAction)
   <1>4. TypeOK /\ Inv4045_R14_0_I4 /\ e2aAction => Inv4045_R14_0_I4'
-       BY DEF TypeOK,e2aAction,e2a,Inv4045_R14_0_I4
+    <2> SUFFICES ASSUME TypeOK,
+                        Inv4045_R14_0_I4,
+                        TRUE,
+                        NEW self \in Procs,
+                        pc[self] = "e2",
+                        unchecked[self] # {},
+                        NEW i \in unchecked[self],
+                        /\ unchecked' = [unchecked EXCEPT ![self] = unchecked[self] \ {i}]
+                        /\ IF num[i] > max[self]
+                            THEN /\ max' = [max EXCEPT ![self] = num[i]]
+                            ELSE /\ max' = max,
+                        pc' = [pc EXCEPT ![self] = "e2"],
+                        UNCHANGED << num, flag, nxt >>
+                 PROVE  Inv4045_R14_0_I4'
+      BY DEF e2a, e2aAction
+    <2> QED
+      <3> SUFFICES ASSUME NEW VARI \in Procs',
+                          NEW VARJ \in Procs'
+                   PROVE  ((VARJ \in unchecked[nxt[VARJ]]) \/ ((max[nxt[VARJ]] >= num[VARJ]) \/ ((pc[VARI] = "e3")) \/ (~((pc[nxt[VARJ]] = "e2"))) \/ ((pc[VARJ] = "ncs")) \/ (~(pc[VARJ] = "w2"))))'
+        BY DEF Inv4045_R14_0_I4
+        
+      <3> QED
+        <4> CASE num[i] > max[self] BY FS_Singleton,FS_Difference, FS_Subset DEF TypeOK,e2aAction,e2a,Inv4045_R14_0_I4
+        <4> CASE num[i] <= max[self]  BY FS_Singleton,FS_Difference, FS_Subset DEF TypeOK,e2aAction,e2a,Inv4045_R14_0_I4
+        <4>3. QED BY FS_Singleton,FS_Difference, FS_Subset DEF TypeOK,e2aAction,e2a,Inv4045_R14_0_I4
+      
+       
   \* (Inv4045_R14_0_I4,e2bAction)
   <1>5. TypeOK /\ Inv4045_R14_0_I4 /\ e2bAction => Inv4045_R14_0_I4'
        BY DEF TypeOK,e2bAction,e2b,Inv4045_R14_0_I4
@@ -551,13 +634,13 @@ THEOREM L_10 == TypeOK /\ Inv11_R15_0_I1 /\ Inv4045_R14_0_I4 /\ Next => Inv4045_
        BY DEF TypeOK,e3aAction,e3a,Inv4045_R14_0_I4
   \* (Inv4045_R14_0_I4,e3bAction)
   <1>7. TypeOK /\ Inv4045_R14_0_I4 /\ e3bAction => Inv4045_R14_0_I4'
-       BY DEF TypeOK,e3bAction,e3b,Inv4045_R14_0_I4
+       BY DEF TypeOK,e3bAction,e3b,Inv4045_R14_0_I4,\prec
   \* (Inv4045_R14_0_I4,e4aAction)
   <1>8. TypeOK /\ Inv4045_R14_0_I4 /\ e4aAction => Inv4045_R14_0_I4'
        BY DEF TypeOK,e4aAction,e4a,Inv4045_R14_0_I4
   \* (Inv4045_R14_0_I4,e4bAction)
   <1>9. TypeOK /\ Inv4045_R14_0_I4 /\ e4bAction => Inv4045_R14_0_I4'
-       BY DEF TypeOK,e4bAction,e4b,Inv4045_R14_0_I4
+       BY DEF TypeOK,e4bAction,e4b,Inv4045_R14_0_I4,\prec
   \* (Inv4045_R14_0_I4,w1aAction)
   <1>10. TypeOK /\ Inv11_R15_0_I1 /\ Inv4045_R14_0_I4 /\ w1aAction => Inv4045_R14_0_I4'
        BY DEF TypeOK,Inv11_R15_0_I1,w1aAction,w1a,Inv4045_R14_0_I4
@@ -566,18 +649,43 @@ THEOREM L_10 == TypeOK /\ Inv11_R15_0_I1 /\ Inv4045_R14_0_I4 /\ Next => Inv4045_
        BY DEF TypeOK,w1bAction,w1b,Inv4045_R14_0_I4
   \* (Inv4045_R14_0_I4,w2Action)
   <1>12. TypeOK /\ Inv4045_R14_0_I4 /\ w2Action => Inv4045_R14_0_I4'
-       BY DEF TypeOK,w2Action,w2,Inv4045_R14_0_I4
+       BY DEF TypeOK,w2Action,w2,Inv4045_R14_0_I4,\prec
   \* (Inv4045_R14_0_I4,csAction)
   <1>13. TypeOK /\ Inv4045_R14_0_I4 /\ csAction => Inv4045_R14_0_I4'
        BY DEF TypeOK,csAction,cs,Inv4045_R14_0_I4
   \* (Inv4045_R14_0_I4,exitAction)
   <1>14. TypeOK /\ Inv4045_R14_0_I4 /\ exitAction => Inv4045_R14_0_I4'
-       BY DEF TypeOK,exitAction,exit,Inv4045_R14_0_I4
+    <2> SUFFICES ASSUME TypeOK,
+                        Inv4045_R14_0_I4,
+                        TRUE,
+                        NEW self \in Procs,
+                        pc[self] = "exit",
+                        UNCHANGED << flag, unchecked, max, nxt >>,
+                        NEW VARI \in Procs',
+                        NEW VARJ \in Procs',
+                        \/ /\ \E k \in Nat:
+                                num' = [num EXCEPT ![self] = k]
+                           /\ pc' = [pc EXCEPT ![self] = "exit"]
+                        \/ /\ num' = [num EXCEPT ![self] = 0]
+                           /\ pc' = [pc EXCEPT ![self] = "ncs"]
+                 PROVE  ((VARJ \in unchecked[nxt[VARJ]]) \/ ((max[nxt[VARJ]] >= num[VARJ]) \/ ((pc[VARI] = "e3")) \/ (~((pc[nxt[VARJ]] = "e2"))) \/ ((pc[VARJ] = "ncs")) \/ (~(pc[VARJ] = "w2"))))'
+      BY DEF Inv4045_R14_0_I4, exit, exitAction
+    <2>1. CASE /\ \E k \in Nat:
+                    num' = [num EXCEPT ![self] = k]
+               /\ pc' = [pc EXCEPT ![self] = "exit"]
+      BY <2>1 DEF TypeOK,exitAction,exit,Inv4045_R14_0_I4
+    <2>2. CASE /\ num' = [num EXCEPT ![self] = 0]
+               /\ pc' = [pc EXCEPT ![self] = "ncs"]
+      BY <2>2 DEF TypeOK,exitAction,exit,Inv4045_R14_0_I4
+    <2>3. QED
+      BY <2>1, <2>2
+       
 <1>15. QED BY <1>1,<1>2,<1>3,<1>4,<1>5,<1>6,<1>7,<1>8,<1>9,<1>10,<1>11,<1>12,<1>13,<1>14 DEF Next
 
 
 \*** Inv11_R15_0_I1
 THEOREM L_11 == TypeOK /\ Inv11_R15_0_I1 /\ Next => Inv11_R15_0_I1'
+  <1>. USE A0
   \* (Inv11_R15_0_I1,ncsAction)
   <1>1. TypeOK /\ Inv11_R15_0_I1 /\ ncsAction => Inv11_R15_0_I1'
        BY DEF TypeOK,ncsAction,ncs,Inv11_R15_0_I1
@@ -598,13 +706,13 @@ THEOREM L_11 == TypeOK /\ Inv11_R15_0_I1 /\ Next => Inv11_R15_0_I1'
        BY DEF TypeOK,e3aAction,e3a,Inv11_R15_0_I1
   \* (Inv11_R15_0_I1,e3bAction)
   <1>7. TypeOK /\ Inv11_R15_0_I1 /\ e3bAction => Inv11_R15_0_I1'
-       BY DEF TypeOK,e3bAction,e3b,Inv11_R15_0_I1
+       BY DEF TypeOK,e3bAction,e3b,Inv11_R15_0_I1,\prec
   \* (Inv11_R15_0_I1,e4aAction)
   <1>8. TypeOK /\ Inv11_R15_0_I1 /\ e4aAction => Inv11_R15_0_I1'
        BY DEF TypeOK,e4aAction,e4a,Inv11_R15_0_I1
   \* (Inv11_R15_0_I1,e4bAction)
   <1>9. TypeOK /\ Inv11_R15_0_I1 /\ e4bAction => Inv11_R15_0_I1'
-       BY DEF TypeOK,e4bAction,e4b,Inv11_R15_0_I1
+       BY DEF TypeOK,e4bAction,e4b,Inv11_R15_0_I1,\prec
   \* (Inv11_R15_0_I1,w1aAction)
   <1>10. TypeOK /\ Inv11_R15_0_I1 /\ w1aAction => Inv11_R15_0_I1'
        BY DEF TypeOK,w1aAction,w1a,Inv11_R15_0_I1
@@ -613,7 +721,7 @@ THEOREM L_11 == TypeOK /\ Inv11_R15_0_I1 /\ Next => Inv11_R15_0_I1'
        BY DEF TypeOK,w1bAction,w1b,Inv11_R15_0_I1
   \* (Inv11_R15_0_I1,w2Action)
   <1>12. TypeOK /\ Inv11_R15_0_I1 /\ w2Action => Inv11_R15_0_I1'
-       BY DEF TypeOK,w2Action,w2,Inv11_R15_0_I1
+       BY DEF TypeOK,w2Action,w2,Inv11_R15_0_I1,\prec
   \* (Inv11_R15_0_I1,csAction)
   <1>13. TypeOK /\ Inv11_R15_0_I1 /\ csAction => Inv11_R15_0_I1'
        BY DEF TypeOK,csAction,cs,Inv11_R15_0_I1
@@ -625,6 +733,7 @@ THEOREM L_11 == TypeOK /\ Inv11_R15_0_I1 /\ Next => Inv11_R15_0_I1'
 
 \*** Inv3811_R12_1_I2
 THEOREM L_12 == TypeOK /\ Inv4045_R14_0_I4 /\ Inv36_R14_1_I1 /\ Inv3811_R12_1_I2 /\ Next => Inv3811_R12_1_I2'
+  <1>. USE A0
   \* (Inv3811_R12_1_I2,ncsAction)
   <1>1. TypeOK /\ Inv3811_R12_1_I2 /\ ncsAction => Inv3811_R12_1_I2'
        BY DEF TypeOK,ncsAction,ncs,Inv3811_R12_1_I2
@@ -636,7 +745,25 @@ THEOREM L_12 == TypeOK /\ Inv4045_R14_0_I4 /\ Inv36_R14_1_I1 /\ Inv3811_R12_1_I2
        BY DEF TypeOK,e1bAction,e1b,Inv3811_R12_1_I2
   \* (Inv3811_R12_1_I2,e2aAction)
   <1>4. TypeOK /\ Inv3811_R12_1_I2 /\ e2aAction => Inv3811_R12_1_I2'
-       BY DEF TypeOK,e2aAction,e2a,Inv3811_R12_1_I2
+    <2> SUFFICES ASSUME TypeOK,
+                        Inv3811_R12_1_I2,
+                        TRUE,
+                        NEW self \in Procs,
+                        pc[self] = "e2",
+                        unchecked[self] # {},
+                        NEW i \in unchecked[self],
+                        /\ unchecked' = [unchecked EXCEPT ![self] = unchecked[self] \ {i}]
+                        /\ IF num[i] > max[self]
+                            THEN /\ max' = [max EXCEPT ![self] = num[i]]
+                            ELSE /\ max' = max,
+                        pc' = [pc EXCEPT ![self] = "e2"],
+                        UNCHANGED << num, flag, nxt >>,
+                        NEW VARI \in Procs'
+                 PROVE  ((max[nxt[VARI]] >= num[VARI]) \/ (~((pc[nxt[VARI]] = "e3"))) \/ (~(pc[VARI] = "w2")))'
+      BY DEF Inv3811_R12_1_I2, e2a, e2aAction
+    <2> QED
+      BY DEF TypeOK,e2aAction,e2a,Inv3811_R12_1_I2
+       
   \* (Inv3811_R12_1_I2,e2bAction)
   <1>5. TypeOK /\ Inv4045_R14_0_I4 /\ Inv3811_R12_1_I2 /\ e2bAction => Inv3811_R12_1_I2'
        BY DEF TypeOK,Inv4045_R14_0_I4,e2bAction,e2b,Inv3811_R12_1_I2
@@ -645,13 +772,13 @@ THEOREM L_12 == TypeOK /\ Inv4045_R14_0_I4 /\ Inv36_R14_1_I1 /\ Inv3811_R12_1_I2
        BY DEF TypeOK,e3aAction,e3a,Inv3811_R12_1_I2
   \* (Inv3811_R12_1_I2,e3bAction)
   <1>7. TypeOK /\ Inv3811_R12_1_I2 /\ e3bAction => Inv3811_R12_1_I2'
-       BY DEF TypeOK,e3bAction,e3b,Inv3811_R12_1_I2
+       BY DEF TypeOK,e3bAction,e3b,Inv3811_R12_1_I2,\prec
   \* (Inv3811_R12_1_I2,e4aAction)
   <1>8. TypeOK /\ Inv3811_R12_1_I2 /\ e4aAction => Inv3811_R12_1_I2'
        BY DEF TypeOK,e4aAction,e4a,Inv3811_R12_1_I2
   \* (Inv3811_R12_1_I2,e4bAction)
   <1>9. TypeOK /\ Inv3811_R12_1_I2 /\ e4bAction => Inv3811_R12_1_I2'
-       BY DEF TypeOK,e4bAction,e4b,Inv3811_R12_1_I2
+       BY DEF TypeOK,e4bAction,e4b,Inv3811_R12_1_I2,\prec
   \* (Inv3811_R12_1_I2,w1aAction)
   <1>10. TypeOK /\ Inv36_R14_1_I1 /\ Inv3811_R12_1_I2 /\ w1aAction => Inv3811_R12_1_I2'
        BY DEF TypeOK,Inv36_R14_1_I1,w1aAction,w1a,Inv3811_R12_1_I2
@@ -660,7 +787,7 @@ THEOREM L_12 == TypeOK /\ Inv4045_R14_0_I4 /\ Inv36_R14_1_I1 /\ Inv3811_R12_1_I2
        BY DEF TypeOK,w1bAction,w1b,Inv3811_R12_1_I2
   \* (Inv3811_R12_1_I2,w2Action)
   <1>12. TypeOK /\ Inv3811_R12_1_I2 /\ w2Action => Inv3811_R12_1_I2'
-       BY DEF TypeOK,w2Action,w2,Inv3811_R12_1_I2
+       BY DEF TypeOK,w2Action,w2,Inv3811_R12_1_I2,\prec
   \* (Inv3811_R12_1_I2,csAction)
   <1>13. TypeOK /\ Inv3811_R12_1_I2 /\ csAction => Inv3811_R12_1_I2'
        BY DEF TypeOK,csAction,cs,Inv3811_R12_1_I2
@@ -672,6 +799,7 @@ THEOREM L_12 == TypeOK /\ Inv4045_R14_0_I4 /\ Inv36_R14_1_I1 /\ Inv3811_R12_1_I2
 
 \*** Inv36_R14_1_I1
 THEOREM L_13 == TypeOK /\ Inv11_R15_0_I1 /\ Inv36_R14_1_I1 /\ Next => Inv36_R14_1_I1'
+  <1>. USE A0
   \* (Inv36_R14_1_I1,ncsAction)
   <1>1. TypeOK /\ Inv36_R14_1_I1 /\ ncsAction => Inv36_R14_1_I1'
        BY DEF TypeOK,ncsAction,ncs,Inv36_R14_1_I1
@@ -692,13 +820,13 @@ THEOREM L_13 == TypeOK /\ Inv11_R15_0_I1 /\ Inv36_R14_1_I1 /\ Next => Inv36_R14_
        BY DEF TypeOK,e3aAction,e3a,Inv36_R14_1_I1
   \* (Inv36_R14_1_I1,e3bAction)
   <1>7. TypeOK /\ Inv36_R14_1_I1 /\ e3bAction => Inv36_R14_1_I1'
-       BY DEF TypeOK,e3bAction,e3b,Inv36_R14_1_I1
+       BY DEF TypeOK,e3bAction,e3b,Inv36_R14_1_I1,\prec
   \* (Inv36_R14_1_I1,e4aAction)
   <1>8. TypeOK /\ Inv36_R14_1_I1 /\ e4aAction => Inv36_R14_1_I1'
        BY DEF TypeOK,e4aAction,e4a,Inv36_R14_1_I1
   \* (Inv36_R14_1_I1,e4bAction)
   <1>9. TypeOK /\ Inv36_R14_1_I1 /\ e4bAction => Inv36_R14_1_I1'
-       BY DEF TypeOK,e4bAction,e4b,Inv36_R14_1_I1
+       BY DEF TypeOK,e4bAction,e4b,Inv36_R14_1_I1,\prec
   \* (Inv36_R14_1_I1,w1aAction)
   <1>10. TypeOK /\ Inv36_R14_1_I1 /\ w1aAction => Inv36_R14_1_I1'
        BY DEF TypeOK,w1aAction,w1a,Inv36_R14_1_I1
@@ -707,7 +835,7 @@ THEOREM L_13 == TypeOK /\ Inv11_R15_0_I1 /\ Inv36_R14_1_I1 /\ Next => Inv36_R14_
        BY DEF TypeOK,w1bAction,w1b,Inv36_R14_1_I1
   \* (Inv36_R14_1_I1,w2Action)
   <1>12. TypeOK /\ Inv36_R14_1_I1 /\ w2Action => Inv36_R14_1_I1'
-       BY DEF TypeOK,w2Action,w2,Inv36_R14_1_I1
+       BY DEF TypeOK,w2Action,w2,Inv36_R14_1_I1,\prec
   \* (Inv36_R14_1_I1,csAction)
   <1>13. TypeOK /\ Inv36_R14_1_I1 /\ csAction => Inv36_R14_1_I1'
        BY DEF TypeOK,csAction,cs,Inv36_R14_1_I1
@@ -719,6 +847,7 @@ THEOREM L_13 == TypeOK /\ Inv11_R15_0_I1 /\ Inv36_R14_1_I1 /\ Next => Inv36_R14_
 
 \*** Inv61_R2_0_I3
 THEOREM L_14 == TypeOK /\ Inv61_R2_0_I3 /\ Next => Inv61_R2_0_I3'
+  <1>. USE A0
   \* (Inv61_R2_0_I3,ncsAction)
   <1>1. TypeOK /\ Inv61_R2_0_I3 /\ ncsAction => Inv61_R2_0_I3'
        BY DEF TypeOK,ncsAction,ncs,Inv61_R2_0_I3
@@ -739,13 +868,13 @@ THEOREM L_14 == TypeOK /\ Inv61_R2_0_I3 /\ Next => Inv61_R2_0_I3'
        BY DEF TypeOK,e3aAction,e3a,Inv61_R2_0_I3
   \* (Inv61_R2_0_I3,e3bAction)
   <1>7. TypeOK /\ Inv61_R2_0_I3 /\ e3bAction => Inv61_R2_0_I3'
-       BY DEF TypeOK,e3bAction,e3b,Inv61_R2_0_I3
+       BY DEF TypeOK,e3bAction,e3b,Inv61_R2_0_I3,\prec
   \* (Inv61_R2_0_I3,e4aAction)
   <1>8. TypeOK /\ Inv61_R2_0_I3 /\ e4aAction => Inv61_R2_0_I3'
        BY DEF TypeOK,e4aAction,e4a,Inv61_R2_0_I3
   \* (Inv61_R2_0_I3,e4bAction)
   <1>9. TypeOK /\ Inv61_R2_0_I3 /\ e4bAction => Inv61_R2_0_I3'
-       BY DEF TypeOK,e4bAction,e4b,Inv61_R2_0_I3
+       BY DEF TypeOK,e4bAction,e4b,Inv61_R2_0_I3,\prec
   \* (Inv61_R2_0_I3,w1aAction)
   <1>10. TypeOK /\ Inv61_R2_0_I3 /\ w1aAction => Inv61_R2_0_I3'
        BY DEF TypeOK,w1aAction,w1a,Inv61_R2_0_I3
@@ -754,7 +883,7 @@ THEOREM L_14 == TypeOK /\ Inv61_R2_0_I3 /\ Next => Inv61_R2_0_I3'
        BY DEF TypeOK,w1bAction,w1b,Inv61_R2_0_I3
   \* (Inv61_R2_0_I3,w2Action)
   <1>12. TypeOK /\ Inv61_R2_0_I3 /\ w2Action => Inv61_R2_0_I3'
-       BY DEF TypeOK,w2Action,w2,Inv61_R2_0_I3
+       BY DEF TypeOK,w2Action,w2,Inv61_R2_0_I3,\prec
   \* (Inv61_R2_0_I3,csAction)
   <1>13. TypeOK /\ Inv61_R2_0_I3 /\ csAction => Inv61_R2_0_I3'
        BY DEF TypeOK,csAction,cs,Inv61_R2_0_I3
@@ -766,6 +895,7 @@ THEOREM L_14 == TypeOK /\ Inv61_R2_0_I3 /\ Next => Inv61_R2_0_I3'
 
 \*** Inv4081_R1_1_I2
 THEOREM L_15 == TypeOK /\ Inv6208_R3_0_I2 /\ Inv4472_R2_0_I3 /\ Inv4081_R1_1_I2 /\ Next => Inv4081_R1_1_I2'
+  <1>. USE A0
   \* (Inv4081_R1_1_I2,ncsAction)
   <1>1. TypeOK /\ Inv4081_R1_1_I2 /\ ncsAction => Inv4081_R1_1_I2'
        BY DEF TypeOK,ncsAction,ncs,Inv4081_R1_1_I2
@@ -786,22 +916,22 @@ THEOREM L_15 == TypeOK /\ Inv6208_R3_0_I2 /\ Inv4472_R2_0_I3 /\ Inv4081_R1_1_I2 
        BY DEF TypeOK,e3aAction,e3a,Inv4081_R1_1_I2
   \* (Inv4081_R1_1_I2,e3bAction)
   <1>7. TypeOK /\ Inv4081_R1_1_I2 /\ e3bAction => Inv4081_R1_1_I2'
-       BY DEF TypeOK,e3bAction,e3b,Inv4081_R1_1_I2
+       BY DEF TypeOK,e3bAction,e3b,Inv4081_R1_1_I2,\prec
   \* (Inv4081_R1_1_I2,e4aAction)
   <1>8. TypeOK /\ Inv4081_R1_1_I2 /\ e4aAction => Inv4081_R1_1_I2'
        BY DEF TypeOK,e4aAction,e4a,Inv4081_R1_1_I2
   \* (Inv4081_R1_1_I2,e4bAction)
   <1>9. TypeOK /\ Inv4081_R1_1_I2 /\ e4bAction => Inv4081_R1_1_I2'
-       BY DEF TypeOK,e4bAction,e4b,Inv4081_R1_1_I2
+       BY DEF TypeOK,e4bAction,e4b,Inv4081_R1_1_I2,\prec
   \* (Inv4081_R1_1_I2,w1aAction)
   <1>10. TypeOK /\ Inv6208_R3_0_I2 /\ Inv4081_R1_1_I2 /\ w1aAction => Inv4081_R1_1_I2'
-       BY DEF TypeOK,Inv6208_R3_0_I2,w1aAction,w1a,Inv4081_R1_1_I2
+       BY DEF TypeOK,Inv6208_R3_0_I2,w1aAction,w1a,Inv4081_R1_1_I2,\prec
   \* (Inv4081_R1_1_I2,w1bAction)
   <1>11. TypeOK /\ Inv4472_R2_0_I3 /\ Inv4081_R1_1_I2 /\ w1bAction => Inv4081_R1_1_I2'
-       BY DEF TypeOK,Inv4472_R2_0_I3,w1bAction,w1b,Inv4081_R1_1_I2
+       BY DEF TypeOK,Inv4472_R2_0_I3,w1bAction,w1b,Inv4081_R1_1_I2,\prec
   \* (Inv4081_R1_1_I2,w2Action)
   <1>12. TypeOK /\ Inv4081_R1_1_I2 /\ w2Action => Inv4081_R1_1_I2'
-       BY DEF TypeOK,w2Action,w2,Inv4081_R1_1_I2
+       BY DEF TypeOK,w2Action,w2,Inv4081_R1_1_I2,\prec
   \* (Inv4081_R1_1_I2,csAction)
   <1>13. TypeOK /\ Inv4081_R1_1_I2 /\ csAction => Inv4081_R1_1_I2'
        BY DEF TypeOK,csAction,cs,Inv4081_R1_1_I2
@@ -813,6 +943,7 @@ THEOREM L_15 == TypeOK /\ Inv6208_R3_0_I2 /\ Inv4472_R2_0_I3 /\ Inv4081_R1_1_I2 
 
 \*** Inv6208_R3_0_I2
 THEOREM L_16 == TypeOK /\ Inv1739_R7_0_I2 /\ Inv2373_R5_0_I2 /\ Inv4081_R1_1_I2 /\ Inv6208_R3_0_I2 /\ Next => Inv6208_R3_0_I2'
+  <1>. USE A0
   \* (Inv6208_R3_0_I2,ncsAction)
   <1>1. TypeOK /\ Inv6208_R3_0_I2 /\ ncsAction => Inv6208_R3_0_I2'
        BY DEF TypeOK,ncsAction,ncs,Inv6208_R3_0_I2
@@ -833,13 +964,13 @@ THEOREM L_16 == TypeOK /\ Inv1739_R7_0_I2 /\ Inv2373_R5_0_I2 /\ Inv4081_R1_1_I2 
        BY DEF TypeOK,e3aAction,e3a,Inv6208_R3_0_I2
   \* (Inv6208_R3_0_I2,e3bAction)
   <1>7. TypeOK /\ Inv6208_R3_0_I2 /\ e3bAction => Inv6208_R3_0_I2'
-       BY DEF TypeOK,e3bAction,e3b,Inv6208_R3_0_I2
+       BY DEF TypeOK,e3bAction,e3b,Inv6208_R3_0_I2,\prec
   \* (Inv6208_R3_0_I2,e4aAction)
   <1>8. TypeOK /\ Inv6208_R3_0_I2 /\ e4aAction => Inv6208_R3_0_I2'
        BY DEF TypeOK,e4aAction,e4a,Inv6208_R3_0_I2
   \* (Inv6208_R3_0_I2,e4bAction)
   <1>9. TypeOK /\ Inv1739_R7_0_I2 /\ Inv6208_R3_0_I2 /\ e4bAction => Inv6208_R3_0_I2'
-       BY DEF TypeOK,Inv1739_R7_0_I2,e4bAction,e4b,Inv6208_R3_0_I2
+       BY DEF TypeOK,Inv1739_R7_0_I2,e4bAction,e4b,Inv6208_R3_0_I2,\prec
   \* (Inv6208_R3_0_I2,w1aAction)
   <1>10. TypeOK /\ Inv6208_R3_0_I2 /\ w1aAction => Inv6208_R3_0_I2'
        BY DEF TypeOK,w1aAction,w1a,Inv6208_R3_0_I2
@@ -848,7 +979,7 @@ THEOREM L_16 == TypeOK /\ Inv1739_R7_0_I2 /\ Inv2373_R5_0_I2 /\ Inv4081_R1_1_I2 
        BY DEF TypeOK,Inv2373_R5_0_I2,w1bAction,w1b,Inv6208_R3_0_I2
   \* (Inv6208_R3_0_I2,w2Action)
   <1>12. TypeOK /\ Inv4081_R1_1_I2 /\ Inv6208_R3_0_I2 /\ w2Action => Inv6208_R3_0_I2'
-       BY DEF TypeOK,Inv4081_R1_1_I2,w2Action,w2,Inv6208_R3_0_I2
+       BY DEF TypeOK,Inv4081_R1_1_I2,w2Action,w2,Inv6208_R3_0_I2,\prec
   \* (Inv6208_R3_0_I2,csAction)
   <1>13. TypeOK /\ Inv6208_R3_0_I2 /\ csAction => Inv6208_R3_0_I2'
        BY DEF TypeOK,csAction,cs,Inv6208_R3_0_I2
@@ -860,6 +991,7 @@ THEOREM L_16 == TypeOK /\ Inv1739_R7_0_I2 /\ Inv2373_R5_0_I2 /\ Inv4081_R1_1_I2 
 
 \*** Inv1739_R7_0_I2
 THEOREM L_17 == TypeOK /\ Inv31710_R9_0_I2 /\ Inv5016_R8_0_I3 /\ Inv1739_R7_0_I2 /\ Next => Inv1739_R7_0_I2'
+  <1>. USE A0
   \* (Inv1739_R7_0_I2,ncsAction)
   <1>1. TypeOK /\ Inv1739_R7_0_I2 /\ ncsAction => Inv1739_R7_0_I2'
        BY DEF TypeOK,ncsAction,ncs,Inv1739_R7_0_I2
@@ -880,22 +1012,22 @@ THEOREM L_17 == TypeOK /\ Inv31710_R9_0_I2 /\ Inv5016_R8_0_I3 /\ Inv1739_R7_0_I2
        BY DEF TypeOK,e3aAction,e3a,Inv1739_R7_0_I2
   \* (Inv1739_R7_0_I2,e3bAction)
   <1>7. TypeOK /\ Inv31710_R9_0_I2 /\ Inv1739_R7_0_I2 /\ e3bAction => Inv1739_R7_0_I2'
-       BY DEF TypeOK,Inv31710_R9_0_I2,e3bAction,e3b,Inv1739_R7_0_I2
+       BY DEF TypeOK,Inv31710_R9_0_I2,e3bAction,e3b,Inv1739_R7_0_I2,\prec
   \* (Inv1739_R7_0_I2,e4aAction)
   <1>8. TypeOK /\ Inv1739_R7_0_I2 /\ e4aAction => Inv1739_R7_0_I2'
        BY DEF TypeOK,e4aAction,e4a,Inv1739_R7_0_I2
   \* (Inv1739_R7_0_I2,e4bAction)
   <1>9. TypeOK /\ Inv1739_R7_0_I2 /\ e4bAction => Inv1739_R7_0_I2'
-       BY DEF TypeOK,e4bAction,e4b,Inv1739_R7_0_I2
+       BY DEF TypeOK,e4bAction,e4b,Inv1739_R7_0_I2,\prec
   \* (Inv1739_R7_0_I2,w1aAction)
   <1>10. TypeOK /\ Inv1739_R7_0_I2 /\ w1aAction => Inv1739_R7_0_I2'
        BY DEF TypeOK,w1aAction,w1a,Inv1739_R7_0_I2
   \* (Inv1739_R7_0_I2,w1bAction)
   <1>11. TypeOK /\ Inv5016_R8_0_I3 /\ Inv1739_R7_0_I2 /\ w1bAction => Inv1739_R7_0_I2'
-       BY DEF TypeOK,Inv5016_R8_0_I3,w1bAction,w1b,Inv1739_R7_0_I2
+       BY DEF TypeOK,Inv5016_R8_0_I3,w1bAction,w1b,Inv1739_R7_0_I2,\prec
   \* (Inv1739_R7_0_I2,w2Action)
   <1>12. TypeOK /\ Inv1739_R7_0_I2 /\ w2Action => Inv1739_R7_0_I2'
-       BY DEF TypeOK,w2Action,w2,Inv1739_R7_0_I2
+       BY DEF TypeOK,w2Action,w2,Inv1739_R7_0_I2,\prec
   \* (Inv1739_R7_0_I2,csAction)
   <1>13. TypeOK /\ Inv1739_R7_0_I2 /\ csAction => Inv1739_R7_0_I2'
        BY DEF TypeOK,csAction,cs,Inv1739_R7_0_I2
@@ -907,6 +1039,7 @@ THEOREM L_17 == TypeOK /\ Inv31710_R9_0_I2 /\ Inv5016_R8_0_I3 /\ Inv1739_R7_0_I2
 
 \*** Inv31710_R9_0_I2
 THEOREM L_18 == TypeOK /\ Inv2883_R11_0_I3 /\ Inv3258_R10_0_I3 /\ Inv31710_R9_0_I2 /\ Next => Inv31710_R9_0_I2'
+  <1>. USE A0
   \* (Inv31710_R9_0_I2,ncsAction)
   <1>1. TypeOK /\ Inv31710_R9_0_I2 /\ ncsAction => Inv31710_R9_0_I2'
        BY DEF TypeOK,ncsAction,ncs,Inv31710_R9_0_I2
@@ -927,13 +1060,13 @@ THEOREM L_18 == TypeOK /\ Inv2883_R11_0_I3 /\ Inv3258_R10_0_I3 /\ Inv31710_R9_0_
        BY DEF TypeOK,e3aAction,e3a,Inv31710_R9_0_I2
   \* (Inv31710_R9_0_I2,e3bAction)
   <1>7. TypeOK /\ Inv31710_R9_0_I2 /\ e3bAction => Inv31710_R9_0_I2'
-       BY DEF TypeOK,e3bAction,e3b,Inv31710_R9_0_I2
+       BY DEF TypeOK,e3bAction,e3b,Inv31710_R9_0_I2,\prec
   \* (Inv31710_R9_0_I2,e4aAction)
   <1>8. TypeOK /\ Inv31710_R9_0_I2 /\ e4aAction => Inv31710_R9_0_I2'
        BY DEF TypeOK,e4aAction,e4a,Inv31710_R9_0_I2
   \* (Inv31710_R9_0_I2,e4bAction)
   <1>9. TypeOK /\ Inv31710_R9_0_I2 /\ e4bAction => Inv31710_R9_0_I2'
-       BY DEF TypeOK,e4bAction,e4b,Inv31710_R9_0_I2
+       BY DEF TypeOK,e4bAction,e4b,Inv31710_R9_0_I2,\prec
   \* (Inv31710_R9_0_I2,w1aAction)
   <1>10. TypeOK /\ Inv31710_R9_0_I2 /\ w1aAction => Inv31710_R9_0_I2'
        BY DEF TypeOK,w1aAction,w1a,Inv31710_R9_0_I2
@@ -942,7 +1075,7 @@ THEOREM L_18 == TypeOK /\ Inv2883_R11_0_I3 /\ Inv3258_R10_0_I3 /\ Inv31710_R9_0_
        BY DEF TypeOK,Inv3258_R10_0_I3,w1bAction,w1b,Inv31710_R9_0_I2
   \* (Inv31710_R9_0_I2,w2Action)
   <1>12. TypeOK /\ Inv31710_R9_0_I2 /\ w2Action => Inv31710_R9_0_I2'
-       BY DEF TypeOK,w2Action,w2,Inv31710_R9_0_I2
+       BY DEF TypeOK,w2Action,w2,Inv31710_R9_0_I2,\prec
   \* (Inv31710_R9_0_I2,csAction)
   <1>13. TypeOK /\ Inv31710_R9_0_I2 /\ csAction => Inv31710_R9_0_I2'
        BY DEF TypeOK,csAction,cs,Inv31710_R9_0_I2
@@ -954,6 +1087,7 @@ THEOREM L_18 == TypeOK /\ Inv2883_R11_0_I3 /\ Inv3258_R10_0_I3 /\ Inv31710_R9_0_
 
 \*** Inv2883_R11_0_I3
 THEOREM L_19 == TypeOK /\ Inv2073_R1_0_I4 /\ Inv2883_R11_0_I3 /\ Next => Inv2883_R11_0_I3'
+  <1>. USE A0
   \* (Inv2883_R11_0_I3,ncsAction)
   <1>1. TypeOK /\ Inv2883_R11_0_I3 /\ ncsAction => Inv2883_R11_0_I3'
        BY DEF TypeOK,ncsAction,ncs,Inv2883_R11_0_I3
@@ -974,13 +1108,13 @@ THEOREM L_19 == TypeOK /\ Inv2073_R1_0_I4 /\ Inv2883_R11_0_I3 /\ Next => Inv2883
        BY DEF TypeOK,e3aAction,e3a,Inv2883_R11_0_I3
   \* (Inv2883_R11_0_I3,e3bAction)
   <1>7. TypeOK /\ Inv2883_R11_0_I3 /\ e3bAction => Inv2883_R11_0_I3'
-       BY DEF TypeOK,e3bAction,e3b,Inv2883_R11_0_I3
+       BY DEF TypeOK,e3bAction,e3b,Inv2883_R11_0_I3,\prec
   \* (Inv2883_R11_0_I3,e4aAction)
   <1>8. TypeOK /\ Inv2883_R11_0_I3 /\ e4aAction => Inv2883_R11_0_I3'
        BY DEF TypeOK,e4aAction,e4a,Inv2883_R11_0_I3
   \* (Inv2883_R11_0_I3,e4bAction)
   <1>9. TypeOK /\ Inv2883_R11_0_I3 /\ e4bAction => Inv2883_R11_0_I3'
-       BY DEF TypeOK,e4bAction,e4b,Inv2883_R11_0_I3
+       BY DEF TypeOK,e4bAction,e4b,Inv2883_R11_0_I3,\prec
   \* (Inv2883_R11_0_I3,w1aAction)
   <1>10. TypeOK /\ Inv2883_R11_0_I3 /\ w1aAction => Inv2883_R11_0_I3'
        BY DEF TypeOK,w1aAction,w1a,Inv2883_R11_0_I3
@@ -989,7 +1123,7 @@ THEOREM L_19 == TypeOK /\ Inv2073_R1_0_I4 /\ Inv2883_R11_0_I3 /\ Next => Inv2883
        BY DEF TypeOK,Inv2073_R1_0_I4,w1bAction,w1b,Inv2883_R11_0_I3
   \* (Inv2883_R11_0_I3,w2Action)
   <1>12. TypeOK /\ Inv2883_R11_0_I3 /\ w2Action => Inv2883_R11_0_I3'
-       BY DEF TypeOK,w2Action,w2,Inv2883_R11_0_I3
+       BY DEF TypeOK,w2Action,w2,Inv2883_R11_0_I3,\prec
   \* (Inv2883_R11_0_I3,csAction)
   <1>13. TypeOK /\ Inv2883_R11_0_I3 /\ csAction => Inv2883_R11_0_I3'
        BY DEF TypeOK,csAction,cs,Inv2883_R11_0_I3
@@ -1001,6 +1135,7 @@ THEOREM L_19 == TypeOK /\ Inv2073_R1_0_I4 /\ Inv2883_R11_0_I3 /\ Next => Inv2883
 
 \*** Inv4491_R1_1_I2
 THEOREM L_20 == TypeOK /\ Inv61_R2_0_I3 /\ Inv4491_R1_1_I2 /\ Next => Inv4491_R1_1_I2'
+  <1>. USE A0
   \* (Inv4491_R1_1_I2,ncsAction)
   <1>1. TypeOK /\ Inv4491_R1_1_I2 /\ ncsAction => Inv4491_R1_1_I2'
        BY DEF TypeOK,ncsAction,ncs,Inv4491_R1_1_I2
@@ -1021,13 +1156,13 @@ THEOREM L_20 == TypeOK /\ Inv61_R2_0_I3 /\ Inv4491_R1_1_I2 /\ Next => Inv4491_R1
        BY DEF TypeOK,e3aAction,e3a,Inv4491_R1_1_I2
   \* (Inv4491_R1_1_I2,e3bAction)
   <1>7. TypeOK /\ Inv4491_R1_1_I2 /\ e3bAction => Inv4491_R1_1_I2'
-       BY DEF TypeOK,e3bAction,e3b,Inv4491_R1_1_I2
+       BY DEF TypeOK,e3bAction,e3b,Inv4491_R1_1_I2,\prec
   \* (Inv4491_R1_1_I2,e4aAction)
   <1>8. TypeOK /\ Inv4491_R1_1_I2 /\ e4aAction => Inv4491_R1_1_I2'
        BY DEF TypeOK,e4aAction,e4a,Inv4491_R1_1_I2
   \* (Inv4491_R1_1_I2,e4bAction)
   <1>9. TypeOK /\ Inv4491_R1_1_I2 /\ e4bAction => Inv4491_R1_1_I2'
-       BY DEF TypeOK,e4bAction,e4b,Inv4491_R1_1_I2
+       BY DEF TypeOK,e4bAction,e4b,Inv4491_R1_1_I2,\prec
   \* (Inv4491_R1_1_I2,w1aAction)
   <1>10. TypeOK /\ Inv4491_R1_1_I2 /\ w1aAction => Inv4491_R1_1_I2'
        BY DEF TypeOK,w1aAction,w1a,Inv4491_R1_1_I2
@@ -1036,7 +1171,7 @@ THEOREM L_20 == TypeOK /\ Inv61_R2_0_I3 /\ Inv4491_R1_1_I2 /\ Next => Inv4491_R1
        BY DEF TypeOK,Inv61_R2_0_I3,w1bAction,w1b,Inv4491_R1_1_I2
   \* (Inv4491_R1_1_I2,w2Action)
   <1>12. TypeOK /\ Inv4491_R1_1_I2 /\ w2Action => Inv4491_R1_1_I2'
-       BY DEF TypeOK,w2Action,w2,Inv4491_R1_1_I2
+       BY DEF TypeOK,w2Action,w2,Inv4491_R1_1_I2,\prec
   \* (Inv4491_R1_1_I2,csAction)
   <1>13. TypeOK /\ Inv4491_R1_1_I2 /\ csAction => Inv4491_R1_1_I2'
        BY DEF TypeOK,csAction,cs,Inv4491_R1_1_I2
@@ -1052,6 +1187,6 @@ THEOREM IndGlobal /\ Next => IndGlobal'
 \* Inv21195_R4_0_I3 == \A VARI \in Procs : ~(nxt[VARI] = VARI) \/ (~(unchecked[VARI] = {})) \/ (~(pc[VARI] = "w1"))
 =============================================================================
 \* Modification History
-\* Last modified Wed Apr 17 01:06:40 EDT 2024 by willyschultz
+\* Last modified Wed Apr 17 12:32:55 EDT 2024 by willyschultz
 \* Last modified Tue Dec 18 13:48:46 PST 2018 by lamport
 \* Created Thu Nov 21 15:54:32 PST 2013 by lamport
