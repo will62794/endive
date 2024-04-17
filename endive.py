@@ -4754,9 +4754,12 @@ class InductiveInvGen():
         support_nodes = {}
         action_nodes = [e[0] for e in self.proof_graph["edges"] if e[1] == node]
         # Safety_RMChooseToAbortAction
+        # print("- ", node)
         for a in action_nodes:
+            # print("    ", a)
             action = a.split("_")[-1]
             action_incoming_nodes = [e[0] for e in self.proof_graph["edges"] if e[1] == a]
+            # print("         ", action_incoming_nodes)
             support_nodes[action] = action_incoming_nodes
         return support_nodes
 
@@ -4765,13 +4768,42 @@ class InductiveInvGen():
 
         # Get all children of this graph node i.e. all incoming edges.
         root_proof_node = StructuredProofNode("L_" + start_node, start_node)
-        support_nodes = self.proof_graph_get_support_nodes(start_node)
-        seen.append(start_node)
-        # print("SUPPORT:", support_nodes)
-        for action in support_nodes:
-            # print(support_nodes[action])
-            children_to_add = [c for c in support_nodes[action] if c not in seen]
-            root_proof_node.children[action] = [self.proof_graph_to_structured_proof(child, seen=seen) for child in children_to_add] 
+        to_explore = [(start_node, root_proof_node)]
+        visited = []
+
+        while len(to_explore) > 0:
+            (curr_node, curr_proof_node) = to_explore.pop()
+            visited.append((curr_node, curr_proof_node))
+
+            # print(">> CURR NODE:", curr_node)
+
+            support_nodes = self.proof_graph_get_support_nodes(curr_node)
+
+            # Create proof node for this by adding all supporting nodes.
+            for action in support_nodes:
+                # print(support_nodes[action])
+                # children_to_add = [c for c in support_nodes[action] if c not in seen]
+                children_to_add = [c for c in support_nodes[action]]
+                # print(f"             #### ({action} children_to_add:", children_to_add)
+
+                # curr_proof_node.children[action] = [StructuredProofNode("L_" + child, child) for child in children_to_add]
+                    # self.proof_graph_to_structured_proof(child, seen=seen) for child in children_to_add] 
+
+                # Add all children into to explore set if we haven't already visited them.
+                curr_proof_node.children[action] = []
+                for c in children_to_add:
+                    if c not in [v[0] for v in visited]:
+                        child_node = StructuredProofNode("L_" + c, c)
+                        curr_proof_node.children[action].append(child_node)
+                        to_explore.append((c, child_node))
+                    else:
+                        # If c was already visited, then append the existing node.
+                        existing_node = [v for v in visited if v[0] == c][0][1]
+                        curr_proof_node.children[action].append(existing_node)
+
+                print(curr_proof_node.children)
+
+        
         return root_proof_node
     
     def check_proof_node(self, n, action_filter=None):

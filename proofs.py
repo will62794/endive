@@ -412,7 +412,7 @@ class StructuredProof():
         for a in curr_node.children:
             for c in curr_node.children[a]:
                 # print(c)
-                if c.expr not in seen:
+                if c is not None and c.expr not in seen:
                     self.walk_proof_graph(c, visit_fn, seen, all_nodes=all_nodes)
 
     def to_tlaps_proof_skeleton(self, tlaps_proof_config, add_lemma_defs=None, seed=None):
@@ -421,7 +421,8 @@ class StructuredProof():
         if seed is not None:
             seed_str = f"_{seed}"
         modname = self.specname + f"_IndDecompProof{seed_str}"
-        f = open("benchmarks/" + modname + ".tla", 'w')
+        fname = "benchmarks/" + modname + ".tla"
+        f = open(fname, 'w')
         spec_lines = f"---- MODULE {modname} ----\n"
         spec_lines += f"EXTENDS {self.specname}\n"
 
@@ -512,6 +513,7 @@ class StructuredProof():
 
         spec_lines += "\n"
         spec_lines += "===="
+        logging.info(f"Saving proof graph TLAPS obligations to file '{fname}'.")
         f.write(spec_lines)
         f.close()
 
