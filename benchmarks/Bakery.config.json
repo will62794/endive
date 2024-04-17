@@ -91,6 +91,9 @@
         "w1bAction": [
         ],
         "w2Action":[
+        ],
+        "e2bAction":[
+            "(VARI \\in unchecked[VARJ]) \\/ ((pc[VARJ] = \"e1\") \\/ (~(max[VARI] < num[VARJ]) \\/ (~(pc[VARI] = \"e2\"))) \\/ (~(unchecked[VARI] = {}))) \\/ (~(pc[VARJ] \\in {\"w1\",\"w2\"}))"
         ]
     },
     "preds_alt" : [],
@@ -131,6 +134,8 @@
             "Safety": ["H_MutualExclusion"]
         },
         "action_def_expands":{
+            "e3bAction": ["\\prec"],
+            "e4bAction": ["\\prec"]
         }
     }
 }
