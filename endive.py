@@ -4873,10 +4873,8 @@ class InductiveInvGen():
                 if self.check_proof_graph:
                     errors_found = []
                     for n in lemma_nodes:
-                        print("\n==============================")
+                        print("\nProof graph checking of lemma node:", n)
                         print("==============================")
-                        print("Proof graph checking of lemma node:", n)
-                        print("---------------------------")
                         k_ctis = self.check_proof_node(n)
                         print(f"Found {len(k_ctis)} k-CTIS")
                         if len(k_ctis) > 0:
