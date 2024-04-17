@@ -611,20 +611,14 @@ THEOREM L_10 == TypeOK /\ Inv11_R15_0_I1 /\ Inv4045_R14_0_I4 /\ Next => Inv4045_
                             THEN /\ max' = [max EXCEPT ![self] = num[i]]
                             ELSE /\ max' = max,
                         pc' = [pc EXCEPT ![self] = "e2"],
-                        UNCHANGED << num, flag, nxt >>
-                 PROVE  Inv4045_R14_0_I4'
-      BY DEF e2a, e2aAction
+                        UNCHANGED << num, flag, nxt >>,
+                        NEW VARI \in Procs',
+                        NEW VARJ \in Procs'
+                 PROVE  ((VARJ \in unchecked[nxt[VARJ]]) \/ ((max[nxt[VARJ]] >= num[VARJ]) \/ ((pc[VARI] = "e3")) \/ (~((pc[nxt[VARJ]] = "e2"))) \/ ((pc[VARJ] = "ncs")) \/ (~(pc[VARJ] = "w2"))))'
+      BY DEF Inv4045_R14_0_I4, e2a, e2aAction
     <2> QED
-      <3> SUFFICES ASSUME NEW VARI \in Procs',
-                          NEW VARJ \in Procs'
-                   PROVE  ((VARJ \in unchecked[nxt[VARJ]]) \/ ((max[nxt[VARJ]] >= num[VARJ]) \/ ((pc[VARI] = "e3")) \/ (~((pc[nxt[VARJ]] = "e2"))) \/ ((pc[VARJ] = "ncs")) \/ (~(pc[VARJ] = "w2"))))'
-        BY DEF Inv4045_R14_0_I4
-        
-      <3> QED
-        <4> CASE num[i] > max[self] BY FS_Singleton,FS_Difference, FS_Subset DEF TypeOK,e2aAction,e2a,Inv4045_R14_0_I4
-        <4> CASE num[i] <= max[self]  BY FS_Singleton,FS_Difference, FS_Subset DEF TypeOK,e2aAction,e2a,Inv4045_R14_0_I4
-        <4>3. QED BY FS_Singleton,FS_Difference, FS_Subset DEF TypeOK,e2aAction,e2a,Inv4045_R14_0_I4
-      
+      BY FS_Singleton,FS_Subset,FS_Difference DEF TypeOK,e2aAction,e2a,Inv4045_R14_0_I4,Inv11_R15_0_I1, Procs
+       
        
   \* (Inv4045_R14_0_I4,e2bAction)
   <1>5. TypeOK /\ Inv4045_R14_0_I4 /\ e2bAction => Inv4045_R14_0_I4'
@@ -1187,6 +1181,6 @@ THEOREM IndGlobal /\ Next => IndGlobal'
 \* Inv21195_R4_0_I3 == \A VARI \in Procs : ~(nxt[VARI] = VARI) \/ (~(unchecked[VARI] = {})) \/ (~(pc[VARI] = "w1"))
 =============================================================================
 \* Modification History
-\* Last modified Wed Apr 17 12:32:55 EDT 2024 by willyschultz
+\* Last modified Wed Apr 17 14:24:51 EDT 2024 by willyschultz
 \* Last modified Tue Dec 18 13:48:46 PST 2018 by lamport
 \* Created Thu Nov 21 15:54:32 PST 2013 by lamport
