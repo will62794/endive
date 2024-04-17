@@ -135,6 +135,7 @@
             "Safety": ["H_MutualExclusion"]
         },
         "action_def_expands":{
+            "e2aAction": ["Procs"],
             "e3bAction": ["\\prec"],
             "e4bAction": ["\\prec"],
             "w1aAction": ["\\prec"],
