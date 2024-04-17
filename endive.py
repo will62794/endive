@@ -4801,14 +4801,6 @@ class InductiveInvGen():
                         existing_node = [v for v in visited if v[0] == c][0][1]
                         curr_proof_node.children[action].append(existing_node)
 
-
-                print(curr_proof_node.children)
-
-        
-        
-                print(curr_proof_node.children)
-
-        
         return root_proof_node
     
     def check_proof_node(self, n, action_filter=None):
