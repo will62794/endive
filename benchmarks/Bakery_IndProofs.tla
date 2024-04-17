@@ -1175,12 +1175,44 @@ THEOREM L_20 == TypeOK /\ Inv61_R2_0_I3 /\ Inv4491_R1_1_I2 /\ Next => Inv4491_R1
 <1>15. QED BY <1>1,<1>2,<1>3,<1>4,<1>5,<1>6,<1>7,<1>8,<1>9,<1>10,<1>11,<1>12,<1>13,<1>14 DEF Next
 
 
+
+
+\* Initiation.
+THEOREM Init => IndGlobal
+    <1> USE A0 DEF \prec,Procs,ProcSet,H_MutualExclusion
+    <1>0. Init => TypeOK BY DEF Init, TypeOK, IndGlobal, ProcSet
+    <1>1. Init => Safety BY DEF Init, Safety, IndGlobal, ProcSet
+    <1>2. Init => Inv8417_R0_0_I2 BY DEF Init, Inv8417_R0_0_I2, IndGlobal
+    <1>3. Init => Inv4429_R1_0_I2 BY DEF Init, Inv4429_R1_0_I2, IndGlobal
+    <1>4. Init => Inv4472_R2_0_I3 BY DEF Init, Inv4472_R2_0_I3, IndGlobal
+    <1>5. Init => Inv2373_R5_0_I2 BY DEF Init, Inv2373_R5_0_I2, IndGlobal
+    <1>6. Init => Inv5016_R8_0_I3 BY DEF Init, Inv5016_R8_0_I3, IndGlobal
+    <1>7. Init => Inv3258_R10_0_I3 BY DEF Init, Inv3258_R10_0_I3, IndGlobal
+    <1>8. Init => Inv1_R0_0_I0 BY DEF Init, Inv1_R0_0_I0, IndGlobal
+    <1>9. Init => Inv2073_R1_0_I4 BY DEF Init, Inv2073_R1_0_I4, IndGlobal
+    <1>10. Init => Inv4045_R14_0_I4 BY DEF Init, Inv4045_R14_0_I4, IndGlobal
+    <1>11. Init => Inv11_R15_0_I1 BY DEF Init, Inv11_R15_0_I1, IndGlobal
+    <1>12. Init => Inv3811_R12_1_I2 BY DEF Init, Inv3811_R12_1_I2, IndGlobal
+    <1>13. Init => Inv36_R14_1_I1 BY DEF Init, Inv36_R14_1_I1, IndGlobal
+    <1>14. Init => Inv61_R2_0_I3 BY DEF Init, Inv61_R2_0_I3, IndGlobal
+    <1>15. Init => Inv4081_R1_1_I2 BY DEF Init, Inv4081_R1_1_I2, IndGlobal
+    <1>16. Init => Inv6208_R3_0_I2 BY DEF Init, Inv6208_R3_0_I2, IndGlobal
+    <1>17. Init => Inv1739_R7_0_I2 BY DEF Init, Inv1739_R7_0_I2, IndGlobal
+    <1>18. Init => Inv31710_R9_0_I2 BY DEF Init, Inv31710_R9_0_I2, IndGlobal
+    <1>19. Init => Inv2883_R11_0_I3 BY DEF Init, Inv2883_R11_0_I3, IndGlobal
+    <1>20. Init => Inv4491_R1_1_I2 BY DEF Init, Inv4491_R1_1_I2, IndGlobal
+    <1>22. QED BY <1>0,<1>1,<1>2,<1>3,<1>4,<1>5,<1>6,<1>7,<1>8,<1>9,<1>10,<1>11,<1>12,<1>13,<1>14,<1>15,<1>16,<1>17,<1>18,<1>19,<1>20 DEF IndGlobal
+
+
+
 THEOREM IndGlobal /\ Next => IndGlobal'
   BY L_0,L_1,L_2,L_3,L_4,L_5,L_6,L_7,L_8,L_9,L_10,L_11,L_12,L_13,L_14,L_15,L_16,L_17,L_18,L_19,L_20 DEF Next, IndGlobal
+  
+
 
 \* Inv21195_R4_0_I3 == \A VARI \in Procs : ~(nxt[VARI] = VARI) \/ (~(unchecked[VARI] = {})) \/ (~(pc[VARI] = "w1"))
 =============================================================================
 \* Modification History
-\* Last modified Wed Apr 17 14:24:51 EDT 2024 by willyschultz
+\* Last modified Wed Apr 17 14:50:56 EDT 2024 by willyschultz
 \* Last modified Tue Dec 18 13:48:46 PST 2018 by lamport
 \* Created Thu Nov 21 15:54:32 PST 2013 by lamport
