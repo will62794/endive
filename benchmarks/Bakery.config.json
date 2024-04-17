@@ -129,13 +129,17 @@
     "simulate"  :  true,
     "tlaps_proof_config": {
         "assumes": [
+            "N \\in Nat /\\ Procs \\subseteq Nat /\\ IsFiniteSet(Procs)"
         ],
         "lemma_def_expands": {
             "Safety": ["H_MutualExclusion"]
         },
         "action_def_expands":{
             "e3bAction": ["\\prec"],
-            "e4bAction": ["\\prec"]
+            "e4bAction": ["\\prec"],
+            "w1aAction": ["\\prec"],
+            "w1bAction": ["\\prec"],
+            "w2Action": ["\\prec"]
         }
     }
 }
