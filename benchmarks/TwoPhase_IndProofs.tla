@@ -1,5 +1,5 @@
 ---- MODULE TwoPhase_IndProofs ----
-EXTENDS TwoPhase, FiniteSetTheorems 
+EXTENDS TwoPhase 
 
 \* endive.py stats
 \* -----------------
@@ -27,263 +27,260 @@ EXTENDS TwoPhase, FiniteSetTheorems
 \* processor: arm
 \* cpu_count: 8
 
-\* Inductive strengthening conjuncts
-Inv276_1_0_def == (tmPrepared = RM) \/ (~([type |-> "Commit"] \in msgs))
-Inv45_1_1_def == \A rmi \in RM : ([type |-> "Commit"] \in msgs) \/ (~(rmState[rmi] = "committed"))
-Inv79_1_2_def == \A rmi \in RM : ([type |-> "Prepared", rm |-> rmi] \in msgs) \/ (~(tmPrepared = tmPrepared \cup {rmi}))
-Inv349_1_3_def == \A rmi \in RM : ~([type |-> "Prepared", rm |-> rmi] \in msgs) \/ (~(rmState[rmi] = "working"))
-Inv318_1_4_def == ~([type |-> "Abort"] \in msgs) \/ (~([type |-> "Commit"] \in msgs))
-Inv331_1_5_def == ~([type |-> "Abort"] \in msgs) \/ (~(tmState = "init"))
-Inv334_1_6_def == \A rmi \in RM : ~([type |-> "Commit"] \in msgs) \/ (~(rmState[rmi] = "aborted"))
-Inv344_1_7_def == ~([type |-> "Commit"] \in msgs) \/ (~(tmState = "init"))
-Inv1863_2_8_def == \A rmi \in RM : (rmState[rmi] = "prepared") \/ (~([type |-> "Prepared", rm |-> rmi] \in msgs) \/ (~(tmState = "init")))
+\* \* Inductive strengthening conjuncts
+\* Inv276_1_0_def == (tmPrepared = RM) \/ (~([type |-> "Commit"] \in msgs))
+\* Inv45_1_1_def == \A rmi \in RM : ([type |-> "Commit"] \in msgs) \/ (~(rmState[rmi] = "committed"))
+\* Inv79_1_2_def == \A rmi \in RM : ([type |-> "Prepared", rm |-> rmi] \in msgs) \/ (~(tmPrepared = tmPrepared \cup {rmi}))
+\* Inv349_1_3_def == \A rmi \in RM : ~([type |-> "Prepared", rm |-> rmi] \in msgs) \/ (~(rmState[rmi] = "working"))
+\* Inv318_1_4_def == ~([type |-> "Abort"] \in msgs) \/ (~([type |-> "Commit"] \in msgs))
+\* Inv331_1_5_def == ~([type |-> "Abort"] \in msgs) \/ (~(tmState = "init"))
+\* Inv334_1_6_def == \A rmi \in RM : ~([type |-> "Commit"] \in msgs) \/ (~(rmState[rmi] = "aborted"))
+\* Inv344_1_7_def == ~([type |-> "Commit"] \in msgs) \/ (~(tmState = "init"))
+\* Inv1863_2_8_def == \A rmi \in RM : (rmState[rmi] = "prepared") \/ (~([type |-> "Prepared", rm |-> rmi] \in msgs) \/ (~(tmState = "init")))
 
-\* The inductive invariant candidate.
-IndAuto ==
-  /\ TypeOK
-  /\ TCConsistent
-  /\ Inv276_1_0_def
-  /\ Inv45_1_1_def
-  /\ Inv79_1_2_def
-  /\ Inv349_1_3_def
-  /\ Inv318_1_4_def
-  /\ Inv331_1_5_def
-  /\ Inv334_1_6_def
-  /\ Inv344_1_7_def
-  /\ Inv1863_2_8_def
+\* \* The inductive invariant candidate.
+\* IndAuto ==
+\*   /\ TypeOK
+\*   /\ TCConsistent
+\*   /\ Inv276_1_0_def
+\*   /\ Inv45_1_1_def
+\*   /\ Inv79_1_2_def
+\*   /\ Inv349_1_3_def
+\*   /\ Inv318_1_4_def
+\*   /\ Inv331_1_5_def
+\*   /\ Inv334_1_6_def
+\*   /\ Inv344_1_7_def
+\*   /\ Inv1863_2_8_def
 
-\* TLAPS Proof skeleton.
-THEOREM Init => IndAuto 
- BY DEF TypeOK,Init,Next,IndAuto,TCConsistent,Inv276_1_0_def,Inv45_1_1_def,Inv79_1_2_def,Inv349_1_3_def,Inv318_1_4_def,Inv331_1_5_def,Inv334_1_6_def,Inv344_1_7_def,Inv1863_2_8_def
+\* \* TLAPS Proof skeleton.
+\* THEOREM Init => IndAuto 
+\*  BY DEF TypeOK,Init,Next,IndAuto,TCConsistent,Inv276_1_0_def,Inv45_1_1_def,Inv79_1_2_def,Inv349_1_3_def,Inv318_1_4_def,Inv331_1_5_def,Inv334_1_6_def,Inv344_1_7_def,Inv1863_2_8_def
 
-THEOREM IndAuto /\ Next => IndAuto'
-  <1> SUFFICES ASSUME IndAuto /\ Next
-               PROVE  IndAuto'
-    OBVIOUS
-  <1>1. TypeOK'
-    <2>1. (rmState \in [RM -> {"working", "prepared", "committed", "aborted"}])'
-      BY DEF TypeOK,Init,Next,IndAuto,TCConsistent, TMCommit, TMAbort, TMRcvPrepared, RMPrepare, RMChooseToAbort, RMRcvCommitMsg, RMRcvAbortMsg,Inv276_1_0_def,Inv45_1_1_def,Inv79_1_2_def,Inv349_1_3_def,Inv318_1_4_def,Inv331_1_5_def,Inv334_1_6_def,Inv344_1_7_def,Inv1863_2_8_def
-    <2>2. (tmState \in {"init", "committed", "aborted"})'
-      BY DEF TypeOK,Init,Next,IndAuto,TCConsistent, TMCommit, TMAbort, TMRcvPrepared, RMPrepare, RMChooseToAbort, RMRcvCommitMsg, RMRcvAbortMsg,Inv276_1_0_def,Inv45_1_1_def,Inv79_1_2_def,Inv349_1_3_def,Inv318_1_4_def,Inv331_1_5_def,Inv334_1_6_def,Inv344_1_7_def,Inv1863_2_8_def
-    <2>3. (tmPrepared \in SUBSET RM)'
-      <3>1. CASE TMCommit
-        BY <3>1 DEF TypeOK,Init,Next,IndAuto,TCConsistent, TMCommit, TMAbort, TMRcvPrepared, RMPrepare, RMChooseToAbort, RMRcvCommitMsg, RMRcvAbortMsg,Inv276_1_0_def,Inv45_1_1_def,Inv79_1_2_def,Inv349_1_3_def,Inv318_1_4_def,Inv331_1_5_def,Inv334_1_6_def,Inv344_1_7_def,Inv1863_2_8_def
-      <3>2. CASE TMAbort
-        BY <3>2 DEF TypeOK,Init,Next,IndAuto,TCConsistent, TMCommit, TMAbort, TMRcvPrepared, RMPrepare, RMChooseToAbort, RMRcvCommitMsg, RMRcvAbortMsg,Inv276_1_0_def,Inv45_1_1_def,Inv79_1_2_def,Inv349_1_3_def,Inv318_1_4_def,Inv331_1_5_def,Inv334_1_6_def,Inv344_1_7_def,Inv1863_2_8_def
-      <3>3. CASE \E rm \in RM : TMRcvPrepared(rm)
-        BY <3>3 DEF TypeOK,Init,Next,IndAuto,TCConsistent, TMCommit, TMAbort, TMRcvPrepared, RMPrepare, RMChooseToAbort, RMRcvCommitMsg, RMRcvAbortMsg,Inv276_1_0_def,Inv45_1_1_def,Inv79_1_2_def,Inv349_1_3_def,Inv318_1_4_def,Inv331_1_5_def,Inv334_1_6_def,Inv344_1_7_def,Inv1863_2_8_def
-      <3>4. CASE \E rm \in RM : RMPrepare(rm)
-        BY <3>4 DEF TypeOK,Init,Next,IndAuto,TCConsistent, TMCommit, TMAbort, TMRcvPrepared, RMPrepare, RMChooseToAbort, RMRcvCommitMsg, RMRcvAbortMsg,Inv276_1_0_def,Inv45_1_1_def,Inv79_1_2_def,Inv349_1_3_def,Inv318_1_4_def,Inv331_1_5_def,Inv334_1_6_def,Inv344_1_7_def,Inv1863_2_8_def
-      <3>5. CASE \E rm \in RM : RMChooseToAbort(rm)
-        BY <3>5 DEF TypeOK,Init,Next,IndAuto,TCConsistent, TMCommit, TMAbort, TMRcvPrepared, RMPrepare, RMChooseToAbort, RMRcvCommitMsg, RMRcvAbortMsg,Inv276_1_0_def,Inv45_1_1_def,Inv79_1_2_def,Inv349_1_3_def,Inv318_1_4_def,Inv331_1_5_def,Inv334_1_6_def,Inv344_1_7_def,Inv1863_2_8_def
-      <3>6. CASE \E rm \in RM : RMRcvCommitMsg(rm)
-        BY <3>6 DEF TypeOK,Init,Next,IndAuto,TCConsistent, TMCommit, TMAbort, TMRcvPrepared, RMPrepare, RMChooseToAbort, RMRcvCommitMsg, RMRcvAbortMsg,Inv276_1_0_def,Inv45_1_1_def,Inv79_1_2_def,Inv349_1_3_def,Inv318_1_4_def,Inv331_1_5_def,Inv334_1_6_def,Inv344_1_7_def,Inv1863_2_8_def
-      <3>7. CASE \E rm \in RM : RMRcvAbortMsg(rm)
-        BY <3>7 DEF TypeOK,Init,Next,IndAuto,TCConsistent, TMCommit, TMAbort, TMRcvPrepared, RMPrepare, RMChooseToAbort, RMRcvCommitMsg, RMRcvAbortMsg,Inv276_1_0_def,Inv45_1_1_def,Inv79_1_2_def,Inv349_1_3_def,Inv318_1_4_def,Inv331_1_5_def,Inv334_1_6_def,Inv344_1_7_def,Inv1863_2_8_def
-      <3>8. QED
-        BY <3>1, <3>2, <3>3, <3>4, <3>5, <3>6, <3>7 DEF Next
+\* THEOREM IndAuto /\ Next => IndAuto'
+\*   <1> SUFFICES ASSUME IndAuto /\ Next
+\*                PROVE  IndAuto'
+\*     OBVIOUS
+\*   <1>1. TypeOK'
+\*     <2>1. (rmState \in [RM -> {"working", "prepared", "committed", "aborted"}])'
+\*       BY DEF TypeOK,Init,Next,IndAuto,TCConsistent, TMCommit, TMAbort, TMRcvPrepared, RMPrepare, RMChooseToAbort, RMRcvCommitMsg, RMRcvAbortMsg,Inv276_1_0_def,Inv45_1_1_def,Inv79_1_2_def,Inv349_1_3_def,Inv318_1_4_def,Inv331_1_5_def,Inv334_1_6_def,Inv344_1_7_def,Inv1863_2_8_def
+\*     <2>2. (tmState \in {"init", "committed", "aborted"})'
+\*       BY DEF TypeOK,Init,Next,IndAuto,TCConsistent, TMCommit, TMAbort, TMRcvPrepared, RMPrepare, RMChooseToAbort, RMRcvCommitMsg, RMRcvAbortMsg,Inv276_1_0_def,Inv45_1_1_def,Inv79_1_2_def,Inv349_1_3_def,Inv318_1_4_def,Inv331_1_5_def,Inv334_1_6_def,Inv344_1_7_def,Inv1863_2_8_def
+\*     <2>3. (tmPrepared \in SUBSET RM)'
+\*       <3>1. CASE TMCommit
+\*         BY <3>1 DEF TypeOK,Init,Next,IndAuto,TCConsistent, TMCommit, TMAbort, TMRcvPrepared, RMPrepare, RMChooseToAbort, RMRcvCommitMsg, RMRcvAbortMsg,Inv276_1_0_def,Inv45_1_1_def,Inv79_1_2_def,Inv349_1_3_def,Inv318_1_4_def,Inv331_1_5_def,Inv334_1_6_def,Inv344_1_7_def,Inv1863_2_8_def
+\*       <3>2. CASE TMAbort
+\*         BY <3>2 DEF TypeOK,Init,Next,IndAuto,TCConsistent, TMCommit, TMAbort, TMRcvPrepared, RMPrepare, RMChooseToAbort, RMRcvCommitMsg, RMRcvAbortMsg,Inv276_1_0_def,Inv45_1_1_def,Inv79_1_2_def,Inv349_1_3_def,Inv318_1_4_def,Inv331_1_5_def,Inv334_1_6_def,Inv344_1_7_def,Inv1863_2_8_def
+\*       <3>3. CASE \E rm \in RM : TMRcvPrepared(rm)
+\*         BY <3>3 DEF TypeOK,Init,Next,IndAuto,TCConsistent, TMCommit, TMAbort, TMRcvPrepared, RMPrepare, RMChooseToAbort, RMRcvCommitMsg, RMRcvAbortMsg,Inv276_1_0_def,Inv45_1_1_def,Inv79_1_2_def,Inv349_1_3_def,Inv318_1_4_def,Inv331_1_5_def,Inv334_1_6_def,Inv344_1_7_def,Inv1863_2_8_def
+\*       <3>4. CASE \E rm \in RM : RMPrepare(rm)
+\*         BY <3>4 DEF TypeOK,Init,Next,IndAuto,TCConsistent, TMCommit, TMAbort, TMRcvPrepared, RMPrepare, RMChooseToAbort, RMRcvCommitMsg, RMRcvAbortMsg,Inv276_1_0_def,Inv45_1_1_def,Inv79_1_2_def,Inv349_1_3_def,Inv318_1_4_def,Inv331_1_5_def,Inv334_1_6_def,Inv344_1_7_def,Inv1863_2_8_def
+\*       <3>5. CASE \E rm \in RM : RMChooseToAbort(rm)
+\*         BY <3>5 DEF TypeOK,Init,Next,IndAuto,TCConsistent, TMCommit, TMAbort, TMRcvPrepared, RMPrepare, RMChooseToAbort, RMRcvCommitMsg, RMRcvAbortMsg,Inv276_1_0_def,Inv45_1_1_def,Inv79_1_2_def,Inv349_1_3_def,Inv318_1_4_def,Inv331_1_5_def,Inv334_1_6_def,Inv344_1_7_def,Inv1863_2_8_def
+\*       <3>6. CASE \E rm \in RM : RMRcvCommitMsg(rm)
+\*         BY <3>6 DEF TypeOK,Init,Next,IndAuto,TCConsistent, TMCommit, TMAbort, TMRcvPrepared, RMPrepare, RMChooseToAbort, RMRcvCommitMsg, RMRcvAbortMsg,Inv276_1_0_def,Inv45_1_1_def,Inv79_1_2_def,Inv349_1_3_def,Inv318_1_4_def,Inv331_1_5_def,Inv334_1_6_def,Inv344_1_7_def,Inv1863_2_8_def
+\*       <3>7. CASE \E rm \in RM : RMRcvAbortMsg(rm)
+\*         BY <3>7 DEF TypeOK,Init,Next,IndAuto,TCConsistent, TMCommit, TMAbort, TMRcvPrepared, RMPrepare, RMChooseToAbort, RMRcvCommitMsg, RMRcvAbortMsg,Inv276_1_0_def,Inv45_1_1_def,Inv79_1_2_def,Inv349_1_3_def,Inv318_1_4_def,Inv331_1_5_def,Inv334_1_6_def,Inv344_1_7_def,Inv1863_2_8_def
+\*       <3>8. QED
+\*         BY <3>1, <3>2, <3>3, <3>4, <3>5, <3>6, <3>7 DEF Next
       
-    <2>4. (msgs \in SUBSET Message)'
-      <3>1. CASE TMCommit
-        BY <3>1 DEF IndAuto, TypeOK, TMCommit, Message
-      <3>2. CASE TMAbort
-        BY <3>2 DEF IndAuto, TypeOK, TMAbort, Message
-      <3>3. CASE \E rm \in RM : TMRcvPrepared(rm)
-        BY <3>3 DEF TypeOK,Init,Next,IndAuto,TCConsistent, TMCommit, TMAbort, TMRcvPrepared, RMPrepare, RMChooseToAbort, RMRcvCommitMsg, RMRcvAbortMsg,Inv276_1_0_def,Inv45_1_1_def,Inv79_1_2_def,Inv349_1_3_def,Inv318_1_4_def,Inv331_1_5_def,Inv334_1_6_def,Inv344_1_7_def,Inv1863_2_8_def
-      <3>4. CASE \E rm \in RM : RMPrepare(rm)
-         <4>.  PICK rmm \in RM : RMPrepare(rmm) BY <3>4
-         <4>1. msgs \in SUBSET ([type : {"Prepared"}, rm : RM]  \cup  [type : {"Commit", "Abort"}])
-             BY DEF IndAuto, TypeOK, Message
-         <4>2. {[type |-> "Prepared", rm |-> rmm]} \in SUBSET [type : {"Prepared"}, rm : RM]
-             OBVIOUS
-         <4>. QED BY <4>1, <4>2 DEF IndAuto, TypeOK, RMPrepare, Message
-      <3>5. CASE \E rm \in RM : RMChooseToAbort(rm)
-        BY <3>5 DEF TypeOK,Init,Next,IndAuto,TCConsistent, TMCommit, TMAbort, TMRcvPrepared, RMPrepare, RMChooseToAbort, RMRcvCommitMsg, RMRcvAbortMsg,Inv276_1_0_def,Inv45_1_1_def,Inv79_1_2_def,Inv349_1_3_def,Inv318_1_4_def,Inv331_1_5_def,Inv334_1_6_def,Inv344_1_7_def,Inv1863_2_8_def
-      <3>6. CASE \E rm \in RM : RMRcvCommitMsg(rm)
-        BY <3>6 DEF TypeOK,Init,Next,IndAuto,TCConsistent, TMCommit, TMAbort, TMRcvPrepared, RMPrepare, RMChooseToAbort, RMRcvCommitMsg, RMRcvAbortMsg,Inv276_1_0_def,Inv45_1_1_def,Inv79_1_2_def,Inv349_1_3_def,Inv318_1_4_def,Inv331_1_5_def,Inv334_1_6_def,Inv344_1_7_def,Inv1863_2_8_def
-      <3>7. CASE \E rm \in RM : RMRcvAbortMsg(rm)
-        BY <3>7 DEF TypeOK,Init,Next,IndAuto,TCConsistent, TMCommit, TMAbort, TMRcvPrepared, RMPrepare, RMChooseToAbort, RMRcvCommitMsg, RMRcvAbortMsg,Inv276_1_0_def,Inv45_1_1_def,Inv79_1_2_def,Inv349_1_3_def,Inv318_1_4_def,Inv331_1_5_def,Inv334_1_6_def,Inv344_1_7_def,Inv1863_2_8_def
-      <3>8. QED
-        BY <3>1, <3>2, <3>3, <3>4, <3>5, <3>6, <3>7 DEF Next
+\*     <2>4. (msgs \in SUBSET Message)'
+\*       <3>1. CASE TMCommit
+\*         BY <3>1 DEF IndAuto, TypeOK, TMCommit, Message
+\*       <3>2. CASE TMAbort
+\*         BY <3>2 DEF IndAuto, TypeOK, TMAbort, Message
+\*       <3>3. CASE \E rm \in RM : TMRcvPrepared(rm)
+\*         BY <3>3 DEF TypeOK,Init,Next,IndAuto,TCConsistent, TMCommit, TMAbort, TMRcvPrepared, RMPrepare, RMChooseToAbort, RMRcvCommitMsg, RMRcvAbortMsg,Inv276_1_0_def,Inv45_1_1_def,Inv79_1_2_def,Inv349_1_3_def,Inv318_1_4_def,Inv331_1_5_def,Inv334_1_6_def,Inv344_1_7_def,Inv1863_2_8_def
+\*       <3>4. CASE \E rm \in RM : RMPrepare(rm)
+\*          <4>.  PICK rmm \in RM : RMPrepare(rmm) BY <3>4
+\*          <4>1. msgs \in SUBSET ([type : {"Prepared"}, rm : RM]  \cup  [type : {"Commit", "Abort"}])
+\*              BY DEF IndAuto, TypeOK, Message
+\*          <4>2. {[type |-> "Prepared", rm |-> rmm]} \in SUBSET [type : {"Prepared"}, rm : RM]
+\*              OBVIOUS
+\*          <4>. QED BY <4>1, <4>2 DEF IndAuto, TypeOK, RMPrepare, Message
+\*       <3>5. CASE \E rm \in RM : RMChooseToAbort(rm)
+\*         BY <3>5 DEF TypeOK,Init,Next,IndAuto,TCConsistent, TMCommit, TMAbort, TMRcvPrepared, RMPrepare, RMChooseToAbort, RMRcvCommitMsg, RMRcvAbortMsg,Inv276_1_0_def,Inv45_1_1_def,Inv79_1_2_def,Inv349_1_3_def,Inv318_1_4_def,Inv331_1_5_def,Inv334_1_6_def,Inv344_1_7_def,Inv1863_2_8_def
+\*       <3>6. CASE \E rm \in RM : RMRcvCommitMsg(rm)
+\*         BY <3>6 DEF TypeOK,Init,Next,IndAuto,TCConsistent, TMCommit, TMAbort, TMRcvPrepared, RMPrepare, RMChooseToAbort, RMRcvCommitMsg, RMRcvAbortMsg,Inv276_1_0_def,Inv45_1_1_def,Inv79_1_2_def,Inv349_1_3_def,Inv318_1_4_def,Inv331_1_5_def,Inv334_1_6_def,Inv344_1_7_def,Inv1863_2_8_def
+\*       <3>7. CASE \E rm \in RM : RMRcvAbortMsg(rm)
+\*         BY <3>7 DEF TypeOK,Init,Next,IndAuto,TCConsistent, TMCommit, TMAbort, TMRcvPrepared, RMPrepare, RMChooseToAbort, RMRcvCommitMsg, RMRcvAbortMsg,Inv276_1_0_def,Inv45_1_1_def,Inv79_1_2_def,Inv349_1_3_def,Inv318_1_4_def,Inv331_1_5_def,Inv334_1_6_def,Inv344_1_7_def,Inv1863_2_8_def
+\*       <3>8. QED
+\*         BY <3>1, <3>2, <3>3, <3>4, <3>5, <3>6, <3>7 DEF Next
       
-    <2>5. QED
-      BY <2>1, <2>2, <2>3, <2>4 DEF TypeOK
+\*     <2>5. QED
+\*       BY <2>1, <2>2, <2>3, <2>4 DEF TypeOK
     
-  <1>2. TCConsistent'
-    <2>1. CASE TMCommit
-      BY <2>1 DEF TypeOK,Init,Next,IndAuto,TCConsistent, TMCommit, TMAbort, TMRcvPrepared, RMPrepare, RMChooseToAbort, RMRcvCommitMsg, RMRcvAbortMsg,Inv276_1_0_def,Inv45_1_1_def,Inv79_1_2_def,Inv349_1_3_def,Inv318_1_4_def,Inv331_1_5_def,Inv334_1_6_def,Inv344_1_7_def,Inv1863_2_8_def
-    <2>2. CASE TMAbort
-      BY <2>2 DEF TypeOK,Init,Next,IndAuto,TCConsistent, TMCommit, TMAbort, TMRcvPrepared, RMPrepare, RMChooseToAbort, RMRcvCommitMsg, RMRcvAbortMsg,Inv276_1_0_def,Inv45_1_1_def,Inv79_1_2_def,Inv349_1_3_def,Inv318_1_4_def,Inv331_1_5_def,Inv334_1_6_def,Inv344_1_7_def,Inv1863_2_8_def
-    <2>3. CASE \E rm \in RM : TMRcvPrepared(rm)
-      BY <2>3 DEF TypeOK,Init,Next,IndAuto,TCConsistent, TMCommit, TMAbort, TMRcvPrepared, RMPrepare, RMChooseToAbort, RMRcvCommitMsg, RMRcvAbortMsg,Inv276_1_0_def,Inv45_1_1_def,Inv79_1_2_def,Inv349_1_3_def,Inv318_1_4_def,Inv331_1_5_def,Inv334_1_6_def,Inv344_1_7_def,Inv1863_2_8_def
-    <2>4. CASE \E rm \in RM : RMPrepare(rm)
-      BY <2>4 DEF TypeOK,Init,Next,IndAuto,TCConsistent, TMCommit, TMAbort, TMRcvPrepared, RMPrepare, RMChooseToAbort, RMRcvCommitMsg, RMRcvAbortMsg,Inv276_1_0_def,Inv45_1_1_def,Inv79_1_2_def,Inv349_1_3_def,Inv318_1_4_def,Inv331_1_5_def,Inv334_1_6_def,Inv344_1_7_def,Inv1863_2_8_def
-    <2>5. CASE \E rm \in RM : RMChooseToAbort(rm)
-      BY <2>5 DEF TypeOK,Init,Next,IndAuto,TCConsistent, TMCommit, TMAbort, TMRcvPrepared, RMPrepare, RMChooseToAbort, RMRcvCommitMsg, RMRcvAbortMsg,Inv276_1_0_def,Inv45_1_1_def,Inv79_1_2_def,Inv349_1_3_def,Inv318_1_4_def,Inv331_1_5_def,Inv334_1_6_def,Inv344_1_7_def,Inv1863_2_8_def
-    <2>6. CASE \E rm \in RM : RMRcvCommitMsg(rm)
-      BY <2>6 DEF TypeOK,Init,Next,IndAuto,TCConsistent, TMCommit, TMAbort, TMRcvPrepared, RMPrepare, RMChooseToAbort, RMRcvCommitMsg, RMRcvAbortMsg,Inv276_1_0_def,Inv45_1_1_def,Inv79_1_2_def,Inv349_1_3_def,Inv318_1_4_def,Inv331_1_5_def,Inv334_1_6_def,Inv344_1_7_def,Inv1863_2_8_def
-    <2>7. CASE \E rm \in RM : RMRcvAbortMsg(rm)
-      BY <2>7 DEF TypeOK,Init,Next,IndAuto,TCConsistent, TMCommit, TMAbort, TMRcvPrepared, RMPrepare, RMChooseToAbort, RMRcvCommitMsg, RMRcvAbortMsg,Inv276_1_0_def,Inv45_1_1_def,Inv79_1_2_def,Inv349_1_3_def,Inv318_1_4_def,Inv331_1_5_def,Inv334_1_6_def,Inv344_1_7_def,Inv1863_2_8_def
-    <2>8. QED
-      BY <2>1, <2>2, <2>3, <2>4, <2>5, <2>6, <2>7 DEF Next
+\*   <1>2. TCConsistent'
+\*     <2>1. CASE TMCommit
+\*       BY <2>1 DEF TypeOK,Init,Next,IndAuto,TCConsistent, TMCommit, TMAbort, TMRcvPrepared, RMPrepare, RMChooseToAbort, RMRcvCommitMsg, RMRcvAbortMsg,Inv276_1_0_def,Inv45_1_1_def,Inv79_1_2_def,Inv349_1_3_def,Inv318_1_4_def,Inv331_1_5_def,Inv334_1_6_def,Inv344_1_7_def,Inv1863_2_8_def
+\*     <2>2. CASE TMAbort
+\*       BY <2>2 DEF TypeOK,Init,Next,IndAuto,TCConsistent, TMCommit, TMAbort, TMRcvPrepared, RMPrepare, RMChooseToAbort, RMRcvCommitMsg, RMRcvAbortMsg,Inv276_1_0_def,Inv45_1_1_def,Inv79_1_2_def,Inv349_1_3_def,Inv318_1_4_def,Inv331_1_5_def,Inv334_1_6_def,Inv344_1_7_def,Inv1863_2_8_def
+\*     <2>3. CASE \E rm \in RM : TMRcvPrepared(rm)
+\*       BY <2>3 DEF TypeOK,Init,Next,IndAuto,TCConsistent, TMCommit, TMAbort, TMRcvPrepared, RMPrepare, RMChooseToAbort, RMRcvCommitMsg, RMRcvAbortMsg,Inv276_1_0_def,Inv45_1_1_def,Inv79_1_2_def,Inv349_1_3_def,Inv318_1_4_def,Inv331_1_5_def,Inv334_1_6_def,Inv344_1_7_def,Inv1863_2_8_def
+\*     <2>4. CASE \E rm \in RM : RMPrepare(rm)
+\*       BY <2>4 DEF TypeOK,Init,Next,IndAuto,TCConsistent, TMCommit, TMAbort, TMRcvPrepared, RMPrepare, RMChooseToAbort, RMRcvCommitMsg, RMRcvAbortMsg,Inv276_1_0_def,Inv45_1_1_def,Inv79_1_2_def,Inv349_1_3_def,Inv318_1_4_def,Inv331_1_5_def,Inv334_1_6_def,Inv344_1_7_def,Inv1863_2_8_def
+\*     <2>5. CASE \E rm \in RM : RMChooseToAbort(rm)
+\*       BY <2>5 DEF TypeOK,Init,Next,IndAuto,TCConsistent, TMCommit, TMAbort, TMRcvPrepared, RMPrepare, RMChooseToAbort, RMRcvCommitMsg, RMRcvAbortMsg,Inv276_1_0_def,Inv45_1_1_def,Inv79_1_2_def,Inv349_1_3_def,Inv318_1_4_def,Inv331_1_5_def,Inv334_1_6_def,Inv344_1_7_def,Inv1863_2_8_def
+\*     <2>6. CASE \E rm \in RM : RMRcvCommitMsg(rm)
+\*       BY <2>6 DEF TypeOK,Init,Next,IndAuto,TCConsistent, TMCommit, TMAbort, TMRcvPrepared, RMPrepare, RMChooseToAbort, RMRcvCommitMsg, RMRcvAbortMsg,Inv276_1_0_def,Inv45_1_1_def,Inv79_1_2_def,Inv349_1_3_def,Inv318_1_4_def,Inv331_1_5_def,Inv334_1_6_def,Inv344_1_7_def,Inv1863_2_8_def
+\*     <2>7. CASE \E rm \in RM : RMRcvAbortMsg(rm)
+\*       BY <2>7 DEF TypeOK,Init,Next,IndAuto,TCConsistent, TMCommit, TMAbort, TMRcvPrepared, RMPrepare, RMChooseToAbort, RMRcvCommitMsg, RMRcvAbortMsg,Inv276_1_0_def,Inv45_1_1_def,Inv79_1_2_def,Inv349_1_3_def,Inv318_1_4_def,Inv331_1_5_def,Inv334_1_6_def,Inv344_1_7_def,Inv1863_2_8_def
+\*     <2>8. QED
+\*       BY <2>1, <2>2, <2>3, <2>4, <2>5, <2>6, <2>7 DEF Next
     
-  <1>3. Inv276_1_0_def'
-    <2>1. CASE TMCommit
-      BY <2>1 DEF TypeOK,Init,Next,IndAuto,TCConsistent, TMCommit, TMAbort, TMRcvPrepared, RMPrepare, RMChooseToAbort, RMRcvCommitMsg, RMRcvAbortMsg,Inv276_1_0_def,Inv45_1_1_def,Inv79_1_2_def,Inv349_1_3_def,Inv318_1_4_def,Inv331_1_5_def,Inv334_1_6_def,Inv344_1_7_def,Inv1863_2_8_def
-    <2>2. CASE TMAbort
-      BY <2>2 DEF TypeOK,Init,Next,IndAuto,TCConsistent, TMCommit, TMAbort, TMRcvPrepared, RMPrepare, RMChooseToAbort, RMRcvCommitMsg, RMRcvAbortMsg,Inv276_1_0_def,Inv45_1_1_def,Inv79_1_2_def,Inv349_1_3_def,Inv318_1_4_def,Inv331_1_5_def,Inv334_1_6_def,Inv344_1_7_def,Inv1863_2_8_def
-    <2>3. CASE \E rm \in RM : TMRcvPrepared(rm)
-      BY <2>3 DEF TypeOK,Init,Next,IndAuto,TCConsistent, TMCommit, TMAbort, TMRcvPrepared, RMPrepare, RMChooseToAbort, RMRcvCommitMsg, RMRcvAbortMsg,Inv276_1_0_def,Inv45_1_1_def,Inv79_1_2_def,Inv349_1_3_def,Inv318_1_4_def,Inv331_1_5_def,Inv334_1_6_def,Inv344_1_7_def,Inv1863_2_8_def
-    <2>4. CASE \E rm \in RM : RMPrepare(rm)
-      BY <2>4 DEF TypeOK,Init,Next,IndAuto,TCConsistent, TMCommit, TMAbort, TMRcvPrepared, RMPrepare, RMChooseToAbort, RMRcvCommitMsg, RMRcvAbortMsg,Inv276_1_0_def,Inv45_1_1_def,Inv79_1_2_def,Inv349_1_3_def,Inv318_1_4_def,Inv331_1_5_def,Inv334_1_6_def,Inv344_1_7_def,Inv1863_2_8_def
-    <2>5. CASE \E rm \in RM : RMChooseToAbort(rm)
-      BY <2>5 DEF TypeOK,Init,Next,IndAuto,TCConsistent, TMCommit, TMAbort, TMRcvPrepared, RMPrepare, RMChooseToAbort, RMRcvCommitMsg, RMRcvAbortMsg,Inv276_1_0_def,Inv45_1_1_def,Inv79_1_2_def,Inv349_1_3_def,Inv318_1_4_def,Inv331_1_5_def,Inv334_1_6_def,Inv344_1_7_def,Inv1863_2_8_def
-    <2>6. CASE \E rm \in RM : RMRcvCommitMsg(rm)
-      BY <2>6 DEF TypeOK,Init,Next,IndAuto,TCConsistent, TMCommit, TMAbort, TMRcvPrepared, RMPrepare, RMChooseToAbort, RMRcvCommitMsg, RMRcvAbortMsg,Inv276_1_0_def,Inv45_1_1_def,Inv79_1_2_def,Inv349_1_3_def,Inv318_1_4_def,Inv331_1_5_def,Inv334_1_6_def,Inv344_1_7_def,Inv1863_2_8_def
-    <2>7. CASE \E rm \in RM : RMRcvAbortMsg(rm)
-      BY <2>7 DEF TypeOK,Init,Next,IndAuto,TCConsistent, TMCommit, TMAbort, TMRcvPrepared, RMPrepare, RMChooseToAbort, RMRcvCommitMsg, RMRcvAbortMsg,Inv276_1_0_def,Inv45_1_1_def,Inv79_1_2_def,Inv349_1_3_def,Inv318_1_4_def,Inv331_1_5_def,Inv334_1_6_def,Inv344_1_7_def,Inv1863_2_8_def
-    <2>8. QED
-      BY <2>1, <2>2, <2>3, <2>4, <2>5, <2>6, <2>7 DEF Next
+\*   <1>3. Inv276_1_0_def'
+\*     <2>1. CASE TMCommit
+\*       BY <2>1 DEF TypeOK,Init,Next,IndAuto,TCConsistent, TMCommit, TMAbort, TMRcvPrepared, RMPrepare, RMChooseToAbort, RMRcvCommitMsg, RMRcvAbortMsg,Inv276_1_0_def,Inv45_1_1_def,Inv79_1_2_def,Inv349_1_3_def,Inv318_1_4_def,Inv331_1_5_def,Inv334_1_6_def,Inv344_1_7_def,Inv1863_2_8_def
+\*     <2>2. CASE TMAbort
+\*       BY <2>2 DEF TypeOK,Init,Next,IndAuto,TCConsistent, TMCommit, TMAbort, TMRcvPrepared, RMPrepare, RMChooseToAbort, RMRcvCommitMsg, RMRcvAbortMsg,Inv276_1_0_def,Inv45_1_1_def,Inv79_1_2_def,Inv349_1_3_def,Inv318_1_4_def,Inv331_1_5_def,Inv334_1_6_def,Inv344_1_7_def,Inv1863_2_8_def
+\*     <2>3. CASE \E rm \in RM : TMRcvPrepared(rm)
+\*       BY <2>3 DEF TypeOK,Init,Next,IndAuto,TCConsistent, TMCommit, TMAbort, TMRcvPrepared, RMPrepare, RMChooseToAbort, RMRcvCommitMsg, RMRcvAbortMsg,Inv276_1_0_def,Inv45_1_1_def,Inv79_1_2_def,Inv349_1_3_def,Inv318_1_4_def,Inv331_1_5_def,Inv334_1_6_def,Inv344_1_7_def,Inv1863_2_8_def
+\*     <2>4. CASE \E rm \in RM : RMPrepare(rm)
+\*       BY <2>4 DEF TypeOK,Init,Next,IndAuto,TCConsistent, TMCommit, TMAbort, TMRcvPrepared, RMPrepare, RMChooseToAbort, RMRcvCommitMsg, RMRcvAbortMsg,Inv276_1_0_def,Inv45_1_1_def,Inv79_1_2_def,Inv349_1_3_def,Inv318_1_4_def,Inv331_1_5_def,Inv334_1_6_def,Inv344_1_7_def,Inv1863_2_8_def
+\*     <2>5. CASE \E rm \in RM : RMChooseToAbort(rm)
+\*       BY <2>5 DEF TypeOK,Init,Next,IndAuto,TCConsistent, TMCommit, TMAbort, TMRcvPrepared, RMPrepare, RMChooseToAbort, RMRcvCommitMsg, RMRcvAbortMsg,Inv276_1_0_def,Inv45_1_1_def,Inv79_1_2_def,Inv349_1_3_def,Inv318_1_4_def,Inv331_1_5_def,Inv334_1_6_def,Inv344_1_7_def,Inv1863_2_8_def
+\*     <2>6. CASE \E rm \in RM : RMRcvCommitMsg(rm)
+\*       BY <2>6 DEF TypeOK,Init,Next,IndAuto,TCConsistent, TMCommit, TMAbort, TMRcvPrepared, RMPrepare, RMChooseToAbort, RMRcvCommitMsg, RMRcvAbortMsg,Inv276_1_0_def,Inv45_1_1_def,Inv79_1_2_def,Inv349_1_3_def,Inv318_1_4_def,Inv331_1_5_def,Inv334_1_6_def,Inv344_1_7_def,Inv1863_2_8_def
+\*     <2>7. CASE \E rm \in RM : RMRcvAbortMsg(rm)
+\*       BY <2>7 DEF TypeOK,Init,Next,IndAuto,TCConsistent, TMCommit, TMAbort, TMRcvPrepared, RMPrepare, RMChooseToAbort, RMRcvCommitMsg, RMRcvAbortMsg,Inv276_1_0_def,Inv45_1_1_def,Inv79_1_2_def,Inv349_1_3_def,Inv318_1_4_def,Inv331_1_5_def,Inv334_1_6_def,Inv344_1_7_def,Inv1863_2_8_def
+\*     <2>8. QED
+\*       BY <2>1, <2>2, <2>3, <2>4, <2>5, <2>6, <2>7 DEF Next
     
-  <1>4. Inv45_1_1_def'
-    BY DEF TypeOK,Init,Next,IndAuto,TCConsistent, TMCommit, TMAbort, TMRcvPrepared, RMPrepare, RMChooseToAbort, RMRcvCommitMsg, RMRcvAbortMsg,Inv276_1_0_def,Inv45_1_1_def,Inv79_1_2_def,Inv349_1_3_def,Inv318_1_4_def,Inv331_1_5_def,Inv334_1_6_def,Inv344_1_7_def,Inv1863_2_8_def
-  <1>5. Inv79_1_2_def'
-    BY DEF TypeOK,Init,Next,IndAuto,TCConsistent, TMCommit, TMAbort, TMRcvPrepared, RMPrepare, RMChooseToAbort, RMRcvCommitMsg, RMRcvAbortMsg,Inv276_1_0_def,Inv45_1_1_def,Inv79_1_2_def,Inv349_1_3_def,Inv318_1_4_def,Inv331_1_5_def,Inv334_1_6_def,Inv344_1_7_def,Inv1863_2_8_def
-  <1>6. Inv349_1_3_def'
-    <2>1. CASE TMCommit
-      BY <2>1 DEF TypeOK,Init,Next,IndAuto,TCConsistent, TMCommit, TMAbort, TMRcvPrepared, RMPrepare, RMChooseToAbort, RMRcvCommitMsg, RMRcvAbortMsg,Inv276_1_0_def,Inv45_1_1_def,Inv79_1_2_def,Inv349_1_3_def,Inv318_1_4_def,Inv331_1_5_def,Inv334_1_6_def,Inv344_1_7_def,Inv1863_2_8_def
-    <2>2. CASE TMAbort
-      BY <2>2 DEF TypeOK,Init,Next,IndAuto,TCConsistent, TMCommit, TMAbort, TMRcvPrepared, RMPrepare, RMChooseToAbort, RMRcvCommitMsg, RMRcvAbortMsg,Inv276_1_0_def,Inv45_1_1_def,Inv79_1_2_def,Inv349_1_3_def,Inv318_1_4_def,Inv331_1_5_def,Inv334_1_6_def,Inv344_1_7_def,Inv1863_2_8_def
-    <2>3. CASE \E rm \in RM : TMRcvPrepared(rm)
-      BY <2>3 DEF TypeOK,Init,Next,IndAuto,TCConsistent, TMCommit, TMAbort, TMRcvPrepared, RMPrepare, RMChooseToAbort, RMRcvCommitMsg, RMRcvAbortMsg,Inv276_1_0_def,Inv45_1_1_def,Inv79_1_2_def,Inv349_1_3_def,Inv318_1_4_def,Inv331_1_5_def,Inv334_1_6_def,Inv344_1_7_def,Inv1863_2_8_def
-    <2>4. CASE \E rm \in RM : RMPrepare(rm)
-      BY <2>4 DEF TypeOK,Init,Next,IndAuto,TCConsistent, TMCommit, TMAbort, TMRcvPrepared, RMPrepare, RMChooseToAbort, RMRcvCommitMsg, RMRcvAbortMsg,Inv276_1_0_def,Inv45_1_1_def,Inv79_1_2_def,Inv349_1_3_def,Inv318_1_4_def,Inv331_1_5_def,Inv334_1_6_def,Inv344_1_7_def,Inv1863_2_8_def
-    <2>5. CASE \E rm \in RM : RMChooseToAbort(rm)
-      BY <2>5 DEF TypeOK,Init,Next,IndAuto,TCConsistent, TMCommit, TMAbort, TMRcvPrepared, RMPrepare, RMChooseToAbort, RMRcvCommitMsg, RMRcvAbortMsg,Inv276_1_0_def,Inv45_1_1_def,Inv79_1_2_def,Inv349_1_3_def,Inv318_1_4_def,Inv331_1_5_def,Inv334_1_6_def,Inv344_1_7_def,Inv1863_2_8_def
-    <2>6. CASE \E rm \in RM : RMRcvCommitMsg(rm)
-      BY <2>6 DEF TypeOK,Init,Next,IndAuto,TCConsistent, TMCommit, TMAbort, TMRcvPrepared, RMPrepare, RMChooseToAbort, RMRcvCommitMsg, RMRcvAbortMsg,Inv276_1_0_def,Inv45_1_1_def,Inv79_1_2_def,Inv349_1_3_def,Inv318_1_4_def,Inv331_1_5_def,Inv334_1_6_def,Inv344_1_7_def,Inv1863_2_8_def
-    <2>7. CASE \E rm \in RM : RMRcvAbortMsg(rm)
-      BY <2>7 DEF TypeOK,Init,Next,IndAuto,TCConsistent, TMCommit, TMAbort, TMRcvPrepared, RMPrepare, RMChooseToAbort, RMRcvCommitMsg, RMRcvAbortMsg,Inv276_1_0_def,Inv45_1_1_def,Inv79_1_2_def,Inv349_1_3_def,Inv318_1_4_def,Inv331_1_5_def,Inv334_1_6_def,Inv344_1_7_def,Inv1863_2_8_def
-    <2>8. QED
-      BY <2>1, <2>2, <2>3, <2>4, <2>5, <2>6, <2>7 DEF Next
+\*   <1>4. Inv45_1_1_def'
+\*     BY DEF TypeOK,Init,Next,IndAuto,TCConsistent, TMCommit, TMAbort, TMRcvPrepared, RMPrepare, RMChooseToAbort, RMRcvCommitMsg, RMRcvAbortMsg,Inv276_1_0_def,Inv45_1_1_def,Inv79_1_2_def,Inv349_1_3_def,Inv318_1_4_def,Inv331_1_5_def,Inv334_1_6_def,Inv344_1_7_def,Inv1863_2_8_def
+\*   <1>5. Inv79_1_2_def'
+\*     BY DEF TypeOK,Init,Next,IndAuto,TCConsistent, TMCommit, TMAbort, TMRcvPrepared, RMPrepare, RMChooseToAbort, RMRcvCommitMsg, RMRcvAbortMsg,Inv276_1_0_def,Inv45_1_1_def,Inv79_1_2_def,Inv349_1_3_def,Inv318_1_4_def,Inv331_1_5_def,Inv334_1_6_def,Inv344_1_7_def,Inv1863_2_8_def
+\*   <1>6. Inv349_1_3_def'
+\*     <2>1. CASE TMCommit
+\*       BY <2>1 DEF TypeOK,Init,Next,IndAuto,TCConsistent, TMCommit, TMAbort, TMRcvPrepared, RMPrepare, RMChooseToAbort, RMRcvCommitMsg, RMRcvAbortMsg,Inv276_1_0_def,Inv45_1_1_def,Inv79_1_2_def,Inv349_1_3_def,Inv318_1_4_def,Inv331_1_5_def,Inv334_1_6_def,Inv344_1_7_def,Inv1863_2_8_def
+\*     <2>2. CASE TMAbort
+\*       BY <2>2 DEF TypeOK,Init,Next,IndAuto,TCConsistent, TMCommit, TMAbort, TMRcvPrepared, RMPrepare, RMChooseToAbort, RMRcvCommitMsg, RMRcvAbortMsg,Inv276_1_0_def,Inv45_1_1_def,Inv79_1_2_def,Inv349_1_3_def,Inv318_1_4_def,Inv331_1_5_def,Inv334_1_6_def,Inv344_1_7_def,Inv1863_2_8_def
+\*     <2>3. CASE \E rm \in RM : TMRcvPrepared(rm)
+\*       BY <2>3 DEF TypeOK,Init,Next,IndAuto,TCConsistent, TMCommit, TMAbort, TMRcvPrepared, RMPrepare, RMChooseToAbort, RMRcvCommitMsg, RMRcvAbortMsg,Inv276_1_0_def,Inv45_1_1_def,Inv79_1_2_def,Inv349_1_3_def,Inv318_1_4_def,Inv331_1_5_def,Inv334_1_6_def,Inv344_1_7_def,Inv1863_2_8_def
+\*     <2>4. CASE \E rm \in RM : RMPrepare(rm)
+\*       BY <2>4 DEF TypeOK,Init,Next,IndAuto,TCConsistent, TMCommit, TMAbort, TMRcvPrepared, RMPrepare, RMChooseToAbort, RMRcvCommitMsg, RMRcvAbortMsg,Inv276_1_0_def,Inv45_1_1_def,Inv79_1_2_def,Inv349_1_3_def,Inv318_1_4_def,Inv331_1_5_def,Inv334_1_6_def,Inv344_1_7_def,Inv1863_2_8_def
+\*     <2>5. CASE \E rm \in RM : RMChooseToAbort(rm)
+\*       BY <2>5 DEF TypeOK,Init,Next,IndAuto,TCConsistent, TMCommit, TMAbort, TMRcvPrepared, RMPrepare, RMChooseToAbort, RMRcvCommitMsg, RMRcvAbortMsg,Inv276_1_0_def,Inv45_1_1_def,Inv79_1_2_def,Inv349_1_3_def,Inv318_1_4_def,Inv331_1_5_def,Inv334_1_6_def,Inv344_1_7_def,Inv1863_2_8_def
+\*     <2>6. CASE \E rm \in RM : RMRcvCommitMsg(rm)
+\*       BY <2>6 DEF TypeOK,Init,Next,IndAuto,TCConsistent, TMCommit, TMAbort, TMRcvPrepared, RMPrepare, RMChooseToAbort, RMRcvCommitMsg, RMRcvAbortMsg,Inv276_1_0_def,Inv45_1_1_def,Inv79_1_2_def,Inv349_1_3_def,Inv318_1_4_def,Inv331_1_5_def,Inv334_1_6_def,Inv344_1_7_def,Inv1863_2_8_def
+\*     <2>7. CASE \E rm \in RM : RMRcvAbortMsg(rm)
+\*       BY <2>7 DEF TypeOK,Init,Next,IndAuto,TCConsistent, TMCommit, TMAbort, TMRcvPrepared, RMPrepare, RMChooseToAbort, RMRcvCommitMsg, RMRcvAbortMsg,Inv276_1_0_def,Inv45_1_1_def,Inv79_1_2_def,Inv349_1_3_def,Inv318_1_4_def,Inv331_1_5_def,Inv334_1_6_def,Inv344_1_7_def,Inv1863_2_8_def
+\*     <2>8. QED
+\*       BY <2>1, <2>2, <2>3, <2>4, <2>5, <2>6, <2>7 DEF Next
     
-  <1>7. Inv318_1_4_def'
-    <2>1. CASE TMCommit
-      BY <2>1 DEF TypeOK,Init,Next,IndAuto,TCConsistent, TMCommit, TMAbort, TMRcvPrepared, RMPrepare, RMChooseToAbort, RMRcvCommitMsg, RMRcvAbortMsg,Inv276_1_0_def,Inv45_1_1_def,Inv79_1_2_def,Inv349_1_3_def,Inv318_1_4_def,Inv331_1_5_def,Inv334_1_6_def,Inv344_1_7_def,Inv1863_2_8_def
-    <2>2. CASE TMAbort
-      BY <2>2 DEF TypeOK,Init,Next,IndAuto,TCConsistent, TMCommit, TMAbort, TMRcvPrepared, RMPrepare, RMChooseToAbort, RMRcvCommitMsg, RMRcvAbortMsg,Inv276_1_0_def,Inv45_1_1_def,Inv79_1_2_def,Inv349_1_3_def,Inv318_1_4_def,Inv331_1_5_def,Inv334_1_6_def,Inv344_1_7_def,Inv1863_2_8_def
-    <2>3. CASE \E rm \in RM : TMRcvPrepared(rm)
-      BY <2>3 DEF TypeOK,Init,Next,IndAuto,TCConsistent, TMCommit, TMAbort, TMRcvPrepared, RMPrepare, RMChooseToAbort, RMRcvCommitMsg, RMRcvAbortMsg,Inv276_1_0_def,Inv45_1_1_def,Inv79_1_2_def,Inv349_1_3_def,Inv318_1_4_def,Inv331_1_5_def,Inv334_1_6_def,Inv344_1_7_def,Inv1863_2_8_def
-    <2>4. CASE \E rm \in RM : RMPrepare(rm)
-      BY <2>4 DEF TypeOK,Init,Next,IndAuto,TCConsistent, TMCommit, TMAbort, TMRcvPrepared, RMPrepare, RMChooseToAbort, RMRcvCommitMsg, RMRcvAbortMsg,Inv276_1_0_def,Inv45_1_1_def,Inv79_1_2_def,Inv349_1_3_def,Inv318_1_4_def,Inv331_1_5_def,Inv334_1_6_def,Inv344_1_7_def,Inv1863_2_8_def
-    <2>5. CASE \E rm \in RM : RMChooseToAbort(rm)
-      BY <2>5 DEF TypeOK,Init,Next,IndAuto,TCConsistent, TMCommit, TMAbort, TMRcvPrepared, RMPrepare, RMChooseToAbort, RMRcvCommitMsg, RMRcvAbortMsg,Inv276_1_0_def,Inv45_1_1_def,Inv79_1_2_def,Inv349_1_3_def,Inv318_1_4_def,Inv331_1_5_def,Inv334_1_6_def,Inv344_1_7_def,Inv1863_2_8_def
-    <2>6. CASE \E rm \in RM : RMRcvCommitMsg(rm)
-      BY <2>6 DEF TypeOK,Init,Next,IndAuto,TCConsistent, TMCommit, TMAbort, TMRcvPrepared, RMPrepare, RMChooseToAbort, RMRcvCommitMsg, RMRcvAbortMsg,Inv276_1_0_def,Inv45_1_1_def,Inv79_1_2_def,Inv349_1_3_def,Inv318_1_4_def,Inv331_1_5_def,Inv334_1_6_def,Inv344_1_7_def,Inv1863_2_8_def
-    <2>7. CASE \E rm \in RM : RMRcvAbortMsg(rm)
-      BY <2>7 DEF TypeOK,Init,Next,IndAuto,TCConsistent, TMCommit, TMAbort, TMRcvPrepared, RMPrepare, RMChooseToAbort, RMRcvCommitMsg, RMRcvAbortMsg,Inv276_1_0_def,Inv45_1_1_def,Inv79_1_2_def,Inv349_1_3_def,Inv318_1_4_def,Inv331_1_5_def,Inv334_1_6_def,Inv344_1_7_def,Inv1863_2_8_def
-    <2>8. QED
-      BY <2>1, <2>2, <2>3, <2>4, <2>5, <2>6, <2>7 DEF Next
+\*   <1>7. Inv318_1_4_def'
+\*     <2>1. CASE TMCommit
+\*       BY <2>1 DEF TypeOK,Init,Next,IndAuto,TCConsistent, TMCommit, TMAbort, TMRcvPrepared, RMPrepare, RMChooseToAbort, RMRcvCommitMsg, RMRcvAbortMsg,Inv276_1_0_def,Inv45_1_1_def,Inv79_1_2_def,Inv349_1_3_def,Inv318_1_4_def,Inv331_1_5_def,Inv334_1_6_def,Inv344_1_7_def,Inv1863_2_8_def
+\*     <2>2. CASE TMAbort
+\*       BY <2>2 DEF TypeOK,Init,Next,IndAuto,TCConsistent, TMCommit, TMAbort, TMRcvPrepared, RMPrepare, RMChooseToAbort, RMRcvCommitMsg, RMRcvAbortMsg,Inv276_1_0_def,Inv45_1_1_def,Inv79_1_2_def,Inv349_1_3_def,Inv318_1_4_def,Inv331_1_5_def,Inv334_1_6_def,Inv344_1_7_def,Inv1863_2_8_def
+\*     <2>3. CASE \E rm \in RM : TMRcvPrepared(rm)
+\*       BY <2>3 DEF TypeOK,Init,Next,IndAuto,TCConsistent, TMCommit, TMAbort, TMRcvPrepared, RMPrepare, RMChooseToAbort, RMRcvCommitMsg, RMRcvAbortMsg,Inv276_1_0_def,Inv45_1_1_def,Inv79_1_2_def,Inv349_1_3_def,Inv318_1_4_def,Inv331_1_5_def,Inv334_1_6_def,Inv344_1_7_def,Inv1863_2_8_def
+\*     <2>4. CASE \E rm \in RM : RMPrepare(rm)
+\*       BY <2>4 DEF TypeOK,Init,Next,IndAuto,TCConsistent, TMCommit, TMAbort, TMRcvPrepared, RMPrepare, RMChooseToAbort, RMRcvCommitMsg, RMRcvAbortMsg,Inv276_1_0_def,Inv45_1_1_def,Inv79_1_2_def,Inv349_1_3_def,Inv318_1_4_def,Inv331_1_5_def,Inv334_1_6_def,Inv344_1_7_def,Inv1863_2_8_def
+\*     <2>5. CASE \E rm \in RM : RMChooseToAbort(rm)
+\*       BY <2>5 DEF TypeOK,Init,Next,IndAuto,TCConsistent, TMCommit, TMAbort, TMRcvPrepared, RMPrepare, RMChooseToAbort, RMRcvCommitMsg, RMRcvAbortMsg,Inv276_1_0_def,Inv45_1_1_def,Inv79_1_2_def,Inv349_1_3_def,Inv318_1_4_def,Inv331_1_5_def,Inv334_1_6_def,Inv344_1_7_def,Inv1863_2_8_def
+\*     <2>6. CASE \E rm \in RM : RMRcvCommitMsg(rm)
+\*       BY <2>6 DEF TypeOK,Init,Next,IndAuto,TCConsistent, TMCommit, TMAbort, TMRcvPrepared, RMPrepare, RMChooseToAbort, RMRcvCommitMsg, RMRcvAbortMsg,Inv276_1_0_def,Inv45_1_1_def,Inv79_1_2_def,Inv349_1_3_def,Inv318_1_4_def,Inv331_1_5_def,Inv334_1_6_def,Inv344_1_7_def,Inv1863_2_8_def
+\*     <2>7. CASE \E rm \in RM : RMRcvAbortMsg(rm)
+\*       BY <2>7 DEF TypeOK,Init,Next,IndAuto,TCConsistent, TMCommit, TMAbort, TMRcvPrepared, RMPrepare, RMChooseToAbort, RMRcvCommitMsg, RMRcvAbortMsg,Inv276_1_0_def,Inv45_1_1_def,Inv79_1_2_def,Inv349_1_3_def,Inv318_1_4_def,Inv331_1_5_def,Inv334_1_6_def,Inv344_1_7_def,Inv1863_2_8_def
+\*     <2>8. QED
+\*       BY <2>1, <2>2, <2>3, <2>4, <2>5, <2>6, <2>7 DEF Next
     
-  <1>8. Inv331_1_5_def'
-    <2>1. CASE TMCommit
-      BY <2>1 DEF TypeOK,Init,Next,IndAuto,TCConsistent, TMCommit, TMAbort, TMRcvPrepared, RMPrepare, RMChooseToAbort, RMRcvCommitMsg, RMRcvAbortMsg,Inv276_1_0_def,Inv45_1_1_def,Inv79_1_2_def,Inv349_1_3_def,Inv318_1_4_def,Inv331_1_5_def,Inv334_1_6_def,Inv344_1_7_def,Inv1863_2_8_def
-    <2>2. CASE TMAbort
-      BY <2>2 DEF TypeOK,Init,Next,IndAuto,TCConsistent, TMCommit, TMAbort, TMRcvPrepared, RMPrepare, RMChooseToAbort, RMRcvCommitMsg, RMRcvAbortMsg,Inv276_1_0_def,Inv45_1_1_def,Inv79_1_2_def,Inv349_1_3_def,Inv318_1_4_def,Inv331_1_5_def,Inv334_1_6_def,Inv344_1_7_def,Inv1863_2_8_def
-    <2>3. CASE \E rm \in RM : TMRcvPrepared(rm)
-      BY <2>3 DEF TypeOK,Init,Next,IndAuto,TCConsistent, TMCommit, TMAbort, TMRcvPrepared, RMPrepare, RMChooseToAbort, RMRcvCommitMsg, RMRcvAbortMsg,Inv276_1_0_def,Inv45_1_1_def,Inv79_1_2_def,Inv349_1_3_def,Inv318_1_4_def,Inv331_1_5_def,Inv334_1_6_def,Inv344_1_7_def,Inv1863_2_8_def
-    <2>4. CASE \E rm \in RM : RMPrepare(rm)
-      BY <2>4 DEF TypeOK,Init,Next,IndAuto,TCConsistent, TMCommit, TMAbort, TMRcvPrepared, RMPrepare, RMChooseToAbort, RMRcvCommitMsg, RMRcvAbortMsg,Inv276_1_0_def,Inv45_1_1_def,Inv79_1_2_def,Inv349_1_3_def,Inv318_1_4_def,Inv331_1_5_def,Inv334_1_6_def,Inv344_1_7_def,Inv1863_2_8_def
-    <2>5. CASE \E rm \in RM : RMChooseToAbort(rm)
-      BY <2>5 DEF TypeOK,Init,Next,IndAuto,TCConsistent, TMCommit, TMAbort, TMRcvPrepared, RMPrepare, RMChooseToAbort, RMRcvCommitMsg, RMRcvAbortMsg,Inv276_1_0_def,Inv45_1_1_def,Inv79_1_2_def,Inv349_1_3_def,Inv318_1_4_def,Inv331_1_5_def,Inv334_1_6_def,Inv344_1_7_def,Inv1863_2_8_def
-    <2>6. CASE \E rm \in RM : RMRcvCommitMsg(rm)
-      BY <2>6 DEF TypeOK,Init,Next,IndAuto,TCConsistent, TMCommit, TMAbort, TMRcvPrepared, RMPrepare, RMChooseToAbort, RMRcvCommitMsg, RMRcvAbortMsg,Inv276_1_0_def,Inv45_1_1_def,Inv79_1_2_def,Inv349_1_3_def,Inv318_1_4_def,Inv331_1_5_def,Inv334_1_6_def,Inv344_1_7_def,Inv1863_2_8_def
-    <2>7. CASE \E rm \in RM : RMRcvAbortMsg(rm)
-      BY <2>7 DEF TypeOK,Init,Next,IndAuto,TCConsistent, TMCommit, TMAbort, TMRcvPrepared, RMPrepare, RMChooseToAbort, RMRcvCommitMsg, RMRcvAbortMsg,Inv276_1_0_def,Inv45_1_1_def,Inv79_1_2_def,Inv349_1_3_def,Inv318_1_4_def,Inv331_1_5_def,Inv334_1_6_def,Inv344_1_7_def,Inv1863_2_8_def
-    <2>8. QED
-      BY <2>1, <2>2, <2>3, <2>4, <2>5, <2>6, <2>7 DEF Next
+\*   <1>8. Inv331_1_5_def'
+\*     <2>1. CASE TMCommit
+\*       BY <2>1 DEF TypeOK,Init,Next,IndAuto,TCConsistent, TMCommit, TMAbort, TMRcvPrepared, RMPrepare, RMChooseToAbort, RMRcvCommitMsg, RMRcvAbortMsg,Inv276_1_0_def,Inv45_1_1_def,Inv79_1_2_def,Inv349_1_3_def,Inv318_1_4_def,Inv331_1_5_def,Inv334_1_6_def,Inv344_1_7_def,Inv1863_2_8_def
+\*     <2>2. CASE TMAbort
+\*       BY <2>2 DEF TypeOK,Init,Next,IndAuto,TCConsistent, TMCommit, TMAbort, TMRcvPrepared, RMPrepare, RMChooseToAbort, RMRcvCommitMsg, RMRcvAbortMsg,Inv276_1_0_def,Inv45_1_1_def,Inv79_1_2_def,Inv349_1_3_def,Inv318_1_4_def,Inv331_1_5_def,Inv334_1_6_def,Inv344_1_7_def,Inv1863_2_8_def
+\*     <2>3. CASE \E rm \in RM : TMRcvPrepared(rm)
+\*       BY <2>3 DEF TypeOK,Init,Next,IndAuto,TCConsistent, TMCommit, TMAbort, TMRcvPrepared, RMPrepare, RMChooseToAbort, RMRcvCommitMsg, RMRcvAbortMsg,Inv276_1_0_def,Inv45_1_1_def,Inv79_1_2_def,Inv349_1_3_def,Inv318_1_4_def,Inv331_1_5_def,Inv334_1_6_def,Inv344_1_7_def,Inv1863_2_8_def
+\*     <2>4. CASE \E rm \in RM : RMPrepare(rm)
+\*       BY <2>4 DEF TypeOK,Init,Next,IndAuto,TCConsistent, TMCommit, TMAbort, TMRcvPrepared, RMPrepare, RMChooseToAbort, RMRcvCommitMsg, RMRcvAbortMsg,Inv276_1_0_def,Inv45_1_1_def,Inv79_1_2_def,Inv349_1_3_def,Inv318_1_4_def,Inv331_1_5_def,Inv334_1_6_def,Inv344_1_7_def,Inv1863_2_8_def
+\*     <2>5. CASE \E rm \in RM : RMChooseToAbort(rm)
+\*       BY <2>5 DEF TypeOK,Init,Next,IndAuto,TCConsistent, TMCommit, TMAbort, TMRcvPrepared, RMPrepare, RMChooseToAbort, RMRcvCommitMsg, RMRcvAbortMsg,Inv276_1_0_def,Inv45_1_1_def,Inv79_1_2_def,Inv349_1_3_def,Inv318_1_4_def,Inv331_1_5_def,Inv334_1_6_def,Inv344_1_7_def,Inv1863_2_8_def
+\*     <2>6. CASE \E rm \in RM : RMRcvCommitMsg(rm)
+\*       BY <2>6 DEF TypeOK,Init,Next,IndAuto,TCConsistent, TMCommit, TMAbort, TMRcvPrepared, RMPrepare, RMChooseToAbort, RMRcvCommitMsg, RMRcvAbortMsg,Inv276_1_0_def,Inv45_1_1_def,Inv79_1_2_def,Inv349_1_3_def,Inv318_1_4_def,Inv331_1_5_def,Inv334_1_6_def,Inv344_1_7_def,Inv1863_2_8_def
+\*     <2>7. CASE \E rm \in RM : RMRcvAbortMsg(rm)
+\*       BY <2>7 DEF TypeOK,Init,Next,IndAuto,TCConsistent, TMCommit, TMAbort, TMRcvPrepared, RMPrepare, RMChooseToAbort, RMRcvCommitMsg, RMRcvAbortMsg,Inv276_1_0_def,Inv45_1_1_def,Inv79_1_2_def,Inv349_1_3_def,Inv318_1_4_def,Inv331_1_5_def,Inv334_1_6_def,Inv344_1_7_def,Inv1863_2_8_def
+\*     <2>8. QED
+\*       BY <2>1, <2>2, <2>3, <2>4, <2>5, <2>6, <2>7 DEF Next
     
-  <1>9. Inv334_1_6_def'
-    <2>1. CASE TMCommit
-      BY <2>1 DEF TMCommit,TypeOK,IndAuto,TCConsistent,
-      Inv276_1_0_def,Inv45_1_1_def,Inv79_1_2_def,Inv349_1_3_def,Inv318_1_4_def,Inv331_1_5_def,Inv334_1_6_def,Inv344_1_7_def,Inv1863_2_8_def
-    <2>2. CASE TMAbort
-      BY <2>2 DEF TypeOK,Init,Next,IndAuto,TCConsistent, TMCommit, TMAbort, TMRcvPrepared, RMPrepare, RMChooseToAbort, RMRcvCommitMsg, RMRcvAbortMsg,Inv276_1_0_def,Inv45_1_1_def,Inv79_1_2_def,Inv349_1_3_def,Inv318_1_4_def,Inv331_1_5_def,Inv334_1_6_def,Inv344_1_7_def,Inv1863_2_8_def
-    <2>3. CASE \E rm \in RM : TMRcvPrepared(rm)
-      BY <2>3 DEF TypeOK,Init,Next,IndAuto,TCConsistent, TMCommit, TMAbort, TMRcvPrepared, RMPrepare, RMChooseToAbort, RMRcvCommitMsg, RMRcvAbortMsg,Inv276_1_0_def,Inv45_1_1_def,Inv79_1_2_def,Inv349_1_3_def,Inv318_1_4_def,Inv331_1_5_def,Inv334_1_6_def,Inv344_1_7_def,Inv1863_2_8_def
-    <2>4. CASE \E rm \in RM : RMPrepare(rm)
-      BY <2>4 DEF TypeOK,Init,Next,IndAuto,TCConsistent, TMCommit, TMAbort, TMRcvPrepared, RMPrepare, RMChooseToAbort, RMRcvCommitMsg, RMRcvAbortMsg,Inv276_1_0_def,Inv45_1_1_def,Inv79_1_2_def,Inv349_1_3_def,Inv318_1_4_def,Inv331_1_5_def,Inv334_1_6_def,Inv344_1_7_def,Inv1863_2_8_def
-    <2>5. CASE \E rm \in RM : RMChooseToAbort(rm)
-        <3>1. PICK rm \in RM : RMChooseToAbort(rm) BY <2>5
-        <3>2. rmState[rm] = "working" BY <3>1 DEF RMChooseToAbort
-        <3>3. ~(tmPrepared = tmPrepared \cup {rm}) BY <3>2 DEF IndAuto, Inv276_1_0_def,Inv45_1_1_def,Inv79_1_2_def,Inv349_1_3_def,Inv318_1_4_def,Inv331_1_5_def,Inv334_1_6_def,Inv344_1_7_def,Inv1863_2_8_def
-        <3>4. ~([type |-> "Commit"] \in msgs) BY <3>3 DEF IndAuto, Inv276_1_0_def,Inv45_1_1_def,Inv79_1_2_def,Inv349_1_3_def,Inv318_1_4_def,Inv331_1_5_def,Inv334_1_6_def,Inv344_1_7_def,Inv1863_2_8_def
-        <3>. QED BY <2>5, <3>4 DEF IndAuto, RMChooseToAbort, TypeOK, Inv276_1_0_def,Inv45_1_1_def,Inv79_1_2_def,Inv349_1_3_def,Inv318_1_4_def,Inv331_1_5_def,Inv334_1_6_def,Inv344_1_7_def,Inv1863_2_8_def
-    <2>6. CASE \E rm \in RM : RMRcvCommitMsg(rm)
-      BY <2>6 DEF TypeOK,Init,Next,IndAuto,TCConsistent, TMCommit, TMAbort, TMRcvPrepared, RMPrepare, RMChooseToAbort, RMRcvCommitMsg, RMRcvAbortMsg,Inv276_1_0_def,Inv45_1_1_def,Inv79_1_2_def,Inv349_1_3_def,Inv318_1_4_def,Inv331_1_5_def,Inv334_1_6_def,Inv344_1_7_def,Inv1863_2_8_def
-    <2>7. CASE \E rm \in RM : RMRcvAbortMsg(rm)
-      BY <2>7 DEF TypeOK,Init,Next,IndAuto,TCConsistent, TMCommit, TMAbort, TMRcvPrepared, RMPrepare, RMChooseToAbort, RMRcvCommitMsg, RMRcvAbortMsg,Inv276_1_0_def,Inv45_1_1_def,Inv79_1_2_def,Inv349_1_3_def,Inv318_1_4_def,Inv331_1_5_def,Inv334_1_6_def,Inv344_1_7_def,Inv1863_2_8_def
-    <2>8. QED
-      BY <2>1, <2>2, <2>3, <2>4, <2>5, <2>6, <2>7 DEF Next
+\*   <1>9. Inv334_1_6_def'
+\*     <2>1. CASE TMCommit
+\*       BY <2>1 DEF TMCommit,TypeOK,IndAuto,TCConsistent,
+\*       Inv276_1_0_def,Inv45_1_1_def,Inv79_1_2_def,Inv349_1_3_def,Inv318_1_4_def,Inv331_1_5_def,Inv334_1_6_def,Inv344_1_7_def,Inv1863_2_8_def
+\*     <2>2. CASE TMAbort
+\*       BY <2>2 DEF TypeOK,Init,Next,IndAuto,TCConsistent, TMCommit, TMAbort, TMRcvPrepared, RMPrepare, RMChooseToAbort, RMRcvCommitMsg, RMRcvAbortMsg,Inv276_1_0_def,Inv45_1_1_def,Inv79_1_2_def,Inv349_1_3_def,Inv318_1_4_def,Inv331_1_5_def,Inv334_1_6_def,Inv344_1_7_def,Inv1863_2_8_def
+\*     <2>3. CASE \E rm \in RM : TMRcvPrepared(rm)
+\*       BY <2>3 DEF TypeOK,Init,Next,IndAuto,TCConsistent, TMCommit, TMAbort, TMRcvPrepared, RMPrepare, RMChooseToAbort, RMRcvCommitMsg, RMRcvAbortMsg,Inv276_1_0_def,Inv45_1_1_def,Inv79_1_2_def,Inv349_1_3_def,Inv318_1_4_def,Inv331_1_5_def,Inv334_1_6_def,Inv344_1_7_def,Inv1863_2_8_def
+\*     <2>4. CASE \E rm \in RM : RMPrepare(rm)
+\*       BY <2>4 DEF TypeOK,Init,Next,IndAuto,TCConsistent, TMCommit, TMAbort, TMRcvPrepared, RMPrepare, RMChooseToAbort, RMRcvCommitMsg, RMRcvAbortMsg,Inv276_1_0_def,Inv45_1_1_def,Inv79_1_2_def,Inv349_1_3_def,Inv318_1_4_def,Inv331_1_5_def,Inv334_1_6_def,Inv344_1_7_def,Inv1863_2_8_def
+\*     <2>5. CASE \E rm \in RM : RMChooseToAbort(rm)
+\*         <3>1. PICK rm \in RM : RMChooseToAbort(rm) BY <2>5
+\*         <3>2. rmState[rm] = "working" BY <3>1 DEF RMChooseToAbort
+\*         <3>3. ~(tmPrepared = tmPrepared \cup {rm}) BY <3>2 DEF IndAuto, Inv276_1_0_def,Inv45_1_1_def,Inv79_1_2_def,Inv349_1_3_def,Inv318_1_4_def,Inv331_1_5_def,Inv334_1_6_def,Inv344_1_7_def,Inv1863_2_8_def
+\*         <3>4. ~([type |-> "Commit"] \in msgs) BY <3>3 DEF IndAuto, Inv276_1_0_def,Inv45_1_1_def,Inv79_1_2_def,Inv349_1_3_def,Inv318_1_4_def,Inv331_1_5_def,Inv334_1_6_def,Inv344_1_7_def,Inv1863_2_8_def
+\*         <3>. QED BY <2>5, <3>4 DEF IndAuto, RMChooseToAbort, TypeOK, Inv276_1_0_def,Inv45_1_1_def,Inv79_1_2_def,Inv349_1_3_def,Inv318_1_4_def,Inv331_1_5_def,Inv334_1_6_def,Inv344_1_7_def,Inv1863_2_8_def
+\*     <2>6. CASE \E rm \in RM : RMRcvCommitMsg(rm)
+\*       BY <2>6 DEF TypeOK,Init,Next,IndAuto,TCConsistent, TMCommit, TMAbort, TMRcvPrepared, RMPrepare, RMChooseToAbort, RMRcvCommitMsg, RMRcvAbortMsg,Inv276_1_0_def,Inv45_1_1_def,Inv79_1_2_def,Inv349_1_3_def,Inv318_1_4_def,Inv331_1_5_def,Inv334_1_6_def,Inv344_1_7_def,Inv1863_2_8_def
+\*     <2>7. CASE \E rm \in RM : RMRcvAbortMsg(rm)
+\*       BY <2>7 DEF TypeOK,Init,Next,IndAuto,TCConsistent, TMCommit, TMAbort, TMRcvPrepared, RMPrepare, RMChooseToAbort, RMRcvCommitMsg, RMRcvAbortMsg,Inv276_1_0_def,Inv45_1_1_def,Inv79_1_2_def,Inv349_1_3_def,Inv318_1_4_def,Inv331_1_5_def,Inv334_1_6_def,Inv344_1_7_def,Inv1863_2_8_def
+\*     <2>8. QED
+\*       BY <2>1, <2>2, <2>3, <2>4, <2>5, <2>6, <2>7 DEF Next
     
-  <1>10. Inv344_1_7_def'
-    <2>1. CASE TMCommit
-      BY <2>1 DEF TypeOK,Init,Next,IndAuto,TCConsistent, TMCommit, TMAbort, TMRcvPrepared, RMPrepare, RMChooseToAbort, RMRcvCommitMsg, RMRcvAbortMsg,Inv276_1_0_def,Inv45_1_1_def,Inv79_1_2_def,Inv349_1_3_def,Inv318_1_4_def,Inv331_1_5_def,Inv334_1_6_def,Inv344_1_7_def,Inv1863_2_8_def
-    <2>2. CASE TMAbort
-      BY <2>2 DEF TypeOK,Init,Next,IndAuto,TCConsistent, TMCommit, TMAbort, TMRcvPrepared, RMPrepare, RMChooseToAbort, RMRcvCommitMsg, RMRcvAbortMsg,Inv276_1_0_def,Inv45_1_1_def,Inv79_1_2_def,Inv349_1_3_def,Inv318_1_4_def,Inv331_1_5_def,Inv334_1_6_def,Inv344_1_7_def,Inv1863_2_8_def
-    <2>3. CASE \E rm \in RM : TMRcvPrepared(rm)
-      BY <2>3 DEF TypeOK,Init,Next,IndAuto,TCConsistent, TMCommit, TMAbort, TMRcvPrepared, RMPrepare, RMChooseToAbort, RMRcvCommitMsg, RMRcvAbortMsg,Inv276_1_0_def,Inv45_1_1_def,Inv79_1_2_def,Inv349_1_3_def,Inv318_1_4_def,Inv331_1_5_def,Inv334_1_6_def,Inv344_1_7_def,Inv1863_2_8_def
-    <2>4. CASE \E rm \in RM : RMPrepare(rm)
-      BY <2>4 DEF TypeOK,Init,Next,IndAuto,TCConsistent, TMCommit, TMAbort, TMRcvPrepared, RMPrepare, RMChooseToAbort, RMRcvCommitMsg, RMRcvAbortMsg,Inv276_1_0_def,Inv45_1_1_def,Inv79_1_2_def,Inv349_1_3_def,Inv318_1_4_def,Inv331_1_5_def,Inv334_1_6_def,Inv344_1_7_def,Inv1863_2_8_def
-    <2>5. CASE \E rm \in RM : RMChooseToAbort(rm)
-      BY <2>5 DEF TypeOK,Init,Next,IndAuto,TCConsistent, TMCommit, TMAbort, TMRcvPrepared, RMPrepare, RMChooseToAbort, RMRcvCommitMsg, RMRcvAbortMsg,Inv276_1_0_def,Inv45_1_1_def,Inv79_1_2_def,Inv349_1_3_def,Inv318_1_4_def,Inv331_1_5_def,Inv334_1_6_def,Inv344_1_7_def,Inv1863_2_8_def
-    <2>6. CASE \E rm \in RM : RMRcvCommitMsg(rm)
-      BY <2>6 DEF TypeOK,Init,Next,IndAuto,TCConsistent, TMCommit, TMAbort, TMRcvPrepared, RMPrepare, RMChooseToAbort, RMRcvCommitMsg, RMRcvAbortMsg,Inv276_1_0_def,Inv45_1_1_def,Inv79_1_2_def,Inv349_1_3_def,Inv318_1_4_def,Inv331_1_5_def,Inv334_1_6_def,Inv344_1_7_def,Inv1863_2_8_def
-    <2>7. CASE \E rm \in RM : RMRcvAbortMsg(rm)
-      BY <2>7 DEF TypeOK,Init,Next,IndAuto,TCConsistent, TMCommit, TMAbort, TMRcvPrepared, RMPrepare, RMChooseToAbort, RMRcvCommitMsg, RMRcvAbortMsg,Inv276_1_0_def,Inv45_1_1_def,Inv79_1_2_def,Inv349_1_3_def,Inv318_1_4_def,Inv331_1_5_def,Inv334_1_6_def,Inv344_1_7_def,Inv1863_2_8_def
-    <2>8. QED
-      BY <2>1, <2>2, <2>3, <2>4, <2>5, <2>6, <2>7 DEF Next
+\*   <1>10. Inv344_1_7_def'
+\*     <2>1. CASE TMCommit
+\*       BY <2>1 DEF TypeOK,Init,Next,IndAuto,TCConsistent, TMCommit, TMAbort, TMRcvPrepared, RMPrepare, RMChooseToAbort, RMRcvCommitMsg, RMRcvAbortMsg,Inv276_1_0_def,Inv45_1_1_def,Inv79_1_2_def,Inv349_1_3_def,Inv318_1_4_def,Inv331_1_5_def,Inv334_1_6_def,Inv344_1_7_def,Inv1863_2_8_def
+\*     <2>2. CASE TMAbort
+\*       BY <2>2 DEF TypeOK,Init,Next,IndAuto,TCConsistent, TMCommit, TMAbort, TMRcvPrepared, RMPrepare, RMChooseToAbort, RMRcvCommitMsg, RMRcvAbortMsg,Inv276_1_0_def,Inv45_1_1_def,Inv79_1_2_def,Inv349_1_3_def,Inv318_1_4_def,Inv331_1_5_def,Inv334_1_6_def,Inv344_1_7_def,Inv1863_2_8_def
+\*     <2>3. CASE \E rm \in RM : TMRcvPrepared(rm)
+\*       BY <2>3 DEF TypeOK,Init,Next,IndAuto,TCConsistent, TMCommit, TMAbort, TMRcvPrepared, RMPrepare, RMChooseToAbort, RMRcvCommitMsg, RMRcvAbortMsg,Inv276_1_0_def,Inv45_1_1_def,Inv79_1_2_def,Inv349_1_3_def,Inv318_1_4_def,Inv331_1_5_def,Inv334_1_6_def,Inv344_1_7_def,Inv1863_2_8_def
+\*     <2>4. CASE \E rm \in RM : RMPrepare(rm)
+\*       BY <2>4 DEF TypeOK,Init,Next,IndAuto,TCConsistent, TMCommit, TMAbort, TMRcvPrepared, RMPrepare, RMChooseToAbort, RMRcvCommitMsg, RMRcvAbortMsg,Inv276_1_0_def,Inv45_1_1_def,Inv79_1_2_def,Inv349_1_3_def,Inv318_1_4_def,Inv331_1_5_def,Inv334_1_6_def,Inv344_1_7_def,Inv1863_2_8_def
+\*     <2>5. CASE \E rm \in RM : RMChooseToAbort(rm)
+\*       BY <2>5 DEF TypeOK,Init,Next,IndAuto,TCConsistent, TMCommit, TMAbort, TMRcvPrepared, RMPrepare, RMChooseToAbort, RMRcvCommitMsg, RMRcvAbortMsg,Inv276_1_0_def,Inv45_1_1_def,Inv79_1_2_def,Inv349_1_3_def,Inv318_1_4_def,Inv331_1_5_def,Inv334_1_6_def,Inv344_1_7_def,Inv1863_2_8_def
+\*     <2>6. CASE \E rm \in RM : RMRcvCommitMsg(rm)
+\*       BY <2>6 DEF TypeOK,Init,Next,IndAuto,TCConsistent, TMCommit, TMAbort, TMRcvPrepared, RMPrepare, RMChooseToAbort, RMRcvCommitMsg, RMRcvAbortMsg,Inv276_1_0_def,Inv45_1_1_def,Inv79_1_2_def,Inv349_1_3_def,Inv318_1_4_def,Inv331_1_5_def,Inv334_1_6_def,Inv344_1_7_def,Inv1863_2_8_def
+\*     <2>7. CASE \E rm \in RM : RMRcvAbortMsg(rm)
+\*       BY <2>7 DEF TypeOK,Init,Next,IndAuto,TCConsistent, TMCommit, TMAbort, TMRcvPrepared, RMPrepare, RMChooseToAbort, RMRcvCommitMsg, RMRcvAbortMsg,Inv276_1_0_def,Inv45_1_1_def,Inv79_1_2_def,Inv349_1_3_def,Inv318_1_4_def,Inv331_1_5_def,Inv334_1_6_def,Inv344_1_7_def,Inv1863_2_8_def
+\*     <2>8. QED
+\*       BY <2>1, <2>2, <2>3, <2>4, <2>5, <2>6, <2>7 DEF Next
     
-  <1>11. Inv1863_2_8_def'
-    <2>1. CASE TMCommit
-      BY <2>1 DEF TypeOK,Init,Next,IndAuto,TCConsistent, TMCommit, TMAbort, TMRcvPrepared, RMPrepare, RMChooseToAbort, RMRcvCommitMsg, RMRcvAbortMsg,Inv276_1_0_def,Inv45_1_1_def,Inv79_1_2_def,Inv349_1_3_def,Inv318_1_4_def,Inv331_1_5_def,Inv334_1_6_def,Inv344_1_7_def,Inv1863_2_8_def
-    <2>2. CASE TMAbort
-      BY <2>2 DEF TypeOK,Init,Next,IndAuto,TCConsistent, TMCommit, TMAbort, TMRcvPrepared, RMPrepare, RMChooseToAbort, RMRcvCommitMsg, RMRcvAbortMsg,Inv276_1_0_def,Inv45_1_1_def,Inv79_1_2_def,Inv349_1_3_def,Inv318_1_4_def,Inv331_1_5_def,Inv334_1_6_def,Inv344_1_7_def,Inv1863_2_8_def
-    <2>3. CASE \E rm \in RM : TMRcvPrepared(rm)
-      BY <2>3 DEF TypeOK,Init,Next,IndAuto,TCConsistent, TMCommit, TMAbort, TMRcvPrepared, RMPrepare, RMChooseToAbort, RMRcvCommitMsg, RMRcvAbortMsg,Inv276_1_0_def,Inv45_1_1_def,Inv79_1_2_def,Inv349_1_3_def,Inv318_1_4_def,Inv331_1_5_def,Inv334_1_6_def,Inv344_1_7_def,Inv1863_2_8_def
-    <2>4. CASE \E rm \in RM : RMPrepare(rm)
-      BY <2>4 DEF TypeOK,Init,Next,IndAuto,TCConsistent, TMCommit, TMAbort, TMRcvPrepared, RMPrepare, RMChooseToAbort, RMRcvCommitMsg, RMRcvAbortMsg,Inv276_1_0_def,Inv45_1_1_def,Inv79_1_2_def,Inv349_1_3_def,Inv318_1_4_def,Inv331_1_5_def,Inv334_1_6_def,Inv344_1_7_def,Inv1863_2_8_def
-    <2>5. CASE \E rm \in RM : RMChooseToAbort(rm)
-      BY <2>5 DEF TypeOK,Init,Next,IndAuto,TCConsistent, TMCommit, TMAbort, TMRcvPrepared, RMPrepare, RMChooseToAbort, RMRcvCommitMsg, RMRcvAbortMsg,Inv276_1_0_def,Inv45_1_1_def,Inv79_1_2_def,Inv349_1_3_def,Inv318_1_4_def,Inv331_1_5_def,Inv334_1_6_def,Inv344_1_7_def,Inv1863_2_8_def
-    <2>6. CASE \E rm \in RM : RMRcvCommitMsg(rm)
-      BY <2>6 DEF TypeOK,Init,Next,IndAuto,TCConsistent, TMCommit, TMAbort, TMRcvPrepared, RMPrepare, RMChooseToAbort, RMRcvCommitMsg, RMRcvAbortMsg,Inv276_1_0_def,Inv45_1_1_def,Inv79_1_2_def,Inv349_1_3_def,Inv318_1_4_def,Inv331_1_5_def,Inv334_1_6_def,Inv344_1_7_def,Inv1863_2_8_def
-    <2>7. CASE \E rm \in RM : RMRcvAbortMsg(rm)
-      BY <2>7 DEF TypeOK,Init,Next,IndAuto,TCConsistent, TMCommit, TMAbort, TMRcvPrepared, RMPrepare, RMChooseToAbort, RMRcvCommitMsg, RMRcvAbortMsg,Inv276_1_0_def,Inv45_1_1_def,Inv79_1_2_def,Inv349_1_3_def,Inv318_1_4_def,Inv331_1_5_def,Inv334_1_6_def,Inv344_1_7_def,Inv1863_2_8_def
-    <2>8. QED
-      BY <2>1, <2>2, <2>3, <2>4, <2>5, <2>6, <2>7 DEF Next
+\*   <1>11. Inv1863_2_8_def'
+\*     <2>1. CASE TMCommit
+\*       BY <2>1 DEF TypeOK,Init,Next,IndAuto,TCConsistent, TMCommit, TMAbort, TMRcvPrepared, RMPrepare, RMChooseToAbort, RMRcvCommitMsg, RMRcvAbortMsg,Inv276_1_0_def,Inv45_1_1_def,Inv79_1_2_def,Inv349_1_3_def,Inv318_1_4_def,Inv331_1_5_def,Inv334_1_6_def,Inv344_1_7_def,Inv1863_2_8_def
+\*     <2>2. CASE TMAbort
+\*       BY <2>2 DEF TypeOK,Init,Next,IndAuto,TCConsistent, TMCommit, TMAbort, TMRcvPrepared, RMPrepare, RMChooseToAbort, RMRcvCommitMsg, RMRcvAbortMsg,Inv276_1_0_def,Inv45_1_1_def,Inv79_1_2_def,Inv349_1_3_def,Inv318_1_4_def,Inv331_1_5_def,Inv334_1_6_def,Inv344_1_7_def,Inv1863_2_8_def
+\*     <2>3. CASE \E rm \in RM : TMRcvPrepared(rm)
+\*       BY <2>3 DEF TypeOK,Init,Next,IndAuto,TCConsistent, TMCommit, TMAbort, TMRcvPrepared, RMPrepare, RMChooseToAbort, RMRcvCommitMsg, RMRcvAbortMsg,Inv276_1_0_def,Inv45_1_1_def,Inv79_1_2_def,Inv349_1_3_def,Inv318_1_4_def,Inv331_1_5_def,Inv334_1_6_def,Inv344_1_7_def,Inv1863_2_8_def
+\*     <2>4. CASE \E rm \in RM : RMPrepare(rm)
+\*       BY <2>4 DEF TypeOK,Init,Next,IndAuto,TCConsistent, TMCommit, TMAbort, TMRcvPrepared, RMPrepare, RMChooseToAbort, RMRcvCommitMsg, RMRcvAbortMsg,Inv276_1_0_def,Inv45_1_1_def,Inv79_1_2_def,Inv349_1_3_def,Inv318_1_4_def,Inv331_1_5_def,Inv334_1_6_def,Inv344_1_7_def,Inv1863_2_8_def
+\*     <2>5. CASE \E rm \in RM : RMChooseToAbort(rm)
+\*       BY <2>5 DEF TypeOK,Init,Next,IndAuto,TCConsistent, TMCommit, TMAbort, TMRcvPrepared, RMPrepare, RMChooseToAbort, RMRcvCommitMsg, RMRcvAbortMsg,Inv276_1_0_def,Inv45_1_1_def,Inv79_1_2_def,Inv349_1_3_def,Inv318_1_4_def,Inv331_1_5_def,Inv334_1_6_def,Inv344_1_7_def,Inv1863_2_8_def
+\*     <2>6. CASE \E rm \in RM : RMRcvCommitMsg(rm)
+\*       BY <2>6 DEF TypeOK,Init,Next,IndAuto,TCConsistent, TMCommit, TMAbort, TMRcvPrepared, RMPrepare, RMChooseToAbort, RMRcvCommitMsg, RMRcvAbortMsg,Inv276_1_0_def,Inv45_1_1_def,Inv79_1_2_def,Inv349_1_3_def,Inv318_1_4_def,Inv331_1_5_def,Inv334_1_6_def,Inv344_1_7_def,Inv1863_2_8_def
+\*     <2>7. CASE \E rm \in RM : RMRcvAbortMsg(rm)
+\*       BY <2>7 DEF TypeOK,Init,Next,IndAuto,TCConsistent, TMCommit, TMAbort, TMRcvPrepared, RMPrepare, RMChooseToAbort, RMRcvCommitMsg, RMRcvAbortMsg,Inv276_1_0_def,Inv45_1_1_def,Inv79_1_2_def,Inv349_1_3_def,Inv318_1_4_def,Inv331_1_5_def,Inv334_1_6_def,Inv344_1_7_def,Inv1863_2_8_def
+\*     <2>8. QED
+\*       BY <2>1, <2>2, <2>3, <2>4, <2>5, <2>6, <2>7 DEF Next
     
-  <1>12. QED
-    BY <1>1, <1>10, <1>11, <1>2, <1>3, <1>4, <1>5, <1>6, <1>7, <1>8, <1>9 DEF IndAuto
+\*   <1>12. QED
+\*     BY <1>1, <1>10, <1>11, <1>2, <1>3, <1>4, <1>5, <1>6, <1>7, <1>8, <1>9 DEF IndAuto
 
 
 
 
-
-
-
-
-
-====================================================
-====================================================
-====================================================
+---------------------------------------------------------------------------
+---------------------------------------------------------------------------
+---------------------------------------------------------------------------
 
 \* DISCOVERY 2024.
 
 
+THEOREM (\A i \in RM : rmState[i] \in {"working"}) => (\A i \in RM : rmState[i] \in {"working", "committed"}) OBVIOUS
 
 
 \* Proof Graph Stats
 \* ==================
+\* seed: 1
 \* num proof graph nodes: 12
 \* num proof obligations: 84
 Safety == H_TCConsistent
@@ -296,7 +293,7 @@ Inv227_R2_1_I1 == \A VARRMI \in RM : ~(rmState[VARRMI] = "committed") \/ (~(tmSt
 Inv1302_R3_2_I2 == \A VARRMI \in RM : (rmState[VARRMI] = "prepared") \/ (~(tmState = "init")) \/ (~(tmPrepared = RM))
 Inv36_R5_0_I1 == ~([type |-> "Commit"] \in msgsCommit) \/ (~(tmState = "init"))
 Inv90_R5_1_I1 == ~([type |-> "Abort"] \in msgsAbort) \/ (~(tmState = "init"))
-Inv1786_R7_2_I2 == \A VARRMI \in RM : (rmState[VARRMI] = "prepared") \/ (~(tmPrepared = tmPrepared \cup {VARRMI}) \/ (~(tmState = "init")))
+Inv1786_R7_2_I2 == \A VARRMI \in RM : (rmState[VARRMI] = "prepared") \/ (~(VARRMI \in tmPrepared) \/ (~(tmState = "init")))
 Inv1827_R7_2_I2 == \A VARRMI \in RM : (rmState[VARRMI] = "prepared") \/ (~(tmState = "init")) \/ (~([type |-> "Prepared", rm |-> VARRMI] \in msgsPrepared))
 
 IndGlobal == 
@@ -504,12 +501,15 @@ THEOREM L_6 == TypeOK /\ Inv36_R5_0_I1 /\ Next => Inv36_R5_0_I1'
        BY DEF TypeOK,RMRcvCommitMsgAction,RMRcvCommitMsg,Inv36_R5_0_I1
 <1>8. QED BY <1>1,<1>2,<1>3,<1>4,<1>5,<1>6,<1>7 DEF Next
 
+\*ASSUME Fin == RM = {0,1,2}
+\*USE Fin
 
 \*** Inv1786_R7_2_I2
 THEOREM L_7 == TypeOK /\ Inv1827_R7_2_I2 /\ Inv1786_R7_2_I2 /\ Next => Inv1786_R7_2_I2'
   \* (Inv1786_R7_2_I2,RMRcvAbortMsgAction)
   <1>1. TypeOK /\ Inv1786_R7_2_I2 /\ RMRcvAbortMsgAction => Inv1786_R7_2_I2'
-       BY DEF TypeOK,RMRcvAbortMsgAction,RMRcvAbortMsg,Inv1786_R7_2_I2
+    BY DEF TypeOK,RMRcvAbortMsgAction,RMRcvAbortMsg,Inv1786_R7_2_I2
+       
   \* (Inv1786_R7_2_I2,TMAbortAction)
   <1>2. TypeOK /\ Inv1786_R7_2_I2 /\ TMAbortAction => Inv1786_R7_2_I2'
        BY DEF TypeOK,TMAbortAction,TMAbort,Inv1786_R7_2_I2
@@ -663,9 +663,6 @@ THEOREM L_12 == TypeOK /\ Inv108_R0_2_I1 /\ Next => Inv108_R0_2_I1'
 
 THEOREM IndGlobal /\ Next => IndGlobal'
   BY L_0,L_1,L_2,L_3,L_4,L_5,L_6,L_7,L_8,L_9,L_10,L_11,L_12 DEF Next, IndGlobal
-
-
-
 
 
 ====
