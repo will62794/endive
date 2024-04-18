@@ -5,7 +5,7 @@
 #SBATCH -N 1                   # Number of nodes
 #SBATCH -n 1                   # Number of tasks
 #SBATCH --cpus-per-task 28                  # Number of cores
-#SBATCH --array=1,2,3,4,5,6
+#SBATCH --array=1,2,3,4,5,6,7,8
 
 specname="AsyncRaft"
 
@@ -15,7 +15,7 @@ source /home/schultz.w/bm_setup.sh "${specname}_OnePrimaryPerTerm_${seed}"
 # Override for more CTI workers parallelism.
 num_cti_workers=16
 
-common_flags=" --tlc_workers $tlc_workers --override_num_cti_workers $num_cti_workers --cti_elimination_workers=$cti_elimination_workers"
+common_flags=" --tlc_workers $tlc_workers --num_ctigen_workers $num_cti_workers --cti_elimination_workers=$cti_elimination_workers"
 common_flags+=" --debug --target_sample_time_limit_ms 10000 --num_simulate_traces $num_simulate_traces --target_sample_states $target_sample_states"
 common_flags+=" --opt_quant_minimize --k_cti_induction_depth 1"
 common_flags+=" --ninvs $ninvs --max_num_ctis_per_round $max_num_ctis_per_round"
@@ -23,7 +23,7 @@ common_flags+=" --save_dot --max_num_conjuncts_per_round 16 --niters 4 --nrounds
 
 # All optimizations.
 srun -o /scratch/schultz.w/endive_logs/${specname}_OnePrimaryPerTerm/${specname}_OnePrimaryPerTerm_output_${seed}.txt \
-    python3 endive.py --spec benchmarks/$specname --config_file benchmarks/AsyncRaft_small_logs.config.json \
+    python3 endive.py --spec benchmarks/$specname \
     $common_flags --seed $seed --proof_tree_mode --auto_lemma_action_decomposition --enable_partitioned_state_caching --safety "H_OnePrimaryPerTerm"
 
 # srun -o /home/schultz.w/endive_logs/${specname}_baseline/${specname}_baseline_output_%j_${seed}.txt \
