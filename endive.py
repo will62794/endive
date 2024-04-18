@@ -1268,7 +1268,7 @@ class InductiveInvGen():
             traces_per_worker = num_traces_per_worker
             simulate_flag = "-simulate num=%d" % traces_per_worker
 
-        logging.debug(f"Using fixed TLC process '-workers={self.num_ctigen_workers}' count to ensure reproducible CTI generation.")
+        # logging.debug(f"Using fixed TLC process '-workers={self.num_ctigen_workers}' count to ensure reproducible CTI generation.")
         dirpath = tempfile.mkdtemp()
 
         # Apalache run.
