@@ -170,11 +170,14 @@
             "MaxTerm \\in Nat"
         ],
         "lemma_def_expands": {
+            "Safety": ["H_OnePrimaryPerTerm"],
             "H_RequestVoteQuorumInTermImpliesNoOtherLogsInTerm": ["ExistsRequestVoteResponseQuorum"]
         },
         "action_def_expands":{
             "HandleRequestVoteRequestAction": ["LastTerm","RequestVoteRequestType","RequestVoteResponseType","Terms","LogIndicesWithZero"],
-            "HandleRequestVoteResponseAction": ["LastTerm","RequestVoteRequestType","RequestVoteResponseType","Terms","LogIndicesWithZero"]
+            "HandleRequestVoteResponseAction": ["LastTerm","RequestVoteRequestType","RequestVoteResponseType","Terms","LogIndicesWithZero"],
+            "RequestVoteAction": ["RequestVoteRequestType","RequestVoteResponseType","Terms","LogIndicesWithZero", "AppendEntriesRequestType","AppendEntriesResponseType"],
+            "UpdateTermAction": ["RequestVoteRequestType","RequestVoteResponseType","Terms","LogIndicesWithZero", "AppendEntriesRequestType","AppendEntriesResponseType"]
         }
     }
 }
