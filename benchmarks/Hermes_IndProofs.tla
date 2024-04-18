@@ -32,8 +32,9 @@ IndGlobal ==
 ASSUME Fin == IsFiniteSet(H_NODES) /\ H_NODES \subseteq Nat
 
 \* Optional finitization.
-ASSUME NFIN == H_NODES = {0,1,2,3,4}
+ASSUME NFIN == H_NODES = {0,1,2}
 USE NFIN
+USE Fin
 
 \*** TypeOK
 THEOREM L_0 == TypeOK /\ TypeOK /\ Next => TypeOK'
@@ -222,36 +223,7 @@ THEOREM L_0 == TypeOK /\ TypeOK /\ Next => TypeOK'
        
   \* (TypeOK,NodeFailureAction)
   <1>10. TypeOK /\ TypeOK /\ NodeFailureAction => TypeOK'
-    <2> SUFFICES ASSUME TypeOK /\ TypeOK /\ NodeFailureAction
-                 PROVE  TypeOK'
-      OBVIOUS
-    <2>1. (msgsINV \in INVMessage)'
-      BY DEF TypeOK,NodeFailureAction,NodeFailure,TypeOK
-    <2>2. (msgsVAL \in VALMessage)'
-      BY DEF TypeOK,NodeFailureAction,NodeFailure,TypeOK
-    <2>3. (msgsACK \in ACKMessage)'
-      BY DEF TypeOK,NodeFailureAction,NodeFailure,TypeOK
-    <2>4. (nodeRcvedAcks \in [H_NODES -> SUBSET H_NODES])'
-      BY DEF TypeOK,NodeFailureAction,NodeFailure,TypeOK
-    <2>5. (\A n \in H_NODES: nodeRcvedAcks[n] \subseteq (H_NODES \ {n}))'
-      BY DEF TypeOK,NodeFailureAction,NodeFailure,TypeOK
-    <2>6. (nodeLastWriter  \in [H_NODES -> H_NODES])'
-      BY DEF TypeOK,NodeFailureAction,NodeFailure,TypeOK
-    <2>7. (nodeLastWriteTS \in [H_NODES -> [version : Nat, tieBreaker: H_NODES ]])'
-      BY DEF TypeOK,NodeFailureAction,NodeFailure,TypeOK
-    <2>8. (nodeTS          \in [H_NODES -> [version : Nat, tieBreaker: H_NODES ]])'
-      BY DEF TypeOK,NodeFailureAction,NodeFailure,TypeOK
-    <2>9. (nodeState       \in [H_NODES -> {"valid", "invalid", "invalid_write", "write", "replay"}])'
-      BY DEF TypeOK,NodeFailureAction,NodeFailure,TypeOK
-    <2>10. (aliveNodes      \in SUBSET H_NODES)'
-      BY DEF TypeOK,NodeFailureAction,NodeFailure,TypeOK
-    <2>11. (epochID         \in 0..(Cardinality(H_NODES) - 1))'
-      BY DEF TypeOK,NodeFailureAction,NodeFailure,TypeOK
-    <2>12. (nodeWriteEpochID \in [H_NODES -> 0..(Cardinality(H_NODES) - 1)])'
-      BY DEF TypeOK,NodeFailureAction,NodeFailure,TypeOK
-    <2>13. QED
-      BY <2>1, <2>10, <2>11, <2>12, <2>2, <2>3, <2>4, <2>5, <2>6, <2>7, <2>8, <2>9 DEF TypeOK
-       
+    BY DEF TypeOK,NodeFailureAction,NodeFailure,TypeOK       
 <1>11. QED BY <1>1,<1>2,<1>3,<1>4,<1>5,<1>6,<1>7,<1>8,<1>9,<1>10 DEF Next
 
 

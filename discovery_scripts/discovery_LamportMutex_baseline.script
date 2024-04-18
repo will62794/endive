@@ -12,7 +12,7 @@ seed=$SLURM_ARRAY_TASK_ID
 
 # Run one baseline.
 source bm_setup.sh "${specname}_baseline_${seed}"
-srun --time=$time_limit_large -o /scratch/schultz.w/endive_logs/${specname}_baseline/${specname}_baseline_${seed}_output_${seed}.txt \
+srun --time=$time_limit_large -o /scratch/schultz.w/endive_logs/${specname}_baseline/${specname}_baseline_output_${seed}.txt \
     python3 endive.py --spec benchmarks/$specname \
     $common_flags --seed $seed
 

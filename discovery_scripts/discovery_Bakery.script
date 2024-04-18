@@ -13,7 +13,7 @@ seed=$SLURM_ARRAY_TASK_ID
 source /home/schultz.w/bm_setup.sh "${specname}_${seed}"
 
 nrounds=45
-ninvs=500000
+ninvs=2500000
 max_num_ctis_per_round=500
 target_sample_states=200000
 num_simulate_traces=200000

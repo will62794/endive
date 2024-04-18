@@ -25,19 +25,20 @@ rm -rf benchmarks/states
 #
 
 tlc_workers=24
-num_cti_workers=16
-cti_elimination_workers=8
+num_ctigen_workers=16
+cti_elimination_workers=1
 
 nrounds=45
-ninvs=80000
-max_num_ctis_per_round=10000
+ninvs=200000
+max_num_ctis_per_round=500
 target_sample_states=200000
 num_simulate_traces=200000
+niters=5
 
-common_flags=" --tlc_workers $tlc_workers --override_num_cti_workers $num_cti_workers --cti_elimination_workers=$cti_elimination_workers"
+common_flags=" --tlc_workers $tlc_workers --num_ctigen_workers $num_ctigen_workers --cti_elimination_workers=$cti_elimination_workers"
 common_flags+=" --debug --target_sample_time_limit_ms 10000 --num_simulate_traces $num_simulate_traces --target_sample_states $target_sample_states"
 common_flags+=" --opt_quant_minimize --k_cti_induction_depth 1"
 common_flags+=" --ninvs $ninvs --max_num_ctis_per_round $max_num_ctis_per_round"
-common_flags+=" --save_dot --max_num_conjuncts_per_round 16 --niters 4 --nrounds $nrounds"
+common_flags+=" --save_dot --max_num_conjuncts_per_round 20 --niters $niters --nrounds $nrounds"
 
 time_limit_large="08:00:00"

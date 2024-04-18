@@ -13,6 +13,14 @@ EXTENDS Hermes, Randomization, TLC
 \* Set of all subsets of a set of size <= k.
 \* kOrSmallerSubset(k, S) == UNION {(kSubset(n, S)) : n \in 0..k}
 
+INVMessageBound == [
+    type: {"INV"}, 
+    sender    : H_NODES,
+    epochID   : 0..(Cardinality(H_NODES) - 1),
+    version   : 0..H_MAX_VERSION,  
+    tieBreaker: H_NODES
+] 
+
 INVMessageRandom(r) == [
     type       |-> "INV", 
     sender     |-> RandomElement(H_NODES),
@@ -41,12 +49,12 @@ VALMessageRandom(r) == [
 \* RequestVoteResponseTypeSampled == UNION { kOrSmallerSubset(2, RequestVoteResponseTypeOp({t})) : t \in Terms }
 
 TypeOKRandom ==  \* The type correctness invariant
-    \* /\ msgsINV \in RandomSetOfSubsets(4, 2, INVMessage) \* {INVMessageRandom(0),INVMessageRandom(0)}
+    /\ msgsINV \in RandomSetOfSubsets(4, 2, INVMessageBound) \* {INVMessageRandom(0),INVMessageRandom(0)}
     \* /\ msgsVAL \in RandomSetOfSubsets(4, 2, VALMessage) \* SUBSET {VALMessageRandom(0),VALMessageRandom(0)}
     \* /\ msgsACK \in RandomSetOfSubsets(4, 2, ACKMessage) \* SUBSET {ACKMessageRandom(0),ACKMessageRandom(0)}
-    /\ msgsINV \in SUBSET {INVMessageRandom(0),INVMessageRandom(0)}
-    /\ msgsVAL \in SUBSET {VALMessageRandom(0),VALMessageRandom(0)}
-    /\ msgsACK \in SUBSET {ACKMessageRandom(0),ACKMessageRandom(0)}
+    \* /\ msgsINV \in SUBSET {INVMessageRandom(0),INVMessageRandom(0),INVMessageRandom(0)}
+    /\ msgsVAL \in SUBSET {VALMessageRandom(0),VALMessageRandom(0),VALMessageRandom(0)}
+    /\ msgsACK \in SUBSET {ACKMessageRandom(0),ACKMessageRandom(0),ACKMessageRandom(0)}
     /\ nodeRcvedAcks \in [H_NODES -> SUBSET H_NODES]
     /\ \A n \in H_NODES: nodeRcvedAcks[n] \subseteq (H_NODES \ {n})
     /\  nodeLastWriter  \in [H_NODES -> H_NODES]

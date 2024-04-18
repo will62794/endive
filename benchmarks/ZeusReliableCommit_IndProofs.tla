@@ -36,7 +36,32 @@ IndGlobal ==
 THEOREM L_0 == TypeOK /\ TypeOK /\ Next => TypeOK'
   \* (TypeOK,RRcvInvAction)
   <1>1. TypeOK /\ TypeOK /\ RRcvInvAction => TypeOK'
-       BY DEF TypeOK,RRcvInvAction,RRcvInv,TypeOK
+    <2> SUFFICES ASSUME TypeOK /\ TypeOK /\ RRcvInvAction
+                 PROVE  TypeOK'
+      OBVIOUS
+    <2>1. (rMsgsINV        \subseteq RMessageINV)'
+      BY DEF TypeOK,RRcvInvAction,RRcvInv,TypeOK
+    <2>2. (rMsgsACK           \subseteq RMessageACK)'
+      BY DEF TypeOK,RRcvInvAction,RRcvInv,TypeOK
+    <2>3. (rMsgsVAL           \subseteq RMessageVAL)'
+      BY DEF TypeOK,RRcvInvAction,RRcvInv,TypeOK
+    <2>4. (rAliveNodes     \subseteq R_NODES)'
+      BY DEF TypeOK,RRcvInvAction,RRcvInv,TypeOK
+    <2>5. (\A n \in R_NODES: rKeyRcvedACKs[n] \subseteq (R_NODES \ {n}))'
+      BY DEF TypeOK,RRcvInvAction,RRcvInv,TypeOK
+    <2>6. (rNodeEpochID    \in [R_NODES -> Nat])'
+      BY DEF TypeOK,RRcvInvAction,RRcvInv,TypeOK
+    <2>7. (rKeyLastWriter  \in [R_NODES -> R_NODES])'
+      BY DEF TypeOK,RRcvInvAction,RRcvInv,TypeOK
+    <2>8. (rKeyVersion     \in [R_NODES -> Nat])'
+      BY DEF TypeOK,RRcvInvAction,RRcvInv,TypeOK
+    <2>9. (rKeySharers     \in [R_NODES -> {"owner", "reader", "non-sharer"}])'
+      BY DEF TypeOK,RRcvInvAction,RRcvInv,TypeOK
+    <2>10. (rKeyState       \in [R_NODES -> {"valid", "invalid", "write", "replay"}])'
+      BY DEF TypeOK,RRcvInvAction,RRcvInv,TypeOK
+    <2>11. QED
+      BY <2>1, <2>10, <2>2, <2>3, <2>4, <2>5, <2>6, <2>7, <2>8, <2>9 DEF TypeOK
+       
   \* (TypeOK,RRcvValAction)
   <1>2. TypeOK /\ TypeOK /\ RRcvValAction => TypeOK'
        BY DEF TypeOK,RRcvValAction,RRcvVal,TypeOK

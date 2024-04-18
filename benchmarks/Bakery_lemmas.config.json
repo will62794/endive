@@ -1,0 +1,52 @@
+{
+    "preds"  :  [
+        "L1 /\\ pc = pc /\\ num = num",
+        "L2 /\\ pc = pc /\\ flag = flag",
+        "L3 /\\ pc = pc /\\ nxt = nxt",
+        "L4 /\\ pc = pc /\\ unchecked = unchecked",
+        "L5 /\\ pc = pc /\\ unchecked = unchecked /\\ max = max /\\ num = num",
+        "L6 /\\ pc = pc /\\ unchecked = unchecked /\\ nxt = nxt",
+        "L7 /\\ pc = pc /\\ unchecked = unchecked /\\ max = max /\\ num = num",
+        "L0 /\\ pc = pc /\\ num = num"
+    ],
+    "preds_alt" : [],
+    "safety"  :  "H_MutualExclusion",
+    "constants"  : {
+        "N": ["1", "2", "3"],
+        "Nat": ["{0,1,2,3}"]
+    },
+    "actions": [
+        "ncsAction",
+        "e1Action",
+        "e2Action",
+        "e3Action",
+        "e4Action",
+        "w1Action",
+        "w2Action",
+        "csAction",
+        "exitAction"
+    ],
+    "max_tlc_inv_depth": 32,
+    "simulation_inv_check": false,
+    "simulation_inv_check_num_states": 2000000,
+    "simulation_inv_check_depth": 60,
+    "constraint"  :  "",
+    "quant_inv"  :  "\\A VARI \\in Procs : \\A VARJ \\in Procs : ",
+    "quant_inv_alt"  :  null,
+    "quant_vars": ["VARI", "VARJ"],
+    "model_consts"  :  "",
+    "symmetry" : false,
+    "typeok"  :  "TypeOK",
+    "tlc_specific_spec": false,
+    "try_final_minimize": false,
+    "simulate"  :  true,
+    "tlaps_proof_config": {
+        "assumes": [
+        ],
+        "lemma_def_expands": {
+            "Safety": ["H_MutualExclusion"]
+        },
+        "action_def_expands":{
+        }
+    }
+}
