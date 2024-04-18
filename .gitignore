@@ -82,3 +82,5 @@ subsumption_graphs/
 discovery_data/
 *proofgraph.json*
 *_ind-proof-tree*sd*
+*ind-proof-tree.pdf*
+*ind-proof-tree
