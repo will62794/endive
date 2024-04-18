@@ -2062,6 +2062,9 @@ class InductiveInvGen():
         iteration = 1
         uniqid = 0
 
+        round_stats = {"iterations": {}}
+        
+
         if cache_states_with_ignored_vars is not None:
             var_slice = [v for v in self.state_vars if v not in cache_states_with_ignored_vars]
         else:
@@ -2886,6 +2889,14 @@ class InductiveInvGen():
 
             # Update global set of eliminated CTIs.
             eliminated_ctis = ctis_eliminated_this_iter
+
+            # Update stats.
+            round_stats["iterations"][iteration] = {
+                "conjuncts_added_in_round": [({k:c[k] for k in c.keys() if k in ["inv", "invexp"]}) for c in conjuncts_added_in_round],
+                "num_new_ctis_eliminated": num_new_ctis_eliminated,
+                "num_ctis_remaining": len(list(cti_table.keys()))-len(eliminated_ctis)
+            }
+            self.cti_elimination_round_stats[(roundi, subroundi)] = round_stats
 
 
             #####################################
@@ -3889,6 +3900,8 @@ class InductiveInvGen():
 
         self.auto_lemma_action_decomposition = True
 
+        self.cti_elimination_round_stats = {}
+
         # TODO: Make node/action configurable.
         # target_node = ("NewestVALMsgImpliesAllValidNodesMatchVersion", "H_NewestVALMsgImpliesAllValidNodesMatchVersion")
         # target_node = ("WriteNodeWithAllAcksImpliesAllAliveAreValid", "HH_WriteNodeWithAllAcksImpliesAllAliveAreValid")
@@ -4337,6 +4350,8 @@ class InductiveInvGen():
                 subround += 1
 
                 logging.info(f"[ END CTI elimination Round {roundi}, subround {subround}. ]")
+
+                print("Elimination round stats:", self.cti_elimination_round_stats)
 
                 # Update timing spent on proof node.
                 if action_node in self.proof_graph["nodes"]:
