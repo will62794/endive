@@ -212,5 +212,93 @@ Mutex == \A p,q \in crit : p = q
 CTICost == 0
 NextUnchanged == UNCHANGED vars
 
+
+H_Inv36_R0_0_I1_def == \A VARI \in Proc : \A VARJ \in Proc : (VARI # VARJ /\ ack = ack) \/ (~(network[VARI][VARJ] # <<>>))
+H_Inv306_R1_0_I1_def == \A VARI \in Proc : (ack[VARI] = Proc) \/ (~(VARI \in crit))
+H_Inv875_R2_0_I1_def == \A VARI \in Proc : \A VARJ \in Proc : ~(VARJ \in crit) \/ (~(req[VARI][VARJ] > req[VARJ][VARJ]))
+H_Inv840_R3_0_I1_def == \A VARI \in Proc : \A VARJ \in Proc : ~(VARI \in ack[VARJ]) \/ (~(req[VARI][VARJ] > req[VARJ][VARJ]))
+H_Inv695_R3_0_I1_def == \A VARI \in Proc : \A VARJ \in Proc : (req[VARI][VARJ] > 0) \/ (~(VARI \in ack[VARJ]))
+H_Inv381_R4_0_I1_def == \A VARI \in Proc : \A VARJ \in Proc : (beats(VARI,VARJ)) \/ (~(ack[VARI] = {}))
+H_Inv92_R5_0_I1_def == \A VARI \in Proc : (VARI \in ack[VARI]) \/ ((ack[VARI] = {}))
+
+HInv19_R0_0_I1 == \A VARI \in Proc : ~(VARI \in crit)
+
+H_Inv565 == \A VARI \in Proc : \A VARJ \in Proc : ~(network[VARI][VARJ] # <<>> /\ Head(network[VARI][VARJ]).type = "ack") \/ (~(req[VARI][VARJ] > req[VARJ][VARJ]))
+
+
+A_Inv364_R0_0_I1 == \A VARI \in Proc : \A VARJ \in Proc : ~(VARI \in ack[VARJ]) \/ (~(req[VARI][VARJ] > req[VARJ][VARJ]))
+A_Inv186_R0_0_I1 == \A VARI \in Proc : (ack[VARI] = Proc) \/ (~(VARI \in crit))
+A_Inv275_R0_0_I1 == \A VARI \in Proc : \A VARJ \in Proc : (req[VARI][VARJ] > 0) \/ (~(VARI \in ack[VARJ]))
+A_Inv165_R0_0_I1 == \A VARI \in Proc : (\A VOTHER \in Proc \ {VARI} : beats(VARI,VOTHER) /\ req = req) \/ (~(VARI \in crit))
+A_Inv1320_R1_0_I1 == \A VARI \in Proc : \A VARJ \in Proc : ~(network[VARI][VARJ] # <<>> /\ Head(network[VARI][VARJ]).type = "ack") \/ (~(req[VARI][VARJ] > req[VARJ][VARJ]))
+A_Inv39_R1_1_I1 == \A VARI \in Proc : \A VARJ \in Proc : (VARI # VARJ /\ ack = ack) \/ (~(network[VARI][VARJ] # <<>>))
+A_Inv914_R3_1_I1 == \A VARI \in Proc : \A VARJ \in Proc : \A VARRINDI \in DOMAIN network[VARI][VARJ] : (req[VARI][VARI] = network[VARI][VARJ][VARRINDI].clock) \/ (~(network[VARI][VARJ][VARRINDI].type = "req"))
+A_Inv166_R4_1_I1 == \A VARI \in Proc : \A VARJ \in Proc : (req[VARI][VARJ] > 0) \/ (~(VARJ \in crit))
+A_Inv35_R7_0_I1 == \A VARI \in Proc : \A VARJ \in Proc : (VARI # VARJ /\ crit = crit) \/ (~(network[VARI][VARJ] # <<>>))
+
+IndGlobal1 == 
+  /\ Mutex
+  /\ A_Inv364_R0_0_I1
+  /\ A_Inv1320_R1_0_I1
+  /\ A_Inv914_R3_1_I1
+  /\ A_Inv35_R7_0_I1
+  /\ A_Inv39_R1_1_I1
+  /\ A_Inv186_R0_0_I1
+  /\ A_Inv275_R0_0_I1
+  /\ A_Inv165_R0_0_I1
+  /\ A_Inv166_R4_1_I1
+
+B_Inv364_R0_0_I1 == \A VARI \in Proc : \A VARJ \in Proc : ~(VARI \in ack[VARJ]) \/ (~(req[VARI][VARJ] > req[VARJ][VARJ]))
+B_Inv186_R0_0_I1 == \A VARI \in Proc : (ack[VARI] = Proc) \/ (~(VARI \in crit))
+B_Inv275_R0_0_I1 == \A VARI \in Proc : \A VARJ \in Proc : (req[VARI][VARJ] > 0) \/ (~(VARI \in ack[VARJ]))
+B_Inv229_R0_0_I1 == \A VARI \in Proc : \A VARJ \in Proc : (beats(VARI,VARJ) /\ req = req) \/ (~(ack[VARI] = {}))
+B_Inv1320_R1_0_I1 == \A VARI \in Proc : \A VARJ \in Proc : ~(network[VARI][VARJ] # <<>> /\ Head(network[VARI][VARJ]).type = "ack") \/ (~(req[VARI][VARJ] > req[VARJ][VARJ]))
+B_Inv914_R1_1_I1 == \A VARI \in Proc : \A VARJ \in Proc : \A VARRINDI \in DOMAIN network[VARI][VARJ] : (req[VARI][VARI] = network[VARI][VARJ][VARRINDI].clock) \/ (~(network[VARI][VARJ][VARRINDI].type = "req"))
+B_Inv39_R3_1_I1 == \A VARI \in Proc : \A VARJ \in Proc : (VARI # VARJ /\ ack = ack) \/ (~(network[VARI][VARJ] # <<>>))
+B_Inv839_R5_1_I1 == \A VARI \in Proc : \A VARJ \in Proc : ~(network[VARI][VARJ] # <<>> /\ Head(network[VARI][VARJ]).type = "rel") \/ (~(req[VARI][VARJ] > req[VARJ][VARJ]))
+B_Inv549_R6_0_I1 == \A VARI \in Proc : \A VARJ \in Proc : \A VARRINDI \in DOMAIN network[VARI][VARJ] : (network[VARI][VARJ][VARRINDI].type = "ack") \/ (~(VARI \in crit))
+B_Inv1330_R9_1_I1 == \A VARI \in Proc : \A VARJ \in Proc : (req[VARI][VARJ] > 0) \/ (~(VARJ \in crit))
+
+IndGlobal2 == 
+    /\ B_Inv364_R0_0_I1
+    /\ B_Inv186_R0_0_I1
+    /\ B_Inv275_R0_0_I1
+    /\ B_Inv229_R0_0_I1
+    /\ B_Inv1320_R1_0_I1
+    /\ B_Inv914_R1_1_I1
+    /\ B_Inv39_R3_1_I1
+    /\ B_Inv839_R5_1_I1
+    /\ B_Inv549_R6_0_I1
+    /\ B_Inv1330_R9_1_I1
+
+
+
+P_Inv1250_R0_0_I1 == \A VARI \in Proc : \A VARJ \in Proc : (req[VARI][VARJ] > 0) \/ (~(network[VARI][VARJ] # <<>> /\ Head(network[VARI][VARJ]).type = "ack"))
+P_Inv124_R0_1_I1 == \A VARI \in Proc : (VARI \in ack[VARI]) \/ ((ack[VARI] = {}))
+P_Inv35_R1_0_I1 == \A VARI \in Proc : \A VARJ \in Proc : (VARI # VARJ /\ crit = crit) \/ (~(network[VARI][VARJ] # <<>>))
+P_Inv574_R1_1_I1 == \A VARI \in Proc : \A VARJ \in Proc : \A VARRINDI \in DOMAIN network[VARI][VARJ] : (req[VARI][VARI] = network[VARI][VARJ][VARRINDI].clock) \/ (~(network[VARI][VARJ][VARRINDI].type = "req"))
+P_Inv832_R1_1_I1 == \A VARI \in Proc : \A VARJ \in Proc : ~(network[VARI][VARJ] # <<>> /\ Head(network[VARI][VARJ]).type = "rel") \/ (~(network[VARJ][VARI] # <<>> /\ req[VARI][VARJ] > Head(network[VARJ][VARI]).clock))
+P_Inv553_R1_1_I1 == \A VARI \in Proc : \A VARJ \in Proc : (network[VARJ][VARI] # <<>>) \/ (~(req[VARI][VARJ] > req[VARJ][VARJ]))
+P_Inv653_R1_2_I1 == \A VARI \in Proc : \A VARJ \in Proc : \A VARRINDI \in DOMAIN network[VARI][VARJ] : (req[VARI][VARJ] > 0) \/ (~(network[VARI][VARJ][VARRINDI].type = "ack"))
+P_Inv19_R2_0_I1 == \A VARI \in Proc : \A VARJ \in Proc : (VARI # VARJ /\ ack = ack) \/ (~(network[VARI][VARJ] # <<>>))
+P_Inv282_R2_0_I1 == \A VARI \in Proc : \A VARJ \in Proc : \A VARRINDI \in DOMAIN network[VARI][VARJ] : ~(ack[VARI] = {}) \/ (~(network[VARI][VARJ][VARRINDI].type = "req"))
+P_Inv259_R2_0_I1 == \A VARI \in Proc : \A VARJ \in Proc : ~(VARI \in ack[VARJ]) \/ (~(network[VARI][VARJ] # <<>> /\ Head(network[VARI][VARJ]).type = "ack"))
+P_Inv549_R4_0_I1 == \A VARI \in Proc : \A VARJ \in Proc : \A VARRINDI \in DOMAIN network[VARI][VARJ] : (network[VARI][VARJ][VARRINDI].type = "ack") \/ (~(VARI \in crit))
+P_Inv938_R5_1_I1 == \A VARI \in Proc : \A VARJ \in Proc : \A VARRINDI \in DOMAIN network[VARI][VARJ] : ~(network[VARI][VARJ][VARRINDI].type = "rel") \/ (~(network[VARJ][VARI] # <<>> /\ req[VARI][VARJ] > Head(network[VARJ][VARI]).clock))
+P_Inv582_R6_0_I1 == \A VARI \in Proc : \A VARJ \in Proc : \A VARRINDI \in DOMAIN network[VARI][VARJ] : (req[VARI][VARI] = network[VARI][VARJ][VARRINDI].clock) \/ (~(req[VARI][VARJ] > req[VARJ][VARJ]))
+P_Inv912_R6_0_I1 == \A VARI \in Proc : \A VARJ \in Proc : ~(network[VARI][VARJ] # <<>>) \/ (~(network[VARJ][VARI] # <<>> /\ req[VARI][VARJ] = Head(network[VARJ][VARI]).clock))
+P_Inv263_R10_1_I1 == \A VARI \in Proc : \A VARJ \in Proc : \A VARRINDI \in DOMAIN network[VARI][VARJ] : ~(VARI \in ack[VARJ]) \/ (~(network[VARI][VARJ][VARRINDI].type = "ack"))
+P_Inv270_R15_1_I1 == \A VARI \in Proc : \A VARJ \in Proc : ~(ack[VARI] = Proc) \/ (~(network[VARI][VARJ] # <<>> /\ Head(network[VARI][VARJ]).type = "req"))
+P_Inv2170_R16_0_I2 == \A VARI \in Proc : \A VARJ \in Proc : ~(VARI \in ack[VARJ]) \/ (~(network[VARJ][VARI] # <<>>)) \/ (~(network[VARI][VARJ] # <<>>))
+P_Inv289_R16_0_I2 == \A VARI \in Proc : \A VARJ \in Proc : \A VARRINDI \in DOMAIN network[VARI][VARJ] : (VARI \in ack[VARI]) \/ ((ack[VARI] = Proc) \/ (~(network[VARI][VARJ][VARRINDI].type = "req")))
+P_Inv179_R17_0_I1 == \A VARI \in Proc : (ack[VARI] = Proc) \/ (~(VARI \in crit))
+P_Inv277_R19_0_I1 == \A VARI \in Proc : \A VARJ \in Proc : (req[VARI][VARJ] > 0) \/ (~(VARJ \in crit))
+P_Inv275_R20_0_I1 == \A VARI \in Proc : \A VARJ \in Proc : (req[VARI][VARJ] > 0) \/ (~(VARI \in ack[VARJ]))
+
+
+
+
+
+
 ==============================================================================
 ==============================================================================
