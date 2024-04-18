@@ -3800,7 +3800,7 @@ class InductiveInvGen():
         """ Clear out any persisted proof graphs. """
         fname = self.proofgraph_filename()
         # Delete proof graph object if exists.
-        logging.info("Cleaning proof graph file: '{fname}'")
+        logging.info(f"Cleaning proof graph file: '{fname}'")
         try:
             os.remove(fname)
         except OSError:
