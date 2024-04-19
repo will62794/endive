@@ -64,14 +64,19 @@ AppendEntriesResponseTypeBounded == [
     mdest        : Server
 ]
 
-RequestVoteRequestTypeSampled == RandomSetOfSubsets(3, 2, RequestVoteRequestTypeBounded) 
-RequestVoteResponseTypeSampled == RandomSetOfSubsets(3, 2, RequestVoteResponseTypeBounded)  
+AvgSubsetSize == 1
+NumSubsets == 15
+
+\* RequestVoteRequestTypeSampled == RandomSetOfSubsets(NumSubsets, AvgSubsetSize, RequestVoteRequestTypeBounded) 
+\* RequestVoteResponseTypeSampled == RandomSetOfSubsets(NumSubsets, AvgSubsetSize, RequestVoteResponseTypeBounded)  
 AppendEntriesRequestTypeSampled == RandomSetOfSubsets(2, 2, AppendEntriesRequestTypeBounded) \cup RandomSetOfSubsets(3, 3, AppendEntriesRequestTypeBounded)
 AppendEntriesResponseTypeSampled == RandomSetOfSubsets(1, 1, AppendEntriesResponseTypeBounded) \cup RandomSetOfSubsets(2, 2, AppendEntriesResponseTypeBounded) \cup RandomSetOfSubsets(3, 3, AppendEntriesResponseTypeBounded)  
 
+\* ASSUME PrintT(RandomSetOfSubsets(10, 1, RequestVoteRequestTypeBounded) )
+
 TypeOKRandom == 
-    /\ requestVoteRequestMsgs \in RequestVoteRequestTypeSampled
-    /\ requestVoteResponseMsgs \in RequestVoteResponseTypeSampled
+    /\ requestVoteRequestMsgs \in RandomSetOfSubsets(NumSubsets, AvgSubsetSize, RequestVoteRequestTypeBounded) 
+    /\ requestVoteResponseMsgs \in RandomSetOfSubsets(NumSubsets, AvgSubsetSize, RequestVoteResponseTypeBounded) 
     /\ appendEntriesRequestMsgs \in AppendEntriesRequestTypeSampled
     /\ appendEntriesResponseMsgs \in AppendEntriesResponseTypeSampled
     /\ currentTerm \in [Server -> Terms]
