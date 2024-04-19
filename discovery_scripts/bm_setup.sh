@@ -25,7 +25,7 @@ rm -rf benchmarks/states
 #
 
 tlc_workers=24
-num_ctigen_workers=16
+num_ctigen_workers=8
 cti_elimination_workers=1
 
 nrounds=45
