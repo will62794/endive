@@ -4416,17 +4416,19 @@ class InductiveInvGen():
                 # Determines whether we will re-generate CTIs after every new strengthening lemma discovered.
                 k_ctis = [c for c in k_ctis if c not in k_ctis_to_eliminate]
 
+                recheck = False # for now we already do re-checking inside CTI elimination.
                 if len(k_ctis) == 0:
                     self.proof_graph["nodes"][curr_obligation]["discharged"] = True
 
-                    logging.info("Re-checking inductive proof obligation after we eliminated all known CTIs in this round.")
-                    # Re-check if we have eliminated all CTIs.
-                    k_ctis_from_recheck = self.check_proof_node(curr_obligation)
-                    if len(k_ctis_from_recheck) > 0:
-                        # TODO: Consider some policy here i.e. like re-running the round or something with more CTIs or something.
-                        logging.info(f"!!!!!!!!!!!! WARNING, still have {len(k_ctis_from_recheck)} CTIs remaining after elimination step at {curr_obligation}.")
-                    else:
-                        logging.info(f"Re-checked proof obligation at node {curr_obligation} and looks good. All CTIs eliminated.")
+                    if recheck:
+                        logging.info("Re-checking inductive proof obligation after we eliminated all known CTIs in this round.")
+                        # Re-check if we have eliminated all CTIs.
+                        k_ctis_from_recheck = self.check_proof_node(curr_obligation)
+                        if len(k_ctis_from_recheck) > 0:
+                            # TODO: Consider some policy here i.e. like re-running the round or something with more CTIs or something.
+                            logging.info(f"!!!!!!!!!!!! WARNING, still have {len(k_ctis_from_recheck)} CTIs remaining after elimination step at {curr_obligation}.")
+                        else:
+                            logging.info(f"Re-checked proof obligation at node {curr_obligation} and looks good. All CTIs eliminated.")
 
             if self.save_dot and len(self.proof_graph["edges"]) > 0:
                 # Render updated proof graph as we go.
