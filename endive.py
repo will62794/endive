@@ -4935,18 +4935,22 @@ class InductiveInvGen():
                         print("\nProof graph checking of lemma node:", n)
                         print("==============================")
                         k_ctis = self.check_proof_node(n)
-                        print(f"Found {len(k_ctis)} k-CTIS")
+                        print(f"Found {len(k_ctis)} k-CTIs.")
                         if len(k_ctis) > 0:
-                            print(f"ERROR, found CTIs for lemma node {n}")
-                            errors_found.append((n, k_ctis))
+                            print(f"ERROR! Found CTIs for lemma node {n}")
+                            action_names_found = set()
+                            for c in k_ctis:
+                                action_names_found.add(c.action_name)
+                            print("CTIs found for actions:", action_names_found)
+                            errors_found.append((n, k_ctis, action_names_found))
                             # raise Exception(f"Found CTIs for lemma node {n}.")
                     if len(errors_found) == 0:
                         print(f"~~~~~ DONE! Checked {len(lemma_nodes)} total lemma nodes and no CTIs were found.")
                     else:
                         print(f"!!! Done checking nodes, found errors! {len(errors_found)} / {len(lemma_nodes)} nodes with CTIs.")
                         print(f"{len(errors_found)} lemma nodes with CTIs:")
-                        for e,ctis in errors_found:
-                            print(" - ", e, "num_ctis:", len(ctis))
+                        for e,ctis,actions_found in errors_found:
+                            print(" - ", e, "num_ctis:", len(ctis), "actions:", actions_found)
 
                 
 
