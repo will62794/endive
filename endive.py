@@ -1388,7 +1388,9 @@ class InductiveInvGen():
         #     num_cti_worker_procs = self.num_ctigen_workers
 
         # Now we parallelize CTI generation inside each TLC instance, so we just start up 1 TLC instance with multiple worker threads here.
-        num_cti_worker_procs = 1
+        # For now continue parallelizing also a bit across TLC instances, since I think this seems to still aid in randomization
+        # when generating CTIs.
+        num_cti_worker_procs = 2
 
         if self.use_apalache_ctigen:
             num_cti_worker_procs = 1
