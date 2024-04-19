@@ -1106,7 +1106,8 @@ class InductiveInvGen():
                                         sampling_target_time_limit_ms=8000,
                                         defs_to_add=None,
                                         pre_props=None,
-                                        specname_tag=None):
+                                        specname_tag=None,
+                                        ignore_vars=None):
         """ Starts a single instance of TLC to generate CTIs.
         
         Will generate CTIs for the conjunction of all predicates given in 'props'.
@@ -1298,8 +1299,12 @@ class InductiveInvGen():
             simulate_depth = self.k_cti_induction_depth
         
         sampling_args = f"-Dtlc2.tool.impl.Tool.autoInitStatesSampling=true -Dtlc2.tool.impl.Tool.autoInitSamplingTimeLimitMS={sampling_target_time_limit_ms} -Dtlc2.tool.impl.Tool.autoInitSamplingTargetNumInitStates={sampling_target_num_init_states}"
-        args = (dirpath, sampling_args, TLC_JAR, mc.TLC_MAX_SET_SIZE, simulate_flag, simulate_depth, ctiseed, tag, self.num_ctigen_workers, indcheckcfgfilename(action), indchecktlafilename)
-        cmd = self.java_exe + ' -Xss16M -Djava.io.tmpdir="%s" %s -cp %s tlc2.TLC -maxSetSize %d %s -depth %d -seed %d -noGenerateSpecTE -metadir states/indcheckrandom_%s -continue -deadlock -workers %d -config %s %s' % args
+        ignore_vars_arg = ""
+        if ignore_vars is not None:
+            ignore_vars_arg = f"-cacheStatesIgnoreVars {','.join(sorted(ignore_vars))}"
+        
+        args = (dirpath, sampling_args, TLC_JAR, ignore_vars_arg, mc.TLC_MAX_SET_SIZE, simulate_flag, simulate_depth, ctiseed, tag, self.num_ctigen_workers, indcheckcfgfilename(action), indchecktlafilename)
+        cmd = self.java_exe + ' -Xss16M -Djava.io.tmpdir="%s" %s -cp %s tlc2.TLC %s -maxSetSize %d %s -depth %d -seed %d -noGenerateSpecTE -metadir states/indcheckrandom_%s -continue -deadlock -workers %d -config %s %s' % args
         logging.debug("TLC command: " + cmd)
         workdir = None
         if self.specdir != "":
@@ -1360,7 +1365,8 @@ class InductiveInvGen():
 
     def generate_ctis(self, props=None, reseed=False, depth=None, view=None, actions=None, typeok_override=None, constants_obj=None, 
                       defs_to_add=None, pre_props=None,
-                      specname_tag=None):
+                      specname_tag=None,
+                      ignore_vars=None):
         """ Generate CTIs for use in counterexample elimination. """
 
         # Re-set random seed to ensure consistent RNG initial state.
@@ -1424,7 +1430,8 @@ class InductiveInvGen():
                                         constants_obj=constants_obj,
                                         defs_to_add=defs_to_add,
                                         pre_props=pre_props,
-                                        specname_tag=specname_tag)
+                                        specname_tag=specname_tag,
+                                        ignore_vars=ignore_vars)
                     
                     proc_obj = {"action": action, "proc": cti_subproc}
                     cti_subprocs.append(proc_obj)
@@ -1451,7 +1458,8 @@ class InductiveInvGen():
                                     sampling_target_time_limit_ms=target_sample_time_limit_ms,
                                     defs_to_add=defs_to_add,
                                     pre_props=pre_props,
-                                    specname_tag=specname_tag)
+                                    specname_tag=specname_tag,
+                                    ignore_vars=ignore_vars)
                 
                 cti_subprocs.append({"proc": cti_subproc})
 
