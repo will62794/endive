@@ -4348,6 +4348,11 @@ class InductiveInvGen():
 
                 self.latest_elimination_iter = 1
 
+                # TODO: Tentatively consider re-running CTI generation just for particular variable slice.
+                # logging.info("Re-generating CTIs at local variable slice.")
+                # k_ctis, k_cti_traces = self.generate_ctis(props=[curr_obligation_pred_tup], specname_tag=curr_obligation, ignore_vars=cache_with_ignored_vars)
+                # logging.info(f"Re-generated {len(k_ctis)} CTIs after local variable slice.")
+
                 #
                 # Run CTI elimination.
                 #
