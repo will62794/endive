@@ -8,8 +8,8 @@ import sys
 import random
 import re
 import tempfile
-import pyeda
-import pyeda.inter
+# import pyeda
+# import pyeda.inter
 import uuid
 import itertools
 import time
@@ -414,6 +414,7 @@ def generate_invs(preds, num_invs, min_num_conjuncts=2, max_num_conjuncts=2,
             invs_symb_strs.append(symb_inv_str)
 
             if enable_symb_equiv_reduction:
+                import pyeda.inter
                 symb_expr = pyeda.inter.expr(symb_inv_str)
                 invs_symb.append(symb_expr)
         total_check_dur += time.time() - total_check_start

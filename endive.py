@@ -18,9 +18,6 @@ from itertools import chain, combinations
 
 import graphviz
 
-import pyeda
-import pyeda.inter
-
 import mc
 import tlaparse
 from proofs import *
