@@ -138,7 +138,7 @@
     "model_consts"  :  "CONSTANT n1,n2,n3,n4,n5",
     "max_tlc_inv_depth": 17,
     "simulation_inv_check": true,
-    "simulation_inv_check_num_states": 4000000,
+    "simulation_inv_check_num_states": 12000000,
     "simulation_inv_check_depth": 45,
     "symmetry" : true,
     "typeok"  :  "TypeOKRandom",
