@@ -2275,6 +2275,7 @@ class InductiveInvGen():
                 invs = set([x for x in invs if quant_inv_fn(x) not in self.all_violated_invs])
                 logging.info(f"Reduced to {len(invs)} candidate invariants after removing known violated invariants.")
                 num_new_uniq_invs = len(invs)
+                no_new_generated = (num_new_uniq_invs == 0)
 
                 # TODO: Also consider avoiding checks of already known invariants if cost savings is worth it.
                 already_sat_invs = set([x for x in invs if quant_inv_fn(x) in self.all_sat_invs])
@@ -2440,11 +2441,25 @@ class InductiveInvGen():
                     # for e in subsumption_edges:
                     #     print(e)
 
-
-                # if len(invs)==0:
-                if num_new_uniq_invs==0:
-                    logging.info("No new candidate invariants generated. Continuing.")
+                # If we didn't actually generate any new unchecked invariants, then we just jump ahead to the next
+                # iteration right away.
+                if no_new_generated:
+                    logging.info("Did not generate any new, unchecked invariants. Continuing to next iteration.")
                     iteration += 1
+                    continue
+
+                if num_new_uniq_invs==0:
+                    if self.num_sampled_invs_in_iteration[iteration] < num_invs:
+                        logging.info("No new candidate invariants found. Continuing.")
+                        iter_repeat = True
+                        num_iter_repeats += 1
+                    else:
+                        logging.info("No invariants found. Continuing to next iteration.")
+                        iteration += 1
+                    # Re-render the proof graph.
+                    if self.save_dot and len(self.proof_graph["edges"]) > 0:
+                        # Render updated proof graph as we go.
+                        self.render_proof_graph()  
                     continue
 
 
