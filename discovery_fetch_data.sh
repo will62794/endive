@@ -13,6 +13,7 @@ scp -O -r $xfer:/scratch/schultz.w/endive_logs discovery_data
 bmdir="/scratch/schultz.w/benchmarking"
 local_dir="discovery_data/proof_graphs"
 mkdir -p $local_dir
+mkdir -p $local_dir/json
 
 # Fetch proof graph stuff.
 bms="TwoPhase consensus_epr LamportMutex Hermes ZeusReliableCommit Boulanger Bakery AsyncRaft"
@@ -41,7 +42,7 @@ if [[ $bms == *"AsyncRaft"* ]]; then
         for seed in 1 2 3 4 5 6 7 8
         do
         scp -O -r "$xfer:$bmdir/AsyncRaft_${tag}_$seed/endive/benchmarks/AsyncRaft_ind-proof-tree-sd$seed.pdf" $local_dir/AsyncRaft_${tag}_ind-proof-tree-sd$seed.pdf &
-        scp -O -r "$xfer:$bmdir/AsyncRaft_${tag}_$seed/endive/benchmarks/AsyncRaft_ind-proof-tree-sd$seed.proofgraph.json" $local_dir/AsyncRaft_${tag}_ind-proof-tree-sd$seed.proofgraph.json &
+        scp -O -r "$xfer:$bmdir/AsyncRaft_${tag}_$seed/endive/benchmarks/AsyncRaft_ind-proof-tree-sd$seed.proofgraph.json" $local_dir/json/AsyncRaft_${tag}_ind-proof-tree-sd$seed.proofgraph.json &
         scp -O -r "$xfer:$bmdir/AsyncRaft_${tag}_$seed/endive/benchmarks/AsyncRaft_IndDecompProof_$seed.tla" $local_dir/AsyncRaft_${tag}_IndDecompProof_$seed.tla
         done
     done
