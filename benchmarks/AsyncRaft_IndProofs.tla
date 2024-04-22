@@ -1,46 +1,5 @@
 --------------------------------- MODULE AsyncRaft_IndProofs ---------------------------------
 EXTENDS AsyncRaft,TLAPS, SequenceTheorems, FunctionTheorems, FiniteSetTheorems, FiniteSets
-
-\* Proof Graph Stats
-\* ==================
-\* seed: 6
-\* num proof graph nodes: 11
-\* num proof obligations: 132
-Safety == H_OnePrimaryPerTerm
-Inv8807_R0_0_I2 == \A VARI \in Server : \A VARJ \in Server : ((state[VARJ] = Follower)) \/ (~(votesGranted[VARJ] \in Quorum)) \/ (~((state[VARI] = Leader /\ VARI # VARJ /\ currentTerm[VARI] = currentTerm[VARJ])))
-Inv6321_R1_0_I2 == \A VARI \in Server : \A VARJ \in Server : (votesGranted[VARI] \cap votesGranted[VARJ] = {}) \/ (~((state[VARI] = Candidate /\ VARI # VARJ /\ currentTerm[VARI] = currentTerm[VARJ])) \/ (~((state[VARJ] = Candidate))))
-Inv1900_R1_1_I1 == \A VARI \in Server : \A VARJ \in Server : \A VARREQVRES \in requestVoteResponseMsgs : ~((state[VARI] = Leader)) \/ (~(VARREQVRES.mterm = currentTerm[VARI] /\ VARREQVRES.msource = VARJ /\ VARREQVRES.mdest # VARI /\ VARREQVRES.mvoteGranted))
-Inv10_R2_0_I1 == \A VARI \in Server : \A VARJ \in Server : ((currentTerm[VARI] <= currentTerm[VARJ])) \/ (~((state[VARI] \in {Leader,Candidate} /\ VARJ \in votesGranted[VARI])))
-Inv6184_R3_0_I2 == \A VARI \in Server : \A VARJ \in Server : \A VARREQVRES \in requestVoteResponseMsgs : ~((state[VARI] = Candidate)) \/ (~(votesGranted[VARI] \in Quorum)) \/ (~(VARREQVRES.mterm = currentTerm[VARI] /\ VARREQVRES.msource = VARJ /\ VARREQVRES.mdest # VARI /\ VARREQVRES.mvoteGranted))
-Inv984_R3_1_I1 == \A VARI \in Server : \A VARREQVM \in requestVoteRequestMsgs : ~(VARREQVM.mlastLogTerm >= currentTerm[VARI]) \/ (~(VARREQVM.mterm = currentTerm[VARI]))
-Inv6_R3_1_I1 == \A VARREQVRES \in requestVoteResponseMsgs : (currentTerm[VARREQVRES.msource] >= VARREQVRES.mterm)
-Inv1209_R3_1_I1 == \A VARI \in Server : \A VARJ \in Server : \A VARREQVRES \in requestVoteResponseMsgs : ~(VARREQVRES.mterm = currentTerm[VARI] /\ VARREQVRES.msource = VARJ /\ VARREQVRES.mdest # VARI /\ VARREQVRES.mvoteGranted) \/ (~(votedFor[VARJ] = VARI))
-Inv0_R8_0_I1 == \A VARI \in Server : \A VARJ \in Server : ((currentTerm[VARI] <= currentTerm[VARJ])) \/ (~(votedFor[VARI] = VARJ))
-Inv1_R9_0_I0 == \A VARREQVM \in requestVoteRequestMsgs : (currentTerm[VARREQVM.msource] >= VARREQVM.mterm)
-
-IndGlobal == 
-  /\ TypeOK
-  /\ Safety
-  /\ Inv8807_R0_0_I2
-  /\ Inv6321_R1_0_I2
-  /\ Inv10_R2_0_I1
-  /\ Inv6_R3_1_I1
-  /\ Inv1900_R1_1_I1
-  /\ Inv6184_R3_0_I2
-  /\ Inv984_R3_1_I1
-  /\ Inv1209_R3_1_I1
-  /\ Inv0_R8_0_I1
-  /\ Inv1_R9_0_I0
-
-ASSUME A0 == IsFiniteSet(Server)
-ASSUME A1 == Nil \notin Server
-ASSUME A2 == (Leader # Follower) /\ (Leader # Candidate)
-ASSUME A3 == (Follower # Candidate)
-ASSUME A4 == Server = Server
-ASSUME A5 == Quorum \subseteq Server /\ \A Q \in Quorum : Q # {}
-ASSUME A6 == MaxLogLen \in Nat
-ASSUME A7 == MaxTerm \in Nat /\ Server = {1,2,3} /\ MaxTerm = 3 /\ MaxLogLen = 1
-ASSUME ServerIsFinite == IsFiniteSet(Server)
   
 LEMMA QuorumsExistForNonEmptySets ==
 ASSUME NEW S, IsFiniteSet(S), S # {}
@@ -52,41 +11,87 @@ ASSUME TypeOK, NEW s \in Server
 PROVE Quorum \subseteq SUBSET Server
 PROOF BY DEF Quorum, TypeOK
 
-LEMMA StaticQuorumsOverlap ==
-ASSUME NEW cfg \in SUBSET Server,
-       NEW Q1 \in Quorum,
-       NEW Q2 \in Quorum
-PROVE Q1 \cap Q2 # {}
-PROOF
-    <1>. IsFiniteSet(cfg)
-        BY FS_Subset, ServerIsFinite
-    <1>. IsFiniteSet(Q1) /\ IsFiniteSet(Q2)
-        BY QuorumsAreServerSubsets, ServerIsFinite, FS_Subset DEF Quorum
-    <1>. IsFiniteSet(Q1 \cap Q2)
-        BY FS_Intersection
-    <1>1. Q1 \in SUBSET cfg /\ Q2 \in SUBSET cfg
-        BY QuorumsAreServerSubsets DEF Quorum, TypeOK
-    <1>2. Cardinality(Q1) + Cardinality(Q2) <= Cardinality(cfg) + Cardinality(Q1 \cap Q2)
-        <2>1. Cardinality(Q1 \cup Q2) = Cardinality(Q1) + Cardinality(Q2) - Cardinality(Q1 \cap Q2)
-            BY FS_Union
-        <2>2. Cardinality(Q1 \cup Q2) <= Cardinality(cfg)
-            BY <1>1, FS_Subset, ServerIsFinite
-        <2>3. QED BY <2>1, <2>2, FS_CardinalityType
-    <1>3. Cardinality(Q1) + Cardinality(Q2) < Cardinality(Q1) + Cardinality(Q2) + Cardinality(Q1 \cap Q2)
-        <2>1. Cardinality(Q1) * 2 > Cardinality(cfg) /\ Cardinality(Q2) * 2 > Cardinality(cfg)
-            BY <1>1 DEF Quorum, TypeOK
-        <2>2. Cardinality(Q1) + Cardinality(Q2) > Cardinality(cfg)
-            BY <2>1, FS_CardinalityType, ServerIsFinite
-        <2>3. QED BY <2>2, <1>2, FS_CardinalityType
-    <1>4. Cardinality(Q1 \cap Q2) > 0
-        BY <1>3, FS_CardinalityType
-    <1>5. QED BY <1>4, FS_EmptySet
+LEMMA AddingToQuorumRemainsQuorum == \A Q \in Quorum : \A s \in Server : Q \in Quorum => Q \cup {s} \in Quorum
 
-\* mean in-degree: 1.0909090909090908
+
+ LEMMA StaticQuorumsOverlap ==
+ ASSUME NEW cfg \in SUBSET Server,
+        NEW Q1 \in Quorum,
+        NEW Q2 \in Quorum
+ PROVE Q1 \cap Q2 # {}
+ PROOF
+     <1>. IsFiniteSet(cfg)
+         BY FS_Subset, IsFiniteSet(Server)
+     <1>. IsFiniteSet(Q1) /\ IsFiniteSet(Q2)
+         BY QuorumsAreServerSubsets, IsFiniteSet(Server), FS_Subset DEF Quorum
+     <1>. IsFiniteSet(Q1 \cap Q2)
+         BY FS_Intersection
+     <1>1. Q1 \in SUBSET cfg /\ Q2 \in SUBSET cfg
+         BY QuorumsAreServerSubsets DEF Quorum, TypeOK
+     <1>2. Cardinality(Q1) + Cardinality(Q2) <= Cardinality(cfg) + Cardinality(Q1 \cap Q2)
+         <2>1. Cardinality(Q1 \cup Q2) = Cardinality(Q1) + Cardinality(Q2) - Cardinality(Q1 \cap Q2)
+             BY FS_Union
+         <2>2. Cardinality(Q1 \cup Q2) <= Cardinality(cfg)
+             BY <1>1, FS_Subset, IsFiniteSet(Server)
+         <2>3. QED BY <2>1, <2>2, FS_CardinalityType
+     <1>3. Cardinality(Q1) + Cardinality(Q2) < Cardinality(Q1) + Cardinality(Q2) + Cardinality(Q1 \cap Q2)
+         <2>1. Cardinality(Q1) * 2 > Cardinality(cfg) /\ Cardinality(Q2) * 2 > Cardinality(cfg)
+             BY <1>1 DEF Quorum, TypeOK
+         <2>2. Cardinality(Q1) + Cardinality(Q2) > Cardinality(cfg)
+             BY <2>1, FS_CardinalityType, IsFiniteSet(Server)
+         <2>3. QED BY <2>2, <1>2, FS_CardinalityType
+     <1>4. Cardinality(Q1 \cap Q2) > 0
+         BY <1>3, FS_CardinalityType
+     <1>5. QED BY <1>4, FS_EmptySet
+     
+     
+\* Proof Graph Stats
+\* ==================
+\* seed: 1
+\* num proof graph nodes: 11
+\* num proof obligations: 132
+Safety == H_OnePrimaryPerTerm
+Inv17456_R0_0_I2 == \A VARI \in Server : \A VARJ \in Server : ((state[VARJ] = Follower)) \/ (~((state[VARI] = Leader /\ VARI # VARJ /\ currentTerm[VARI] = currentTerm[VARJ]))) \/ (~(votesGranted[VARJ] \in Quorum))
+Inv6127_R1_0_I2 == \A VARI \in Server : \A VARJ \in Server : ((state[VARJ] = Follower)) \/ ((votesGranted[VARI] \cap votesGranted[VARJ] = {}) \/ (~((state[VARI] = Candidate /\ VARI # VARJ /\ currentTerm[VARI] = currentTerm[VARJ]))))
+Inv341_R1_1_I1 == \A VARI \in Server : ((state[VARI] = Follower)) \/ ((VARI \in votesGranted[VARI]))
+Inv1692_R1_1_I1 == \A VARI \in Server : (votesGranted[VARI] \in Quorum) \/ (~((state[VARI] = Leader)))
+Inv100_R2_0_I1 == \A VARI \in Server : \A VARJ \in Server : \A VARREQVRES \in requestVoteResponseMsgs : ~((state[VARI] \in {Leader,Candidate} /\ VARJ \in votesGranted[VARI])) \/ (~(VARREQVRES.mterm = currentTerm[VARI] /\ VARREQVRES.msource = VARJ /\ VARREQVRES.mdest # VARI /\ VARREQVRES.mvoteGranted))
+Inv10_R2_1_I1 == \A VARI \in Server : \A VARJ \in Server : ((currentTerm[VARI] <= currentTerm[VARJ])) \/ (~((state[VARI] \in {Leader,Candidate} /\ VARJ \in votesGranted[VARI])))
+Inv340_R5_0_I1 == \A VARI \in Server : ((state[VARI] = Follower)) \/ ((votedFor[VARI] = VARI))
+Inv749_R5_0_I1 == \A VARI \in Server : \A VARJ \in Server : (VARI \in votesGranted[VARI]) \/ (~(votedFor[VARJ] = VARI))
+Inv4_R5_2_I0 == \A VARREQVRES \in requestVoteResponseMsgs : (currentTerm[VARREQVRES.msource] >= VARREQVRES.mterm)
+Inv6_R8_0_I1 == \A VARI \in Server : \A VARREQVM \in requestVoteRequestMsgs : (VARI \in votesGranted[VARI]) \/ (~(VARREQVM.msource = VARI))
+
+IndGlobal == 
+  /\ TypeOK
+  /\ Safety
+  /\ Inv17456_R0_0_I2
+  /\ Inv6127_R1_0_I2
+  /\ Inv100_R2_0_I1
+  /\ Inv340_R5_0_I1
+  /\ Inv749_R5_0_I1
+  /\ Inv6_R8_0_I1
+  /\ Inv341_R1_1_I1
+  /\ Inv4_R5_2_I0
+  /\ Inv10_R2_1_I1
+  /\ Inv1692_R1_1_I1
+
+
+\* mean in-degree: 1.1818181818181819
 \* median in-degree: 1
 \* max in-degree: 4
 \* min in-degree: 0
 \* mean variable slice size: 0
+
+ASSUME A0 == IsFiniteSet(Server)
+ASSUME A1 == Nil \notin Server
+ASSUME A2 == (Leader # Follower) /\ (Leader # Candidate)
+ASSUME A3 == (Follower # Candidate)
+ASSUME A4 == Server = Server
+ASSUME A5 == Quorum \subseteq SUBSET Server /\ {} \notin Quorum
+ASSUME A6 == MaxLogLen \in Nat
+ASSUME A7 == MaxTerm \in Nat
+\* /\ Server = {1,2,3} /\ MaxTerm = 3 /\ MaxLogLen = 2
 
 \*** TypeOK
 THEOREM L_0 == TypeOK /\ TypeOK /\ Next => TypeOK'
@@ -97,7 +102,7 @@ THEOREM L_0 == TypeOK /\ TypeOK /\ Next => TypeOK'
                  PROVE  TypeOK'
       OBVIOUS
     <2>1. (requestVoteRequestMsgs \in SUBSET RequestVoteRequestType)'
-      BY DEF TypeOK,RequestVoteAction,RequestVote,TypeOK,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero,AppendEntriesRequestType,AppendEntriesResponseType
+      BY DEF TypeOK,RequestVoteAction,RequestVote,TypeOK,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero,AppendEntriesRequestType,AppendEntriesResponseType,LastTerm
     <2>2. (requestVoteResponseMsgs \in SUBSET RequestVoteResponseType)'
       BY DEF TypeOK,RequestVoteAction,RequestVote,TypeOK,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero,AppendEntriesRequestType,AppendEntriesResponseType
     <2>3. (appendEntriesRequestMsgs \in SUBSET AppendEntriesRequestType)'
@@ -148,28 +153,71 @@ THEOREM L_0 == TypeOK /\ TypeOK /\ Next => TypeOK'
        BY DEF TypeOK,AppendEntriesAction,AppendEntries,TypeOK
   \* (TypeOK,HandleRequestVoteRequestAction)
   <1>7. TypeOK /\ TypeOK /\ HandleRequestVoteRequestAction => TypeOK'
-       BY DEF TypeOK,HandleRequestVoteRequestAction,HandleRequestVoteRequest,TypeOK,LastTerm,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero
+    <2> SUFFICES ASSUME TypeOK /\ TypeOK /\ HandleRequestVoteRequestAction
+                 PROVE  TypeOK'
+      OBVIOUS
+    <2>1. (requestVoteRequestMsgs \in SUBSET RequestVoteRequestType)'
+      BY DEF TypeOK,HandleRequestVoteRequestAction,HandleRequestVoteRequest,TypeOK,LastTerm,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero
+    <2>2. (requestVoteResponseMsgs \in SUBSET RequestVoteResponseType)'
+      <3> SUFFICES ASSUME NEW m \in requestVoteRequestMsgs,
+                          HandleRequestVoteRequest(m)
+                   PROVE  (requestVoteResponseMsgs \in SUBSET RequestVoteResponseType)'
+        BY DEF HandleRequestVoteRequestAction
+      <3> QED
+        BY DEF TypeOK,HandleRequestVoteRequestAction,HandleRequestVoteRequest,TypeOK,LastTerm,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero
+      
+    <2>3. (appendEntriesRequestMsgs \in SUBSET AppendEntriesRequestType)'
+      BY DEF TypeOK,HandleRequestVoteRequestAction,HandleRequestVoteRequest,TypeOK,LastTerm,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero
+    <2>4. (appendEntriesResponseMsgs \in SUBSET AppendEntriesResponseType)'
+      BY DEF TypeOK,HandleRequestVoteRequestAction,HandleRequestVoteRequest,TypeOK,LastTerm,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero
+    <2>5. (currentTerm \in [Server -> Nat])'
+      BY DEF TypeOK,HandleRequestVoteRequestAction,HandleRequestVoteRequest,TypeOK,LastTerm,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero
+    <2>6. (state       \in [Server -> {Leader, Follower, Candidate}])'
+      BY DEF TypeOK,HandleRequestVoteRequestAction,HandleRequestVoteRequest,TypeOK,LastTerm,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero
+    <2>7. (votedFor    \in [Server -> ({Nil} \cup Server)])'
+      BY DEF TypeOK,HandleRequestVoteRequestAction,HandleRequestVoteRequest,TypeOK,LastTerm,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero
+    <2>8. (votesGranted \in [Server -> (SUBSET Server)])'
+      BY DEF TypeOK,HandleRequestVoteRequestAction,HandleRequestVoteRequest,TypeOK,LastTerm,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero
+    <2>9. (nextIndex  \in [Server -> [Server -> Nat]])'
+      BY DEF TypeOK,HandleRequestVoteRequestAction,HandleRequestVoteRequest,TypeOK,LastTerm,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero
+    <2>10. (matchIndex \in [Server -> [Server -> Nat]])'
+      BY DEF TypeOK,HandleRequestVoteRequestAction,HandleRequestVoteRequest,TypeOK,LastTerm,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero
+    <2>11. (log             \in [Server -> Seq(Nat)])'
+      BY DEF TypeOK,HandleRequestVoteRequestAction,HandleRequestVoteRequest,TypeOK,LastTerm,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero
+    <2>12. (commitIndex     \in [Server -> Nat])'
+      BY DEF TypeOK,HandleRequestVoteRequestAction,HandleRequestVoteRequest,TypeOK,LastTerm,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero
+    <2>13. (\A m \in requestVoteRequestMsgs : m.msource # m.mdest)'
+      BY DEF TypeOK,HandleRequestVoteRequestAction,HandleRequestVoteRequest,TypeOK,LastTerm,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero
+    <2>14. (\A m \in requestVoteResponseMsgs : m.msource # m.mdest)'
+      BY DEF TypeOK,HandleRequestVoteRequestAction,HandleRequestVoteRequest,TypeOK,LastTerm,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero
+    <2>15. (\A m \in appendEntriesRequestMsgs : m.msource # m.mdest)'
+      BY DEF TypeOK,HandleRequestVoteRequestAction,HandleRequestVoteRequest,TypeOK,LastTerm,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero
+    <2>16. (\A m \in appendEntriesResponseMsgs : m.msource # m.mdest)'
+      BY DEF TypeOK,HandleRequestVoteRequestAction,HandleRequestVoteRequest,TypeOK,LastTerm,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero
+    <2>17. QED
+      BY <2>1, <2>10, <2>11, <2>12, <2>13, <2>14, <2>15, <2>16, <2>2, <2>3, <2>4, <2>5, <2>6, <2>7, <2>8, <2>9 DEF TypeOK
+       
   \* (TypeOK,HandleRequestVoteResponseAction)
   <1>8. TypeOK /\ TypeOK /\ HandleRequestVoteResponseAction => TypeOK'
        BY DEF TypeOK,HandleRequestVoteResponseAction,HandleRequestVoteResponse,TypeOK,LastTerm,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero
   \* (TypeOK,RejectAppendEntriesRequestAction)
   <1>9. TypeOK /\ TypeOK /\ RejectAppendEntriesRequestAction => TypeOK'
-       BY DEF TypeOK,RejectAppendEntriesRequestAction,RejectAppendEntriesRequest,TypeOK
+       BY DEF TypeOK,RejectAppendEntriesRequestAction,RejectAppendEntriesRequest,TypeOK,LogOk,AppendEntriesRequestType
   \* (TypeOK,AcceptAppendEntriesRequestAppendAction)
   <1>10. TypeOK /\ TypeOK /\ AcceptAppendEntriesRequestAppendAction => TypeOK'
-       BY DEF TypeOK,AcceptAppendEntriesRequestAppendAction,AcceptAppendEntriesRequestAppend,TypeOK
+       BY DEF TypeOK,AcceptAppendEntriesRequestAppendAction,AcceptAppendEntriesRequestAppend,TypeOK,AppendEntriesResponseType
   \* (TypeOK,AcceptAppendEntriesRequestLearnCommitAction)
   <1>11. TypeOK /\ TypeOK /\ AcceptAppendEntriesRequestLearnCommitAction => TypeOK'
-       BY DEF TypeOK,AcceptAppendEntriesRequestLearnCommitAction,AcceptAppendEntriesRequestLearnCommit,TypeOK
+       BY DEF TypeOK,AcceptAppendEntriesRequestLearnCommitAction,AcceptAppendEntriesRequestLearnCommit,TypeOK,AppendEntriesRequestType
   \* (TypeOK,HandleAppendEntriesResponseAction)
   <1>12. TypeOK /\ TypeOK /\ HandleAppendEntriesResponseAction => TypeOK'
-       BY DEF TypeOK,HandleAppendEntriesResponseAction,HandleAppendEntriesResponse,TypeOK
+       BY DEF TypeOK,HandleAppendEntriesResponseAction,HandleAppendEntriesResponse,TypeOK,AppendEntriesResponseType,Max
 <1>13. QED BY <1>1,<1>2,<1>3,<1>4,<1>5,<1>6,<1>7,<1>8,<1>9,<1>10,<1>11,<1>12 DEF Next
 
 
 \* (ROOT SAFETY PROP)
 \*** Safety
-THEOREM L_1 == TypeOK /\ Inv8807_R0_0_I2 /\ Safety /\ Next => Safety'
+THEOREM L_1 == TypeOK /\ Inv17456_R0_0_I2 /\ Safety /\ Next => Safety'
   <1>. USE A0,A1,A2,A3,A4,A5,A6,A7
   \* (Safety,RequestVoteAction)
   <1>1. TypeOK /\ Safety /\ RequestVoteAction => Safety'
@@ -178,8 +226,8 @@ THEOREM L_1 == TypeOK /\ Inv8807_R0_0_I2 /\ Safety /\ Next => Safety'
   <1>2. TypeOK /\ Safety /\ UpdateTermAction => Safety'
        BY DEF TypeOK,UpdateTermAction,UpdateTerm,Safety,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero,AppendEntriesRequestType,AppendEntriesResponseType,H_OnePrimaryPerTerm
   \* (Safety,BecomeLeaderAction)
-  <1>3. TypeOK /\ Inv8807_R0_0_I2 /\ Safety /\ BecomeLeaderAction => Safety'
-       BY DEF TypeOK,Inv8807_R0_0_I2,BecomeLeaderAction,BecomeLeader,Safety,H_OnePrimaryPerTerm
+  <1>3. TypeOK /\ Inv17456_R0_0_I2 /\ Safety /\ BecomeLeaderAction => Safety'
+       BY DEF TypeOK,Inv17456_R0_0_I2,BecomeLeaderAction,BecomeLeader,Safety,H_OnePrimaryPerTerm
   \* (Safety,ClientRequestAction)
   <1>4. TypeOK /\ Safety /\ ClientRequestAction => Safety'
        BY DEF TypeOK,ClientRequestAction,ClientRequest,Safety,H_OnePrimaryPerTerm
@@ -210,473 +258,469 @@ THEOREM L_1 == TypeOK /\ Inv8807_R0_0_I2 /\ Safety /\ Next => Safety'
 <1>13. QED BY <1>1,<1>2,<1>3,<1>4,<1>5,<1>6,<1>7,<1>8,<1>9,<1>10,<1>11,<1>12 DEF Next
 
 
-\*** Inv8807_R0_0_I2
-THEOREM L_2 == TypeOK /\ Inv6321_R1_0_I2 /\ Inv1900_R1_1_I1 /\ Inv8807_R0_0_I2 /\ Next => Inv8807_R0_0_I2'
+\*** Inv17456_R0_0_I2
+THEOREM L_2 == TypeOK /\ Inv6127_R1_0_I2 /\ Inv341_R1_1_I1 /\ Inv6127_R1_0_I2 /\ Inv1692_R1_1_I1 /\ Inv17456_R0_0_I2 /\ Next => Inv17456_R0_0_I2'
   <1>. USE A0,A1,A2,A3,A4,A5,A6,A7
-  \* (Inv8807_R0_0_I2,RequestVoteAction)
-  <1>1. TypeOK /\ Inv8807_R0_0_I2 /\ RequestVoteAction => Inv8807_R0_0_I2'
+  \* (Inv17456_R0_0_I2,RequestVoteAction)
+  <1>1. TypeOK /\ Inv17456_R0_0_I2 /\ RequestVoteAction => Inv17456_R0_0_I2'
     <2> SUFFICES ASSUME TypeOK,
-                        Inv8807_R0_0_I2,
+                        Inv17456_R0_0_I2,
                         TRUE,
                         NEW i \in Server,
                         RequestVote(i),
                         NEW VARI \in Server',
                         NEW VARJ \in Server'
-                 PROVE  (((state[VARJ] = Follower)) \/ (~(votesGranted[VARJ] \in Quorum)) \/ (~((state[VARI] = Leader /\ VARI # VARJ /\ currentTerm[VARI] = currentTerm[VARJ]))))'
-      BY DEF Inv8807_R0_0_I2, RequestVoteAction
+                 PROVE  (((state[VARJ] = Follower)) \/ (~((state[VARI] = Leader /\ VARI # VARJ /\ currentTerm[VARI] = currentTerm[VARJ]))) \/ (~(votesGranted[VARJ] \in Quorum)))'
+      BY DEF Inv17456_R0_0_I2, RequestVoteAction
     <2> QED
-      BY DEF TypeOK,RequestVoteAction,RequestVote,Inv8807_R0_0_I2,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero,AppendEntriesRequestType,AppendEntriesResponseType
+      BY SMTT(30) DEF TypeOK,RequestVoteAction,RequestVote,Inv17456_R0_0_I2,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero,AppendEntriesRequestType,AppendEntriesResponseType
        
-  \* (Inv8807_R0_0_I2,UpdateTermAction)
-  <1>2. TypeOK /\ Inv8807_R0_0_I2 /\ UpdateTermAction => Inv8807_R0_0_I2'
-       BY DEF TypeOK,UpdateTermAction,UpdateTerm,Inv8807_R0_0_I2,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero,AppendEntriesRequestType,AppendEntriesResponseType
-  \* (Inv8807_R0_0_I2,BecomeLeaderAction)
-  <1>3. TypeOK /\ Inv6321_R1_0_I2 /\ Inv8807_R0_0_I2 /\ BecomeLeaderAction => Inv8807_R0_0_I2'
+  \* (Inv17456_R0_0_I2,UpdateTermAction)
+  <1>2. TypeOK /\ Inv17456_R0_0_I2 /\ UpdateTermAction => Inv17456_R0_0_I2'
+       BY DEF TypeOK,UpdateTermAction,UpdateTerm,Inv17456_R0_0_I2,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero,AppendEntriesRequestType,AppendEntriesResponseType
+  \* (Inv17456_R0_0_I2,BecomeLeaderAction)
+  <1>3. TypeOK /\ Inv6127_R1_0_I2 /\ Inv17456_R0_0_I2 /\ BecomeLeaderAction => Inv17456_R0_0_I2' 
     <2> SUFFICES ASSUME TypeOK,
-                        Inv6321_R1_0_I2,
-                        Inv8807_R0_0_I2,
+                        Inv6127_R1_0_I2,
+                        Inv17456_R0_0_I2,
                         TRUE,
                         NEW i \in Server,
                         BecomeLeader(i),
                         NEW VARI \in Server',
                         NEW VARJ \in Server'
-                 PROVE  (((state[VARJ] = Follower)) \/ (~(votesGranted[VARJ] \in Quorum)) \/ (~((state[VARI] = Leader /\ VARI # VARJ /\ currentTerm[VARI] = currentTerm[VARJ]))))'
-      BY DEF BecomeLeaderAction, Inv8807_R0_0_I2
+                 PROVE  (((state[VARJ] = Follower)) \/ (~((state[VARI] = Leader /\ VARI # VARJ /\ currentTerm[VARI] = currentTerm[VARJ]))) \/ (~(votesGranted[VARJ] \in Quorum)))'
+      OBVIOUS
     <2> QED
-      BY StaticQuorumsOverlap DEF TypeOK,Inv6321_R1_0_I2,BecomeLeaderAction,BecomeLeader,Inv8807_R0_0_I2
+      BY DEF TypeOK, BecomeLeaderAction, BecomeLeader, Inv6127_R1_0_I2, Inv17456_R0_0_I2
        
-  \* (Inv8807_R0_0_I2,ClientRequestAction)
-  <1>4. TypeOK /\ Inv8807_R0_0_I2 /\ ClientRequestAction => Inv8807_R0_0_I2'
-       BY DEF TypeOK,ClientRequestAction,ClientRequest,Inv8807_R0_0_I2
-  \* (Inv8807_R0_0_I2,AdvanceCommitIndexAction)
-  <1>5. TypeOK /\ Inv8807_R0_0_I2 /\ AdvanceCommitIndexAction => Inv8807_R0_0_I2'
-       BY DEF TypeOK,AdvanceCommitIndexAction,AdvanceCommitIndex,Inv8807_R0_0_I2
-  \* (Inv8807_R0_0_I2,AppendEntriesAction)
-  <1>6. TypeOK /\ Inv8807_R0_0_I2 /\ AppendEntriesAction => Inv8807_R0_0_I2'
-       BY DEF TypeOK,AppendEntriesAction,AppendEntries,Inv8807_R0_0_I2
-  \* (Inv8807_R0_0_I2,HandleRequestVoteRequestAction)
-  <1>7. TypeOK /\ Inv8807_R0_0_I2 /\ HandleRequestVoteRequestAction => Inv8807_R0_0_I2'
-       BY DEF TypeOK,HandleRequestVoteRequestAction,HandleRequestVoteRequest,Inv8807_R0_0_I2,LastTerm,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero
-  \* (Inv8807_R0_0_I2,HandleRequestVoteResponseAction)
-  <1>8. TypeOK /\ Inv1900_R1_1_I1 /\ Inv8807_R0_0_I2 /\ HandleRequestVoteResponseAction => Inv8807_R0_0_I2'
-       BY DEF TypeOK,Inv1900_R1_1_I1,HandleRequestVoteResponseAction,HandleRequestVoteResponse,Inv8807_R0_0_I2,LastTerm,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero
-  \* (Inv8807_R0_0_I2,RejectAppendEntriesRequestAction)
-  <1>9. TypeOK /\ Inv8807_R0_0_I2 /\ RejectAppendEntriesRequestAction => Inv8807_R0_0_I2'
-       BY DEF TypeOK,RejectAppendEntriesRequestAction,RejectAppendEntriesRequest,Inv8807_R0_0_I2
-  \* (Inv8807_R0_0_I2,AcceptAppendEntriesRequestAppendAction)
-  <1>10. TypeOK /\ Inv8807_R0_0_I2 /\ AcceptAppendEntriesRequestAppendAction => Inv8807_R0_0_I2'
-       BY DEF TypeOK,AcceptAppendEntriesRequestAppendAction,AcceptAppendEntriesRequestAppend,Inv8807_R0_0_I2
-  \* (Inv8807_R0_0_I2,AcceptAppendEntriesRequestLearnCommitAction)
-  <1>11. TypeOK /\ Inv8807_R0_0_I2 /\ AcceptAppendEntriesRequestLearnCommitAction => Inv8807_R0_0_I2'
-       BY DEF TypeOK,AcceptAppendEntriesRequestLearnCommitAction,AcceptAppendEntriesRequestLearnCommit,Inv8807_R0_0_I2
-  \* (Inv8807_R0_0_I2,HandleAppendEntriesResponseAction)
-  <1>12. TypeOK /\ Inv8807_R0_0_I2 /\ HandleAppendEntriesResponseAction => Inv8807_R0_0_I2'
-       BY DEF TypeOK,HandleAppendEntriesResponseAction,HandleAppendEntriesResponse,Inv8807_R0_0_I2
+  \* (Inv17456_R0_0_I2,ClientRequestAction)
+  <1>4. TypeOK /\ Inv17456_R0_0_I2 /\ ClientRequestAction => Inv17456_R0_0_I2'
+       BY DEF TypeOK,ClientRequestAction,ClientRequest,Inv17456_R0_0_I2
+  \* (Inv17456_R0_0_I2,AdvanceCommitIndexAction)
+  <1>5. TypeOK /\ Inv17456_R0_0_I2 /\ AdvanceCommitIndexAction => Inv17456_R0_0_I2'
+       BY DEF TypeOK,AdvanceCommitIndexAction,AdvanceCommitIndex,Inv17456_R0_0_I2
+  \* (Inv17456_R0_0_I2,AppendEntriesAction)
+  <1>6. TypeOK /\ Inv17456_R0_0_I2 /\ AppendEntriesAction => Inv17456_R0_0_I2'
+       BY DEF TypeOK,AppendEntriesAction,AppendEntries,Inv17456_R0_0_I2
+  \* (Inv17456_R0_0_I2,HandleRequestVoteRequestAction)
+  <1>7. TypeOK /\ Inv17456_R0_0_I2 /\ HandleRequestVoteRequestAction => Inv17456_R0_0_I2'
+       BY DEF TypeOK,HandleRequestVoteRequestAction,HandleRequestVoteRequest,Inv17456_R0_0_I2,LastTerm,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero
+  \* (Inv17456_R0_0_I2,HandleRequestVoteResponseAction)
+  <1>8. TypeOK /\ Inv341_R1_1_I1 /\ Inv6127_R1_0_I2 /\ Inv1692_R1_1_I1 /\ Inv17456_R0_0_I2 /\ HandleRequestVoteResponseAction => Inv17456_R0_0_I2'
+       BY AddingToQuorumRemainsQuorum DEF TypeOK,Inv341_R1_1_I1,Inv6127_R1_0_I2,Inv1692_R1_1_I1,HandleRequestVoteResponseAction,HandleRequestVoteResponse,Inv17456_R0_0_I2,LastTerm,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero
+  \* (Inv17456_R0_0_I2,RejectAppendEntriesRequestAction)
+  <1>9. TypeOK /\ Inv17456_R0_0_I2 /\ RejectAppendEntriesRequestAction => Inv17456_R0_0_I2'
+       BY DEF TypeOK,RejectAppendEntriesRequestAction,RejectAppendEntriesRequest,Inv17456_R0_0_I2
+  \* (Inv17456_R0_0_I2,AcceptAppendEntriesRequestAppendAction)
+  <1>10. TypeOK /\ Inv17456_R0_0_I2 /\ AcceptAppendEntriesRequestAppendAction => Inv17456_R0_0_I2'
+       BY DEF TypeOK,AcceptAppendEntriesRequestAppendAction,AcceptAppendEntriesRequestAppend,Inv17456_R0_0_I2
+  \* (Inv17456_R0_0_I2,AcceptAppendEntriesRequestLearnCommitAction)
+  <1>11. TypeOK /\ Inv17456_R0_0_I2 /\ AcceptAppendEntriesRequestLearnCommitAction => Inv17456_R0_0_I2'
+       BY DEF TypeOK,AcceptAppendEntriesRequestLearnCommitAction,AcceptAppendEntriesRequestLearnCommit,Inv17456_R0_0_I2
+  \* (Inv17456_R0_0_I2,HandleAppendEntriesResponseAction)
+  <1>12. TypeOK /\ Inv17456_R0_0_I2 /\ HandleAppendEntriesResponseAction => Inv17456_R0_0_I2'
+       BY DEF TypeOK,HandleAppendEntriesResponseAction,HandleAppendEntriesResponse,Inv17456_R0_0_I2
 <1>13. QED BY <1>1,<1>2,<1>3,<1>4,<1>5,<1>6,<1>7,<1>8,<1>9,<1>10,<1>11,<1>12 DEF Next
 
 
-\*** Inv6321_R1_0_I2
-THEOREM L_3 == TypeOK /\ Inv10_R2_0_I1 /\ Inv6321_R1_0_I2 /\ Next => Inv6321_R1_0_I2'
+\*** Inv6127_R1_0_I2
+THEOREM L_3 == TypeOK /\ Inv10_R2_1_I1 /\ Inv100_R2_0_I1 /\ Inv6127_R1_0_I2 /\ Next => Inv6127_R1_0_I2'
   <1>. USE A0,A1,A2,A3,A4,A5,A6,A7
-  \* (Inv6321_R1_0_I2,RequestVoteAction)
-  <1>1. TypeOK /\ Inv10_R2_0_I1 /\ Inv6321_R1_0_I2 /\ RequestVoteAction => Inv6321_R1_0_I2'
-       BY DEF TypeOK,Inv10_R2_0_I1,RequestVoteAction,RequestVote,Inv6321_R1_0_I2,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero,AppendEntriesRequestType,AppendEntriesResponseType
-  \* (Inv6321_R1_0_I2,UpdateTermAction)
-  <1>2. TypeOK /\ Inv6321_R1_0_I2 /\ UpdateTermAction => Inv6321_R1_0_I2'
-       BY DEF TypeOK,UpdateTermAction,UpdateTerm,Inv6321_R1_0_I2,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero,AppendEntriesRequestType,AppendEntriesResponseType
-  \* (Inv6321_R1_0_I2,BecomeLeaderAction)
-  <1>3. TypeOK /\ Inv6321_R1_0_I2 /\ BecomeLeaderAction => Inv6321_R1_0_I2'
-       BY DEF TypeOK,BecomeLeaderAction,BecomeLeader,Inv6321_R1_0_I2
-  \* (Inv6321_R1_0_I2,ClientRequestAction)
-  <1>4. TypeOK /\ Inv6321_R1_0_I2 /\ ClientRequestAction => Inv6321_R1_0_I2'
-       BY DEF TypeOK,ClientRequestAction,ClientRequest,Inv6321_R1_0_I2
-  \* (Inv6321_R1_0_I2,AdvanceCommitIndexAction)
-  <1>5. TypeOK /\ Inv6321_R1_0_I2 /\ AdvanceCommitIndexAction => Inv6321_R1_0_I2'
-       BY DEF TypeOK,AdvanceCommitIndexAction,AdvanceCommitIndex,Inv6321_R1_0_I2
-  \* (Inv6321_R1_0_I2,AppendEntriesAction)
-  <1>6. TypeOK /\ Inv6321_R1_0_I2 /\ AppendEntriesAction => Inv6321_R1_0_I2'
-       BY DEF TypeOK,AppendEntriesAction,AppendEntries,Inv6321_R1_0_I2
-  \* (Inv6321_R1_0_I2,HandleRequestVoteRequestAction)
-  <1>7. TypeOK /\ Inv6321_R1_0_I2 /\ HandleRequestVoteRequestAction => Inv6321_R1_0_I2'
-       BY DEF TypeOK,HandleRequestVoteRequestAction,HandleRequestVoteRequest,Inv6321_R1_0_I2,LastTerm,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero
-  \* (Inv6321_R1_0_I2,HandleRequestVoteResponseAction)
-  <1>8. TypeOK /\ Inv6321_R1_0_I2 /\ HandleRequestVoteResponseAction => Inv6321_R1_0_I2'
-       BY StaticQuorumsOverlap DEF TypeOK,HandleRequestVoteResponseAction,HandleRequestVoteResponse,Inv6321_R1_0_I2,LastTerm,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero
-  \* (Inv6321_R1_0_I2,RejectAppendEntriesRequestAction)
-  <1>9. TypeOK /\ Inv6321_R1_0_I2 /\ RejectAppendEntriesRequestAction => Inv6321_R1_0_I2'
-       BY DEF TypeOK,RejectAppendEntriesRequestAction,RejectAppendEntriesRequest,Inv6321_R1_0_I2
-  \* (Inv6321_R1_0_I2,AcceptAppendEntriesRequestAppendAction)
-  <1>10. TypeOK /\ Inv6321_R1_0_I2 /\ AcceptAppendEntriesRequestAppendAction => Inv6321_R1_0_I2'
-       BY DEF TypeOK,AcceptAppendEntriesRequestAppendAction,AcceptAppendEntriesRequestAppend,Inv6321_R1_0_I2
-  \* (Inv6321_R1_0_I2,AcceptAppendEntriesRequestLearnCommitAction)
-  <1>11. TypeOK /\ Inv6321_R1_0_I2 /\ AcceptAppendEntriesRequestLearnCommitAction => Inv6321_R1_0_I2'
-       BY DEF TypeOK,AcceptAppendEntriesRequestLearnCommitAction,AcceptAppendEntriesRequestLearnCommit,Inv6321_R1_0_I2
-  \* (Inv6321_R1_0_I2,HandleAppendEntriesResponseAction)
-  <1>12. TypeOK /\ Inv6321_R1_0_I2 /\ HandleAppendEntriesResponseAction => Inv6321_R1_0_I2'
-       BY DEF TypeOK,HandleAppendEntriesResponseAction,HandleAppendEntriesResponse,Inv6321_R1_0_I2
+  \* (Inv6127_R1_0_I2,RequestVoteAction)
+  <1>1. TypeOK /\ Inv10_R2_1_I1 /\ Inv6127_R1_0_I2 /\ RequestVoteAction => Inv6127_R1_0_I2'
+       BY DEF TypeOK,Inv10_R2_1_I1,RequestVoteAction,RequestVote,Inv6127_R1_0_I2,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero,AppendEntriesRequestType,AppendEntriesResponseType
+  \* (Inv6127_R1_0_I2,UpdateTermAction)
+  <1>2. TypeOK /\ Inv6127_R1_0_I2 /\ UpdateTermAction => Inv6127_R1_0_I2'
+       BY DEF TypeOK,UpdateTermAction,UpdateTerm,Inv6127_R1_0_I2,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero,AppendEntriesRequestType,AppendEntriesResponseType
+  \* (Inv6127_R1_0_I2,BecomeLeaderAction)
+  <1>3. TypeOK /\ Inv6127_R1_0_I2 /\ BecomeLeaderAction => Inv6127_R1_0_I2'
+       BY DEF TypeOK,BecomeLeaderAction,BecomeLeader,Inv6127_R1_0_I2
+  \* (Inv6127_R1_0_I2,ClientRequestAction)
+  <1>4. TypeOK /\ Inv6127_R1_0_I2 /\ ClientRequestAction => Inv6127_R1_0_I2'
+       BY DEF TypeOK,ClientRequestAction,ClientRequest,Inv6127_R1_0_I2
+  \* (Inv6127_R1_0_I2,AdvanceCommitIndexAction)
+  <1>5. TypeOK /\ Inv6127_R1_0_I2 /\ AdvanceCommitIndexAction => Inv6127_R1_0_I2'
+       BY DEF TypeOK,AdvanceCommitIndexAction,AdvanceCommitIndex,Inv6127_R1_0_I2
+  \* (Inv6127_R1_0_I2,AppendEntriesAction)
+  <1>6. TypeOK /\ Inv6127_R1_0_I2 /\ AppendEntriesAction => Inv6127_R1_0_I2'
+       BY DEF TypeOK,AppendEntriesAction,AppendEntries,Inv6127_R1_0_I2
+  \* (Inv6127_R1_0_I2,HandleRequestVoteRequestAction)
+  <1>7. TypeOK /\ Inv6127_R1_0_I2 /\ HandleRequestVoteRequestAction => Inv6127_R1_0_I2'
+       BY DEF TypeOK,HandleRequestVoteRequestAction,HandleRequestVoteRequest,Inv6127_R1_0_I2,LastTerm,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero
+  \* (Inv6127_R1_0_I2,HandleRequestVoteResponseAction)
+  <1>8. TypeOK /\ Inv100_R2_0_I1 /\ Inv6127_R1_0_I2 /\ HandleRequestVoteResponseAction => Inv6127_R1_0_I2'
+       BY DEF TypeOK,Inv100_R2_0_I1,HandleRequestVoteResponseAction,HandleRequestVoteResponse,Inv6127_R1_0_I2,LastTerm,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero
+  \* (Inv6127_R1_0_I2,RejectAppendEntriesRequestAction)
+  <1>9. TypeOK /\ Inv6127_R1_0_I2 /\ RejectAppendEntriesRequestAction => Inv6127_R1_0_I2'
+       BY DEF TypeOK,RejectAppendEntriesRequestAction,RejectAppendEntriesRequest,Inv6127_R1_0_I2
+  \* (Inv6127_R1_0_I2,AcceptAppendEntriesRequestAppendAction)
+  <1>10. TypeOK /\ Inv6127_R1_0_I2 /\ AcceptAppendEntriesRequestAppendAction => Inv6127_R1_0_I2'
+       BY DEF TypeOK,AcceptAppendEntriesRequestAppendAction,AcceptAppendEntriesRequestAppend,Inv6127_R1_0_I2
+  \* (Inv6127_R1_0_I2,AcceptAppendEntriesRequestLearnCommitAction)
+  <1>11. TypeOK /\ Inv6127_R1_0_I2 /\ AcceptAppendEntriesRequestLearnCommitAction => Inv6127_R1_0_I2'
+       BY DEF TypeOK,AcceptAppendEntriesRequestLearnCommitAction,AcceptAppendEntriesRequestLearnCommit,Inv6127_R1_0_I2
+  \* (Inv6127_R1_0_I2,HandleAppendEntriesResponseAction)
+  <1>12. TypeOK /\ Inv6127_R1_0_I2 /\ HandleAppendEntriesResponseAction => Inv6127_R1_0_I2'
+       BY DEF TypeOK,HandleAppendEntriesResponseAction,HandleAppendEntriesResponse,Inv6127_R1_0_I2
 <1>13. QED BY <1>1,<1>2,<1>3,<1>4,<1>5,<1>6,<1>7,<1>8,<1>9,<1>10,<1>11,<1>12 DEF Next
 
 
-\*** Inv10_R2_0_I1
-THEOREM L_4 == TypeOK /\ Inv6_R3_1_I1 /\ Inv10_R2_0_I1 /\ Next => Inv10_R2_0_I1'
+\*** Inv100_R2_0_I1
+THEOREM L_4 == TypeOK /\ Inv4_R5_2_I0 /\ Inv340_R5_0_I1 /\ Inv749_R5_0_I1 /\ Inv341_R1_1_I1 /\ Inv100_R2_0_I1 /\ Next => Inv100_R2_0_I1'
   <1>. USE A0,A1,A2,A3,A4,A5,A6,A7
-  \* (Inv10_R2_0_I1,RequestVoteAction)
-  <1>1. TypeOK /\ Inv10_R2_0_I1 /\ RequestVoteAction => Inv10_R2_0_I1'
-       BY DEF TypeOK,RequestVoteAction,RequestVote,Inv10_R2_0_I1,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero,AppendEntriesRequestType,AppendEntriesResponseType
-  \* (Inv10_R2_0_I1,UpdateTermAction)
-  <1>2. TypeOK /\ Inv10_R2_0_I1 /\ UpdateTermAction => Inv10_R2_0_I1'
-       BY DEF TypeOK,UpdateTermAction,UpdateTerm,Inv10_R2_0_I1,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero,AppendEntriesRequestType,AppendEntriesResponseType
-  \* (Inv10_R2_0_I1,BecomeLeaderAction)
-  <1>3. TypeOK /\ Inv10_R2_0_I1 /\ BecomeLeaderAction => Inv10_R2_0_I1'
-       BY DEF TypeOK,BecomeLeaderAction,BecomeLeader,Inv10_R2_0_I1
-  \* (Inv10_R2_0_I1,ClientRequestAction)
-  <1>4. TypeOK /\ Inv10_R2_0_I1 /\ ClientRequestAction => Inv10_R2_0_I1'
-       BY DEF TypeOK,ClientRequestAction,ClientRequest,Inv10_R2_0_I1
-  \* (Inv10_R2_0_I1,AdvanceCommitIndexAction)
-  <1>5. TypeOK /\ Inv10_R2_0_I1 /\ AdvanceCommitIndexAction => Inv10_R2_0_I1'
-       BY DEF TypeOK,AdvanceCommitIndexAction,AdvanceCommitIndex,Inv10_R2_0_I1
-  \* (Inv10_R2_0_I1,AppendEntriesAction)
-  <1>6. TypeOK /\ Inv10_R2_0_I1 /\ AppendEntriesAction => Inv10_R2_0_I1'
-       BY DEF TypeOK,AppendEntriesAction,AppendEntries,Inv10_R2_0_I1
-  \* (Inv10_R2_0_I1,HandleRequestVoteRequestAction)
-  <1>7. TypeOK /\ Inv10_R2_0_I1 /\ HandleRequestVoteRequestAction => Inv10_R2_0_I1'
-       BY DEF TypeOK,HandleRequestVoteRequestAction,HandleRequestVoteRequest,Inv10_R2_0_I1,LastTerm,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero
-  \* (Inv10_R2_0_I1,HandleRequestVoteResponseAction)
-  <1>8. TypeOK /\ Inv6_R3_1_I1 /\ Inv10_R2_0_I1 /\ HandleRequestVoteResponseAction => Inv10_R2_0_I1'
-       BY DEF TypeOK,Inv6_R3_1_I1,HandleRequestVoteResponseAction,HandleRequestVoteResponse,Inv10_R2_0_I1,LastTerm,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero
-  \* (Inv10_R2_0_I1,RejectAppendEntriesRequestAction)
-  <1>9. TypeOK /\ Inv10_R2_0_I1 /\ RejectAppendEntriesRequestAction => Inv10_R2_0_I1'
-       BY DEF TypeOK,RejectAppendEntriesRequestAction,RejectAppendEntriesRequest,Inv10_R2_0_I1
-  \* (Inv10_R2_0_I1,AcceptAppendEntriesRequestAppendAction)
-  <1>10. TypeOK /\ Inv10_R2_0_I1 /\ AcceptAppendEntriesRequestAppendAction => Inv10_R2_0_I1'
-       BY DEF TypeOK,AcceptAppendEntriesRequestAppendAction,AcceptAppendEntriesRequestAppend,Inv10_R2_0_I1
-  \* (Inv10_R2_0_I1,AcceptAppendEntriesRequestLearnCommitAction)
-  <1>11. TypeOK /\ Inv10_R2_0_I1 /\ AcceptAppendEntriesRequestLearnCommitAction => Inv10_R2_0_I1'
-       BY DEF TypeOK,AcceptAppendEntriesRequestLearnCommitAction,AcceptAppendEntriesRequestLearnCommit,Inv10_R2_0_I1
-  \* (Inv10_R2_0_I1,HandleAppendEntriesResponseAction)
-  <1>12. TypeOK /\ Inv10_R2_0_I1 /\ HandleAppendEntriesResponseAction => Inv10_R2_0_I1'
-       BY DEF TypeOK,HandleAppendEntriesResponseAction,HandleAppendEntriesResponse,Inv10_R2_0_I1
+  \* (Inv100_R2_0_I1,RequestVoteAction)
+  <1>1. TypeOK /\ Inv4_R5_2_I0 /\ Inv100_R2_0_I1 /\ RequestVoteAction => Inv100_R2_0_I1'
+       BY DEF TypeOK,Inv4_R5_2_I0,RequestVoteAction,RequestVote,Inv100_R2_0_I1,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero,AppendEntriesRequestType,AppendEntriesResponseType
+  \* (Inv100_R2_0_I1,UpdateTermAction)
+  <1>2. TypeOK /\ Inv100_R2_0_I1 /\ UpdateTermAction => Inv100_R2_0_I1'
+       BY DEF TypeOK,UpdateTermAction,UpdateTerm,Inv100_R2_0_I1,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero,AppendEntriesRequestType,AppendEntriesResponseType
+  \* (Inv100_R2_0_I1,BecomeLeaderAction)
+  <1>3. TypeOK /\ Inv100_R2_0_I1 /\ BecomeLeaderAction => Inv100_R2_0_I1'
+       BY DEF TypeOK,BecomeLeaderAction,BecomeLeader,Inv100_R2_0_I1
+  \* (Inv100_R2_0_I1,ClientRequestAction)
+  <1>4. TypeOK /\ Inv100_R2_0_I1 /\ ClientRequestAction => Inv100_R2_0_I1'
+       BY DEF TypeOK,ClientRequestAction,ClientRequest,Inv100_R2_0_I1
+  \* (Inv100_R2_0_I1,AdvanceCommitIndexAction)
+  <1>5. TypeOK /\ Inv100_R2_0_I1 /\ AdvanceCommitIndexAction => Inv100_R2_0_I1'
+       BY DEF TypeOK,AdvanceCommitIndexAction,AdvanceCommitIndex,Inv100_R2_0_I1
+  \* (Inv100_R2_0_I1,AppendEntriesAction)
+  <1>6. TypeOK /\ Inv100_R2_0_I1 /\ AppendEntriesAction => Inv100_R2_0_I1'
+       BY DEF TypeOK,AppendEntriesAction,AppendEntries,Inv100_R2_0_I1
+  \* (Inv100_R2_0_I1,HandleRequestVoteRequestAction)
+  <1>7. TypeOK /\ Inv340_R5_0_I1 /\ Inv749_R5_0_I1 /\ Inv100_R2_0_I1 /\ HandleRequestVoteRequestAction => Inv100_R2_0_I1'
+       BY DEF TypeOK,Inv340_R5_0_I1,Inv749_R5_0_I1,HandleRequestVoteRequestAction,HandleRequestVoteRequest,Inv100_R2_0_I1,LastTerm,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero
+  \* (Inv100_R2_0_I1,HandleRequestVoteResponseAction)
+  <1>8. TypeOK /\ Inv341_R1_1_I1 /\ Inv100_R2_0_I1 /\ HandleRequestVoteResponseAction => Inv100_R2_0_I1'
+       BY DEF TypeOK,Inv341_R1_1_I1,HandleRequestVoteResponseAction,HandleRequestVoteResponse,Inv100_R2_0_I1,LastTerm,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero
+  \* (Inv100_R2_0_I1,RejectAppendEntriesRequestAction)
+  <1>9. TypeOK /\ Inv100_R2_0_I1 /\ RejectAppendEntriesRequestAction => Inv100_R2_0_I1'
+       BY DEF TypeOK,RejectAppendEntriesRequestAction,RejectAppendEntriesRequest,Inv100_R2_0_I1
+  \* (Inv100_R2_0_I1,AcceptAppendEntriesRequestAppendAction)
+  <1>10. TypeOK /\ Inv100_R2_0_I1 /\ AcceptAppendEntriesRequestAppendAction => Inv100_R2_0_I1'
+       BY DEF TypeOK,AcceptAppendEntriesRequestAppendAction,AcceptAppendEntriesRequestAppend,Inv100_R2_0_I1
+  \* (Inv100_R2_0_I1,AcceptAppendEntriesRequestLearnCommitAction)
+  <1>11. TypeOK /\ Inv100_R2_0_I1 /\ AcceptAppendEntriesRequestLearnCommitAction => Inv100_R2_0_I1'
+       BY DEF TypeOK,AcceptAppendEntriesRequestLearnCommitAction,AcceptAppendEntriesRequestLearnCommit,Inv100_R2_0_I1
+  \* (Inv100_R2_0_I1,HandleAppendEntriesResponseAction)
+  <1>12. TypeOK /\ Inv100_R2_0_I1 /\ HandleAppendEntriesResponseAction => Inv100_R2_0_I1'
+       BY DEF TypeOK,HandleAppendEntriesResponseAction,HandleAppendEntriesResponse,Inv100_R2_0_I1
 <1>13. QED BY <1>1,<1>2,<1>3,<1>4,<1>5,<1>6,<1>7,<1>8,<1>9,<1>10,<1>11,<1>12 DEF Next
 
 
-\*** Inv6_R3_1_I1
-THEOREM L_5 == TypeOK /\ Inv6_R3_1_I1 /\ Next => Inv6_R3_1_I1'
+\*** Inv340_R5_0_I1
+THEOREM L_5 == TypeOK /\ Inv340_R5_0_I1 /\ Next => Inv340_R5_0_I1'
   <1>. USE A0,A1,A2,A3,A4,A5,A6,A7
-  \* (Inv6_R3_1_I1,RequestVoteAction)
-  <1>1. TypeOK /\ Inv6_R3_1_I1 /\ RequestVoteAction => Inv6_R3_1_I1'
-       BY DEF TypeOK,RequestVoteAction,RequestVote,Inv6_R3_1_I1,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero,AppendEntriesRequestType,AppendEntriesResponseType
-  \* (Inv6_R3_1_I1,UpdateTermAction)
-  <1>2. TypeOK /\ Inv6_R3_1_I1 /\ UpdateTermAction => Inv6_R3_1_I1'
-       BY DEF TypeOK,UpdateTermAction,UpdateTerm,Inv6_R3_1_I1,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero,AppendEntriesRequestType,AppendEntriesResponseType
-  \* (Inv6_R3_1_I1,BecomeLeaderAction)
-  <1>3. TypeOK /\ Inv6_R3_1_I1 /\ BecomeLeaderAction => Inv6_R3_1_I1'
-       BY DEF TypeOK,BecomeLeaderAction,BecomeLeader,Inv6_R3_1_I1
-  \* (Inv6_R3_1_I1,ClientRequestAction)
-  <1>4. TypeOK /\ Inv6_R3_1_I1 /\ ClientRequestAction => Inv6_R3_1_I1'
-       BY DEF TypeOK,ClientRequestAction,ClientRequest,Inv6_R3_1_I1
-  \* (Inv6_R3_1_I1,AdvanceCommitIndexAction)
-  <1>5. TypeOK /\ Inv6_R3_1_I1 /\ AdvanceCommitIndexAction => Inv6_R3_1_I1'
-       BY DEF TypeOK,AdvanceCommitIndexAction,AdvanceCommitIndex,Inv6_R3_1_I1
-  \* (Inv6_R3_1_I1,AppendEntriesAction)
-  <1>6. TypeOK /\ Inv6_R3_1_I1 /\ AppendEntriesAction => Inv6_R3_1_I1'
-       BY DEF TypeOK,AppendEntriesAction,AppendEntries,Inv6_R3_1_I1
-  \* (Inv6_R3_1_I1,HandleRequestVoteRequestAction)
-  <1>7. TypeOK /\ Inv6_R3_1_I1 /\ HandleRequestVoteRequestAction => Inv6_R3_1_I1'
-       BY DEF TypeOK,HandleRequestVoteRequestAction,HandleRequestVoteRequest,Inv6_R3_1_I1,LastTerm,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero
-  \* (Inv6_R3_1_I1,HandleRequestVoteResponseAction)
-  <1>8. TypeOK /\ Inv6_R3_1_I1 /\ HandleRequestVoteResponseAction => Inv6_R3_1_I1'
-       BY DEF TypeOK,HandleRequestVoteResponseAction,HandleRequestVoteResponse,Inv6_R3_1_I1,LastTerm,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero
-  \* (Inv6_R3_1_I1,RejectAppendEntriesRequestAction)
-  <1>9. TypeOK /\ Inv6_R3_1_I1 /\ RejectAppendEntriesRequestAction => Inv6_R3_1_I1'
-       BY DEF TypeOK,RejectAppendEntriesRequestAction,RejectAppendEntriesRequest,Inv6_R3_1_I1
-  \* (Inv6_R3_1_I1,AcceptAppendEntriesRequestAppendAction)
-  <1>10. TypeOK /\ Inv6_R3_1_I1 /\ AcceptAppendEntriesRequestAppendAction => Inv6_R3_1_I1'
-       BY DEF TypeOK,AcceptAppendEntriesRequestAppendAction,AcceptAppendEntriesRequestAppend,Inv6_R3_1_I1
-  \* (Inv6_R3_1_I1,AcceptAppendEntriesRequestLearnCommitAction)
-  <1>11. TypeOK /\ Inv6_R3_1_I1 /\ AcceptAppendEntriesRequestLearnCommitAction => Inv6_R3_1_I1'
-       BY DEF TypeOK,AcceptAppendEntriesRequestLearnCommitAction,AcceptAppendEntriesRequestLearnCommit,Inv6_R3_1_I1
-  \* (Inv6_R3_1_I1,HandleAppendEntriesResponseAction)
-  <1>12. TypeOK /\ Inv6_R3_1_I1 /\ HandleAppendEntriesResponseAction => Inv6_R3_1_I1'
-       BY DEF TypeOK,HandleAppendEntriesResponseAction,HandleAppendEntriesResponse,Inv6_R3_1_I1
+  \* (Inv340_R5_0_I1,RequestVoteAction)
+  <1>1. TypeOK /\ Inv340_R5_0_I1 /\ RequestVoteAction => Inv340_R5_0_I1'
+       BY DEF TypeOK,RequestVoteAction,RequestVote,Inv340_R5_0_I1,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero,AppendEntriesRequestType,AppendEntriesResponseType
+  \* (Inv340_R5_0_I1,UpdateTermAction)
+  <1>2. TypeOK /\ Inv340_R5_0_I1 /\ UpdateTermAction => Inv340_R5_0_I1'
+       BY DEF TypeOK,UpdateTermAction,UpdateTerm,Inv340_R5_0_I1,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero,AppendEntriesRequestType,AppendEntriesResponseType
+  \* (Inv340_R5_0_I1,BecomeLeaderAction)
+  <1>3. TypeOK /\ Inv340_R5_0_I1 /\ BecomeLeaderAction => Inv340_R5_0_I1'
+       BY DEF TypeOK,BecomeLeaderAction,BecomeLeader,Inv340_R5_0_I1
+  \* (Inv340_R5_0_I1,ClientRequestAction)
+  <1>4. TypeOK /\ Inv340_R5_0_I1 /\ ClientRequestAction => Inv340_R5_0_I1'
+       BY DEF TypeOK,ClientRequestAction,ClientRequest,Inv340_R5_0_I1
+  \* (Inv340_R5_0_I1,AdvanceCommitIndexAction)
+  <1>5. TypeOK /\ Inv340_R5_0_I1 /\ AdvanceCommitIndexAction => Inv340_R5_0_I1'
+       BY DEF TypeOK,AdvanceCommitIndexAction,AdvanceCommitIndex,Inv340_R5_0_I1
+  \* (Inv340_R5_0_I1,AppendEntriesAction)
+  <1>6. TypeOK /\ Inv340_R5_0_I1 /\ AppendEntriesAction => Inv340_R5_0_I1'
+       BY DEF TypeOK,AppendEntriesAction,AppendEntries,Inv340_R5_0_I1
+  \* (Inv340_R5_0_I1,HandleRequestVoteRequestAction)
+  <1>7. TypeOK /\ Inv340_R5_0_I1 /\ HandleRequestVoteRequestAction => Inv340_R5_0_I1'
+       BY DEF TypeOK,HandleRequestVoteRequestAction,HandleRequestVoteRequest,Inv340_R5_0_I1,LastTerm,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero
+  \* (Inv340_R5_0_I1,HandleRequestVoteResponseAction)
+  <1>8. TypeOK /\ Inv340_R5_0_I1 /\ HandleRequestVoteResponseAction => Inv340_R5_0_I1'
+       BY DEF TypeOK,HandleRequestVoteResponseAction,HandleRequestVoteResponse,Inv340_R5_0_I1,LastTerm,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero
+  \* (Inv340_R5_0_I1,RejectAppendEntriesRequestAction)
+  <1>9. TypeOK /\ Inv340_R5_0_I1 /\ RejectAppendEntriesRequestAction => Inv340_R5_0_I1'
+       BY DEF TypeOK,RejectAppendEntriesRequestAction,RejectAppendEntriesRequest,Inv340_R5_0_I1
+  \* (Inv340_R5_0_I1,AcceptAppendEntriesRequestAppendAction)
+  <1>10. TypeOK /\ Inv340_R5_0_I1 /\ AcceptAppendEntriesRequestAppendAction => Inv340_R5_0_I1'
+       BY DEF TypeOK,AcceptAppendEntriesRequestAppendAction,AcceptAppendEntriesRequestAppend,Inv340_R5_0_I1
+  \* (Inv340_R5_0_I1,AcceptAppendEntriesRequestLearnCommitAction)
+  <1>11. TypeOK /\ Inv340_R5_0_I1 /\ AcceptAppendEntriesRequestLearnCommitAction => Inv340_R5_0_I1'
+       BY DEF TypeOK,AcceptAppendEntriesRequestLearnCommitAction,AcceptAppendEntriesRequestLearnCommit,Inv340_R5_0_I1
+  \* (Inv340_R5_0_I1,HandleAppendEntriesResponseAction)
+  <1>12. TypeOK /\ Inv340_R5_0_I1 /\ HandleAppendEntriesResponseAction => Inv340_R5_0_I1'
+       BY DEF TypeOK,HandleAppendEntriesResponseAction,HandleAppendEntriesResponse,Inv340_R5_0_I1
 <1>13. QED BY <1>1,<1>2,<1>3,<1>4,<1>5,<1>6,<1>7,<1>8,<1>9,<1>10,<1>11,<1>12 DEF Next
 
 
-\*** Inv1900_R1_1_I1
-THEOREM L_6 == TypeOK /\ Inv6184_R3_0_I2 /\ Inv984_R3_1_I1 /\ Inv6_R3_1_I1 /\ Inv1209_R3_1_I1 /\ Inv1900_R1_1_I1 /\ Next => Inv1900_R1_1_I1'
+\*** Inv749_R5_0_I1
+THEOREM L_6 == TypeOK /\ Inv6_R8_0_I1 /\ Inv749_R5_0_I1 /\ Next => Inv749_R5_0_I1'
   <1>. USE A0,A1,A2,A3,A4,A5,A6,A7
-  \* (Inv1900_R1_1_I1,RequestVoteAction)
-  <1>1. TypeOK /\ Inv1900_R1_1_I1 /\ RequestVoteAction => Inv1900_R1_1_I1'
-       BY DEF TypeOK,RequestVoteAction,RequestVote,Inv1900_R1_1_I1,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero,AppendEntriesRequestType,AppendEntriesResponseType
-  \* (Inv1900_R1_1_I1,UpdateTermAction)
-  <1>2. TypeOK /\ Inv1900_R1_1_I1 /\ UpdateTermAction => Inv1900_R1_1_I1'
-       BY DEF TypeOK,UpdateTermAction,UpdateTerm,Inv1900_R1_1_I1,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero,AppendEntriesRequestType,AppendEntriesResponseType
-  \* (Inv1900_R1_1_I1,BecomeLeaderAction)
-  <1>3. TypeOK /\ Inv6184_R3_0_I2 /\ Inv1900_R1_1_I1 /\ BecomeLeaderAction => Inv1900_R1_1_I1'
-       BY DEF TypeOK,Inv6184_R3_0_I2,BecomeLeaderAction,BecomeLeader,Inv1900_R1_1_I1
-  \* (Inv1900_R1_1_I1,ClientRequestAction)
-  <1>4. TypeOK /\ Inv1900_R1_1_I1 /\ ClientRequestAction => Inv1900_R1_1_I1'
-       BY DEF TypeOK,ClientRequestAction,ClientRequest,Inv1900_R1_1_I1
-  \* (Inv1900_R1_1_I1,AdvanceCommitIndexAction)
-  <1>5. TypeOK /\ Inv1900_R1_1_I1 /\ AdvanceCommitIndexAction => Inv1900_R1_1_I1'
-       BY DEF TypeOK,AdvanceCommitIndexAction,AdvanceCommitIndex,Inv1900_R1_1_I1
-  \* (Inv1900_R1_1_I1,AppendEntriesAction)
-  <1>6. TypeOK /\ Inv1900_R1_1_I1 /\ AppendEntriesAction => Inv1900_R1_1_I1'
-       BY DEF TypeOK,AppendEntriesAction,AppendEntries,Inv1900_R1_1_I1
-  \* (Inv1900_R1_1_I1,HandleRequestVoteRequestAction)
-  <1>7. TypeOK /\ Inv984_R3_1_I1 /\ Inv6_R3_1_I1 /\ Inv1209_R3_1_I1 /\ Inv1900_R1_1_I1 /\ HandleRequestVoteRequestAction => Inv1900_R1_1_I1'
-       BY DEF TypeOK,Inv984_R3_1_I1,Inv6_R3_1_I1,Inv1209_R3_1_I1,HandleRequestVoteRequestAction,HandleRequestVoteRequest,Inv1900_R1_1_I1,LastTerm,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero
-  \* (Inv1900_R1_1_I1,HandleRequestVoteResponseAction)
-  <1>8. TypeOK /\ Inv1900_R1_1_I1 /\ HandleRequestVoteResponseAction => Inv1900_R1_1_I1'
-       BY DEF TypeOK,HandleRequestVoteResponseAction,HandleRequestVoteResponse,Inv1900_R1_1_I1,LastTerm,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero
-  \* (Inv1900_R1_1_I1,RejectAppendEntriesRequestAction)
-  <1>9. TypeOK /\ Inv1900_R1_1_I1 /\ RejectAppendEntriesRequestAction => Inv1900_R1_1_I1'
-       BY DEF TypeOK,RejectAppendEntriesRequestAction,RejectAppendEntriesRequest,Inv1900_R1_1_I1
-  \* (Inv1900_R1_1_I1,AcceptAppendEntriesRequestAppendAction)
-  <1>10. TypeOK /\ Inv1900_R1_1_I1 /\ AcceptAppendEntriesRequestAppendAction => Inv1900_R1_1_I1'
-       BY DEF TypeOK,AcceptAppendEntriesRequestAppendAction,AcceptAppendEntriesRequestAppend,Inv1900_R1_1_I1
-  \* (Inv1900_R1_1_I1,AcceptAppendEntriesRequestLearnCommitAction)
-  <1>11. TypeOK /\ Inv1900_R1_1_I1 /\ AcceptAppendEntriesRequestLearnCommitAction => Inv1900_R1_1_I1'
-       BY DEF TypeOK,AcceptAppendEntriesRequestLearnCommitAction,AcceptAppendEntriesRequestLearnCommit,Inv1900_R1_1_I1
-  \* (Inv1900_R1_1_I1,HandleAppendEntriesResponseAction)
-  <1>12. TypeOK /\ Inv1900_R1_1_I1 /\ HandleAppendEntriesResponseAction => Inv1900_R1_1_I1'
-       BY DEF TypeOK,HandleAppendEntriesResponseAction,HandleAppendEntriesResponse,Inv1900_R1_1_I1
+  \* (Inv749_R5_0_I1,RequestVoteAction)
+  <1>1. TypeOK /\ Inv749_R5_0_I1 /\ RequestVoteAction => Inv749_R5_0_I1'
+       BY DEF TypeOK,RequestVoteAction,RequestVote,Inv749_R5_0_I1,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero,AppendEntriesRequestType,AppendEntriesResponseType
+  \* (Inv749_R5_0_I1,UpdateTermAction)
+  <1>2. TypeOK /\ Inv749_R5_0_I1 /\ UpdateTermAction => Inv749_R5_0_I1'
+       BY DEF TypeOK,UpdateTermAction,UpdateTerm,Inv749_R5_0_I1,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero,AppendEntriesRequestType,AppendEntriesResponseType
+  \* (Inv749_R5_0_I1,BecomeLeaderAction)
+  <1>3. TypeOK /\ Inv749_R5_0_I1 /\ BecomeLeaderAction => Inv749_R5_0_I1'
+       BY DEF TypeOK,BecomeLeaderAction,BecomeLeader,Inv749_R5_0_I1
+  \* (Inv749_R5_0_I1,ClientRequestAction)
+  <1>4. TypeOK /\ Inv749_R5_0_I1 /\ ClientRequestAction => Inv749_R5_0_I1'
+       BY DEF TypeOK,ClientRequestAction,ClientRequest,Inv749_R5_0_I1
+  \* (Inv749_R5_0_I1,AdvanceCommitIndexAction)
+  <1>5. TypeOK /\ Inv749_R5_0_I1 /\ AdvanceCommitIndexAction => Inv749_R5_0_I1'
+       BY DEF TypeOK,AdvanceCommitIndexAction,AdvanceCommitIndex,Inv749_R5_0_I1
+  \* (Inv749_R5_0_I1,AppendEntriesAction)
+  <1>6. TypeOK /\ Inv749_R5_0_I1 /\ AppendEntriesAction => Inv749_R5_0_I1'
+       BY DEF TypeOK,AppendEntriesAction,AppendEntries,Inv749_R5_0_I1
+  \* (Inv749_R5_0_I1,HandleRequestVoteRequestAction)
+  <1>7. TypeOK /\ Inv6_R8_0_I1 /\ Inv749_R5_0_I1 /\ HandleRequestVoteRequestAction => Inv749_R5_0_I1'
+       BY DEF TypeOK,Inv6_R8_0_I1,HandleRequestVoteRequestAction,HandleRequestVoteRequest,Inv749_R5_0_I1,LastTerm,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero
+  \* (Inv749_R5_0_I1,HandleRequestVoteResponseAction)
+  <1>8. TypeOK /\ Inv749_R5_0_I1 /\ HandleRequestVoteResponseAction => Inv749_R5_0_I1'
+       BY DEF TypeOK,HandleRequestVoteResponseAction,HandleRequestVoteResponse,Inv749_R5_0_I1,LastTerm,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero
+  \* (Inv749_R5_0_I1,RejectAppendEntriesRequestAction)
+  <1>9. TypeOK /\ Inv749_R5_0_I1 /\ RejectAppendEntriesRequestAction => Inv749_R5_0_I1'
+       BY DEF TypeOK,RejectAppendEntriesRequestAction,RejectAppendEntriesRequest,Inv749_R5_0_I1
+  \* (Inv749_R5_0_I1,AcceptAppendEntriesRequestAppendAction)
+  <1>10. TypeOK /\ Inv749_R5_0_I1 /\ AcceptAppendEntriesRequestAppendAction => Inv749_R5_0_I1'
+       BY DEF TypeOK,AcceptAppendEntriesRequestAppendAction,AcceptAppendEntriesRequestAppend,Inv749_R5_0_I1
+  \* (Inv749_R5_0_I1,AcceptAppendEntriesRequestLearnCommitAction)
+  <1>11. TypeOK /\ Inv749_R5_0_I1 /\ AcceptAppendEntriesRequestLearnCommitAction => Inv749_R5_0_I1'
+       BY DEF TypeOK,AcceptAppendEntriesRequestLearnCommitAction,AcceptAppendEntriesRequestLearnCommit,Inv749_R5_0_I1
+  \* (Inv749_R5_0_I1,HandleAppendEntriesResponseAction)
+  <1>12. TypeOK /\ Inv749_R5_0_I1 /\ HandleAppendEntriesResponseAction => Inv749_R5_0_I1'
+       BY DEF TypeOK,HandleAppendEntriesResponseAction,HandleAppendEntriesResponse,Inv749_R5_0_I1
 <1>13. QED BY <1>1,<1>2,<1>3,<1>4,<1>5,<1>6,<1>7,<1>8,<1>9,<1>10,<1>11,<1>12 DEF Next
 
 
-\*** Inv6184_R3_0_I2
-THEOREM L_7 == TypeOK /\ Inv6184_R3_0_I2 /\ Next => Inv6184_R3_0_I2'
+\*** Inv6_R8_0_I1
+THEOREM L_7 == TypeOK /\ Inv6_R8_0_I1 /\ Next => Inv6_R8_0_I1'
   <1>. USE A0,A1,A2,A3,A4,A5,A6,A7
-  \* (Inv6184_R3_0_I2,RequestVoteAction)
-  <1>1. TypeOK /\ Inv6184_R3_0_I2 /\ RequestVoteAction => Inv6184_R3_0_I2'
-       BY DEF TypeOK,RequestVoteAction,RequestVote,Inv6184_R3_0_I2,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero,AppendEntriesRequestType,AppendEntriesResponseType
-  \* (Inv6184_R3_0_I2,UpdateTermAction)
-  <1>2. TypeOK /\ Inv6184_R3_0_I2 /\ UpdateTermAction => Inv6184_R3_0_I2'
-       BY DEF TypeOK,UpdateTermAction,UpdateTerm,Inv6184_R3_0_I2,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero,AppendEntriesRequestType,AppendEntriesResponseType
-  \* (Inv6184_R3_0_I2,BecomeLeaderAction)
-  <1>3. TypeOK /\ Inv6184_R3_0_I2 /\ BecomeLeaderAction => Inv6184_R3_0_I2'
-       BY DEF TypeOK,BecomeLeaderAction,BecomeLeader,Inv6184_R3_0_I2
-  \* (Inv6184_R3_0_I2,ClientRequestAction)
-  <1>4. TypeOK /\ Inv6184_R3_0_I2 /\ ClientRequestAction => Inv6184_R3_0_I2'
-       BY DEF TypeOK,ClientRequestAction,ClientRequest,Inv6184_R3_0_I2
-  \* (Inv6184_R3_0_I2,AdvanceCommitIndexAction)
-  <1>5. TypeOK /\ Inv6184_R3_0_I2 /\ AdvanceCommitIndexAction => Inv6184_R3_0_I2'
-       BY DEF TypeOK,AdvanceCommitIndexAction,AdvanceCommitIndex,Inv6184_R3_0_I2
-  \* (Inv6184_R3_0_I2,AppendEntriesAction)
-  <1>6. TypeOK /\ Inv6184_R3_0_I2 /\ AppendEntriesAction => Inv6184_R3_0_I2'
-       BY DEF TypeOK,AppendEntriesAction,AppendEntries,Inv6184_R3_0_I2
-  \* (Inv6184_R3_0_I2,HandleRequestVoteRequestAction)
-  <1>7. TypeOK /\ Inv6184_R3_0_I2 /\ HandleRequestVoteRequestAction => Inv6184_R3_0_I2'
-       BY DEF TypeOK,HandleRequestVoteRequestAction,HandleRequestVoteRequest,Inv6184_R3_0_I2,LastTerm,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero
-  \* (Inv6184_R3_0_I2,HandleRequestVoteResponseAction)
-  <1>8. TypeOK /\ Inv6184_R3_0_I2 /\ HandleRequestVoteResponseAction => Inv6184_R3_0_I2'
-       BY DEF TypeOK,HandleRequestVoteResponseAction,HandleRequestVoteResponse,Inv6184_R3_0_I2,LastTerm,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero
-  \* (Inv6184_R3_0_I2,RejectAppendEntriesRequestAction)
-  <1>9. TypeOK /\ Inv6184_R3_0_I2 /\ RejectAppendEntriesRequestAction => Inv6184_R3_0_I2'
-       BY DEF TypeOK,RejectAppendEntriesRequestAction,RejectAppendEntriesRequest,Inv6184_R3_0_I2
-  \* (Inv6184_R3_0_I2,AcceptAppendEntriesRequestAppendAction)
-  <1>10. TypeOK /\ Inv6184_R3_0_I2 /\ AcceptAppendEntriesRequestAppendAction => Inv6184_R3_0_I2'
-       BY DEF TypeOK,AcceptAppendEntriesRequestAppendAction,AcceptAppendEntriesRequestAppend,Inv6184_R3_0_I2
-  \* (Inv6184_R3_0_I2,AcceptAppendEntriesRequestLearnCommitAction)
-  <1>11. TypeOK /\ Inv6184_R3_0_I2 /\ AcceptAppendEntriesRequestLearnCommitAction => Inv6184_R3_0_I2'
-       BY DEF TypeOK,AcceptAppendEntriesRequestLearnCommitAction,AcceptAppendEntriesRequestLearnCommit,Inv6184_R3_0_I2
-  \* (Inv6184_R3_0_I2,HandleAppendEntriesResponseAction)
-  <1>12. TypeOK /\ Inv6184_R3_0_I2 /\ HandleAppendEntriesResponseAction => Inv6184_R3_0_I2'
-       BY DEF TypeOK,HandleAppendEntriesResponseAction,HandleAppendEntriesResponse,Inv6184_R3_0_I2
+  \* (Inv6_R8_0_I1,RequestVoteAction)
+  <1>1. TypeOK /\ Inv6_R8_0_I1 /\ RequestVoteAction => Inv6_R8_0_I1'
+       BY DEF TypeOK,RequestVoteAction,RequestVote,Inv6_R8_0_I1,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero,AppendEntriesRequestType,AppendEntriesResponseType
+  \* (Inv6_R8_0_I1,UpdateTermAction)
+  <1>2. TypeOK /\ Inv6_R8_0_I1 /\ UpdateTermAction => Inv6_R8_0_I1'
+       BY DEF TypeOK,UpdateTermAction,UpdateTerm,Inv6_R8_0_I1,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero,AppendEntriesRequestType,AppendEntriesResponseType
+  \* (Inv6_R8_0_I1,BecomeLeaderAction)
+  <1>3. TypeOK /\ Inv6_R8_0_I1 /\ BecomeLeaderAction => Inv6_R8_0_I1'
+       BY DEF TypeOK,BecomeLeaderAction,BecomeLeader,Inv6_R8_0_I1
+  \* (Inv6_R8_0_I1,ClientRequestAction)
+  <1>4. TypeOK /\ Inv6_R8_0_I1 /\ ClientRequestAction => Inv6_R8_0_I1'
+       BY DEF TypeOK,ClientRequestAction,ClientRequest,Inv6_R8_0_I1
+  \* (Inv6_R8_0_I1,AdvanceCommitIndexAction)
+  <1>5. TypeOK /\ Inv6_R8_0_I1 /\ AdvanceCommitIndexAction => Inv6_R8_0_I1'
+       BY DEF TypeOK,AdvanceCommitIndexAction,AdvanceCommitIndex,Inv6_R8_0_I1
+  \* (Inv6_R8_0_I1,AppendEntriesAction)
+  <1>6. TypeOK /\ Inv6_R8_0_I1 /\ AppendEntriesAction => Inv6_R8_0_I1'
+       BY DEF TypeOK,AppendEntriesAction,AppendEntries,Inv6_R8_0_I1
+  \* (Inv6_R8_0_I1,HandleRequestVoteRequestAction)
+  <1>7. TypeOK /\ Inv6_R8_0_I1 /\ HandleRequestVoteRequestAction => Inv6_R8_0_I1'
+       BY DEF TypeOK,HandleRequestVoteRequestAction,HandleRequestVoteRequest,Inv6_R8_0_I1,LastTerm,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero
+  \* (Inv6_R8_0_I1,HandleRequestVoteResponseAction)
+  <1>8. TypeOK /\ Inv6_R8_0_I1 /\ HandleRequestVoteResponseAction => Inv6_R8_0_I1'
+       BY DEF TypeOK,HandleRequestVoteResponseAction,HandleRequestVoteResponse,Inv6_R8_0_I1,LastTerm,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero
+  \* (Inv6_R8_0_I1,RejectAppendEntriesRequestAction)
+  <1>9. TypeOK /\ Inv6_R8_0_I1 /\ RejectAppendEntriesRequestAction => Inv6_R8_0_I1'
+       BY DEF TypeOK,RejectAppendEntriesRequestAction,RejectAppendEntriesRequest,Inv6_R8_0_I1
+  \* (Inv6_R8_0_I1,AcceptAppendEntriesRequestAppendAction)
+  <1>10. TypeOK /\ Inv6_R8_0_I1 /\ AcceptAppendEntriesRequestAppendAction => Inv6_R8_0_I1'
+       BY DEF TypeOK,AcceptAppendEntriesRequestAppendAction,AcceptAppendEntriesRequestAppend,Inv6_R8_0_I1
+  \* (Inv6_R8_0_I1,AcceptAppendEntriesRequestLearnCommitAction)
+  <1>11. TypeOK /\ Inv6_R8_0_I1 /\ AcceptAppendEntriesRequestLearnCommitAction => Inv6_R8_0_I1'
+       BY DEF TypeOK,AcceptAppendEntriesRequestLearnCommitAction,AcceptAppendEntriesRequestLearnCommit,Inv6_R8_0_I1
+  \* (Inv6_R8_0_I1,HandleAppendEntriesResponseAction)
+  <1>12. TypeOK /\ Inv6_R8_0_I1 /\ HandleAppendEntriesResponseAction => Inv6_R8_0_I1'
+       BY DEF TypeOK,HandleAppendEntriesResponseAction,HandleAppendEntriesResponse,Inv6_R8_0_I1
 <1>13. QED BY <1>1,<1>2,<1>3,<1>4,<1>5,<1>6,<1>7,<1>8,<1>9,<1>10,<1>11,<1>12 DEF Next
 
 
-\*** Inv984_R3_1_I1
-THEOREM L_8 == TypeOK /\ Inv984_R3_1_I1 /\ Next => Inv984_R3_1_I1'
+\*** Inv341_R1_1_I1
+THEOREM L_8 == TypeOK /\ Inv341_R1_1_I1 /\ Next => Inv341_R1_1_I1'
   <1>. USE A0,A1,A2,A3,A4,A5,A6,A7
-  \* (Inv984_R3_1_I1,RequestVoteAction)
-  <1>1. TypeOK /\ Inv984_R3_1_I1 /\ RequestVoteAction => Inv984_R3_1_I1'
-       BY DEF TypeOK,RequestVoteAction,RequestVote,Inv984_R3_1_I1,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero,AppendEntriesRequestType,AppendEntriesResponseType
-  \* (Inv984_R3_1_I1,UpdateTermAction)
-  <1>2. TypeOK /\ Inv984_R3_1_I1 /\ UpdateTermAction => Inv984_R3_1_I1'
+  \* (Inv341_R1_1_I1,RequestVoteAction)
+  <1>1. TypeOK /\ Inv341_R1_1_I1 /\ RequestVoteAction => Inv341_R1_1_I1'
+       BY DEF TypeOK,RequestVoteAction,RequestVote,Inv341_R1_1_I1,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero,AppendEntriesRequestType,AppendEntriesResponseType
+  \* (Inv341_R1_1_I1,UpdateTermAction)
+  <1>2. TypeOK /\ Inv341_R1_1_I1 /\ UpdateTermAction => Inv341_R1_1_I1'
+       BY DEF TypeOK,UpdateTermAction,UpdateTerm,Inv341_R1_1_I1,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero,AppendEntriesRequestType,AppendEntriesResponseType
+  \* (Inv341_R1_1_I1,BecomeLeaderAction)
+  <1>3. TypeOK /\ Inv341_R1_1_I1 /\ BecomeLeaderAction => Inv341_R1_1_I1'
+       BY DEF TypeOK,BecomeLeaderAction,BecomeLeader,Inv341_R1_1_I1
+  \* (Inv341_R1_1_I1,ClientRequestAction)
+  <1>4. TypeOK /\ Inv341_R1_1_I1 /\ ClientRequestAction => Inv341_R1_1_I1'
+       BY DEF TypeOK,ClientRequestAction,ClientRequest,Inv341_R1_1_I1
+  \* (Inv341_R1_1_I1,AdvanceCommitIndexAction)
+  <1>5. TypeOK /\ Inv341_R1_1_I1 /\ AdvanceCommitIndexAction => Inv341_R1_1_I1'
+       BY DEF TypeOK,AdvanceCommitIndexAction,AdvanceCommitIndex,Inv341_R1_1_I1
+  \* (Inv341_R1_1_I1,AppendEntriesAction)
+  <1>6. TypeOK /\ Inv341_R1_1_I1 /\ AppendEntriesAction => Inv341_R1_1_I1'
+       BY DEF TypeOK,AppendEntriesAction,AppendEntries,Inv341_R1_1_I1
+  \* (Inv341_R1_1_I1,HandleRequestVoteRequestAction)
+  <1>7. TypeOK /\ Inv341_R1_1_I1 /\ HandleRequestVoteRequestAction => Inv341_R1_1_I1'
+       BY DEF TypeOK,HandleRequestVoteRequestAction,HandleRequestVoteRequest,Inv341_R1_1_I1,LastTerm,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero
+  \* (Inv341_R1_1_I1,HandleRequestVoteResponseAction)
+  <1>8. TypeOK /\ Inv341_R1_1_I1 /\ HandleRequestVoteResponseAction => Inv341_R1_1_I1'
+       BY DEF TypeOK,HandleRequestVoteResponseAction,HandleRequestVoteResponse,Inv341_R1_1_I1,LastTerm,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero
+  \* (Inv341_R1_1_I1,RejectAppendEntriesRequestAction)
+  <1>9. TypeOK /\ Inv341_R1_1_I1 /\ RejectAppendEntriesRequestAction => Inv341_R1_1_I1'
+       BY DEF TypeOK,RejectAppendEntriesRequestAction,RejectAppendEntriesRequest,Inv341_R1_1_I1
+  \* (Inv341_R1_1_I1,AcceptAppendEntriesRequestAppendAction)
+  <1>10. TypeOK /\ Inv341_R1_1_I1 /\ AcceptAppendEntriesRequestAppendAction => Inv341_R1_1_I1'
+       BY DEF TypeOK,AcceptAppendEntriesRequestAppendAction,AcceptAppendEntriesRequestAppend,Inv341_R1_1_I1
+  \* (Inv341_R1_1_I1,AcceptAppendEntriesRequestLearnCommitAction)
+  <1>11. TypeOK /\ Inv341_R1_1_I1 /\ AcceptAppendEntriesRequestLearnCommitAction => Inv341_R1_1_I1'
+       BY DEF TypeOK,AcceptAppendEntriesRequestLearnCommitAction,AcceptAppendEntriesRequestLearnCommit,Inv341_R1_1_I1
+  \* (Inv341_R1_1_I1,HandleAppendEntriesResponseAction)
+  <1>12. TypeOK /\ Inv341_R1_1_I1 /\ HandleAppendEntriesResponseAction => Inv341_R1_1_I1'
+       BY DEF TypeOK,HandleAppendEntriesResponseAction,HandleAppendEntriesResponse,Inv341_R1_1_I1
+<1>13. QED BY <1>1,<1>2,<1>3,<1>4,<1>5,<1>6,<1>7,<1>8,<1>9,<1>10,<1>11,<1>12 DEF Next
+
+
+\*** Inv4_R5_2_I0
+THEOREM L_9 == TypeOK /\ Inv4_R5_2_I0 /\ Next => Inv4_R5_2_I0'
+  <1>. USE A0,A1,A2,A3,A4,A5,A6,A7
+  \* (Inv4_R5_2_I0,RequestVoteAction)
+  <1>1. TypeOK /\ Inv4_R5_2_I0 /\ RequestVoteAction => Inv4_R5_2_I0'
+       BY DEF TypeOK,RequestVoteAction,RequestVote,Inv4_R5_2_I0,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero,AppendEntriesRequestType,AppendEntriesResponseType
+  \* (Inv4_R5_2_I0,UpdateTermAction)
+  <1>2. TypeOK /\ Inv4_R5_2_I0 /\ UpdateTermAction => Inv4_R5_2_I0'
+       BY DEF TypeOK,UpdateTermAction,UpdateTerm,Inv4_R5_2_I0,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero,AppendEntriesRequestType,AppendEntriesResponseType
+  \* (Inv4_R5_2_I0,BecomeLeaderAction)
+  <1>3. TypeOK /\ Inv4_R5_2_I0 /\ BecomeLeaderAction => Inv4_R5_2_I0'
+       BY DEF TypeOK,BecomeLeaderAction,BecomeLeader,Inv4_R5_2_I0
+  \* (Inv4_R5_2_I0,ClientRequestAction)
+  <1>4. TypeOK /\ Inv4_R5_2_I0 /\ ClientRequestAction => Inv4_R5_2_I0'
+       BY DEF TypeOK,ClientRequestAction,ClientRequest,Inv4_R5_2_I0
+  \* (Inv4_R5_2_I0,AdvanceCommitIndexAction)
+  <1>5. TypeOK /\ Inv4_R5_2_I0 /\ AdvanceCommitIndexAction => Inv4_R5_2_I0'
+       BY DEF TypeOK,AdvanceCommitIndexAction,AdvanceCommitIndex,Inv4_R5_2_I0
+  \* (Inv4_R5_2_I0,AppendEntriesAction)
+  <1>6. TypeOK /\ Inv4_R5_2_I0 /\ AppendEntriesAction => Inv4_R5_2_I0'
+       BY DEF TypeOK,AppendEntriesAction,AppendEntries,Inv4_R5_2_I0
+  \* (Inv4_R5_2_I0,HandleRequestVoteRequestAction)
+  <1>7. TypeOK /\ Inv4_R5_2_I0 /\ HandleRequestVoteRequestAction => Inv4_R5_2_I0'
+       BY DEF TypeOK,HandleRequestVoteRequestAction,HandleRequestVoteRequest,Inv4_R5_2_I0,LastTerm,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero
+  \* (Inv4_R5_2_I0,HandleRequestVoteResponseAction)
+  <1>8. TypeOK /\ Inv4_R5_2_I0 /\ HandleRequestVoteResponseAction => Inv4_R5_2_I0'
+       BY DEF TypeOK,HandleRequestVoteResponseAction,HandleRequestVoteResponse,Inv4_R5_2_I0,LastTerm,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero
+  \* (Inv4_R5_2_I0,RejectAppendEntriesRequestAction)
+  <1>9. TypeOK /\ Inv4_R5_2_I0 /\ RejectAppendEntriesRequestAction => Inv4_R5_2_I0'
+       BY DEF TypeOK,RejectAppendEntriesRequestAction,RejectAppendEntriesRequest,Inv4_R5_2_I0
+  \* (Inv4_R5_2_I0,AcceptAppendEntriesRequestAppendAction)
+  <1>10. TypeOK /\ Inv4_R5_2_I0 /\ AcceptAppendEntriesRequestAppendAction => Inv4_R5_2_I0'
+       BY DEF TypeOK,AcceptAppendEntriesRequestAppendAction,AcceptAppendEntriesRequestAppend,Inv4_R5_2_I0
+  \* (Inv4_R5_2_I0,AcceptAppendEntriesRequestLearnCommitAction)
+  <1>11. TypeOK /\ Inv4_R5_2_I0 /\ AcceptAppendEntriesRequestLearnCommitAction => Inv4_R5_2_I0'
+       BY DEF TypeOK,AcceptAppendEntriesRequestLearnCommitAction,AcceptAppendEntriesRequestLearnCommit,Inv4_R5_2_I0
+  \* (Inv4_R5_2_I0,HandleAppendEntriesResponseAction)
+  <1>12. TypeOK /\ Inv4_R5_2_I0 /\ HandleAppendEntriesResponseAction => Inv4_R5_2_I0'
+       BY DEF TypeOK,HandleAppendEntriesResponseAction,HandleAppendEntriesResponse,Inv4_R5_2_I0
+<1>13. QED BY <1>1,<1>2,<1>3,<1>4,<1>5,<1>6,<1>7,<1>8,<1>9,<1>10,<1>11,<1>12 DEF Next
+
+
+\*** Inv10_R2_1_I1
+THEOREM L_10 == TypeOK /\ Inv4_R5_2_I0 /\ Inv10_R2_1_I1 /\ Next => Inv10_R2_1_I1'
+  <1>. USE A0,A1,A2,A3,A4,A5,A6,A7
+  \* (Inv10_R2_1_I1,RequestVoteAction)
+  <1>1. TypeOK /\ Inv10_R2_1_I1 /\ RequestVoteAction => Inv10_R2_1_I1'
+       BY DEF TypeOK,RequestVoteAction,RequestVote,Inv10_R2_1_I1,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero,AppendEntriesRequestType,AppendEntriesResponseType
+  \* (Inv10_R2_1_I1,UpdateTermAction)
+  <1>2. TypeOK /\ Inv10_R2_1_I1 /\ UpdateTermAction => Inv10_R2_1_I1'
+       BY DEF TypeOK,UpdateTermAction,UpdateTerm,Inv10_R2_1_I1,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero,AppendEntriesRequestType,AppendEntriesResponseType
+  \* (Inv10_R2_1_I1,BecomeLeaderAction)
+  <1>3. TypeOK /\ Inv10_R2_1_I1 /\ BecomeLeaderAction => Inv10_R2_1_I1'
+       BY DEF TypeOK,BecomeLeaderAction,BecomeLeader,Inv10_R2_1_I1
+  \* (Inv10_R2_1_I1,ClientRequestAction)
+  <1>4. TypeOK /\ Inv10_R2_1_I1 /\ ClientRequestAction => Inv10_R2_1_I1'
+       BY DEF TypeOK,ClientRequestAction,ClientRequest,Inv10_R2_1_I1
+  \* (Inv10_R2_1_I1,AdvanceCommitIndexAction)
+  <1>5. TypeOK /\ Inv10_R2_1_I1 /\ AdvanceCommitIndexAction => Inv10_R2_1_I1'
+       BY DEF TypeOK,AdvanceCommitIndexAction,AdvanceCommitIndex,Inv10_R2_1_I1
+  \* (Inv10_R2_1_I1,AppendEntriesAction)
+  <1>6. TypeOK /\ Inv10_R2_1_I1 /\ AppendEntriesAction => Inv10_R2_1_I1'
+       BY DEF TypeOK,AppendEntriesAction,AppendEntries,Inv10_R2_1_I1
+  \* (Inv10_R2_1_I1,HandleRequestVoteRequestAction)
+  <1>7. TypeOK /\ Inv10_R2_1_I1 /\ HandleRequestVoteRequestAction => Inv10_R2_1_I1'
+       BY DEF TypeOK,HandleRequestVoteRequestAction,HandleRequestVoteRequest,Inv10_R2_1_I1,LastTerm,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero
+  \* (Inv10_R2_1_I1,HandleRequestVoteResponseAction)
+  <1>8. TypeOK /\ Inv4_R5_2_I0 /\ Inv10_R2_1_I1 /\ HandleRequestVoteResponseAction => Inv10_R2_1_I1'
+       BY DEF TypeOK,Inv4_R5_2_I0,HandleRequestVoteResponseAction,HandleRequestVoteResponse,Inv10_R2_1_I1,LastTerm,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero
+  \* (Inv10_R2_1_I1,RejectAppendEntriesRequestAction)
+  <1>9. TypeOK /\ Inv10_R2_1_I1 /\ RejectAppendEntriesRequestAction => Inv10_R2_1_I1'
+       BY DEF TypeOK,RejectAppendEntriesRequestAction,RejectAppendEntriesRequest,Inv10_R2_1_I1
+  \* (Inv10_R2_1_I1,AcceptAppendEntriesRequestAppendAction)
+  <1>10. TypeOK /\ Inv10_R2_1_I1 /\ AcceptAppendEntriesRequestAppendAction => Inv10_R2_1_I1'
+       BY DEF TypeOK,AcceptAppendEntriesRequestAppendAction,AcceptAppendEntriesRequestAppend,Inv10_R2_1_I1
+  \* (Inv10_R2_1_I1,AcceptAppendEntriesRequestLearnCommitAction)
+  <1>11. TypeOK /\ Inv10_R2_1_I1 /\ AcceptAppendEntriesRequestLearnCommitAction => Inv10_R2_1_I1'
+       BY DEF TypeOK,AcceptAppendEntriesRequestLearnCommitAction,AcceptAppendEntriesRequestLearnCommit,Inv10_R2_1_I1
+  \* (Inv10_R2_1_I1,HandleAppendEntriesResponseAction)
+  <1>12. TypeOK /\ Inv10_R2_1_I1 /\ HandleAppendEntriesResponseAction => Inv10_R2_1_I1'
+       BY DEF TypeOK,HandleAppendEntriesResponseAction,HandleAppendEntriesResponse,Inv10_R2_1_I1
+<1>13. QED BY <1>1,<1>2,<1>3,<1>4,<1>5,<1>6,<1>7,<1>8,<1>9,<1>10,<1>11,<1>12 DEF Next
+
+
+\*** Inv1692_R1_1_I1
+THEOREM L_11 == TypeOK /\ Inv1692_R1_1_I1 /\ Next => Inv1692_R1_1_I1'
+  <1>. USE A0,A1,A2,A3,A4,A5,A6,A7
+  \* (Inv1692_R1_1_I1,RequestVoteAction)
+  <1>1. TypeOK /\ Inv1692_R1_1_I1 /\ RequestVoteAction => Inv1692_R1_1_I1'
+       BY DEF TypeOK,RequestVoteAction,RequestVote,Inv1692_R1_1_I1,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero,AppendEntriesRequestType,AppendEntriesResponseType
+  \* (Inv1692_R1_1_I1,UpdateTermAction)
+  <1>2. TypeOK /\ Inv1692_R1_1_I1 /\ UpdateTermAction => Inv1692_R1_1_I1'
+       BY DEF TypeOK,UpdateTermAction,UpdateTerm,Inv1692_R1_1_I1,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero,AppendEntriesRequestType,AppendEntriesResponseType
+  \* (Inv1692_R1_1_I1,BecomeLeaderAction)
+  <1>3. TypeOK /\ Inv1692_R1_1_I1 /\ BecomeLeaderAction => Inv1692_R1_1_I1'
+       BY DEF TypeOK,BecomeLeaderAction,BecomeLeader,Inv1692_R1_1_I1
+  \* (Inv1692_R1_1_I1,ClientRequestAction)
+  <1>4. TypeOK /\ Inv1692_R1_1_I1 /\ ClientRequestAction => Inv1692_R1_1_I1'
+       BY DEF TypeOK,ClientRequestAction,ClientRequest,Inv1692_R1_1_I1
+  \* (Inv1692_R1_1_I1,AdvanceCommitIndexAction)
+  <1>5. TypeOK /\ Inv1692_R1_1_I1 /\ AdvanceCommitIndexAction => Inv1692_R1_1_I1'
+       BY DEF TypeOK,AdvanceCommitIndexAction,AdvanceCommitIndex,Inv1692_R1_1_I1
+  \* (Inv1692_R1_1_I1,AppendEntriesAction)
+  <1>6. TypeOK /\ Inv1692_R1_1_I1 /\ AppendEntriesAction => Inv1692_R1_1_I1'
+       BY DEF TypeOK,AppendEntriesAction,AppendEntries,Inv1692_R1_1_I1
+  \* (Inv1692_R1_1_I1,HandleRequestVoteRequestAction)
+  <1>7. TypeOK /\ Inv1692_R1_1_I1 /\ HandleRequestVoteRequestAction => Inv1692_R1_1_I1'
+       BY DEF TypeOK,HandleRequestVoteRequestAction,HandleRequestVoteRequest,Inv1692_R1_1_I1,LastTerm,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero
+  \* (Inv1692_R1_1_I1,HandleRequestVoteResponseAction)
+  <1>8. TypeOK /\ Inv1692_R1_1_I1 /\ HandleRequestVoteResponseAction => Inv1692_R1_1_I1'
     <2> SUFFICES ASSUME TypeOK,
-                        Inv984_R3_1_I1,
-                        TRUE,
-                        NEW m \in requestVoteRequestMsgs \cup requestVoteResponseMsgs \cup appendEntriesRequestMsgs \cup appendEntriesResponseMsgs,
-                        UpdateTerm(m.mterm, m.mdest),
-                        NEW VARI \in Server',
-                        NEW VARREQVM \in requestVoteRequestMsgs'
-                 PROVE  (~(VARREQVM.mlastLogTerm >= currentTerm[VARI]) \/ (~(VARREQVM.mterm = currentTerm[VARI])))'
-      BY DEF Inv984_R3_1_I1, UpdateTermAction
+                       Inv1692_R1_1_I1,
+                        NEW m \in requestVoteResponseMsgs,
+                        HandleRequestVoteResponse(m),
+                        NEW VARI \in Server'
+                 PROVE  ((votesGranted[VARI] \in Quorum) \/ (~((state[VARI] = Leader))))'
+      BY DEF HandleRequestVoteResponseAction, Inv1692_R1_1_I1
+    <2> USE DEF TypeOK,HandleRequestVoteResponseAction,HandleRequestVoteResponse,Inv1692_R1_1_I1,LastTerm,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero
+    <2>1. CASE m.mvoteGranted
+        <3>1. CASE VARI = m.mdest BY AddingToQuorumRemainsQuorum,FS_Singleton, <2>1 DEF TypeOK
+        <3>2. CASE VARI # m.mdest 
+            <4>1. votesGranted[VARI] = votesGranted'[VARI] BY <3>2
+            <4>2. QED BY <4>1
+        <3>3. QED BY <3>1, <3>2
+    <2>2. CASE ~m.mvoteGranted 
+        <3>1. CASE VARI = m.mdest BY <2>2 DEF TypeOK
+        <3>2. CASE VARI # m.mdest 
+            <4>1. votesGranted[VARI] = votesGranted'[VARI] BY <3>2
+            <4>2. QED BY <4>1
+        <3>3. QED BY <3>1, <3>2
     <2> QED
-        <3>1. CASE m.mtype = RequestVoteResponseType BY  <3>1 DEF TypeOK,UpdateTermAction,UpdateTerm,Inv984_R3_1_I1,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero,AppendEntriesRequestType,AppendEntriesResponseType
-        <3>2. CASE m.mtype = RequestVoteRequestType BY  <3>1 DEF TypeOK,UpdateTermAction,UpdateTerm,Inv984_R3_1_I1,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero,AppendEntriesRequestType,AppendEntriesResponseType
-        <3>3. CASE m.mtype = AppendEntriesRequestType BY  <3>1 DEF TypeOK,UpdateTermAction,UpdateTerm,Inv984_R3_1_I1,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero,AppendEntriesRequestType,AppendEntriesResponseType
-        <3>4. CASE m.mtype = AppendEntriesResponseType BY  <3>1 DEF TypeOK,UpdateTermAction,UpdateTerm,Inv984_R3_1_I1,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero,AppendEntriesRequestType,AppendEntriesResponseType
-        <3>5. QED BY  <3>1,<3>2,<3>3,<3>4 DEF TypeOK,UpdateTermAction,UpdateTerm,Inv984_R3_1_I1,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero,AppendEntriesRequestType,AppendEntriesResponseType
+      BY <2>1, <2>2, FS_Subset, FS_Difference, FS_Singleton, FS_Union DEF TypeOK,HandleRequestVoteResponseAction,HandleRequestVoteResponse,Inv1692_R1_1_I1,LastTerm,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero
     
-  \* (Inv984_R3_1_I1,BecomeLeaderAction)
-  <1>3. TypeOK /\ Inv984_R3_1_I1 /\ BecomeLeaderAction => Inv984_R3_1_I1'
-       BY DEF TypeOK,BecomeLeaderAction,BecomeLeader,Inv984_R3_1_I1
-  \* (Inv984_R3_1_I1,ClientRequestAction)
-  <1>4. TypeOK /\ Inv984_R3_1_I1 /\ ClientRequestAction => Inv984_R3_1_I1'
-       BY DEF TypeOK,ClientRequestAction,ClientRequest,Inv984_R3_1_I1
-  \* (Inv984_R3_1_I1,AdvanceCommitIndexAction)
-  <1>5. TypeOK /\ Inv984_R3_1_I1 /\ AdvanceCommitIndexAction => Inv984_R3_1_I1'
-       BY DEF TypeOK,AdvanceCommitIndexAction,AdvanceCommitIndex,Inv984_R3_1_I1
-  \* (Inv984_R3_1_I1,AppendEntriesAction)
-  <1>6. TypeOK /\ Inv984_R3_1_I1 /\ AppendEntriesAction => Inv984_R3_1_I1'
-       BY DEF TypeOK,AppendEntriesAction,AppendEntries,Inv984_R3_1_I1
-  \* (Inv984_R3_1_I1,HandleRequestVoteRequestAction)
-  <1>7. TypeOK /\ Inv984_R3_1_I1 /\ HandleRequestVoteRequestAction => Inv984_R3_1_I1'
-       BY DEF TypeOK,HandleRequestVoteRequestAction,HandleRequestVoteRequest,Inv984_R3_1_I1,LastTerm,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero
-  \* (Inv984_R3_1_I1,HandleRequestVoteResponseAction)
-  <1>8. TypeOK /\ Inv984_R3_1_I1 /\ HandleRequestVoteResponseAction => Inv984_R3_1_I1'
-       BY DEF TypeOK,HandleRequestVoteResponseAction,HandleRequestVoteResponse,Inv984_R3_1_I1,LastTerm,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero
-  \* (Inv984_R3_1_I1,RejectAppendEntriesRequestAction)
-  <1>9. TypeOK /\ Inv984_R3_1_I1 /\ RejectAppendEntriesRequestAction => Inv984_R3_1_I1'
-       BY DEF TypeOK,RejectAppendEntriesRequestAction,RejectAppendEntriesRequest,Inv984_R3_1_I1
-  \* (Inv984_R3_1_I1,AcceptAppendEntriesRequestAppendAction)
-  <1>10. TypeOK /\ Inv984_R3_1_I1 /\ AcceptAppendEntriesRequestAppendAction => Inv984_R3_1_I1'
-       BY DEF TypeOK,AcceptAppendEntriesRequestAppendAction,AcceptAppendEntriesRequestAppend,Inv984_R3_1_I1
-  \* (Inv984_R3_1_I1,AcceptAppendEntriesRequestLearnCommitAction)
-  <1>11. TypeOK /\ Inv984_R3_1_I1 /\ AcceptAppendEntriesRequestLearnCommitAction => Inv984_R3_1_I1'
-       BY DEF TypeOK,AcceptAppendEntriesRequestLearnCommitAction,AcceptAppendEntriesRequestLearnCommit,Inv984_R3_1_I1
-  \* (Inv984_R3_1_I1,HandleAppendEntriesResponseAction)
-  <1>12. TypeOK /\ Inv984_R3_1_I1 /\ HandleAppendEntriesResponseAction => Inv984_R3_1_I1'
-       BY DEF TypeOK,HandleAppendEntriesResponseAction,HandleAppendEntriesResponse,Inv984_R3_1_I1
-<1>13. QED BY <1>1,<1>2,<1>3,<1>4,<1>5,<1>6,<1>7,<1>8,<1>9,<1>10,<1>11,<1>12 DEF Next
-
-
-\*** Inv1209_R3_1_I1
-THEOREM L_9 == TypeOK /\ Inv6_R3_1_I1 /\ Inv0_R8_0_I1 /\ Inv1209_R3_1_I1 /\ Next => Inv1209_R3_1_I1'
-  <1>. USE A0,A1,A2,A3,A4,A5,A6,A7
-  \* (Inv1209_R3_1_I1,RequestVoteAction)
-  <1>1. TypeOK /\ Inv6_R3_1_I1 /\ Inv0_R8_0_I1 /\ Inv1209_R3_1_I1 /\ RequestVoteAction => Inv1209_R3_1_I1'
-       BY DEF TypeOK,Inv6_R3_1_I1,Inv0_R8_0_I1,RequestVoteAction,RequestVote,Inv1209_R3_1_I1,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero,AppendEntriesRequestType,AppendEntriesResponseType
-  \* (Inv1209_R3_1_I1,UpdateTermAction)
-  <1>2. TypeOK /\ Inv1209_R3_1_I1 /\ UpdateTermAction => Inv1209_R3_1_I1'
-    <2> SUFFICES ASSUME TypeOK,
-                        Inv1209_R3_1_I1,
-                        TRUE,
-                        NEW m \in requestVoteRequestMsgs \cup requestVoteResponseMsgs \cup appendEntriesRequestMsgs \cup appendEntriesResponseMsgs,
-                        UpdateTerm(m.mterm, m.mdest),
-                        NEW VARI \in Server',
-                        NEW VARJ \in Server',
-                        NEW VARREQVRES \in requestVoteResponseMsgs'
-                 PROVE  (~(VARREQVRES.mterm = currentTerm[VARI] /\ VARREQVRES.msource = VARJ /\ VARREQVRES.mdest # VARI /\ VARREQVRES.mvoteGranted) \/ (~(votedFor[VARJ] = VARI)))'
-      BY DEF Inv1209_R3_1_I1, UpdateTermAction
-    <2> QED
-      BY DEF TypeOK,UpdateTermAction,UpdateTerm,Inv1209_R3_1_I1,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero,AppendEntriesRequestType,AppendEntriesResponseType
        
-  \* (Inv1209_R3_1_I1,BecomeLeaderAction)
-  <1>3. TypeOK /\ Inv1209_R3_1_I1 /\ BecomeLeaderAction => Inv1209_R3_1_I1'
-       BY DEF TypeOK,BecomeLeaderAction,BecomeLeader,Inv1209_R3_1_I1
-  \* (Inv1209_R3_1_I1,ClientRequestAction)
-  <1>4. TypeOK /\ Inv1209_R3_1_I1 /\ ClientRequestAction => Inv1209_R3_1_I1'
-       BY DEF TypeOK,ClientRequestAction,ClientRequest,Inv1209_R3_1_I1
-  \* (Inv1209_R3_1_I1,AdvanceCommitIndexAction)
-  <1>5. TypeOK /\ Inv1209_R3_1_I1 /\ AdvanceCommitIndexAction => Inv1209_R3_1_I1'
-       BY DEF TypeOK,AdvanceCommitIndexAction,AdvanceCommitIndex,Inv1209_R3_1_I1
-  \* (Inv1209_R3_1_I1,AppendEntriesAction)
-  <1>6. TypeOK /\ Inv1209_R3_1_I1 /\ AppendEntriesAction => Inv1209_R3_1_I1'
-       BY DEF TypeOK,AppendEntriesAction,AppendEntries,Inv1209_R3_1_I1
-  \* (Inv1209_R3_1_I1,HandleRequestVoteRequestAction)
-  <1>7. TypeOK /\ Inv1209_R3_1_I1 /\ HandleRequestVoteRequestAction => Inv1209_R3_1_I1'
-       BY DEF TypeOK,HandleRequestVoteRequestAction,HandleRequestVoteRequest,Inv1209_R3_1_I1,LastTerm,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero
-  \* (Inv1209_R3_1_I1,HandleRequestVoteResponseAction)
-  <1>8. TypeOK /\ Inv1209_R3_1_I1 /\ HandleRequestVoteResponseAction => Inv1209_R3_1_I1'
-       BY DEF TypeOK,HandleRequestVoteResponseAction,HandleRequestVoteResponse,Inv1209_R3_1_I1,LastTerm,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero
-  \* (Inv1209_R3_1_I1,RejectAppendEntriesRequestAction)
-  <1>9. TypeOK /\ Inv1209_R3_1_I1 /\ RejectAppendEntriesRequestAction => Inv1209_R3_1_I1'
-       BY DEF TypeOK,RejectAppendEntriesRequestAction,RejectAppendEntriesRequest,Inv1209_R3_1_I1
-  \* (Inv1209_R3_1_I1,AcceptAppendEntriesRequestAppendAction)
-  <1>10. TypeOK /\ Inv1209_R3_1_I1 /\ AcceptAppendEntriesRequestAppendAction => Inv1209_R3_1_I1'
-       BY DEF TypeOK,AcceptAppendEntriesRequestAppendAction,AcceptAppendEntriesRequestAppend,Inv1209_R3_1_I1
-  \* (Inv1209_R3_1_I1,AcceptAppendEntriesRequestLearnCommitAction)
-  <1>11. TypeOK /\ Inv1209_R3_1_I1 /\ AcceptAppendEntriesRequestLearnCommitAction => Inv1209_R3_1_I1'
-       BY DEF TypeOK,AcceptAppendEntriesRequestLearnCommitAction,AcceptAppendEntriesRequestLearnCommit,Inv1209_R3_1_I1
-  \* (Inv1209_R3_1_I1,HandleAppendEntriesResponseAction)
-  <1>12. TypeOK /\ Inv1209_R3_1_I1 /\ HandleAppendEntriesResponseAction => Inv1209_R3_1_I1'
-       BY DEF TypeOK,HandleAppendEntriesResponseAction,HandleAppendEntriesResponse,Inv1209_R3_1_I1
-<1>13. QED BY <1>1,<1>2,<1>3,<1>4,<1>5,<1>6,<1>7,<1>8,<1>9,<1>10,<1>11,<1>12 DEF Next
-
-
-\*** Inv0_R8_0_I1
-THEOREM L_10 == TypeOK /\ Inv1_R9_0_I0 /\ Inv0_R8_0_I1 /\ Next => Inv0_R8_0_I1'
-  <1>. USE A0,A1,A2,A3,A4,A5,A6,A7
-  \* (Inv0_R8_0_I1,RequestVoteAction)
-  <1>1. TypeOK /\ Inv0_R8_0_I1 /\ RequestVoteAction => Inv0_R8_0_I1'
-       BY DEF TypeOK,RequestVoteAction,RequestVote,Inv0_R8_0_I1,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero,AppendEntriesRequestType,AppendEntriesResponseType
-  \* (Inv0_R8_0_I1,UpdateTermAction)
-  <1>2. TypeOK /\ Inv0_R8_0_I1 /\ UpdateTermAction => Inv0_R8_0_I1'
-       BY DEF TypeOK,UpdateTermAction,UpdateTerm,Inv0_R8_0_I1,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero,AppendEntriesRequestType,AppendEntriesResponseType
-  \* (Inv0_R8_0_I1,BecomeLeaderAction)
-  <1>3. TypeOK /\ Inv0_R8_0_I1 /\ BecomeLeaderAction => Inv0_R8_0_I1'
-       BY DEF TypeOK,BecomeLeaderAction,BecomeLeader,Inv0_R8_0_I1
-  \* (Inv0_R8_0_I1,ClientRequestAction)
-  <1>4. TypeOK /\ Inv0_R8_0_I1 /\ ClientRequestAction => Inv0_R8_0_I1'
-       BY DEF TypeOK,ClientRequestAction,ClientRequest,Inv0_R8_0_I1
-  \* (Inv0_R8_0_I1,AdvanceCommitIndexAction)
-  <1>5. TypeOK /\ Inv0_R8_0_I1 /\ AdvanceCommitIndexAction => Inv0_R8_0_I1'
-       BY DEF TypeOK,AdvanceCommitIndexAction,AdvanceCommitIndex,Inv0_R8_0_I1
-  \* (Inv0_R8_0_I1,AppendEntriesAction)
-  <1>6. TypeOK /\ Inv0_R8_0_I1 /\ AppendEntriesAction => Inv0_R8_0_I1'
-       BY DEF TypeOK,AppendEntriesAction,AppendEntries,Inv0_R8_0_I1
-  \* (Inv0_R8_0_I1,HandleRequestVoteRequestAction)
-  <1>7. TypeOK /\ Inv1_R9_0_I0 /\ Inv0_R8_0_I1 /\ HandleRequestVoteRequestAction => Inv0_R8_0_I1'
-       BY DEF TypeOK,Inv1_R9_0_I0,HandleRequestVoteRequestAction,HandleRequestVoteRequest,Inv0_R8_0_I1,LastTerm,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero
-  \* (Inv0_R8_0_I1,HandleRequestVoteResponseAction)
-  <1>8. TypeOK /\ Inv0_R8_0_I1 /\ HandleRequestVoteResponseAction => Inv0_R8_0_I1'
-       BY DEF TypeOK,HandleRequestVoteResponseAction,HandleRequestVoteResponse,Inv0_R8_0_I1,LastTerm,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero
-  \* (Inv0_R8_0_I1,RejectAppendEntriesRequestAction)
-  <1>9. TypeOK /\ Inv0_R8_0_I1 /\ RejectAppendEntriesRequestAction => Inv0_R8_0_I1'
-       BY DEF TypeOK,RejectAppendEntriesRequestAction,RejectAppendEntriesRequest,Inv0_R8_0_I1
-  \* (Inv0_R8_0_I1,AcceptAppendEntriesRequestAppendAction)
-  <1>10. TypeOK /\ Inv0_R8_0_I1 /\ AcceptAppendEntriesRequestAppendAction => Inv0_R8_0_I1'
-       BY DEF TypeOK,AcceptAppendEntriesRequestAppendAction,AcceptAppendEntriesRequestAppend,Inv0_R8_0_I1
-  \* (Inv0_R8_0_I1,AcceptAppendEntriesRequestLearnCommitAction)
-  <1>11. TypeOK /\ Inv0_R8_0_I1 /\ AcceptAppendEntriesRequestLearnCommitAction => Inv0_R8_0_I1'
-       BY DEF TypeOK,AcceptAppendEntriesRequestLearnCommitAction,AcceptAppendEntriesRequestLearnCommit,Inv0_R8_0_I1
-  \* (Inv0_R8_0_I1,HandleAppendEntriesResponseAction)
-  <1>12. TypeOK /\ Inv0_R8_0_I1 /\ HandleAppendEntriesResponseAction => Inv0_R8_0_I1'
-       BY DEF TypeOK,HandleAppendEntriesResponseAction,HandleAppendEntriesResponse,Inv0_R8_0_I1
-<1>13. QED BY <1>1,<1>2,<1>3,<1>4,<1>5,<1>6,<1>7,<1>8,<1>9,<1>10,<1>11,<1>12 DEF Next
-
-
-\*** Inv1_R9_0_I0
-THEOREM L_11 == TypeOK /\ Inv1_R9_0_I0 /\ Next => Inv1_R9_0_I0'
-  <1>. USE A0,A1,A2,A3,A4,A5,A6,A7
-  \* (Inv1_R9_0_I0,RequestVoteAction)
-  <1>1. TypeOK /\ Inv1_R9_0_I0 /\ RequestVoteAction => Inv1_R9_0_I0'
-       BY DEF TypeOK,RequestVoteAction,RequestVote,Inv1_R9_0_I0,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero,AppendEntriesRequestType,AppendEntriesResponseType
-  \* (Inv1_R9_0_I0,UpdateTermAction)
-  <1>2. TypeOK /\ Inv1_R9_0_I0 /\ UpdateTermAction => Inv1_R9_0_I0'
-       BY DEF TypeOK,UpdateTermAction,UpdateTerm,Inv1_R9_0_I0,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero,AppendEntriesRequestType,AppendEntriesResponseType
-  \* (Inv1_R9_0_I0,BecomeLeaderAction)
-  <1>3. TypeOK /\ Inv1_R9_0_I0 /\ BecomeLeaderAction => Inv1_R9_0_I0'
-       BY DEF TypeOK,BecomeLeaderAction,BecomeLeader,Inv1_R9_0_I0
-  \* (Inv1_R9_0_I0,ClientRequestAction)
-  <1>4. TypeOK /\ Inv1_R9_0_I0 /\ ClientRequestAction => Inv1_R9_0_I0'
-       BY DEF TypeOK,ClientRequestAction,ClientRequest,Inv1_R9_0_I0
-  \* (Inv1_R9_0_I0,AdvanceCommitIndexAction)
-  <1>5. TypeOK /\ Inv1_R9_0_I0 /\ AdvanceCommitIndexAction => Inv1_R9_0_I0'
-       BY DEF TypeOK,AdvanceCommitIndexAction,AdvanceCommitIndex,Inv1_R9_0_I0
-  \* (Inv1_R9_0_I0,AppendEntriesAction)
-  <1>6. TypeOK /\ Inv1_R9_0_I0 /\ AppendEntriesAction => Inv1_R9_0_I0'
-       BY DEF TypeOK,AppendEntriesAction,AppendEntries,Inv1_R9_0_I0
-  \* (Inv1_R9_0_I0,HandleRequestVoteRequestAction)
-  <1>7. TypeOK /\ Inv1_R9_0_I0 /\ HandleRequestVoteRequestAction => Inv1_R9_0_I0'
-       BY DEF TypeOK,HandleRequestVoteRequestAction,HandleRequestVoteRequest,Inv1_R9_0_I0,LastTerm,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero
-  \* (Inv1_R9_0_I0,HandleRequestVoteResponseAction)
-  <1>8. TypeOK /\ Inv1_R9_0_I0 /\ HandleRequestVoteResponseAction => Inv1_R9_0_I0'
-       BY DEF TypeOK,HandleRequestVoteResponseAction,HandleRequestVoteResponse,Inv1_R9_0_I0,LastTerm,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero
-  \* (Inv1_R9_0_I0,RejectAppendEntriesRequestAction)
-  <1>9. TypeOK /\ Inv1_R9_0_I0 /\ RejectAppendEntriesRequestAction => Inv1_R9_0_I0'
-       BY DEF TypeOK,RejectAppendEntriesRequestAction,RejectAppendEntriesRequest,Inv1_R9_0_I0
-  \* (Inv1_R9_0_I0,AcceptAppendEntriesRequestAppendAction)
-  <1>10. TypeOK /\ Inv1_R9_0_I0 /\ AcceptAppendEntriesRequestAppendAction => Inv1_R9_0_I0'
-       BY DEF TypeOK,AcceptAppendEntriesRequestAppendAction,AcceptAppendEntriesRequestAppend,Inv1_R9_0_I0
-  \* (Inv1_R9_0_I0,AcceptAppendEntriesRequestLearnCommitAction)
-  <1>11. TypeOK /\ Inv1_R9_0_I0 /\ AcceptAppendEntriesRequestLearnCommitAction => Inv1_R9_0_I0'
-       BY DEF TypeOK,AcceptAppendEntriesRequestLearnCommitAction,AcceptAppendEntriesRequestLearnCommit,Inv1_R9_0_I0
-  \* (Inv1_R9_0_I0,HandleAppendEntriesResponseAction)
-  <1>12. TypeOK /\ Inv1_R9_0_I0 /\ HandleAppendEntriesResponseAction => Inv1_R9_0_I0'
-       BY DEF TypeOK,HandleAppendEntriesResponseAction,HandleAppendEntriesResponse,Inv1_R9_0_I0
+  \* (Inv1692_R1_1_I1,RejectAppendEntriesRequestAction)
+  <1>9. TypeOK /\ Inv1692_R1_1_I1 /\ RejectAppendEntriesRequestAction => Inv1692_R1_1_I1'
+       BY DEF TypeOK,RejectAppendEntriesRequestAction,RejectAppendEntriesRequest,Inv1692_R1_1_I1
+  \* (Inv1692_R1_1_I1,AcceptAppendEntriesRequestAppendAction)
+  <1>10. TypeOK /\ Inv1692_R1_1_I1 /\ AcceptAppendEntriesRequestAppendAction => Inv1692_R1_1_I1'
+       BY DEF TypeOK,AcceptAppendEntriesRequestAppendAction,AcceptAppendEntriesRequestAppend,Inv1692_R1_1_I1
+  \* (Inv1692_R1_1_I1,AcceptAppendEntriesRequestLearnCommitAction)
+  <1>11. TypeOK /\ Inv1692_R1_1_I1 /\ AcceptAppendEntriesRequestLearnCommitAction => Inv1692_R1_1_I1'
+       BY DEF TypeOK,AcceptAppendEntriesRequestLearnCommitAction,AcceptAppendEntriesRequestLearnCommit,Inv1692_R1_1_I1
+  \* (Inv1692_R1_1_I1,HandleAppendEntriesResponseAction)
+  <1>12. TypeOK /\ Inv1692_R1_1_I1 /\ HandleAppendEntriesResponseAction => Inv1692_R1_1_I1'
+       BY DEF TypeOK,HandleAppendEntriesResponseAction,HandleAppendEntriesResponse,Inv1692_R1_1_I1
 <1>13. QED BY <1>1,<1>2,<1>3,<1>4,<1>5,<1>6,<1>7,<1>8,<1>9,<1>10,<1>11,<1>12 DEF Next
 
 \* Initiation.
@@ -684,16 +728,16 @@ THEOREM Init => IndGlobal
     <1> USE A0,A1,A2,A3,A4,A5,A6,A7
     <1>0. Init => TypeOK BY DEF Init, TypeOK, IndGlobal
     <1>1. Init => Safety BY DEF Init, Safety, IndGlobal, H_OnePrimaryPerTerm
-    <1>2. Init => Inv8807_R0_0_I2 BY DEF Init, Inv8807_R0_0_I2, IndGlobal
-    <1>3. Init => Inv6321_R1_0_I2 BY DEF Init, Inv6321_R1_0_I2, IndGlobal
-    <1>4. Init => Inv10_R2_0_I1 BY DEF Init, Inv10_R2_0_I1, IndGlobal
-    <1>5. Init => Inv6_R3_1_I1 BY DEF Init, Inv6_R3_1_I1, IndGlobal
-    <1>6. Init => Inv1900_R1_1_I1 BY DEF Init, Inv1900_R1_1_I1, IndGlobal
-    <1>7. Init => Inv6184_R3_0_I2 BY DEF Init, Inv6184_R3_0_I2, IndGlobal
-    <1>8. Init => Inv984_R3_1_I1 BY DEF Init, Inv984_R3_1_I1, IndGlobal
-    <1>9. Init => Inv1209_R3_1_I1 BY DEF Init, Inv1209_R3_1_I1, IndGlobal
-    <1>10. Init => Inv0_R8_0_I1 BY DEF Init, Inv0_R8_0_I1, IndGlobal
-    <1>11. Init => Inv1_R9_0_I0 BY DEF Init, Inv1_R9_0_I0, IndGlobal
+    <1>2. Init => Inv17456_R0_0_I2 BY DEF Init, Inv17456_R0_0_I2, IndGlobal
+    <1>3. Init => Inv6127_R1_0_I2 BY DEF Init, Inv6127_R1_0_I2, IndGlobal
+    <1>4. Init => Inv100_R2_0_I1 BY DEF Init, Inv100_R2_0_I1, IndGlobal
+    <1>5. Init => Inv340_R5_0_I1 BY DEF Init, Inv340_R5_0_I1, IndGlobal
+    <1>6. Init => Inv749_R5_0_I1 BY DEF Init, Inv749_R5_0_I1, IndGlobal
+    <1>7. Init => Inv6_R8_0_I1 BY DEF Init, Inv6_R8_0_I1, IndGlobal
+    <1>8. Init => Inv341_R1_1_I1 BY DEF Init, Inv341_R1_1_I1, IndGlobal
+    <1>9. Init => Inv4_R5_2_I0 BY DEF Init, Inv4_R5_2_I0, IndGlobal
+    <1>10. Init => Inv10_R2_1_I1 BY DEF Init, Inv10_R2_1_I1, IndGlobal
+    <1>11. Init => Inv1692_R1_1_I1 BY DEF Init, Inv1692_R1_1_I1, IndGlobal
     <1>a. QED BY <1>0,<1>1,<1>2,<1>3,<1>4,<1>5,<1>6,<1>7,<1>8,<1>9,<1>10,<1>11 DEF IndGlobal
 
 \* Consecution.

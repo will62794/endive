@@ -604,16 +604,16 @@ MaxMEntriesLen == 1
 
 RequestVoteRequestType == [
     mtype         : {RequestVoteRequest},
-    mterm         : Terms,
-    mlastLogTerm  : Terms,
-    mlastLogIndex : LogIndicesWithZero,
+    mterm         : Nat,
+    mlastLogTerm  : Nat,
+    mlastLogIndex : Nat,
     msource       : Server,
     mdest         : Server
 ]
 
 RequestVoteResponseType == [
     mtype        : {RequestVoteResponse},
-    mterm        : Terms,
+    mterm        : Nat,
     mvoteGranted : BOOLEAN,
     msource      : Server,
     mdest        : Server
@@ -621,20 +621,20 @@ RequestVoteResponseType == [
 
 AppendEntriesRequestType == [
     mtype      : {AppendEntriesRequest},
-    mterm      : Terms,
-    mprevLogIndex  : LogIndices,
-    mprevLogTerm   : Terms,
-    mentries       : Seq(Terms),
-    mcommitIndex   : LogIndicesWithZero,
+    mterm      : Nat,
+    mprevLogIndex  : Nat,
+    mprevLogTerm   : Nat,
+    mentries       : Seq(Nat),
+    mcommitIndex   : Nat,
     msource        : Server,
     mdest          : Server
 ]
 
 AppendEntriesResponseType == [
     mtype        : {AppendEntriesResponse},
-    mterm        : Terms,
+    mterm        : Nat,
     msuccess     : BOOLEAN,
-    mmatchIndex  : LogIndices,
+    mmatchIndex  : Nat,
     msource      : Server,
     mdest        : Server
 ]
