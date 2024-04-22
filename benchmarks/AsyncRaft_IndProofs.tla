@@ -51,7 +51,8 @@ LEMMA AddingToQuorumRemainsQuorum == \A Q \in Quorum : \A s \in Server : Q \in Q
 \* num proof graph nodes: 11
 \* num proof obligations: 132
 Safety == H_OnePrimaryPerTerm
-Inv17456_R0_0_I2 == \A VARI \in Server : \A VARJ \in Server : ((state[VARJ] = Follower)) \/ (~((state[VARI] = Leader /\ VARI # VARJ /\ currentTerm[VARI] = currentTerm[VARJ]))) \/ (~(votesGranted[VARJ] \in Quorum))
+\*Inv17456_R0_0_I2 == \A VARI \in Server : \A VARJ \in Server : ((state[VARJ] = Follower)) \/ (~((state[VARI] = Leader /\ VARI # VARJ /\ currentTerm[VARI] = currentTerm[VARJ]))) \/ (~(votesGranted[VARJ] \in Quorum))
+Inv17456_R0_0_I2 == \A VARI \in Server : \A VARJ \in Server : ( (((state[VARI] = Leader /\ VARI # VARJ /\ currentTerm[VARI] = currentTerm[VARJ]))) /\ ((votesGranted[VARJ] \in Quorum)) ) => ((state[VARJ] = Follower))
 Inv6127_R1_0_I2 == \A VARI \in Server : \A VARJ \in Server : ((state[VARJ] = Follower)) \/ ((votesGranted[VARI] \cap votesGranted[VARJ] = {}) \/ (~((state[VARI] = Candidate /\ VARI # VARJ /\ currentTerm[VARI] = currentTerm[VARJ]))))
 Inv341_R1_1_I1 == \A VARI \in Server : ((state[VARI] = Follower)) \/ ((VARI \in votesGranted[VARI]))
 Inv1692_R1_1_I1 == \A VARI \in Server : (votesGranted[VARI] \in Quorum) \/ (~((state[VARI] = Leader)))
@@ -83,15 +84,14 @@ IndGlobal ==
 \* min in-degree: 0
 \* mean variable slice size: 0
 
-ASSUME A0 == IsFiniteSet(Server)
+ASSUME A0 == IsFiniteSet(Server) /\ Cardinality(Server) > 1
 ASSUME A1 == Nil \notin Server
 ASSUME A2 == (Leader # Follower) /\ (Leader # Candidate)
 ASSUME A3 == (Follower # Candidate)
 ASSUME A4 == Server = Server
-ASSUME A5 == Quorum \subseteq SUBSET Server /\ {} \notin Quorum
+ASSUME A5 == Quorum \subseteq SUBSET Server /\ {} \notin Quorum /\ Quorum # {} /\ \A s \in Server : {s} \notin Quorum
 ASSUME A6 == MaxLogLen \in Nat
-ASSUME A7 == MaxTerm \in Nat
-\* /\ Server = {1,2,3} /\ MaxTerm = 3 /\ MaxLogLen = 2
+ASSUME A7 == MaxTerm \in Nat \*/\ Server = {1,2,3} /\ MaxTerm = 3 /\ MaxLogLen = 2 /\ Quorum = {{1,2}, {2,3}}
 
 \*** TypeOK
 THEOREM L_0 == TypeOK /\ TypeOK /\ Next => TypeOK'
@@ -270,10 +270,11 @@ THEOREM L_2 == TypeOK /\ Inv6127_R1_0_I2 /\ Inv341_R1_1_I1 /\ Inv6127_R1_0_I2 /\
                         RequestVote(i),
                         NEW VARI \in Server',
                         NEW VARJ \in Server'
-                 PROVE  (((state[VARJ] = Follower)) \/ (~((state[VARI] = Leader /\ VARI # VARJ /\ currentTerm[VARI] = currentTerm[VARJ]))) \/ (~(votesGranted[VARJ] \in Quorum)))'
+                 PROVE  ( ( (((state[VARI] = Leader /\ VARI # VARJ /\ currentTerm[VARI] = currentTerm[VARJ]))) /\ ((votesGranted[VARJ] \in Quorum)) ) => ((state[VARJ] = Follower)))'
       BY DEF Inv17456_R0_0_I2, RequestVoteAction
     <2> QED
-      BY SMTT(30) DEF TypeOK,RequestVoteAction,RequestVote,Inv17456_R0_0_I2,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero,AppendEntriesRequestType,AppendEntriesResponseType
+      BY FS_Singleton
+      DEF TypeOK,RequestVoteAction,RequestVote,Inv17456_R0_0_I2,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero,AppendEntriesRequestType,AppendEntriesResponseType, LastTerm
        
   \* (Inv17456_R0_0_I2,UpdateTermAction)
   <1>2. TypeOK /\ Inv17456_R0_0_I2 /\ UpdateTermAction => Inv17456_R0_0_I2'
@@ -287,11 +288,13 @@ THEOREM L_2 == TypeOK /\ Inv6127_R1_0_I2 /\ Inv341_R1_1_I1 /\ Inv6127_R1_0_I2 /\
                         NEW i \in Server,
                         BecomeLeader(i),
                         NEW VARI \in Server',
-                        NEW VARJ \in Server'
-                 PROVE  (((state[VARJ] = Follower)) \/ (~((state[VARI] = Leader /\ VARI # VARJ /\ currentTerm[VARI] = currentTerm[VARJ]))) \/ (~(votesGranted[VARJ] \in Quorum)))'
-      OBVIOUS
-    <2> QED
+                        NEW VARJ \in Server',
+                        ((((state[VARI] = Leader /\ VARI # VARJ /\ currentTerm[VARI] = currentTerm[VARJ]))) /\ ((votesGranted[VARJ] \in Quorum)))'
+                 PROVE  (state[VARJ] = Follower)'
+      BY DEF BecomeLeaderAction, Inv17456_R0_0_I2
+   <2> QED
       BY DEF TypeOK, BecomeLeaderAction, BecomeLeader, Inv6127_R1_0_I2, Inv17456_R0_0_I2
+    
        
   \* (Inv17456_R0_0_I2,ClientRequestAction)
   <1>4. TypeOK /\ Inv17456_R0_0_I2 /\ ClientRequestAction => Inv17456_R0_0_I2'
