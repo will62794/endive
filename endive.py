@@ -1116,7 +1116,7 @@ class InductiveInvGen():
         # Avoid TLC directory naming conflicts.
         # Use small UUID.
         tag = uuid.uuid4().hex[:8]
-        ctiseed = random.randint(0,10000)
+        ctiseed = random.randint(0,1000000)
 
         specname_tag_str = ""
         if specname_tag is not None:
@@ -4987,6 +4987,8 @@ class InductiveInvGen():
         # If we have found what seems to be a valid proof graph, re-check it just to be sure.
         if self.proof_tree_mode and len(self.proof_graph_failed_lemma_nodes()) == 0:
             logging.info("Found what appears to be valid proof graph with 0 failed nodes. Re-checking each node just to make sure.")
+            # Re-seed with a different initial seed for some CTI generation diversity.
+            random.seed(self.seed + 55555)
             self.check_proof_graph()
 
     def is_inv_inductive(self):
