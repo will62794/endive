@@ -147,7 +147,7 @@ THEOREM L_0 == TypeOK /\ TypeOK /\ Next => TypeOK'
        BY DEF TypeOK,ClientRequestAction,ClientRequest,TypeOK
   \* (TypeOK,AdvanceCommitIndexAction)
   <1>5. TypeOK /\ TypeOK /\ AdvanceCommitIndexAction => TypeOK'
-       BY DEF TypeOK,AdvanceCommitIndexAction,AdvanceCommitIndex,TypeOK
+       BY DEF TypeOK,AdvanceCommitIndexAction,AdvanceCommitIndex,TypeOK,Agree,Max
   \* (TypeOK,AppendEntriesAction)
   <1>6. TypeOK /\ TypeOK /\ AppendEntriesAction => TypeOK'
        BY DEF TypeOK,AppendEntriesAction,AppendEntries,TypeOK
@@ -307,7 +307,20 @@ THEOREM L_2 == TypeOK /\ Inv6127_R1_0_I2 /\ Inv341_R1_1_I1 /\ Inv6127_R1_0_I2 /\
        BY DEF TypeOK,HandleRequestVoteRequestAction,HandleRequestVoteRequest,Inv17456_R0_0_I2,LastTerm,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero
   \* (Inv17456_R0_0_I2,HandleRequestVoteResponseAction)
   <1>8. TypeOK /\ Inv341_R1_1_I1 /\ Inv6127_R1_0_I2 /\ Inv1692_R1_1_I1 /\ Inv17456_R0_0_I2 /\ HandleRequestVoteResponseAction => Inv17456_R0_0_I2'
-       BY AddingToQuorumRemainsQuorum DEF TypeOK,Inv341_R1_1_I1,Inv6127_R1_0_I2,Inv1692_R1_1_I1,HandleRequestVoteResponseAction,HandleRequestVoteResponse,Inv17456_R0_0_I2,LastTerm,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero
+    <2> SUFFICES ASSUME TypeOK,
+                        Inv341_R1_1_I1,
+                        Inv6127_R1_0_I2,
+                        Inv1692_R1_1_I1,
+                        Inv17456_R0_0_I2,
+                        NEW m \in requestVoteResponseMsgs,
+                        HandleRequestVoteResponse(m),
+                        NEW VARI \in Server',
+                        NEW VARJ \in Server'
+                 PROVE  (((state[VARJ] = Follower)) \/ (~((state[VARI] = Leader /\ VARI # VARJ /\ currentTerm[VARI] = currentTerm[VARJ]))) \/ (~(votesGranted[VARJ] \in Quorum)))'
+      BY DEF HandleRequestVoteResponseAction, Inv17456_R0_0_I2
+    <2> QED
+      BY AddingToQuorumRemainsQuorum DEF TypeOK,Inv341_R1_1_I1,Inv6127_R1_0_I2,Inv1692_R1_1_I1,HandleRequestVoteResponseAction,HandleRequestVoteResponse,Inv17456_R0_0_I2,LastTerm,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero
+       
   \* (Inv17456_R0_0_I2,RejectAppendEntriesRequestAction)
   <1>9. TypeOK /\ Inv17456_R0_0_I2 /\ RejectAppendEntriesRequestAction => Inv17456_R0_0_I2'
        BY DEF TypeOK,RejectAppendEntriesRequestAction,RejectAppendEntriesRequest,Inv17456_R0_0_I2
@@ -349,7 +362,7 @@ THEOREM L_3 == TypeOK /\ Inv10_R2_1_I1 /\ Inv100_R2_0_I1 /\ Inv6127_R1_0_I2 /\ N
        BY DEF TypeOK,HandleRequestVoteRequestAction,HandleRequestVoteRequest,Inv6127_R1_0_I2,LastTerm,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero
   \* (Inv6127_R1_0_I2,HandleRequestVoteResponseAction)
   <1>8. TypeOK /\ Inv100_R2_0_I1 /\ Inv6127_R1_0_I2 /\ HandleRequestVoteResponseAction => Inv6127_R1_0_I2'
-       BY DEF TypeOK,Inv100_R2_0_I1,HandleRequestVoteResponseAction,HandleRequestVoteResponse,Inv6127_R1_0_I2,LastTerm,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero
+       BY FS_Singleton DEF TypeOK,Inv100_R2_0_I1,HandleRequestVoteResponseAction,HandleRequestVoteResponse,Inv6127_R1_0_I2,LastTerm,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero
   \* (Inv6127_R1_0_I2,RejectAppendEntriesRequestAction)
   <1>9. TypeOK /\ Inv6127_R1_0_I2 /\ RejectAppendEntriesRequestAction => Inv6127_R1_0_I2'
        BY DEF TypeOK,RejectAppendEntriesRequestAction,RejectAppendEntriesRequest,Inv6127_R1_0_I2
@@ -391,7 +404,7 @@ THEOREM L_4 == TypeOK /\ Inv4_R5_2_I0 /\ Inv340_R5_0_I1 /\ Inv749_R5_0_I1 /\ Inv
        BY DEF TypeOK,Inv340_R5_0_I1,Inv749_R5_0_I1,HandleRequestVoteRequestAction,HandleRequestVoteRequest,Inv100_R2_0_I1,LastTerm,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero
   \* (Inv100_R2_0_I1,HandleRequestVoteResponseAction)
   <1>8. TypeOK /\ Inv341_R1_1_I1 /\ Inv100_R2_0_I1 /\ HandleRequestVoteResponseAction => Inv100_R2_0_I1'
-       BY DEF TypeOK,Inv341_R1_1_I1,HandleRequestVoteResponseAction,HandleRequestVoteResponse,Inv100_R2_0_I1,LastTerm,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero
+       BY FS_Singleton DEF TypeOK,Inv341_R1_1_I1,HandleRequestVoteResponseAction,HandleRequestVoteResponse,Inv100_R2_0_I1,LastTerm,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero
   \* (Inv100_R2_0_I1,RejectAppendEntriesRequestAction)
   <1>9. TypeOK /\ Inv100_R2_0_I1 /\ RejectAppendEntriesRequestAction => Inv100_R2_0_I1'
        BY DEF TypeOK,RejectAppendEntriesRequestAction,RejectAppendEntriesRequest,Inv100_R2_0_I1
