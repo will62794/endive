@@ -136,7 +136,7 @@ class InductiveInvGen():
         self.proof_tree_mode = proof_tree_mode
 
         self.reprove_failed_nodes = all_args["reprove_failed_nodes"]
-        self.check_proof_graph = all_args["check_proof_graph"]
+        self.recheck_proof_graph = all_args["recheck_proof_graph"]
 
         # In persistent mode we will save the generated proof graph on completion and also load 
         # from a previously saved proof graph by default if one exists.
@@ -4017,6 +4017,11 @@ class InductiveInvGen():
 
         if self.persistent_proof_tree_mode:
             self.load_proof_graph()
+            # If we are just re-checking an existing proof graph, check it and then return.
+            if self.recheck_proof_graph:
+                logging.info("Re-checking proof graph.")
+                self.check_proof_graph()
+                return
         else:
             self.clean_proof_graph()
 
@@ -4871,6 +4876,30 @@ class InductiveInvGen():
             k_ctis = [c for c in k_ctis if c.action_name in action_filter]
 
         return k_ctis
+    
+    def check_proof_graph(self):
+        lemma_nodes = [n for n in self.proof_graph["nodes"] if "is_lemma" in self.proof_graph["nodes"][n]]
+        errors_found = []
+        for n in lemma_nodes:
+            print("\nProof graph checking of lemma node:", n)
+            print("==============================")
+            k_ctis = self.check_proof_node(n)
+            print(f"Found {len(k_ctis)} k-CTIs.")
+            if len(k_ctis) > 0:
+                print(f"ERROR! Found CTIs for lemma node {n}")
+                action_names_found = set()
+                for c in k_ctis:
+                    action_names_found.add(c.action_name)
+                print("CTIs found for actions:", action_names_found)
+                errors_found.append((n, k_ctis, action_names_found))
+                # raise Exception(f"Found CTIs for lemma node {n}.")
+        if len(errors_found) == 0:
+            print(f"~~~~~ DONE! Checked {len(lemma_nodes)} total lemma nodes and no CTIs were found.")
+        else:
+            print(f"!!! Done checking nodes, found errors! {len(errors_found)} / {len(lemma_nodes)} nodes with CTIs.")
+            print(f"{len(errors_found)} lemma nodes with CTIs:")
+            for e,ctis,actions_found in errors_found:
+                print(" - ", e, "num_ctis:", len(ctis), "actions:", actions_found)        
 
     def run(self):
         tstart = time.time()
@@ -4943,58 +4972,6 @@ class InductiveInvGen():
                 lemma_nodes = [n for n in self.proof_graph["nodes"] if "is_lemma" in self.proof_graph["nodes"][n]]
                 structured_proof.to_tlaps_proof_skeleton(proof_config, add_lemma_defs=[(n, self.proof_graph["nodes"][n]["expr"]) for n in lemma_nodes], seed=self.seed)
             
-                if self.check_proof_graph:
-                    errors_found = []
-                    for n in lemma_nodes:
-                        print("\nProof graph checking of lemma node:", n)
-                        print("==============================")
-                        k_ctis = self.check_proof_node(n)
-                        print(f"Found {len(k_ctis)} k-CTIs.")
-                        if len(k_ctis) > 0:
-                            print(f"ERROR! Found CTIs for lemma node {n}")
-                            action_names_found = set()
-                            for c in k_ctis:
-                                action_names_found.add(c.action_name)
-                            print("CTIs found for actions:", action_names_found)
-                            errors_found.append((n, k_ctis, action_names_found))
-                            # raise Exception(f"Found CTIs for lemma node {n}.")
-                    if len(errors_found) == 0:
-                        print(f"~~~~~ DONE! Checked {len(lemma_nodes)} total lemma nodes and no CTIs were found.")
-                    else:
-                        print(f"!!! Done checking nodes, found errors! {len(errors_found)} / {len(lemma_nodes)} nodes with CTIs.")
-                        print(f"{len(errors_found)} lemma nodes with CTIs:")
-                        for e,ctis,actions_found in errors_found:
-                            print(" - ", e, "num_ctis:", len(ctis), "actions:", actions_found)
-
-                
-
-            # print("")
-            # print("Proof graph edges")
-            # dot = graphviz.Digraph('round-table', comment='The Round Table')  
-            # dot.graph_attr["rankdir"] = "LR"
-            # dot.node_attr["fontname"] = "courier"
-            # dot.node_attr["shape"] = "box"
-            
-            # # Store all nodes.
-            # for e in self.proof_graph["edges"]:
-            #     print(e[0])
-            #     print(e[1])
-            #     dot.node(e[0][0], e[0][1].replace("\\", "\\\\"))
-            #     dot.node(e[1][0], e[1][1].replace("\\", "\\\\"))
-
-            # for e in self.proof_graph["edges"]:
-            #     print(e[0])
-            #     print(e[1])
-            #     dot.edge(e[0][0], e[1][0])
-            #     # print(e)
-
-            # print("Final proof graph:")
-            # print(dot.source)
-            # f = open("notes/" + self.specname + "_ind-proof-tree.dot", 'w')
-            # f.write(dot.source)
-            # f.close()
-            # dot.render("notes/" + self.specname + "_ind-proof-tree")
-                
             print("Finished inductive invariant generation in proof tree mode.")
         else:
             self.do_invgen()
@@ -5006,6 +4983,11 @@ class InductiveInvGen():
         self.total_duration_secs = (tend - tstart)
         if self.cached_invs_gen_time_secs != None:
             self.total_duration_secs += self.cached_invs_gen_time_secs
+
+        # If we have found what seems to be a valid proof graph, re-check it just to be sure.
+        if self.proof_tree_mode and len(self.proof_graph_failed_lemma_nodes()) == 0:
+            logging.info("Found what appears to be valid proof graph with 0 failed nodes. Re-checking each node just to make sure.")
+            self.check_proof_graph()
 
     def is_inv_inductive(self):
         """ Return whether the current discovered invariant is believed to be inductive. """
@@ -5134,7 +5116,7 @@ if __name__ == "__main__":
     parser.add_argument('--use_apalache_ctigen', help='Use Apalache for CTI generation (experimental).', required=False, default=False, action='store_true')
     parser.add_argument('--do_apalache_final_induction_check', help='Do final induction check with Apalache (experimental).', required=False, default=False, action='store_true')
     parser.add_argument('--apalache_smt_timeout_secs', help='Apalache SMT timeout. (experimental).', required=False, type=int, default=15)
-    parser.add_argument('--check_proof_graph', help='Check proof graph inductive obligations.', default=False, action='store_true')
+    parser.add_argument('--recheck_proof_graph', help='Check proof graph inductive obligations.', default=False, action='store_true')
     
 
     args = vars(parser.parse_args())
