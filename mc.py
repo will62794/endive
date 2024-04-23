@@ -468,7 +468,7 @@ def runtlc(spec,config=None,tlc_workers=6,cwd=None,tlcjar="tla2tools-checkall.ja
             cacheWithIgnoredInvCounts = "|".join([str(c) for c in cache_with_ignore_inv_counts])
             cacheFlags += f' -cacheStatesIgnoreVarsInvListCounts "{cacheWithIgnoredInvCounts}"'
 
-    cmd = java + (f' -Djava.io.tmpdir="{dirpath}" -cp {tlcjar} tlc2.TLC {tlc_flags} {cacheFlags} -maxDepth {max_depth} -maxSetSize {TLC_MAX_SET_SIZE} -metadir {metadir_path} -noGenerateSpecTE -checkAllInvariants -deadlock -continue -workers {tlc_workers}')
+    cmd = java + (f' -XX:+UseParallelGC -Djava.io.tmpdir="{dirpath}" -cp {tlcjar} tlc2.TLC {tlc_flags} {cacheFlags} -maxDepth {max_depth} -maxSetSize {TLC_MAX_SET_SIZE} -metadir {metadir_path} -noGenerateSpecTE -checkAllInvariants -deadlock -continue -workers {tlc_workers}')
     if config:
         cmd += " -config " + config
     cmd += " " + spec
