@@ -1104,7 +1104,8 @@ class InductiveInvGen():
                                         defs_to_add=None,
                                         pre_props=None,
                                         specname_tag=None,
-                                        ignore_vars=None):
+                                        ignore_vars=None,
+                                        nworkers=1):
         """ Starts a single instance of TLC to generate CTIs.
         
         Will generate CTIs for the conjunction of all predicates given in 'props'.
@@ -1300,7 +1301,7 @@ class InductiveInvGen():
         if ignore_vars is not None:
             ignore_vars_arg = f"-cacheStatesIgnoreVars {','.join(sorted(ignore_vars))}"
         
-        args = (dirpath, sampling_args, TLC_JAR, ignore_vars_arg, mc.TLC_MAX_SET_SIZE, simulate_flag, simulate_depth, ctiseed, tag, self.num_ctigen_workers, indcheckcfgfilename(action), indchecktlafilename)
+        args = (dirpath, sampling_args, TLC_JAR, ignore_vars_arg, mc.TLC_MAX_SET_SIZE, simulate_flag, simulate_depth, ctiseed, tag, nworkers, indcheckcfgfilename(action), indchecktlafilename)
         cmd = self.java_exe + ' -Xss16M -Djava.io.tmpdir="%s" %s -cp %s tlc2.TLC %s -maxSetSize %d %s -depth %d -seed %d -noGenerateSpecTE -metadir states/indcheckrandom_%s -continue -deadlock -workers %d -config %s %s' % args
         logging.debug("TLC command: " + cmd)
         workdir = None
@@ -1378,24 +1379,25 @@ class InductiveInvGen():
         # potential set of random initial states. We run each CTI generation process
         # in parallel, using a separate TLC instance.
         self.start_timing_ctigen()
-        # num_cti_worker_procs = 4
+        num_cti_worker_procs = 4
 
         # # Only allow alternate CTI worker count if explicitly overridden from command line.
-        # if self.num_ctigen_workers:
-        #     num_cti_worker_procs = self.num_ctigen_workers
+        if self.num_ctigen_workers:
+            num_cti_worker_procs = self.num_ctigen_workers
 
         # Now we parallelize CTI generation inside each TLC instance, so we just start up 1 TLC instance with multiple worker threads here.
         # For now continue parallelizing also a bit across TLC instances, since I think this seems to still aid in randomization
         # when generating CTIs.
-        num_cti_worker_procs = 4
+        # N.B. Switch back to instance parallelization for CTI generation for now to give better seed diversity.
+        # num_cti_worker_procs = 4
 
         if self.use_apalache_ctigen:
             num_cti_worker_procs = 1
         cti_subprocs = []
-        # num_traces_per_tlc_instance = self.num_simulate_traces // num_cti_worker_procs
+        num_traces_per_tlc_instance = self.num_simulate_traces // num_cti_worker_procs
 
         # We now compute trace count based on the number of TLC workers, since we are not parallelizing across multiple TLC instances now.
-        num_traces_per_tlc_instance = self.num_simulate_traces // self.num_ctigen_workers
+        # num_traces_per_tlc_instance = self.num_simulate_traces // self.num_ctigen_workers
 
         # Break down CTIs by action in this case.
         if actions is not None:
