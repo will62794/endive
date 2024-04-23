@@ -2508,7 +2508,7 @@ class InductiveInvGen():
                             ignored = tuple(sorted([svar for svar in self.state_vars if svar not in predvar_set]))
                             ignored_var_subsets.append(ignored)
                         # Limit number of subsets to cache at once to avoid overwhelming TLC memory.
-                        MAX_NUM_SUBSETS = 10
+                        MAX_NUM_SUBSETS = 5
                         ignored_var_subsets_remaining = list(ignored_var_subsets)
                         while len(ignored_var_subsets_remaining) > 0:
                             subsets_chunk = ignored_var_subsets_remaining[:MAX_NUM_SUBSETS]
