@@ -2507,7 +2507,13 @@ class InductiveInvGen():
                             predvar_set = p[1]
                             ignored = tuple(sorted([svar for svar in self.state_vars if svar not in predvar_set]))
                             ignored_var_subsets.append(ignored)
-                        self.cache_projected_states(ignored_var_subsets, max_depth=max_depth, tlc_workers=tlc_workers)
+                        # Limit number of subsets to cache at once to avoid overwhelming TLC memory.
+                        MAX_NUM_SUBSETS = 10
+                        ignored_var_subsets_remaining = list(ignored_var_subsets)
+                        while len(ignored_var_subsets_remaining) > 0:
+                            subsets_chunk = ignored_var_subsets_remaining[:MAX_NUM_SUBSETS]
+                            self.cache_projected_states(subsets_chunk, max_depth=max_depth, tlc_workers=tlc_workers)
+                            ignored_var_subsets_remaining = ignored_var_subsets_remaining[MAX_NUM_SUBSETS:]
 
                         # for p in pred_var_counts_tups[:]:
                         #     # print(p)
