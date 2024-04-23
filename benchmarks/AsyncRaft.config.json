@@ -164,12 +164,12 @@
     ],
     "tlaps_proof_config": {
         "assumes": [
-            "IsFiniteSet(Server)",
+            "IsFiniteSet(Server) /\\ Cardinality(Server) > 1",
             "Nil \\notin Server",
             "(Leader # Follower) /\\ (Leader # Candidate)",
             "(Follower # Candidate)",
             "Server = Server",
-            "Quorum \\subseteq Server",
+            "Quorum \\subseteq SUBSET Server /\\ {} \\notin Quorum /\\ Quorum # {} /\\ \\A s \\in Server : {s} \\notin Quorum",
             "MaxLogLen \\in Nat",
             "MaxTerm \\in Nat"
         ],
