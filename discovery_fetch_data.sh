@@ -2,7 +2,7 @@
 #
 # Download logs and other data from Discovery server.
 #
-set -e
+# set -e
 
 mkdir -p discovery_data
 
