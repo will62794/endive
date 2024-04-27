@@ -22,6 +22,8 @@ import mc
 import tlaparse
 from proofs import *
 from mc import CTI,Trace,State
+import tlaps
+
 
 DEBUG = False
 # MAC_FAST_JAVA_EXE = "/usr/local/zulu15.32.15-ca-jdk15.0.3-macosx_aarch64/bin/java"
@@ -4128,7 +4130,34 @@ class InductiveInvGen():
             #     if len(k_ctis) > 0:
             #         print("constant obj:", c)
             #         break
-                
+
+            do_tlaps_inductive_check = False
+            if do_tlaps_inductive_check:
+                proof_node = StructuredProofNode(curr_obligation_pred_tup[0], curr_obligation_pred_tup[1])
+                local_proof = StructuredProof(proof_node, specname=self.specname, actions=self.actions)
+                ret = local_proof.to_tlaps_proof_skeleton(
+                                    self.spec_config["tlaps_proof_config"], add_lemma_defs=[(n, self.proof_graph["nodes"][n]["expr"]) for n in lemma_nodes], 
+                                    seed=111115, workdir="benchmarks/gen_tla",tag=curr_obligation_pred_tup[0] + "_" + curr_obligation_pred_tup[1],
+                                    include_typeok=False)
+                tla_proof_file = ret["tlaps_filename"]
+                lemma_source_map = ret["lemma_source_map"]
+                # print("LEMMA SOURCE MAP:")
+                # for m in lemma_source_map:
+                    # print(m, lemma_source_map[m])
+                logging.info("Checking local proof obligations with TLAPS.")
+                st = time.time()
+                proof_stats = tlaps.tlapm_check_proof(tla_proof_file, stretch=0.1, nthreads=4)
+                obl_states = proof_stats["obligation_states"]
+
+                for bid in obl_states:
+                    if obl_states[bid]["status"] not in ["trivial"]:
+                        start_line = int(obl_states[bid]["loc"]["startPos"][0])
+                        if start_line in lemma_source_map:
+                            print(lemma_source_map[start_line], obl_states[bid]["status"])
+
+                logging.info(f"Checked local proof obligation with TLAPS in {time.time() - st}s.")
+
+
             k_ctis, k_cti_traces = self.generate_ctis(props=[curr_obligation_pred_tup], specname_tag=curr_obligation)
             count += 1
 

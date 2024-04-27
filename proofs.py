@@ -5,8 +5,6 @@
 import random
 import pickle
 import graphviz
-from mc import CTI
-import mc
 import logging
 import json
 import dot2tex
@@ -16,6 +14,10 @@ import multiprocessing
 import time
 import io
 import contextlib
+
+from mc import CTI
+import mc
+import tlaps
 
 log = logging.getLogger("dot2tex")
 log.setLevel(logging.WARNING)
@@ -330,6 +332,8 @@ class StructuredProofNode():
         typeok = "TypeOK"
         land = " /\\ "
 
+        oblig_source_map = {}
+
         # Collect all support lemmas across all actions.
         all_support_lemmas = []
         for (ind,a) in enumerate(actions):
@@ -368,12 +372,17 @@ class StructuredProofNode():
             if self.expr in lemma_def_expands:
                 defs_list += lemma_def_expands[self.expr]
             out_str += f"  \* ({self.expr},{a})\n"
-            out_str += f"""  <1>{ind+1}. {supports_conj_str}{land}{a} => {self.expr}'\n"""
-            out_str += f"       BY DEF {','.join(defs_list)}\n" 
+            oblig_source_map[(self.expr, a)] = len(out_str.split("\n")) - 1
+            out_str += f"""  <1>{ind+1}. {supports_conj_str}{land}{a} => {self.expr}'"""
+            out_str += f" BY DEF {','.join(defs_list)}\n" 
             out_str += ""
+
         out_str += f"<1>{len(actions)+1}. " + "QED BY " + (",".join([f"<1>{ind}" for ind in range(1, len(actions)+1)])) + " DEF Next"
         out_str += "\n"
-        return out_str
+        return {
+            "out_str": out_str,
+            "source_map": oblig_source_map
+        }
 
 class StructuredProof():
     """ Structured safety proof of an inductive invariant. 
@@ -416,16 +425,22 @@ class StructuredProof():
                 if c is not None and c.expr not in seen:
                     self.walk_proof_graph(c, visit_fn, seen, all_nodes=all_nodes)
 
-    def to_tlaps_proof_skeleton(self, tlaps_proof_config, add_lemma_defs=None, seed=None):
+    def to_tlaps_proof_skeleton(self, tlaps_proof_config, add_lemma_defs=None, seed=None, tag=None, workdir="benchmarks", include_typeok=True):
         """ Export proof graph obligations to TLAPS proof structure."""
         seed_str = ""
         if seed is not None:
             seed_str = f"_{seed}"
-        modname = self.specname + f"_IndDecompProof{seed_str}"
-        fname = "benchmarks/" + modname + ".tla"
+        tag_str = ""
+        if tag is not None:
+            tag_str = f"_{tag}"
+        modname = self.specname + f"_IndDecompProof{seed_str}{tag_str}"
+        fname = f"{workdir}/" + modname + ".tla"
         f = open(fname, 'w')
         spec_lines = f"---- MODULE {modname} ----\n"
         spec_lines += f"EXTENDS {self.specname},TLAPS\n"
+
+        # Maintain a source map which records lines that proof obligations live on.
+        lemma_source_map = {}
 
         nodes = []
         seen = set()
@@ -463,8 +478,9 @@ class StructuredProof():
                 assumes_name_list.append(name)
 
         # Create a separate node for TypeOK to include as proof obligation.
-        typeok_node = StructuredProofNode("H_TypeOK", "TypeOK")
-        nodes = [typeok_node] + nodes
+        if include_typeok:
+            typeok_node = StructuredProofNode("H_TypeOK", "TypeOK")
+            nodes = [typeok_node] + nodes
 
         all_var_slices = []
         proof_obligation_lines = ""
@@ -482,12 +498,19 @@ class StructuredProof():
             if n.expr == self.root.expr:
                 proof_obligation_lines += "\n\* (ROOT SAFETY PROP)"
             proof_obligation_lines += f"\n\*** {n.expr}\n"
-            proof_obligation_lines += n.to_tlaps_proof_obligation(self.actions, 
-                                                                  tlaps_proof_config["action_def_expands"], 
-                                                                  tlaps_proof_config["lemma_def_expands"], 
-                                                                  global_def_expands,
-                                                                  assumes_name_list,
-                                                                  theorem_name=f"L_{ind}")
+
+            curr_line = len(proof_obligation_lines.split("\n")) - 1
+
+            ret = n.to_tlaps_proof_obligation(self.actions, 
+                                                tlaps_proof_config["action_def_expands"], 
+                                                tlaps_proof_config["lemma_def_expands"], 
+                                                global_def_expands,
+                                                assumes_name_list,
+                                                theorem_name=f"L_{ind}")
+            proof_obligation_lines += ret["out_str"]
+            # print(ret["source_map"])
+            for obl in ret["source_map"]:
+                lemma_source_map[ret["source_map"][obl] + curr_line] = obl
             proof_obligation_lines += "\n"
 
         var_slice_sizes = [len(s) for s in all_var_slices]
@@ -508,8 +531,16 @@ class StructuredProof():
         # Add assumes.
         spec_lines += assume_spec_lines
 
+        # Re-adjust source map.
+        curr_line = len(spec_lines.split("\n"))
+        lemma_source_map_new = {}
+        for ln in lemma_source_map:
+            lemma_source_map_new[ln + curr_line] = lemma_source_map[ln]
+        lemma_source_map = lemma_source_map_new
+
         # Add proof obligation lines.
         spec_lines += proof_obligation_lines
+
 
         #
         # For a sanity check, add as a top level theorem the property that the conjunction of lemma nodes
@@ -520,10 +551,10 @@ class StructuredProof():
         spec_lines += "\* Initiation." 
         spec_lines += "\nTHEOREM Init => IndGlobal\n"
         init_defs = ",".join([f"{n.expr}" for ind,n in enumerate(nodes)])
-        spec_lines += "    <1> USE " + ",".join(assumes_name_list)
+        if len(assumes_name_list) > 0:
+            spec_lines += "    <1> USE " + ",".join(assumes_name_list) + "\n"
         if len(global_def_expands) > 0:
-            spec_lines += " DEF " + ",".join(global_def_expands)
-        spec_lines += "\n"
+            spec_lines += " DEF " + ",".join(global_def_expands) + "\n"
         for ind,n in enumerate(nodes):
             # Decomposed proof obligation for each oncjunction.
             spec_lines +=  f"    <1>{ind}. Init => {n.expr} BY DEF Init, {n.expr}, IndGlobal\n"
@@ -541,6 +572,10 @@ class StructuredProof():
         logging.info(f"Saving proof graph TLAPS obligations to file '{fname}'.")
         f.write(spec_lines)
         f.close()
+        return {
+            "tlaps_filename": fname,
+            "lemma_source_map": lemma_source_map
+        }
 
 
     def apalache_check_all_nodes(self, save_dot=False, lemma_filter=None):

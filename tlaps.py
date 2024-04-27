@@ -118,15 +118,19 @@ def html_proof_report_lines(obligation_stats, tla_file):
     html_lines.append("</html>")
     return html_lines
 
-def tlapm_check_proof(tla_file, nthreads=1):
+def tlapm_check_proof(tla_file, nthreads=1, stretch=1):
     proofchecking_stats = {}
     nfail = 0
 
     checkproof_start = time.time()
     print(f"Checking proof in '{tla_file}' with tlapm")
-    solver_flag = """--solver 'z3 -smt2 "$file"'"""
-    cmd = f"tlapm {solver_flag} --threads {nthreads} --stretch 1 --toolbox 0 0 -I benchmarks --cleanfp --nofp {tla_file}"
+    search_path = "/usr/local/lib/tlaps/"
+    smt_timeout = 1
+    solver_flag = f"""--method smt --solver '{search_path}bin/z3 -T:{smt_timeout} -smt2 "$file"'"""
+    # solver_flag = ""
+    cmd = f"tlapm {solver_flag} --threads {nthreads} -I {search_path} --stretch {stretch} --toolbox 0 0 -I benchmarks --cleanfp --nofp {tla_file}"
     print("tlapm cmd:", cmd)
+    sys.stdout.flush()
     proc = subprocess.Popen(cmd, shell=True, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
     tlapm_toolbox_output = proc.stderr.read().decode(sys.stderr.encoding)
     checkproof_end = time.time()
@@ -169,11 +173,16 @@ def tlapm_check_proof(tla_file, nthreads=1):
         nfail += 1
         # exit(1)
 
-    proofchecking_stats[tla_file] = {
+    for bid in obligation_states:
+        if obligation_states[bid]["status"] not in ["trivial"]:
+            print(bid, obligation_states[bid])
+
+    proofchecking_stats = {
         "num_total_obligations": num_total_obligations,
         "num_proved_obligations": num_proved_obligations,
         "num_unproved_obligations": unproven,
-        "proof_check_time_secs": checkproof_time
+        "proof_check_time_secs": checkproof_time,
+        "obligation_states": obligation_states
     }
 
     return proofchecking_stats
