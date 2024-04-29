@@ -1456,7 +1456,7 @@ class InductiveInvGen():
                     actions_started += 1
                     curr_proc_batch.append(proc_obj)
                     # Limit the number of concurrent procs running.
-                    if actions_started % MAX_CONCURRENT_PROCS == 0 or (actions_started == len(actions) and len(curr_proc_batch)):
+                    if actions_started % MAX_CONCURRENT_PROCS == 0: # or (actions_started == len(actions) and len(curr_proc_batch)):
                         logging.info(f"Launched {actions_started} total CTI procs, awaiting previous to complete.")
                         self.generate_ctis_tlc_run_await_subprocs(curr_proc_batch, actions=actions, all_ctis=all_ctis)
                         curr_proc_batch = []
@@ -5026,7 +5026,7 @@ class InductiveInvGen():
             print(f"!!! Done checking nodes, found errors! {len(errors_found)} / {len(lemma_nodes)} nodes with CTIs.")
             print(f"{len(errors_found)} lemma nodes with CTIs:")
             for e,ctis,actions_found in errors_found:
-                print(" - ", e, "num_ctis:", len(ctis), "actions:", actions_found)        
+                print(" - ", e, "num_ctis:", len(ctis), ", actions:", actions_found)        
 
     def run(self):
         tstart = time.time()
