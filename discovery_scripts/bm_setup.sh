@@ -2,17 +2,21 @@
 specname_arg=$1
 
 lscpu # log CPU info.
-echo "Loading Java"
+echo "Loading modules"
 module load OpenJDK/19.0.1
+module load gcc/11.1.0
 
 #
 # To optionally install TLA+ proof manager, if we want to enable this for later use.
 #
-# cd /scratch/schultz.w
+
+# If tlapm install directory does not exist, create it.
+# cd /home/schultz.w
 # wget https://github.com/tlaplus/tlapm/releases/download/v1.4.5/tlaps-1.4.5-x86_64-linux-gnu-inst.bin
 # chmod +x tlaps-1.4.5-x86_64-linux-gnu-inst.bin
 # mkdir tlapm_install
-# ./tlaps-1.4.5-x86_64-linux-gnu-inst.bin -d /scratch/schultz.w/tlapm_install
+# ./tlaps-1.4.5-x86_64-linux-gnu-inst.bin -d /home/schultz.w/tlapm_install
+
 #
 # Run with tlapm_install/bin/tlapm
 #
@@ -37,7 +41,7 @@ rm -rf benchmarks/states
 #
 
 tlc_workers=24
-num_ctigen_workers=8
+num_ctigen_workers=16
 cti_elimination_workers=1
 
 nrounds=45
