@@ -139,6 +139,7 @@ class InductiveInvGen():
 
         self.reprove_failed_nodes = all_args["reprove_failed_nodes"]
         self.recheck_proof_graph = all_args["recheck_proof_graph"]
+        self.tlapm_install_dir = all_args["tlapm_install_dir"]
 
         # In persistent mode we will save the generated proof graph on completion and also load 
         # from a previously saved proof graph by default if one exists.
@@ -4167,7 +4168,7 @@ class InductiveInvGen():
                     print(m, lemma_source_map[m])
                 logging.info("Checking local proof obligations with TLAPS.")
                 st = time.time()
-                proof_stats = tlaps.tlapm_check_proof(tla_proof_file, stretch=0.1, nthreads=4)
+                proof_stats = tlaps.tlapm_check_proof(tla_proof_file, stretch=0.1, nthreads=4, tlapm_install_dir=self.tlapm_install_dir)
                 obl_states = proof_stats["obligation_states"]
 
                 print("--- TLAPS Checks --- ")
@@ -5231,6 +5232,7 @@ if __name__ == "__main__":
     parser.add_argument('--action_filter', help='CTI action filter.', required=False, default=None, type=str)
     parser.add_argument('--include_existing_conjuncts', help='Whether to include existing conjuncts as invariant candidates during CTI elimination.', default=True, action='store_true')
     parser.add_argument('--reprove_failed_nodes', help='Try to reprove failed nodes in loaded proof graph.', default=False, action='store_true')
+    parser.add_argument('--tlapm_install_dir', help='TLAPM binary to use if needed.', required=False, default="/usr/local", type=str)
 
     # Apalache related commands.
     parser.add_argument('--use_apalache_ctigen', help='Use Apalache for CTI generation (experimental).', required=False, default=False, action='store_true')
