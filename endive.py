@@ -4181,7 +4181,7 @@ class InductiveInvGen():
                     print(m, lemma_source_map[m])
                 logging.info("Checking local proof obligations with TLAPS.")
                 st = time.time()
-                proof_stats = tlaps.tlapm_check_proof(tla_proof_file, stretch=0.1, nthreads=4, tlapm_install_dir=self.tlapm_install_dir)
+                proof_stats = tlaps.tlapm_check_proof(tla_proof_file, stretch=0.2, nthreads=4, smt_timeout=3, tlapm_install_dir=self.tlapm_install_dir)
                 obl_states = proof_stats["obligation_states"]
 
                 print("--- TLAPS Checks --- ")

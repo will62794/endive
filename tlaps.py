@@ -118,14 +118,13 @@ def html_proof_report_lines(obligation_stats, tla_file):
     html_lines.append("</html>")
     return html_lines
 
-def tlapm_check_proof(tla_file, nthreads=1, stretch=1, tlapm_install_dir="/usr/local"):
+def tlapm_check_proof(tla_file, nthreads=1, stretch=1, tlapm_install_dir="/usr/local", smt_timeout=1):
     proofchecking_stats = {}
     nfail = 0
 
     checkproof_start = time.time()
     print(f"Checking proof in '{tla_file}' with tlapm")
     search_path = f"{tlapm_install_dir}/lib/tlaps/"
-    smt_timeout = 1
     solver_flag = f"""--method smt --solver '{search_path}bin/z3 -T:{smt_timeout} -smt2 "$file"'"""
     # solver_flag = ""
     cmd = f"{tlapm_install_dir}/bin/tlapm {solver_flag} --threads {nthreads} -I {search_path} --stretch {stretch} --toolbox 0 0 -I benchmarks --cleanfp --nofp {tla_file}"
