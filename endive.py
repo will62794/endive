@@ -989,12 +989,19 @@ class InductiveInvGen():
 
         curr_line = 0
 
+        if len(lines) == 0:
+            return (all_ctis, all_cti_traces)
+
         # Step forward to the first CTI error trace.
         # while not re.search('Error: The behavior up to this point is', lines[curr_line]):
-        while not re.search('Error.*Invariant.*is violated.', lines[curr_line]):
+        # print(len(lines))
+        curr_line_val = lines[curr_line]
+        while not re.search('Error.*Invariant.*is violated.', curr_line_val):
             curr_line += 1
             if curr_line >= len(lines):
                 break
+            curr_line_val = lines[curr_line]
+            # print(curr_line, len(lines),lines[curr_line])
 
         if curr_line >= len(lines):
             return (all_ctis, all_cti_traces)  
@@ -1354,10 +1361,13 @@ class InductiveInvGen():
                     action = cti_subproc["action"]
                     logging.info(f"Waiting for CTI generation process termination (action={action})")
                     (parsed_ctis, parsed_cti_traces) = self.generate_ctis_tlc_run_await(cti_subproc["proc"]) 
-                    if action in all_ctis:
-                        all_ctis[action].update(parsed_ctis)
-                    else:
-                        all_ctis[action] = parsed_ctis
+                    # if action in all_ctis:
+                    all_ctis.update(parsed_ctis)
+
+                    # for c in parsed_ctis:
+                        # all_ctis[c.action_name].add(c)
+                    # else:
+                        # all_ctis[action] = parsed_ctis
                 else:
                     logging.info(f"Waiting for CTI generation process termination.")
                     (parsed_ctis, parsed_cti_traces) = self.generate_ctis_tlc_run_await(cti_subproc["proc"]) 
@@ -2321,8 +2331,8 @@ class InductiveInvGen():
                         # For any invariants that do not eliminate any CTIs, add them to the "already checked in iteration" list as well.
                         # TODO: Might this rule out these invariants from being used after re-generating CTIs, though?
                         # Might want to consider this in future.
-                        # for x in invs_with_no_cti_elimination:
-                            # self.invs_checked_in_iteration[iteration].add(quant_inv_fn(x))
+                        for x in invs_with_no_cti_elimination:
+                            self.invs_checked_in_iteration[iteration].add(quant_inv_fn(x))
 
                         logging.info(f"Reduced to {len(invs)} candidate invariants after quick pre-check of CTI elimination.")
                         logging.info(f"Added {len(invs_with_no_cti_elimination)} invariants that eliminate no CTIs to already checked list.")
@@ -2370,6 +2380,7 @@ class InductiveInvGen():
                
                 # inv_candidates_generated_in_round.update(invs_symb_strs)
                 self.all_generated_inv_candidates.update(invs_symb_strs)
+                # self.all_generated_inv_candidates.update(all_invs["raw_invs"])
 
                 #  # Count the number of generated candidates that were already checked previously.
                 # repeated_invs = 0
@@ -4133,35 +4144,103 @@ class InductiveInvGen():
             #         print("constant obj:", c)
             #         break
 
-            do_tlaps_inductive_check = False
+            #
+            # Check obligation initially with TLAPS to see which actions can be discharged. Then, for any 
+            # actions that fail to be discharged, generate CTIs for them using TLC.
+            #
+            do_tlaps_inductive_check = True
+
             if do_tlaps_inductive_check:
-                proof_node = StructuredProofNode(curr_obligation_pred_tup[0], curr_obligation_pred_tup[1])
+                proof_node = StructuredProofNode("L_" + curr_obligation_pred_tup[0], curr_obligation_pred_tup[0])
+                if curr_obligation_pred_tup[0] == "Safety":
+                    proof_node = StructuredProofNode("L_" + curr_obligation_pred_tup[0], self.safety)
                 local_proof = StructuredProof(proof_node, specname=self.specname, actions=self.actions)
                 ret = local_proof.to_tlaps_proof_skeleton(
-                                    self.spec_config["tlaps_proof_config"], add_lemma_defs=[(n, self.proof_graph["nodes"][n]["expr"]) for n in lemma_nodes], 
-                                    seed=111115, workdir="benchmarks/gen_tla",tag=curr_obligation_pred_tup[0] + "_" + curr_obligation_pred_tup[1],
+                                    self.spec_config["tlaps_proof_config"], 
+                                    add_lemma_defs=[(n, self.proof_graph["nodes"][n]["expr"]) for n in lemma_nodes], 
+                                    seed=111115, workdir="benchmarks/gen_tla",tag=curr_obligation_pred_tup[0],
                                     include_typeok=False)
                 tla_proof_file = ret["tlaps_filename"]
                 lemma_source_map = ret["lemma_source_map"]
-                # print("LEMMA SOURCE MAP:")
-                # for m in lemma_source_map:
-                    # print(m, lemma_source_map[m])
+                print("LEMMA SOURCE MAP:")
+                for m in lemma_source_map:
+                    print(m, lemma_source_map[m])
                 logging.info("Checking local proof obligations with TLAPS.")
                 st = time.time()
                 proof_stats = tlaps.tlapm_check_proof(tla_proof_file, stretch=0.1, nthreads=4)
                 obl_states = proof_stats["obligation_states"]
 
+                print("--- TLAPS Checks --- ")
+                unproved_obls = []
                 for bid in obl_states:
                     if obl_states[bid]["status"] not in ["trivial"]:
                         start_line = int(obl_states[bid]["loc"]["startPos"][0])
                         if start_line in lemma_source_map:
-                            print(lemma_source_map[start_line], obl_states[bid]["status"])
+                            act = lemma_source_map[start_line][1]
+                            status = obl_states[bid]["status"]
+                            if status == "failed":
+                                unproved_obls.append(lemma_source_map[start_line])
+                            print(lemma_source_map[start_line], act, obl_states[bid]["status"])
 
                 logging.info(f"Checked local proof obligation with TLAPS in {time.time() - st}s.")
+            print("TLAPS UNPROVED:", unproved_obls)
 
+            # Re-parse spec object to include definitions of any newly generate strengthening lemmas.
+            # if len(self.strengthening_conjuncts) > 0:
+            if len(self.proof_graph["nodes"]) > 0:
+                specname = f"{self.specname}_lemma_parse"
+                rootpath = f"benchmarks/{specname}"
+                # self.make_check_invariants_spec([], rootpath, defs_to_add=self.strengthening_conjuncts + [curr_obligation])
+                # self.make_check_invariants_spec([], rootpath, defs_to_add=[curr_obligation_pred_tup] + self.strengthening_conjuncts)
+                node_conjuncts = [(n, self.proof_graph["nodes"][n]["expr"], "") for n in self.proof_graph["nodes"] if "is_lemma" in self.proof_graph["nodes"][n]]
+                self.make_check_invariants_spec([], rootpath, defs_to_add=node_conjuncts)
+                # self.make_check_invariants_spec([], rootpath, defs_to_add=self.strengthening_conjuncts)
 
-            k_ctis, k_cti_traces = self.generate_ctis(props=[curr_obligation_pred_tup], specname_tag=curr_obligation)
-            count += 1
+                logging.info("Re-parsing spec for any newly discovered lemma definitions.")
+                s1 = time.time()
+                self.spec_obj_with_lemmas = tlaparse.parse_tla_file(self.specdir, specname)
+                self.reparsing_duration_secs += (time.time() - s1)
+                logging.info("Done re-parsing. Total time spent parsing so far: {:.2f}s".format(self.reparsing_duration_secs))
+
+            # Now, for any obligations that failed to be discharged by TLAPS, we try to generate CTIs for them.
+            k_ctis = set()
+            for (l,a) in unproved_obls:
+
+                (k_cti_lemma, k_cti_action) = l,a
+
+                logging.info(f"Computing COI for {(k_cti_lemma, k_cti_action)}")
+                # actions_real_defs = [a.replace("Action", "") for a in actions]
+                lemma_action_coi = {}
+
+                k_cti_action_opname = k_cti_action.replace("Action", "")
+                ret = self.spec_obj_with_lemmas.get_vars_in_def(k_cti_action_opname)
+                vars_in_action,action_updated_vars = ret
+                print("vars in action:", vars_in_action)
+                print("action updated vars:", action_updated_vars)
+                vars_in_action_non_updated,_ = self.spec_obj_with_lemmas.get_vars_in_def(k_cti_action_opname, ignore_update_expressions=True)
+                logging.info(f"Getting variables in lemma definition: {k_cti_lemma}")
+                vars_in_lemma_defs = self.spec_obj_with_lemmas.get_vars_in_def(k_cti_lemma)[0]
+
+                lemma_action_coi = self.spec_obj_with_lemmas.compute_coi(None, None, None,action_updated_vars, vars_in_action_non_updated, vars_in_lemma_defs)
+                print("Lemma-action COI")
+                print(lemma_action_coi)
+
+                cti_ignore_vars = [s for s in self.state_vars if s not in lemma_action_coi]
+                k_ctis_action, k_cti_traces = self.generate_ctis(props=[curr_obligation_pred_tup], specname_tag=curr_obligation, actions=[a], ignore_vars=cti_ignore_vars)
+                # k_ctis_action, k_cti_traces = self.generate_ctis(props=[curr_obligation_pred_tup], specname_tag=curr_obligation, actions=[a])
+                k_cti_init_states = set()
+                uniq_k_ctis = set()
+
+                for c in k_ctis_action:
+                    init = str(c.trace.getStates()[0])
+                    if init not in k_cti_init_states:
+                        k_cti_init_states.add(init)
+                        uniq_k_ctis.add(c)
+                logging.info(f"num full ctis: {len(k_ctis_action)}")
+                logging.info(f"num unique ctis: {len(uniq_k_ctis)}")
+                # k_ctis.update(k_ctis_action)
+                k_ctis.update(uniq_k_ctis)
+                count += 1
 
             # for kcti in k_ctis:
                 # print(str(kcti))
@@ -4273,22 +4352,22 @@ class InductiveInvGen():
                 cti_action_invs_found = [c for c in cti_action_invs_found if not cti_action_inv_is_failed(c)]
 
 
-                # Re-parse spec object to include definitions of any newly generate strengthening lemmas.
-                # if len(self.strengthening_conjuncts) > 0:
-                if len(self.proof_graph["nodes"]) > 0:
-                    specname = f"{self.specname}_lemma_parse"
-                    rootpath = f"benchmarks/{specname}"
-                    # self.make_check_invariants_spec([], rootpath, defs_to_add=self.strengthening_conjuncts + [curr_obligation])
-                    # self.make_check_invariants_spec([], rootpath, defs_to_add=[curr_obligation_pred_tup] + self.strengthening_conjuncts)
-                    node_conjuncts = [(n, self.proof_graph["nodes"][n]["expr"], "") for n in self.proof_graph["nodes"] if "is_lemma" in self.proof_graph["nodes"][n]]
-                    self.make_check_invariants_spec([], rootpath, defs_to_add=node_conjuncts)
-                    # self.make_check_invariants_spec([], rootpath, defs_to_add=self.strengthening_conjuncts)
+                # # Re-parse spec object to include definitions of any newly generate strengthening lemmas.
+                # # if len(self.strengthening_conjuncts) > 0:
+                # if len(self.proof_graph["nodes"]) > 0:
+                #     specname = f"{self.specname}_lemma_parse"
+                #     rootpath = f"benchmarks/{specname}"
+                #     # self.make_check_invariants_spec([], rootpath, defs_to_add=self.strengthening_conjuncts + [curr_obligation])
+                #     # self.make_check_invariants_spec([], rootpath, defs_to_add=[curr_obligation_pred_tup] + self.strengthening_conjuncts)
+                #     node_conjuncts = [(n, self.proof_graph["nodes"][n]["expr"], "") for n in self.proof_graph["nodes"] if "is_lemma" in self.proof_graph["nodes"][n]]
+                #     self.make_check_invariants_spec([], rootpath, defs_to_add=node_conjuncts)
+                #     # self.make_check_invariants_spec([], rootpath, defs_to_add=self.strengthening_conjuncts)
 
-                    logging.info("Re-parsing spec for any newly discovered lemma definitions.")
-                    s1 = time.time()
-                    self.spec_obj_with_lemmas = tlaparse.parse_tla_file(self.specdir, specname)
-                    self.reparsing_duration_secs += (time.time() - s1)
-                    logging.info("Done re-parsing. Total time spent parsing so far: {:.2f}s".format(self.reparsing_duration_secs))
+                #     logging.info("Re-parsing spec for any newly discovered lemma definitions.")
+                #     s1 = time.time()
+                #     self.spec_obj_with_lemmas = tlaparse.parse_tla_file(self.specdir, specname)
+                #     self.reparsing_duration_secs += (time.time() - s1)
+                #     logging.info("Done re-parsing. Total time spent parsing so far: {:.2f}s".format(self.reparsing_duration_secs))
 
                 defs = self.spec_obj_with_lemmas.get_all_user_defs(level="1")
                 # for d in defs:
