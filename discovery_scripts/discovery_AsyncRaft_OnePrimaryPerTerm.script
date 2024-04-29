@@ -20,6 +20,7 @@ max_num_ctis_per_round=800
 ninvs_per_iter_group=50000
 target_sample_states=200000
 num_simulate_traces=200000
+tlapm_install="/home/schultz.w/tlapm_install"
 
 common_flags=" --tlc_workers $tlc_workers --num_ctigen_workers $num_cti_workers --cti_elimination_workers=$cti_elimination_workers"
 common_flags+=" --debug --target_sample_time_limit_ms 15000 --num_simulate_traces $num_simulate_traces --target_sample_states $target_sample_states"
@@ -29,7 +30,7 @@ common_flags+=" --save_dot --max_num_conjuncts_per_round 16 --niters $niters --n
 
 # All optimizations.
 srun -o /scratch/schultz.w/endive_logs/${specname}_OnePrimaryPerTerm/${specname}_OnePrimaryPerTerm_output_${seed}.txt \
-    python3 endive.py --spec benchmarks/$specname \
+    python3 endive.py --spec benchmarks/$specname --tlapm_install_dir $tlapm_install \
     $common_flags --seed $seed --proof_tree_mode --auto_lemma_action_decomposition --enable_partitioned_state_caching --ninvs_per_iter_group $ninvs_per_iter_group --safety "H_OnePrimaryPerTerm"
 
 # srun -o /home/schultz.w/endive_logs/${specname}_baseline/${specname}_baseline_output_%j_${seed}.txt \
