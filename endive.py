@@ -3937,7 +3937,20 @@ class InductiveInvGen():
         print("sat inv counts:")
         for ind,num in enumerate(state_nums):
             print("num states=", num, ", num_sat_invs=", sat_inv_table[ind])
-                    
+
+    def reparse_spec_with_proof_graph_defs(self):
+        """ Re-parse the main spec but include any new lemma definitions that now exist in the generated proof graph."""
+        specname = f"{self.specname}_lemma_parse"
+        rootpath = f"benchmarks/{specname}"
+        node_conjuncts = [(n, self.proof_graph["nodes"][n]["expr"], "") for n in self.proof_graph["nodes"] if "is_lemma" in self.proof_graph["nodes"][n]]
+        self.make_check_invariants_spec([], rootpath, defs_to_add=node_conjuncts)
+        # self.make_check_invariants_spec([], rootpath, defs_to_add=self.strengthening_conjuncts)
+
+        logging.info("Re-parsing spec for any newly discovered lemma definitions.")
+        s1 = time.time()
+        self.spec_obj_with_lemmas = tlaparse.parse_tla_file(self.specdir, specname)
+        self.reparsing_duration_secs += (time.time() - s1)
+        logging.info("Done re-parsing. Total time spent parsing so far: {:.2f}s".format(self.reparsing_duration_secs))   
 
     def do_invgen_proof_tree_mode(self):
         """ Do localized invariant synthesis based on an inductive proof graph structure."""
@@ -4121,7 +4134,7 @@ class InductiveInvGen():
             self.curr_obligation_depth = self.proof_graph["nodes"][curr_obligation]["depth"]
 
             logging.info("Generating CTIs.")
-            t0 = time.time()
+            ctigen_start = time.time()
             # curr_obligation = self.proof_obligation_queue.pop(0)
             print("Current obligation:", curr_obligation)
             # k_ctis = self.generate_ctis(props=[("LemmaObligation" + str(count), curr_obligation[1])])
@@ -4181,33 +4194,24 @@ class InductiveInvGen():
                             status = obl_states[bid]["status"]
                             if status == "failed":
                                 unproved_obls.append(lemma_source_map[start_line])
-                            print(lemma_source_map[start_line], act, obl_states[bid]["status"])
+                            print(lemma_source_map[start_line], obl_states[bid]["status"])
 
                 logging.info(f"Checked local proof obligation with TLAPS in {time.time() - st}s.")
-            print("TLAPS UNPROVED:", unproved_obls)
+            print("TLAPS UNPROVED:")
+            for ob in unproved_obls:
+                print(" ", ob)
 
             # Re-parse spec object to include definitions of any newly generate strengthening lemmas.
             # if len(self.strengthening_conjuncts) > 0:
             if len(self.proof_graph["nodes"]) > 0:
-                specname = f"{self.specname}_lemma_parse"
-                rootpath = f"benchmarks/{specname}"
-                # self.make_check_invariants_spec([], rootpath, defs_to_add=self.strengthening_conjuncts + [curr_obligation])
-                # self.make_check_invariants_spec([], rootpath, defs_to_add=[curr_obligation_pred_tup] + self.strengthening_conjuncts)
-                node_conjuncts = [(n, self.proof_graph["nodes"][n]["expr"], "") for n in self.proof_graph["nodes"] if "is_lemma" in self.proof_graph["nodes"][n]]
-                self.make_check_invariants_spec([], rootpath, defs_to_add=node_conjuncts)
-                # self.make_check_invariants_spec([], rootpath, defs_to_add=self.strengthening_conjuncts)
-
-                logging.info("Re-parsing spec for any newly discovered lemma definitions.")
-                s1 = time.time()
-                self.spec_obj_with_lemmas = tlaparse.parse_tla_file(self.specdir, specname)
-                self.reparsing_duration_secs += (time.time() - s1)
-                logging.info("Done re-parsing. Total time spent parsing so far: {:.2f}s".format(self.reparsing_duration_secs))
+                self.reparse_spec_with_proof_graph_defs()
 
             # Now, for any obligations that failed to be discharged by TLAPS, we try to generate CTIs for them.
             k_ctis = set()
-            for (l,a) in unproved_obls:
+            for (k_cti_lemma, k_cti_action) in unproved_obls:
 
-                (k_cti_lemma, k_cti_action) = l,a
+                action_tstart = time.time()
+
 
                 logging.info(f"Computing COI for {(k_cti_lemma, k_cti_action)}")
                 # actions_real_defs = [a.replace("Action", "") for a in actions]
@@ -4227,25 +4231,29 @@ class InductiveInvGen():
                 print(lemma_action_coi)
 
                 cti_ignore_vars = [s for s in self.state_vars if s not in lemma_action_coi]
-                k_ctis_action, k_cti_traces = self.generate_ctis(props=[curr_obligation_pred_tup], specname_tag=curr_obligation, actions=[a], ignore_vars=cti_ignore_vars)
+                k_ctis_action, k_cti_traces = self.generate_ctis(props=[curr_obligation_pred_tup], specname_tag=curr_obligation, actions=[k_cti_action], ignore_vars=cti_ignore_vars)
                 # k_ctis_action, k_cti_traces = self.generate_ctis(props=[curr_obligation_pred_tup], specname_tag=curr_obligation, actions=[a])
-                k_cti_init_states = set()
-                uniq_k_ctis = set()
+                
+                # De-duplicate CTIs based on initial state (not needed?)
+                # k_cti_init_states = set()
+                # uniq_k_ctis = set()
+                # for c in k_ctis_action:
+                #     init = str(c.trace.getStates()[0])
+                #     if init not in k_cti_init_states:
+                #         k_cti_init_states.add(init)
+                #         uniq_k_ctis.add(c)
+                # logging.info(f"num full ctis: {len(k_ctis_action)}")
+                # logging.info(f"num unique ctis: {len(uniq_k_ctis)}")
+                # k_ctis.update(uniq_k_ctis)
 
-                for c in k_ctis_action:
-                    init = str(c.trace.getStates()[0])
-                    if init not in k_cti_init_states:
-                        k_cti_init_states.add(init)
-                        uniq_k_ctis.add(c)
-                logging.info(f"num full ctis: {len(k_ctis_action)}")
-                logging.info(f"num unique ctis: {len(uniq_k_ctis)}")
-                # k_ctis.update(k_ctis_action)
-                k_ctis.update(uniq_k_ctis)
+                k_ctis.update(k_ctis_action)
                 count += 1
+                logging.info("Number of action k-CTIs found: {}. (took {:.2f} secs)".format(len(k_ctis_action), (time.time()-action_tstart)))
+
 
             # for kcti in k_ctis:
                 # print(str(kcti))
-            logging.info("Number of total unique k-CTIs found: {}. (took {:.2f} secs)".format(len(k_ctis), (time.time()-t0)))
+            logging.info("Number of total unique k-CTIs found: {}. (took {:.2f} secs)".format(len(k_ctis), (time.time()-ctigen_start)))
 
             subround = 0
 
