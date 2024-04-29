@@ -1402,8 +1402,8 @@ class InductiveInvGen():
         # num_traces_per_tlc_instance = self.num_simulate_traces // self.num_ctigen_workers
 
         # Break down CTIs by action in this case.
-        if actions is not None:
-            all_ctis = {}
+        # if actions is not None:
+            # all_ctis = {}
 
         # Start the TLC processes for CTI generation.
         logging.info(f"Running {num_cti_worker_procs} parallel CTI generation processes")
@@ -1412,6 +1412,8 @@ class InductiveInvGen():
                 # cti_subproc = self.generate_ctis_apalache_run_async(num_traces_per_tlc_instance)
             # else:
             MAX_CONCURRENT_PROCS = 3
+            target_sample_states = self.target_sample_states
+            target_sample_time_limit_ms = self.target_sample_time_limit_ms
             if actions is not None:
                 actions_started = 0
                 curr_proc_batch = []
@@ -1431,6 +1433,8 @@ class InductiveInvGen():
                                         action=action, 
                                         typeok=typeok_override,
                                         constants_obj=constants_obj,
+                                        sampling_target_num_init_states=target_sample_states // num_cti_worker_procs,
+                                        sampling_target_time_limit_ms=target_sample_time_limit_ms,
                                         defs_to_add=defs_to_add,
                                         pre_props=pre_props,
                                         specname_tag=specname_tag,
@@ -1448,8 +1452,6 @@ class InductiveInvGen():
 
             else:
                 logging.info(f"Starting CTI generation process {n} (of {num_cti_worker_procs} total workers)")
-                target_sample_states = self.target_sample_states
-                target_sample_time_limit_ms = self.target_sample_time_limit_ms
                 cti_subproc = self.generate_ctis_tlc_run_async(
                                     num_traces_per_tlc_instance,
                                     props=props, 
