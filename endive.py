@@ -1409,59 +1409,45 @@ class InductiveInvGen():
         cti_subprocs = []
         num_traces_per_tlc_instance = self.num_simulate_traces // num_cti_worker_procs
 
-        # We now compute trace count based on the number of TLC workers, since we are not parallelizing across multiple TLC instances now.
-        # num_traces_per_tlc_instance = self.num_simulate_traces // self.num_ctigen_workers
 
-        # Break down CTIs by action in this case.
-        # if actions is not None:
-            # all_ctis = {}
-
+        #
         # Start the TLC processes for CTI generation.
-        logging.info(f"Running {num_cti_worker_procs} parallel CTI generation processes")
-        for n in range(num_cti_worker_procs):
-            # if self.use_apalache_ctigen:
-                # cti_subproc = self.generate_ctis_apalache_run_async(num_traces_per_tlc_instance)
-            # else:
-            MAX_CONCURRENT_PROCS = 3
-            target_sample_states = self.target_sample_states
-            target_sample_time_limit_ms = self.target_sample_time_limit_ms
-            if actions is not None:
-                actions_started = 0
-                curr_proc_batch = []
-                for action in actions:
-                    logging.info(f"Starting CTI generation process {n} (of {num_cti_worker_procs} total workers), Action='{action}'")
-                    
-                    # TODO: Consider iterating over multiple config instances, ideally in order of "smallest" to "largest".
-                    # constants_obj = self.get_config_constant_instances()[-1]
-                    # for constants_obj in self.get_config_constant_instances()[-1:]:
-                    print("CTI generation for config:", constants_obj)
-                
-                    cti_subproc = self.generate_ctis_tlc_run_async(
-                                        num_traces_per_tlc_instance,
-                                        props=props, 
-                                        depth=depth, 
-                                        view=view, 
-                                        action=action, 
-                                        typeok=typeok_override,
-                                        constants_obj=constants_obj,
-                                        sampling_target_num_init_states=target_sample_states // num_cti_worker_procs,
-                                        sampling_target_time_limit_ms=target_sample_time_limit_ms,
-                                        defs_to_add=defs_to_add,
-                                        pre_props=pre_props,
-                                        specname_tag=specname_tag,
-                                        ignore_vars=ignore_vars)
-                    
-                    proc_obj = {"action": action, "proc": cti_subproc}
-                    cti_subprocs.append(proc_obj)
-                    actions_started += 1
-                    curr_proc_batch.append(proc_obj)
-                    # Limit the number of concurrent procs running.
-                    if actions_started % MAX_CONCURRENT_PROCS == 0: # or (actions_started == len(actions) and len(curr_proc_batch)):
-                        logging.info(f"Launched {actions_started} total CTI procs, awaiting previous to complete.")
-                        self.generate_ctis_tlc_run_await_subprocs(curr_proc_batch, actions=actions, all_ctis=all_ctis)
-                        curr_proc_batch = []
+        #
 
-            else:
+        # Action specific CTI generation.
+        if actions is not None:
+            # Generate CTIs action by action.
+            for action in actions:
+                for n in range(num_cti_worker_procs):
+                    if actions is not None:
+                        logging.info(f"Starting CTI generation process {n} (of {num_cti_worker_procs} total workers), Action='{action}'")
+                        
+                        # TODO: Consider iterating over multiple config instances, ideally in order of "smallest" to "largest".
+                        # constants_obj = self.get_config_constant_instances()[-1]
+                        # for constants_obj in self.get_config_constant_instances()[-1:]:
+                        print("CTI generation for config:", constants_obj)
+                    
+                        cti_subproc = self.generate_ctis_tlc_run_async(
+                                            num_traces_per_tlc_instance,
+                                            props=props, 
+                                            depth=depth, 
+                                            view=view, 
+                                            action=action, 
+                                            typeok=typeok_override,
+                                            constants_obj=constants_obj,
+                                            sampling_target_num_init_states=self.target_sample_states // num_cti_worker_procs,
+                                            sampling_target_time_limit_ms=int((self.target_sample_time_limit_ms // num_cti_worker_procs) * 1.5),
+                                            defs_to_add=defs_to_add,
+                                            pre_props=pre_props,
+                                            specname_tag=specname_tag,
+                                            ignore_vars=ignore_vars)
+                        
+                        proc_obj = {"action": action, "proc": cti_subproc}
+                        cti_subprocs.append(proc_obj)
+        else:
+            # Non-action specific.
+            logging.info(f"Running {num_cti_worker_procs} parallel CTI generation processes")
+            for n in range(num_cti_worker_procs):
                 logging.info(f"Starting CTI generation process {n} (of {num_cti_worker_procs} total workers)")
                 cti_subproc = self.generate_ctis_tlc_run_async(
                                     num_traces_per_tlc_instance,
@@ -1470,8 +1456,8 @@ class InductiveInvGen():
                                     view=view, 
                                     typeok=typeok_override,
                                     constants_obj=constants_obj,
-                                    sampling_target_num_init_states=target_sample_states // num_cti_worker_procs,
-                                    sampling_target_time_limit_ms=target_sample_time_limit_ms,
+                                    sampling_target_num_init_states=self.target_sample_states // num_cti_worker_procs,
+                                    sampling_target_time_limit_ms=int((self.target_sample_time_limit_ms // num_cti_worker_procs) * 1.5),
                                     defs_to_add=defs_to_add,
                                     pre_props=pre_props,
                                     specname_tag=specname_tag,
