@@ -55,11 +55,34 @@ LEMMA AddingToQuorumRemainsQuorum == \A Q \in Quorum : \A s \in Server : Q \in Q
 \* num proof graph nodes: 15
 \* num proof obligations: 180
 Safety == H_OnePrimaryPerTerm
-Inv20249_R0_0_I2 == \A VARI \in Server : \A VARJ \in Server : ((state[VARI] = Candidate /\ VARI # VARJ /\ currentTerm[VARI] = currentTerm[VARJ])) => (~((state[VARJ] = Leader)) \/ (~(votesGranted[VARI] \in Quorum)))
-Inv10820_R1_0_I2 == \A VARI \in Server : \A VARJ \in Server : ((state[VARJ] = Follower)) \/ ((votesGranted[VARI] \cap votesGranted[VARJ] = {})) \/ (~((state[VARI] = Candidate /\ VARI # VARJ /\ currentTerm[VARI] = currentTerm[VARJ])))
-Inv25049_R1_1_I2 == \A VARI \in Server : \A VARJ \in Server : ~((currentTerm[VARI] >= currentTerm[VARJ])) \/ (~((state[VARI] \in {Leader,Candidate} /\ VARJ \in votesGranted[VARI])) \/ (~((state[VARJ] \in {Leader,Candidate} /\ VARI # VARJ))))
-Inv774_R1_1_I2 == \A VARI \in Server : \A VARJ \in Server : (VARI \in votesGranted[VARI]) \/ (~(VARJ \in votesGranted[VARI]))
-Inv22_R2_0_I1 == \A VARI \in Server : \A VARJ \in Server : \A VARREQVRES \in requestVoteResponseMsgs : ~((state[VARI] \in {Leader,Candidate} /\ VARJ \in votesGranted[VARI])) \/ (~(VARREQVRES.mterm = currentTerm[VARI] /\ VARREQVRES.msource = VARJ /\ VARREQVRES.mdest # VARI /\ VARREQVRES.mvoteGranted))
+
+Inv20249_R0_0_I2 == 
+    \A VARI \in Server : 
+    \A VARJ \in Server : 
+        ((state[VARI] = Candidate /\ VARI # VARJ /\ currentTerm[VARI] = currentTerm[VARJ])) => 
+            (~((state[VARJ] = Leader)) \/ (~(votesGranted[VARI] \in Quorum)))
+
+Inv10820_R1_0_I2 == 
+    \A VARI \in Server : 
+    \A VARJ \in Server : 
+        ((state[VARJ] = Follower)) \/ ((votesGranted[VARI] \cap votesGranted[VARJ] = {})) \/ (~((state[VARI] = Candidate /\ VARI # VARJ /\ currentTerm[VARI] = currentTerm[VARJ])))
+
+Inv25049_R1_1_I2 == 
+    \A VARI \in Server : 
+    \A VARJ \in Server : 
+        ~((currentTerm[VARI] >= currentTerm[VARJ])) \/ (~((state[VARI] \in {Leader,Candidate} /\ VARJ \in votesGranted[VARI])) \/ (~((state[VARJ] \in {Leader,Candidate} /\ VARI # VARJ))))
+
+Inv774_R1_1_I2 == 
+    \A VARI \in Server : 
+    \A VARJ \in Server : 
+        (VARI \in votesGranted[VARI]) \/ (~(VARJ \in votesGranted[VARI]))
+
+Inv22_R2_0_I1 == 
+    \A VARI \in Server : 
+    \A VARJ \in Server : 
+    \A VARREQVRES \in requestVoteResponseMsgs : 
+        ~((state[VARI] \in {Leader,Candidate} /\ VARJ \in votesGranted[VARI])) \/ (~(VARREQVRES.mterm = currentTerm[VARI] /\ VARREQVRES.msource = VARJ /\ VARREQVRES.mdest # VARI /\ VARREQVRES.mvoteGranted))
+
 Inv10_R2_1_I1 == \A VARI \in Server : \A VARJ \in Server : ((currentTerm[VARI] <= currentTerm[VARJ])) \/ (~((state[VARI] \in {Leader,Candidate} /\ VARJ \in votesGranted[VARI])))
 Inv2197_R3_0_I2 == \A VARI \in Server : \A VARJ \in Server : \A VARREQVRES \in requestVoteResponseMsgs : ((currentTerm[VARJ] > currentTerm[VARI])) \/ (((state[VARJ] = Follower))) \/ (~(VARREQVRES.mterm = currentTerm[VARI] /\ VARREQVRES.msource = VARJ /\ VARREQVRES.mdest # VARI /\ VARREQVRES.mvoteGranted))
 Inv5439_R3_0_I2 == \A VARI \in Server : \A VARREQVRES \in requestVoteResponseMsgs : ((state[VARI] = Leader)) \/ (~((state[VARI] = Follower))) \/ ((currentTerm[VARREQVRES.msource] >= VARREQVRES.mterm))
