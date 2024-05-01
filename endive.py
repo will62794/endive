@@ -4051,6 +4051,8 @@ class InductiveInvGen():
             # If we are just re-checking an existing proof graph, check it and then return.
             if self.recheck_proof_graph:
                 logging.info("Re-checking proof graph.")
+                # For re-checking proof graph, just use random seeds.
+                random.seed(time.time())
                 self.check_proof_graph()
                 return
         else:
