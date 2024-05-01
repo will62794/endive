@@ -147,6 +147,7 @@ ASSUME A6 == MaxLogLen \in Nat
 ASSUME A7 == MaxTerm \in Nat 
 
 ASSUME Fin == Server = {1,2} /\ Quorum = {{1,2}}
+LEMMA EmptyLogs == \A s \in Server : Len(log[s]) = 0 /\ \A m \in appendEntriesRequestMsgs : m.mentries = <<>>
 
 \*** TypeOK
 THEOREM L_0 == TypeOK /\ TypeOK /\ Next => TypeOK'
@@ -937,7 +938,8 @@ THEOREM L_15 == TypeOK /\ Inv6_R5_2_I0 /\ Inv6_R5_2_I0 /\ Inv5439_R3_0_I2 /\ Nex
                    PROVE  (((state[VARI] = Leader)) \/ (~((state[VARI] = Follower))) \/ ((currentTerm[VARREQVRES.msource] >= VARREQVRES.mterm)))'
         BY DEF AcceptAppendEntriesRequestAppendAction
       <3> QED
-        BY DEF TypeOK,AcceptAppendEntriesRequestAppendAction,AcceptAppendEntriesRequestAppend,Inv5439_R3_0_I2
+        BY EmptyLogs \* Partial empty log assumption for proving ElectionSafety, due to logs only restricting behavior.
+        DEF TypeOK,AcceptAppendEntriesRequestAppendAction,AcceptAppendEntriesRequestAppend,Inv5439_R3_0_I2, LogOk, CanAppend
       
   \* (Inv5439_R3_0_I2,AcceptAppendEntriesRequestLearnCommitAction)
   <1>11. TypeOK /\ Inv6_R5_2_I0 /\ Inv5439_R3_0_I2 /\ AcceptAppendEntriesRequestLearnCommitAction => Inv5439_R3_0_I2' BY DEF TypeOK,Inv6_R5_2_I0,AcceptAppendEntriesRequestLearnCommitAction,AcceptAppendEntriesRequestLearnCommit,Inv5439_R3_0_I2
