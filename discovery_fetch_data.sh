@@ -43,8 +43,9 @@ if [[ $bms == *"AsyncRaft"* ]]; then
         do
         scp -O -r "$xfer:$bmdir/AsyncRaft_${tag}_$seed/endive/benchmarks/AsyncRaft_ind-proof-tree-sd$seed.pdf" $local_dir/AsyncRaft_${tag}_ind-proof-tree-sd$seed.pdf &
         scp -O -r "$xfer:$bmdir/AsyncRaft_${tag}_$seed/endive/benchmarks/AsyncRaft_ind-proof-tree-sd$seed.proofgraph.json" $local_dir/json/AsyncRaft_${tag}_ind-proof-tree-sd$seed.proofgraph.json &
-        scp -O -r "$xfer:$bmdir/AsyncRaft_${tag}_$seed/endive/benchmarks/AsyncRaft_IndDecompProof_$seed.tla" $local_dir/AsyncRaft_${tag}_IndDecompProof_$seed.tla
+        scp -O -r "$xfer:$bmdir/AsyncRaft_${tag}_$seed/endive/benchmarks/AsyncRaft_IndDecompProof_$seed.tla" $local_dir/AsyncRaft_${tag}_IndDecompProof_$seed.tla &
         done
+        wait
     done
     wait
 fi
