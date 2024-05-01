@@ -3187,13 +3187,21 @@ class InductiveInvGen():
                     action_node = f"{proof_graph_node}_{proof_graph_action}"
                     logging.info("------")
                     logging.info(f"Re-checking CTIs at node {proof_graph_node}, action={proof_graph_action}.")
+                    
+                    # Re-check a bit if we didn't find any CTIs, with configurable number of re-checks.
+                    rechecks=2
                     k_ctis_rechecked = self.check_proof_node(proof_graph_node, action_filter=[proof_graph_action])
-                    # Print some CTIs.
-                    n_to_show = 10
-                    logging.info(f"Sample of {n_to_show} newly found CTIs")
-                    for c in k_ctis_rechecked[:n_to_show]:
-                        print(c.action_name, c)
+                    while len(k_ctis_rechecked) == 0 and rechecks > 0:
+                        logging.info(f"Re-checking for CTIs again at node {proof_graph_node}, action={proof_graph_action}, rechecks_left={rechecks}.")
+                        k_ctis_rechecked = self.check_proof_node(proof_graph_node, action_filter=[proof_graph_action])
+                        rechecks -= 1
+                    
                     if len(k_ctis_rechecked) > 0:
+                        # Print some CTIs.
+                        n_to_show = 10
+                        logging.info(f"Sample of {n_to_show} newly found CTIs")
+                        for c in k_ctis_rechecked[:n_to_show]:
+                            print(c.action_name, c)
                         # TODO: Re-run round with these CTIs?
                         logging.info(f" !! Still have {len(k_ctis_rechecked)} CTIs remaining for proof node ({proof_graph_node}, {proof_graph_action}).")
                         self.proof_graph["nodes"][action_node]["ctis_remaining"] = len(k_ctis_rechecked)
@@ -5098,7 +5106,7 @@ class InductiveInvGen():
             self.total_duration_secs += self.cached_invs_gen_time_secs
 
         # If we have found what seems to be a valid proof graph, re-check it just to be sure.
-        if self.proof_tree_mode and len(self.proof_graph_failed_lemma_nodes()) == 0:
+        if self.proof_tree_mode and len(self.proof_graph_failed_lemma_nodes()) == 0 and not self.recheck_proof_graph:
             logging.info("Found what appears to be valid proof graph with 0 failed nodes. Re-checking each node just to make sure.")
             # Re-seed with a different initial seed for some CTI generation diversity.
             random.seed(self.seed + 55555)
