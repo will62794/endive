@@ -16,6 +16,12 @@ PROOF BY DEF Quorum, TypeOK
 
 LEMMA AddingToQuorumRemainsQuorum == \A Q \in Quorum : \A s \in Server : Q \in Quorum => Q \cup {s} \in Quorum
 
+\* If the intersection of two server sets is empty, then they can't both be quorums.
+LEMMA EmptyIntersectionImpliesNotBothQuorums == 
+    \A s1 \in SUBSET Server :
+    \A s2 \in SUBSET Server :
+        (s1 \cap s2 = {}) => ~(s1 \in Quorum /\ s2 \in Quorum)
+
 
  LEMMA StaticQuorumsOverlap ==
  ASSUME NEW cfg \in SUBSET Server,
@@ -59,13 +65,14 @@ Safety == H_OnePrimaryPerTerm
 Inv20249_R0_0_I2 == 
     \A VARI \in Server : 
     \A VARJ \in Server : 
-        ((state[VARI] = Candidate /\ VARI # VARJ /\ currentTerm[VARI] = currentTerm[VARJ])) => 
-            (~((state[VARJ] = Leader)) \/ (~(votesGranted[VARI] \in Quorum)))
+            (((state[VARJ] = Leader)) /\ ((votesGranted[VARI] \in Quorum))) => 
+                ~((state[VARI] = Candidate /\ VARI # VARJ /\ currentTerm[VARI] = currentTerm[VARJ]))
 
 Inv10820_R1_0_I2 == 
     \A VARI \in Server : 
     \A VARJ \in Server : 
-        ((state[VARJ] = Follower)) \/ ((votesGranted[VARI] \cap votesGranted[VARJ] = {})) \/ (~((state[VARI] = Candidate /\ VARI # VARJ /\ currentTerm[VARI] = currentTerm[VARJ])))
+        (((VARI # VARJ /\ state[VARI] = Candidate /\ currentTerm[VARI] = currentTerm[VARJ]))) => 
+            ((state[VARJ] = Follower)) \/ ((votesGranted[VARI] \cap votesGranted[VARJ] = {}))
 
 Inv25049_R1_1_I2 == 
     \A VARI \in Server : 
@@ -75,7 +82,7 @@ Inv25049_R1_1_I2 ==
 Inv774_R1_1_I2 == 
     \A VARI \in Server : 
     \A VARJ \in Server : 
-        (VARI \in votesGranted[VARI]) \/ (~(VARJ \in votesGranted[VARI]))
+        (VARJ \in votesGranted[VARI]) => (VARI \in votesGranted[VARI])
 
 Inv22_R2_0_I1 == 
     \A VARI \in Server : 
@@ -329,23 +336,51 @@ THEOREM L_2 == TypeOK /\ Inv10820_R1_0_I2 /\ Inv25049_R1_1_I2 /\ Inv774_R1_1_I2 
   <1>2. TypeOK /\ Inv20249_R0_0_I2 /\ UpdateTermAction => Inv20249_R0_0_I2' BY DEF TypeOK,UpdateTermAction,UpdateTerm,Inv20249_R0_0_I2,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero,AppendEntriesRequestType,AppendEntriesResponseType
   \* (Inv20249_R0_0_I2,BecomeLeaderAction)
   <1>3. TypeOK /\ Inv10820_R1_0_I2 /\ Inv20249_R0_0_I2 /\ BecomeLeaderAction => Inv20249_R0_0_I2' 
-    <2> SUFFICES ASSUME TypeOK /\ Inv10820_R1_0_I2 /\ Inv20249_R0_0_I2 /\ BecomeLeaderAction,
+    <2> SUFFICES ASSUME TypeOK,
+                        Inv10820_R1_0_I2,
+                        Inv20249_R0_0_I2,
+                        TRUE,
+                        NEW i \in Server,
+                        BecomeLeader(i),
                         NEW VARI \in Server',
-                        NEW VARJ \in Server'
-                 PROVE  (((state[VARI] = Candidate /\ VARI # VARJ /\ currentTerm[VARI] = currentTerm[VARJ])) => (~((state[VARJ] = Leader)) \/ (~(votesGranted[VARI] \in Quorum))))'
-      BY DEF Inv20249_R0_0_I2
+                        NEW VARJ \in Server',
+                        (((state[VARJ] = Leader)) /\ ((votesGranted[VARI] \in Quorum)))'
+                 PROVE  (~((state[VARI] = Candidate /\ VARI # VARJ /\ currentTerm[VARI] = currentTerm[VARJ])))'
+      BY DEF BecomeLeaderAction, Inv20249_R0_0_I2
+    <2>1. CASE i = VARJ /\ state[VARJ] = Leader
+            BY <2>1, AddingToQuorumRemainsQuorum, FS_Subset, FS_Singleton, FS_Intersection, FS_Union, StaticQuorumsOverlap 
+            DEF TypeOK,Inv10820_R1_0_I2,BecomeLeaderAction,BecomeLeader,Inv20249_R0_0_I2
+    <2>2. CASE i = VARJ /\ state[VARJ] = Candidate /\ currentTerm[VARJ] = currentTerm[VARI] /\ VARI # VARJ
+        <3>1. CASE state[VARI] = Follower
+            BY <3>1, AddingToQuorumRemainsQuorum, FS_Subset, FS_Singleton, FS_Intersection, FS_Union, StaticQuorumsOverlap 
+            DEF TypeOK,Inv10820_R1_0_I2,BecomeLeaderAction,BecomeLeader,Inv20249_R0_0_I2
+        <3>2. CASE state[VARI] = Candidate
+            <4>1. (votesGranted[VARI] \cap votesGranted[VARJ] = {}) /\ votesGranted[VARJ] \in Quorum
+                BY <2>2, <3>2, AddingToQuorumRemainsQuorum, FS_Subset, FS_Singleton, FS_Intersection, FS_Union, StaticQuorumsOverlap 
+                DEF TypeOK,Inv10820_R1_0_I2,BecomeLeaderAction,BecomeLeader,Inv20249_R0_0_I2
+            \* If the intersection of two sets is empty, then they can't both be quorums.
+            <4>2. ~(votesGranted[VARJ] \in Quorum /\ votesGranted[VARI] \in Quorum)
+                BY <4>1, <3>2, <2>2, AddingToQuorumRemainsQuorum, FS_Subset, FS_Singleton, FS_Intersection, FS_Union, StaticQuorumsOverlap 
+                DEF TypeOK,Inv10820_R1_0_I2,BecomeLeaderAction,BecomeLeader,Inv20249_R0_0_I2
+                
+            <4> QED BY <4>1,<4>2, <3>2, <2>2, AddingToQuorumRemainsQuorum, FS_Subset, FS_Singleton, FS_Intersection, FS_Union, StaticQuorumsOverlap 
+                DEF TypeOK,Inv10820_R1_0_I2,BecomeLeaderAction,BecomeLeader,Inv20249_R0_0_I2
+        <3>3. CASE state[VARI] = Leader
+            BY <3>3, AddingToQuorumRemainsQuorum, FS_Subset, FS_Singleton, FS_Intersection, FS_Union, StaticQuorumsOverlap 
+            DEF TypeOK,Inv10820_R1_0_I2,BecomeLeaderAction,BecomeLeader,Inv20249_R0_0_I2
+        <3> QED
+            BY <3>1,<3>2,<3>3, AddingToQuorumRemainsQuorum, FS_Subset, FS_Singleton, FS_Intersection, FS_Union, StaticQuorumsOverlap 
+            DEF TypeOK,Inv10820_R1_0_I2,BecomeLeaderAction,BecomeLeader,Inv20249_R0_0_I2
+    <2>3. CASE i = VARJ /\ state[VARJ] = Candidate /\ currentTerm[VARJ] # currentTerm[VARI] /\ VARI # VARJ
+            BY <2>3, AddingToQuorumRemainsQuorum, FS_Subset, FS_Singleton, FS_Intersection, FS_Union, StaticQuorumsOverlap 
+            DEF TypeOK,Inv10820_R1_0_I2,BecomeLeaderAction,BecomeLeader,Inv20249_R0_0_I2
+    <2>4. CASE i # VARJ
+            BY <2>2, AddingToQuorumRemainsQuorum, FS_Subset, FS_Singleton, FS_Intersection, FS_Union, StaticQuorumsOverlap 
+            DEF TypeOK,Inv10820_R1_0_I2,BecomeLeaderAction,BecomeLeader,Inv20249_R0_0_I2
     <2> QED
-      <3> SUFFICES ASSUME NEW i \in Server,
-                          BecomeLeader(i)
-                   PROVE  (((state[VARI] = Candidate /\ VARI # VARJ /\ currentTerm[VARI] = currentTerm[VARJ])) => (~((state[VARJ] = Leader)) \/ (~(votesGranted[VARI] \in Quorum))))'
-        BY DEF BecomeLeaderAction
-      <3> QED
-        <4> SUFFICES ASSUME (state[VARI] = Candidate /\ VARI # VARJ /\ currentTerm[VARI] = currentTerm[VARJ])'
-                     PROVE  (~((state[VARJ] = Leader)) \/ (~(votesGranted[VARI] \in Quorum)))'
-          OBVIOUS
-        <4> QED
-          BY AddingToQuorumRemainsQuorum, FS_Subset, FS_Singleton, FS_Intersection, FS_Union, StaticQuorumsOverlap DEF TypeOK,Inv10820_R1_0_I2,BecomeLeaderAction,BecomeLeader,Inv20249_R0_0_I2
-        
+      BY <2>1, <2>2, <2>3, <2>4, AddingToQuorumRemainsQuorum, FS_Subset, FS_Singleton, FS_Intersection, FS_Union, StaticQuorumsOverlap, FS_EmptySet, FS_AddElement, FS_RemoveElement
+      DEF TypeOK,Inv10820_R1_0_I2,BecomeLeaderAction,BecomeLeader,Inv20249_R0_0_I2
+    
       
   \* (Inv20249_R0_0_I2,ClientRequestAction)
   <1>4. TypeOK /\ Inv20249_R0_0_I2 /\ ClientRequestAction => Inv20249_R0_0_I2' BY DEF TypeOK,ClientRequestAction,ClientRequest,Inv20249_R0_0_I2
@@ -357,25 +392,21 @@ THEOREM L_2 == TypeOK /\ Inv10820_R1_0_I2 /\ Inv25049_R1_1_I2 /\ Inv774_R1_1_I2 
   <1>7. TypeOK /\ Inv20249_R0_0_I2 /\ HandleRequestVoteRequestAction => Inv20249_R0_0_I2' BY DEF TypeOK,HandleRequestVoteRequestAction,HandleRequestVoteRequest,Inv20249_R0_0_I2,LastTerm,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero
   \* (Inv20249_R0_0_I2,HandleRequestVoteResponseAction)
   <1>8. TypeOK /\ Inv25049_R1_1_I2 /\ Inv774_R1_1_I2 /\ Inv20249_R0_0_I2 /\ HandleRequestVoteResponseAction => Inv20249_R0_0_I2' 
-    <2> SUFFICES ASSUME TypeOK /\ Inv25049_R1_1_I2 /\ Inv774_R1_1_I2 /\ Inv20249_R0_0_I2 /\ HandleRequestVoteResponseAction,
+    <2> SUFFICES ASSUME TypeOK,
+                        Inv25049_R1_1_I2,
+                        Inv774_R1_1_I2,
+                        Inv20249_R0_0_I2,
+                        NEW m \in requestVoteResponseMsgs,
+                        HandleRequestVoteResponse(m),
                         NEW VARI \in Server',
-                        NEW VARJ \in Server'
-                 PROVE  (((state[VARI] = Candidate /\ VARI # VARJ /\ currentTerm[VARI] = currentTerm[VARJ])) => (~((state[VARJ] = Leader)) \/ (~(votesGranted[VARI] \in Quorum))))'
-      BY DEF Inv20249_R0_0_I2
+                        NEW VARJ \in Server',
+                        (((state[VARJ] = Leader)) /\ ((votesGranted[VARI] \in Quorum)))'
+                 PROVE  (~((state[VARI] = Candidate /\ VARI # VARJ /\ currentTerm[VARI] = currentTerm[VARJ])))'
+      BY DEF HandleRequestVoteResponseAction, Inv20249_R0_0_I2
     <2> QED
-      <3> SUFFICES ASSUME NEW m \in requestVoteResponseMsgs,
-                          HandleRequestVoteResponse(m),
-                          (state[VARI] = Candidate /\ VARI # VARJ /\ currentTerm[VARI] = currentTerm[VARJ])'
-                   PROVE  (~((state[VARJ] = Leader)) \/ (~(votesGranted[VARI] \in Quorum)))'
-        BY DEF HandleRequestVoteResponseAction
-      <3>1. CASE VARI = m.mdest BY <3>1, FS_Subset, FS_Singleton, FS_Union, AddingToQuorumRemainsQuorum, FS_Singleton, StaticQuorumsOverlap 
-        DEF TypeOK,Inv25049_R1_1_I2,Inv774_R1_1_I2,HandleRequestVoteResponseAction,HandleRequestVoteResponse,Inv20249_R0_0_I2,LastTerm,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero
-      <3>2. CASE VARI # m.mdest BY <3>2, FS_Subset, FS_Singleton, AddingToQuorumRemainsQuorum, FS_Singleton, StaticQuorumsOverlap 
-        DEF TypeOK,Inv25049_R1_1_I2,Inv774_R1_1_I2,HandleRequestVoteResponseAction,HandleRequestVoteResponse,Inv20249_R0_0_I2,LastTerm,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero
-                
-      <3> QED
-        BY AddingToQuorumRemainsQuorum, FS_Singleton, FS_Subset, FS_Intersection, FS_Union, StaticQuorumsOverlap 
-        DEF TypeOK,Inv25049_R1_1_I2,Inv774_R1_1_I2,HandleRequestVoteResponseAction,HandleRequestVoteResponse,Inv20249_R0_0_I2,LastTerm,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero
+      BY AddingToQuorumRemainsQuorum, FS_Singleton, FS_Subset, FS_Intersection, FS_Union, StaticQuorumsOverlap, FS_AddElement, FS_EmptySet 
+     DEF TypeOK,Inv25049_R1_1_I2,Inv774_R1_1_I2,HandleRequestVoteResponseAction,HandleRequestVoteResponse,Inv20249_R0_0_I2,LastTerm,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero
+     
       
   \* (Inv20249_R0_0_I2,RejectAppendEntriesRequestAction)
   <1>9. TypeOK /\ Inv20249_R0_0_I2 /\ RejectAppendEntriesRequestAction => Inv20249_R0_0_I2' BY DEF TypeOK,RejectAppendEntriesRequestAction,RejectAppendEntriesRequest,Inv20249_R0_0_I2
@@ -413,7 +444,13 @@ THEOREM L_3 == TypeOK /\ Inv10_R2_1_I1 /\ Inv22_R2_0_I1 /\ Inv10820_R1_0_I2 /\ N
                  PROVE  (((state[VARJ] = Follower)) \/ ((votesGranted[VARI] \cap votesGranted[VARJ] = {})) \/ (~((state[VARI] = Candidate /\ VARI # VARJ /\ currentTerm[VARI] = currentTerm[VARJ]))))'
       BY DEF Inv10820_R1_0_I2
     <2> QED
-      BY Fin,FS_Intersection, FS_Singleton, FS_Difference DEF TypeOK,Inv22_R2_0_I1,HandleRequestVoteResponseAction,HandleRequestVoteResponse,Inv10820_R1_0_I2,LastTerm,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero
+      <3> SUFFICES ASSUME NEW m \in requestVoteResponseMsgs,
+                          HandleRequestVoteResponse(m)
+                   PROVE  (((state[VARJ] = Follower)) \/ ((votesGranted[VARI] \cap votesGranted[VARJ] = {})) \/ (~((state[VARI] = Candidate /\ VARI # VARJ /\ currentTerm[VARI] = currentTerm[VARJ]))))'
+        BY DEF HandleRequestVoteResponseAction
+      <3> QED
+        BY FS_Intersection, FS_Singleton, FS_Difference, FS_Union, FS_Subset DEF TypeOK,Inv22_R2_0_I1,HandleRequestVoteResponseAction,HandleRequestVoteResponse,Inv10820_R1_0_I2,LastTerm,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero
+      
   \* (Inv10820_R1_0_I2,RejectAppendEntriesRequestAction)
   <1>9. TypeOK /\ Inv10820_R1_0_I2 /\ RejectAppendEntriesRequestAction => Inv10820_R1_0_I2' BY DEF TypeOK,RejectAppendEntriesRequestAction,RejectAppendEntriesRequest,Inv10820_R1_0_I2
   \* (Inv10820_R1_0_I2,AcceptAppendEntriesRequestAppendAction)
@@ -740,8 +777,8 @@ THEOREM L_13 == TypeOK /\ Inv10_R2_1_I1 /\ Inv2197_R3_0_I2 /\ Inv5439_R3_0_I2 /\
                           HandleRequestVoteResponse(m)
                    PROVE  (~((currentTerm[VARI] >= currentTerm[VARJ])) \/ (~((state[VARI] \in {Leader,Candidate} /\ VARJ \in votesGranted[VARI])) \/ (~((state[VARJ] \in {Leader,Candidate} /\ VARI # VARJ)))))'
         BY DEF HandleRequestVoteResponseAction
-      <3> QED
-        BY FS_Singleton, FS_Union, FS_Subset, FS_Difference DEF TypeOK,Inv2197_R3_0_I2,Inv5439_R3_0_I2,HandleRequestVoteResponseAction,HandleRequestVoteResponse,Inv25049_R1_1_I2,LastTerm,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero
+      <3> QED BY FS_Singleton, FS_Union, FS_Subset, FS_Difference DEF TypeOK,Inv2197_R3_0_I2,Inv5439_R3_0_I2,HandleRequestVoteResponseAction,HandleRequestVoteResponse,Inv25049_R1_1_I2,LastTerm,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero
+        
       
   \* (Inv25049_R1_1_I2,RejectAppendEntriesRequestAction)
   <1>9. TypeOK /\ Inv25049_R1_1_I2 /\ RejectAppendEntriesRequestAction => Inv25049_R1_1_I2' BY DEF TypeOK,RejectAppendEntriesRequestAction,RejectAppendEntriesRequest,Inv25049_R1_1_I2
