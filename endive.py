@@ -3189,7 +3189,7 @@ class InductiveInvGen():
                     logging.info(f"Re-checking CTIs at node {proof_graph_node}, action={proof_graph_action}.")
                     
                     # Re-check a bit if we didn't find any CTIs, with configurable number of re-checks.
-                    rechecks=2
+                    rechecks=1
                     k_ctis_rechecked = self.check_proof_node(proof_graph_node, action_filter=[proof_graph_action])
                     while len(k_ctis_rechecked) == 0 and rechecks > 0:
                         logging.info(f"Re-checking for CTIs again at node {proof_graph_node}, action={proof_graph_action}, rechecks_left={rechecks}.")
