@@ -109,7 +109,9 @@
         "VARMAERES.mterm > currentTerm[VARMAERES.msource]",
         "VARMAERES.mterm = currentTerm[VARI]",
         "matchIndex[VARI][VARJ] = VARMAERES.mmatchIndex",
-        "VARMAERES.msuccess"
+        "VARMAERES.msuccess",
+        "\\A s,t \\in Server : (/\\ s # t /\\ state[s] = Candidate /\\ votesGranted[s] \\in Quorum /\\ currentTerm[s] = currentTerm[t]) => state[t] # Leader",
+        "\\A s,t \\in Server : ( /\\ s # t /\\ state[s] \\in {Leader,Candidate} /\\ state[t] \\in {Leader,Candidate} /\\ currentTerm[s] = currentTerm[t]) => votesGranted[s] \\cap votesGranted[t] = {}"
     ],
     "preds_alt" : [],
     "safety"  :  "H_LogMatching",
