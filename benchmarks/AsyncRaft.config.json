@@ -58,8 +58,8 @@
         "LogOk(VARI, VARM) /\\ log = log",
         "log = [log EXCEPT ![VARI] = Append(log[VARI], currentTerm[VARI])]",
         "log = [log EXCEPT ![VARJ] = Append(log[VARJ], currentTerm[VARJ])]",
-        "VARI \\in VARQ",
-        "VARJ \\in VARQ",
+        "VARI \\in VARQ /\\ currentTerm = currentTerm",
+        "VARJ \\in VARQ /\\ currentTerm = currentTerm",
         "VARREQVM.mterm = currentTerm[VARI]",
         "VARREQVM.msource = VARI",
         "VARREQVM.msource = VARJ",
@@ -115,6 +115,12 @@
         "BecomeLeaderAction": [
             "\\A s,t \\in Server : (/\\ s # t /\\ state[s] = Candidate /\\ votesGranted[s] \\in Quorum /\\ currentTerm[s] = currentTerm[t]) => state[t] # Leader",
             "\\A s,t \\in Server : ( /\\ s # t /\\ state[s] \\in {Leader,Candidate} /\\ state[t] \\in {Leader,Candidate} /\\ currentTerm[s] = currentTerm[t]) => votesGranted[s] \\cap votesGranted[t] = {}"
+        ],
+        "HandleRequestVoteResponseAction": [
+            "\\A s \\in Server : (state[s] = Leader) => votesGranted[s] \\in Quorum",
+            "\\A s,t \\in Server : ( /\\ s # t /\\ state[s] \\in {Leader,Candidate} /\\ state[t] \\in {Leader,Candidate} /\\ currentTerm[s] = currentTerm[t]) => votesGranted[s] \\cap votesGranted[t] = {}",
+            "\\A s,t \\in Server : \\A m \\in requestVoteResponseMsgs :( /\\ state[s] \\in {Candidate,Leader} /\\ t \\in votesGranted[s]) => ~(/\\ m.mterm = currentTerm[s] /\\ m.msource = t /\\ m.mdest # s /\\ m.mvoteGranted)"
+
         ]
     },
     "preds_alt" : [],
@@ -125,7 +131,7 @@
         "n3" : "n3",
         "n4" : "n4",
         "n5" : "n5",
-        "Server" : [ "{n1,n2}", "{n1,n2,n3,n4,n5}"],
+        "Server" : [ "{n1,n2,n3}", "{n1,n2,n3,n4,n5}"],
         "Follower" : "Follower",
         "Candidate" : "Candidate",
         "Leader" : "Leader",
@@ -134,8 +140,8 @@
         "RequestVoteResponse" : "RequestVoteResponse",
         "AppendEntriesRequest" : "AppendEntriesRequest",
         "AppendEntriesResponse" : "AppendEntriesResponse",
-        "MaxTerm" : ["2"],
-        "MaxLogLen" : ["1", "1"],
+        "MaxTerm" : ["3"],
+        "MaxLogLen" : ["1"],
         "MaxNumVoteMsgs": ["0"]
     },
     "constraint"  :  "StateConstraint",
@@ -144,7 +150,7 @@
     "model_consts"  :  "CONSTANT n1,n2,n3,n4,n5",
     "max_tlc_inv_depth": 17,
     "simulation_inv_check": true,
-    "simulation_inv_check_num_states": 15000000,
+    "simulation_inv_check_num_states": 4500000,
     "simulation_inv_check_depth": 40,
     "symmetry" : true,
     "typeok"  :  "TypeOKRandom",
