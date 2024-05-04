@@ -2023,7 +2023,8 @@ class InductiveInvGen():
                        quant_inv_alt=None, tlc_workers=6, specdir=None, append_inv_round_id=True,
                        cache_states_with_ignored_vars=None,
                        proof_graph_node=None,
-                       proof_graph_action=None):
+                       proof_graph_action=None,
+                       cti_constants_obj=None):
         """ Check which of the given satisfied invariants eliminate CTIs. """
         
         if preds is None:
@@ -2257,6 +2258,11 @@ class InductiveInvGen():
                 use_pred_identifiers = self.use_fast_pred_eval
                 boolean_style = "pyeda" if self.use_fast_pred_eval else "tla"
 
+                action_local_preds = []
+                if "action_local_preds" in self.spec_config and proof_graph_action in self.spec_config["action_local_preds"] and iteration > 1:
+                    # Avoid action local preds after 1st round.
+                    preds = [p for p in preds if (p not in self.spec_config["action_local_preds"][proof_graph_action])]
+
                 all_invs = mc.generate_invs(
                     preds, self.num_invs_per_iter_group, min_num_conjuncts=min_conjs, max_num_conjuncts=max_conjs, 
                     process_local=process_local, quant_vars=self.quant_vars, 
@@ -2302,8 +2308,22 @@ class InductiveInvGen():
                         start = time.time()
                         invs = sorted(list(invs))
                         logging.info("Quick check of new CTI elimination.")
-                        ret = self.check_cti_elimination([c for c in orig_k_ctis if str(hash(c)) not in eliminated_ctis], invs, [f"Inv{i}" for i in range(len(invs))])
-                        cti_states_eliminated_by_invs = ret["eliminated"]
+                        cti_constants_obj_small = list(self.get_config_constant_instances())[-2]
+                        cti_constants_obj_large = list(self.get_config_constant_instances())[-1]
+                        k_ctis_small = [c for c in orig_k_ctis if c.constants_obj == cti_constants_obj_small]
+                        k_ctis_large = [c for c in orig_k_ctis if c.constants_obj == cti_constants_obj_large]
+                        # ret_small = self.check_cti_elimination(k_ctis_small, invs, sat_invs, constants_obj=cti_constants_obj_small)
+
+                        ret_small = self.check_cti_elimination([c for c in k_ctis_small if str(hash(c)) not in eliminated_ctis], invs, [f"Inv{i}" for i in range(len(invs))], constants_obj=cti_constants_obj_small)
+                        ret_large = self.check_cti_elimination([c for c in k_ctis_large if str(hash(c)) not in eliminated_ctis], invs, [f"Inv{i}" for i in range(len(invs))], constants_obj=cti_constants_obj_large)
+
+                        # Merge the dicts ret_small and ret_large.
+                        cti_states_eliminated_by_invs = ret_small["eliminated"]
+                        for inv in cti_states_eliminated_by_invs:
+                            cti_states_eliminated_by_invs[inv] = cti_states_eliminated_by_invs[inv].union(ret_large["eliminated"][inv])
+                                    
+                        # ret = self.check_cti_elimination([c for c in orig_k_ctis if str(hash(c)) not in eliminated_ctis], invs, [f"Inv{i}" for i in range(len(invs))])
+                        # cti_states_eliminated_by_invs = ret["eliminated"]
                         num_eliminating_ctis = 0
                         invs_eliminating_some_ctis = set()
                         for c in cti_states_eliminated_by_invs:
@@ -2452,7 +2472,7 @@ class InductiveInvGen():
                     iteration += 1
                     continue
 
-                if num_new_uniq_invs==0:
+                if num_new_uniq_invs==0 or len(invs)==0:
                     if self.num_sampled_invs_in_iteration[iteration] < num_invs:
                         logging.info("No new candidate invariants found. Continuing.")
                         iter_repeat = True
@@ -2509,6 +2529,7 @@ class InductiveInvGen():
                             predvar_set = p[1]
                             ignored = tuple(sorted([svar for svar in self.state_vars if svar not in predvar_set]))
                             ignored_var_subsets.append(ignored)
+                        # print(ignored_var_subsets)
                         # Limit number of subsets to cache at once to avoid overwhelming TLC memory.
                         MAX_NUM_SUBSETS = 5
                         ignored_var_subsets_remaining = list(ignored_var_subsets)
@@ -2758,8 +2779,26 @@ class InductiveInvGen():
 
             self.start_timing_ctielimcheck()
             logging.info("[--- BEGIN CTI ELIMINATION ---]")
-            ret = self.check_cti_elimination(orig_k_ctis, invs, sat_invs)
-            cti_states_eliminated_by_invs = ret["eliminated"]
+            cti_constants_obj_small = list(self.get_config_constant_instances())[-2]
+            print("CONST SMALL:", cti_constants_obj_small)
+            cti_constants_obj_large = list(self.get_config_constant_instances())[-1]
+
+            k_ctis_small = [c for c in orig_k_ctis if c.constants_obj == cti_constants_obj_small]
+            k_ctis_large = [c for c in orig_k_ctis if c.constants_obj == cti_constants_obj_large]
+            print(k_ctis_small[:1])
+            print(k_ctis_large[:1])
+            
+            # ret = self.check_cti_elimination(orig_k_ctis, invs, sat_invs, constants_obj=cti_constants_obj_small)
+            ret_small = self.check_cti_elimination(k_ctis_small, invs, sat_invs, constants_obj=cti_constants_obj_small)
+            ret_large = self.check_cti_elimination(k_ctis_large, invs, sat_invs, constants_obj=cti_constants_obj_large)
+
+            # Merge the dicts ret_small and ret_large.
+            cti_states_eliminated_by_invs = ret_small["eliminated"]
+            for inv in cti_states_eliminated_by_invs:
+                cti_states_eliminated_by_invs[inv] = cti_states_eliminated_by_invs[inv].union(ret_large["eliminated"][inv])
+
+            # ret = self.check_cti_elimination(orig_k_ctis, invs, sat_invs, constants_obj=cti_constants_obj)
+            # cti_states_eliminated_by_invs = ret["eliminated"]
 
             # The estimated syntactic/semantic "cost" (i.e complexity) of an invariant expression.
             def get_invexp_cost(inv):
@@ -4227,8 +4266,23 @@ class InductiveInvGen():
                 print(lemma_action_coi)
 
                 cti_ignore_vars = [s for s in self.state_vars if s not in lemma_action_coi]
-                k_ctis_action, k_cti_traces = self.generate_ctis(props=[curr_obligation_pred_tup], specname_tag=curr_obligation, actions=[k_cti_action], ignore_vars=cti_ignore_vars)
-                # k_ctis_action, k_cti_traces = self.generate_ctis(props=[curr_obligation_pred_tup], specname_tag=curr_obligation, actions=[a])
+
+                #
+                # Take last two constant objects to use for checking CTIs.
+                #
+                cobjs = list(self.get_config_constant_instances())
+                cobjs[-2:]
+                k_ctis_action = []
+                for cobj in cobjs:
+                    k_ctis_action_new, k_cti_traces = self.generate_ctis(props=[curr_obligation_pred_tup], 
+                                                                     specname_tag=curr_obligation, actions=[k_cti_action], 
+                                                                     ignore_vars=cti_ignore_vars, constants_obj=cobj)
+                    for c in k_ctis_action_new:
+                        c.constants_obj = cobj
+                    k_ctis_action += k_ctis_action_new
+                    
+                # k_ctis_action, k_cti_traces = self.generate_ctis(props=[curr_obligation_pred_tup], specname_tag=curr_obligation, actions=[k_cti_action], ignore_vars=cti_ignore_vars)
+                
                 
                 # De-duplicate CTIs based on initial state (not needed?)
                 # k_cti_init_states = set()
@@ -4994,7 +5048,21 @@ class InductiveInvGen():
         for p in pre_props:
             logging.info(f" pre: {p}")
         props = [(n, self.proof_graph["nodes"][n]["expr"], "")]
-        k_ctis, k_cti_traces = self.generate_ctis(props=props, pre_props=pre_props, defs_to_add=defs_to_add, specname_tag=n)
+
+        #
+        # Take last two constant objects to use for checking CTIs.
+        #
+        cobjs = list(self.get_config_constant_instances())
+        cobjs[-2:]
+        k_ctis = []
+        for cobj in cobjs:
+            print("Checking with constants instantiation: ", cobj)
+            k_ctis_new, k_cti_traces = self.generate_ctis(props=props, pre_props=pre_props, defs_to_add=defs_to_add, specname_tag=n, constants_obj=cobj)
+            for c in k_ctis_new:
+                c.constants_obj = cobj
+            k_ctis += k_ctis_new
+
+
         if action_filter is not None:
             k_ctis = [c for c in k_ctis if c.action_name in action_filter]
 
