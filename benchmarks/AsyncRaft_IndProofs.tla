@@ -23,35 +23,8 @@ LEMMA EmptyIntersectionImpliesNotBothQuorums ==
         (s1 \cap s2 = {}) => ~(s1 \in Quorum /\ s2 \in Quorum)
 
 
- LEMMA StaticQuorumsOverlap ==
- ASSUME NEW cfg \in SUBSET Server,
-        NEW Q1 \in Quorum,
-        NEW Q2 \in Quorum
- PROVE Q1 \cap Q2 # {}
- PROOF
-     <1>. IsFiniteSet(cfg)
-         BY FS_Subset, IsFiniteSet(Server)
-     <1>. IsFiniteSet(Q1) /\ IsFiniteSet(Q2)
-         BY QuorumsAreServerSubsets, IsFiniteSet(Server), FS_Subset DEF Quorum
-     <1>. IsFiniteSet(Q1 \cap Q2)
-         BY FS_Intersection
-     <1>1. Q1 \in SUBSET cfg /\ Q2 \in SUBSET cfg
-         BY QuorumsAreServerSubsets DEF Quorum, TypeOK
-     <1>2. Cardinality(Q1) + Cardinality(Q2) <= Cardinality(cfg) + Cardinality(Q1 \cap Q2)
-         <2>1. Cardinality(Q1 \cup Q2) = Cardinality(Q1) + Cardinality(Q2) - Cardinality(Q1 \cap Q2)
-             BY FS_Union
-         <2>2. Cardinality(Q1 \cup Q2) <= Cardinality(cfg)
-             BY <1>1, FS_Subset, IsFiniteSet(Server)
-         <2>3. QED BY <2>1, <2>2, FS_CardinalityType
-     <1>3. Cardinality(Q1) + Cardinality(Q2) < Cardinality(Q1) + Cardinality(Q2) + Cardinality(Q1 \cap Q2)
-         <2>1. Cardinality(Q1) * 2 > Cardinality(cfg) /\ Cardinality(Q2) * 2 > Cardinality(cfg)
-             BY <1>1 DEF Quorum, TypeOK
-         <2>2. Cardinality(Q1) + Cardinality(Q2) > Cardinality(cfg)
-             BY <2>1, FS_CardinalityType, IsFiniteSet(Server)
-         <2>3. QED BY <2>2, <1>2, FS_CardinalityType
-     <1>4. Cardinality(Q1 \cap Q2) > 0
-         BY <1>3, FS_CardinalityType
-     <1>5. QED BY <1>4, FS_EmptySet
+LEMMA StaticQuorumsOverlap == \A Q1,Q2 \in Quorum : Q1 \cap Q2 # {}
+
      
      
 
@@ -170,28 +143,52 @@ THEOREM L_A0 == TypeOK /\ H_VotesCantBeGrantedTwiceToCandidatesInSameTerm /\ H_L
      
 
 THEOREM L_A1 == TypeOK /\ H_LeaderHasVotesGrantedQuorum /\ Next => H_LeaderHasVotesGrantedQuorum'
-  <1> SUFFICES ASSUME TypeOK,
+  <1>. SUFFICES ASSUME TypeOK,
                       H_LeaderHasVotesGrantedQuorum,
                       Next
                PROVE  H_LeaderHasVotesGrantedQuorum'
     OBVIOUS
-  <1> USE A0,A1,A2,A3,A4,A5,A6,A7,StaticQuorumsOverlap, FS_Singleton, FS_Union, FS_Subset, AddingToQuorumRemainsQuorum
+  <1>. USE A0,A1,A2,A3,A4,A5,A6,A7,
+        StaticQuorumsOverlap, 
+        FS_Singleton, FS_Union, FS_Subset, FS_Difference, AddingToQuorumRemainsQuorum
   <1>1. CASE RequestVoteAction
     BY <1>1 DEF TypeOK,Inv1566_R0_1_I1,Next,RequestVoteAction,RequestVote,H_LeaderHasVotesGrantedQuorum,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero
   <1>2. CASE UpdateTermAction
-    <2> SUFFICES ASSUME NEW m \in requestVoteRequestMsgs \cup requestVoteResponseMsgs \cup appendEntriesRequestMsgs \cup appendEntriesResponseMsgs,
-                        UpdateTerm(m.mterm, m.mdest),
-                        NEW s \in Server',
+    <2> SUFFICES ASSUME NEW s \in Server',
                         (state[s] = Leader)'
                  PROVE  (votesGranted[s] \in Quorum)'
-      BY <1>2 DEF H_LeaderHasVotesGrantedQuorum, UpdateTermAction
+      BY DEF H_LeaderHasVotesGrantedQuorum
     <2> QED
-      BY <1>2 DEF TypeOK,Inv1566_R0_1_I1,UpdateTermAction,UpdateTerm,H_LeaderHasVotesGrantedQuorum,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero,AppendEntriesRequestType,AppendEntriesResponseType,H_OnePrimaryPerTerm
+      <3> SUFFICES ASSUME NEW m \in requestVoteRequestMsgs \cup requestVoteResponseMsgs \cup appendEntriesRequestMsgs \cup appendEntriesResponseMsgs,
+                          UpdateTerm(m.mterm, m.mdest)
+                   PROVE  (votesGranted[s] \in Quorum)'
+        BY <1>2 DEF UpdateTermAction
+      <3> QED
+        BY DEF TypeOK,Inv1566_R0_1_I1,UpdateTermAction,UpdateTerm,H_LeaderHasVotesGrantedQuorum,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero,AppendEntriesRequestType,AppendEntriesResponseType,H_OnePrimaryPerTerm
+      
+    
     
   <1>3. CASE HandleRequestVoteRequestAction
     BY <1>3 DEF TypeOK,Inv1566_R0_1_I1,HandleRequestVoteRequestAction,HandleRequestVoteRequest,H_LeaderHasVotesGrantedQuorum,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero,AppendEntriesRequestType,AppendEntriesResponseType,H_OnePrimaryPerTerm
   <1>4. CASE HandleRequestVoteResponseAction
-    BY <1>4 DEF TypeOK,Inv1566_R0_1_I1,HandleRequestVoteResponseAction,HandleRequestVoteResponse,H_LeaderHasVotesGrantedQuorum,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero,AppendEntriesRequestType,AppendEntriesResponseType,H_OnePrimaryPerTerm
+    <2> SUFFICES ASSUME NEW m \in requestVoteResponseMsgs,
+                        HandleRequestVoteResponse(m),
+                        NEW s \in Server',
+                        (state[s] = Leader)'
+                 PROVE  (votesGranted[s] \in Quorum)'
+      BY <1>4 DEF H_LeaderHasVotesGrantedQuorum, HandleRequestVoteResponseAction
+    <2>1. CASE state[s] # Leader
+      BY <2>1, <1>4 DEF TypeOK,Inv1566_R0_1_I1,HandleRequestVoteResponseAction,HandleRequestVoteResponse,H_LeaderHasVotesGrantedQuorum,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero,AppendEntriesRequestType,AppendEntriesResponseType,H_OnePrimaryPerTerm
+    <2>2. CASE state[s] = Leader /\ m.mdest = s
+      BY <2>2, <1>4 DEF TypeOK,Inv1566_R0_1_I1,HandleRequestVoteResponseAction,HandleRequestVoteResponse,H_LeaderHasVotesGrantedQuorum,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero,AppendEntriesRequestType,AppendEntriesResponseType,H_OnePrimaryPerTerm
+    <2>3. CASE state[s] = Leader /\ m.mdest # s
+      BY <2>3, <1>4 DEF TypeOK,Inv1566_R0_1_I1,HandleRequestVoteResponseAction,HandleRequestVoteResponse,H_LeaderHasVotesGrantedQuorum,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero,AppendEntriesRequestType,AppendEntriesResponseType,H_OnePrimaryPerTerm
+                
+    <2> QED
+      BY <2>1,<2>2,<2>3,<1>4 DEF TypeOK,Inv1566_R0_1_I1,HandleRequestVoteResponseAction,HandleRequestVoteResponse,H_LeaderHasVotesGrantedQuorum,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero,AppendEntriesRequestType,AppendEntriesResponseType,H_OnePrimaryPerTerm
+    
+       
+    
   <1>5. CASE BecomeLeaderAction
     BY <1>5 DEF TypeOK,Inv1566_R0_1_I1,BecomeLeaderAction,BecomeLeader,H_LeaderHasVotesGrantedQuorum,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero,AppendEntriesRequestType,AppendEntriesResponseType,H_OnePrimaryPerTerm
   <1>6. CASE ClientRequestAction
