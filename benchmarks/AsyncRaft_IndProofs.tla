@@ -60,7 +60,8 @@ LEMMA EmptyIntersectionImpliesNotBothQuorums ==
 \* seed: 1
 \* num proof graph nodes: 7
 \* num proof obligations: 84
-Safety == H_VotesCantBeGrantedTwiceToCandidatesInSameTerm
+
+Safety == H_CandidateWithVotesGrantedInTermImplyNoOtherLeader
 Inv41_R0_0_I0 == (\A s,t \in Server : \A m \in requestVoteResponseMsgs :( /\ state[s] \in {Candidate,Leader} /\ t \in votesGranted[s]) => ~(/\ m.mterm = currentTerm[s] /\ m.msource = t /\ m.mdest # s /\ m.mvoteGranted))
 Inv1566_R0_1_I1 == \A VARI \in Server : \A VARJ \in Server : ~((currentTerm[VARI] > currentTerm[VARJ])) \/ (~((state[VARI] \in {Leader,Candidate} /\ VARJ \in votesGranted[VARI])))
 Inv7_R1_0_I0 == (\A s \in Server : state[s] \in {Candidate,Leader} =>  (\A t \in votesGranted[s] :  /\ currentTerm[t] = currentTerm[s] => votedFor[t] = s ))
@@ -71,6 +72,8 @@ Inv0_R3_0_I0 == (\A m \in requestVoteResponseMsgs : m.mtype = RequestVoteRespons
 IndGlobal == 
   /\ TypeOK
   /\ Safety
+  /\ H_VotesCantBeGrantedTwiceToCandidatesInSameTerm
+  /\ H_LeaderHasVotesGrantedQuorum
   /\ Inv41_R0_0_I0
   /\ Inv7_R1_0_I0
   /\ Inv0_R3_0_I0
@@ -124,34 +127,120 @@ THEOREM L_0 == TypeOK /\ TypeOK /\ Next => TypeOK'
 <1>13. QED BY <1>1,<1>2,<1>3,<1>4,<1>5,<1>6,<1>7,<1>8,<1>9,<1>10,<1>11,<1>12 DEF Next
 
 
+THEOREM L_A0 == TypeOK /\ H_VotesCantBeGrantedTwiceToCandidatesInSameTerm /\ H_LeaderHasVotesGrantedQuorum /\ Inv41_R0_0_I0 /\ Safety /\ Next => Safety'
+  <1> SUFFICES ASSUME TypeOK,
+                      Safety,
+                      Next
+               PROVE  Safety'
+    OBVIOUS
+   <1> USE A0,A1,A2,A3,A4,A5,A6,A7,StaticQuorumsOverlap, FS_Singleton, FS_Difference, FS_Union, FS_Subset, AddingToQuorumRemainsQuorum
+  <1> USE DEF H_CandidateWithVotesGrantedInTermImplyNoOtherLeader
+  <1>1. CASE RequestVoteAction
+    <2> SUFFICES ASSUME NEW i \in Server,
+                        RequestVote(i)
+                 PROVE  Safety'
+      BY <1>1 DEF RequestVoteAction
+    <2> QED
+      BY <1>1 DEF TypeOK,Inv1566_R0_1_I1,RequestVoteAction,RequestVote,Safety,H_CandidateWithVotesGrantedInTermImplyNoOtherLeader,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero,AppendEntriesRequestType,AppendEntriesResponseType,H_OnePrimaryPerTerm
+    
+  <1>2. CASE UpdateTermAction
+    BY <1>2 DEF TypeOK,UpdateTermAction,UpdateTerm,Safety,RequestVoteRequestType,H_CandidateWithVotesGrantedInTermImplyNoOtherLeader,RequestVoteResponseType,Terms,LogIndicesWithZero,AppendEntriesRequestType,AppendEntriesResponseType,H_OnePrimaryPerTerm
+  <1>3. CASE HandleRequestVoteRequestAction
+    BY <1>3 DEF TypeOK,Inv1566_R0_1_I1,HandleRequestVoteRequestAction,HandleRequestVoteRequest,H_CandidateWithVotesGrantedInTermImplyNoOtherLeader,Safety,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero,AppendEntriesRequestType,AppendEntriesResponseType,H_OnePrimaryPerTerm
+  <1>4. CASE HandleRequestVoteResponseAction
+    BY <1>4 DEF TypeOK,Inv1566_R0_1_I1,H_VotesCantBeGrantedTwiceToCandidatesInSameTerm,H_CandidateWithVotesGrantedInTermImplyNoOtherLeader,H_LeaderHasVotesGrantedQuorum,HandleRequestVoteResponseAction,HandleRequestVoteResponse,Safety,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero,AppendEntriesRequestType,AppendEntriesResponseType,H_OnePrimaryPerTerm
+  <1>5. CASE BecomeLeaderAction
+    BY <1>5 DEF TypeOK,H_VotesCantBeGrantedTwiceToCandidatesInSameTerm,Inv1566_R0_1_I1,BecomeLeaderAction,BecomeLeader,H_CandidateWithVotesGrantedInTermImplyNoOtherLeader,Safety,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero,AppendEntriesRequestType,AppendEntriesResponseType,H_OnePrimaryPerTerm
+  <1>6. CASE ClientRequestAction
+    BY <1>6 DEF TypeOK,Inv1566_R0_1_I1,ClientRequestAction,ClientRequest,Safety,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero,AppendEntriesRequestType,AppendEntriesResponseType,H_OnePrimaryPerTerm
+  <1>7. CASE AppendEntriesAction
+    BY <1>7 DEF TypeOK,Inv1566_R0_1_I1,AppendEntriesAction,AppendEntries,Safety,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero,AppendEntriesRequestType,AppendEntriesResponseType,H_OnePrimaryPerTerm
+  <1>8. CASE RejectAppendEntriesRequestAction
+    BY <1>8 DEF TypeOK,Inv1566_R0_1_I1,RejectAppendEntriesRequestAction,RejectAppendEntriesRequest,Safety,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero,AppendEntriesRequestType,AppendEntriesResponseType,H_OnePrimaryPerTerm
+  <1>9. CASE AcceptAppendEntriesRequestAppendAction
+    BY <1>9 DEF TypeOK,Inv1566_R0_1_I1,AcceptAppendEntriesRequestAppendAction,AcceptAppendEntriesRequestAppend,Safety,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero,AppendEntriesRequestType,AppendEntriesResponseType,H_OnePrimaryPerTerm
+  <1>10. CASE AcceptAppendEntriesRequestLearnCommitAction
+    BY <1>10 DEF TypeOK,Inv1566_R0_1_I1,AcceptAppendEntriesRequestLearnCommitAction,AcceptAppendEntriesRequestLearnCommit,Safety,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero,AppendEntriesRequestType,AppendEntriesResponseType,H_OnePrimaryPerTerm
+  <1>11. CASE HandleAppendEntriesResponseAction
+    BY <1>11 DEF TypeOK,Inv1566_R0_1_I1,HandleAppendEntriesResponseAction,HandleAppendEntriesResponse,Safety,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero,AppendEntriesRequestType,AppendEntriesResponseType,H_OnePrimaryPerTerm
+  <1>12. CASE AdvanceCommitIndexAction
+    BY <1>12 DEF TypeOK,Inv1566_R0_1_I1,AdvanceCommitIndexAction,AdvanceCommitIndex,Safety,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero,AppendEntriesRequestType,AppendEntriesResponseType,H_OnePrimaryPerTerm
+  <1>13. QED
+    BY <1>1, <1>10, <1>11, <1>12, <1>2, <1>3, <1>4, <1>5, <1>6, <1>7, <1>8, <1>9 DEF Next
+     
+
+THEOREM L_A1 == TypeOK /\ H_LeaderHasVotesGrantedQuorum /\ Next => H_LeaderHasVotesGrantedQuorum'
+  <1> SUFFICES ASSUME TypeOK,
+                      H_LeaderHasVotesGrantedQuorum,
+                      Next
+               PROVE  H_LeaderHasVotesGrantedQuorum'
+    OBVIOUS
+  <1> USE A0,A1,A2,A3,A4,A5,A6,A7,StaticQuorumsOverlap, FS_Singleton, FS_Union, FS_Subset, AddingToQuorumRemainsQuorum
+  <1>1. CASE RequestVoteAction
+    BY <1>1 DEF TypeOK,Inv1566_R0_1_I1,Next,RequestVoteAction,RequestVote,H_LeaderHasVotesGrantedQuorum,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero
+  <1>2. CASE UpdateTermAction
+    <2> SUFFICES ASSUME NEW m \in requestVoteRequestMsgs \cup requestVoteResponseMsgs \cup appendEntriesRequestMsgs \cup appendEntriesResponseMsgs,
+                        UpdateTerm(m.mterm, m.mdest),
+                        NEW s \in Server',
+                        (state[s] = Leader)'
+                 PROVE  (votesGranted[s] \in Quorum)'
+      BY <1>2 DEF H_LeaderHasVotesGrantedQuorum, UpdateTermAction
+    <2> QED
+      BY <1>2 DEF TypeOK,Inv1566_R0_1_I1,UpdateTermAction,UpdateTerm,H_LeaderHasVotesGrantedQuorum,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero,AppendEntriesRequestType,AppendEntriesResponseType,H_OnePrimaryPerTerm
+    
+  <1>3. CASE HandleRequestVoteRequestAction
+    BY <1>3 DEF TypeOK,Inv1566_R0_1_I1,HandleRequestVoteRequestAction,HandleRequestVoteRequest,H_LeaderHasVotesGrantedQuorum,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero,AppendEntriesRequestType,AppendEntriesResponseType,H_OnePrimaryPerTerm
+  <1>4. CASE HandleRequestVoteResponseAction
+    BY <1>4 DEF TypeOK,Inv1566_R0_1_I1,HandleRequestVoteResponseAction,HandleRequestVoteResponse,H_LeaderHasVotesGrantedQuorum,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero,AppendEntriesRequestType,AppendEntriesResponseType,H_OnePrimaryPerTerm
+  <1>5. CASE BecomeLeaderAction
+    BY <1>5 DEF TypeOK,Inv1566_R0_1_I1,BecomeLeaderAction,BecomeLeader,H_LeaderHasVotesGrantedQuorum,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero,AppendEntriesRequestType,AppendEntriesResponseType,H_OnePrimaryPerTerm
+  <1>6. CASE ClientRequestAction
+    BY <1>6 DEF TypeOK,Inv1566_R0_1_I1,ClientRequestAction,ClientRequest,H_LeaderHasVotesGrantedQuorum,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero,AppendEntriesRequestType,AppendEntriesResponseType,H_OnePrimaryPerTerm
+  <1>7. CASE AppendEntriesAction
+    BY <1>7 DEF TypeOK,Inv1566_R0_1_I1,AppendEntriesAction,AppendEntries,H_LeaderHasVotesGrantedQuorum,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero,AppendEntriesRequestType,AppendEntriesResponseType,H_OnePrimaryPerTerm
+  <1>8. CASE RejectAppendEntriesRequestAction
+    BY <1>8 DEF TypeOK,Inv1566_R0_1_I1,RejectAppendEntriesRequestAction,RejectAppendEntriesRequest,H_LeaderHasVotesGrantedQuorum,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero,AppendEntriesRequestType,AppendEntriesResponseType,H_OnePrimaryPerTerm
+  <1>9. CASE AcceptAppendEntriesRequestAppendAction
+    BY <1>9 DEF TypeOK,Inv1566_R0_1_I1,AcceptAppendEntriesRequestAppendAction,AcceptAppendEntriesRequestAppend,H_LeaderHasVotesGrantedQuorum,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero,AppendEntriesRequestType,AppendEntriesResponseType,H_OnePrimaryPerTerm
+  <1>10. CASE AcceptAppendEntriesRequestLearnCommitAction
+    BY <1>10 DEF TypeOK,Inv1566_R0_1_I1,AcceptAppendEntriesRequestLearnCommitAction,AcceptAppendEntriesRequestLearnCommit,H_LeaderHasVotesGrantedQuorum,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero,AppendEntriesRequestType,AppendEntriesResponseType,H_OnePrimaryPerTerm
+  <1>11. CASE HandleAppendEntriesResponseAction
+    BY <1>11 DEF TypeOK,Inv1566_R0_1_I1,HandleAppendEntriesResponseAction,HandleAppendEntriesResponse,H_LeaderHasVotesGrantedQuorum,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero,AppendEntriesRequestType,AppendEntriesResponseType,H_OnePrimaryPerTerm
+  <1>12. CASE AdvanceCommitIndexAction
+    BY <1>12 DEF TypeOK,Inv1566_R0_1_I1,AdvanceCommitIndexAction,AdvanceCommitIndex,H_LeaderHasVotesGrantedQuorum,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero,AppendEntriesRequestType,AppendEntriesResponseType,H_OnePrimaryPerTerm
+  <1>13. QED
+    BY <1>1, <1>10, <1>11, <1>12, <1>2, <1>3, <1>4, <1>5, <1>6, <1>7, <1>8, <1>9 DEF Next
+     
+
+
 \* (ROOT SAFETY PROP)
 \*** Safety
-THEOREM L_1 == TypeOK /\ Inv1566_R0_1_I1 /\ Inv41_R0_0_I0 /\ Safety /\ Next => Safety'
+THEOREM L_1 == TypeOK /\ Inv1566_R0_1_I1 /\ Inv41_R0_0_I0 /\ H_VotesCantBeGrantedTwiceToCandidatesInSameTerm /\ Next => H_VotesCantBeGrantedTwiceToCandidatesInSameTerm'
   <1>. USE A0,A1,A2,A3,A4,A5,A6,A7 DEF H_VotesCantBeGrantedTwiceToCandidatesInSameTerm
-  \* (Safety,RequestVoteAction)
-  <1>1. TypeOK /\ Inv1566_R0_1_I1 /\ Safety /\ RequestVoteAction => Safety' BY DEF TypeOK,Inv1566_R0_1_I1,RequestVoteAction,RequestVote,Safety,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero,AppendEntriesRequestType,AppendEntriesResponseType,H_OnePrimaryPerTerm
-  \* (Safety,UpdateTermAction)
-  <1>2. TypeOK /\ Safety /\ UpdateTermAction => Safety' BY DEF TypeOK,UpdateTermAction,UpdateTerm,Safety,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero,AppendEntriesRequestType,AppendEntriesResponseType,H_OnePrimaryPerTerm
-  \* (Safety,BecomeLeaderAction)
-  <1>3. TypeOK /\ Safety /\ BecomeLeaderAction => Safety' BY DEF TypeOK,BecomeLeaderAction,BecomeLeader,Safety,H_OnePrimaryPerTerm
-  \* (Safety,ClientRequestAction)
-  <1>4. TypeOK /\ Safety /\ ClientRequestAction => Safety' BY DEF TypeOK,ClientRequestAction,ClientRequest,Safety,H_OnePrimaryPerTerm
-  \* (Safety,AdvanceCommitIndexAction)
-  <1>5. TypeOK /\ Safety /\ AdvanceCommitIndexAction => Safety' BY DEF TypeOK,AdvanceCommitIndexAction,AdvanceCommitIndex,Safety,H_OnePrimaryPerTerm
-  \* (Safety,AppendEntriesAction)
-  <1>6. TypeOK /\ Safety /\ AppendEntriesAction => Safety' BY DEF TypeOK,AppendEntriesAction,AppendEntries,Safety,H_OnePrimaryPerTerm
-  \* (Safety,HandleRequestVoteRequestAction)
-  <1>7. TypeOK /\ Safety /\ HandleRequestVoteRequestAction => Safety' BY DEF TypeOK,HandleRequestVoteRequestAction,HandleRequestVoteRequest,Safety,LastTerm,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero,H_OnePrimaryPerTerm
-  \* (Safety,HandleRequestVoteResponseAction)
-  <1>8. TypeOK /\ Inv41_R0_0_I0 /\ Safety /\ HandleRequestVoteResponseAction => Safety' BY DEF TypeOK,Inv41_R0_0_I0,HandleRequestVoteResponseAction,HandleRequestVoteResponse,Safety,LastTerm,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero,H_OnePrimaryPerTerm
-  \* (Safety,RejectAppendEntriesRequestAction)
-  <1>9. TypeOK /\ Safety /\ RejectAppendEntriesRequestAction => Safety' BY DEF TypeOK,RejectAppendEntriesRequestAction,RejectAppendEntriesRequest,Safety,H_OnePrimaryPerTerm
-  \* (Safety,AcceptAppendEntriesRequestAppendAction)
-  <1>10. TypeOK /\ Safety /\ AcceptAppendEntriesRequestAppendAction => Safety' BY DEF TypeOK,AcceptAppendEntriesRequestAppendAction,AcceptAppendEntriesRequestAppend,Safety,H_OnePrimaryPerTerm
-  \* (Safety,AcceptAppendEntriesRequestLearnCommitAction)
-  <1>11. TypeOK /\ Safety /\ AcceptAppendEntriesRequestLearnCommitAction => Safety' BY DEF TypeOK,AcceptAppendEntriesRequestLearnCommitAction,AcceptAppendEntriesRequestLearnCommit,Safety,H_OnePrimaryPerTerm
-  \* (Safety,HandleAppendEntriesResponseAction)
-  <1>12. TypeOK /\ Safety /\ HandleAppendEntriesResponseAction => Safety' BY DEF TypeOK,HandleAppendEntriesResponseAction,HandleAppendEntriesResponse,Safety,H_OnePrimaryPerTerm
+  \* (H_VotesCantBeGrantedTwiceToCandidatesInSameTerm,RequestVoteAction)
+  <1>1. TypeOK /\ Inv1566_R0_1_I1 /\ H_VotesCantBeGrantedTwiceToCandidatesInSameTerm /\ RequestVoteAction => H_VotesCantBeGrantedTwiceToCandidatesInSameTerm' BY DEF TypeOK,Inv1566_R0_1_I1,RequestVoteAction,RequestVote,H_VotesCantBeGrantedTwiceToCandidatesInSameTerm,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero,AppendEntriesRequestType,AppendEntriesResponseType,H_OnePrimaryPerTerm
+  \* (H_VotesCantBeGrantedTwiceToCandidatesInSameTerm,UpdateTermAction)
+  <1>2. TypeOK /\ H_VotesCantBeGrantedTwiceToCandidatesInSameTerm /\ UpdateTermAction => H_VotesCantBeGrantedTwiceToCandidatesInSameTerm' BY DEF TypeOK,UpdateTermAction,UpdateTerm,H_VotesCantBeGrantedTwiceToCandidatesInSameTerm,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero,AppendEntriesRequestType,AppendEntriesResponseType,H_OnePrimaryPerTerm
+  \* (H_VotesCantBeGrantedTwiceToCandidatesInSameTerm,BecomeLeaderAction)
+  <1>3. TypeOK /\ H_VotesCantBeGrantedTwiceToCandidatesInSameTerm /\ BecomeLeaderAction => H_VotesCantBeGrantedTwiceToCandidatesInSameTerm' BY DEF TypeOK,BecomeLeaderAction,BecomeLeader,H_VotesCantBeGrantedTwiceToCandidatesInSameTerm,H_OnePrimaryPerTerm
+  \* (H_VotesCantBeGrantedTwiceToCandidatesInSameTerm,ClientRequestAction)
+  <1>4. TypeOK /\ H_VotesCantBeGrantedTwiceToCandidatesInSameTerm /\ ClientRequestAction => H_VotesCantBeGrantedTwiceToCandidatesInSameTerm' BY DEF TypeOK,ClientRequestAction,ClientRequest,H_VotesCantBeGrantedTwiceToCandidatesInSameTerm,H_OnePrimaryPerTerm
+  \* (H_VotesCantBeGrantedTwiceToCandidatesInSameTerm,AdvanceCommitIndexAction)
+  <1>5. TypeOK /\ H_VotesCantBeGrantedTwiceToCandidatesInSameTerm /\ AdvanceCommitIndexAction => H_VotesCantBeGrantedTwiceToCandidatesInSameTerm' BY DEF TypeOK,AdvanceCommitIndexAction,AdvanceCommitIndex,H_VotesCantBeGrantedTwiceToCandidatesInSameTerm,H_OnePrimaryPerTerm
+  \* (H_VotesCantBeGrantedTwiceToCandidatesInSameTerm,AppendEntriesAction)
+  <1>6. TypeOK /\ H_VotesCantBeGrantedTwiceToCandidatesInSameTerm /\ AppendEntriesAction => H_VotesCantBeGrantedTwiceToCandidatesInSameTerm' BY DEF TypeOK,AppendEntriesAction,AppendEntries,H_VotesCantBeGrantedTwiceToCandidatesInSameTerm,H_OnePrimaryPerTerm
+  \* (H_VotesCantBeGrantedTwiceToCandidatesInSameTerm,HandleRequestVoteRequestAction)
+  <1>7. TypeOK /\ H_VotesCantBeGrantedTwiceToCandidatesInSameTerm /\ HandleRequestVoteRequestAction => H_VotesCantBeGrantedTwiceToCandidatesInSameTerm' BY DEF TypeOK,HandleRequestVoteRequestAction,HandleRequestVoteRequest,H_VotesCantBeGrantedTwiceToCandidatesInSameTerm,LastTerm,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero,H_OnePrimaryPerTerm
+  \* (H_VotesCantBeGrantedTwiceToCandidatesInSameTerm,HandleRequestVoteResponseAction)
+  <1>8. TypeOK /\ Inv41_R0_0_I0 /\ H_VotesCantBeGrantedTwiceToCandidatesInSameTerm /\ HandleRequestVoteResponseAction => H_VotesCantBeGrantedTwiceToCandidatesInSameTerm' BY DEF TypeOK,Inv41_R0_0_I0,HandleRequestVoteResponseAction,HandleRequestVoteResponse,H_VotesCantBeGrantedTwiceToCandidatesInSameTerm,LastTerm,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero,H_OnePrimaryPerTerm
+  \* (H_VotesCantBeGrantedTwiceToCandidatesInSameTerm,RejectAppendEntriesRequestAction)
+  <1>9. TypeOK /\ H_VotesCantBeGrantedTwiceToCandidatesInSameTerm /\ RejectAppendEntriesRequestAction => H_VotesCantBeGrantedTwiceToCandidatesInSameTerm' BY DEF TypeOK,RejectAppendEntriesRequestAction,RejectAppendEntriesRequest,H_VotesCantBeGrantedTwiceToCandidatesInSameTerm,H_OnePrimaryPerTerm
+  \* (H_VotesCantBeGrantedTwiceToCandidatesInSameTerm,AcceptAppendEntriesRequestAppendAction)
+  <1>10. TypeOK /\ H_VotesCantBeGrantedTwiceToCandidatesInSameTerm /\ AcceptAppendEntriesRequestAppendAction => H_VotesCantBeGrantedTwiceToCandidatesInSameTerm' BY DEF TypeOK,AcceptAppendEntriesRequestAppendAction,AcceptAppendEntriesRequestAppend,H_VotesCantBeGrantedTwiceToCandidatesInSameTerm,H_OnePrimaryPerTerm
+  \* (H_VotesCantBeGrantedTwiceToCandidatesInSameTerm,AcceptAppendEntriesRequestLearnCommitAction)
+  <1>11. TypeOK /\ H_VotesCantBeGrantedTwiceToCandidatesInSameTerm /\ AcceptAppendEntriesRequestLearnCommitAction => H_VotesCantBeGrantedTwiceToCandidatesInSameTerm' BY DEF TypeOK,AcceptAppendEntriesRequestLearnCommitAction,AcceptAppendEntriesRequestLearnCommit,H_VotesCantBeGrantedTwiceToCandidatesInSameTerm,H_OnePrimaryPerTerm
+  \* (H_VotesCantBeGrantedTwiceToCandidatesInSameTerm,HandleAppendEntriesResponseAction)
+  <1>12. TypeOK /\ H_VotesCantBeGrantedTwiceToCandidatesInSameTerm /\ HandleAppendEntriesResponseAction => H_VotesCantBeGrantedTwiceToCandidatesInSameTerm' BY DEF TypeOK,HandleAppendEntriesResponseAction,HandleAppendEntriesResponse,H_VotesCantBeGrantedTwiceToCandidatesInSameTerm,H_OnePrimaryPerTerm
 <1>13. QED BY <1>1,<1>2,<1>3,<1>4,<1>5,<1>6,<1>7,<1>8,<1>9,<1>10,<1>11,<1>12 DEF Next
 
 
@@ -406,7 +495,7 @@ THEOREM L_7 == TypeOK /\ Inv0_R3_0_I0 /\ Inv0_R1_1_I0 /\ Next => Inv0_R1_1_I0'
 THEOREM Init => IndGlobal
     <1> USE A0,A1,A2,A3,A4,A5,A6,A7
     <1>0. Init => TypeOK BY DEF Init, TypeOK, IndGlobal
-    <1>1. Init => Safety BY DEF Init, Safety, IndGlobal,H_VotesCantBeGrantedTwiceToCandidatesInSameTerm
+    <1>1. Init => H_VotesCantBeGrantedTwiceToCandidatesInSameTerm BY DEF Init, Safety, IndGlobal,H_VotesCantBeGrantedTwiceToCandidatesInSameTerm
     <1>2. Init => Inv41_R0_0_I0 BY DEF Init, Inv41_R0_0_I0, IndGlobal
     <1>3. Init => Inv7_R1_0_I0 BY DEF Init, Inv7_R1_0_I0, IndGlobal
     <1>4. Init => Inv0_R3_0_I0 BY DEF Init, Inv0_R3_0_I0, IndGlobal
@@ -417,7 +506,7 @@ THEOREM Init => IndGlobal
 
 \* Consecution.
 THEOREM IndGlobal /\ Next => IndGlobal'
-  BY L_0,L_1,L_2,L_3,L_4,L_5,L_6,L_7 DEF Next, IndGlobal
+  BY L_0,L_1,L_2,L_3,L_4,L_5,L_6,L_7,L_A0,L_A1 DEF Next, IndGlobal
 
 
 
