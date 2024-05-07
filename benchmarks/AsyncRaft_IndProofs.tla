@@ -106,24 +106,68 @@ THEOREM L_A0 == TypeOK /\ H_VotesCantBeGrantedTwiceToCandidatesInSameTerm /\ H_L
                       Next
                PROVE  Safety'
     OBVIOUS
-   <1> USE A0,A1,A2,A3,A4,A5,A6,A7,StaticQuorumsOverlap, FS_Singleton, FS_Difference, FS_Union, FS_Subset, AddingToQuorumRemainsQuorum
+   <1> USE A0,A1,A2,A3,A4,A5,A6,A7,StaticQuorumsOverlap, 
+       FS_Singleton, FS_Difference, FS_Union, FS_Subset, AddingToQuorumRemainsQuorum
   <1> USE DEF H_CandidateWithVotesGrantedInTermImplyNoOtherLeader
   <1>1. CASE RequestVoteAction
     <2> SUFFICES ASSUME NEW i \in Server,
                         RequestVote(i)
-                 PROVE  Safety'
-      BY <1>1 DEF RequestVoteAction
+                 PROVE   (\A s,t \in Server :
+        (/\ s # t
+         /\ state[s] = Candidate
+         /\ votesGranted[s] \in Quorum
+         /\ currentTerm[s] = currentTerm[t]) =>
+            state[t] # Leader)'
+      BY <1>1 DEF RequestVoteAction, Safety, H_CandidateWithVotesGrantedInTermImplyNoOtherLeader 
+         
     <2> QED
-      BY <1>1 DEF TypeOK,Inv1566_R0_1_I1,RequestVoteAction,RequestVote,Safety,H_CandidateWithVotesGrantedInTermImplyNoOtherLeader,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero,AppendEntriesRequestType,AppendEntriesResponseType,H_OnePrimaryPerTerm
+      <3> SUFFICES ASSUME NEW s \in Server', NEW t \in Server',
+                          (/\ s # t
+                           /\ state[s] = Candidate
+                           /\ votesGranted[s] \in Quorum
+                           /\ currentTerm[s] = currentTerm[t])'
+                   PROVE  (state[t] # Leader)'
+        OBVIOUS
+      <3> QED
+        BY <1>1 DEF LastTerm,TypeOK,Inv1566_R0_1_I1,RequestVoteAction,RequestVote,Safety,H_CandidateWithVotesGrantedInTermImplyNoOtherLeader,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero,AppendEntriesRequestType,AppendEntriesResponseType,H_OnePrimaryPerTerm
+      
+      
     
   <1>2. CASE UpdateTermAction
     BY <1>2 DEF TypeOK,UpdateTermAction,UpdateTerm,Safety,RequestVoteRequestType,H_CandidateWithVotesGrantedInTermImplyNoOtherLeader,RequestVoteResponseType,Terms,LogIndicesWithZero,AppendEntriesRequestType,AppendEntriesResponseType,H_OnePrimaryPerTerm
   <1>3. CASE HandleRequestVoteRequestAction
     BY <1>3 DEF TypeOK,Inv1566_R0_1_I1,HandleRequestVoteRequestAction,HandleRequestVoteRequest,H_CandidateWithVotesGrantedInTermImplyNoOtherLeader,Safety,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero,AppendEntriesRequestType,AppendEntriesResponseType,H_OnePrimaryPerTerm
   <1>4. CASE HandleRequestVoteResponseAction
-    BY <1>4 DEF TypeOK,Inv1566_R0_1_I1,H_VotesCantBeGrantedTwiceToCandidatesInSameTerm,H_CandidateWithVotesGrantedInTermImplyNoOtherLeader,H_LeaderHasVotesGrantedQuorum,HandleRequestVoteResponseAction,HandleRequestVoteResponse,Safety,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero,AppendEntriesRequestType,AppendEntriesResponseType,H_OnePrimaryPerTerm
+    <2> SUFFICES ASSUME NEW m \in requestVoteResponseMsgs,
+                        HandleRequestVoteResponse(m)
+                 PROVE  (\A s,t \in Server :
+        (/\ s # t
+         /\ state[s] = Candidate
+         /\ votesGranted[s] \in Quorum
+         /\ currentTerm[s] = currentTerm[t]) =>
+            state[t] # Leader)'
+      BY <1>4 DEF HandleRequestVoteResponseAction, Safety, H_CandidateWithVotesGrantedInTermImplyNoOtherLeader
+    <2> QED
+      <3> SUFFICES ASSUME NEW s \in Server', NEW t \in Server',
+                          (/\ s # t
+                           /\ state[s] = Candidate
+                           /\ votesGranted[s] \in Quorum
+                           /\ currentTerm[s] = currentTerm[t])'
+                   PROVE  (state[t] # Leader)'
+        OBVIOUS
+      <3> QED
+        BY <1>4 DEF TypeOK,Inv1566_R0_1_I1,H_VotesCantBeGrantedTwiceToCandidatesInSameTerm,H_CandidateWithVotesGrantedInTermImplyNoOtherLeader,H_LeaderHasVotesGrantedQuorum,HandleRequestVoteResponseAction,HandleRequestVoteResponse,Safety,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero,AppendEntriesRequestType,AppendEntriesResponseType,H_OnePrimaryPerTerm
+      
+    
+    
   <1>5. CASE BecomeLeaderAction
-    BY <1>5 DEF TypeOK,H_VotesCantBeGrantedTwiceToCandidatesInSameTerm,Inv1566_R0_1_I1,BecomeLeaderAction,BecomeLeader,H_CandidateWithVotesGrantedInTermImplyNoOtherLeader,Safety,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero,AppendEntriesRequestType,AppendEntriesResponseType,H_OnePrimaryPerTerm
+    <2> SUFFICES ASSUME NEW i \in Server,
+                        BecomeLeader(i)
+                 PROVE  Safety'
+      BY <1>5 DEF BecomeLeaderAction
+    <2> QED
+      BY <1>5 DEF TypeOK,H_VotesCantBeGrantedTwiceToCandidatesInSameTerm,Inv1566_R0_1_I1,BecomeLeaderAction,BecomeLeader,H_CandidateWithVotesGrantedInTermImplyNoOtherLeader,Safety,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero,AppendEntriesRequestType,AppendEntriesResponseType,H_OnePrimaryPerTerm
+    
   <1>6. CASE ClientRequestAction
     BY <1>6 DEF TypeOK,Inv1566_R0_1_I1,ClientRequestAction,ClientRequest,Safety,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero,AppendEntriesRequestType,AppendEntriesResponseType,H_OnePrimaryPerTerm
   <1>7. CASE AppendEntriesAction
@@ -492,6 +536,8 @@ THEOREM L_7 == TypeOK /\ Inv0_R3_0_I0 /\ Inv0_R1_1_I0 /\ Next => Inv0_R1_1_I0'
 THEOREM Init => IndGlobal
     <1> USE A0,A1,A2,A3,A4,A5,A6,A7
     <1>0. Init => TypeOK BY DEF Init, TypeOK, IndGlobal
+    <1> Init => Safety BY DEF Init, Safety, TypeOK, IndGlobal, H_CandidateWithVotesGrantedInTermImplyNoOtherLeader
+    <1> Init => H_LeaderHasVotesGrantedQuorum BY DEF Init, H_LeaderHasVotesGrantedQuorum, TypeOK, IndGlobal
     <1>1. Init => H_VotesCantBeGrantedTwiceToCandidatesInSameTerm BY DEF Init, Safety, IndGlobal,H_VotesCantBeGrantedTwiceToCandidatesInSameTerm
     <1>2. Init => Inv41_R0_0_I0 BY DEF Init, Inv41_R0_0_I0, IndGlobal
     <1>3. Init => Inv7_R1_0_I0 BY DEF Init, Inv7_R1_0_I0, IndGlobal
