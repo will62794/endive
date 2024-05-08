@@ -239,8 +239,30 @@ THEOREM L_A0 == TypeOK /\ H_VotesCantBeGrantedTwiceToCandidatesInSameTerm /\ H_L
                            /\ currentTerm[s] = currentTerm[t])'
                    PROVE  (state[t] # Leader)'
         OBVIOUS
+      <3>1. CASE state[t] # Leader
+         BY <3>1, <1>1 DEF LastTerm,TypeOK,Inv1566_R0_1_I1,RequestVoteAction,RequestVote,Safety,H_CandidateWithVotesGrantedInTermImplyNoOtherLeader,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero,AppendEntriesRequestType,AppendEntriesResponseType,H_OnePrimaryPerTerm
+      <3>2. CASE state[t] = Leader /\ i # s
+               BY <3>2, <1>1 DEF LastTerm,TypeOK,Inv1566_R0_1_I1,RequestVoteAction,RequestVote,Safety,H_CandidateWithVotesGrantedInTermImplyNoOtherLeader,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero,AppendEntriesRequestType,AppendEntriesResponseType,H_OnePrimaryPerTerm
+      <3>3. CASE state[t] = Leader /\ i = s /\ state[i] = Leader
+               BY <3>3, <1>1 DEF LastTerm,TypeOK,Inv1566_R0_1_I1,RequestVoteAction,RequestVote,Safety,H_CandidateWithVotesGrantedInTermImplyNoOtherLeader,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero,AppendEntriesRequestType,AppendEntriesResponseType,H_OnePrimaryPerTerm
+      <3>4. CASE state[t] = Leader /\ i = s /\ state[i] \in {Follower,Candidate} /\ currentTerm[s] = currentTerm[t]
+               BY <3>4, <1>1 DEF LastTerm,TypeOK,Inv1566_R0_1_I1,RequestVoteAction,RequestVote,Safety,H_CandidateWithVotesGrantedInTermImplyNoOtherLeader,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero,AppendEntriesRequestType,AppendEntriesResponseType,H_OnePrimaryPerTerm
+      
+      <3>5. CASE state[t] = Leader /\ i = s /\ state[i] \in {Follower,Candidate} /\ currentTerm[s] > currentTerm[t]
+               BY <3>5, <1>1 DEF LastTerm,TypeOK,Inv1566_R0_1_I1,RequestVoteAction,RequestVote,Safety,H_CandidateWithVotesGrantedInTermImplyNoOtherLeader,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero,AppendEntriesRequestType,AppendEntriesResponseType,H_OnePrimaryPerTerm
+      <3>6. CASE state[t] = Leader /\ i = s /\ state[i] \in {Follower,Candidate} /\ currentTerm[s] < currentTerm[t] - 1
+               BY <3>6, <1>1 DEF LastTerm,TypeOK,Inv1566_R0_1_I1,RequestVoteAction,RequestVote,Safety,H_CandidateWithVotesGrantedInTermImplyNoOtherLeader,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero,AppendEntriesRequestType,AppendEntriesResponseType,H_OnePrimaryPerTerm
+      <3>7. CASE state[t] = Leader /\ i = s /\ state[i] \in {Follower,Candidate} /\ currentTerm[s] = currentTerm[t] - 1
+            <4>1. votesGranted'[s] = {s}
+               BY <3>7, <1>1 DEF LastTerm,TypeOK,Inv1566_R0_1_I1,RequestVoteAction,RequestVote,Safety,H_CandidateWithVotesGrantedInTermImplyNoOtherLeader,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero,AppendEntriesRequestType,AppendEntriesResponseType,H_OnePrimaryPerTerm
+             <4>2. {s} \notin Quorum
+                BY <3>7, <1>1 DEF LastTerm,TypeOK,Inv1566_R0_1_I1,RequestVoteAction,RequestVote,Safety,H_CandidateWithVotesGrantedInTermImplyNoOtherLeader,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero,AppendEntriesRequestType,AppendEntriesResponseType,H_OnePrimaryPerTerm
+             <4>3. votesGranted'[s] \notin Quorum
+                    BY <4>1, <4>2
+             <4>4. QED BY <4>1 , <4>3, <4>2                        
       <3> QED
-        BY <1>1 DEF LastTerm,TypeOK,Inv1566_R0_1_I1,RequestVoteAction,RequestVote,Safety,H_CandidateWithVotesGrantedInTermImplyNoOtherLeader,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero,AppendEntriesRequestType,AppendEntriesResponseType,H_OnePrimaryPerTerm
+        BY <3>1, <3>2, <3>3, <3>4, <3>5, <3>6, <3>7
+        DEF LastTerm,TypeOK,Inv1566_R0_1_I1,RequestVoteAction,RequestVote,Safety,H_CandidateWithVotesGrantedInTermImplyNoOtherLeader,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero,AppendEntriesRequestType,AppendEntriesResponseType,H_OnePrimaryPerTerm
       
       
     
