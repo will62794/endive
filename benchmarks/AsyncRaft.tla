@@ -918,10 +918,14 @@ H_RequestVoteResponseTermsMatchSource ==
         m.mtype = RequestVoteResponse => 
             /\ currentTerm[m.msource] >= m.mterm
 
+    \* \A m \in requestVoteResponseMsgs : m.mtype = RequestVoteResponse =>  currentTerm[m.msource] >= m.mterm
+
 H_RequestVoteResponseTermsMatchSource2 ==
     \A m \in requestVoteResponseMsgs :
         m.mtype = RequestVoteResponse => 
             /\ (m.mvoteGranted /\ (currentTerm[m.msource] = m.mterm)) => votedFor[m.msource] = m.mdest
+
+    \* \A m \in requestVoteResponseMsgs : m.mtype = RequestVoteResponse =>  /\ (m.mvoteGranted /\ (currentTerm[m.msource] = m.mterm)) => votedFor[m.msource] = m.mdest
 
 \* If a candidate C has garnered a set of granted votes in term T, 
 \* then all of those voters must be at term T or newer, and if they
@@ -952,11 +956,15 @@ H_VoteInGrantedImpliesVotedFor ==
          /\ t \in votesGranted[s]) => 
             /\ currentTerm[t] >= currentTerm[s]
 
+    \* \A s,t \in Server :  (/\ state[s] = Candidate /\ t \in votesGranted[s]) => /\ currentTerm[t] >= currentTerm[s]
+
 H_VoteInGrantedImpliesVotedFor2 == 
     \A s,t \in Server :
         (/\ state[s] = Candidate
          /\ t \in votesGranted[s]) => 
             /\ currentTerm[t] = currentTerm[s] => votedFor[t] = s
+
+\* \A s,t \in Server : (/\ state[s] = Candidate /\ t \in votesGranted[s]) =>  /\ currentTerm[t] = currentTerm[s] => votedFor[t] = s
 
 \* A node can't have sent a RequestVoteResponse ack to two different servers in the same term.
 H_RequestVoteResponseMsgsInTermUnique ==
@@ -965,6 +973,8 @@ H_RequestVoteResponseMsgsInTermUnique ==
          /\ mi.msource = mj.msource
          /\ mi.mvoteGranted
          /\ mj.mvoteGranted) => mi.mdest = mj.mdest
+
+    \* \A mi,mj \in requestVoteResponseMsgs : (/\ mi.mterm = mj.mterm /\ mi.msource = mj.msource /\ mi.mvoteGranted /\ mj.mvoteGranted) => mi.mdest = mj.mdest
 
 \* If a server has granted its vote to a server S in term T, then
 \* there can't be a vote response message from that server to some other server R # S.
@@ -978,6 +988,8 @@ H_VoteGrantedImpliesVoteResponseMsgConsistent ==
                   /\ m.mdest # s
                   /\ m.mvoteGranted)
 
+    \* \A s,t \in Server : \A m \in requestVoteResponseMsgs :( /\ state[s] \in {Candidate,Leader} /\ t \in votesGranted[s]) => ~(/\ m.mterm = currentTerm[s] /\ m.msource = t /\ m.mdest # s /\ m.mvoteGranted)
+
 \* If a node has granted its vote to some node in term T, then the granting
 \* node must be safe at term T.
 H_VoteGrantedImpliesNodeSafeAtTerm == 
@@ -987,12 +999,16 @@ H_VoteGrantedImpliesNodeSafeAtTerm ==
             /\ currentTerm[t] >= currentTerm[s]
         )
 
+    \* \A s \in Server : state[s] \in {Candidate,Leader} => (\A t \in votesGranted[s] : /\ currentTerm[t] >= currentTerm[s])
+
 H_VoteGrantedImpliesNodeSafeAtTerm2 == 
     \A s \in Server : 
         state[s] \in {Candidate,Leader} => 
         (\A t \in votesGranted[s] : 
             /\ currentTerm[t] = currentTerm[s] => votedFor[t] = s
         )
+
+    \* \A s \in Server : state[s] \in {Candidate,Leader} =>  (\A t \in votesGranted[s] :  /\ currentTerm[t] = currentTerm[s] => votedFor[t] = s )
 
 H_VotesCantBeGrantedTwiceToCandidatesInSameTerm ==
     \A s,t \in Server : 
@@ -1002,6 +1018,9 @@ H_VotesCantBeGrantedTwiceToCandidatesInSameTerm ==
           /\ currentTerm[s] = currentTerm[t]) =>
             \* Cannot be intersection between voters that gave votes to candidates in same term.
             votesGranted[s] \cap votesGranted[t] = {}
+
+
+    \* \A s,t \in Server : ( /\ s # t  /\ state[s] \in {Leader,Candidate} /\ state[t] \in {Leader,Candidate} /\ currentTerm[s] = currentTerm[t]) => votesGranted[s] \cap votesGranted[t] = {}
 
 \* H_VotesCantBeGrantedTwiceToCandidatesInSameTerm == 
 \*     \A s,t \in Server : 
@@ -1441,6 +1460,9 @@ H_Inv210_R0_1_I3_2 ==
     \A VARLOGINDI \in LogIndices : 
         ((currentTerm[VARI] <= currentTerm[VARJ])) \/ (~((state[VARJ] = Leader)) \/ (~(VARLOGINDI \in DOMAIN log[VARI] /\ Agree(VARI, VARLOGINDI) \in Quorum)))
 ------------------------------------------------------------------------------------------------------------------------
+L_Inv1494_R3_0_I3 == \A VARI \in Server : \A VARJ \in Server : \A VARREQVRES \in requestVoteResponseMsgs : ((currentTerm[VARJ] <= currentTerm[VARI])) \/ (~(VARJ \in votesGranted[VARI])) \/ (~(VARREQVRES.mdest = VARJ)) \/ ((VARREQVRES.mterm = currentTerm[VARJ]))
+L_Inv16249_R3_0_I3 == \A VARI \in Server : \A VARREQVRES \in requestVoteResponseMsgs : (VARREQVRES.msource = VARI) \/ ((currentTerm[VARREQVRES.mdest] >= VARREQVRES.mterm) \/ (~(VARREQVRES.mvoteGranted)))
+L_Inv10853_R3_0_I3 == \A VARI \in Server : \A VARJ \in Server : (VARI \in votesGranted[VARI]) \/ ((votesGranted[VARI] \in Quorum)) \/ (~(VARJ \in votesGranted[VARI]))
 
 \* 
 \* Other scratchpad stuff.
@@ -1716,5 +1738,33 @@ C_Inv4_R10_0_I0 == \A VARREQVM \in requestVoteRequestMsgs : (currentTerm[VARREQV
 C_Inv1_R12_0_I1 == \A VARI \in Server : \A VARREQVRES \in requestVoteResponseMsgs : (VARI \in votesGranted[VARI]) \/ (~(VARREQVRES.mdest = VARI))
 C_Inv10_R15_0_I1 == \A VARI \in Server : \A VARREQVM \in requestVoteRequestMsgs : (VARI \in votesGranted[VARI]) \/ (~(VARREQVM.msource = VARI))
 
+
+M_Inv23449_R0_0_I2 == \A VARI \in Server : \A VARJ \in Server : ~((state[VARI] = Candidate /\ VARI # VARJ /\ currentTerm[VARI] = currentTerm[VARJ])) \/ (~((state[VARJ] = Leader)) \/ (~(votesGranted[VARI] \in Quorum)))
+M_Inv12193_R1_0_I2 == \A VARI \in Server : \A VARJ \in Server : ((state[VARJ] = Follower)) \/ ((votesGranted[VARI] \cap votesGranted[VARJ] = {})) \/ (~((state[VARI] = Candidate /\ VARI # VARJ /\ currentTerm[VARI] = currentTerm[VARJ])))
+M_Inv1030_R1_1_I1 == \A VARI \in Server : \A VARJ \in Server : (VARI \in votesGranted[VARI]) \/ (~(VARJ \in votesGranted[VARI]))
+M_Inv15_R1_1_I1 == \A VARREQVRES \in requestVoteResponseMsgs : (currentTerm[VARREQVRES.msource] >= VARREQVRES.mterm)
+M_Inv18_R2_0_I1 == \A VARI \in Server : \A VARJ \in Server : \A VARREQVRES \in requestVoteResponseMsgs : ~((state[VARI] \in {Leader,Candidate} /\ VARJ \in votesGranted[VARI])) \/ (~(VARREQVRES.mterm = currentTerm[VARI] /\ VARREQVRES.msource = VARJ /\ VARREQVRES.mdest # VARI /\ VARREQVRES.mvoteGranted))
+M_Inv10_R2_1_I1 == \A VARI \in Server : \A VARJ \in Server : ((currentTerm[VARI] <= currentTerm[VARJ])) \/ (~((state[VARI] \in {Leader,Candidate} /\ VARJ \in votesGranted[VARI])))
+M_Inv1_R3_0_I1 == \A VARI \in Server : \A VARREQVRES \in requestVoteResponseMsgs : (VARI \in votesGranted[VARI]) \/ (~(VARREQVRES.mdest = VARI))
+M_Inv295_R5_0_I1 == \A VARI \in Server : ((state[VARI] = Follower)) \/ ((votedFor[VARI] = VARI))
+M_Inv654_R5_0_I1 == \A VARI \in Server : (VARI \in votesGranted[VARI]) \/ (~(votedFor[VARI] = VARI))
+M_Inv12_R5_1_I1 == \A VARI \in Server : ((state[VARI] = Follower)) \/ ((VARI \in votesGranted[VARI]))
+M_Inv12_R7_0_I1 == \A VARI \in Server : \A VARREQVM \in requestVoteRequestMsgs : (VARI \in votesGranted[VARI]) \/ (~(VARREQVM.msource = VARI))
+
+
+I_Inv20249_R0_0_I2 == \A VARI \in Server : \A VARJ \in Server : ~((state[VARI] = Candidate /\ VARI # VARJ /\ currentTerm[VARI] = currentTerm[VARJ])) \/ (~((state[VARJ] = Leader)) \/ (~(votesGranted[VARI] \in Quorum)))
+
+C_Inv10820_R1_0_I2 == 
+    \A VARI \in Server : 
+    \A VARJ \in Server : 
+        (((VARI # VARJ /\ state[VARI] = Candidate /\ currentTerm[VARI] = currentTerm[VARJ]))) => 
+            ((state[VARJ] = Follower)) \/ ((votesGranted[VARI] \cap votesGranted[VARJ] = {}))
+
+
+H_Inv1567_R1_0_I1 == \A VARI \in Server : \A VARJ \in Server : ~((currentTerm[VARI] > currentTerm[VARJ])) \/ (~((state[VARI] \in {Leader,Candidate} /\ VARJ \in votesGranted[VARI])))
+H_Inv10677_R1_1_I2 == \A VARI \in Server : \A VARJ \in Server : ((state[VARJ] = Follower)) \/ (~((currentTerm[VARI] > currentTerm[VARJ])) \/ (~(VARJ \in votesGranted[VARI])))
+
+H_Inv7_R1_0_I0 == (\A s \in Server : state[s] \in {Candidate,Leader} =>  (\A t \in votesGranted[s] :  /\ currentTerm[t] = currentTerm[s] => votedFor[t] = s ))
+H_Inv0_R1_1_I0 == (\A mi,mj \in requestVoteResponseMsgs : (/\ mi.mterm = mj.mterm /\ mi.msource = mj.msource /\ mi.mvoteGranted /\ mj.mvoteGranted) => mi.mdest = mj.mdest)
 
 ===============================================================================

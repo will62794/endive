@@ -213,13 +213,16 @@ THEOREM L_0 == TypeOK /\ TypeOK /\ Next => TypeOK'
 
 THEOREM L_A0 == TypeOK /\ H_VotesCantBeGrantedTwiceToCandidatesInSameTerm /\ H_LeaderHasVotesGrantedQuorum /\ Inv41_R0_0_I0 /\ Safety /\ Next => Safety'
   <1> SUFFICES ASSUME TypeOK,
+                      H_VotesCantBeGrantedTwiceToCandidatesInSameTerm,
+                      H_LeaderHasVotesGrantedQuorum,
+                      Inv41_R0_0_I0,
                       Safety,
                       Next
                PROVE  Safety'
     OBVIOUS
    <1> USE A0,A1,A2,A3,A4,A5,A6,A7,StaticQuorumsOverlap, 
        FS_Singleton, FS_Difference, FS_Union, FS_Subset, AddingToQuorumRemainsQuorum
-  <1> USE DEF H_CandidateWithVotesGrantedInTermImplyNoOtherLeader
+  <1> USE DEF H_CandidateWithVotesGrantedInTermImplyNoOtherLeader, H_LeaderHasVotesGrantedQuorum, Inv41_R0_0_I0
   <1>1. CASE RequestVoteAction
     <2> SUFFICES ASSUME NEW i \in Server,
                         RequestVote(i)
@@ -287,10 +290,9 @@ THEOREM L_A0 == TypeOK /\ H_VotesCantBeGrantedTwiceToCandidatesInSameTerm /\ H_L
                            /\ votesGranted[s] \in Quorum
                            /\ currentTerm[s] = currentTerm[t])'
                    PROVE  (state[t] # Leader)'
-        OBVIOUS
+        OBVIOUS     
       <3> QED
-        BY <1>4 DEF TypeOK,Inv1566_R0_1_I1,H_VotesCantBeGrantedTwiceToCandidatesInSameTerm,H_CandidateWithVotesGrantedInTermImplyNoOtherLeader,H_LeaderHasVotesGrantedQuorum,HandleRequestVoteResponseAction,HandleRequestVoteResponse,Safety,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero,AppendEntriesRequestType,AppendEntriesResponseType,H_OnePrimaryPerTerm
-      
+        BY <1>4 DEF H_VotesCantBeGrantedTwiceToCandidatesInSameTerm, H_LeaderHasVotesGrantedQuorum, Inv41_R0_0_I0,TypeOK,Inv1566_R0_1_I1,H_VotesCantBeGrantedTwiceToCandidatesInSameTerm,H_CandidateWithVotesGrantedInTermImplyNoOtherLeader,H_LeaderHasVotesGrantedQuorum,HandleRequestVoteResponseAction,HandleRequestVoteResponse,Safety,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero,AppendEntriesRequestType,AppendEntriesResponseType,H_OnePrimaryPerTerm
     
     
   <1>5. CASE BecomeLeaderAction
