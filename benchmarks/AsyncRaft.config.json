@@ -19,6 +19,7 @@
         "(state[VARI] \\in {Follower,Candidate})",
         "(state[VARI] \\in {Leader,Candidate} /\\ VARJ \\in votesGranted[VARI])",
         "(state[VARI] \\in {Leader,Candidate} /\\ VARI # VARJ)",
+        "(state[VARI] \\in {Leader,Candidate} /\\ state[VARJ] \\in {Leader,Candidate} /\\ VARI # VARJ)",
         "VARREQVRES.mterm = currentTerm[VARI] /\\ VARREQVRES.msource = VARJ /\\ VARREQVRES.mdest # VARI /\\ VARREQVRES.mvoteGranted",
         "(state[VARI] \\in {Follower,Candidate} /\\ VARI # VARJ)",
         "(state[VARI] = Leader /\\ VARI # VARJ /\\ currentTerm[VARI] = currentTerm[VARJ])",
