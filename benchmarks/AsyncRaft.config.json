@@ -131,6 +131,25 @@
             " \\A s,t \\in Server : (/\\ state[s] = Candidate /\\ t \\in votesGranted[s]) =>  /\\ currentTerm[t] = currentTerm[s] => votedFor[t] = s"
         ]
     },
+    "action_local_preds_KNOWN":{
+        "BecomeLeaderAction": [
+            "\\A s,t \\in Server : (/\\ s # t /\\ state[s] = Candidate /\\ votesGranted[s] \\in Quorum /\\ currentTerm[s] = currentTerm[t]) => state[t] # Leader",
+            "\\A s,t \\in Server : ( /\\ s # t /\\ state[s] \\in {Leader,Candidate} /\\ state[t] \\in {Leader,Candidate} /\\ currentTerm[s] = currentTerm[t]) => votesGranted[s] \\cap votesGranted[t] = {}"
+        ],
+        "HandleRequestVoteResponseAction": [
+            "\\A s \\in Server : (state[s] = Leader) => votesGranted[s] \\in Quorum",
+            "\\A s,t \\in Server : ( /\\ s # t /\\ state[s] \\in {Leader,Candidate} /\\ state[t] \\in {Leader,Candidate} /\\ currentTerm[s] = currentTerm[t]) => votesGranted[s] \\cap votesGranted[t] = {}",
+            "\\A s,t \\in Server : \\A m \\in requestVoteResponseMsgs :( /\\ state[s] \\in {Candidate,Leader} /\\ t \\in votesGranted[s]) => ~(/\\ m.mterm = currentTerm[s] /\\ m.msource = t /\\ m.mdest # s /\\ m.mvoteGranted)",
+            "\\A mi,mj \\in requestVoteResponseMsgs : (/\\ mi.mterm = mj.mterm /\\ mi.msource = mj.msource /\\ mi.mvoteGranted /\\ mj.mvoteGranted) => mi.mdest = mj.mdest",
+            "\\A m \\in requestVoteResponseMsgs : m.mtype = RequestVoteResponse =>  /\\ (m.mvoteGranted /\\ (currentTerm[m.msource] = m.mterm)) => votedFor[m.msource] = m.mdest"
+        ],
+        "HandleRequestVoteRequestAction": [
+            "\\A s \\in Server : state[s] \\in {Candidate,Leader} => (\\A t \\in votesGranted[s] : /\\ currentTerm[t] >= currentTerm[s])",
+            "\\A s \\in Server : state[s] \\in {Candidate,Leader} =>  (\\A t \\in votesGranted[s] :  /\\ currentTerm[t] = currentTerm[s] => votedFor[t] = s )",
+            "\\A s,t \\in Server :  (/\\ state[s] = Candidate /\\ t \\in votesGranted[s]) => /\\ currentTerm[t] >= currentTerm[s]",
+            " \\A s,t \\in Server : (/\\ state[s] = Candidate /\\ t \\in votesGranted[s]) =>  /\\ currentTerm[t] = currentTerm[s] => votedFor[t] = s"
+        ]
+    },
     "preds_alt" : [],
     "safety"  :  "H_LogMatching",
     "constants"  : {
