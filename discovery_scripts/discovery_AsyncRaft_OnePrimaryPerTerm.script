@@ -4,7 +4,7 @@
 #SBATCH --constraint="[broadwell|cascadelake]"       # Newer processors.
 #SBATCH -N 1                   # Number of nodes
 #SBATCH -n 1                   # Number of tasks
-#SBATCH --cpus-per-task 48                  # Number of cores
+#SBATCH --cpus-per-task 32                  # Number of cores
 #SBATCH --array=1,2,3,4,5,6,7,8
 
 specname="AsyncRaft"
@@ -13,15 +13,15 @@ seed=$SLURM_ARRAY_TASK_ID
 source /home/schultz.w/bm_setup.sh "${specname}_OnePrimaryPerTerm_${seed}"
 
 # Override for more CTI workers parallelism.
-num_cti_workers=36
-tlc_workers=32
-ninvs=1500000
+num_cti_workers=24
+tlc_workers=24
+ninvs=800000
 niters=5
-max_num_ctis_per_round=2000
+max_num_ctis_per_round=1000
 ninvs_per_iter_group=50000
-target_sample_states=800000
-target_sample_time_limit_ms=500000
-num_simulate_traces=800000
+target_sample_states=200000
+target_sample_time_limit_ms=200000
+num_simulate_traces=400000
 tlapm_install="/home/schultz.w/tlapm_install"
 
 common_flags=" --tlc_workers $tlc_workers --num_ctigen_workers $num_cti_workers --cti_elimination_workers=$cti_elimination_workers"
@@ -34,7 +34,7 @@ common_flags+=" --save_dot --max_num_conjuncts_per_round 16 --niters $niters --n
 srun -o /scratch/schultz.w/endive_logs/${specname}_OnePrimaryPerTerm/${specname}_OnePrimaryPerTerm_output_${seed}.txt \
     python3 endive.py --spec benchmarks/$specname --tlapm_install_dir $tlapm_install \
     $common_flags --seed $seed --proof_tree_mode --auto_lemma_action_decomposition --enable_partitioned_state_caching --ninvs_per_iter_group $ninvs_per_iter_group \
-    --safety "H_OnePrimaryPerTerm"
+    --safety "H_CandidateWithVotesGrantedInTermImplyNoOtherLeader"
 
 # srun -o /home/schultz.w/endive_logs/${specname}_baseline/${specname}_baseline_output_%j_${seed}.txt \
 #     python3 endive.py --spec benchmarks/$specname \
