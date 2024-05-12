@@ -252,8 +252,7 @@ class InductiveInvGen():
 
     def get_tlc_config_constants_str(self):
         """ Return string for CONSTANT definitions in TLC config. """
-        # return self.get_config_constant_instances()[-1]
-        return self.constants_obj_to_constants_str(self.get_config_constant_instances()[-1])
+        return self.constants_obj_to_constants_str(self.get_config_constant_instances()[0])
     
     def get_tlc_overrides_str(self):
         out = ""
@@ -744,7 +743,7 @@ class InductiveInvGen():
 
     #     return set()
 
-    def make_check_invariants_spec(self, invs, root_filepath, exclude_inv_defs=False, invname_prefix="Inv", defs_to_add=[]):
+    def make_check_invariants_spec(self, invs, root_filepath, exclude_inv_defs=False, invname_prefix="Inv", defs_to_add=[], constants_obj=None):
         specname = os.path.basename(root_filepath)
         invcheck_tla = f"---- MODULE {specname} ----\n"
         suffix = ""
@@ -775,7 +774,12 @@ class InductiveInvGen():
 
         invcheck_cfg = "INIT Init\n"
         invcheck_cfg += "NEXT Next\n"
-        invcheck_cfg += self.get_tlc_config_constants_str()
+
+        if constants_obj is None:
+            invcheck_cfg += self.get_tlc_config_constants_str()
+        else:
+            invcheck_cfg += self.constants_obj_to_constants_str(constants_obj)
+
         invcheck_cfg += self.get_tlc_overrides_str()
         invcheck_cfg += "\n"
         invcheck_cfg += f"CONSTRAINT {self.state_constraint}"
@@ -801,7 +805,8 @@ class InductiveInvGen():
                          cache_with_ignored=None, 
                          cache_with_ignore_inv_counts=None,
                          cache_state_load=False,
-                         invcheck_file_path=None, tlc_flags=""):
+                         invcheck_file_path=None, tlc_flags="",
+                         constants_obj=None):
         """ Check which of the given invariants are valid. """
         ta = time.time()
         # invcheck_tla = "---- MODULE %s_InvCheck_%d ----\n" % (self.specname,self.seed)
@@ -817,7 +822,7 @@ class InductiveInvGen():
         invcheck_spec_name = f"{GEN_TLA_DIR}/{self.specname}_InvCheck_{self.seed}"
         invcheck_cfg_filename = f"{GEN_TLA_DIR}/{self.specname}_InvCheck_{self.seed}.cfg"
 
-        self.make_check_invariants_spec(invs, rootpath, exclude_inv_defs=skip_checking)
+        self.make_check_invariants_spec(invs, rootpath, exclude_inv_defs=skip_checking, constants_obj=constants_obj)
 
         # Check invariants.
         if not skip_checking:
@@ -2308,19 +2313,21 @@ class InductiveInvGen():
                         start = time.time()
                         invs = sorted(list(invs))
                         logging.info("Quick check of new CTI elimination.")
-                        cti_constants_obj_small = list(self.get_config_constant_instances())[-2]
-                        cti_constants_obj_large = list(self.get_config_constant_instances())[-1]
-                        k_ctis_small = [c for c in orig_k_ctis if c.constants_obj == cti_constants_obj_small]
-                        k_ctis_large = [c for c in orig_k_ctis if c.constants_obj == cti_constants_obj_large]
-                        # ret_small = self.check_cti_elimination(k_ctis_small, invs, sat_invs, constants_obj=cti_constants_obj_small)
+                        cti_states_eliminated_by_invs = {}
+                        for cti_constants_obj in self.get_ctigen_constant_instances():
+                            k_ctis_loc = [c for c in orig_k_ctis if c.constants_obj == cti_constants_obj]
+                            ret = self.check_cti_elimination([c for c in k_ctis_loc if str(hash(c)) not in eliminated_ctis], invs, [f"Inv{i}" for i in range(len(invs))], constants_obj=cti_constants_obj)
 
-                        ret_small = self.check_cti_elimination([c for c in k_ctis_small if str(hash(c)) not in eliminated_ctis], invs, [f"Inv{i}" for i in range(len(invs))], constants_obj=cti_constants_obj_small)
-                        ret_large = self.check_cti_elimination([c for c in k_ctis_large if str(hash(c)) not in eliminated_ctis], invs, [f"Inv{i}" for i in range(len(invs))], constants_obj=cti_constants_obj_large)
+                            # Merge the dicts.
+                            for inv in ret["eliminated"]:
+                                if inv not in cti_states_eliminated_by_invs:
+                                    cti_states_eliminated_by_invs[inv] = set()
+                                cti_states_eliminated_by_invs[inv] = cti_states_eliminated_by_invs[inv].union(ret["eliminated"][inv])
 
                         # Merge the dicts ret_small and ret_large.
-                        cti_states_eliminated_by_invs = ret_small["eliminated"]
-                        for inv in cti_states_eliminated_by_invs:
-                            cti_states_eliminated_by_invs[inv] = cti_states_eliminated_by_invs[inv].union(ret_large["eliminated"][inv])
+                        # cti_states_eliminated_by_invs = ret_small["eliminated"]
+                        # for inv in cti_states_eliminated_by_invs:
+                        #     cti_states_eliminated_by_invs[inv] = cti_states_eliminated_by_invs[inv].union(ret_large["eliminated"][inv])
                                     
                         # ret = self.check_cti_elimination([c for c in orig_k_ctis if str(hash(c)) not in eliminated_ctis], invs, [f"Inv{i}" for i in range(len(invs))])
                         # cti_states_eliminated_by_invs = ret["eliminated"]
@@ -2538,27 +2545,28 @@ class InductiveInvGen():
                             self.cache_projected_states(subsets_chunk, max_depth=max_depth, tlc_workers=tlc_workers)
                             ignored_var_subsets_remaining = ignored_var_subsets_remaining[MAX_NUM_SUBSETS:]
 
-                        # for p in pred_var_counts_tups[:]:
-                        #     # print(p)
-                        #     if p[0] < LARGE_PRED_GROUP_COUNT:
-                        #         # If we reached a group that is too small, we stop, even if we haven't dont all top K.
-                        #         logging.info(f"Exiting partitioned state caching loop due to small group size: {p}.")
-                        #         break  
+                        """
+                        for p in pred_var_counts_tups[:]:
+                            # print(p)
+                            if p[0] < LARGE_PRED_GROUP_COUNT:
+                                # If we reached a group that is too small, we stop, even if we haven't dont all top K.
+                                logging.info(f"Exiting partitioned state caching loop due to small group size: {p}.")
+                                break  
                                 
-                        #     predvar_set = p[1]
-                        #     ignored = sorted([svar for svar in self.state_vars if svar not in predvar_set])
-                        #     # print(ignored)
+                            predvar_set = p[1]
+                            ignored = sorted([svar for svar in self.state_vars if svar not in predvar_set])
+                            # print(ignored)
 
-                        #     invs_to_check = [(ind, inv) for ind,inv in enumerate(invs) if pred_var_sets_for_invs[ind] == predvar_set]
+                            invs_to_check = [(ind, inv) for ind,inv in enumerate(invs) if pred_var_sets_for_invs[ind] == predvar_set]
 
-                        #     # If var count is empty, then just remove these and don't check them, since they should be constant expressions.
-                        #     if len(predvar_set) == 0:
-                        #         invs_to_check_names = set([iv[1] for iv in invs_to_check])
-                        #         main_invs_to_check = [mi for mi in main_invs_to_check if mi[1] not in invs_to_check_names]
-                        #         logging.info(f"Skipping group of {p[0]} invs with empty var slice.")
-                        #         continue
+                            # If var count is empty, then just remove these and don't check them, since they should be constant expressions.
+                            if len(predvar_set) == 0:
+                                invs_to_check_names = set([iv[1] for iv in invs_to_check])
+                                main_invs_to_check = [mi for mi in main_invs_to_check if mi[1] not in invs_to_check_names]
+                                logging.info(f"Skipping group of {p[0]} invs with empty var slice.")
+                                continue
 
-                        #     partition_var_slice = [s for s in self.state_vars if s not in ignored]
+                            partition_var_slice = [s for s in self.state_vars if s not in ignored]
                             # logging.info(f"Running partitioned state caching step with {len(ignored)} ignored vars (slice={partition_var_slice}), num invs to check: {len(invs_to_check)}")
                             
                             ####
@@ -2566,30 +2574,35 @@ class InductiveInvGen():
                             ####
 
                             # Do the caching run.
-                            # self.cache_projected_states([ignored], max_depth=max_depth, tlc_workers=tlc_workers)
+                            self.cache_projected_states([ignored], max_depth=max_depth, tlc_workers=tlc_workers)
 
-                            # # Check the invariants on the cached states.
-                            # # local_sat_invs will return indices of invariants that were satisfied in the given 'invs_to_check' array.
-                            # local_sat_invs = self.check_invariants([iv[1] for iv in invs_to_check], 
-                            #                                        tlc_workers=tlc_workers, max_depth=max_depth, 
-                            #                                        cache_with_ignored=[ignored], 
-                            #                                        cache_with_ignore_inv_counts=[len(invs_to_check)],
-                            #                                        cache_state_load=True)
-                            # logging.info(f"Found {len(local_sat_invs)} local partition sat invs.")
-                            # orig_invs_to_remove = []
-                            # local_invs_sat = [m for (mind,m) in enumerate(invs_to_check) if f"Inv{mind}" in local_sat_invs]
+                            # Check the invariants on the cached states.
+                            # local_sat_invs will return indices of invariants that were satisfied in the given 'invs_to_check' array.
+                            local_sat_invs = self.check_invariants([iv[1] for iv in invs_to_check], 
+                                                                   tlc_workers=tlc_workers, max_depth=max_depth, 
+                                                                   cache_with_ignored=[ignored], 
+                                                                   cache_with_ignore_inv_counts=[len(invs_to_check)],
+                                                                   cache_state_load=True)
+                            logging.info(f"Found {len(local_sat_invs)} local partition sat invs.")
+                            orig_invs_to_remove = []
+                            local_invs_sat = [m for (mind,m) in enumerate(invs_to_check) if f"Inv{mind}" in local_sat_invs]
 
-                            # for si in local_sat_invs:
-                            #     invs_to_check_ind = int(si.replace("Inv", ""))
-                            #     inv = invs_to_check[invs_to_check_ind]
-                            #     orig_inv_ind = inv[0]
-                            #     orig_invs_to_remove.append(inv[1])
+                            for si in local_sat_invs:
+                                invs_to_check_ind = int(si.replace("Inv", ""))
+                                inv = invs_to_check[invs_to_check_ind]
+                                orig_inv_ind = inv[0]
+                                orig_invs_to_remove.append(inv[1])
                             
-                            # # These no longer need to be checked.
-                            # invs_to_check_names = set([iv[1] for iv in invs_to_check])
-                            # main_invs_to_check = [mi for mi in main_invs_to_check if mi[1] not in invs_to_check_names]
-                            # partition_sat_invs.update(set([f"Inv{iv[0]}" for iv in local_invs_sat]))
+                            # These no longer need to be checked.
+                            invs_to_check_names = set([iv[1] for iv in invs_to_check])
+                            main_invs_to_check = [mi for mi in main_invs_to_check if mi[1] not in invs_to_check_names]
+                            partition_sat_invs.update(set([f"Inv{iv[0]}" for iv in local_invs_sat]))
+                        """
 
+
+                        #
+                        # ALTERNATE LOGIC FOR CHECKING ALL PRED INVARIANT GROUPS IN ONE CALL TO TLC.
+                        # 
 
                         predvar_sets = [p[1] for p in pred_var_counts_tups]
                         ignored_var_sets = [sorted([svar for svar in self.state_vars if svar not in predvar_set]) for predvar_set in predvar_sets]
@@ -2723,7 +2736,7 @@ class InductiveInvGen():
             def get_invexp(inv):
                 invi = int(inv.replace("Inv",""))
                 return quant_inv_fn(orig_invs_sorted[invi])
-        
+
             # Cache all generated invariants so we don't need to unnecessarily re-generate them
             # in future rounds.
             violated_invs = [f"Inv{ind}" for ind,iv in enumerate(orig_invs_sorted) if f"Inv{ind}" not in sat_invs]
@@ -2777,28 +2790,21 @@ class InductiveInvGen():
             # Compute CTI elimination for each invariant.
             #
 
+
+
             self.start_timing_ctielimcheck()
             logging.info("[--- BEGIN CTI ELIMINATION ---]")
-            cti_constants_obj_small = list(self.get_config_constant_instances())[-2]
-            print("CONST SMALL:", cti_constants_obj_small)
-            cti_constants_obj_large = list(self.get_config_constant_instances())[-1]
 
-            k_ctis_small = [c for c in orig_k_ctis if c.constants_obj == cti_constants_obj_small]
-            k_ctis_large = [c for c in orig_k_ctis if c.constants_obj == cti_constants_obj_large]
-            print(k_ctis_small[:1])
-            print(k_ctis_large[:1])
-            
-            # ret = self.check_cti_elimination(orig_k_ctis, invs, sat_invs, constants_obj=cti_constants_obj_small)
-            ret_small = self.check_cti_elimination(k_ctis_small, invs, sat_invs, constants_obj=cti_constants_obj_small)
-            ret_large = self.check_cti_elimination(k_ctis_large, invs, sat_invs, constants_obj=cti_constants_obj_large)
 
-            # Merge the dicts ret_small and ret_large.
-            cti_states_eliminated_by_invs = ret_small["eliminated"]
-            for inv in cti_states_eliminated_by_invs:
-                cti_states_eliminated_by_invs[inv] = cti_states_eliminated_by_invs[inv].union(ret_large["eliminated"][inv])
+            cti_states_eliminated_by_invs = {}
+            for cti_constants_obj in self.get_ctigen_constant_instances():
+                k_ctis_loc = [c for c in orig_k_ctis if c.constants_obj == cti_constants_obj]
+                ret = self.check_cti_elimination([c for c in k_ctis_loc if str(hash(c)) not in eliminated_ctis], invs, [f"Inv{i}" for i in range(len(invs))], constants_obj=cti_constants_obj)
 
-            # ret = self.check_cti_elimination(orig_k_ctis, invs, sat_invs, constants_obj=cti_constants_obj)
-            # cti_states_eliminated_by_invs = ret["eliminated"]
+                for inv in ret["eliminated"]:
+                    if inv not in cti_states_eliminated_by_invs:
+                        cti_states_eliminated_by_invs[inv] = set()
+                    cti_states_eliminated_by_invs[inv] = cti_states_eliminated_by_invs[inv].union(ret["eliminated"][inv])
 
             # The estimated syntactic/semantic "cost" (i.e complexity) of an invariant expression.
             def get_invexp_cost(inv):
@@ -2863,7 +2869,7 @@ class InductiveInvGen():
                     top_num_eliminated = len(cti_states_eliminated_by_invs[new_inv_cands[0]] - ctis_eliminated_this_iter)
                     all_top_equiv_k = [civ for civ in new_inv_cands if len(cti_states_eliminated_by_invs[civ] - ctis_eliminated_this_iter) == top_num_eliminated]
                     # for ind,iv in enumerate(new_inv_cands[:top_k]):
-                    all_top_equiv_k = all_top_equiv_k[:5]
+                    all_top_equiv_k = all_top_equiv_k[:3]
                     for ind,iv in enumerate(all_top_equiv_k):
                         # Don't consider invariants that don't eliminate any CTIs.
                         new_ctis_eliminated_by_inv = cti_states_eliminated_by_invs[iv] - ctis_eliminated_this_iter
@@ -2884,6 +2890,34 @@ class InductiveInvGen():
                 existing_inv_cands = sorted(conjuncts_added_in_round, reverse=True, key = lambda conj : len(conj["ctis_eliminated"] - ctis_eliminated_this_iter))
 
                 top_new_inv_cand = new_inv_cands[0]
+                invi = int(top_new_inv_cand.replace("Inv", ""))
+                
+                # # Consider doing one quick re-check of all invariants at larger parameter bound?
+                # # No caching here.
+                if "simulation_inv_check" in self.spec_config and self.spec_config["simulation_inv_check"] and "large_instance_inv_check_index" in self.spec_config:
+                    logging.info("+ Doing re-checking at larger parameter bound")
+                    depth = self.spec_config.get("simulation_inv_check_depth", 50)
+                    num_states = 100000 # Make this relatively cheap.
+                    num = num_states // depth // tlc_workers
+                    quick_tlc_flags = f"-depth {depth} -simulate num={num}"
+                    larger_constants_obj = list(self.get_config_constant_instances())[self.spec_config["large_instance_inv_check_index"]]
+                    logging.info(f"config instance obj: {larger_constants_obj}")
+                    local_invs_to_check = [invs[invi]]
+                    new_sat_invs = self.check_invariants(local_invs_to_check, 
+                                                        tlc_workers=tlc_workers, max_depth=depth,
+                                                        tlc_flags=quick_tlc_flags,constants_obj=larger_constants_obj)
+                    print(new_sat_invs)
+                    # violated = [c for ind,c in enumerate(new_conjuncts) if f"Inv{ind}" not in new_sat_invs]
+                    print("num new sat invs out of new conjuncts:", len(new_sat_invs))
+                    # print("violated new conjuncts:", violated)
+                    # Remove violated from set of invs.
+                    # sorted_invs = [s for s in sorted_invs if s not in violated]
+                    if len(new_sat_invs) == 0:
+                        print("!!!!! ERROR: Some new conjuncts violated at larger bound.")
+                        # new_inv_cands.remove(top_new_inv_cand)
+                        sorted_invs.remove(top_new_inv_cand)
+                        continue
+
                 if len(existing_inv_cands) == 0:
                     invi = int(top_new_inv_cand.replace("Inv", ""))
                     chosen_cand = {"inv": top_new_inv_cand, "invexp": orig_invs_sorted[invi], "ctis_eliminated": cti_states_eliminated_by_invs[top_new_inv_cand]}
@@ -3985,6 +4019,16 @@ class InductiveInvGen():
         self.reparsing_duration_secs += (time.time() - s1)
         logging.info("Done re-parsing. Total time spent parsing so far: {:.2f}s".format(self.reparsing_duration_secs))   
 
+    def get_ctigen_constant_instances(self):
+        constant_instances = list(self.get_config_constant_instances()) 
+        # User specified configs to use for generating CTIs.
+        if "cti_gen_instance_indexes" in self.spec_config:
+            cobjs = [constant_instances[ind] for ind in self.spec_config["cti_gen_instance_indexes"]]
+        else:
+            # Use the latest one.
+            cobjs = [constant_instances[-1]]
+        return cobjs
+
     def do_invgen_proof_tree_mode(self):
         """ Do localized invariant synthesis based on an inductive proof graph structure."""
 
@@ -4267,11 +4311,8 @@ class InductiveInvGen():
 
                 cti_ignore_vars = [s for s in self.state_vars if s not in lemma_action_coi]
 
-                #
-                # Take last two constant objects to use for checking CTIs.
-                #
-                cobjs = list(self.get_config_constant_instances())
-                cobjs[-2:]
+                # Get constant objects to use for checking CTIs.
+                cobjs = self.get_ctigen_constant_instances()
                 k_ctis_action = []
                 for cobj in cobjs:
                     k_ctis_action_new, k_cti_traces = self.generate_ctis(props=[curr_obligation_pred_tup], 
@@ -5049,11 +5090,8 @@ class InductiveInvGen():
             logging.info(f" pre: {p}")
         props = [(n, self.proof_graph["nodes"][n]["expr"], "")]
 
-        #
-        # Take last two constant objects to use for checking CTIs.
-        #
-        cobjs = list(self.get_config_constant_instances())
-        cobjs[-2:]
+        # Get constant objects to use for checking CTIs.
+        cobjs = self.get_ctigen_constant_instances()
         k_ctis = []
         for cobj in cobjs:
             print("Checking with constants instantiation: ", cobj)

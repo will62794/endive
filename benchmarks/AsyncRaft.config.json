@@ -114,11 +114,9 @@
     ],
     "action_local_preds":{
         "BecomeLeaderAction": [
-            "\\A s,t \\in Server : (/\\ s # t /\\ state[s] = Candidate /\\ votesGranted[s] \\in Quorum /\\ currentTerm[s] = currentTerm[t]) => state[t] # Leader",
             "\\A s,t \\in Server : ( /\\ s # t /\\ state[s] \\in {Leader,Candidate} /\\ state[t] \\in {Leader,Candidate} /\\ currentTerm[s] = currentTerm[t]) => votesGranted[s] \\cap votesGranted[t] = {}"
         ],
         "HandleRequestVoteResponseAction": [
-            "\\A s \\in Server : (state[s] = Leader) => votesGranted[s] \\in Quorum",
             "\\A s,t \\in Server : ( /\\ s # t /\\ state[s] \\in {Leader,Candidate} /\\ state[t] \\in {Leader,Candidate} /\\ currentTerm[s] = currentTerm[t]) => votesGranted[s] \\cap votesGranted[t] = {}",
             "\\A s,t \\in Server : \\A m \\in requestVoteResponseMsgs :( /\\ state[s] \\in {Candidate,Leader} /\\ t \\in votesGranted[s]) => ~(/\\ m.mterm = currentTerm[s] /\\ m.msource = t /\\ m.mdest # s /\\ m.mvoteGranted)",
             "\\A mi,mj \\in requestVoteResponseMsgs : (/\\ mi.mterm = mj.mterm /\\ mi.msource = mj.msource /\\ mi.mvoteGranted /\\ mj.mvoteGranted) => mi.mdest = mj.mdest",
@@ -171,6 +169,8 @@
         "MaxLogLen" : ["1"],
         "MaxNumVoteMsgs": ["0"]
     },
+    "large_instance_inv_check_index": 1,
+    "cti_gen_instance_indexes": [0,1],
     "constraint"  :  "StateConstraint",
     "quant_inv": "\\A VARI \\in Server : \\A VARJ \\in Server : \\E VARQ \\in Quorum : \\A VARM \\in appendEntriesRequestMsgs : \\A VARMAERES \\in appendEntriesResponseMsgs : \\A VARREQVM \\in requestVoteRequestMsgs : \\A VARREQVRES \\in requestVoteResponseMsgs : \\A VARLOGINDI \\in LogIndices : ",
     "quant_vars": ["VARI", "VARJ", "VARIND", "VARM", "VARLOGINDI"],
