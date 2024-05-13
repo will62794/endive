@@ -123,7 +123,6 @@
             "\\A m \\in requestVoteResponseMsgs : m.mtype = RequestVoteResponse =>  /\\ (m.mvoteGranted /\\ (currentTerm[m.msource] = m.mterm)) => votedFor[m.msource] = m.mdest"
         ],
         "HandleRequestVoteRequestAction": [
-            "\\A s \\in Server : state[s] \\in {Candidate,Leader} =>  (\\A t \\in votesGranted[s] :  /\\ currentTerm[t] = currentTerm[s] => votedFor[t] = s )",
             "\\A s,t \\in Server :  (/\\ state[s] = Candidate /\\ t \\in votesGranted[s]) => /\\ currentTerm[t] >= currentTerm[s]",
             " \\A s,t \\in Server : (/\\ state[s] = Candidate /\\ t \\in votesGranted[s]) =>  /\\ currentTerm[t] = currentTerm[s] => votedFor[t] = s"
         ]
