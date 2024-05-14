@@ -7,6 +7,7 @@
         "nodeState[VARI] = \"replay\"",
         "nodeState[VARI] \\in {\"write\", \"replay\"}",
         "nodeState[VARI] \\in {\"write\", \"invalid_write\", \"replay\"}",
+        "nodeState[VARI] \\in {\"valid\", \"invalid\", \"replay\"}",
         "nodeState[VARJ] = \"valid\"",
         "nodeState[VARJ] = \"invalid\"",
         "nodeState[VARJ] = \"invalid_write\"",
@@ -17,6 +18,7 @@
         "nodeState[VARI] \\in {\"write\", \"valid\"}",
         "nodeState[VARJ] \\in {\"write\", \"replay\"}",
         "nodeState[VARJ] \\in {\"invalid\", \"replay\"}",
+        "nodeState[VARJ] \\in {\"valid\", \"invalid\", \"replay\"}",
         "nodeState[VARJ] \\in {\"write\", \"valid\"}",
         "nodeTS[VARI] = nodeTS[VARJ]",
         "greaterOrEqualTS(nodeTS[VARI].version, nodeTS[VARI].tieBreaker, nodeTS[VARJ].version, nodeTS[VARJ].tieBreaker)",
@@ -72,13 +74,17 @@
         "VARMINVI.version = nodeTS[VARJ].version",
         "VARMINVI.version < nodeTS[VARI].version",
         "VARMINVI.version < nodeTS[VARJ].version",
+        "VARMINVI.tieBreaker = epochID",
+        "VARMINVI.tieBreaker > epochID",
         "VARMINVI.tieBreaker = nodeTS[VARI].tieBreaker",
         "VARMINVI.tieBreaker = nodeTS[VARJ].tieBreaker",
         "VARMINVI.tieBreaker < nodeTS[VARI].tieBreaker",
         "VARMINVI.tieBreaker < nodeTS[VARJ].tieBreaker",
         "equalTS(VARMINVI.version, VARMINVI.tieBreaker, nodeTS[VARI].version, nodeTS[VARI].tieBreaker)",
+        "equalTS(VARMINVI.version, VARMINVI.tieBreaker, nodeTS[VARJ].version, nodeTS[VARJ].tieBreaker)",
         "equalTS(VARMINVI.version, VARMINVI.tieBreaker, nodeLastWriteTS[VARI].version, nodeLastWriteTS[VARI].tieBreaker)",
         "greaterTS(VARMINVI.version, VARMINVI.tieBreaker, nodeTS[VARI].version, nodeTS[VARI].tieBreaker)",
+        "greaterTS(VARMINVI.version, VARMINVI.tieBreaker, nodeTS[VARJ].version, nodeTS[VARJ].tieBreaker)",
         "greaterTS(VARMINVI.version, VARMINVI.tieBreaker, nodeLastWriteTS[VARI].version, nodeLastWriteTS[VARI].tieBreaker)",
         "greaterOrEqualTS(VARMINVI.version, VARMINVI.tieBreaker, nodeTS[VARI].version, nodeTS[VARI].tieBreaker)",
         "greaterOrEqualTS(VARMINVI.version, VARMINVI.tieBreaker, nodeLastWriteTS[VARI].version, nodeLastWriteTS[VARI].tieBreaker)",
@@ -99,7 +105,11 @@
         "nodeWriteEpochID[VARI] < epochID",
         "nodeWriteEpochID[VARJ] < epochID",
         "nodeWriteEpochID[VARI] = epochID",
-        "nodeWriteEpochID[VARJ] = epochID"
+        "nodeWriteEpochID[VARJ] = epochID",
+        "VARI \\in aliveNodes",
+        "Cardinality(aliveNodes) > 2",
+        "Cardinality(aliveNodes) = 2",
+        "Cardinality(aliveNodes) <= 2"
     ],
     "action_local_preds":{
         "NodeFailureAction": [
@@ -112,12 +122,12 @@
     "preds_alt" : [],
     "safety"  :  "HConsistent",
     "constants"  : {
-        "H_NODES" : ["{0,1}" , "{0,1,2}"],
-        "H_MAX_VERSION" : ["1", "2", "3"]
+        "H_NODES" : ["{0,1,2,3}"],
+        "H_MAX_VERSION" : ["3"]
     },
     "actions": [],
     "constraint"  :  "",
-    "quant_inv"  :  "\\A VARI \\in aliveNodes : \\A VARJ \\in aliveNodes : \\A VARMVALI \\in msgsVAL : \\A VARMACKI \\in msgsACK : \\A VARMINVI \\in msgsINV : ",
+    "quant_inv"  :  "\\A VARI \\in H_NODES : \\A VARJ \\in aliveNodes : \\A VARMVALI \\in msgsVAL : \\A VARMACKI \\in msgsACK : \\A VARMINVI \\in msgsINV : ",
     "quant_inv_alt"  :  null,
     "quant_vars": ["VARI", "VARJ", "VARMVALI", "VARMACKI", "VARMINVI"],
     "model_consts"  :  "",
@@ -127,8 +137,8 @@
     "try_final_minimize": false,
     "max_tlc_inv_depth": 17,
     "simulation_inv_check": true,
-    "simulation_inv_check_num_states": 2500000,
-    "simulation_inv_check_depth": 35,
+    "simulation_inv_check_num_states": 10000000,
+    "simulation_inv_check_depth": 40,
     "simulate"  :  true,
     "tlaps_proof_config": {
         "assumes": [
