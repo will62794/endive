@@ -1757,7 +1757,7 @@ class InductiveInvGen():
                     dirpath = tempfile.mkdtemp()
                     # , cti_states_relative_file(ci, curr_ind, tag=tag)
                     cmdargs = (dirpath, TLC_JAR, mc.TLC_MAX_SET_SIZE, self.specname, ci, curr_ind, tag, cfg_filename, ctiquicktlafilename)
-                    cmd = self.java_exe + ' -Xss16M -Djava.io.tmpdir="%s" -cp %s tlc2.TLC -maxSetSize %d -checkCTIElimination -noGenerateSpecTE -metadir states/ctiquick_%s_chunk%d_%d%s -continue -checkAllInvariants -deadlock -workers 1 -config %s %s' % cmdargs
+                    cmd = self.java_exe + ' -Xss16M -Djava.io.tmpdir="%s" -cp %s tlc2.TLC -cleanup -maxSetSize %d -checkCTIElimination -noGenerateSpecTE -metadir states/ctiquick_%s_chunk%d_%d%s -continue -checkAllInvariants -deadlock -workers 1 -config %s %s' % cmdargs
                     logging.debug("TLC command: " + cmd)
                     subproc = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, cwd=workdir)
                     return subproc
