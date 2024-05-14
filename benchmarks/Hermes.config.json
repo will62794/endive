@@ -106,10 +106,7 @@
         "nodeWriteEpochID[VARJ] < epochID",
         "nodeWriteEpochID[VARI] = epochID",
         "nodeWriteEpochID[VARJ] = epochID",
-        "VARI \\in aliveNodes",
-        "Cardinality(aliveNodes) > 2",
-        "Cardinality(aliveNodes) = 2",
-        "Cardinality(aliveNodes) <= 2"
+        "VARI \\in aliveNodes"
     ],
     "action_local_preds":{
         "NodeFailureAction": [
