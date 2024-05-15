@@ -54,9 +54,9 @@ ASSUME A1 == R_NODES \subseteq Nat
 THEOREM L_0 == TypeOK /\ TypeOK /\ Next => TypeOK'
   <1>. USE A0,A1
   \* (TypeOK,RRcvInvAction)
-  <1>1. TypeOK /\ TypeOK /\ RRcvInvAction => TypeOK' BY DEF TypeOK,RRcvInvAction,RRcvInv,TypeOK
+  <1>1. TypeOK /\ TypeOK /\ RRcvInvAction => TypeOK' BY DEF TypeOK,RRcvInvAction,RRcvInv,TypeOK,RMessageINV,RMessageVAL,RMessageACK
   \* (TypeOK,RRcvValAction)
-  <1>2. TypeOK /\ TypeOK /\ RRcvValAction => TypeOK' BY DEF TypeOK,RRcvValAction,RRcvVal,TypeOK
+  <1>2. TypeOK /\ TypeOK /\ RRcvValAction => TypeOK' BY DEF TypeOK,RRcvValAction,RRcvVal,TypeOK,RMessageINV,RMessageVAL,RMessageACK
   \* (TypeOK,RWriteAction)
   <1>3. TypeOK /\ TypeOK /\ RWriteAction => TypeOK' BY DEF TypeOK,RWriteAction,RWrite,TypeOK,RMessageINV,RMessageVAL
   \* (TypeOK,RRcvAckAction)
@@ -83,15 +83,15 @@ THEOREM L_0 == TypeOK /\ TypeOK /\ Next => TypeOK'
 THEOREM L_1 == TypeOK /\ Inv29_R0_0_I1 /\ Inv602_R0_0_I1 /\ Inv602_R0_0_I1 /\ Inv15995_R0_1_I2 /\ Inv326_R0_1_I2 /\ Inv407_R0_1_I2 /\ Safety /\ Next => Safety'
   <1>. USE A0,A1
   \* (Safety,RRcvInvAction)
-  <1>1. TypeOK /\ Safety /\ RRcvInvAction => Safety' BY DEF TypeOK,RRcvInvAction,RRcvInv,Safety,RConsistentInvariant,RMessageINV
+  <1>1. TypeOK /\ Safety /\ RRcvInvAction => Safety' BY DEF TypeOK,RRcvInvAction,RRcvInv,Safety,RMessageINV,RMessageVAL,RMessageACK,RConsistentInvariant,RMessageINV
   \* (Safety,RRcvValAction)
-  <1>2. TypeOK /\ Inv29_R0_0_I1 /\ Inv602_R0_0_I1 /\ Safety /\ RRcvValAction => Safety' BY DEF TypeOK,Inv29_R0_0_I1,Inv602_R0_0_I1,RRcvValAction,RRcvVal,Safety,RConsistentInvariant,RMessageINV
+  <1>2. TypeOK /\ Inv29_R0_0_I1 /\ Inv602_R0_0_I1 /\ Safety /\ RRcvValAction => Safety' BY DEF TypeOK,Inv29_R0_0_I1,Inv602_R0_0_I1,RRcvValAction,RRcvVal,Safety,RMessageINV,RMessageVAL,RMessageACK,RConsistentInvariant,RMessageINV
   \* (Safety,RWriteAction)
   <1>3. TypeOK /\ Safety /\ RWriteAction => Safety' BY DEF TypeOK,RWriteAction,RWrite,Safety,RMessageINV,RMessageVAL,RConsistentInvariant,RMessageINV
   \* (Safety,RRcvAckAction)
   <1>4. TypeOK /\ Safety /\ RRcvAckAction => Safety' BY DEF TypeOK,RRcvAckAction,RRcvAck,Safety,RConsistentInvariant,RMessageINV
   \* (Safety,RSendValsAction)
-  <1>5. TypeOK /\ Inv602_R0_0_I1 /\ Inv15995_R0_1_I2 /\ Inv326_R0_1_I2 /\ Inv407_R0_1_I2 /\ Safety /\ RSendValsAction => Safety' BY DEF TypeOK,Inv602_R0_0_I1,Inv15995_R0_1_I2,Inv326_R0_1_I2,Inv407_R0_1_I2,RSendValsAction,RSendVals,Safety,RConsistentInvariant,RMessageINV
+  <1>5. TypeOK /\ Inv602_R0_0_I1 /\ Inv326_R0_1_I2 /\ Inv15995_R0_1_I2 /\ Inv407_R0_1_I2 /\ Safety /\ RSendValsAction => Safety' BY DEF TypeOK,Inv602_R0_0_I1,Inv15995_R0_1_I2,Inv326_R0_1_I2,Inv407_R0_1_I2,RSendValsAction,RSendVals,Safety,RConsistentInvariant,RMessageINV
   \* (Safety,RLocalWriteReplayAction)
   <1>6. TypeOK /\ Safety /\ RLocalWriteReplayAction => Safety' BY DEF TypeOK,RLocalWriteReplayAction,RLocalWriteReplay,Safety,RConsistentInvariant,RMessageINV
   \* (Safety,RFailedNodeWriteReplayAction)
@@ -99,7 +99,23 @@ THEOREM L_1 == TypeOK /\ Inv29_R0_0_I1 /\ Inv602_R0_0_I1 /\ Inv602_R0_0_I1 /\ In
   \* (Safety,RUpdateLocalEpochIDAction)
   <1>8. TypeOK /\ Safety /\ RUpdateLocalEpochIDAction => Safety' BY DEF TypeOK,RUpdateLocalEpochIDAction,RUpdateLocalEpochID,Safety,RConsistentInvariant,RMessageINV
   \* (Safety,ROverthrowOwnerAction)
-  <1>9. TypeOK /\ Safety /\ ROverthrowOwnerAction => Safety' BY DEF TypeOK,ROverthrowOwnerAction,ROverthrowOwner,Safety,RConsistentInvariant,RMessageINV
+  <1>9. TypeOK /\ Safety /\ ROverthrowOwnerAction => Safety' 
+    <2> SUFFICES ASSUME TypeOK,
+                        Safety,
+                        NEW n \in rAliveNodes,
+                        NEW k \in rAliveNodes,
+                        /\ rKeySharers[n] /= "owner"
+                        /\ \A x \in rAliveNodes: rNodeEpochID[x] = rEpochID \*TODO may move this to RNewOwner
+                        /\ rKeyState[k]   = "valid"
+                        /\ rKeySharers[k] = "owner"
+                        /\ rKeySharers'   = [rKeySharers EXCEPT ![n] = "owner",
+                                                                ![k] = "reader"]
+                        /\ UNCHANGED <<rMsgsINV, rMsgsVAL, rMsgsACK, rKeyState, rKeyVersion, rKeyRcvedACKs,
+                                       rKeyLastWriter, rAliveNodes, rNodeEpochID, rEpochID>>
+                 PROVE  Safety'
+      BY DEF ROverthrowOwner, ROverthrowOwnerAction
+    <2> QED
+      BY FS_Singleton, FS_Difference DEF TypeOK,ROverthrowOwnerAction,ROverthrowOwner,Safety,RConsistentInvariant,RMessageINV
   \* (Safety,RNewOwnerAction)
   <1>10. TypeOK /\ Safety /\ RNewOwnerAction => Safety' BY DEF TypeOK,RNewOwnerAction,RNewOwner,Safety,RConsistentInvariant,RMessageINV
   \* (Safety,RNodeFailureAction)
@@ -111,9 +127,9 @@ THEOREM L_1 == TypeOK /\ Inv29_R0_0_I1 /\ Inv602_R0_0_I1 /\ Inv602_R0_0_I1 /\ In
 THEOREM L_2 == TypeOK /\ Inv15995_R0_1_I2 /\ Inv29_R0_0_I1 /\ Next => Inv29_R0_0_I1'
   <1>. USE A0,A1
   \* (Inv29_R0_0_I1,RRcvInvAction)
-  <1>1. TypeOK /\ Inv29_R0_0_I1 /\ RRcvInvAction => Inv29_R0_0_I1' BY DEF TypeOK,RRcvInvAction,RRcvInv,Inv29_R0_0_I1
+  <1>1. TypeOK /\ Inv29_R0_0_I1 /\ RRcvInvAction => Inv29_R0_0_I1' BY DEF TypeOK,RRcvInvAction,RRcvInv,Inv29_R0_0_I1,RMessageINV,RMessageVAL,RMessageACK
   \* (Inv29_R0_0_I1,RRcvValAction)
-  <1>2. TypeOK /\ Inv29_R0_0_I1 /\ RRcvValAction => Inv29_R0_0_I1' BY DEF TypeOK,RRcvValAction,RRcvVal,Inv29_R0_0_I1
+  <1>2. TypeOK /\ Inv29_R0_0_I1 /\ RRcvValAction => Inv29_R0_0_I1' BY DEF TypeOK,RRcvValAction,RRcvVal,Inv29_R0_0_I1,RMessageINV,RMessageVAL,RMessageACK
   \* (Inv29_R0_0_I1,RWriteAction)
   <1>3. TypeOK /\ Inv29_R0_0_I1 /\ RWriteAction => Inv29_R0_0_I1' BY DEF TypeOK,RWriteAction,RWrite,Inv29_R0_0_I1,RMessageINV,RMessageVAL
   \* (Inv29_R0_0_I1,RRcvAckAction)
@@ -139,9 +155,9 @@ THEOREM L_2 == TypeOK /\ Inv15995_R0_1_I2 /\ Inv29_R0_0_I1 /\ Next => Inv29_R0_0
 THEOREM L_3 == TypeOK /\ Inv794_R3_0_I1 /\ Inv326_R0_1_I2 /\ Inv602_R0_0_I1 /\ Inv407_R0_1_I2 /\ Inv15995_R0_1_I2 /\ Next => Inv15995_R0_1_I2'
   <1>. USE A0,A1
   \* (Inv15995_R0_1_I2,RRcvInvAction)
-  <1>1. TypeOK /\ Inv15995_R0_1_I2 /\ RRcvInvAction => Inv15995_R0_1_I2' BY DEF TypeOK,RRcvInvAction,RRcvInv,Inv15995_R0_1_I2
+  <1>1. TypeOK /\ Inv15995_R0_1_I2 /\ RRcvInvAction => Inv15995_R0_1_I2' BY DEF TypeOK,RRcvInvAction,RRcvInv,Inv15995_R0_1_I2,RMessageINV,RMessageVAL,RMessageACK
   \* (Inv15995_R0_1_I2,RRcvValAction)
-  <1>2. TypeOK /\ Inv15995_R0_1_I2 /\ RRcvValAction => Inv15995_R0_1_I2' BY DEF TypeOK,RRcvValAction,RRcvVal,Inv15995_R0_1_I2
+  <1>2. TypeOK /\ Inv15995_R0_1_I2 /\ RRcvValAction => Inv15995_R0_1_I2' BY DEF TypeOK,RRcvValAction,RRcvVal,Inv15995_R0_1_I2,RMessageINV,RMessageVAL,RMessageACK
   \* (Inv15995_R0_1_I2,RWriteAction)
   <1>3. TypeOK /\ Inv15995_R0_1_I2 /\ RWriteAction => Inv15995_R0_1_I2' BY DEF TypeOK,RWriteAction,RWrite,Inv15995_R0_1_I2,RMessageINV,RMessageVAL
   \* (Inv15995_R0_1_I2,RRcvAckAction)
@@ -167,9 +183,9 @@ THEOREM L_3 == TypeOK /\ Inv794_R3_0_I1 /\ Inv326_R0_1_I2 /\ Inv602_R0_0_I1 /\ I
 THEOREM L_4 == TypeOK /\ Inv794_R3_0_I1 /\ Next => Inv794_R3_0_I1'
   <1>. USE A0,A1
   \* (Inv794_R3_0_I1,RRcvInvAction)
-  <1>1. TypeOK /\ Inv794_R3_0_I1 /\ RRcvInvAction => Inv794_R3_0_I1' BY DEF TypeOK,RRcvInvAction,RRcvInv,Inv794_R3_0_I1
+  <1>1. TypeOK /\ Inv794_R3_0_I1 /\ RRcvInvAction => Inv794_R3_0_I1' BY DEF TypeOK,RRcvInvAction,RRcvInv,Inv794_R3_0_I1,RMessageINV,RMessageVAL,RMessageACK
   \* (Inv794_R3_0_I1,RRcvValAction)
-  <1>2. TypeOK /\ Inv794_R3_0_I1 /\ RRcvValAction => Inv794_R3_0_I1' BY DEF TypeOK,RRcvValAction,RRcvVal,Inv794_R3_0_I1
+  <1>2. TypeOK /\ Inv794_R3_0_I1 /\ RRcvValAction => Inv794_R3_0_I1' BY DEF TypeOK,RRcvValAction,RRcvVal,Inv794_R3_0_I1,RMessageINV,RMessageVAL,RMessageACK
   \* (Inv794_R3_0_I1,RWriteAction)
   <1>3. TypeOK /\ Inv794_R3_0_I1 /\ RWriteAction => Inv794_R3_0_I1' BY DEF TypeOK,RWriteAction,RWrite,Inv794_R3_0_I1,RMessageINV,RMessageVAL
   \* (Inv794_R3_0_I1,RRcvAckAction)
@@ -195,9 +211,9 @@ THEOREM L_4 == TypeOK /\ Inv794_R3_0_I1 /\ Next => Inv794_R3_0_I1'
 THEOREM L_5 == TypeOK /\ Inv30_R4_0_I0 /\ Inv12_R4_1_I1 /\ Inv356_R4_1_I1 /\ Inv602_R0_0_I1 /\ Inv234_R4_1_I1 /\ Inv407_R0_1_I2 /\ Inv326_R0_1_I2 /\ Next => Inv326_R0_1_I2'
   <1>. USE A0,A1
   \* (Inv326_R0_1_I2,RRcvInvAction)
-  <1>1. TypeOK /\ Inv30_R4_0_I0 /\ Inv326_R0_1_I2 /\ RRcvInvAction => Inv326_R0_1_I2' BY DEF TypeOK,Inv30_R4_0_I0,RRcvInvAction,RRcvInv,Inv326_R0_1_I2
+  <1>1. TypeOK /\ Inv30_R4_0_I0 /\ Inv326_R0_1_I2 /\ RRcvInvAction => Inv326_R0_1_I2' BY DEF TypeOK,Inv30_R4_0_I0,RRcvInvAction,RRcvInv,Inv326_R0_1_I2,RMessageINV,RMessageVAL,RMessageACK
   \* (Inv326_R0_1_I2,RRcvValAction)
-  <1>2. TypeOK /\ Inv326_R0_1_I2 /\ RRcvValAction => Inv326_R0_1_I2' BY DEF TypeOK,RRcvValAction,RRcvVal,Inv326_R0_1_I2
+  <1>2. TypeOK /\ Inv326_R0_1_I2 /\ RRcvValAction => Inv326_R0_1_I2' BY DEF TypeOK,RRcvValAction,RRcvVal,Inv326_R0_1_I2,RMessageINV,RMessageVAL,RMessageACK
   \* (Inv326_R0_1_I2,RWriteAction)
   <1>3. TypeOK /\ Inv12_R4_1_I1 /\ Inv356_R4_1_I1 /\ Inv602_R0_0_I1 /\ Inv234_R4_1_I1 /\ Inv407_R0_1_I2 /\ Inv326_R0_1_I2 /\ RWriteAction => Inv326_R0_1_I2' BY DEF TypeOK,Inv12_R4_1_I1,Inv356_R4_1_I1,Inv602_R0_0_I1,Inv234_R4_1_I1,Inv407_R0_1_I2,RWriteAction,RWrite,Inv326_R0_1_I2,RMessageINV,RMessageVAL
   \* (Inv326_R0_1_I2,RRcvAckAction)
@@ -223,9 +239,9 @@ THEOREM L_5 == TypeOK /\ Inv30_R4_0_I0 /\ Inv12_R4_1_I1 /\ Inv356_R4_1_I1 /\ Inv
 THEOREM L_6 == TypeOK /\ Inv30_R4_0_I0 /\ Next => Inv30_R4_0_I0'
   <1>. USE A0,A1
   \* (Inv30_R4_0_I0,RRcvInvAction)
-  <1>1. TypeOK /\ Inv30_R4_0_I0 /\ RRcvInvAction => Inv30_R4_0_I0' BY DEF TypeOK,RRcvInvAction,RRcvInv,Inv30_R4_0_I0
+  <1>1. TypeOK /\ Inv30_R4_0_I0 /\ RRcvInvAction => Inv30_R4_0_I0' BY DEF TypeOK,RRcvInvAction,RRcvInv,Inv30_R4_0_I0,RMessageINV,RMessageVAL,RMessageACK
   \* (Inv30_R4_0_I0,RRcvValAction)
-  <1>2. TypeOK /\ Inv30_R4_0_I0 /\ RRcvValAction => Inv30_R4_0_I0' BY DEF TypeOK,RRcvValAction,RRcvVal,Inv30_R4_0_I0
+  <1>2. TypeOK /\ Inv30_R4_0_I0 /\ RRcvValAction => Inv30_R4_0_I0' BY DEF TypeOK,RRcvValAction,RRcvVal,Inv30_R4_0_I0,RMessageINV,RMessageVAL,RMessageACK
   \* (Inv30_R4_0_I0,RWriteAction)
   <1>3. TypeOK /\ Inv30_R4_0_I0 /\ RWriteAction => Inv30_R4_0_I0' BY DEF TypeOK,RWriteAction,RWrite,Inv30_R4_0_I0,RMessageINV,RMessageVAL
   \* (Inv30_R4_0_I0,RRcvAckAction)
@@ -251,9 +267,9 @@ THEOREM L_6 == TypeOK /\ Inv30_R4_0_I0 /\ Next => Inv30_R4_0_I0'
 THEOREM L_7 == TypeOK /\ Inv12_R4_1_I1 /\ Next => Inv12_R4_1_I1'
   <1>. USE A0,A1
   \* (Inv12_R4_1_I1,RRcvInvAction)
-  <1>1. TypeOK /\ Inv12_R4_1_I1 /\ RRcvInvAction => Inv12_R4_1_I1' BY DEF TypeOK,RRcvInvAction,RRcvInv,Inv12_R4_1_I1
+  <1>1. TypeOK /\ Inv12_R4_1_I1 /\ RRcvInvAction => Inv12_R4_1_I1' BY DEF TypeOK,RRcvInvAction,RRcvInv,Inv12_R4_1_I1,RMessageINV,RMessageVAL,RMessageACK
   \* (Inv12_R4_1_I1,RRcvValAction)
-  <1>2. TypeOK /\ Inv12_R4_1_I1 /\ RRcvValAction => Inv12_R4_1_I1' BY DEF TypeOK,RRcvValAction,RRcvVal,Inv12_R4_1_I1
+  <1>2. TypeOK /\ Inv12_R4_1_I1 /\ RRcvValAction => Inv12_R4_1_I1' BY DEF TypeOK,RRcvValAction,RRcvVal,Inv12_R4_1_I1,RMessageINV,RMessageVAL,RMessageACK
   \* (Inv12_R4_1_I1,RWriteAction)
   <1>3. TypeOK /\ Inv12_R4_1_I1 /\ RWriteAction => Inv12_R4_1_I1' BY DEF TypeOK,RWriteAction,RWrite,Inv12_R4_1_I1,RMessageINV,RMessageVAL
   \* (Inv12_R4_1_I1,RRcvAckAction)
@@ -279,9 +295,9 @@ THEOREM L_7 == TypeOK /\ Inv12_R4_1_I1 /\ Next => Inv12_R4_1_I1'
 THEOREM L_8 == TypeOK /\ Inv30_R4_0_I0 /\ Inv12_R4_1_I1 /\ Inv234_R4_1_I1 /\ Inv82_R9_3_I2 /\ Inv4413_R9_3_I2 /\ Inv602_R0_0_I1 /\ Inv85_R9_3_I2 /\ Inv27_R9_1_I1 /\ Inv12_R4_1_I1 /\ Inv602_R0_0_I1 /\ Inv356_R4_1_I1 /\ Next => Inv356_R4_1_I1'
   <1>. USE A0,A1
   \* (Inv356_R4_1_I1,RRcvInvAction)
-  <1>1. TypeOK /\ Inv30_R4_0_I0 /\ Inv356_R4_1_I1 /\ RRcvInvAction => Inv356_R4_1_I1' BY DEF TypeOK,Inv30_R4_0_I0,RRcvInvAction,RRcvInv,Inv356_R4_1_I1
+  <1>1. TypeOK /\ Inv30_R4_0_I0 /\ Inv356_R4_1_I1 /\ RRcvInvAction => Inv356_R4_1_I1' BY DEF TypeOK,Inv30_R4_0_I0,RRcvInvAction,RRcvInv,Inv356_R4_1_I1,RMessageINV,RMessageVAL,RMessageACK
   \* (Inv356_R4_1_I1,RRcvValAction)
-  <1>2. TypeOK /\ Inv356_R4_1_I1 /\ RRcvValAction => Inv356_R4_1_I1' BY DEF TypeOK,RRcvValAction,RRcvVal,Inv356_R4_1_I1
+  <1>2. TypeOK /\ Inv356_R4_1_I1 /\ RRcvValAction => Inv356_R4_1_I1' BY DEF TypeOK,RRcvValAction,RRcvVal,Inv356_R4_1_I1,RMessageINV,RMessageVAL,RMessageACK
   \* (Inv356_R4_1_I1,RWriteAction)
   <1>3. TypeOK /\ Inv12_R4_1_I1 /\ Inv234_R4_1_I1 /\ Inv82_R9_3_I2 /\ Inv4413_R9_3_I2 /\ Inv602_R0_0_I1 /\ Inv85_R9_3_I2 /\ Inv356_R4_1_I1 /\ RWriteAction => Inv356_R4_1_I1' BY DEF TypeOK,Inv12_R4_1_I1,Inv234_R4_1_I1,Inv82_R9_3_I2,Inv4413_R9_3_I2,Inv602_R0_0_I1,Inv85_R9_3_I2,RWriteAction,RWrite,Inv356_R4_1_I1,RMessageINV,RMessageVAL
   \* (Inv356_R4_1_I1,RRcvAckAction)
@@ -307,9 +323,9 @@ THEOREM L_8 == TypeOK /\ Inv30_R4_0_I0 /\ Inv12_R4_1_I1 /\ Inv234_R4_1_I1 /\ Inv
 THEOREM L_9 == TypeOK /\ Inv29_R0_0_I1 /\ Inv15995_R0_1_I2 /\ Inv602_R0_0_I1 /\ Next => Inv602_R0_0_I1'
   <1>. USE A0,A1
   \* (Inv602_R0_0_I1,RRcvInvAction)
-  <1>1. TypeOK /\ Inv602_R0_0_I1 /\ RRcvInvAction => Inv602_R0_0_I1' BY DEF TypeOK,RRcvInvAction,RRcvInv,Inv602_R0_0_I1
+  <1>1. TypeOK /\ Inv602_R0_0_I1 /\ RRcvInvAction => Inv602_R0_0_I1' BY DEF TypeOK,RRcvInvAction,RRcvInv,Inv602_R0_0_I1,RMessageINV,RMessageVAL,RMessageACK
   \* (Inv602_R0_0_I1,RRcvValAction)
-  <1>2. TypeOK /\ Inv29_R0_0_I1 /\ Inv602_R0_0_I1 /\ RRcvValAction => Inv602_R0_0_I1' BY DEF TypeOK,Inv29_R0_0_I1,RRcvValAction,RRcvVal,Inv602_R0_0_I1
+  <1>2. TypeOK /\ Inv29_R0_0_I1 /\ Inv602_R0_0_I1 /\ RRcvValAction => Inv602_R0_0_I1' BY DEF TypeOK,Inv29_R0_0_I1,RRcvValAction,RRcvVal,Inv602_R0_0_I1,RMessageINV,RMessageVAL,RMessageACK
   \* (Inv602_R0_0_I1,RWriteAction)
   <1>3. TypeOK /\ Inv602_R0_0_I1 /\ RWriteAction => Inv602_R0_0_I1' BY DEF TypeOK,RWriteAction,RWrite,Inv602_R0_0_I1,RMessageINV,RMessageVAL
   \* (Inv602_R0_0_I1,RRcvAckAction)
@@ -335,9 +351,9 @@ THEOREM L_9 == TypeOK /\ Inv29_R0_0_I1 /\ Inv15995_R0_1_I2 /\ Inv602_R0_0_I1 /\ 
 THEOREM L_10 == TypeOK /\ Inv29_R0_0_I1 /\ Inv15995_R0_1_I2 /\ Inv27_R9_1_I1 /\ Next => Inv27_R9_1_I1'
   <1>. USE A0,A1
   \* (Inv27_R9_1_I1,RRcvInvAction)
-  <1>1. TypeOK /\ Inv27_R9_1_I1 /\ RRcvInvAction => Inv27_R9_1_I1' BY DEF TypeOK,RRcvInvAction,RRcvInv,Inv27_R9_1_I1
+  <1>1. TypeOK /\ Inv27_R9_1_I1 /\ RRcvInvAction => Inv27_R9_1_I1' BY DEF TypeOK,RRcvInvAction,RRcvInv,Inv27_R9_1_I1,RMessageINV,RMessageVAL,RMessageACK
   \* (Inv27_R9_1_I1,RRcvValAction)
-  <1>2. TypeOK /\ Inv29_R0_0_I1 /\ Inv27_R9_1_I1 /\ RRcvValAction => Inv27_R9_1_I1' BY DEF TypeOK,Inv29_R0_0_I1,RRcvValAction,RRcvVal,Inv27_R9_1_I1
+  <1>2. TypeOK /\ Inv29_R0_0_I1 /\ Inv27_R9_1_I1 /\ RRcvValAction => Inv27_R9_1_I1' BY DEF TypeOK,Inv29_R0_0_I1,RRcvValAction,RRcvVal,Inv27_R9_1_I1,RMessageINV,RMessageVAL,RMessageACK
   \* (Inv27_R9_1_I1,RWriteAction)
   <1>3. TypeOK /\ Inv27_R9_1_I1 /\ RWriteAction => Inv27_R9_1_I1' BY DEF TypeOK,RWriteAction,RWrite,Inv27_R9_1_I1,RMessageINV,RMessageVAL
   \* (Inv27_R9_1_I1,RRcvAckAction)
@@ -363,9 +379,9 @@ THEOREM L_10 == TypeOK /\ Inv29_R0_0_I1 /\ Inv15995_R0_1_I2 /\ Inv27_R9_1_I1 /\ 
 THEOREM L_11 == TypeOK /\ Inv4413_R9_3_I2 /\ Inv12_R4_1_I1 /\ Inv234_R4_1_I1 /\ Next => Inv234_R4_1_I1'
   <1>. USE A0,A1
   \* (Inv234_R4_1_I1,RRcvInvAction)
-  <1>1. TypeOK /\ Inv234_R4_1_I1 /\ RRcvInvAction => Inv234_R4_1_I1' BY DEF TypeOK,RRcvInvAction,RRcvInv,Inv234_R4_1_I1
+  <1>1. TypeOK /\ Inv234_R4_1_I1 /\ RRcvInvAction => Inv234_R4_1_I1' BY DEF TypeOK,RRcvInvAction,RRcvInv,Inv234_R4_1_I1,RMessageINV,RMessageVAL,RMessageACK
   \* (Inv234_R4_1_I1,RRcvValAction)
-  <1>2. TypeOK /\ Inv234_R4_1_I1 /\ RRcvValAction => Inv234_R4_1_I1' BY DEF TypeOK,RRcvValAction,RRcvVal,Inv234_R4_1_I1
+  <1>2. TypeOK /\ Inv234_R4_1_I1 /\ RRcvValAction => Inv234_R4_1_I1' BY DEF TypeOK,RRcvValAction,RRcvVal,Inv234_R4_1_I1,RMessageINV,RMessageVAL,RMessageACK
   \* (Inv234_R4_1_I1,RWriteAction)
   <1>3. TypeOK /\ Inv4413_R9_3_I2 /\ Inv234_R4_1_I1 /\ RWriteAction => Inv234_R4_1_I1' BY DEF TypeOK,Inv4413_R9_3_I2,RWriteAction,RWrite,Inv234_R4_1_I1,RMessageINV,RMessageVAL
   \* (Inv234_R4_1_I1,RRcvAckAction)
@@ -391,9 +407,9 @@ THEOREM L_11 == TypeOK /\ Inv4413_R9_3_I2 /\ Inv12_R4_1_I1 /\ Inv234_R4_1_I1 /\ 
 THEOREM L_12 == TypeOK /\ Inv12_R4_1_I1 /\ Inv4413_R9_3_I2 /\ Next => Inv4413_R9_3_I2'
   <1>. USE A0,A1
   \* (Inv4413_R9_3_I2,RRcvInvAction)
-  <1>1. TypeOK /\ Inv4413_R9_3_I2 /\ RRcvInvAction => Inv4413_R9_3_I2' BY DEF TypeOK,RRcvInvAction,RRcvInv,Inv4413_R9_3_I2
+  <1>1. TypeOK /\ Inv4413_R9_3_I2 /\ RRcvInvAction => Inv4413_R9_3_I2' BY DEF TypeOK,RRcvInvAction,RRcvInv,Inv4413_R9_3_I2,RMessageINV,RMessageVAL,RMessageACK
   \* (Inv4413_R9_3_I2,RRcvValAction)
-  <1>2. TypeOK /\ Inv4413_R9_3_I2 /\ RRcvValAction => Inv4413_R9_3_I2' BY DEF TypeOK,RRcvValAction,RRcvVal,Inv4413_R9_3_I2
+  <1>2. TypeOK /\ Inv4413_R9_3_I2 /\ RRcvValAction => Inv4413_R9_3_I2' BY DEF TypeOK,RRcvValAction,RRcvVal,Inv4413_R9_3_I2,RMessageINV,RMessageVAL,RMessageACK
   \* (Inv4413_R9_3_I2,RWriteAction)
   <1>3. TypeOK /\ Inv4413_R9_3_I2 /\ RWriteAction => Inv4413_R9_3_I2' BY DEF TypeOK,RWriteAction,RWrite,Inv4413_R9_3_I2,RMessageINV,RMessageVAL
   \* (Inv4413_R9_3_I2,RRcvAckAction)
@@ -419,9 +435,9 @@ THEOREM L_12 == TypeOK /\ Inv12_R4_1_I1 /\ Inv4413_R9_3_I2 /\ Next => Inv4413_R9
 THEOREM L_13 == TypeOK /\ Inv82_R9_3_I2 /\ Next => Inv82_R9_3_I2'
   <1>. USE A0,A1
   \* (Inv82_R9_3_I2,RRcvInvAction)
-  <1>1. TypeOK /\ Inv82_R9_3_I2 /\ RRcvInvAction => Inv82_R9_3_I2' BY DEF TypeOK,RRcvInvAction,RRcvInv,Inv82_R9_3_I2
+  <1>1. TypeOK /\ Inv82_R9_3_I2 /\ RRcvInvAction => Inv82_R9_3_I2' BY DEF TypeOK,RRcvInvAction,RRcvInv,Inv82_R9_3_I2,RMessageINV,RMessageVAL,RMessageACK
   \* (Inv82_R9_3_I2,RRcvValAction)
-  <1>2. TypeOK /\ Inv82_R9_3_I2 /\ RRcvValAction => Inv82_R9_3_I2' BY DEF TypeOK,RRcvValAction,RRcvVal,Inv82_R9_3_I2
+  <1>2. TypeOK /\ Inv82_R9_3_I2 /\ RRcvValAction => Inv82_R9_3_I2' BY DEF TypeOK,RRcvValAction,RRcvVal,Inv82_R9_3_I2,RMessageINV,RMessageVAL,RMessageACK
   \* (Inv82_R9_3_I2,RWriteAction)
   <1>3. TypeOK /\ Inv82_R9_3_I2 /\ RWriteAction => Inv82_R9_3_I2' BY DEF TypeOK,RWriteAction,RWrite,Inv82_R9_3_I2,RMessageINV,RMessageVAL
   \* (Inv82_R9_3_I2,RRcvAckAction)
@@ -439,7 +455,22 @@ THEOREM L_13 == TypeOK /\ Inv82_R9_3_I2 /\ Next => Inv82_R9_3_I2'
   \* (Inv82_R9_3_I2,RNewOwnerAction)
   <1>10. TypeOK /\ Inv82_R9_3_I2 /\ RNewOwnerAction => Inv82_R9_3_I2' BY DEF TypeOK,RNewOwnerAction,RNewOwner,Inv82_R9_3_I2
   \* (Inv82_R9_3_I2,RNodeFailureAction)
-  <1>11. TypeOK /\ Inv82_R9_3_I2 /\ RNodeFailureAction => Inv82_R9_3_I2' BY DEF TypeOK,RNodeFailureAction,RNodeFailure,Inv82_R9_3_I2,RMessageINV,RNoChanges_but_membership
+  <1>11. TypeOK /\ Inv82_R9_3_I2 /\ RNodeFailureAction => Inv82_R9_3_I2' 
+    <2> SUFFICES ASSUME TypeOK,
+                        Inv82_R9_3_I2,
+                        NEW n \in rAliveNodes,
+                        NEW k \in rAliveNodes, NEW m \in rAliveNodes,
+                        /\ k /= n 
+                        /\ m /= n
+                        /\ m /= k,
+                        rEpochID' = rEpochID + 1,
+                        rAliveNodes' = rAliveNodes \ {n},
+                        RNoChanges_but_membership,
+                        NEW VARI \in rAliveNodes'
+                 PROVE  ((rNodeEpochID[VARI] < rEpochID) \/ ((rNodeEpochID[VARI] = rEpochID)))'
+      BY DEF Inv82_R9_3_I2, RNodeFailure, RNodeFailureAction
+    <2> QED
+      BY DEF TypeOK,RNodeFailureAction,RNodeFailure,Inv82_R9_3_I2,RMessageINV,RNoChanges_but_membership
 <1>12. QED BY <1>1,<1>2,<1>3,<1>4,<1>5,<1>6,<1>7,<1>8,<1>9,<1>10,<1>11 DEF Next
 
 
@@ -447,9 +478,9 @@ THEOREM L_13 == TypeOK /\ Inv82_R9_3_I2 /\ Next => Inv82_R9_3_I2'
 THEOREM L_14 == TypeOK /\ Inv85_R9_3_I2 /\ Next => Inv85_R9_3_I2'
   <1>. USE A0,A1
   \* (Inv85_R9_3_I2,RRcvInvAction)
-  <1>1. TypeOK /\ Inv85_R9_3_I2 /\ RRcvInvAction => Inv85_R9_3_I2' BY DEF TypeOK,RRcvInvAction,RRcvInv,Inv85_R9_3_I2
+  <1>1. TypeOK /\ Inv85_R9_3_I2 /\ RRcvInvAction => Inv85_R9_3_I2' BY DEF TypeOK,RRcvInvAction,RRcvInv,Inv85_R9_3_I2,RMessageINV,RMessageVAL,RMessageACK
   \* (Inv85_R9_3_I2,RRcvValAction)
-  <1>2. TypeOK /\ Inv85_R9_3_I2 /\ RRcvValAction => Inv85_R9_3_I2' BY DEF TypeOK,RRcvValAction,RRcvVal,Inv85_R9_3_I2
+  <1>2. TypeOK /\ Inv85_R9_3_I2 /\ RRcvValAction => Inv85_R9_3_I2' BY DEF TypeOK,RRcvValAction,RRcvVal,Inv85_R9_3_I2,RMessageINV,RMessageVAL,RMessageACK
   \* (Inv85_R9_3_I2,RWriteAction)
   <1>3. TypeOK /\ Inv85_R9_3_I2 /\ RWriteAction => Inv85_R9_3_I2' BY DEF TypeOK,RWriteAction,RWrite,Inv85_R9_3_I2,RMessageINV,RMessageVAL
   \* (Inv85_R9_3_I2,RRcvAckAction)
@@ -475,9 +506,9 @@ THEOREM L_14 == TypeOK /\ Inv85_R9_3_I2 /\ Next => Inv85_R9_3_I2'
 THEOREM L_15 == TypeOK /\ Inv234_R4_1_I1 /\ Inv407_R0_1_I2 /\ Next => Inv407_R0_1_I2'
   <1>. USE A0,A1
   \* (Inv407_R0_1_I2,RRcvInvAction)
-  <1>1. TypeOK /\ Inv407_R0_1_I2 /\ RRcvInvAction => Inv407_R0_1_I2' BY DEF TypeOK,RRcvInvAction,RRcvInv,Inv407_R0_1_I2
+  <1>1. TypeOK /\ Inv407_R0_1_I2 /\ RRcvInvAction => Inv407_R0_1_I2' BY DEF TypeOK,RRcvInvAction,RRcvInv,Inv407_R0_1_I2,RMessageINV,RMessageVAL,RMessageACK
   \* (Inv407_R0_1_I2,RRcvValAction)
-  <1>2. TypeOK /\ Inv407_R0_1_I2 /\ RRcvValAction => Inv407_R0_1_I2' BY DEF TypeOK,RRcvValAction,RRcvVal,Inv407_R0_1_I2
+  <1>2. TypeOK /\ Inv407_R0_1_I2 /\ RRcvValAction => Inv407_R0_1_I2' BY DEF TypeOK,RRcvValAction,RRcvVal,Inv407_R0_1_I2,RMessageINV,RMessageVAL,RMessageACK
   \* (Inv407_R0_1_I2,RWriteAction)
   <1>3. TypeOK /\ Inv234_R4_1_I1 /\ Inv407_R0_1_I2 /\ RWriteAction => Inv407_R0_1_I2' BY DEF TypeOK,Inv234_R4_1_I1,RWriteAction,RWrite,Inv407_R0_1_I2,RMessageINV,RMessageVAL
   \* (Inv407_R0_1_I2,RRcvAckAction)
@@ -522,5 +553,5 @@ THEOREM Init => IndGlobal
 \* Consecution.
 THEOREM IndGlobal /\ Next => IndGlobal'
   BY L_0,L_1,L_2,L_3,L_4,L_5,L_6,L_7,L_8,L_9,L_10,L_11,L_12,L_13,L_14,L_15 DEF Next, IndGlobal
-
+  
 =============================================================================
