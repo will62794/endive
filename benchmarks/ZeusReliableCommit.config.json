@@ -74,12 +74,13 @@
     "action_local_preds":{
     },
     "preds_alt" : [],
-    "safety"  :  "H_Safety",
+    "safety"  :  "RConsistentInvariant",
     "constants"  : {
-        "R_NODES" : ["{33,44,55}"],
-        "R_MAX_VERSION" : ["1", "2", "4"],
-        "R_MAX_EPOCH" : ["1", "2", "4"]
+        "R_NODES" : ["{33,44,55}", "{33,44,55,66}"],
+        "R_MAX_VERSION" : ["4"],
+        "R_MAX_EPOCH" : ["4"]
     },
+    "large_instance_inv_check_index": 1,
     "actions": [],
     "constraint"  :  "",
     "quant_inv"  :  "\\A VARI \\in rAliveNodes : \\A VARJ \\in rAliveNodes : \\A VARMVAL \\in rMsgsVAL : \\A VARMACK \\in rMsgsACK : \\A VARMINV \\in rMsgsINV : ",
@@ -97,11 +98,15 @@
     "simulate"  :  true,
     "tlaps_proof_config": {
         "assumes": [
+            "IsFiniteSet(R_NODES)",
+            "R_NODES \\subseteq Nat"
         ],
         "lemma_def_expands": {
-            "Safety": ["RConsistentInvariant"]
+            "Safety": ["RConsistentInvariant", "RMessageINV"]
         },
         "action_def_expands":{
+            "RNodeFailureAction": ["RMessageINV", "RNoChanges_but_membership"],
+            "RWriteAction": ["RMessageINV", "RMessageVAL"]
         }
     }
 }
