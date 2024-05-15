@@ -74,6 +74,8 @@
         "VARMINVI.version = nodeTS[VARJ].version",
         "VARMINVI.version < nodeTS[VARI].version",
         "VARMINVI.version < nodeTS[VARJ].version",
+        "VARMINVI.tieBreaker = VARI",
+        "VARMINVI.tieBreaker = VARJ",
         "VARMINVI.tieBreaker = epochID",
         "VARMINVI.tieBreaker > epochID",
         "VARMINVI.tieBreaker = nodeTS[VARI].tieBreaker",
