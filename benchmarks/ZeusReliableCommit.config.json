@@ -106,7 +106,9 @@
         },
         "action_def_expands":{
             "RNodeFailureAction": ["RMessageINV", "RNoChanges_but_membership"],
-            "RWriteAction": ["RMessageINV", "RMessageVAL"]
+            "RWriteAction": ["RMessageINV", "RMessageVAL"],
+            "RRcvInvAction": ["RMessageINV", "RMessageVAL", "RMessageACK"],
+            "RRcvValAction": ["RMessageINV", "RMessageVAL", "RMessageACK"]
         }
     }
 }
