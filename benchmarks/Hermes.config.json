@@ -121,7 +121,7 @@
     "preds_alt" : [],
     "safety"  :  "HConsistent",
     "constants"  : {
-        "H_NODES" : ["{0,1,2}"],
+        "H_NODES" : ["{0,1,2,3}"],
         "H_MAX_VERSION" : ["3"]
     },
     "actions": [],
