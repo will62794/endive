@@ -2894,7 +2894,8 @@ class InductiveInvGen():
                 
                 # # Consider doing one quick re-check of all invariants at larger parameter bound?
                 # # No caching here.
-                if "simulation_inv_check" in self.spec_config and self.spec_config["simulation_inv_check"] and "large_instance_inv_check_index" in self.spec_config:
+                # if "simulation_inv_check" in self.spec_config and self.spec_config["simulation_inv_check"] and "large_instance_inv_check_index" in self.spec_config:
+                if "large_instance_inv_check_index" in self.spec_config:
                     logging.info("+ Doing re-checking at larger parameter bound")
                     depth = self.spec_config.get("simulation_inv_check_depth", 50)
                     num_states = 100000 # Make this relatively cheap.
