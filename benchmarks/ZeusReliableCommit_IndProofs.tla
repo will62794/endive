@@ -1,393 +1,526 @@
 ------------------------------- MODULE ZeusReliableCommit_IndProofs -------------------------------
-EXTENDS ZeusReliableCommit
-
+EXTENDS ZeusReliableCommit, FiniteSetTheorems
 
 \* Proof Graph Stats
 \* ==================
-\* num proof graph nodes: 7
-\* num proof obligations: 84
-Safety == H_Safety
-Inv34_R0_0_I1 == \A VARI \in rAliveNodes : ~(rKeySharers[VARI] = "non-sharer")
-Inv1431_R0_1_I1 == \A VARI \in rAliveNodes : \A VARJ \in rAliveNodes : ~(rKeyState[VARI] = "valid") \/ (~(rKeyVersion[VARI] > rKeyVersion[VARJ]))
-Inv57_R0_2_I1 == \A VARMINV \in rMsgsINV : ~(VARMINV.version > rKeyVersion[VARMINV.sender])
-Inv35_R0_3_I1 == \A VARI \in rAliveNodes : \A VARMVAL \in rMsgsVAL : ~(VARMVAL.type = "VAL" /\ VARMVAL.version > rKeyVersion[VARI])
-Inv19115_R0_4_I2 == \A VARI \in rAliveNodes : \A VARJ \in rAliveNodes : (rKeyState[VARI] = "invalid") \/ ((rKeyVersion[VARI] <= rKeyVersion[VARJ])) \/ (~(VARJ \in rKeyRcvedACKs[VARI]))
-Inv1153_R5_0_I1 == \A VARJ \in rAliveNodes : \A VARMACK \in rMsgsACK : (VARMACK.version <= rKeyVersion[VARJ]) \/ (~(VARMACK.sender = VARJ))
+\* seed: 2
+\* num proof graph nodes: 15
+\* num proof obligations: 165
+Safety == RConsistentInvariant
+Inv29_R0_0_I1 == \A VARI \in rAliveNodes : \A VARMVAL \in rMsgsVAL : ~(VARMVAL.type = "VAL" /\ VARMVAL.version > rKeyVersion[VARI])
+Inv602_R0_0_I1 == \A VARI \in rAliveNodes : \A VARJ \in rAliveNodes : (rKeyVersion[VARI] <= rKeyVersion[VARJ]) \/ (~(rKeyState[VARI] = "valid"))
+Inv15995_R0_1_I2 == \A VARI \in rAliveNodes : \A VARJ \in rAliveNodes : ~(VARJ \in rKeyRcvedACKs[VARI]) \/ (~(rKeyState[VARI] \in {"write", "replay"})) \/ (~(rKeyVersion[VARI] > rKeyVersion[VARJ]))
+Inv326_R0_1_I2 == \A VARI \in rAliveNodes : \A VARJ \in rAliveNodes : (rKeyVersion[VARI] <= rKeyVersion[VARJ]) \/ (~(rKeyState[VARJ] = "write"))
+Inv407_R0_1_I2 == \A VARI \in rAliveNodes : \A VARJ \in rAliveNodes : ~(VARI # VARJ /\ rKeyState[VARI] = "write") \/ (~(rKeyState[VARJ] = "write"))
+Inv794_R3_0_I1 == \A VARJ \in rAliveNodes : \A VARMACK \in rMsgsACK : (VARMACK.version <= rKeyVersion[VARJ]) \/ (~(VARMACK.sender = VARJ))
+Inv30_R4_0_I0 == \A VARMINV \in rMsgsINV : ~(VARMINV.version > rKeyVersion[VARMINV.sender])
+Inv12_R4_1_I1 == \A VARI \in rAliveNodes : ~(rKeySharers[VARI] = "non-sharer")
+Inv356_R4_1_I1 == \A VARI \in rAliveNodes : \A VARJ \in rAliveNodes : (rKeySharers[VARJ] = "reader") \/ ((rKeyVersion[VARI] <= rKeyVersion[VARJ]))
+Inv234_R4_1_I1 == \A VARI \in rAliveNodes : \A VARJ \in rAliveNodes : (rKeySharers[VARI] = "reader") \/ (~(VARI # VARJ /\ rKeyState[VARJ] = "write"))
+Inv27_R9_1_I1 == \A VARI \in rAliveNodes : \A VARJ \in rAliveNodes : ~(rKeyState[VARI] = "valid") \/ (~(rKeyVersion[VARI] > rKeyVersion[VARJ]))
+Inv82_R9_3_I2 == \A VARI \in rAliveNodes : (rNodeEpochID[VARI] < rEpochID) \/ ((rNodeEpochID[VARI] = rEpochID))
+Inv4413_R9_3_I2 == \A VARI \in rAliveNodes : \A VARJ \in rAliveNodes : (rKeySharers[VARJ] = "reader") \/ (~(VARI # VARJ /\ rKeyState = rKeyState) \/ (~(rKeySharers[VARI] = "owner")))
+Inv85_R9_3_I2 == \A VARI \in rAliveNodes : (rNodeEpochID[VARI] < rEpochID) \/ (~(rKeyState[VARI] = "replay"))
 
 IndGlobal == 
   /\ TypeOK
   /\ Safety
-  /\ Inv34_R0_0_I1
-  /\ Inv1431_R0_1_I1
-  /\ Inv35_R0_3_I1
-  /\ Inv19115_R0_4_I2
-  /\ Inv1153_R5_0_I1
-  /\ Inv57_R0_2_I1
+  /\ Inv29_R0_0_I1
+  /\ Inv15995_R0_1_I2
+  /\ Inv794_R3_0_I1
+  /\ Inv326_R0_1_I2
+  /\ Inv30_R4_0_I0
+  /\ Inv12_R4_1_I1
+  /\ Inv356_R4_1_I1
+  /\ Inv602_R0_0_I1
+  /\ Inv27_R9_1_I1
+  /\ Inv234_R4_1_I1
+  /\ Inv4413_R9_3_I2
+  /\ Inv82_R9_3_I2
+  /\ Inv85_R9_3_I2
+  /\ Inv407_R0_1_I2
 
 
-\* mean in-degree: 0.8571428571428571
+\* mean in-degree: 2.3333333333333335
 \* median in-degree: 1
-\* max in-degree: 3
+\* max in-degree: 10
 \* min in-degree: 0
 \* mean variable slice size: 0
 
+ASSUME A0 == IsFiniteSet(R_NODES)
+ASSUME A1 == R_NODES \subseteq Nat
 
 \*** TypeOK
 THEOREM L_0 == TypeOK /\ TypeOK /\ Next => TypeOK'
+  <1>. USE A0,A1
   \* (TypeOK,RRcvInvAction)
-  <1>1. TypeOK /\ TypeOK /\ RRcvInvAction => TypeOK'
-    <2> SUFFICES ASSUME TypeOK /\ TypeOK /\ RRcvInvAction
-                 PROVE  TypeOK'
-      OBVIOUS
-    <2>1. (rMsgsINV        \subseteq RMessageINV)'
-      BY DEF TypeOK,RRcvInvAction,RRcvInv,TypeOK
-    <2>2. (rMsgsACK           \subseteq RMessageACK)'
-      BY DEF TypeOK,RRcvInvAction,RRcvInv,TypeOK
-    <2>3. (rMsgsVAL           \subseteq RMessageVAL)'
-      BY DEF TypeOK,RRcvInvAction,RRcvInv,TypeOK
-    <2>4. (rAliveNodes     \subseteq R_NODES)'
-      BY DEF TypeOK,RRcvInvAction,RRcvInv,TypeOK
-    <2>5. (\A n \in R_NODES: rKeyRcvedACKs[n] \subseteq (R_NODES \ {n}))'
-      BY DEF TypeOK,RRcvInvAction,RRcvInv,TypeOK
-    <2>6. (rNodeEpochID    \in [R_NODES -> Nat])'
-      BY DEF TypeOK,RRcvInvAction,RRcvInv,TypeOK
-    <2>7. (rKeyLastWriter  \in [R_NODES -> R_NODES])'
-      BY DEF TypeOK,RRcvInvAction,RRcvInv,TypeOK
-    <2>8. (rKeyVersion     \in [R_NODES -> Nat])'
-      BY DEF TypeOK,RRcvInvAction,RRcvInv,TypeOK
-    <2>9. (rKeySharers     \in [R_NODES -> {"owner", "reader", "non-sharer"}])'
-      BY DEF TypeOK,RRcvInvAction,RRcvInv,TypeOK
-    <2>10. (rKeyState       \in [R_NODES -> {"valid", "invalid", "write", "replay"}])'
-      BY DEF TypeOK,RRcvInvAction,RRcvInv,TypeOK
-    <2>11. QED
-      BY <2>1, <2>10, <2>2, <2>3, <2>4, <2>5, <2>6, <2>7, <2>8, <2>9 DEF TypeOK
-       
+  <1>1. TypeOK /\ TypeOK /\ RRcvInvAction => TypeOK' BY DEF TypeOK,RRcvInvAction,RRcvInv,TypeOK
   \* (TypeOK,RRcvValAction)
-  <1>2. TypeOK /\ TypeOK /\ RRcvValAction => TypeOK'
-       BY DEF TypeOK,RRcvValAction,RRcvVal,TypeOK
-  \* (TypeOK,RReadAction)
-  <1>3. TypeOK /\ TypeOK /\ RReadAction => TypeOK'
-       BY DEF TypeOK,RReadAction,RRead,TypeOK
+  <1>2. TypeOK /\ TypeOK /\ RRcvValAction => TypeOK' BY DEF TypeOK,RRcvValAction,RRcvVal,TypeOK
   \* (TypeOK,RWriteAction)
-  <1>4. TypeOK /\ TypeOK /\ RWriteAction => TypeOK'
-       BY DEF TypeOK,RWriteAction,RWrite,TypeOK
+  <1>3. TypeOK /\ TypeOK /\ RWriteAction => TypeOK' BY DEF TypeOK,RWriteAction,RWrite,TypeOK,RMessageINV,RMessageVAL
   \* (TypeOK,RRcvAckAction)
-  <1>5. TypeOK /\ TypeOK /\ RRcvAckAction => TypeOK'
-       BY DEF TypeOK,RRcvAckAction,RRcvAck,TypeOK
+  <1>4. TypeOK /\ TypeOK /\ RRcvAckAction => TypeOK' BY DEF TypeOK,RRcvAckAction,RRcvAck,TypeOK
   \* (TypeOK,RSendValsAction)
-  <1>6. TypeOK /\ TypeOK /\ RSendValsAction => TypeOK'
-       BY DEF TypeOK,RSendValsAction,RSendVals,TypeOK
+  <1>5. TypeOK /\ TypeOK /\ RSendValsAction => TypeOK' BY DEF TypeOK,RSendValsAction,RSendVals,TypeOK
   \* (TypeOK,RLocalWriteReplayAction)
-  <1>7. TypeOK /\ TypeOK /\ RLocalWriteReplayAction => TypeOK'
-       BY DEF TypeOK,RLocalWriteReplayAction,RLocalWriteReplay,TypeOK
+  <1>6. TypeOK /\ TypeOK /\ RLocalWriteReplayAction => TypeOK' BY DEF TypeOK,RLocalWriteReplayAction,RLocalWriteReplay,TypeOK
   \* (TypeOK,RFailedNodeWriteReplayAction)
-  <1>8. TypeOK /\ TypeOK /\ RFailedNodeWriteReplayAction => TypeOK'
-       BY DEF TypeOK,RFailedNodeWriteReplayAction,RFailedNodeWriteReplay,TypeOK
+  <1>7. TypeOK /\ TypeOK /\ RFailedNodeWriteReplayAction => TypeOK' BY DEF TypeOK,RFailedNodeWriteReplayAction,RFailedNodeWriteReplay,TypeOK
   \* (TypeOK,RUpdateLocalEpochIDAction)
-  <1>9. TypeOK /\ TypeOK /\ RUpdateLocalEpochIDAction => TypeOK'
-       BY DEF TypeOK,RUpdateLocalEpochIDAction,RUpdateLocalEpochID,TypeOK
+  <1>8. TypeOK /\ TypeOK /\ RUpdateLocalEpochIDAction => TypeOK' BY DEF TypeOK,RUpdateLocalEpochIDAction,RUpdateLocalEpochID,TypeOK
   \* (TypeOK,ROverthrowOwnerAction)
-  <1>10. TypeOK /\ TypeOK /\ ROverthrowOwnerAction => TypeOK'
-       BY DEF TypeOK,ROverthrowOwnerAction,ROverthrowOwner,TypeOK
+  <1>9. TypeOK /\ TypeOK /\ ROverthrowOwnerAction => TypeOK' BY DEF TypeOK,ROverthrowOwnerAction,ROverthrowOwner,TypeOK
   \* (TypeOK,RNewOwnerAction)
-  <1>11. TypeOK /\ TypeOK /\ RNewOwnerAction => TypeOK'
-       BY DEF TypeOK,RNewOwnerAction,RNewOwner,TypeOK
+  <1>10. TypeOK /\ TypeOK /\ RNewOwnerAction => TypeOK' BY DEF TypeOK,RNewOwnerAction,RNewOwner,TypeOK
   \* (TypeOK,RNodeFailureAction)
-  <1>12. TypeOK /\ TypeOK /\ RNodeFailureAction => TypeOK'
-       BY DEF TypeOK,RNodeFailureAction,RNodeFailure,TypeOK
-<1>13. QED BY <1>1,<1>2,<1>3,<1>4,<1>5,<1>6,<1>7,<1>8,<1>9,<1>10,<1>11,<1>12 DEF Next
+  <1>11. TypeOK /\ TypeOK /\ RNodeFailureAction => TypeOK' BY DEF TypeOK,RNodeFailureAction,RNodeFailure,TypeOK,RMessageINV,RNoChanges_but_membership
+<1>12. QED BY <1>1,<1>2,<1>3,<1>4,<1>5,<1>6,<1>7,<1>8,<1>9,<1>10,<1>11 DEF Next
 
 
 \* (ROOT SAFETY PROP)
 \*** Safety
-THEOREM L_1 == TypeOK /\ Inv57_R0_2_I1 /\ Inv1431_R0_1_I1 /\ Inv34_R0_0_I1 /\ Safety /\ Next => Safety'
+THEOREM L_1 == TypeOK /\ Inv29_R0_0_I1 /\ Inv602_R0_0_I1 /\ Inv602_R0_0_I1 /\ Inv15995_R0_1_I2 /\ Inv326_R0_1_I2 /\ Inv407_R0_1_I2 /\ Safety /\ Next => Safety'
+  <1>. USE A0,A1
   \* (Safety,RRcvInvAction)
-  <1>1. TypeOK /\ Inv57_R0_2_I1 /\ Safety /\ RRcvInvAction => Safety'
-       BY DEF TypeOK,Inv57_R0_2_I1,RRcvInvAction,RRcvInv,Safety,RConsistentInvariant
+  <1>1. TypeOK /\ Safety /\ RRcvInvAction => Safety' BY DEF TypeOK,RRcvInvAction,RRcvInv,Safety,RConsistentInvariant,RMessageINV
   \* (Safety,RRcvValAction)
-  <1>2. TypeOK /\ Safety /\ RRcvValAction => Safety'
-       BY DEF TypeOK,RRcvValAction,RRcvVal,Safety,RConsistentInvariant
-  \* (Safety,RReadAction)
-  <1>3. TypeOK /\ Safety /\ RReadAction => Safety'
-       BY DEF TypeOK,RReadAction,RRead,Safety,RConsistentInvariant
+  <1>2. TypeOK /\ Inv29_R0_0_I1 /\ Inv602_R0_0_I1 /\ Safety /\ RRcvValAction => Safety' BY DEF TypeOK,Inv29_R0_0_I1,Inv602_R0_0_I1,RRcvValAction,RRcvVal,Safety,RConsistentInvariant,RMessageINV
   \* (Safety,RWriteAction)
-  <1>4. TypeOK /\ Safety /\ RWriteAction => Safety'
-       BY DEF TypeOK,RWriteAction,RWrite,Safety,RConsistentInvariant
+  <1>3. TypeOK /\ Safety /\ RWriteAction => Safety' BY DEF TypeOK,RWriteAction,RWrite,Safety,RMessageINV,RMessageVAL,RConsistentInvariant,RMessageINV
   \* (Safety,RRcvAckAction)
-  <1>5. TypeOK /\ Safety /\ RRcvAckAction => Safety'
-       BY DEF TypeOK,RRcvAckAction,RRcvAck,Safety,RConsistentInvariant
+  <1>4. TypeOK /\ Safety /\ RRcvAckAction => Safety' BY DEF TypeOK,RRcvAckAction,RRcvAck,Safety,RConsistentInvariant,RMessageINV
   \* (Safety,RSendValsAction)
-  <1>6. TypeOK /\ Safety /\ RSendValsAction => Safety'
-       BY DEF TypeOK,RSendValsAction,RSendVals,Safety,RConsistentInvariant
+  <1>5. TypeOK /\ Inv602_R0_0_I1 /\ Inv15995_R0_1_I2 /\ Inv326_R0_1_I2 /\ Inv407_R0_1_I2 /\ Safety /\ RSendValsAction => Safety' BY DEF TypeOK,Inv602_R0_0_I1,Inv15995_R0_1_I2,Inv326_R0_1_I2,Inv407_R0_1_I2,RSendValsAction,RSendVals,Safety,RConsistentInvariant,RMessageINV
   \* (Safety,RLocalWriteReplayAction)
-  <1>7. TypeOK /\ Safety /\ RLocalWriteReplayAction => Safety'
-       BY DEF TypeOK,RLocalWriteReplayAction,RLocalWriteReplay,Safety,RConsistentInvariant
+  <1>6. TypeOK /\ Safety /\ RLocalWriteReplayAction => Safety' BY DEF TypeOK,RLocalWriteReplayAction,RLocalWriteReplay,Safety,RConsistentInvariant,RMessageINV
   \* (Safety,RFailedNodeWriteReplayAction)
-  <1>8. TypeOK /\ Safety /\ RFailedNodeWriteReplayAction => Safety'
-       BY DEF TypeOK,RFailedNodeWriteReplayAction,RFailedNodeWriteReplay,Safety,RConsistentInvariant
+  <1>7. TypeOK /\ Safety /\ RFailedNodeWriteReplayAction => Safety' BY DEF TypeOK,RFailedNodeWriteReplayAction,RFailedNodeWriteReplay,Safety,RConsistentInvariant,RMessageINV
   \* (Safety,RUpdateLocalEpochIDAction)
-  <1>9. TypeOK /\ Safety /\ RUpdateLocalEpochIDAction => Safety'
-       BY DEF TypeOK,RUpdateLocalEpochIDAction,RUpdateLocalEpochID,Safety,RConsistentInvariant
+  <1>8. TypeOK /\ Safety /\ RUpdateLocalEpochIDAction => Safety' BY DEF TypeOK,RUpdateLocalEpochIDAction,RUpdateLocalEpochID,Safety,RConsistentInvariant,RMessageINV
   \* (Safety,ROverthrowOwnerAction)
-  <1>10. TypeOK /\ Inv1431_R0_1_I1 /\ Safety /\ ROverthrowOwnerAction => Safety'
-       BY DEF TypeOK,Inv1431_R0_1_I1,ROverthrowOwnerAction,ROverthrowOwner,Safety,RConsistentInvariant
+  <1>9. TypeOK /\ Safety /\ ROverthrowOwnerAction => Safety' BY DEF TypeOK,ROverthrowOwnerAction,ROverthrowOwner,Safety,RConsistentInvariant,RMessageINV
   \* (Safety,RNewOwnerAction)
-  <1>11. TypeOK /\ Inv34_R0_0_I1 /\ Safety /\ RNewOwnerAction => Safety'
-       BY DEF TypeOK,Inv34_R0_0_I1,RNewOwnerAction,RNewOwner,Safety,RConsistentInvariant
+  <1>10. TypeOK /\ Safety /\ RNewOwnerAction => Safety' BY DEF TypeOK,RNewOwnerAction,RNewOwner,Safety,RConsistentInvariant,RMessageINV
   \* (Safety,RNodeFailureAction)
-  <1>12. TypeOK /\ Safety /\ RNodeFailureAction => Safety'
-       BY DEF TypeOK,RNodeFailureAction,RNodeFailure,Safety,RConsistentInvariant
-<1>13. QED BY <1>1,<1>2,<1>3,<1>4,<1>5,<1>6,<1>7,<1>8,<1>9,<1>10,<1>11,<1>12 DEF Next
+  <1>11. TypeOK /\ Safety /\ RNodeFailureAction => Safety' BY DEF TypeOK,RNodeFailureAction,RNodeFailure,Safety,RMessageINV,RNoChanges_but_membership,RConsistentInvariant,RMessageINV
+<1>12. QED BY <1>1,<1>2,<1>3,<1>4,<1>5,<1>6,<1>7,<1>8,<1>9,<1>10,<1>11 DEF Next
 
 
-\*** Inv34_R0_0_I1
-THEOREM L_2 == TypeOK /\ Inv34_R0_0_I1 /\ Next => Inv34_R0_0_I1'
-  \* (Inv34_R0_0_I1,RRcvInvAction)
-  <1>1. TypeOK /\ Inv34_R0_0_I1 /\ RRcvInvAction => Inv34_R0_0_I1'
-       BY DEF TypeOK,RRcvInvAction,RRcvInv,Inv34_R0_0_I1
-  \* (Inv34_R0_0_I1,RRcvValAction)
-  <1>2. TypeOK /\ Inv34_R0_0_I1 /\ RRcvValAction => Inv34_R0_0_I1'
-       BY DEF TypeOK,RRcvValAction,RRcvVal,Inv34_R0_0_I1
-  \* (Inv34_R0_0_I1,RReadAction)
-  <1>3. TypeOK /\ Inv34_R0_0_I1 /\ RReadAction => Inv34_R0_0_I1'
-       BY DEF TypeOK,RReadAction,RRead,Inv34_R0_0_I1
-  \* (Inv34_R0_0_I1,RWriteAction)
-  <1>4. TypeOK /\ Inv34_R0_0_I1 /\ RWriteAction => Inv34_R0_0_I1'
-       BY DEF TypeOK,RWriteAction,RWrite,Inv34_R0_0_I1
-  \* (Inv34_R0_0_I1,RRcvAckAction)
-  <1>5. TypeOK /\ Inv34_R0_0_I1 /\ RRcvAckAction => Inv34_R0_0_I1'
-       BY DEF TypeOK,RRcvAckAction,RRcvAck,Inv34_R0_0_I1
-  \* (Inv34_R0_0_I1,RSendValsAction)
-  <1>6. TypeOK /\ Inv34_R0_0_I1 /\ RSendValsAction => Inv34_R0_0_I1'
-       BY DEF TypeOK,RSendValsAction,RSendVals,Inv34_R0_0_I1
-  \* (Inv34_R0_0_I1,RLocalWriteReplayAction)
-  <1>7. TypeOK /\ Inv34_R0_0_I1 /\ RLocalWriteReplayAction => Inv34_R0_0_I1'
-       BY DEF TypeOK,RLocalWriteReplayAction,RLocalWriteReplay,Inv34_R0_0_I1
-  \* (Inv34_R0_0_I1,RFailedNodeWriteReplayAction)
-  <1>8. TypeOK /\ Inv34_R0_0_I1 /\ RFailedNodeWriteReplayAction => Inv34_R0_0_I1'
-       BY DEF TypeOK,RFailedNodeWriteReplayAction,RFailedNodeWriteReplay,Inv34_R0_0_I1
-  \* (Inv34_R0_0_I1,RUpdateLocalEpochIDAction)
-  <1>9. TypeOK /\ Inv34_R0_0_I1 /\ RUpdateLocalEpochIDAction => Inv34_R0_0_I1'
-       BY DEF TypeOK,RUpdateLocalEpochIDAction,RUpdateLocalEpochID,Inv34_R0_0_I1
-  \* (Inv34_R0_0_I1,ROverthrowOwnerAction)
-  <1>10. TypeOK /\ Inv34_R0_0_I1 /\ ROverthrowOwnerAction => Inv34_R0_0_I1'
-       BY DEF TypeOK,ROverthrowOwnerAction,ROverthrowOwner,Inv34_R0_0_I1
-  \* (Inv34_R0_0_I1,RNewOwnerAction)
-  <1>11. TypeOK /\ Inv34_R0_0_I1 /\ RNewOwnerAction => Inv34_R0_0_I1'
-       BY DEF TypeOK,RNewOwnerAction,RNewOwner,Inv34_R0_0_I1
-  \* (Inv34_R0_0_I1,RNodeFailureAction)
-  <1>12. TypeOK /\ Inv34_R0_0_I1 /\ RNodeFailureAction => Inv34_R0_0_I1'
-       BY DEF TypeOK,RNodeFailureAction,RNodeFailure,Inv34_R0_0_I1
-<1>13. QED BY <1>1,<1>2,<1>3,<1>4,<1>5,<1>6,<1>7,<1>8,<1>9,<1>10,<1>11,<1>12 DEF Next
+\*** Inv29_R0_0_I1
+THEOREM L_2 == TypeOK /\ Inv15995_R0_1_I2 /\ Inv29_R0_0_I1 /\ Next => Inv29_R0_0_I1'
+  <1>. USE A0,A1
+  \* (Inv29_R0_0_I1,RRcvInvAction)
+  <1>1. TypeOK /\ Inv29_R0_0_I1 /\ RRcvInvAction => Inv29_R0_0_I1' BY DEF TypeOK,RRcvInvAction,RRcvInv,Inv29_R0_0_I1
+  \* (Inv29_R0_0_I1,RRcvValAction)
+  <1>2. TypeOK /\ Inv29_R0_0_I1 /\ RRcvValAction => Inv29_R0_0_I1' BY DEF TypeOK,RRcvValAction,RRcvVal,Inv29_R0_0_I1
+  \* (Inv29_R0_0_I1,RWriteAction)
+  <1>3. TypeOK /\ Inv29_R0_0_I1 /\ RWriteAction => Inv29_R0_0_I1' BY DEF TypeOK,RWriteAction,RWrite,Inv29_R0_0_I1,RMessageINV,RMessageVAL
+  \* (Inv29_R0_0_I1,RRcvAckAction)
+  <1>4. TypeOK /\ Inv29_R0_0_I1 /\ RRcvAckAction => Inv29_R0_0_I1' BY DEF TypeOK,RRcvAckAction,RRcvAck,Inv29_R0_0_I1
+  \* (Inv29_R0_0_I1,RSendValsAction)
+  <1>5. TypeOK /\ Inv15995_R0_1_I2 /\ Inv29_R0_0_I1 /\ RSendValsAction => Inv29_R0_0_I1' BY DEF TypeOK,Inv15995_R0_1_I2,RSendValsAction,RSendVals,Inv29_R0_0_I1
+  \* (Inv29_R0_0_I1,RLocalWriteReplayAction)
+  <1>6. TypeOK /\ Inv29_R0_0_I1 /\ RLocalWriteReplayAction => Inv29_R0_0_I1' BY DEF TypeOK,RLocalWriteReplayAction,RLocalWriteReplay,Inv29_R0_0_I1
+  \* (Inv29_R0_0_I1,RFailedNodeWriteReplayAction)
+  <1>7. TypeOK /\ Inv29_R0_0_I1 /\ RFailedNodeWriteReplayAction => Inv29_R0_0_I1' BY DEF TypeOK,RFailedNodeWriteReplayAction,RFailedNodeWriteReplay,Inv29_R0_0_I1
+  \* (Inv29_R0_0_I1,RUpdateLocalEpochIDAction)
+  <1>8. TypeOK /\ Inv29_R0_0_I1 /\ RUpdateLocalEpochIDAction => Inv29_R0_0_I1' BY DEF TypeOK,RUpdateLocalEpochIDAction,RUpdateLocalEpochID,Inv29_R0_0_I1
+  \* (Inv29_R0_0_I1,ROverthrowOwnerAction)
+  <1>9. TypeOK /\ Inv29_R0_0_I1 /\ ROverthrowOwnerAction => Inv29_R0_0_I1' BY DEF TypeOK,ROverthrowOwnerAction,ROverthrowOwner,Inv29_R0_0_I1
+  \* (Inv29_R0_0_I1,RNewOwnerAction)
+  <1>10. TypeOK /\ Inv29_R0_0_I1 /\ RNewOwnerAction => Inv29_R0_0_I1' BY DEF TypeOK,RNewOwnerAction,RNewOwner,Inv29_R0_0_I1
+  \* (Inv29_R0_0_I1,RNodeFailureAction)
+  <1>11. TypeOK /\ Inv29_R0_0_I1 /\ RNodeFailureAction => Inv29_R0_0_I1' BY DEF TypeOK,RNodeFailureAction,RNodeFailure,Inv29_R0_0_I1,RMessageINV,RNoChanges_but_membership
+<1>12. QED BY <1>1,<1>2,<1>3,<1>4,<1>5,<1>6,<1>7,<1>8,<1>9,<1>10,<1>11 DEF Next
 
 
-\*** Inv1431_R0_1_I1
-THEOREM L_3 == TypeOK /\ Inv35_R0_3_I1 /\ Inv1431_R0_1_I1 /\ Next => Inv1431_R0_1_I1'
-  \* (Inv1431_R0_1_I1,RRcvInvAction)
-  <1>1. TypeOK /\ Inv1431_R0_1_I1 /\ RRcvInvAction => Inv1431_R0_1_I1'
-       BY DEF TypeOK,RRcvInvAction,RRcvInv,Inv1431_R0_1_I1
-  \* (Inv1431_R0_1_I1,RRcvValAction)
-  <1>2. TypeOK /\ Inv35_R0_3_I1 /\ Inv1431_R0_1_I1 /\ RRcvValAction => Inv1431_R0_1_I1'
-       BY DEF TypeOK,Inv35_R0_3_I1,RRcvValAction,RRcvVal,Inv1431_R0_1_I1
-  \* (Inv1431_R0_1_I1,RReadAction)
-  <1>3. TypeOK /\ Inv1431_R0_1_I1 /\ RReadAction => Inv1431_R0_1_I1'
-       BY DEF TypeOK,RReadAction,RRead,Inv1431_R0_1_I1
-  \* (Inv1431_R0_1_I1,RWriteAction)
-  <1>4. TypeOK /\ Inv1431_R0_1_I1 /\ RWriteAction => Inv1431_R0_1_I1'
-       BY DEF TypeOK,RWriteAction,RWrite,Inv1431_R0_1_I1
-  \* (Inv1431_R0_1_I1,RRcvAckAction)
-  <1>5. TypeOK /\ Inv1431_R0_1_I1 /\ RRcvAckAction => Inv1431_R0_1_I1'
-       BY DEF TypeOK,RRcvAckAction,RRcvAck,Inv1431_R0_1_I1
-  \* (Inv1431_R0_1_I1,RSendValsAction)
-  <1>6. TypeOK /\ Inv1431_R0_1_I1 /\ RSendValsAction => Inv1431_R0_1_I1'
-       BY DEF TypeOK,RSendValsAction,RSendVals,Inv1431_R0_1_I1
-  \* (Inv1431_R0_1_I1,RLocalWriteReplayAction)
-  <1>7. TypeOK /\ Inv1431_R0_1_I1 /\ RLocalWriteReplayAction => Inv1431_R0_1_I1'
-       BY DEF TypeOK,RLocalWriteReplayAction,RLocalWriteReplay,Inv1431_R0_1_I1
-  \* (Inv1431_R0_1_I1,RFailedNodeWriteReplayAction)
-  <1>8. TypeOK /\ Inv1431_R0_1_I1 /\ RFailedNodeWriteReplayAction => Inv1431_R0_1_I1'
-       BY DEF TypeOK,RFailedNodeWriteReplayAction,RFailedNodeWriteReplay,Inv1431_R0_1_I1
-  \* (Inv1431_R0_1_I1,RUpdateLocalEpochIDAction)
-  <1>9. TypeOK /\ Inv1431_R0_1_I1 /\ RUpdateLocalEpochIDAction => Inv1431_R0_1_I1'
-       BY DEF TypeOK,RUpdateLocalEpochIDAction,RUpdateLocalEpochID,Inv1431_R0_1_I1
-  \* (Inv1431_R0_1_I1,ROverthrowOwnerAction)
-  <1>10. TypeOK /\ Inv1431_R0_1_I1 /\ ROverthrowOwnerAction => Inv1431_R0_1_I1'
-       BY DEF TypeOK,ROverthrowOwnerAction,ROverthrowOwner,Inv1431_R0_1_I1
-  \* (Inv1431_R0_1_I1,RNewOwnerAction)
-  <1>11. TypeOK /\ Inv1431_R0_1_I1 /\ RNewOwnerAction => Inv1431_R0_1_I1'
-       BY DEF TypeOK,RNewOwnerAction,RNewOwner,Inv1431_R0_1_I1
-  \* (Inv1431_R0_1_I1,RNodeFailureAction)
-  <1>12. TypeOK /\ Inv1431_R0_1_I1 /\ RNodeFailureAction => Inv1431_R0_1_I1'
-       BY DEF TypeOK,RNodeFailureAction,RNodeFailure,Inv1431_R0_1_I1
-<1>13. QED BY <1>1,<1>2,<1>3,<1>4,<1>5,<1>6,<1>7,<1>8,<1>9,<1>10,<1>11,<1>12 DEF Next
+\*** Inv15995_R0_1_I2
+THEOREM L_3 == TypeOK /\ Inv794_R3_0_I1 /\ Inv326_R0_1_I2 /\ Inv602_R0_0_I1 /\ Inv407_R0_1_I2 /\ Inv15995_R0_1_I2 /\ Next => Inv15995_R0_1_I2'
+  <1>. USE A0,A1
+  \* (Inv15995_R0_1_I2,RRcvInvAction)
+  <1>1. TypeOK /\ Inv15995_R0_1_I2 /\ RRcvInvAction => Inv15995_R0_1_I2' BY DEF TypeOK,RRcvInvAction,RRcvInv,Inv15995_R0_1_I2
+  \* (Inv15995_R0_1_I2,RRcvValAction)
+  <1>2. TypeOK /\ Inv15995_R0_1_I2 /\ RRcvValAction => Inv15995_R0_1_I2' BY DEF TypeOK,RRcvValAction,RRcvVal,Inv15995_R0_1_I2
+  \* (Inv15995_R0_1_I2,RWriteAction)
+  <1>3. TypeOK /\ Inv15995_R0_1_I2 /\ RWriteAction => Inv15995_R0_1_I2' BY DEF TypeOK,RWriteAction,RWrite,Inv15995_R0_1_I2,RMessageINV,RMessageVAL
+  \* (Inv15995_R0_1_I2,RRcvAckAction)
+  <1>4. TypeOK /\ Inv794_R3_0_I1 /\ Inv326_R0_1_I2 /\ Inv602_R0_0_I1 /\ Inv407_R0_1_I2 /\ Inv15995_R0_1_I2 /\ RRcvAckAction => Inv15995_R0_1_I2' BY DEF TypeOK,Inv794_R3_0_I1,Inv326_R0_1_I2,Inv602_R0_0_I1,Inv407_R0_1_I2,RRcvAckAction,RRcvAck,Inv15995_R0_1_I2
+  \* (Inv15995_R0_1_I2,RSendValsAction)
+  <1>5. TypeOK /\ Inv15995_R0_1_I2 /\ RSendValsAction => Inv15995_R0_1_I2' BY DEF TypeOK,RSendValsAction,RSendVals,Inv15995_R0_1_I2
+  \* (Inv15995_R0_1_I2,RLocalWriteReplayAction)
+  <1>6. TypeOK /\ Inv15995_R0_1_I2 /\ RLocalWriteReplayAction => Inv15995_R0_1_I2' BY DEF TypeOK,RLocalWriteReplayAction,RLocalWriteReplay,Inv15995_R0_1_I2
+  \* (Inv15995_R0_1_I2,RFailedNodeWriteReplayAction)
+  <1>7. TypeOK /\ Inv15995_R0_1_I2 /\ RFailedNodeWriteReplayAction => Inv15995_R0_1_I2' BY DEF TypeOK,RFailedNodeWriteReplayAction,RFailedNodeWriteReplay,Inv15995_R0_1_I2
+  \* (Inv15995_R0_1_I2,RUpdateLocalEpochIDAction)
+  <1>8. TypeOK /\ Inv15995_R0_1_I2 /\ RUpdateLocalEpochIDAction => Inv15995_R0_1_I2' BY DEF TypeOK,RUpdateLocalEpochIDAction,RUpdateLocalEpochID,Inv15995_R0_1_I2
+  \* (Inv15995_R0_1_I2,ROverthrowOwnerAction)
+  <1>9. TypeOK /\ Inv15995_R0_1_I2 /\ ROverthrowOwnerAction => Inv15995_R0_1_I2' BY DEF TypeOK,ROverthrowOwnerAction,ROverthrowOwner,Inv15995_R0_1_I2
+  \* (Inv15995_R0_1_I2,RNewOwnerAction)
+  <1>10. TypeOK /\ Inv15995_R0_1_I2 /\ RNewOwnerAction => Inv15995_R0_1_I2' BY DEF TypeOK,RNewOwnerAction,RNewOwner,Inv15995_R0_1_I2
+  \* (Inv15995_R0_1_I2,RNodeFailureAction)
+  <1>11. TypeOK /\ Inv15995_R0_1_I2 /\ RNodeFailureAction => Inv15995_R0_1_I2' BY DEF TypeOK,RNodeFailureAction,RNodeFailure,Inv15995_R0_1_I2,RMessageINV,RNoChanges_but_membership
+<1>12. QED BY <1>1,<1>2,<1>3,<1>4,<1>5,<1>6,<1>7,<1>8,<1>9,<1>10,<1>11 DEF Next
 
 
-\*** Inv35_R0_3_I1
-THEOREM L_4 == TypeOK /\ Inv19115_R0_4_I2 /\ Inv35_R0_3_I1 /\ Next => Inv35_R0_3_I1'
-  \* (Inv35_R0_3_I1,RRcvInvAction)
-  <1>1. TypeOK /\ Inv35_R0_3_I1 /\ RRcvInvAction => Inv35_R0_3_I1'
-       BY DEF TypeOK,RRcvInvAction,RRcvInv,Inv35_R0_3_I1
-  \* (Inv35_R0_3_I1,RRcvValAction)
-  <1>2. TypeOK /\ Inv35_R0_3_I1 /\ RRcvValAction => Inv35_R0_3_I1'
-       BY DEF TypeOK,RRcvValAction,RRcvVal,Inv35_R0_3_I1
-  \* (Inv35_R0_3_I1,RReadAction)
-  <1>3. TypeOK /\ Inv35_R0_3_I1 /\ RReadAction => Inv35_R0_3_I1'
-       BY DEF TypeOK,RReadAction,RRead,Inv35_R0_3_I1
-  \* (Inv35_R0_3_I1,RWriteAction)
-  <1>4. TypeOK /\ Inv35_R0_3_I1 /\ RWriteAction => Inv35_R0_3_I1'
-       BY DEF TypeOK,RWriteAction,RWrite,Inv35_R0_3_I1
-  \* (Inv35_R0_3_I1,RRcvAckAction)
-  <1>5. TypeOK /\ Inv35_R0_3_I1 /\ RRcvAckAction => Inv35_R0_3_I1'
-       BY DEF TypeOK,RRcvAckAction,RRcvAck,Inv35_R0_3_I1
-  \* (Inv35_R0_3_I1,RSendValsAction)
-  <1>6. TypeOK /\ Inv19115_R0_4_I2 /\ Inv35_R0_3_I1 /\ RSendValsAction => Inv35_R0_3_I1'
-       BY DEF TypeOK,Inv19115_R0_4_I2,RSendValsAction,RSendVals,Inv35_R0_3_I1
-  \* (Inv35_R0_3_I1,RLocalWriteReplayAction)
-  <1>7. TypeOK /\ Inv35_R0_3_I1 /\ RLocalWriteReplayAction => Inv35_R0_3_I1'
-       BY DEF TypeOK,RLocalWriteReplayAction,RLocalWriteReplay,Inv35_R0_3_I1
-  \* (Inv35_R0_3_I1,RFailedNodeWriteReplayAction)
-  <1>8. TypeOK /\ Inv35_R0_3_I1 /\ RFailedNodeWriteReplayAction => Inv35_R0_3_I1'
-       BY DEF TypeOK,RFailedNodeWriteReplayAction,RFailedNodeWriteReplay,Inv35_R0_3_I1
-  \* (Inv35_R0_3_I1,RUpdateLocalEpochIDAction)
-  <1>9. TypeOK /\ Inv35_R0_3_I1 /\ RUpdateLocalEpochIDAction => Inv35_R0_3_I1'
-       BY DEF TypeOK,RUpdateLocalEpochIDAction,RUpdateLocalEpochID,Inv35_R0_3_I1
-  \* (Inv35_R0_3_I1,ROverthrowOwnerAction)
-  <1>10. TypeOK /\ Inv35_R0_3_I1 /\ ROverthrowOwnerAction => Inv35_R0_3_I1'
-       BY DEF TypeOK,ROverthrowOwnerAction,ROverthrowOwner,Inv35_R0_3_I1
-  \* (Inv35_R0_3_I1,RNewOwnerAction)
-  <1>11. TypeOK /\ Inv35_R0_3_I1 /\ RNewOwnerAction => Inv35_R0_3_I1'
-       BY DEF TypeOK,RNewOwnerAction,RNewOwner,Inv35_R0_3_I1
-  \* (Inv35_R0_3_I1,RNodeFailureAction)
-  <1>12. TypeOK /\ Inv35_R0_3_I1 /\ RNodeFailureAction => Inv35_R0_3_I1'
-       BY DEF TypeOK,RNodeFailureAction,RNodeFailure,Inv35_R0_3_I1
-<1>13. QED BY <1>1,<1>2,<1>3,<1>4,<1>5,<1>6,<1>7,<1>8,<1>9,<1>10,<1>11,<1>12 DEF Next
+\*** Inv794_R3_0_I1
+THEOREM L_4 == TypeOK /\ Inv794_R3_0_I1 /\ Next => Inv794_R3_0_I1'
+  <1>. USE A0,A1
+  \* (Inv794_R3_0_I1,RRcvInvAction)
+  <1>1. TypeOK /\ Inv794_R3_0_I1 /\ RRcvInvAction => Inv794_R3_0_I1' BY DEF TypeOK,RRcvInvAction,RRcvInv,Inv794_R3_0_I1
+  \* (Inv794_R3_0_I1,RRcvValAction)
+  <1>2. TypeOK /\ Inv794_R3_0_I1 /\ RRcvValAction => Inv794_R3_0_I1' BY DEF TypeOK,RRcvValAction,RRcvVal,Inv794_R3_0_I1
+  \* (Inv794_R3_0_I1,RWriteAction)
+  <1>3. TypeOK /\ Inv794_R3_0_I1 /\ RWriteAction => Inv794_R3_0_I1' BY DEF TypeOK,RWriteAction,RWrite,Inv794_R3_0_I1,RMessageINV,RMessageVAL
+  \* (Inv794_R3_0_I1,RRcvAckAction)
+  <1>4. TypeOK /\ Inv794_R3_0_I1 /\ RRcvAckAction => Inv794_R3_0_I1' BY DEF TypeOK,RRcvAckAction,RRcvAck,Inv794_R3_0_I1
+  \* (Inv794_R3_0_I1,RSendValsAction)
+  <1>5. TypeOK /\ Inv794_R3_0_I1 /\ RSendValsAction => Inv794_R3_0_I1' BY DEF TypeOK,RSendValsAction,RSendVals,Inv794_R3_0_I1
+  \* (Inv794_R3_0_I1,RLocalWriteReplayAction)
+  <1>6. TypeOK /\ Inv794_R3_0_I1 /\ RLocalWriteReplayAction => Inv794_R3_0_I1' BY DEF TypeOK,RLocalWriteReplayAction,RLocalWriteReplay,Inv794_R3_0_I1
+  \* (Inv794_R3_0_I1,RFailedNodeWriteReplayAction)
+  <1>7. TypeOK /\ Inv794_R3_0_I1 /\ RFailedNodeWriteReplayAction => Inv794_R3_0_I1' BY DEF TypeOK,RFailedNodeWriteReplayAction,RFailedNodeWriteReplay,Inv794_R3_0_I1
+  \* (Inv794_R3_0_I1,RUpdateLocalEpochIDAction)
+  <1>8. TypeOK /\ Inv794_R3_0_I1 /\ RUpdateLocalEpochIDAction => Inv794_R3_0_I1' BY DEF TypeOK,RUpdateLocalEpochIDAction,RUpdateLocalEpochID,Inv794_R3_0_I1
+  \* (Inv794_R3_0_I1,ROverthrowOwnerAction)
+  <1>9. TypeOK /\ Inv794_R3_0_I1 /\ ROverthrowOwnerAction => Inv794_R3_0_I1' BY DEF TypeOK,ROverthrowOwnerAction,ROverthrowOwner,Inv794_R3_0_I1
+  \* (Inv794_R3_0_I1,RNewOwnerAction)
+  <1>10. TypeOK /\ Inv794_R3_0_I1 /\ RNewOwnerAction => Inv794_R3_0_I1' BY DEF TypeOK,RNewOwnerAction,RNewOwner,Inv794_R3_0_I1
+  \* (Inv794_R3_0_I1,RNodeFailureAction)
+  <1>11. TypeOK /\ Inv794_R3_0_I1 /\ RNodeFailureAction => Inv794_R3_0_I1' BY DEF TypeOK,RNodeFailureAction,RNodeFailure,Inv794_R3_0_I1,RMessageINV,RNoChanges_but_membership
+<1>12. QED BY <1>1,<1>2,<1>3,<1>4,<1>5,<1>6,<1>7,<1>8,<1>9,<1>10,<1>11 DEF Next
 
 
-\*** Inv19115_R0_4_I2
-THEOREM L_5 == TypeOK /\ Inv1153_R5_0_I1 /\ Inv19115_R0_4_I2 /\ Next => Inv19115_R0_4_I2'
-  \* (Inv19115_R0_4_I2,RRcvInvAction)
-  <1>1. TypeOK /\ Inv19115_R0_4_I2 /\ RRcvInvAction => Inv19115_R0_4_I2'
-       BY DEF TypeOK,RRcvInvAction,RRcvInv,Inv19115_R0_4_I2
-  \* (Inv19115_R0_4_I2,RRcvValAction)
-  <1>2. TypeOK /\ Inv19115_R0_4_I2 /\ RRcvValAction => Inv19115_R0_4_I2'
-       BY DEF TypeOK,RRcvValAction,RRcvVal,Inv19115_R0_4_I2
-  \* (Inv19115_R0_4_I2,RReadAction)
-  <1>3. TypeOK /\ Inv19115_R0_4_I2 /\ RReadAction => Inv19115_R0_4_I2'
-       BY DEF TypeOK,RReadAction,RRead,Inv19115_R0_4_I2
-  \* (Inv19115_R0_4_I2,RWriteAction)
-  <1>4. TypeOK /\ Inv19115_R0_4_I2 /\ RWriteAction => Inv19115_R0_4_I2'
-       BY DEF TypeOK,RWriteAction,RWrite,Inv19115_R0_4_I2
-  \* (Inv19115_R0_4_I2,RRcvAckAction)
-  <1>5. TypeOK /\ Inv1153_R5_0_I1 /\ Inv19115_R0_4_I2 /\ RRcvAckAction => Inv19115_R0_4_I2'
-       BY DEF TypeOK,Inv1153_R5_0_I1,RRcvAckAction,RRcvAck,Inv19115_R0_4_I2
-  \* (Inv19115_R0_4_I2,RSendValsAction)
-  <1>6. TypeOK /\ Inv19115_R0_4_I2 /\ RSendValsAction => Inv19115_R0_4_I2'
-       BY DEF TypeOK,RSendValsAction,RSendVals,Inv19115_R0_4_I2
-  \* (Inv19115_R0_4_I2,RLocalWriteReplayAction)
-  <1>7. TypeOK /\ Inv19115_R0_4_I2 /\ RLocalWriteReplayAction => Inv19115_R0_4_I2'
-       BY DEF TypeOK,RLocalWriteReplayAction,RLocalWriteReplay,Inv19115_R0_4_I2
-  \* (Inv19115_R0_4_I2,RFailedNodeWriteReplayAction)
-  <1>8. TypeOK /\ Inv19115_R0_4_I2 /\ RFailedNodeWriteReplayAction => Inv19115_R0_4_I2'
-       BY DEF TypeOK,RFailedNodeWriteReplayAction,RFailedNodeWriteReplay,Inv19115_R0_4_I2
-  \* (Inv19115_R0_4_I2,RUpdateLocalEpochIDAction)
-  <1>9. TypeOK /\ Inv19115_R0_4_I2 /\ RUpdateLocalEpochIDAction => Inv19115_R0_4_I2'
-       BY DEF TypeOK,RUpdateLocalEpochIDAction,RUpdateLocalEpochID,Inv19115_R0_4_I2
-  \* (Inv19115_R0_4_I2,ROverthrowOwnerAction)
-  <1>10. TypeOK /\ Inv19115_R0_4_I2 /\ ROverthrowOwnerAction => Inv19115_R0_4_I2'
-       BY DEF TypeOK,ROverthrowOwnerAction,ROverthrowOwner,Inv19115_R0_4_I2
-  \* (Inv19115_R0_4_I2,RNewOwnerAction)
-  <1>11. TypeOK /\ Inv19115_R0_4_I2 /\ RNewOwnerAction => Inv19115_R0_4_I2'
-       BY DEF TypeOK,RNewOwnerAction,RNewOwner,Inv19115_R0_4_I2
-  \* (Inv19115_R0_4_I2,RNodeFailureAction)
-  <1>12. TypeOK /\ Inv19115_R0_4_I2 /\ RNodeFailureAction => Inv19115_R0_4_I2'
-       BY DEF TypeOK,RNodeFailureAction,RNodeFailure,Inv19115_R0_4_I2
-<1>13. QED BY <1>1,<1>2,<1>3,<1>4,<1>5,<1>6,<1>7,<1>8,<1>9,<1>10,<1>11,<1>12 DEF Next
+\*** Inv326_R0_1_I2
+THEOREM L_5 == TypeOK /\ Inv30_R4_0_I0 /\ Inv12_R4_1_I1 /\ Inv356_R4_1_I1 /\ Inv602_R0_0_I1 /\ Inv234_R4_1_I1 /\ Inv407_R0_1_I2 /\ Inv326_R0_1_I2 /\ Next => Inv326_R0_1_I2'
+  <1>. USE A0,A1
+  \* (Inv326_R0_1_I2,RRcvInvAction)
+  <1>1. TypeOK /\ Inv30_R4_0_I0 /\ Inv326_R0_1_I2 /\ RRcvInvAction => Inv326_R0_1_I2' BY DEF TypeOK,Inv30_R4_0_I0,RRcvInvAction,RRcvInv,Inv326_R0_1_I2
+  \* (Inv326_R0_1_I2,RRcvValAction)
+  <1>2. TypeOK /\ Inv326_R0_1_I2 /\ RRcvValAction => Inv326_R0_1_I2' BY DEF TypeOK,RRcvValAction,RRcvVal,Inv326_R0_1_I2
+  \* (Inv326_R0_1_I2,RWriteAction)
+  <1>3. TypeOK /\ Inv12_R4_1_I1 /\ Inv356_R4_1_I1 /\ Inv602_R0_0_I1 /\ Inv234_R4_1_I1 /\ Inv407_R0_1_I2 /\ Inv326_R0_1_I2 /\ RWriteAction => Inv326_R0_1_I2' BY DEF TypeOK,Inv12_R4_1_I1,Inv356_R4_1_I1,Inv602_R0_0_I1,Inv234_R4_1_I1,Inv407_R0_1_I2,RWriteAction,RWrite,Inv326_R0_1_I2,RMessageINV,RMessageVAL
+  \* (Inv326_R0_1_I2,RRcvAckAction)
+  <1>4. TypeOK /\ Inv326_R0_1_I2 /\ RRcvAckAction => Inv326_R0_1_I2' BY DEF TypeOK,RRcvAckAction,RRcvAck,Inv326_R0_1_I2
+  \* (Inv326_R0_1_I2,RSendValsAction)
+  <1>5. TypeOK /\ Inv326_R0_1_I2 /\ RSendValsAction => Inv326_R0_1_I2' BY DEF TypeOK,RSendValsAction,RSendVals,Inv326_R0_1_I2
+  \* (Inv326_R0_1_I2,RLocalWriteReplayAction)
+  <1>6. TypeOK /\ Inv326_R0_1_I2 /\ RLocalWriteReplayAction => Inv326_R0_1_I2' BY DEF TypeOK,RLocalWriteReplayAction,RLocalWriteReplay,Inv326_R0_1_I2
+  \* (Inv326_R0_1_I2,RFailedNodeWriteReplayAction)
+  <1>7. TypeOK /\ Inv326_R0_1_I2 /\ RFailedNodeWriteReplayAction => Inv326_R0_1_I2' BY DEF TypeOK,RFailedNodeWriteReplayAction,RFailedNodeWriteReplay,Inv326_R0_1_I2
+  \* (Inv326_R0_1_I2,RUpdateLocalEpochIDAction)
+  <1>8. TypeOK /\ Inv326_R0_1_I2 /\ RUpdateLocalEpochIDAction => Inv326_R0_1_I2' BY DEF TypeOK,RUpdateLocalEpochIDAction,RUpdateLocalEpochID,Inv326_R0_1_I2
+  \* (Inv326_R0_1_I2,ROverthrowOwnerAction)
+  <1>9. TypeOK /\ Inv326_R0_1_I2 /\ ROverthrowOwnerAction => Inv326_R0_1_I2' BY DEF TypeOK,ROverthrowOwnerAction,ROverthrowOwner,Inv326_R0_1_I2
+  \* (Inv326_R0_1_I2,RNewOwnerAction)
+  <1>10. TypeOK /\ Inv326_R0_1_I2 /\ RNewOwnerAction => Inv326_R0_1_I2' BY DEF TypeOK,RNewOwnerAction,RNewOwner,Inv326_R0_1_I2
+  \* (Inv326_R0_1_I2,RNodeFailureAction)
+  <1>11. TypeOK /\ Inv326_R0_1_I2 /\ RNodeFailureAction => Inv326_R0_1_I2' BY DEF TypeOK,RNodeFailureAction,RNodeFailure,Inv326_R0_1_I2,RMessageINV,RNoChanges_but_membership
+<1>12. QED BY <1>1,<1>2,<1>3,<1>4,<1>5,<1>6,<1>7,<1>8,<1>9,<1>10,<1>11 DEF Next
 
 
-\*** Inv1153_R5_0_I1
-THEOREM L_6 == TypeOK /\ Inv1153_R5_0_I1 /\ Next => Inv1153_R5_0_I1'
-  \* (Inv1153_R5_0_I1,RRcvInvAction)
-  <1>1. TypeOK /\ Inv1153_R5_0_I1 /\ RRcvInvAction => Inv1153_R5_0_I1'
-       BY DEF TypeOK,RRcvInvAction,RRcvInv,Inv1153_R5_0_I1
-  \* (Inv1153_R5_0_I1,RRcvValAction)
-  <1>2. TypeOK /\ Inv1153_R5_0_I1 /\ RRcvValAction => Inv1153_R5_0_I1'
-       BY DEF TypeOK,RRcvValAction,RRcvVal,Inv1153_R5_0_I1
-  \* (Inv1153_R5_0_I1,RReadAction)
-  <1>3. TypeOK /\ Inv1153_R5_0_I1 /\ RReadAction => Inv1153_R5_0_I1'
-       BY DEF TypeOK,RReadAction,RRead,Inv1153_R5_0_I1
-  \* (Inv1153_R5_0_I1,RWriteAction)
-  <1>4. TypeOK /\ Inv1153_R5_0_I1 /\ RWriteAction => Inv1153_R5_0_I1'
-       BY DEF TypeOK,RWriteAction,RWrite,Inv1153_R5_0_I1
-  \* (Inv1153_R5_0_I1,RRcvAckAction)
-  <1>5. TypeOK /\ Inv1153_R5_0_I1 /\ RRcvAckAction => Inv1153_R5_0_I1'
-       BY DEF TypeOK,RRcvAckAction,RRcvAck,Inv1153_R5_0_I1
-  \* (Inv1153_R5_0_I1,RSendValsAction)
-  <1>6. TypeOK /\ Inv1153_R5_0_I1 /\ RSendValsAction => Inv1153_R5_0_I1'
-       BY DEF TypeOK,RSendValsAction,RSendVals,Inv1153_R5_0_I1
-  \* (Inv1153_R5_0_I1,RLocalWriteReplayAction)
-  <1>7. TypeOK /\ Inv1153_R5_0_I1 /\ RLocalWriteReplayAction => Inv1153_R5_0_I1'
-       BY DEF TypeOK,RLocalWriteReplayAction,RLocalWriteReplay,Inv1153_R5_0_I1
-  \* (Inv1153_R5_0_I1,RFailedNodeWriteReplayAction)
-  <1>8. TypeOK /\ Inv1153_R5_0_I1 /\ RFailedNodeWriteReplayAction => Inv1153_R5_0_I1'
-       BY DEF TypeOK,RFailedNodeWriteReplayAction,RFailedNodeWriteReplay,Inv1153_R5_0_I1
-  \* (Inv1153_R5_0_I1,RUpdateLocalEpochIDAction)
-  <1>9. TypeOK /\ Inv1153_R5_0_I1 /\ RUpdateLocalEpochIDAction => Inv1153_R5_0_I1'
-       BY DEF TypeOK,RUpdateLocalEpochIDAction,RUpdateLocalEpochID,Inv1153_R5_0_I1
-  \* (Inv1153_R5_0_I1,ROverthrowOwnerAction)
-  <1>10. TypeOK /\ Inv1153_R5_0_I1 /\ ROverthrowOwnerAction => Inv1153_R5_0_I1'
-       BY DEF TypeOK,ROverthrowOwnerAction,ROverthrowOwner,Inv1153_R5_0_I1
-  \* (Inv1153_R5_0_I1,RNewOwnerAction)
-  <1>11. TypeOK /\ Inv1153_R5_0_I1 /\ RNewOwnerAction => Inv1153_R5_0_I1'
-       BY DEF TypeOK,RNewOwnerAction,RNewOwner,Inv1153_R5_0_I1
-  \* (Inv1153_R5_0_I1,RNodeFailureAction)
-  <1>12. TypeOK /\ Inv1153_R5_0_I1 /\ RNodeFailureAction => Inv1153_R5_0_I1'
-       BY DEF TypeOK,RNodeFailureAction,RNodeFailure,Inv1153_R5_0_I1
-<1>13. QED BY <1>1,<1>2,<1>3,<1>4,<1>5,<1>6,<1>7,<1>8,<1>9,<1>10,<1>11,<1>12 DEF Next
+\*** Inv30_R4_0_I0
+THEOREM L_6 == TypeOK /\ Inv30_R4_0_I0 /\ Next => Inv30_R4_0_I0'
+  <1>. USE A0,A1
+  \* (Inv30_R4_0_I0,RRcvInvAction)
+  <1>1. TypeOK /\ Inv30_R4_0_I0 /\ RRcvInvAction => Inv30_R4_0_I0' BY DEF TypeOK,RRcvInvAction,RRcvInv,Inv30_R4_0_I0
+  \* (Inv30_R4_0_I0,RRcvValAction)
+  <1>2. TypeOK /\ Inv30_R4_0_I0 /\ RRcvValAction => Inv30_R4_0_I0' BY DEF TypeOK,RRcvValAction,RRcvVal,Inv30_R4_0_I0
+  \* (Inv30_R4_0_I0,RWriteAction)
+  <1>3. TypeOK /\ Inv30_R4_0_I0 /\ RWriteAction => Inv30_R4_0_I0' BY DEF TypeOK,RWriteAction,RWrite,Inv30_R4_0_I0,RMessageINV,RMessageVAL
+  \* (Inv30_R4_0_I0,RRcvAckAction)
+  <1>4. TypeOK /\ Inv30_R4_0_I0 /\ RRcvAckAction => Inv30_R4_0_I0' BY DEF TypeOK,RRcvAckAction,RRcvAck,Inv30_R4_0_I0
+  \* (Inv30_R4_0_I0,RSendValsAction)
+  <1>5. TypeOK /\ Inv30_R4_0_I0 /\ RSendValsAction => Inv30_R4_0_I0' BY DEF TypeOK,RSendValsAction,RSendVals,Inv30_R4_0_I0
+  \* (Inv30_R4_0_I0,RLocalWriteReplayAction)
+  <1>6. TypeOK /\ Inv30_R4_0_I0 /\ RLocalWriteReplayAction => Inv30_R4_0_I0' BY DEF TypeOK,RLocalWriteReplayAction,RLocalWriteReplay,Inv30_R4_0_I0
+  \* (Inv30_R4_0_I0,RFailedNodeWriteReplayAction)
+  <1>7. TypeOK /\ Inv30_R4_0_I0 /\ RFailedNodeWriteReplayAction => Inv30_R4_0_I0' BY DEF TypeOK,RFailedNodeWriteReplayAction,RFailedNodeWriteReplay,Inv30_R4_0_I0
+  \* (Inv30_R4_0_I0,RUpdateLocalEpochIDAction)
+  <1>8. TypeOK /\ Inv30_R4_0_I0 /\ RUpdateLocalEpochIDAction => Inv30_R4_0_I0' BY DEF TypeOK,RUpdateLocalEpochIDAction,RUpdateLocalEpochID,Inv30_R4_0_I0
+  \* (Inv30_R4_0_I0,ROverthrowOwnerAction)
+  <1>9. TypeOK /\ Inv30_R4_0_I0 /\ ROverthrowOwnerAction => Inv30_R4_0_I0' BY DEF TypeOK,ROverthrowOwnerAction,ROverthrowOwner,Inv30_R4_0_I0
+  \* (Inv30_R4_0_I0,RNewOwnerAction)
+  <1>10. TypeOK /\ Inv30_R4_0_I0 /\ RNewOwnerAction => Inv30_R4_0_I0' BY DEF TypeOK,RNewOwnerAction,RNewOwner,Inv30_R4_0_I0
+  \* (Inv30_R4_0_I0,RNodeFailureAction)
+  <1>11. TypeOK /\ Inv30_R4_0_I0 /\ RNodeFailureAction => Inv30_R4_0_I0' BY DEF TypeOK,RNodeFailureAction,RNodeFailure,Inv30_R4_0_I0,RMessageINV,RNoChanges_but_membership
+<1>12. QED BY <1>1,<1>2,<1>3,<1>4,<1>5,<1>6,<1>7,<1>8,<1>9,<1>10,<1>11 DEF Next
 
 
-\*** Inv57_R0_2_I1
-THEOREM L_7 == TypeOK /\ Inv57_R0_2_I1 /\ Next => Inv57_R0_2_I1'
-  \* (Inv57_R0_2_I1,RRcvInvAction)
-  <1>1. TypeOK /\ Inv57_R0_2_I1 /\ RRcvInvAction => Inv57_R0_2_I1'
-       BY DEF TypeOK,RRcvInvAction,RRcvInv,Inv57_R0_2_I1
-  \* (Inv57_R0_2_I1,RRcvValAction)
-  <1>2. TypeOK /\ Inv57_R0_2_I1 /\ RRcvValAction => Inv57_R0_2_I1'
-       BY DEF TypeOK,RRcvValAction,RRcvVal,Inv57_R0_2_I1
-  \* (Inv57_R0_2_I1,RReadAction)
-  <1>3. TypeOK /\ Inv57_R0_2_I1 /\ RReadAction => Inv57_R0_2_I1'
-       BY DEF TypeOK,RReadAction,RRead,Inv57_R0_2_I1
-  \* (Inv57_R0_2_I1,RWriteAction)
-  <1>4. TypeOK /\ Inv57_R0_2_I1 /\ RWriteAction => Inv57_R0_2_I1'
-       BY DEF TypeOK,RWriteAction,RWrite,Inv57_R0_2_I1
-  \* (Inv57_R0_2_I1,RRcvAckAction)
-  <1>5. TypeOK /\ Inv57_R0_2_I1 /\ RRcvAckAction => Inv57_R0_2_I1'
-       BY DEF TypeOK,RRcvAckAction,RRcvAck,Inv57_R0_2_I1
-  \* (Inv57_R0_2_I1,RSendValsAction)
-  <1>6. TypeOK /\ Inv57_R0_2_I1 /\ RSendValsAction => Inv57_R0_2_I1'
-       BY DEF TypeOK,RSendValsAction,RSendVals,Inv57_R0_2_I1
-  \* (Inv57_R0_2_I1,RLocalWriteReplayAction)
-  <1>7. TypeOK /\ Inv57_R0_2_I1 /\ RLocalWriteReplayAction => Inv57_R0_2_I1'
-       BY DEF TypeOK,RLocalWriteReplayAction,RLocalWriteReplay,Inv57_R0_2_I1
-  \* (Inv57_R0_2_I1,RFailedNodeWriteReplayAction)
-  <1>8. TypeOK /\ Inv57_R0_2_I1 /\ RFailedNodeWriteReplayAction => Inv57_R0_2_I1'
-       BY DEF TypeOK,RFailedNodeWriteReplayAction,RFailedNodeWriteReplay,Inv57_R0_2_I1
-  \* (Inv57_R0_2_I1,RUpdateLocalEpochIDAction)
-  <1>9. TypeOK /\ Inv57_R0_2_I1 /\ RUpdateLocalEpochIDAction => Inv57_R0_2_I1'
-       BY DEF TypeOK,RUpdateLocalEpochIDAction,RUpdateLocalEpochID,Inv57_R0_2_I1
-  \* (Inv57_R0_2_I1,ROverthrowOwnerAction)
-  <1>10. TypeOK /\ Inv57_R0_2_I1 /\ ROverthrowOwnerAction => Inv57_R0_2_I1'
-       BY DEF TypeOK,ROverthrowOwnerAction,ROverthrowOwner,Inv57_R0_2_I1
-  \* (Inv57_R0_2_I1,RNewOwnerAction)
-  <1>11. TypeOK /\ Inv57_R0_2_I1 /\ RNewOwnerAction => Inv57_R0_2_I1'
-       BY DEF TypeOK,RNewOwnerAction,RNewOwner,Inv57_R0_2_I1
-  \* (Inv57_R0_2_I1,RNodeFailureAction)
-  <1>12. TypeOK /\ Inv57_R0_2_I1 /\ RNodeFailureAction => Inv57_R0_2_I1'
-       BY DEF TypeOK,RNodeFailureAction,RNodeFailure,Inv57_R0_2_I1
-<1>13. QED BY <1>1,<1>2,<1>3,<1>4,<1>5,<1>6,<1>7,<1>8,<1>9,<1>10,<1>11,<1>12 DEF Next
+\*** Inv12_R4_1_I1
+THEOREM L_7 == TypeOK /\ Inv12_R4_1_I1 /\ Next => Inv12_R4_1_I1'
+  <1>. USE A0,A1
+  \* (Inv12_R4_1_I1,RRcvInvAction)
+  <1>1. TypeOK /\ Inv12_R4_1_I1 /\ RRcvInvAction => Inv12_R4_1_I1' BY DEF TypeOK,RRcvInvAction,RRcvInv,Inv12_R4_1_I1
+  \* (Inv12_R4_1_I1,RRcvValAction)
+  <1>2. TypeOK /\ Inv12_R4_1_I1 /\ RRcvValAction => Inv12_R4_1_I1' BY DEF TypeOK,RRcvValAction,RRcvVal,Inv12_R4_1_I1
+  \* (Inv12_R4_1_I1,RWriteAction)
+  <1>3. TypeOK /\ Inv12_R4_1_I1 /\ RWriteAction => Inv12_R4_1_I1' BY DEF TypeOK,RWriteAction,RWrite,Inv12_R4_1_I1,RMessageINV,RMessageVAL
+  \* (Inv12_R4_1_I1,RRcvAckAction)
+  <1>4. TypeOK /\ Inv12_R4_1_I1 /\ RRcvAckAction => Inv12_R4_1_I1' BY DEF TypeOK,RRcvAckAction,RRcvAck,Inv12_R4_1_I1
+  \* (Inv12_R4_1_I1,RSendValsAction)
+  <1>5. TypeOK /\ Inv12_R4_1_I1 /\ RSendValsAction => Inv12_R4_1_I1' BY DEF TypeOK,RSendValsAction,RSendVals,Inv12_R4_1_I1
+  \* (Inv12_R4_1_I1,RLocalWriteReplayAction)
+  <1>6. TypeOK /\ Inv12_R4_1_I1 /\ RLocalWriteReplayAction => Inv12_R4_1_I1' BY DEF TypeOK,RLocalWriteReplayAction,RLocalWriteReplay,Inv12_R4_1_I1
+  \* (Inv12_R4_1_I1,RFailedNodeWriteReplayAction)
+  <1>7. TypeOK /\ Inv12_R4_1_I1 /\ RFailedNodeWriteReplayAction => Inv12_R4_1_I1' BY DEF TypeOK,RFailedNodeWriteReplayAction,RFailedNodeWriteReplay,Inv12_R4_1_I1
+  \* (Inv12_R4_1_I1,RUpdateLocalEpochIDAction)
+  <1>8. TypeOK /\ Inv12_R4_1_I1 /\ RUpdateLocalEpochIDAction => Inv12_R4_1_I1' BY DEF TypeOK,RUpdateLocalEpochIDAction,RUpdateLocalEpochID,Inv12_R4_1_I1
+  \* (Inv12_R4_1_I1,ROverthrowOwnerAction)
+  <1>9. TypeOK /\ Inv12_R4_1_I1 /\ ROverthrowOwnerAction => Inv12_R4_1_I1' BY DEF TypeOK,ROverthrowOwnerAction,ROverthrowOwner,Inv12_R4_1_I1
+  \* (Inv12_R4_1_I1,RNewOwnerAction)
+  <1>10. TypeOK /\ Inv12_R4_1_I1 /\ RNewOwnerAction => Inv12_R4_1_I1' BY DEF TypeOK,RNewOwnerAction,RNewOwner,Inv12_R4_1_I1
+  \* (Inv12_R4_1_I1,RNodeFailureAction)
+  <1>11. TypeOK /\ Inv12_R4_1_I1 /\ RNodeFailureAction => Inv12_R4_1_I1' BY DEF TypeOK,RNodeFailureAction,RNodeFailure,Inv12_R4_1_I1,RMessageINV,RNoChanges_but_membership
+<1>12. QED BY <1>1,<1>2,<1>3,<1>4,<1>5,<1>6,<1>7,<1>8,<1>9,<1>10,<1>11 DEF Next
 
 
+\*** Inv356_R4_1_I1
+THEOREM L_8 == TypeOK /\ Inv30_R4_0_I0 /\ Inv12_R4_1_I1 /\ Inv234_R4_1_I1 /\ Inv82_R9_3_I2 /\ Inv4413_R9_3_I2 /\ Inv602_R0_0_I1 /\ Inv85_R9_3_I2 /\ Inv27_R9_1_I1 /\ Inv12_R4_1_I1 /\ Inv602_R0_0_I1 /\ Inv356_R4_1_I1 /\ Next => Inv356_R4_1_I1'
+  <1>. USE A0,A1
+  \* (Inv356_R4_1_I1,RRcvInvAction)
+  <1>1. TypeOK /\ Inv30_R4_0_I0 /\ Inv356_R4_1_I1 /\ RRcvInvAction => Inv356_R4_1_I1' BY DEF TypeOK,Inv30_R4_0_I0,RRcvInvAction,RRcvInv,Inv356_R4_1_I1
+  \* (Inv356_R4_1_I1,RRcvValAction)
+  <1>2. TypeOK /\ Inv356_R4_1_I1 /\ RRcvValAction => Inv356_R4_1_I1' BY DEF TypeOK,RRcvValAction,RRcvVal,Inv356_R4_1_I1
+  \* (Inv356_R4_1_I1,RWriteAction)
+  <1>3. TypeOK /\ Inv12_R4_1_I1 /\ Inv234_R4_1_I1 /\ Inv82_R9_3_I2 /\ Inv4413_R9_3_I2 /\ Inv602_R0_0_I1 /\ Inv85_R9_3_I2 /\ Inv356_R4_1_I1 /\ RWriteAction => Inv356_R4_1_I1' BY DEF TypeOK,Inv12_R4_1_I1,Inv234_R4_1_I1,Inv82_R9_3_I2,Inv4413_R9_3_I2,Inv602_R0_0_I1,Inv85_R9_3_I2,RWriteAction,RWrite,Inv356_R4_1_I1,RMessageINV,RMessageVAL
+  \* (Inv356_R4_1_I1,RRcvAckAction)
+  <1>4. TypeOK /\ Inv356_R4_1_I1 /\ RRcvAckAction => Inv356_R4_1_I1' BY DEF TypeOK,RRcvAckAction,RRcvAck,Inv356_R4_1_I1
+  \* (Inv356_R4_1_I1,RSendValsAction)
+  <1>5. TypeOK /\ Inv356_R4_1_I1 /\ RSendValsAction => Inv356_R4_1_I1' BY DEF TypeOK,RSendValsAction,RSendVals,Inv356_R4_1_I1
+  \* (Inv356_R4_1_I1,RLocalWriteReplayAction)
+  <1>6. TypeOK /\ Inv356_R4_1_I1 /\ RLocalWriteReplayAction => Inv356_R4_1_I1' BY DEF TypeOK,RLocalWriteReplayAction,RLocalWriteReplay,Inv356_R4_1_I1
+  \* (Inv356_R4_1_I1,RFailedNodeWriteReplayAction)
+  <1>7. TypeOK /\ Inv356_R4_1_I1 /\ RFailedNodeWriteReplayAction => Inv356_R4_1_I1' BY DEF TypeOK,RFailedNodeWriteReplayAction,RFailedNodeWriteReplay,Inv356_R4_1_I1
+  \* (Inv356_R4_1_I1,RUpdateLocalEpochIDAction)
+  <1>8. TypeOK /\ Inv356_R4_1_I1 /\ RUpdateLocalEpochIDAction => Inv356_R4_1_I1' BY DEF TypeOK,RUpdateLocalEpochIDAction,RUpdateLocalEpochID,Inv356_R4_1_I1
+  \* (Inv356_R4_1_I1,ROverthrowOwnerAction)
+  <1>9. TypeOK /\ Inv27_R9_1_I1 /\ Inv356_R4_1_I1 /\ ROverthrowOwnerAction => Inv356_R4_1_I1' BY DEF TypeOK,Inv27_R9_1_I1,ROverthrowOwnerAction,ROverthrowOwner,Inv356_R4_1_I1
+  \* (Inv356_R4_1_I1,RNewOwnerAction)
+  <1>10. TypeOK /\ Inv12_R4_1_I1 /\ Inv602_R0_0_I1 /\ Inv356_R4_1_I1 /\ RNewOwnerAction => Inv356_R4_1_I1' BY DEF TypeOK,Inv12_R4_1_I1,Inv602_R0_0_I1,RNewOwnerAction,RNewOwner,Inv356_R4_1_I1
+  \* (Inv356_R4_1_I1,RNodeFailureAction)
+  <1>11. TypeOK /\ Inv356_R4_1_I1 /\ RNodeFailureAction => Inv356_R4_1_I1' BY DEF TypeOK,RNodeFailureAction,RNodeFailure,Inv356_R4_1_I1,RMessageINV,RNoChanges_but_membership
+<1>12. QED BY <1>1,<1>2,<1>3,<1>4,<1>5,<1>6,<1>7,<1>8,<1>9,<1>10,<1>11 DEF Next
+
+
+\*** Inv602_R0_0_I1
+THEOREM L_9 == TypeOK /\ Inv29_R0_0_I1 /\ Inv15995_R0_1_I2 /\ Inv602_R0_0_I1 /\ Next => Inv602_R0_0_I1'
+  <1>. USE A0,A1
+  \* (Inv602_R0_0_I1,RRcvInvAction)
+  <1>1. TypeOK /\ Inv602_R0_0_I1 /\ RRcvInvAction => Inv602_R0_0_I1' BY DEF TypeOK,RRcvInvAction,RRcvInv,Inv602_R0_0_I1
+  \* (Inv602_R0_0_I1,RRcvValAction)
+  <1>2. TypeOK /\ Inv29_R0_0_I1 /\ Inv602_R0_0_I1 /\ RRcvValAction => Inv602_R0_0_I1' BY DEF TypeOK,Inv29_R0_0_I1,RRcvValAction,RRcvVal,Inv602_R0_0_I1
+  \* (Inv602_R0_0_I1,RWriteAction)
+  <1>3. TypeOK /\ Inv602_R0_0_I1 /\ RWriteAction => Inv602_R0_0_I1' BY DEF TypeOK,RWriteAction,RWrite,Inv602_R0_0_I1,RMessageINV,RMessageVAL
+  \* (Inv602_R0_0_I1,RRcvAckAction)
+  <1>4. TypeOK /\ Inv602_R0_0_I1 /\ RRcvAckAction => Inv602_R0_0_I1' BY DEF TypeOK,RRcvAckAction,RRcvAck,Inv602_R0_0_I1
+  \* (Inv602_R0_0_I1,RSendValsAction)
+  <1>5. TypeOK /\ Inv15995_R0_1_I2 /\ Inv602_R0_0_I1 /\ RSendValsAction => Inv602_R0_0_I1' BY DEF TypeOK,Inv15995_R0_1_I2,RSendValsAction,RSendVals,Inv602_R0_0_I1
+  \* (Inv602_R0_0_I1,RLocalWriteReplayAction)
+  <1>6. TypeOK /\ Inv602_R0_0_I1 /\ RLocalWriteReplayAction => Inv602_R0_0_I1' BY DEF TypeOK,RLocalWriteReplayAction,RLocalWriteReplay,Inv602_R0_0_I1
+  \* (Inv602_R0_0_I1,RFailedNodeWriteReplayAction)
+  <1>7. TypeOK /\ Inv602_R0_0_I1 /\ RFailedNodeWriteReplayAction => Inv602_R0_0_I1' BY DEF TypeOK,RFailedNodeWriteReplayAction,RFailedNodeWriteReplay,Inv602_R0_0_I1
+  \* (Inv602_R0_0_I1,RUpdateLocalEpochIDAction)
+  <1>8. TypeOK /\ Inv602_R0_0_I1 /\ RUpdateLocalEpochIDAction => Inv602_R0_0_I1' BY DEF TypeOK,RUpdateLocalEpochIDAction,RUpdateLocalEpochID,Inv602_R0_0_I1
+  \* (Inv602_R0_0_I1,ROverthrowOwnerAction)
+  <1>9. TypeOK /\ Inv602_R0_0_I1 /\ ROverthrowOwnerAction => Inv602_R0_0_I1' BY DEF TypeOK,ROverthrowOwnerAction,ROverthrowOwner,Inv602_R0_0_I1
+  \* (Inv602_R0_0_I1,RNewOwnerAction)
+  <1>10. TypeOK /\ Inv602_R0_0_I1 /\ RNewOwnerAction => Inv602_R0_0_I1' BY DEF TypeOK,RNewOwnerAction,RNewOwner,Inv602_R0_0_I1
+  \* (Inv602_R0_0_I1,RNodeFailureAction)
+  <1>11. TypeOK /\ Inv602_R0_0_I1 /\ RNodeFailureAction => Inv602_R0_0_I1' BY DEF TypeOK,RNodeFailureAction,RNodeFailure,Inv602_R0_0_I1,RMessageINV,RNoChanges_but_membership
+<1>12. QED BY <1>1,<1>2,<1>3,<1>4,<1>5,<1>6,<1>7,<1>8,<1>9,<1>10,<1>11 DEF Next
+
+
+\*** Inv27_R9_1_I1
+THEOREM L_10 == TypeOK /\ Inv29_R0_0_I1 /\ Inv15995_R0_1_I2 /\ Inv27_R9_1_I1 /\ Next => Inv27_R9_1_I1'
+  <1>. USE A0,A1
+  \* (Inv27_R9_1_I1,RRcvInvAction)
+  <1>1. TypeOK /\ Inv27_R9_1_I1 /\ RRcvInvAction => Inv27_R9_1_I1' BY DEF TypeOK,RRcvInvAction,RRcvInv,Inv27_R9_1_I1
+  \* (Inv27_R9_1_I1,RRcvValAction)
+  <1>2. TypeOK /\ Inv29_R0_0_I1 /\ Inv27_R9_1_I1 /\ RRcvValAction => Inv27_R9_1_I1' BY DEF TypeOK,Inv29_R0_0_I1,RRcvValAction,RRcvVal,Inv27_R9_1_I1
+  \* (Inv27_R9_1_I1,RWriteAction)
+  <1>3. TypeOK /\ Inv27_R9_1_I1 /\ RWriteAction => Inv27_R9_1_I1' BY DEF TypeOK,RWriteAction,RWrite,Inv27_R9_1_I1,RMessageINV,RMessageVAL
+  \* (Inv27_R9_1_I1,RRcvAckAction)
+  <1>4. TypeOK /\ Inv27_R9_1_I1 /\ RRcvAckAction => Inv27_R9_1_I1' BY DEF TypeOK,RRcvAckAction,RRcvAck,Inv27_R9_1_I1
+  \* (Inv27_R9_1_I1,RSendValsAction)
+  <1>5. TypeOK /\ Inv15995_R0_1_I2 /\ Inv27_R9_1_I1 /\ RSendValsAction => Inv27_R9_1_I1' BY DEF TypeOK,Inv15995_R0_1_I2,RSendValsAction,RSendVals,Inv27_R9_1_I1
+  \* (Inv27_R9_1_I1,RLocalWriteReplayAction)
+  <1>6. TypeOK /\ Inv27_R9_1_I1 /\ RLocalWriteReplayAction => Inv27_R9_1_I1' BY DEF TypeOK,RLocalWriteReplayAction,RLocalWriteReplay,Inv27_R9_1_I1
+  \* (Inv27_R9_1_I1,RFailedNodeWriteReplayAction)
+  <1>7. TypeOK /\ Inv27_R9_1_I1 /\ RFailedNodeWriteReplayAction => Inv27_R9_1_I1' BY DEF TypeOK,RFailedNodeWriteReplayAction,RFailedNodeWriteReplay,Inv27_R9_1_I1
+  \* (Inv27_R9_1_I1,RUpdateLocalEpochIDAction)
+  <1>8. TypeOK /\ Inv27_R9_1_I1 /\ RUpdateLocalEpochIDAction => Inv27_R9_1_I1' BY DEF TypeOK,RUpdateLocalEpochIDAction,RUpdateLocalEpochID,Inv27_R9_1_I1
+  \* (Inv27_R9_1_I1,ROverthrowOwnerAction)
+  <1>9. TypeOK /\ Inv27_R9_1_I1 /\ ROverthrowOwnerAction => Inv27_R9_1_I1' BY DEF TypeOK,ROverthrowOwnerAction,ROverthrowOwner,Inv27_R9_1_I1
+  \* (Inv27_R9_1_I1,RNewOwnerAction)
+  <1>10. TypeOK /\ Inv27_R9_1_I1 /\ RNewOwnerAction => Inv27_R9_1_I1' BY DEF TypeOK,RNewOwnerAction,RNewOwner,Inv27_R9_1_I1
+  \* (Inv27_R9_1_I1,RNodeFailureAction)
+  <1>11. TypeOK /\ Inv27_R9_1_I1 /\ RNodeFailureAction => Inv27_R9_1_I1' BY DEF TypeOK,RNodeFailureAction,RNodeFailure,Inv27_R9_1_I1,RMessageINV,RNoChanges_but_membership
+<1>12. QED BY <1>1,<1>2,<1>3,<1>4,<1>5,<1>6,<1>7,<1>8,<1>9,<1>10,<1>11 DEF Next
+
+
+\*** Inv234_R4_1_I1
+THEOREM L_11 == TypeOK /\ Inv4413_R9_3_I2 /\ Inv12_R4_1_I1 /\ Inv234_R4_1_I1 /\ Next => Inv234_R4_1_I1'
+  <1>. USE A0,A1
+  \* (Inv234_R4_1_I1,RRcvInvAction)
+  <1>1. TypeOK /\ Inv234_R4_1_I1 /\ RRcvInvAction => Inv234_R4_1_I1' BY DEF TypeOK,RRcvInvAction,RRcvInv,Inv234_R4_1_I1
+  \* (Inv234_R4_1_I1,RRcvValAction)
+  <1>2. TypeOK /\ Inv234_R4_1_I1 /\ RRcvValAction => Inv234_R4_1_I1' BY DEF TypeOK,RRcvValAction,RRcvVal,Inv234_R4_1_I1
+  \* (Inv234_R4_1_I1,RWriteAction)
+  <1>3. TypeOK /\ Inv4413_R9_3_I2 /\ Inv234_R4_1_I1 /\ RWriteAction => Inv234_R4_1_I1' BY DEF TypeOK,Inv4413_R9_3_I2,RWriteAction,RWrite,Inv234_R4_1_I1,RMessageINV,RMessageVAL
+  \* (Inv234_R4_1_I1,RRcvAckAction)
+  <1>4. TypeOK /\ Inv234_R4_1_I1 /\ RRcvAckAction => Inv234_R4_1_I1' BY DEF TypeOK,RRcvAckAction,RRcvAck,Inv234_R4_1_I1
+  \* (Inv234_R4_1_I1,RSendValsAction)
+  <1>5. TypeOK /\ Inv234_R4_1_I1 /\ RSendValsAction => Inv234_R4_1_I1' BY DEF TypeOK,RSendValsAction,RSendVals,Inv234_R4_1_I1
+  \* (Inv234_R4_1_I1,RLocalWriteReplayAction)
+  <1>6. TypeOK /\ Inv234_R4_1_I1 /\ RLocalWriteReplayAction => Inv234_R4_1_I1' BY DEF TypeOK,RLocalWriteReplayAction,RLocalWriteReplay,Inv234_R4_1_I1
+  \* (Inv234_R4_1_I1,RFailedNodeWriteReplayAction)
+  <1>7. TypeOK /\ Inv234_R4_1_I1 /\ RFailedNodeWriteReplayAction => Inv234_R4_1_I1' BY DEF TypeOK,RFailedNodeWriteReplayAction,RFailedNodeWriteReplay,Inv234_R4_1_I1
+  \* (Inv234_R4_1_I1,RUpdateLocalEpochIDAction)
+  <1>8. TypeOK /\ Inv234_R4_1_I1 /\ RUpdateLocalEpochIDAction => Inv234_R4_1_I1' BY DEF TypeOK,RUpdateLocalEpochIDAction,RUpdateLocalEpochID,Inv234_R4_1_I1
+  \* (Inv234_R4_1_I1,ROverthrowOwnerAction)
+  <1>9. TypeOK /\ Inv234_R4_1_I1 /\ ROverthrowOwnerAction => Inv234_R4_1_I1' BY DEF TypeOK,ROverthrowOwnerAction,ROverthrowOwner,Inv234_R4_1_I1
+  \* (Inv234_R4_1_I1,RNewOwnerAction)
+  <1>10. TypeOK /\ Inv12_R4_1_I1 /\ Inv234_R4_1_I1 /\ RNewOwnerAction => Inv234_R4_1_I1' BY DEF TypeOK,Inv12_R4_1_I1,RNewOwnerAction,RNewOwner,Inv234_R4_1_I1
+  \* (Inv234_R4_1_I1,RNodeFailureAction)
+  <1>11. TypeOK /\ Inv234_R4_1_I1 /\ RNodeFailureAction => Inv234_R4_1_I1' BY DEF TypeOK,RNodeFailureAction,RNodeFailure,Inv234_R4_1_I1,RMessageINV,RNoChanges_but_membership
+<1>12. QED BY <1>1,<1>2,<1>3,<1>4,<1>5,<1>6,<1>7,<1>8,<1>9,<1>10,<1>11 DEF Next
+
+
+\*** Inv4413_R9_3_I2
+THEOREM L_12 == TypeOK /\ Inv12_R4_1_I1 /\ Inv4413_R9_3_I2 /\ Next => Inv4413_R9_3_I2'
+  <1>. USE A0,A1
+  \* (Inv4413_R9_3_I2,RRcvInvAction)
+  <1>1. TypeOK /\ Inv4413_R9_3_I2 /\ RRcvInvAction => Inv4413_R9_3_I2' BY DEF TypeOK,RRcvInvAction,RRcvInv,Inv4413_R9_3_I2
+  \* (Inv4413_R9_3_I2,RRcvValAction)
+  <1>2. TypeOK /\ Inv4413_R9_3_I2 /\ RRcvValAction => Inv4413_R9_3_I2' BY DEF TypeOK,RRcvValAction,RRcvVal,Inv4413_R9_3_I2
+  \* (Inv4413_R9_3_I2,RWriteAction)
+  <1>3. TypeOK /\ Inv4413_R9_3_I2 /\ RWriteAction => Inv4413_R9_3_I2' BY DEF TypeOK,RWriteAction,RWrite,Inv4413_R9_3_I2,RMessageINV,RMessageVAL
+  \* (Inv4413_R9_3_I2,RRcvAckAction)
+  <1>4. TypeOK /\ Inv4413_R9_3_I2 /\ RRcvAckAction => Inv4413_R9_3_I2' BY DEF TypeOK,RRcvAckAction,RRcvAck,Inv4413_R9_3_I2
+  \* (Inv4413_R9_3_I2,RSendValsAction)
+  <1>5. TypeOK /\ Inv4413_R9_3_I2 /\ RSendValsAction => Inv4413_R9_3_I2' BY DEF TypeOK,RSendValsAction,RSendVals,Inv4413_R9_3_I2
+  \* (Inv4413_R9_3_I2,RLocalWriteReplayAction)
+  <1>6. TypeOK /\ Inv4413_R9_3_I2 /\ RLocalWriteReplayAction => Inv4413_R9_3_I2' BY DEF TypeOK,RLocalWriteReplayAction,RLocalWriteReplay,Inv4413_R9_3_I2
+  \* (Inv4413_R9_3_I2,RFailedNodeWriteReplayAction)
+  <1>7. TypeOK /\ Inv4413_R9_3_I2 /\ RFailedNodeWriteReplayAction => Inv4413_R9_3_I2' BY DEF TypeOK,RFailedNodeWriteReplayAction,RFailedNodeWriteReplay,Inv4413_R9_3_I2
+  \* (Inv4413_R9_3_I2,RUpdateLocalEpochIDAction)
+  <1>8. TypeOK /\ Inv4413_R9_3_I2 /\ RUpdateLocalEpochIDAction => Inv4413_R9_3_I2' BY DEF TypeOK,RUpdateLocalEpochIDAction,RUpdateLocalEpochID,Inv4413_R9_3_I2
+  \* (Inv4413_R9_3_I2,ROverthrowOwnerAction)
+  <1>9. TypeOK /\ Inv4413_R9_3_I2 /\ ROverthrowOwnerAction => Inv4413_R9_3_I2' BY DEF TypeOK,ROverthrowOwnerAction,ROverthrowOwner,Inv4413_R9_3_I2
+  \* (Inv4413_R9_3_I2,RNewOwnerAction)
+  <1>10. TypeOK /\ Inv12_R4_1_I1 /\ Inv4413_R9_3_I2 /\ RNewOwnerAction => Inv4413_R9_3_I2' BY DEF TypeOK,Inv12_R4_1_I1,RNewOwnerAction,RNewOwner,Inv4413_R9_3_I2
+  \* (Inv4413_R9_3_I2,RNodeFailureAction)
+  <1>11. TypeOK /\ Inv4413_R9_3_I2 /\ RNodeFailureAction => Inv4413_R9_3_I2' BY DEF TypeOK,RNodeFailureAction,RNodeFailure,Inv4413_R9_3_I2,RMessageINV,RNoChanges_but_membership
+<1>12. QED BY <1>1,<1>2,<1>3,<1>4,<1>5,<1>6,<1>7,<1>8,<1>9,<1>10,<1>11 DEF Next
+
+
+\*** Inv82_R9_3_I2
+THEOREM L_13 == TypeOK /\ Inv82_R9_3_I2 /\ Next => Inv82_R9_3_I2'
+  <1>. USE A0,A1
+  \* (Inv82_R9_3_I2,RRcvInvAction)
+  <1>1. TypeOK /\ Inv82_R9_3_I2 /\ RRcvInvAction => Inv82_R9_3_I2' BY DEF TypeOK,RRcvInvAction,RRcvInv,Inv82_R9_3_I2
+  \* (Inv82_R9_3_I2,RRcvValAction)
+  <1>2. TypeOK /\ Inv82_R9_3_I2 /\ RRcvValAction => Inv82_R9_3_I2' BY DEF TypeOK,RRcvValAction,RRcvVal,Inv82_R9_3_I2
+  \* (Inv82_R9_3_I2,RWriteAction)
+  <1>3. TypeOK /\ Inv82_R9_3_I2 /\ RWriteAction => Inv82_R9_3_I2' BY DEF TypeOK,RWriteAction,RWrite,Inv82_R9_3_I2,RMessageINV,RMessageVAL
+  \* (Inv82_R9_3_I2,RRcvAckAction)
+  <1>4. TypeOK /\ Inv82_R9_3_I2 /\ RRcvAckAction => Inv82_R9_3_I2' BY DEF TypeOK,RRcvAckAction,RRcvAck,Inv82_R9_3_I2
+  \* (Inv82_R9_3_I2,RSendValsAction)
+  <1>5. TypeOK /\ Inv82_R9_3_I2 /\ RSendValsAction => Inv82_R9_3_I2' BY DEF TypeOK,RSendValsAction,RSendVals,Inv82_R9_3_I2
+  \* (Inv82_R9_3_I2,RLocalWriteReplayAction)
+  <1>6. TypeOK /\ Inv82_R9_3_I2 /\ RLocalWriteReplayAction => Inv82_R9_3_I2' BY DEF TypeOK,RLocalWriteReplayAction,RLocalWriteReplay,Inv82_R9_3_I2
+  \* (Inv82_R9_3_I2,RFailedNodeWriteReplayAction)
+  <1>7. TypeOK /\ Inv82_R9_3_I2 /\ RFailedNodeWriteReplayAction => Inv82_R9_3_I2' BY DEF TypeOK,RFailedNodeWriteReplayAction,RFailedNodeWriteReplay,Inv82_R9_3_I2
+  \* (Inv82_R9_3_I2,RUpdateLocalEpochIDAction)
+  <1>8. TypeOK /\ Inv82_R9_3_I2 /\ RUpdateLocalEpochIDAction => Inv82_R9_3_I2' BY DEF TypeOK,RUpdateLocalEpochIDAction,RUpdateLocalEpochID,Inv82_R9_3_I2
+  \* (Inv82_R9_3_I2,ROverthrowOwnerAction)
+  <1>9. TypeOK /\ Inv82_R9_3_I2 /\ ROverthrowOwnerAction => Inv82_R9_3_I2' BY DEF TypeOK,ROverthrowOwnerAction,ROverthrowOwner,Inv82_R9_3_I2
+  \* (Inv82_R9_3_I2,RNewOwnerAction)
+  <1>10. TypeOK /\ Inv82_R9_3_I2 /\ RNewOwnerAction => Inv82_R9_3_I2' BY DEF TypeOK,RNewOwnerAction,RNewOwner,Inv82_R9_3_I2
+  \* (Inv82_R9_3_I2,RNodeFailureAction)
+  <1>11. TypeOK /\ Inv82_R9_3_I2 /\ RNodeFailureAction => Inv82_R9_3_I2' BY DEF TypeOK,RNodeFailureAction,RNodeFailure,Inv82_R9_3_I2,RMessageINV,RNoChanges_but_membership
+<1>12. QED BY <1>1,<1>2,<1>3,<1>4,<1>5,<1>6,<1>7,<1>8,<1>9,<1>10,<1>11 DEF Next
+
+
+\*** Inv85_R9_3_I2
+THEOREM L_14 == TypeOK /\ Inv85_R9_3_I2 /\ Next => Inv85_R9_3_I2'
+  <1>. USE A0,A1
+  \* (Inv85_R9_3_I2,RRcvInvAction)
+  <1>1. TypeOK /\ Inv85_R9_3_I2 /\ RRcvInvAction => Inv85_R9_3_I2' BY DEF TypeOK,RRcvInvAction,RRcvInv,Inv85_R9_3_I2
+  \* (Inv85_R9_3_I2,RRcvValAction)
+  <1>2. TypeOK /\ Inv85_R9_3_I2 /\ RRcvValAction => Inv85_R9_3_I2' BY DEF TypeOK,RRcvValAction,RRcvVal,Inv85_R9_3_I2
+  \* (Inv85_R9_3_I2,RWriteAction)
+  <1>3. TypeOK /\ Inv85_R9_3_I2 /\ RWriteAction => Inv85_R9_3_I2' BY DEF TypeOK,RWriteAction,RWrite,Inv85_R9_3_I2,RMessageINV,RMessageVAL
+  \* (Inv85_R9_3_I2,RRcvAckAction)
+  <1>4. TypeOK /\ Inv85_R9_3_I2 /\ RRcvAckAction => Inv85_R9_3_I2' BY DEF TypeOK,RRcvAckAction,RRcvAck,Inv85_R9_3_I2
+  \* (Inv85_R9_3_I2,RSendValsAction)
+  <1>5. TypeOK /\ Inv85_R9_3_I2 /\ RSendValsAction => Inv85_R9_3_I2' BY DEF TypeOK,RSendValsAction,RSendVals,Inv85_R9_3_I2
+  \* (Inv85_R9_3_I2,RLocalWriteReplayAction)
+  <1>6. TypeOK /\ Inv85_R9_3_I2 /\ RLocalWriteReplayAction => Inv85_R9_3_I2' BY DEF TypeOK,RLocalWriteReplayAction,RLocalWriteReplay,Inv85_R9_3_I2
+  \* (Inv85_R9_3_I2,RFailedNodeWriteReplayAction)
+  <1>7. TypeOK /\ Inv85_R9_3_I2 /\ RFailedNodeWriteReplayAction => Inv85_R9_3_I2' BY DEF TypeOK,RFailedNodeWriteReplayAction,RFailedNodeWriteReplay,Inv85_R9_3_I2
+  \* (Inv85_R9_3_I2,RUpdateLocalEpochIDAction)
+  <1>8. TypeOK /\ Inv85_R9_3_I2 /\ RUpdateLocalEpochIDAction => Inv85_R9_3_I2' BY DEF TypeOK,RUpdateLocalEpochIDAction,RUpdateLocalEpochID,Inv85_R9_3_I2
+  \* (Inv85_R9_3_I2,ROverthrowOwnerAction)
+  <1>9. TypeOK /\ Inv85_R9_3_I2 /\ ROverthrowOwnerAction => Inv85_R9_3_I2' BY DEF TypeOK,ROverthrowOwnerAction,ROverthrowOwner,Inv85_R9_3_I2
+  \* (Inv85_R9_3_I2,RNewOwnerAction)
+  <1>10. TypeOK /\ Inv85_R9_3_I2 /\ RNewOwnerAction => Inv85_R9_3_I2' BY DEF TypeOK,RNewOwnerAction,RNewOwner,Inv85_R9_3_I2
+  \* (Inv85_R9_3_I2,RNodeFailureAction)
+  <1>11. TypeOK /\ Inv85_R9_3_I2 /\ RNodeFailureAction => Inv85_R9_3_I2' BY DEF TypeOK,RNodeFailureAction,RNodeFailure,Inv85_R9_3_I2,RMessageINV,RNoChanges_but_membership
+<1>12. QED BY <1>1,<1>2,<1>3,<1>4,<1>5,<1>6,<1>7,<1>8,<1>9,<1>10,<1>11 DEF Next
+
+
+\*** Inv407_R0_1_I2
+THEOREM L_15 == TypeOK /\ Inv234_R4_1_I1 /\ Inv407_R0_1_I2 /\ Next => Inv407_R0_1_I2'
+  <1>. USE A0,A1
+  \* (Inv407_R0_1_I2,RRcvInvAction)
+  <1>1. TypeOK /\ Inv407_R0_1_I2 /\ RRcvInvAction => Inv407_R0_1_I2' BY DEF TypeOK,RRcvInvAction,RRcvInv,Inv407_R0_1_I2
+  \* (Inv407_R0_1_I2,RRcvValAction)
+  <1>2. TypeOK /\ Inv407_R0_1_I2 /\ RRcvValAction => Inv407_R0_1_I2' BY DEF TypeOK,RRcvValAction,RRcvVal,Inv407_R0_1_I2
+  \* (Inv407_R0_1_I2,RWriteAction)
+  <1>3. TypeOK /\ Inv234_R4_1_I1 /\ Inv407_R0_1_I2 /\ RWriteAction => Inv407_R0_1_I2' BY DEF TypeOK,Inv234_R4_1_I1,RWriteAction,RWrite,Inv407_R0_1_I2,RMessageINV,RMessageVAL
+  \* (Inv407_R0_1_I2,RRcvAckAction)
+  <1>4. TypeOK /\ Inv407_R0_1_I2 /\ RRcvAckAction => Inv407_R0_1_I2' BY DEF TypeOK,RRcvAckAction,RRcvAck,Inv407_R0_1_I2
+  \* (Inv407_R0_1_I2,RSendValsAction)
+  <1>5. TypeOK /\ Inv407_R0_1_I2 /\ RSendValsAction => Inv407_R0_1_I2' BY DEF TypeOK,RSendValsAction,RSendVals,Inv407_R0_1_I2
+  \* (Inv407_R0_1_I2,RLocalWriteReplayAction)
+  <1>6. TypeOK /\ Inv407_R0_1_I2 /\ RLocalWriteReplayAction => Inv407_R0_1_I2' BY DEF TypeOK,RLocalWriteReplayAction,RLocalWriteReplay,Inv407_R0_1_I2
+  \* (Inv407_R0_1_I2,RFailedNodeWriteReplayAction)
+  <1>7. TypeOK /\ Inv407_R0_1_I2 /\ RFailedNodeWriteReplayAction => Inv407_R0_1_I2' BY DEF TypeOK,RFailedNodeWriteReplayAction,RFailedNodeWriteReplay,Inv407_R0_1_I2
+  \* (Inv407_R0_1_I2,RUpdateLocalEpochIDAction)
+  <1>8. TypeOK /\ Inv407_R0_1_I2 /\ RUpdateLocalEpochIDAction => Inv407_R0_1_I2' BY DEF TypeOK,RUpdateLocalEpochIDAction,RUpdateLocalEpochID,Inv407_R0_1_I2
+  \* (Inv407_R0_1_I2,ROverthrowOwnerAction)
+  <1>9. TypeOK /\ Inv407_R0_1_I2 /\ ROverthrowOwnerAction => Inv407_R0_1_I2' BY DEF TypeOK,ROverthrowOwnerAction,ROverthrowOwner,Inv407_R0_1_I2
+  \* (Inv407_R0_1_I2,RNewOwnerAction)
+  <1>10. TypeOK /\ Inv407_R0_1_I2 /\ RNewOwnerAction => Inv407_R0_1_I2' BY DEF TypeOK,RNewOwnerAction,RNewOwner,Inv407_R0_1_I2
+  \* (Inv407_R0_1_I2,RNodeFailureAction)
+  <1>11. TypeOK /\ Inv407_R0_1_I2 /\ RNodeFailureAction => Inv407_R0_1_I2' BY DEF TypeOK,RNodeFailureAction,RNodeFailure,Inv407_R0_1_I2,RMessageINV,RNoChanges_but_membership
+<1>12. QED BY <1>1,<1>2,<1>3,<1>4,<1>5,<1>6,<1>7,<1>8,<1>9,<1>10,<1>11 DEF Next
+
+\* Initiation.
+THEOREM Init => IndGlobal
+    <1> USE A0,A1
+    <1>0. Init => TypeOK BY DEF Init, TypeOK, IndGlobal
+    <1>1. Init => Safety BY DEF Init, Safety, IndGlobal
+    <1>2. Init => Inv29_R0_0_I1 BY DEF Init, Inv29_R0_0_I1, IndGlobal
+    <1>3. Init => Inv15995_R0_1_I2 BY DEF Init, Inv15995_R0_1_I2, IndGlobal
+    <1>4. Init => Inv794_R3_0_I1 BY DEF Init, Inv794_R3_0_I1, IndGlobal
+    <1>5. Init => Inv326_R0_1_I2 BY DEF Init, Inv326_R0_1_I2, IndGlobal
+    <1>6. Init => Inv30_R4_0_I0 BY DEF Init, Inv30_R4_0_I0, IndGlobal
+    <1>7. Init => Inv12_R4_1_I1 BY DEF Init, Inv12_R4_1_I1, IndGlobal
+    <1>8. Init => Inv356_R4_1_I1 BY DEF Init, Inv356_R4_1_I1, IndGlobal
+    <1>9. Init => Inv602_R0_0_I1 BY DEF Init, Inv602_R0_0_I1, IndGlobal
+    <1>10. Init => Inv27_R9_1_I1 BY DEF Init, Inv27_R9_1_I1, IndGlobal
+    <1>11. Init => Inv234_R4_1_I1 BY DEF Init, Inv234_R4_1_I1, IndGlobal
+    <1>12. Init => Inv4413_R9_3_I2 BY DEF Init, Inv4413_R9_3_I2, IndGlobal
+    <1>13. Init => Inv82_R9_3_I2 BY DEF Init, Inv82_R9_3_I2, IndGlobal
+    <1>14. Init => Inv85_R9_3_I2 BY DEF Init, Inv85_R9_3_I2, IndGlobal
+    <1>15. Init => Inv407_R0_1_I2 BY DEF Init, Inv407_R0_1_I2, IndGlobal
+    <1>a. QED BY <1>0,<1>1,<1>2,<1>3,<1>4,<1>5,<1>6,<1>7,<1>8,<1>9,<1>10,<1>11,<1>12,<1>13,<1>14,<1>15 DEF IndGlobal
+
+\* Consecution.
 THEOREM IndGlobal /\ Next => IndGlobal'
-  BY L_0,L_1,L_2,L_3,L_4,L_5,L_6,L_7 DEF Next, IndGlobal
-
+  BY L_0,L_1,L_2,L_3,L_4,L_5,L_6,L_7,L_8,L_9,L_10,L_11,L_12,L_13,L_14,L_15 DEF Next, IndGlobal
 
 =============================================================================
