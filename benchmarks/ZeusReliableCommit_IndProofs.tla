@@ -1,5 +1,5 @@
 ------------------------------- MODULE ZeusReliableCommit_IndProofs -------------------------------
-EXTENDS ZeusReliableCommit, FiniteSetTheorems
+EXTENDS ZeusReliableCommit, FiniteSetTheorems, NaturalsInduction
 
 \* Proof Graph Stats
 \* ==================
@@ -47,8 +47,8 @@ IndGlobal ==
 \* min in-degree: 0
 \* mean variable slice size: 0
 
-ASSUME A0 == IsFiniteSet(R_NODES)
-ASSUME A1 == R_NODES \subseteq Nat
+ASSUME A0 == IsFiniteSet(R_NODES) /\ R_NODES # {}
+ASSUME A1 == R_NODES \subseteq Nat /\ R_MAX_VERSION \in Nat
 
 \*** TypeOK
 THEOREM L_0 == TypeOK /\ TypeOK /\ Next => TypeOK'
@@ -127,7 +127,42 @@ THEOREM L_1 == TypeOK /\ Inv29_R0_0_I1 /\ Inv602_R0_0_I1 /\ Inv602_R0_0_I1 /\ In
 THEOREM L_2 == TypeOK /\ Inv15995_R0_1_I2 /\ Inv29_R0_0_I1 /\ Next => Inv29_R0_0_I1'
   <1>. USE A0,A1
   \* (Inv29_R0_0_I1,RRcvInvAction)
-  <1>1. TypeOK /\ Inv29_R0_0_I1 /\ RRcvInvAction => Inv29_R0_0_I1' BY DEF TypeOK,RRcvInvAction,RRcvInv,Inv29_R0_0_I1,RMessageINV,RMessageVAL,RMessageACK
+  <1>1. TypeOK /\ Inv29_R0_0_I1 /\ RRcvInvAction => Inv29_R0_0_I1' 
+    <2> SUFFICES ASSUME TypeOK,
+                        Inv29_R0_0_I1,
+                        NEW n \in rAliveNodes, NEW m \in rMsgsINV,
+                        m \in rMsgsINV,
+                        m.type     = "INV",
+                        m.epochID  = rEpochID,
+                        m.sender  /= n,
+                        m.sender  \in rAliveNodes,
+                        rMsgsACK' = rMsgsACK \cup {([type       |-> "ACK",
+                               epochID    |-> rEpochID,
+                               sender     |-> n,   
+                               version    |-> m.version])},
+                        UNCHANGED <<rMsgsINV, rMsgsVAL, rAliveNodes, rKeySharers, rKeyRcvedACKs, rNodeEpochID, rEpochID>>,
+                        NEW VARI \in rAliveNodes',
+                        NEW VARMVAL \in rMsgsVAL',
+                        \/ m.version        > rKeyVersion[n]
+                           /\ rKeyState[n]   \in {"valid", "invalid", "replay"}
+                           /\ rKeyState'      = [rKeyState EXCEPT ![n] = "invalid"]
+                           /\ rKeyVersion'    = [rKeyVersion EXCEPT ![n]  = m.version]
+                           /\ rKeyLastWriter' = [rKeyLastWriter EXCEPT ![n] = m.sender]
+                        \/ m.version         <= rKeyVersion[n]
+                           /\ UNCHANGED <<rKeyState, rKeyVersion, rKeyLastWriter>>
+                 PROVE  (~(VARMVAL.type = "VAL" /\ VARMVAL.version > rKeyVersion[VARI]))'
+      BY DEF Inv29_R0_0_I1, RRcvInv, RRcvInvAction
+    <2>1. CASE m.version        > rKeyVersion[n]
+               /\ rKeyState[n]   \in {"valid", "invalid", "replay"}
+               /\ rKeyState'      = [rKeyState EXCEPT ![n] = "invalid"]
+               /\ rKeyVersion'    = [rKeyVersion EXCEPT ![n]  = m.version]
+               /\ rKeyLastWriter' = [rKeyLastWriter EXCEPT ![n] = m.sender]
+      BY <2>1 DEF TypeOK,RRcvInvAction,RRcvInv,Inv29_R0_0_I1,RMessageINV,RMessageVAL,RMessageACK
+    <2>2. CASE m.version         <= rKeyVersion[n]
+               /\ UNCHANGED <<rKeyState, rKeyVersion, rKeyLastWriter>>
+      BY <2>2 DEF TypeOK,RRcvInvAction,RRcvInv,Inv29_R0_0_I1,RMessageINV,RMessageVAL,RMessageACK
+    <2>3. QED
+      BY <2>1, <2>2
   \* (Inv29_R0_0_I1,RRcvValAction)
   <1>2. TypeOK /\ Inv29_R0_0_I1 /\ RRcvValAction => Inv29_R0_0_I1' BY DEF TypeOK,RRcvValAction,RRcvVal,Inv29_R0_0_I1,RMessageINV,RMessageVAL,RMessageACK
   \* (Inv29_R0_0_I1,RWriteAction)
@@ -159,15 +194,59 @@ THEOREM L_3 == TypeOK /\ Inv794_R3_0_I1 /\ Inv326_R0_1_I2 /\ Inv602_R0_0_I1 /\ I
   \* (Inv15995_R0_1_I2,RRcvValAction)
   <1>2. TypeOK /\ Inv15995_R0_1_I2 /\ RRcvValAction => Inv15995_R0_1_I2' BY DEF TypeOK,RRcvValAction,RRcvVal,Inv15995_R0_1_I2,RMessageINV,RMessageVAL,RMessageACK
   \* (Inv15995_R0_1_I2,RWriteAction)
-  <1>3. TypeOK /\ Inv15995_R0_1_I2 /\ RWriteAction => Inv15995_R0_1_I2' BY DEF TypeOK,RWriteAction,RWrite,Inv15995_R0_1_I2,RMessageINV,RMessageVAL
+  <1>3. TypeOK /\ Inv15995_R0_1_I2 /\ RWriteAction => Inv15995_R0_1_I2' 
+    <2> SUFFICES ASSUME TypeOK,
+                        Inv15995_R0_1_I2,
+                        NEW n \in rAliveNodes,
+                        RWrite(n),
+                        NEW VARI \in rAliveNodes',
+                        NEW VARJ \in rAliveNodes'
+                 PROVE  (~(VARJ \in rKeyRcvedACKs[VARI]) \/ (~(rKeyState[VARI] \in {"write", "replay"})) \/ (~(rKeyVersion[VARI] > rKeyVersion[VARJ])))'
+      BY DEF Inv15995_R0_1_I2, RWriteAction
+    <2> QED
+      BY DEF TypeOK,RWriteAction,RWrite,Inv15995_R0_1_I2,RMessageINV,RMessageVAL
   \* (Inv15995_R0_1_I2,RRcvAckAction)
   <1>4. TypeOK /\ Inv794_R3_0_I1 /\ Inv326_R0_1_I2 /\ Inv602_R0_0_I1 /\ Inv407_R0_1_I2 /\ Inv15995_R0_1_I2 /\ RRcvAckAction => Inv15995_R0_1_I2' BY DEF TypeOK,Inv794_R3_0_I1,Inv326_R0_1_I2,Inv602_R0_0_I1,Inv407_R0_1_I2,RRcvAckAction,RRcvAck,Inv15995_R0_1_I2
   \* (Inv15995_R0_1_I2,RSendValsAction)
   <1>5. TypeOK /\ Inv15995_R0_1_I2 /\ RSendValsAction => Inv15995_R0_1_I2' BY DEF TypeOK,RSendValsAction,RSendVals,Inv15995_R0_1_I2
   \* (Inv15995_R0_1_I2,RLocalWriteReplayAction)
-  <1>6. TypeOK /\ Inv15995_R0_1_I2 /\ RLocalWriteReplayAction => Inv15995_R0_1_I2' BY DEF TypeOK,RLocalWriteReplayAction,RLocalWriteReplay,Inv15995_R0_1_I2
+  <1>6. TypeOK /\ Inv15995_R0_1_I2 /\ RLocalWriteReplayAction => Inv15995_R0_1_I2' 
+    <2> SUFFICES ASSUME TypeOK,
+                        Inv15995_R0_1_I2,
+                        NEW n \in rAliveNodes,
+                        rNodeEpochID[n] < rEpochID,
+                        rKeyLastWriter'  =    [rKeyLastWriter   EXCEPT ![n] = n],
+                        rKeyRcvedACKs'   =    [rKeyRcvedACKs    EXCEPT ![n] = {}],
+                        rKeyState'       =    [rKeyState        EXCEPT ![n] = "replay"],
+                        rMsgsINV' = rMsgsINV \cup {([type       |-> "INV",
+                               sender     |-> n,
+                               epochID    |-> rEpochID,
+                               version    |-> rKeyVersion[n]])},
+                        UNCHANGED <<rMsgsVAL, rMsgsACK, rKeyVersion, rKeySharers, rAliveNodes, rNodeEpochID, rEpochID>>,
+                        NEW VARI \in rAliveNodes',
+                        NEW VARJ \in rAliveNodes',
+                        \/ rKeySharers[n] = "owner" 
+                        \/ rKeyState[n]   = "replay"
+                 PROVE  (~(VARJ \in rKeyRcvedACKs[VARI]) \/ (~(rKeyState[VARI] \in {"write", "replay"})) \/ (~(rKeyVersion[VARI] > rKeyVersion[VARJ])))'
+      BY DEF Inv15995_R0_1_I2, RLocalWriteReplay, RLocalWriteReplayAction
+    <2>1. CASE rKeySharers[n] = "owner"
+      BY <2>1, FS_Singleton, FS_EmptySet DEF TypeOK,RLocalWriteReplayAction,RLocalWriteReplay,Inv15995_R0_1_I2,RMessageINV
+    <2>2. CASE rKeyState[n]   = "replay"
+      BY <2>2 DEF TypeOK,RLocalWriteReplayAction,RLocalWriteReplay,Inv15995_R0_1_I2
+    <2>3. QED
+      BY <2>1, <2>2
   \* (Inv15995_R0_1_I2,RFailedNodeWriteReplayAction)
-  <1>7. TypeOK /\ Inv15995_R0_1_I2 /\ RFailedNodeWriteReplayAction => Inv15995_R0_1_I2' BY DEF TypeOK,RFailedNodeWriteReplayAction,RFailedNodeWriteReplay,Inv15995_R0_1_I2
+  <1>7. TypeOK /\ Inv15995_R0_1_I2 /\ RFailedNodeWriteReplayAction => Inv15995_R0_1_I2' 
+    <2> SUFFICES ASSUME TypeOK,
+                        Inv15995_R0_1_I2,
+                        NEW n \in rAliveNodes,
+                        RFailedNodeWriteReplay(n),
+                        NEW VARI \in rAliveNodes',
+                        NEW VARJ \in rAliveNodes'
+                 PROVE  (~(VARJ \in rKeyRcvedACKs[VARI]) \/ (~(rKeyState[VARI] \in {"write", "replay"})) \/ (~(rKeyVersion[VARI] > rKeyVersion[VARJ])))'
+      BY DEF Inv15995_R0_1_I2, RFailedNodeWriteReplayAction
+    <2> QED
+      BY FS_Singleton DEF TypeOK,RFailedNodeWriteReplayAction,RFailedNodeWriteReplay,Inv15995_R0_1_I2, RIsAlive, RMessageINV,RMessageVAL,RMessageACK
   \* (Inv15995_R0_1_I2,RUpdateLocalEpochIDAction)
   <1>8. TypeOK /\ Inv15995_R0_1_I2 /\ RUpdateLocalEpochIDAction => Inv15995_R0_1_I2' BY DEF TypeOK,RUpdateLocalEpochIDAction,RUpdateLocalEpochID,Inv15995_R0_1_I2
   \* (Inv15995_R0_1_I2,ROverthrowOwnerAction)
@@ -187,7 +266,17 @@ THEOREM L_4 == TypeOK /\ Inv794_R3_0_I1 /\ Next => Inv794_R3_0_I1'
   \* (Inv794_R3_0_I1,RRcvValAction)
   <1>2. TypeOK /\ Inv794_R3_0_I1 /\ RRcvValAction => Inv794_R3_0_I1' BY DEF TypeOK,RRcvValAction,RRcvVal,Inv794_R3_0_I1,RMessageINV,RMessageVAL,RMessageACK
   \* (Inv794_R3_0_I1,RWriteAction)
-  <1>3. TypeOK /\ Inv794_R3_0_I1 /\ RWriteAction => Inv794_R3_0_I1' BY DEF TypeOK,RWriteAction,RWrite,Inv794_R3_0_I1,RMessageINV,RMessageVAL
+  <1>3. TypeOK /\ Inv794_R3_0_I1 /\ RWriteAction => Inv794_R3_0_I1' 
+    <2> SUFFICES ASSUME TypeOK,
+                        Inv794_R3_0_I1,
+                        NEW n \in rAliveNodes,
+                        RWrite(n),
+                        NEW VARJ \in rAliveNodes',
+                        NEW VARMACK \in rMsgsACK'
+                 PROVE  ((VARMACK.version <= rKeyVersion[VARJ]) \/ (~(VARMACK.sender = VARJ)))'
+      BY DEF Inv794_R3_0_I1, RWriteAction
+    <2> QED
+      BY DEF TypeOK,RWriteAction,RWrite,Inv794_R3_0_I1,RMessageINV,RMessageVAL,RMessageACK
   \* (Inv794_R3_0_I1,RRcvAckAction)
   <1>4. TypeOK /\ Inv794_R3_0_I1 /\ RRcvAckAction => Inv794_R3_0_I1' BY DEF TypeOK,RRcvAckAction,RRcvAck,Inv794_R3_0_I1
   \* (Inv794_R3_0_I1,RSendValsAction)
@@ -211,7 +300,43 @@ THEOREM L_4 == TypeOK /\ Inv794_R3_0_I1 /\ Next => Inv794_R3_0_I1'
 THEOREM L_5 == TypeOK /\ Inv30_R4_0_I0 /\ Inv12_R4_1_I1 /\ Inv356_R4_1_I1 /\ Inv602_R0_0_I1 /\ Inv234_R4_1_I1 /\ Inv407_R0_1_I2 /\ Inv326_R0_1_I2 /\ Next => Inv326_R0_1_I2'
   <1>. USE A0,A1
   \* (Inv326_R0_1_I2,RRcvInvAction)
-  <1>1. TypeOK /\ Inv30_R4_0_I0 /\ Inv326_R0_1_I2 /\ RRcvInvAction => Inv326_R0_1_I2' BY DEF TypeOK,Inv30_R4_0_I0,RRcvInvAction,RRcvInv,Inv326_R0_1_I2,RMessageINV,RMessageVAL,RMessageACK
+  <1>1. TypeOK /\ Inv30_R4_0_I0 /\ Inv326_R0_1_I2 /\ RRcvInvAction => Inv326_R0_1_I2' 
+    <2> SUFFICES ASSUME TypeOK,
+                        Inv30_R4_0_I0,
+                        Inv326_R0_1_I2,
+                        NEW n \in rAliveNodes, NEW m \in rMsgsINV,
+                        m \in rMsgsINV,
+                        m.type     = "INV",
+                        m.epochID  = rEpochID,
+                        m.sender  /= n,
+                        m.sender  \in rAliveNodes,
+                        rMsgsACK' = rMsgsACK \cup {([type       |-> "ACK",
+                               epochID    |-> rEpochID,
+                               sender     |-> n,   
+                               version    |-> m.version])},
+                        UNCHANGED <<rMsgsINV, rMsgsVAL, rAliveNodes, rKeySharers, rKeyRcvedACKs, rNodeEpochID, rEpochID>>,
+                        NEW VARI \in rAliveNodes',
+                        NEW VARJ \in rAliveNodes',
+                        \/ m.version        > rKeyVersion[n]
+                           /\ rKeyState[n]   \in {"valid", "invalid", "replay"}
+                           /\ rKeyState'      = [rKeyState EXCEPT ![n] = "invalid"]
+                           /\ rKeyVersion'    = [rKeyVersion EXCEPT ![n]  = m.version]
+                           /\ rKeyLastWriter' = [rKeyLastWriter EXCEPT ![n] = m.sender]
+                        \/ m.version         <= rKeyVersion[n]
+                           /\ UNCHANGED <<rKeyState, rKeyVersion, rKeyLastWriter>>
+                 PROVE  ((rKeyVersion[VARI] <= rKeyVersion[VARJ]) \/ (~(rKeyState[VARJ] = "write")))'
+      BY DEF Inv326_R0_1_I2, RRcvInv, RRcvInvAction
+    <2>1. CASE m.version        > rKeyVersion[n]
+               /\ rKeyState[n]   \in {"valid", "invalid", "replay"}
+               /\ rKeyState'      = [rKeyState EXCEPT ![n] = "invalid"]
+               /\ rKeyVersion'    = [rKeyVersion EXCEPT ![n]  = m.version]
+               /\ rKeyLastWriter' = [rKeyLastWriter EXCEPT ![n] = m.sender]
+      BY <2>1, FS_Singleton, FS_Difference, FS_Subset DEF TypeOK,Inv30_R4_0_I0,RRcvInvAction,RRcvInv,Inv326_R0_1_I2,RMessageINV,RMessageVAL,RMessageACK
+    <2>2. CASE m.version         <= rKeyVersion[n]
+               /\ UNCHANGED <<rKeyState, rKeyVersion, rKeyLastWriter>>
+      BY <2>2 DEF TypeOK,Inv30_R4_0_I0,RRcvInvAction,RRcvInv,Inv326_R0_1_I2,RMessageINV,RMessageVAL,RMessageACK
+    <2>3. QED
+      BY <2>1, <2>2
   \* (Inv326_R0_1_I2,RRcvValAction)
   <1>2. TypeOK /\ Inv326_R0_1_I2 /\ RRcvValAction => Inv326_R0_1_I2' BY DEF TypeOK,RRcvValAction,RRcvVal,Inv326_R0_1_I2,RMessageINV,RMessageVAL,RMessageACK
   \* (Inv326_R0_1_I2,RWriteAction)
@@ -239,7 +364,40 @@ THEOREM L_5 == TypeOK /\ Inv30_R4_0_I0 /\ Inv12_R4_1_I1 /\ Inv356_R4_1_I1 /\ Inv
 THEOREM L_6 == TypeOK /\ Inv30_R4_0_I0 /\ Next => Inv30_R4_0_I0'
   <1>. USE A0,A1
   \* (Inv30_R4_0_I0,RRcvInvAction)
-  <1>1. TypeOK /\ Inv30_R4_0_I0 /\ RRcvInvAction => Inv30_R4_0_I0' BY DEF TypeOK,RRcvInvAction,RRcvInv,Inv30_R4_0_I0,RMessageINV,RMessageVAL,RMessageACK
+  <1>1. TypeOK /\ Inv30_R4_0_I0 /\ RRcvInvAction => Inv30_R4_0_I0' 
+    <2> SUFFICES ASSUME TypeOK,
+                        Inv30_R4_0_I0,
+                        NEW n \in rAliveNodes, NEW m \in rMsgsINV,
+                        m \in rMsgsINV,
+                        m.type     = "INV",
+                        m.epochID  = rEpochID,
+                        m.sender  /= n,
+                        m.sender  \in rAliveNodes,
+                        rMsgsACK' = rMsgsACK \cup {([type       |-> "ACK",
+                               epochID    |-> rEpochID,
+                               sender     |-> n,   
+                               version    |-> m.version])},
+                        UNCHANGED <<rMsgsINV, rMsgsVAL, rAliveNodes, rKeySharers, rKeyRcvedACKs, rNodeEpochID, rEpochID>>,
+                        \/ m.version        > rKeyVersion[n]
+                           /\ rKeyState[n]   \in {"valid", "invalid", "replay"}
+                           /\ rKeyState'      = [rKeyState EXCEPT ![n] = "invalid"]
+                           /\ rKeyVersion'    = [rKeyVersion EXCEPT ![n]  = m.version]
+                           /\ rKeyLastWriter' = [rKeyLastWriter EXCEPT ![n] = m.sender]
+                        \/ m.version         <= rKeyVersion[n]
+                           /\ UNCHANGED <<rKeyState, rKeyVersion, rKeyLastWriter>>
+                 PROVE  Inv30_R4_0_I0'
+      BY DEF RRcvInv, RRcvInvAction
+    <2>1. CASE m.version        > rKeyVersion[n]
+               /\ rKeyState[n]   \in {"valid", "invalid", "replay"}
+               /\ rKeyState'      = [rKeyState EXCEPT ![n] = "invalid"]
+               /\ rKeyVersion'    = [rKeyVersion EXCEPT ![n]  = m.version]
+               /\ rKeyLastWriter' = [rKeyLastWriter EXCEPT ![n] = m.sender]
+      BY <2>1 DEF TypeOK,RRcvInvAction,RRcvInv,Inv30_R4_0_I0,RMessageINV,RMessageVAL,RMessageACK
+    <2>2. CASE m.version         <= rKeyVersion[n]
+               /\ UNCHANGED <<rKeyState, rKeyVersion, rKeyLastWriter>>
+      BY <2>2 DEF TypeOK,RRcvInvAction,RRcvInv,Inv30_R4_0_I0,RMessageINV,RMessageVAL,RMessageACK
+    <2>3. QED
+      BY <2>1, <2>2
   \* (Inv30_R4_0_I0,RRcvValAction)
   <1>2. TypeOK /\ Inv30_R4_0_I0 /\ RRcvValAction => Inv30_R4_0_I0' BY DEF TypeOK,RRcvValAction,RRcvVal,Inv30_R4_0_I0,RMessageINV,RMessageVAL,RMessageACK
   \* (Inv30_R4_0_I0,RWriteAction)
@@ -295,7 +453,43 @@ THEOREM L_7 == TypeOK /\ Inv12_R4_1_I1 /\ Next => Inv12_R4_1_I1'
 THEOREM L_8 == TypeOK /\ Inv30_R4_0_I0 /\ Inv12_R4_1_I1 /\ Inv234_R4_1_I1 /\ Inv82_R9_3_I2 /\ Inv4413_R9_3_I2 /\ Inv602_R0_0_I1 /\ Inv85_R9_3_I2 /\ Inv27_R9_1_I1 /\ Inv12_R4_1_I1 /\ Inv602_R0_0_I1 /\ Inv356_R4_1_I1 /\ Next => Inv356_R4_1_I1'
   <1>. USE A0,A1
   \* (Inv356_R4_1_I1,RRcvInvAction)
-  <1>1. TypeOK /\ Inv30_R4_0_I0 /\ Inv356_R4_1_I1 /\ RRcvInvAction => Inv356_R4_1_I1' BY DEF TypeOK,Inv30_R4_0_I0,RRcvInvAction,RRcvInv,Inv356_R4_1_I1,RMessageINV,RMessageVAL,RMessageACK
+  <1>1. TypeOK /\ Inv30_R4_0_I0 /\ Inv356_R4_1_I1 /\ RRcvInvAction => Inv356_R4_1_I1' 
+    <2> SUFFICES ASSUME TypeOK,
+                        Inv30_R4_0_I0,
+                        Inv356_R4_1_I1,
+                        NEW n \in rAliveNodes, NEW m \in rMsgsINV,
+                        m \in rMsgsINV,
+                        m.type     = "INV",
+                        m.epochID  = rEpochID,
+                        m.sender  /= n,
+                        m.sender  \in rAliveNodes,
+                        rMsgsACK' = rMsgsACK \cup {([type       |-> "ACK",
+                               epochID    |-> rEpochID,
+                               sender     |-> n,   
+                               version    |-> m.version])},
+                        UNCHANGED <<rMsgsINV, rMsgsVAL, rAliveNodes, rKeySharers, rKeyRcvedACKs, rNodeEpochID, rEpochID>>,
+                        NEW VARI \in rAliveNodes',
+                        NEW VARJ \in rAliveNodes',
+                        \/ m.version        > rKeyVersion[n]
+                           /\ rKeyState[n]   \in {"valid", "invalid", "replay"}
+                           /\ rKeyState'      = [rKeyState EXCEPT ![n] = "invalid"]
+                           /\ rKeyVersion'    = [rKeyVersion EXCEPT ![n]  = m.version]
+                           /\ rKeyLastWriter' = [rKeyLastWriter EXCEPT ![n] = m.sender]
+                        \/ m.version         <= rKeyVersion[n]
+                           /\ UNCHANGED <<rKeyState, rKeyVersion, rKeyLastWriter>>
+                 PROVE  ((rKeySharers[VARJ] = "reader") \/ ((rKeyVersion[VARI] <= rKeyVersion[VARJ])))'
+      BY DEF Inv356_R4_1_I1, RRcvInv, RRcvInvAction
+    <2>1. CASE m.version        > rKeyVersion[n]
+               /\ rKeyState[n]   \in {"valid", "invalid", "replay"}
+               /\ rKeyState'      = [rKeyState EXCEPT ![n] = "invalid"]
+               /\ rKeyVersion'    = [rKeyVersion EXCEPT ![n]  = m.version]
+               /\ rKeyLastWriter' = [rKeyLastWriter EXCEPT ![n] = m.sender]
+      BY <2>1, FS_Singleton DEF TypeOK,Inv30_R4_0_I0,RRcvInvAction,RRcvInv,Inv356_R4_1_I1,RMessageINV,RMessageVAL,RMessageACK
+    <2>2. CASE m.version         <= rKeyVersion[n]
+               /\ UNCHANGED <<rKeyState, rKeyVersion, rKeyLastWriter>>
+      BY <2>2 DEF TypeOK,Inv30_R4_0_I0,RRcvInvAction,RRcvInv,Inv356_R4_1_I1,RMessageINV,RMessageVAL,RMessageACK
+    <2>3. QED
+      BY <2>1, <2>2
   \* (Inv356_R4_1_I1,RRcvValAction)
   <1>2. TypeOK /\ Inv356_R4_1_I1 /\ RRcvValAction => Inv356_R4_1_I1' BY DEF TypeOK,RRcvValAction,RRcvVal,Inv356_R4_1_I1,RMessageINV,RMessageVAL,RMessageACK
   \* (Inv356_R4_1_I1,RWriteAction)
@@ -470,7 +664,14 @@ THEOREM L_13 == TypeOK /\ Inv82_R9_3_I2 /\ Next => Inv82_R9_3_I2'
                  PROVE  ((rNodeEpochID[VARI] < rEpochID) \/ ((rNodeEpochID[VARI] = rEpochID)))'
       BY DEF Inv82_R9_3_I2, RNodeFailure, RNodeFailureAction
     <2> QED
-      BY DEF TypeOK,RNodeFailureAction,RNodeFailure,Inv82_R9_3_I2,RMessageINV,RNoChanges_but_membership
+        <3>1. CASE rNodeEpochID[VARI] > rEpochID /\ VARI \notin rAliveNodes
+            BY <3>1, FS_Singleton, FS_Difference DEF TypeOK,RNodeFailureAction,RNodeFailure,Inv82_R9_3_I2,RMessageINV,RNoChanges_but_membership
+        <3>2. CASE rNodeEpochID[VARI] > rEpochID /\ VARI \in rAliveNodes /\ VARI = n
+            BY <3>2, FS_Singleton, FS_Difference DEF TypeOK,RNodeFailureAction,RNodeFailure,Inv82_R9_3_I2,RMessageINV,RNoChanges_but_membership
+        <3>3. CASE rNodeEpochID[VARI] > rEpochID /\ VARI \in rAliveNodes /\ VARI # n
+            BY <3>3, FS_Singleton, FS_Difference DEF TypeOK,RNodeFailureAction,RNodeFailure,Inv82_R9_3_I2,RMessageINV,RNoChanges_but_membership
+        
+        <3>4. QED BY <3>1,<3>2
 <1>12. QED BY <1>1,<1>2,<1>3,<1>4,<1>5,<1>6,<1>7,<1>8,<1>9,<1>10,<1>11 DEF Next
 
 
@@ -498,7 +699,22 @@ THEOREM L_14 == TypeOK /\ Inv85_R9_3_I2 /\ Next => Inv85_R9_3_I2'
   \* (Inv85_R9_3_I2,RNewOwnerAction)
   <1>10. TypeOK /\ Inv85_R9_3_I2 /\ RNewOwnerAction => Inv85_R9_3_I2' BY DEF TypeOK,RNewOwnerAction,RNewOwner,Inv85_R9_3_I2
   \* (Inv85_R9_3_I2,RNodeFailureAction)
-  <1>11. TypeOK /\ Inv85_R9_3_I2 /\ RNodeFailureAction => Inv85_R9_3_I2' BY DEF TypeOK,RNodeFailureAction,RNodeFailure,Inv85_R9_3_I2,RMessageINV,RNoChanges_but_membership
+  <1>11. TypeOK /\ Inv85_R9_3_I2 /\ RNodeFailureAction => Inv85_R9_3_I2' 
+    <2> SUFFICES ASSUME TypeOK,
+                        Inv85_R9_3_I2,
+                        NEW n \in rAliveNodes,
+                        NEW k \in rAliveNodes, NEW m \in rAliveNodes,
+                        /\ k /= n 
+                        /\ m /= n
+                        /\ m /= k,
+                        rEpochID' = rEpochID + 1,
+                        rAliveNodes' = rAliveNodes \ {n},
+                        RNoChanges_but_membership,
+                        NEW VARI \in rAliveNodes'
+                 PROVE  ((rNodeEpochID[VARI] < rEpochID) \/ (~(rKeyState[VARI] = "replay")))'
+      BY DEF Inv85_R9_3_I2, RNodeFailure, RNodeFailureAction
+    <2> QED
+      BY FS_Singleton, FS_Difference DEF TypeOK,RNodeFailureAction,RNodeFailure,Inv85_R9_3_I2,RMessageINV,RNoChanges_but_membership
 <1>12. QED BY <1>1,<1>2,<1>3,<1>4,<1>5,<1>6,<1>7,<1>8,<1>9,<1>10,<1>11 DEF Next
 
 
@@ -532,8 +748,35 @@ THEOREM L_15 == TypeOK /\ Inv234_R4_1_I1 /\ Inv407_R0_1_I2 /\ Next => Inv407_R0_
 \* Initiation.
 THEOREM Init => IndGlobal
     <1> USE A0,A1
-    <1>0. Init => TypeOK BY DEF Init, TypeOK, IndGlobal
-    <1>1. Init => Safety BY DEF Init, Safety, IndGlobal
+    <1>0. Init => TypeOK 
+      <2> SUFFICES ASSUME Init
+                   PROVE  TypeOK
+        OBVIOUS
+      <2>1. rMsgsINV        \subseteq RMessageINV
+        BY FS_EmptySet, FS_Singleton, FS_Difference DEF Init, TypeOK, IndGlobal,RMessageINV,RMessageVAL,RMessageACK
+      <2>2. rMsgsACK           \subseteq RMessageACK
+        BY FS_EmptySet, FS_Singleton, FS_Difference DEF Init, TypeOK, IndGlobal,RMessageINV,RMessageVAL,RMessageACK
+      <2>3. rMsgsVAL           \subseteq RMessageVAL
+        BY FS_EmptySet, FS_Singleton, FS_Difference DEF Init, TypeOK, IndGlobal,RMessageINV,RMessageVAL,RMessageACK
+      <2>4. rAliveNodes     \subseteq R_NODES
+        BY FS_EmptySet, FS_Singleton, FS_Difference DEF Init, TypeOK, IndGlobal,RMessageINV,RMessageVAL,RMessageACK
+      <2>5. rKeyRcvedACKs  \in [R_NODES -> SUBSET R_NODES]
+        BY FS_EmptySet, FS_Singleton, FS_Difference DEF Init, TypeOK, IndGlobal,RMessageINV,RMessageVAL,RMessageACK
+      <2>6. \A n \in R_NODES: rKeyRcvedACKs[n] \subseteq (R_NODES \ {n})
+        BY FS_EmptySet, FS_Singleton, FS_Difference DEF Init, TypeOK, IndGlobal,RMessageINV,RMessageVAL,RMessageACK
+      <2>7. rNodeEpochID    \in [R_NODES -> Nat]
+        BY FS_EmptySet, FS_Singleton, FS_Difference DEF Init, TypeOK, IndGlobal,RMessageINV,RMessageVAL,RMessageACK
+      <2>8. rKeyLastWriter  \in [R_NODES -> R_NODES]
+        BY FS_EmptySet, FS_Singleton, FS_Difference DEF Init, TypeOK, IndGlobal,RMessageINV,RMessageVAL,RMessageACK
+      <2>9. rKeyVersion     \in [R_NODES -> Nat]
+        BY FS_EmptySet, FS_Singleton, FS_Difference DEF Init, TypeOK, IndGlobal,RMessageINV,RMessageVAL,RMessageACK
+      <2>10. rKeySharers     \in [R_NODES -> {"owner", "reader", "non-sharer"}]
+        BY FS_EmptySet, FS_Singleton, FS_Difference DEF Init, TypeOK, IndGlobal,RMessageINV,RMessageVAL,RMessageACK
+      <2>11. rKeyState       \in [R_NODES -> {"valid", "invalid", "write", "replay"}]
+        BY FS_EmptySet, FS_Singleton, FS_Difference DEF Init, TypeOK, IndGlobal,RMessageINV,RMessageVAL,RMessageACK
+      <2>12. QED
+        BY <2>1, <2>10, <2>11, <2>2, <2>3, <2>4, <2>5, <2>6, <2>7, <2>8, <2>9 DEF TypeOK
+    <1>1. Init => Safety BY DEF Init, Safety, IndGlobal, RConsistentInvariant
     <1>2. Init => Inv29_R0_0_I1 BY DEF Init, Inv29_R0_0_I1, IndGlobal
     <1>3. Init => Inv15995_R0_1_I2 BY DEF Init, Inv15995_R0_1_I2, IndGlobal
     <1>4. Init => Inv794_R3_0_I1 BY DEF Init, Inv794_R3_0_I1, IndGlobal
