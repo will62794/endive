@@ -48,7 +48,7 @@ IndGlobal ==
 \* mean variable slice size: 0
 
 ASSUME A0 == IsFiniteSet(R_NODES) /\ R_NODES # {}
-ASSUME A1 == R_NODES \subseteq Nat /\ R_MAX_VERSION \in Nat /\ \A n,n2 \in Nat : ~ (n > n2) <=> (n <= n2)
+ASSUME A1 == R_NODES \subseteq Nat /\ R_MAX_VERSION \in Nat /\ (\A n,n2 \in Nat : ~ (n > n2) <=> (n <= n2)) /\ (\E k \in R_NODES : \A m \in R_NODES : k <= m)
 
 \*** TypeOK
 THEOREM L_0 == TypeOK /\ TypeOK /\ Next => TypeOK'
@@ -504,9 +504,11 @@ THEOREM L_8 == TypeOK /\ Inv30_R4_0_I0 /\ Inv12_R4_1_I1 /\ Inv234_R4_1_I1 /\ Inv
             BY <3>4,<2>1, FS_Singleton DEF TypeOK,Inv30_R4_0_I0,RRcvInvAction,RRcvInv,Inv356_R4_1_I1,RMessageINV,RMessageVAL,RMessageACK          
         <3>5.  CASE m.version > rKeyVersion[VARJ] /\ VARJ # n /\ VARI = n /\ VARI # VARJ /\ VARJ = m.sender
             BY <3>5,<2>1, FS_Singleton DEF TypeOK,Inv30_R4_0_I0,RRcvInvAction,RRcvInv,Inv356_R4_1_I1,RMessageINV,RMessageVAL,RMessageACK 
-        <3>6.  CASE m.version > rKeyVersion[VARJ] /\ VARJ # n /\ VARI = n /\ VARI # VARJ /\ VARJ # m.sender
-            BY <3>6,<2>1, FS_Singleton DEF TypeOK,Inv30_R4_0_I0,RRcvInvAction,RRcvInv,Inv356_R4_1_I1,RMessageINV,RMessageVAL,RMessageACK   
-        <3>7. QED BY <2>1,<3>1, FS_Singleton DEF TypeOK,Inv30_R4_0_I0,RRcvInvAction,RRcvInv,Inv356_R4_1_I1,RMessageINV,RMessageVAL,RMessageACK
+        <3>6.  CASE m.version > rKeyVersion[VARJ] /\ VARJ # n /\ VARI = n /\ VARI # VARJ /\ VARJ # m.sender /\ m.version <= rKeyVersion[VARJ]
+            BY <3>6,<2>1, FS_Singleton DEF TypeOK,Inv30_R4_0_I0,RRcvInvAction,RRcvInv,Inv356_R4_1_I1,RMessageINV,RMessageVAL,RMessageACK 
+        <3>7.  CASE m.version > rKeyVersion[VARJ] /\ VARJ # n /\ VARI = n /\ VARI # VARJ /\ VARJ # m.sender /\ m.version > rKeyVersion[VARJ]
+            BY <3>7,<2>1, FS_Singleton DEF TypeOK,Inv30_R4_0_I0,RRcvInvAction,RRcvInv,Inv356_R4_1_I1,RMessageINV,RMessageVAL,RMessageACK  
+        <3>8. QED BY <2>1,<3>1, FS_Singleton DEF TypeOK,Inv30_R4_0_I0,RRcvInvAction,RRcvInv,Inv356_R4_1_I1,RMessageINV,RMessageVAL,RMessageACK
     <2>2. CASE m.version         <= rKeyVersion[n]
                /\ UNCHANGED <<rKeyState, rKeyVersion, rKeyLastWriter>>
       BY <2>2 DEF TypeOK,Inv30_R4_0_I0,RRcvInvAction,RRcvInv,Inv356_R4_1_I1,RMessageINV,RMessageVAL,RMessageACK
@@ -685,15 +687,8 @@ THEOREM L_13 == TypeOK /\ Inv82_R9_3_I2 /\ Next => Inv82_R9_3_I2'
                         NEW VARI \in rAliveNodes'
                  PROVE  ((rNodeEpochID[VARI] < rEpochID) \/ ((rNodeEpochID[VARI] = rEpochID)))'
       BY DEF Inv82_R9_3_I2, RNodeFailure, RNodeFailureAction
-    <2> QED
-        <3>1. CASE rNodeEpochID[VARI] > rEpochID /\ VARI \notin rAliveNodes
-            BY <3>1, FS_Singleton, FS_Difference DEF TypeOK,RNodeFailureAction,RNodeFailure,Inv82_R9_3_I2,RMessageINV,RNoChanges_but_membership
-        <3>2. CASE rNodeEpochID[VARI] > rEpochID /\ VARI \in rAliveNodes /\ VARI = n
-            BY <3>2, FS_Singleton, FS_Difference DEF TypeOK,RNodeFailureAction,RNodeFailure,Inv82_R9_3_I2,RMessageINV,RNoChanges_but_membership
-        <3>3. CASE rNodeEpochID[VARI] > rEpochID /\ VARI \in rAliveNodes /\ VARI # n
-            BY <3>3, FS_Singleton, FS_Difference DEF TypeOK,RNodeFailureAction,RNodeFailure,Inv82_R9_3_I2,RMessageINV,RNoChanges_but_membership
+    <2> QED BY FS_Singleton, FS_Difference DEF TypeOK,RNodeFailureAction,RNodeFailure,Inv82_R9_3_I2,RMessageINV,RNoChanges_but_membership
         
-        <3>4. QED BY <3>1,<3>2
 <1>12. QED BY <1>1,<1>2,<1>3,<1>4,<1>5,<1>6,<1>7,<1>8,<1>9,<1>10,<1>11 DEF Next
 
 
@@ -735,8 +730,21 @@ THEOREM L_14 == TypeOK /\ Inv85_R9_3_I2 /\ Next => Inv85_R9_3_I2'
                         NEW VARI \in rAliveNodes'
                  PROVE  ((rNodeEpochID[VARI] < rEpochID) \/ (~(rKeyState[VARI] = "replay")))'
       BY DEF Inv85_R9_3_I2, RNodeFailure, RNodeFailureAction
+    <2>1. CASE n \in rAliveNodes /\ VARI = n
+         BY <2>1, FS_Singleton, FS_Difference DEF TypeOK,RNodeFailureAction,RNodeFailure,Inv85_R9_3_I2,RMessageINV,RNoChanges_but_membership
+    <2>2. CASE n \in rAliveNodes /\ VARI # n /\ VARI \notin rAliveNodes
+         
+         BY <2>2, FS_Singleton, FS_Difference DEF TypeOK,RNodeFailureAction,RNodeFailure,Inv85_R9_3_I2,RMessageINV,RNoChanges_but_membership
+    <2>3. CASE n \in rAliveNodes /\ VARI # n /\ VARI \in rAliveNodes /\ rKeyState[VARI] # "replay"         
+         BY <2>3, FS_Singleton, FS_Difference DEF TypeOK,RNodeFailureAction,RNodeFailure,Inv85_R9_3_I2,RMessageINV,RNoChanges_but_membership
+    <2>3a. CASE n \in rAliveNodes /\ VARI # n /\ VARI \in rAliveNodes /\ rKeyState[VARI] = "replay"         
+         BY <2>3a, FS_Singleton, FS_Difference DEF TypeOK,RNodeFailureAction,RNodeFailure,Inv85_R9_3_I2,RMessageINV,RNoChanges_but_membership
+            
+    <2>4. CASE n \notin rAliveNodes
+         BY <2>4, FS_Singleton, FS_Difference DEF TypeOK,RNodeFailureAction,RNodeFailure,Inv85_R9_3_I2,RMessageINV,RNoChanges_but_membership
+   
     <2> QED
-      BY FS_Singleton, FS_Difference DEF TypeOK,RNodeFailureAction,RNodeFailure,Inv85_R9_3_I2,RMessageINV,RNoChanges_but_membership
+      BY <2>1, FS_Singleton, FS_Difference DEF TypeOK,RNodeFailureAction,RNodeFailure,Inv85_R9_3_I2,RMessageINV,RNoChanges_but_membership
 <1>12. QED BY <1>1,<1>2,<1>3,<1>4,<1>5,<1>6,<1>7,<1>8,<1>9,<1>10,<1>11 DEF Next
 
 
@@ -774,6 +782,9 @@ THEOREM Init => IndGlobal
       <2> SUFFICES ASSUME Init
                    PROVE  TypeOK
         OBVIOUS
+      <2>0. rEpochID \in Nat
+              BY FS_EmptySet, FS_Singleton, FS_Difference DEF Init, TypeOK, IndGlobal,RMessageINV,RMessageVAL,RMessageACK
+      
       <2>1. rMsgsINV        \subseteq RMessageINV
         BY FS_EmptySet, FS_Singleton, FS_Difference DEF Init, TypeOK, IndGlobal,RMessageINV,RMessageVAL,RMessageACK
       <2>2. rMsgsACK           \subseteq RMessageACK
@@ -797,7 +808,7 @@ THEOREM Init => IndGlobal
       <2>11. rKeyState       \in [R_NODES -> {"valid", "invalid", "write", "replay"}]
         BY FS_EmptySet, FS_Singleton, FS_Difference DEF Init, TypeOK, IndGlobal,RMessageINV,RMessageVAL,RMessageACK
       <2>12. QED
-        BY <2>1, <2>10, <2>11, <2>2, <2>3, <2>4, <2>5, <2>6, <2>7, <2>8, <2>9 DEF TypeOK
+        BY <2>0, <2>1, <2>10, <2>11, <2>2, <2>3, <2>4, <2>5, <2>6, <2>7, <2>8, <2>9 DEF TypeOK
     <1>1. Init => Safety BY DEF Init, Safety, IndGlobal, RConsistentInvariant
     <1>2. Init => Inv29_R0_0_I1 BY DEF Init, Inv29_R0_0_I1, IndGlobal
     <1>3. Init => Inv15995_R0_1_I2 BY DEF Init, Inv15995_R0_1_I2, IndGlobal
