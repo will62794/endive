@@ -1,5 +1,5 @@
 ------------------------------- MODULE ZeusReliableCommit_IndProofs -------------------------------
-EXTENDS ZeusReliableCommit, FiniteSetTheorems, NaturalsInduction
+EXTENDS ZeusReliableCommit, FiniteSetTheorems, NaturalsInduction, TLAPS
 
 \* Proof Graph Stats
 \* ==================
@@ -331,7 +331,17 @@ THEOREM L_5 == TypeOK /\ Inv30_R4_0_I0 /\ Inv12_R4_1_I1 /\ Inv356_R4_1_I1 /\ Inv
                /\ rKeyState'      = [rKeyState EXCEPT ![n] = "invalid"]
                /\ rKeyVersion'    = [rKeyVersion EXCEPT ![n]  = m.version]
                /\ rKeyLastWriter' = [rKeyLastWriter EXCEPT ![n] = m.sender]
-      BY <2>1, FS_Singleton, FS_Difference, FS_Subset DEF TypeOK,Inv30_R4_0_I0,RRcvInvAction,RRcvInv,Inv326_R0_1_I2,RMessageINV,RMessageVAL,RMessageACK
+       
+        <3>1. CASE rKeyState[VARJ] # "write"
+              BY <2>1, <3>1, FS_Singleton, FS_Difference, FS_Subset DEF TypeOK,Inv30_R4_0_I0,RRcvInvAction,RRcvInv,Inv326_R0_1_I2,RMessageINV,RMessageVAL,RMessageACK
+         <3>2. CASE rKeyState[VARJ] = "write" /\ m.sender = VARJ
+               BY <2>1, <3>2, FS_Singleton, FS_Difference, FS_Subset DEF TypeOK,Inv30_R4_0_I0,RRcvInvAction,RRcvInv,Inv326_R0_1_I2,RMessageINV,RMessageVAL,RMessageACK
+         <3>3. CASE rKeyState[VARJ] = "write" /\ m.sender # VARJ /\ VARI # n
+                BY <2>1, <3>3, FS_Singleton, FS_Difference, FS_Subset DEF TypeOK,Inv30_R4_0_I0,RRcvInvAction,RRcvInv,Inv326_R0_1_I2,RMessageINV,RMessageVAL,RMessageACK
+         <3>4. CASE rKeyState[VARJ] = "write" /\ m.sender # VARJ /\ VARI = n
+                BY <2>1, <3>3, FS_Singleton, FS_Difference, FS_Subset DEF TypeOK,Inv30_R4_0_I0,RRcvInvAction,RRcvInv,Inv326_R0_1_I2,RMessageINV,RMessageVAL,RMessageACK
+         
+         <3>5. QED BY <3>1, <3>2
     <2>2. CASE m.version         <= rKeyVersion[n]
                /\ UNCHANGED <<rKeyState, rKeyVersion, rKeyLastWriter>>
       BY <2>2 DEF TypeOK,Inv30_R4_0_I0,RRcvInvAction,RRcvInv,Inv326_R0_1_I2,RMessageINV,RMessageVAL,RMessageACK
