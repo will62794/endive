@@ -93,6 +93,7 @@ TypeOK ==  \* The type correctness invariant
     /\  rKeyVersion     \in [R_NODES -> Nat]
     /\  rKeySharers     \in [R_NODES -> {"owner", "reader", "non-sharer"}]
     /\  rKeyState       \in [R_NODES -> {"valid", "invalid", "write", "replay"}]
+    /\ rEpochID \in Nat
     
 
 Init == \* The initial predicate
