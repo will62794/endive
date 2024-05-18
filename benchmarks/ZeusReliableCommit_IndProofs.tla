@@ -48,7 +48,7 @@ IndGlobal ==
 \* mean variable slice size: 0
 
 ASSUME A0 == IsFiniteSet(R_NODES) /\ R_NODES # {}
-ASSUME A1 == R_NODES \subseteq Nat /\ R_MAX_VERSION \in Nat
+ASSUME A1 == R_NODES \subseteq Nat /\ R_MAX_VERSION \in Nat /\ \A n,n2 \in Nat : ~ (n > n2) <=> (n <= n2)
 
 \*** TypeOK
 THEOREM L_0 == TypeOK /\ TypeOK /\ Next => TypeOK'
@@ -494,7 +494,19 @@ THEOREM L_8 == TypeOK /\ Inv30_R4_0_I0 /\ Inv12_R4_1_I1 /\ Inv234_R4_1_I1 /\ Inv
                /\ rKeyState'      = [rKeyState EXCEPT ![n] = "invalid"]
                /\ rKeyVersion'    = [rKeyVersion EXCEPT ![n]  = m.version]
                /\ rKeyLastWriter' = [rKeyLastWriter EXCEPT ![n] = m.sender]
-      BY <2>1, FS_Singleton DEF TypeOK,Inv30_R4_0_I0,RRcvInvAction,RRcvInv,Inv356_R4_1_I1,RMessageINV,RMessageVAL,RMessageACK
+        <3>1.  CASE m.version <= rKeyVersion[VARJ]
+            BY <3>1,<2>1, FS_Singleton DEF TypeOK,Inv30_R4_0_I0,RRcvInvAction,RRcvInv,Inv356_R4_1_I1,RMessageINV,RMessageVAL,RMessageACK 
+        <3>2.  CASE m.version > rKeyVersion[VARJ] /\ VARJ = n
+            BY <3>2,<2>1, FS_Singleton DEF TypeOK,Inv30_R4_0_I0,RRcvInvAction,RRcvInv,Inv356_R4_1_I1,RMessageINV,RMessageVAL,RMessageACK  
+        <3>3.  CASE m.version > rKeyVersion[VARJ] /\ VARJ # n /\ VARI # n
+            BY <3>3,<2>1, FS_Singleton DEF TypeOK,Inv30_R4_0_I0,RRcvInvAction,RRcvInv,Inv356_R4_1_I1,RMessageINV,RMessageVAL,RMessageACK 
+        <3>4.  CASE m.version > rKeyVersion[VARJ] /\ VARJ # n /\ VARI = n /\ VARI = VARJ
+            BY <3>4,<2>1, FS_Singleton DEF TypeOK,Inv30_R4_0_I0,RRcvInvAction,RRcvInv,Inv356_R4_1_I1,RMessageINV,RMessageVAL,RMessageACK          
+        <3>5.  CASE m.version > rKeyVersion[VARJ] /\ VARJ # n /\ VARI = n /\ VARI # VARJ /\ VARJ = m.sender
+            BY <3>5,<2>1, FS_Singleton DEF TypeOK,Inv30_R4_0_I0,RRcvInvAction,RRcvInv,Inv356_R4_1_I1,RMessageINV,RMessageVAL,RMessageACK 
+        <3>6.  CASE m.version > rKeyVersion[VARJ] /\ VARJ # n /\ VARI = n /\ VARI # VARJ /\ VARJ # m.sender
+            BY <3>6,<2>1, FS_Singleton DEF TypeOK,Inv30_R4_0_I0,RRcvInvAction,RRcvInv,Inv356_R4_1_I1,RMessageINV,RMessageVAL,RMessageACK   
+        <3>7. QED BY <2>1,<3>1, FS_Singleton DEF TypeOK,Inv30_R4_0_I0,RRcvInvAction,RRcvInv,Inv356_R4_1_I1,RMessageINV,RMessageVAL,RMessageACK
     <2>2. CASE m.version         <= rKeyVersion[n]
                /\ UNCHANGED <<rKeyState, rKeyVersion, rKeyLastWriter>>
       BY <2>2 DEF TypeOK,Inv30_R4_0_I0,RRcvInvAction,RRcvInv,Inv356_R4_1_I1,RMessageINV,RMessageVAL,RMessageACK
