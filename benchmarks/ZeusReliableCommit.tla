@@ -85,7 +85,7 @@ TypeOK ==  \* The type correctness invariant
     /\  rMsgsINV        \subseteq RMessageINV
     /\  rMsgsACK           \subseteq RMessageACK
     /\  rMsgsVAL           \subseteq RMessageVAL
-    /\  rAliveNodes     \subseteq R_NODES
+    /\  rAliveNodes     \in SUBSET R_NODES
     /\  rKeyRcvedACKs  \in [R_NODES -> SUBSET R_NODES]
     /\  \A n \in R_NODES: rKeyRcvedACKs[n] \subseteq (R_NODES \ {n})
     /\  rNodeEpochID    \in [R_NODES -> Nat]

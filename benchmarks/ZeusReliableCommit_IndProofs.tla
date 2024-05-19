@@ -47,11 +47,11 @@ IndGlobal ==
 \* min in-degree: 0
 \* mean variable slice size: 0
 
-ASSUME A0 == IsFiniteSet(R_NODES) /\ R_NODES # {}
-ASSUME A1 == R_NODES \subseteq Nat /\ R_MAX_VERSION \in Nat /\ (\A n,n2 \in Nat : ~ (n > n2) <=> (n <= n2)) /\ (\E k \in R_NODES : \A m \in R_NODES : k <= m)
+ASSUME A0 == IsFiniteSet(R_NODES) /\ R_NODES # {} /\ \A a,b \in Nat : ~(a<b) <=> a <= b
+ASSUME A1 == R_NODES \subseteq Nat /\ R_MAX_VERSION \in Nat /\ (\A n,n2 \in Nat : ~ (n > n2) <=> (n <= n2)) /\ (\E k \in R_NODES : \A m \in R_NODES : k <= m) /\ (\A a,b,c \in Nat : (a <= b /\ b <= c) => a <= c)
 
 \*** TypeOK
-THEOREM L_0 == TypeOK /\ TypeOK /\ Next => TypeOK'
+THEOREM L_0 == TypeOK /\ Next => TypeOK'
   <1>. USE A0,A1
   \* (TypeOK,RRcvInvAction)
   <1>1. TypeOK /\ TypeOK /\ RRcvInvAction => TypeOK' BY DEF TypeOK,RRcvInvAction,RRcvInv,TypeOK,RMessageINV,RMessageVAL,RMessageACK
@@ -60,9 +60,67 @@ THEOREM L_0 == TypeOK /\ TypeOK /\ Next => TypeOK'
   \* (TypeOK,RWriteAction)
   <1>3. TypeOK /\ TypeOK /\ RWriteAction => TypeOK' BY DEF TypeOK,RWriteAction,RWrite,TypeOK,RMessageINV,RMessageVAL
   \* (TypeOK,RRcvAckAction)
-  <1>4. TypeOK /\ TypeOK /\ RRcvAckAction => TypeOK' BY DEF TypeOK,RRcvAckAction,RRcvAck,TypeOK
+  <1>4. TypeOK /\ TypeOK /\ RRcvAckAction => TypeOK' 
+    <2> SUFFICES ASSUME TypeOK /\ TypeOK /\ RRcvAckAction
+                 PROVE  TypeOK'
+      OBVIOUS
+    <2>1. (rMsgsINV        \subseteq RMessageINV)'
+      BY DEF TypeOK,RRcvAckAction,RRcvAck,TypeOK
+    <2>2. (rMsgsACK           \subseteq RMessageACK)'
+      BY DEF TypeOK,RRcvAckAction,RRcvAck,TypeOK
+    <2>3. (rMsgsVAL           \subseteq RMessageVAL)'
+      BY DEF TypeOK,RRcvAckAction,RRcvAck,TypeOK
+    <2>4. (rAliveNodes     \subseteq R_NODES)'
+      BY DEF TypeOK,RRcvAckAction,RRcvAck,TypeOK
+    <2>5. (rKeyRcvedACKs  \in [R_NODES -> SUBSET R_NODES])'
+      BY DEF TypeOK,RRcvAckAction,RRcvAck,TypeOK
+    <2>6. (\A n \in R_NODES: rKeyRcvedACKs[n] \subseteq (R_NODES \ {n}))'
+      BY DEF TypeOK,RRcvAckAction,RRcvAck,TypeOK
+    <2>7. (rNodeEpochID    \in [R_NODES -> Nat])'
+      BY DEF TypeOK,RRcvAckAction,RRcvAck,TypeOK
+    <2>8. (rKeyLastWriter  \in [R_NODES -> R_NODES])'
+      BY DEF TypeOK,RRcvAckAction,RRcvAck,TypeOK
+    <2>9. (rKeyVersion     \in [R_NODES -> Nat])'
+      BY DEF TypeOK,RRcvAckAction,RRcvAck,TypeOK
+    <2>10. (rKeySharers     \in [R_NODES -> {"owner", "reader", "non-sharer"}])'
+      BY DEF TypeOK,RRcvAckAction,RRcvAck,TypeOK
+    <2>11. (rKeyState       \in [R_NODES -> {"valid", "invalid", "write", "replay"}])'
+      BY DEF TypeOK,RRcvAckAction,RRcvAck,TypeOK
+    <2>12. (rEpochID \in Nat)'
+      BY DEF TypeOK,RRcvAckAction,RRcvAck,TypeOK
+    <2>13. QED
+      BY <2>1, <2>10, <2>11, <2>12, <2>2, <2>3, <2>4, <2>5, <2>6, <2>7, <2>8, <2>9 DEF TypeOK
   \* (TypeOK,RSendValsAction)
-  <1>5. TypeOK /\ TypeOK /\ RSendValsAction => TypeOK' BY DEF TypeOK,RSendValsAction,RSendVals,TypeOK
+  <1>5. TypeOK /\ TypeOK /\ RSendValsAction => TypeOK' 
+    <2> SUFFICES ASSUME TypeOK /\ TypeOK /\ RSendValsAction
+                 PROVE  TypeOK'
+      OBVIOUS
+    <2>1. (rMsgsINV        \subseteq RMessageINV)'
+      BY DEF TypeOK,RSendValsAction,RSendVals,TypeOK
+    <2>2. (rMsgsACK           \subseteq RMessageACK)'
+      BY DEF TypeOK,RSendValsAction,RSendVals,TypeOK
+    <2>3. (rMsgsVAL           \subseteq RMessageVAL)'
+      BY DEF TypeOK,RSendValsAction,RSendVals,TypeOK
+    <2>4. (rAliveNodes     \subseteq R_NODES)'
+      BY DEF TypeOK,RSendValsAction,RSendVals,TypeOK
+    <2>5. (rKeyRcvedACKs  \in [R_NODES -> SUBSET R_NODES])'
+      BY DEF TypeOK,RSendValsAction,RSendVals,TypeOK
+    <2>6. (\A n \in R_NODES: rKeyRcvedACKs[n] \subseteq (R_NODES \ {n}))'
+      BY DEF TypeOK,RSendValsAction,RSendVals,TypeOK
+    <2>7. (rNodeEpochID    \in [R_NODES -> Nat])'
+      BY DEF TypeOK,RSendValsAction,RSendVals,TypeOK
+    <2>8. (rKeyLastWriter  \in [R_NODES -> R_NODES])'
+      BY DEF TypeOK,RSendValsAction,RSendVals,TypeOK
+    <2>9. (rKeyVersion     \in [R_NODES -> Nat])'
+      BY DEF TypeOK,RSendValsAction,RSendVals,TypeOK
+    <2>10. (rKeySharers     \in [R_NODES -> {"owner", "reader", "non-sharer"}])'
+      BY DEF TypeOK,RSendValsAction,RSendVals,TypeOK
+    <2>11. (rKeyState       \in [R_NODES -> {"valid", "invalid", "write", "replay"}])'
+      BY DEF TypeOK,RSendValsAction,RSendVals,TypeOK
+    <2>12. (rEpochID \in Nat)'
+      BY DEF TypeOK,RSendValsAction,RSendVals,TypeOK
+    <2>13. QED
+      BY <2>1, <2>10, <2>11, <2>12, <2>2, <2>3, <2>4, <2>5, <2>6, <2>7, <2>8, <2>9 DEF TypeOK
   \* (TypeOK,RLocalWriteReplayAction)
   <1>6. TypeOK /\ TypeOK /\ RLocalWriteReplayAction => TypeOK' BY DEF TypeOK,RLocalWriteReplayAction,RLocalWriteReplay,TypeOK
   \* (TypeOK,RFailedNodeWriteReplayAction)
@@ -296,6 +354,33 @@ THEOREM L_4 == TypeOK /\ Inv794_R3_0_I1 /\ Next => Inv794_R3_0_I1'
 <1>12. QED BY <1>1,<1>2,<1>3,<1>4,<1>5,<1>6,<1>7,<1>8,<1>9,<1>10,<1>11 DEF Next
 
 
+LEMMA L1 == 
+    ASSUME 
+    A0,
+    A1,
+    TypeOK,
+    TypeOK',
+    NEW n \in R_NODES,
+    NEW n2 \in R_NODES,
+    NEW n3 \in R_NODES,
+    rKeyVersion'[n] <= rKeyVersion[n2] /\ rKeyVersion[n2] <= rKeyVersion[n3]
+    PROVE rKeyVersion'[n] <= rKeyVersion[n3] 
+    BY DEF TypeOK
+
+LEMMA L2 == 
+    ASSUME 
+    A0,
+    A1,
+    TypeOK,
+    TypeOK',
+    NEW n \in R_NODES,
+    NEW n2 \in R_NODES,
+    NEW n3 \in R_NODES,
+    NEW m \in RMessageINV,
+    ~ (m.version > rKeyVersion[n2]) 
+    PROVE (m.version <= rKeyVersion[n2]) 
+    BY DEF TypeOK
+
 \*** Inv326_R0_1_I2
 THEOREM L_5 == TypeOK /\ Inv30_R4_0_I0 /\ Inv12_R4_1_I1 /\ Inv356_R4_1_I1 /\ Inv602_R0_0_I1 /\ Inv234_R4_1_I1 /\ Inv407_R0_1_I2 /\ Inv326_R0_1_I2 /\ Next => Inv326_R0_1_I2'
   <1>. USE A0,A1
@@ -324,7 +409,7 @@ THEOREM L_5 == TypeOK /\ Inv30_R4_0_I0 /\ Inv12_R4_1_I1 /\ Inv356_R4_1_I1 /\ Inv
                            /\ rKeyLastWriter' = [rKeyLastWriter EXCEPT ![n] = m.sender]
                         \/ m.version         <= rKeyVersion[n]
                            /\ UNCHANGED <<rKeyState, rKeyVersion, rKeyLastWriter>>
-                 PROVE  ((rKeyVersion[VARI] <= rKeyVersion[VARJ]) \/ (~(rKeyState[VARJ] = "write")))'
+                 PROVE  ( ((rKeyState[VARJ] = "write")) => (rKeyVersion[VARI] <= rKeyVersion[VARJ]))'
       BY DEF Inv326_R0_1_I2, RRcvInv, RRcvInvAction
     <2>1. CASE m.version        > rKeyVersion[n]
                /\ rKeyState[n]   \in {"valid", "invalid", "replay"}
@@ -338,10 +423,36 @@ THEOREM L_5 == TypeOK /\ Inv30_R4_0_I0 /\ Inv12_R4_1_I1 /\ Inv356_R4_1_I1 /\ Inv
                BY <2>1, <3>2, FS_Singleton, FS_Difference, FS_Subset DEF TypeOK,Inv30_R4_0_I0,RRcvInvAction,RRcvInv,Inv326_R0_1_I2,RMessageINV,RMessageVAL,RMessageACK
          <3>3. CASE rKeyState[VARJ] = "write" /\ m.sender # VARJ /\ VARI # n
                 BY <2>1, <3>3, FS_Singleton, FS_Difference, FS_Subset DEF TypeOK,Inv30_R4_0_I0,RRcvInvAction,RRcvInv,Inv326_R0_1_I2,RMessageINV,RMessageVAL,RMessageACK
-         <3>4. CASE rKeyState[VARJ] = "write" /\ m.sender # VARJ /\ VARI = n
-                BY <2>1, <3>4, FS_Singleton, FS_Difference, FS_Subset DEF TypeOK,Inv30_R4_0_I0,RRcvInvAction,RRcvInv,Inv326_R0_1_I2,RMessageINV,RMessageVAL,RMessageACK
+         <3>4. CASE rKeyState[VARJ] = "write" /\ m.sender # VARJ /\ VARI = n /\ VARI = VARJ
+           <4> SUFFICES ASSUME (rKeyState[VARJ] = "write")'
+                        PROVE  (rKeyVersion[VARI] <= rKeyVersion[VARJ])'
+             OBVIOUS
+           <4>1. m.version <= rKeyVersion[VARJ] 
+             BY <2>1, <3>4, FS_Singleton, FS_Difference, FS_Subset DEF TypeOK,Inv30_R4_0_I0,RRcvInvAction,RRcvInv,Inv326_R0_1_I2,RMessageINV,RMessageVAL,RMessageACK
+           
+           <4> QED
+             BY <2>1, <3>4, FS_Singleton, FS_Difference, FS_Subset DEF TypeOK,Inv30_R4_0_I0,RRcvInvAction,RRcvInv,Inv326_R0_1_I2,RMessageINV,RMessageVAL,RMessageACK
+        <3>5. CASE rKeyState[VARJ] = "write" /\ m.sender # VARJ /\ VARI = n /\ VARI # VARJ
+            <4>1. rKeyVersion[m.sender] <= rKeyVersion[VARJ]
+                BY <2>1, <3>5, FS_Singleton, FS_Difference, FS_Subset DEF TypeOK,Inv30_R4_0_I0,RRcvInvAction,RRcvInv,Inv326_R0_1_I2,RMessageINV,RMessageVAL,RMessageACK
+            <4>2. m.version <= rKeyVersion[m.sender]
+                  BY <2>1, <3>5, FS_Singleton, FS_Difference, FS_Subset DEF TypeOK,Inv30_R4_0_I0,RRcvInvAction,RRcvInv,Inv326_R0_1_I2,RMessageINV,RMessageVAL,RMessageACK
+            <4>3. rKeyVersion'[VARI] = m.version
+               BY <2>1, <3>5, FS_Singleton, FS_Difference, FS_Subset DEF TypeOK,Inv30_R4_0_I0,RRcvInvAction,RRcvInv,Inv326_R0_1_I2,RMessageINV,RMessageVAL,RMessageACK
+            <4>4. rKeyVersion'[VARI] <= rKeyVersion[m.sender] /\ rKeyVersion[m.sender] <= rKeyVersion[VARJ]
+                BY <2>1, <3>5, <4>1, <4>2, <4>3, FS_Singleton, FS_Difference, FS_Subset DEF TypeOK,Inv30_R4_0_I0,RRcvInvAction,RRcvInv,Inv326_R0_1_I2,RMessageINV,RMessageVAL,RMessageACK
+            <4>4a. rKeyVersion'[VARJ] = rKeyVersion[VARJ]
+                  BY <2>1, <3>5, <4>1, <4>2, <4>3, <4>4, FS_Singleton, FS_Difference, FS_Subset DEF TypeOK,Inv30_R4_0_I0,RRcvInvAction,RRcvInv,Inv326_R0_1_I2,RMessageINV,RMessageVAL,RMessageACK
+            <4>4b. TypeOK'
+                BY L_0, L1, <2>1, <3>5, <4>1, <4>2, <4>3, <4>4, FS_Singleton, FS_Difference, FS_Subset DEF TypeOK,Inv30_R4_0_I0,RRcvInvAction,RRcvInv,Inv326_R0_1_I2,RMessageINV,RMessageVAL,RMessageACK
+            
+            <4>5. rKeyVersion'[VARI] <= rKeyVersion[VARJ]
+                 BY L1,L_0, <2>1, <3>5, <4>1, <4>2, <4>3, <4>4,<4>4b, FS_Singleton, FS_Difference, FS_Subset DEF TypeOK,Inv30_R4_0_I0,RRcvInvAction,RRcvInv,Inv326_R0_1_I2,RMessageINV,RMessageVAL,RMessageACK
+                
+            <4>. QED 
+               BY <2>1, <3>5, <4>1, <4>2, <4>3, <4>4, <4>5, FS_Singleton, FS_Difference, FS_Subset DEF TypeOK,Inv30_R4_0_I0,RRcvInvAction,RRcvInv,Inv326_R0_1_I2,RMessageINV,RMessageVAL,RMessageACK
          
-         <3>5. QED BY <3>1, <3>2, <3>3, <3>4
+         <3>6. QED BY <3>1, <3>2, <3>3, <3>4, <3>5
     <2>2. CASE m.version         <= rKeyVersion[n]
                /\ UNCHANGED <<rKeyState, rKeyVersion, rKeyLastWriter>>
       BY <2>2 DEF TypeOK,Inv30_R4_0_I0,RRcvInvAction,RRcvInv,Inv326_R0_1_I2,RMessageINV,RMessageVAL,RMessageACK
@@ -459,6 +570,7 @@ THEOREM L_7 == TypeOK /\ Inv12_R4_1_I1 /\ Next => Inv12_R4_1_I1'
 <1>12. QED BY <1>1,<1>2,<1>3,<1>4,<1>5,<1>6,<1>7,<1>8,<1>9,<1>10,<1>11 DEF Next
 
 
+
 \*** Inv356_R4_1_I1
 THEOREM L_8 == TypeOK /\ Inv30_R4_0_I0 /\ Inv12_R4_1_I1 /\ Inv234_R4_1_I1 /\ Inv82_R9_3_I2 /\ Inv4413_R9_3_I2 /\ Inv602_R0_0_I1 /\ Inv85_R9_3_I2 /\ Inv27_R9_1_I1 /\ Inv12_R4_1_I1 /\ Inv602_R0_0_I1 /\ Inv356_R4_1_I1 /\ Next => Inv356_R4_1_I1'
   <1>. USE A0,A1
@@ -506,9 +618,35 @@ THEOREM L_8 == TypeOK /\ Inv30_R4_0_I0 /\ Inv12_R4_1_I1 /\ Inv234_R4_1_I1 /\ Inv
             BY <3>5,<2>1, FS_Singleton DEF TypeOK,Inv30_R4_0_I0,RRcvInvAction,RRcvInv,Inv356_R4_1_I1,RMessageINV,RMessageVAL,RMessageACK 
         <3>6.  CASE m.version > rKeyVersion[VARJ] /\ VARJ # n /\ VARI = n /\ VARI # VARJ /\ VARJ # m.sender /\ m.version <= rKeyVersion[VARJ]
             BY <3>6,<2>1, FS_Singleton DEF TypeOK,Inv30_R4_0_I0,RRcvInvAction,RRcvInv,Inv356_R4_1_I1,RMessageINV,RMessageVAL,RMessageACK 
-        <3>7.  CASE m.version > rKeyVersion[VARJ] /\ VARJ # n /\ VARI = n /\ VARI # VARJ /\ VARJ # m.sender /\ m.version > rKeyVersion[VARJ]
-            BY <3>7,<2>1, FS_Singleton DEF TypeOK,Inv30_R4_0_I0,RRcvInvAction,RRcvInv,Inv356_R4_1_I1,RMessageINV,RMessageVAL,RMessageACK  
-        <3>8. QED BY <2>1,<3>1, FS_Singleton DEF TypeOK,Inv30_R4_0_I0,RRcvInvAction,RRcvInv,Inv356_R4_1_I1,RMessageINV,RMessageVAL,RMessageACK
+        <3>6a. TypeOK' 
+             BY L_0,<2>1, FS_Singleton DEF TypeOK,Inv30_R4_0_I0,RRcvInvAction,RRcvInv,Inv356_R4_1_I1,RMessageINV,RMessageVAL,RMessageACK               
+        
+        <3>7a.  CASE m.version > rKeyVersion[VARJ] /\ VARJ # n /\ VARI = n /\ VARI # VARJ /\ VARJ # m.sender /\ rKeySharers[VARJ] = "reader"
+           BY <2>1, <3>7a, FS_Singleton, FS_Difference, FS_Subset 
+           DEF TypeOK,Inv30_R4_0_I0,RRcvInvAction,RRcvInv,Inv326_R0_1_I2,RMessageINV,RMessageVAL,RMessageACK
+        <3>7.  CASE VARI = n /\ VARI # VARJ /\ VARJ # m.sender /\ rKeySharers[VARJ] # "reader"
+            <4> TypeOK' BY L_0, L1, <2>1, <3>7, FS_Singleton, FS_Difference, FS_Subset DEF TypeOK,Inv30_R4_0_I0,RRcvInvAction,RRcvInv,Inv326_R0_1_I2,RMessageINV,RMessageVAL,RMessageACK
+           
+            <4> ~ (m.version > rKeyVersion[m.sender])
+                  BY <2>1, <3>7, FS_Singleton, FS_Difference, FS_Subset DEF TypeOK,Inv30_R4_0_I0,RRcvInvAction,RRcvInv,Inv356_R4_1_I1,RMessageINV,RMessageVAL,RMessageACK
+            <4>  (m.version <= rKeyVersion[m.sender])
+                  BY L2, <2>1, <3>7, FS_Singleton, FS_Difference, FS_Subset 
+                  DEF TypeOK,Inv30_R4_0_I0,RRcvInvAction,RRcvInv,Inv356_R4_1_I1,RMessageINV,RMessageVAL,RMessageACK
+            <4>1. rKeyVersion[m.sender] <= rKeyVersion[VARJ]
+                 BY <2>1, <3>7, FS_Singleton, FS_Difference, FS_Subset DEF TypeOK,Inv30_R4_0_I0,RRcvInvAction,RRcvInv,Inv356_R4_1_I1,RMessageINV,RMessageVAL,RMessageACK
+            
+            <4>3. rKeyVersion'[VARI] = m.version
+               BY <2>1, <3>7, FS_Singleton, FS_Difference, FS_Subset DEF TypeOK,Inv30_R4_0_I0,RRcvInvAction,RRcvInv,Inv356_R4_1_I1,RMessageINV,RMessageVAL,RMessageACK
+            <4>4. rKeyVersion'[VARI] <= rKeyVersion[m.sender]
+                BY <2>1, <3>7, <4>1, <4>3, FS_Singleton, FS_Difference, FS_Subset DEF TypeOK,Inv30_R4_0_I0,RRcvInvAction,RRcvInv,Inv356_R4_1_I1,RMessageINV,RMessageVAL,RMessageACK
+            <4>4a. rKeyVersion'[VARJ] = rKeyVersion[VARJ]
+                  BY <2>1, <3>7, <4>1, <4>3, <4>4, FS_Singleton, FS_Difference, FS_Subset DEF TypeOK,Inv30_R4_0_I0,RRcvInvAction,RRcvInv,Inv356_R4_1_I1,RMessageINV,RMessageVAL,RMessageACK
+            <4>4c. rKeyVersion'[VARI] <= rKeyVersion[VARJ]  
+                BY L1,<4>1, <4>3, <4>4, <4>4a, <3>7
+                DEF TypeOK,Inv30_R4_0_I0,RRcvInvAction,RRcvInv,Inv356_R4_1_I1,RMessageINV,RMessageVAL,RMessageACK
+            <4> QED BY L1,<4>1, <4>3, <4>4, <4>4a, <4>4c, <3>7
+                DEF TypeOK,Inv30_R4_0_I0,RRcvInvAction,RRcvInv,Inv356_R4_1_I1,RMessageINV,RMessageVAL,RMessageACK
+        <3>8. QED BY <2>1,<3>1,<3>2,<3>3,<3>4,<3>5, <3>6, <3>6a, <3>7a, <3>7, FS_Singleton DEF TypeOK,Inv30_R4_0_I0,RRcvInvAction,RRcvInv,Inv356_R4_1_I1,RMessageINV,RMessageVAL,RMessageACK
     <2>2. CASE m.version         <= rKeyVersion[n]
                /\ UNCHANGED <<rKeyState, rKeyVersion, rKeyLastWriter>>
       BY <2>2 DEF TypeOK,Inv30_R4_0_I0,RRcvInvAction,RRcvInv,Inv356_R4_1_I1,RMessageINV,RMessageVAL,RMessageACK
