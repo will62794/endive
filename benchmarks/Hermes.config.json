@@ -108,7 +108,8 @@
         "nodeWriteEpochID[VARJ] < epochID",
         "nodeWriteEpochID[VARI] = epochID",
         "nodeWriteEpochID[VARJ] = epochID",
-        "VARI \\in aliveNodes"
+        "VARI \\in aliveNodes",
+        "VARJ \\in aliveNodes"
     ],
     "action_local_preds":{
         "NodeFailureAction": [
@@ -126,7 +127,7 @@
     },
     "actions": [],
     "constraint"  :  "",
-    "quant_inv"  :  "\\A VARI \\in H_NODES : \\A VARJ \\in aliveNodes : \\A VARMVALI \\in msgsVAL : \\A VARMACKI \\in msgsACK : \\A VARMINVI \\in msgsINV : ",
+    "quant_inv"  :  "\\A VARI \\in H_NODES : \\A VARJ \\in H_NODES : \\A VARMVALI \\in msgsVAL : \\A VARMACKI \\in msgsACK : \\A VARMINVI \\in msgsINV : ",
     "quant_inv_alt"  :  null,
     "quant_vars": ["VARI", "VARJ", "VARMVALI", "VARMACKI", "VARMINVI"],
     "model_consts"  :  "",
