@@ -122,9 +122,10 @@
     "preds_alt" : [],
     "safety"  :  "HConsistent",
     "constants"  : {
-        "H_NODES" : ["{0,1,2,3}"],
+        "H_NODES" : ["{0,1,2}", "{0,1,2,3}"],
         "H_MAX_VERSION" : ["3"]
     },
+    "large_instance_inv_check_index": 1,
     "actions": [],
     "constraint"  :  "",
     "quant_inv"  :  "\\A VARI \\in H_NODES : \\A VARJ \\in H_NODES : \\A VARMVALI \\in msgsVAL : \\A VARMACKI \\in msgsACK : \\A VARMINVI \\in msgsINV : ",
