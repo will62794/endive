@@ -70,7 +70,7 @@ IndGlobal ==
 \* mean variable slice size: 0
 
 
-ASSUME A1 == IsFiniteSet(H_NODES) /\ H_NODES \subseteq Nat
+ASSUME A1 == IsFiniteSet(H_NODES) /\ H_NODES \subseteq Nat /\ H_NODES # {}
 USE A1
 
 
@@ -681,6 +681,7 @@ THEOREM L_23 == TypeOK /\ Inv3029_R2_0_I1 /\ Inv4836_R0_1_I2 /\ Next => Inv4836_
 \*** Inv890_R0_1_I2
 THEOREM L_24 == TypeOK /\ Inv62_R15_1_I1 /\ Inv4085_R0_0_I2 /\ Inv2018_R0_0_I2 /\ Inv5_R0_1_I2 /\ Inv3025_R1_0_I2 /\ Inv890_R0_1_I2 /\ Next => Inv890_R0_1_I2'
   \* (Inv890_R0_1_I2,HRcvInvAction)
+  <1> USE DEF receivedAllAcks
   <1>1. TypeOK /\ Inv890_R0_1_I2 /\ HRcvInvAction => Inv890_R0_1_I2' BY DEF TypeOK,HRcvInvAction,HRcvInv,Inv890_R0_1_I2
   \* (Inv890_R0_1_I2,HRcvInvNewerAction)
   <1>2. TypeOK /\ Inv890_R0_1_I2 /\ HRcvInvNewerAction => Inv890_R0_1_I2' BY DEF TypeOK,HRcvInvNewerAction,HRcvInvNewer,Inv890_R0_1_I2
@@ -748,8 +749,37 @@ THEOREM L_26 == TypeOK /\ Inv627_R9_0_I2 /\ Inv1666_R10_0_I1 /\ Inv4_R0_1_I2 /\ 
 
 \* Initiation.
 THEOREM Init => IndGlobal
-    <1>0. Init => TypeOK BY DEF Init, TypeOK, IndGlobal
-    <1>1. Init => Safety BY DEF Init, Safety, IndGlobal
+    <1>0. Init => TypeOK 
+      <2> SUFFICES ASSUME Init
+                   PROVE  TypeOK
+        OBVIOUS
+      <2>1. msgsINV \in INVMessage
+        BY DEF Init, TypeOK, IndGlobal, INVMessage, VALMessage, ACKMessage
+      <2>2. msgsVAL \in VALMessage
+        BY DEF Init, TypeOK, IndGlobal, INVMessage, VALMessage, ACKMessage
+      <2>3. msgsACK \in ACKMessage
+        BY DEF Init, TypeOK, IndGlobal, INVMessage, VALMessage, ACKMessage
+      <2>4. nodeRcvedAcks \in [H_NODES -> SUBSET H_NODES]
+        BY DEF Init, TypeOK, IndGlobal, INVMessage, VALMessage, ACKMessage
+      <2>5. \A n \in H_NODES: nodeRcvedAcks[n] \subseteq (H_NODES \ {n})
+        BY DEF Init, TypeOK, IndGlobal, INVMessage, VALMessage, ACKMessage
+      <2>6. nodeLastWriter  \in [H_NODES -> H_NODES]
+        BY DEF Init, TypeOK, IndGlobal, INVMessage, VALMessage, ACKMessage
+      <2>7. nodeLastWriteTS \in [H_NODES -> [version : Nat, tieBreaker: H_NODES ]]
+        BY DEF Init, TypeOK, IndGlobal, INVMessage, VALMessage, ACKMessage
+      <2>8. nodeTS          \in [H_NODES -> [version : Nat, tieBreaker: H_NODES ]]
+        BY DEF Init, TypeOK, IndGlobal, INVMessage, VALMessage, ACKMessage
+      <2>9. nodeState       \in [H_NODES -> {"valid", "invalid", "invalid_write", "write", "replay"}]
+        BY DEF Init, TypeOK, IndGlobal, INVMessage, VALMessage, ACKMessage
+      <2>10. aliveNodes      \in SUBSET H_NODES
+        BY DEF Init, TypeOK, IndGlobal, INVMessage, VALMessage, ACKMessage
+      <2>11. epochID         \in Nat
+        BY DEF Init, TypeOK, IndGlobal, INVMessage, VALMessage, ACKMessage
+      <2>12. nodeWriteEpochID \in [H_NODES -> Nat]
+        BY DEF Init, TypeOK, IndGlobal, INVMessage, VALMessage, ACKMessage
+      <2>13. QED
+        BY <2>1, <2>10, <2>11, <2>12, <2>2, <2>3, <2>4, <2>5, <2>6, <2>7, <2>8, <2>9 DEF TypeOK
+    <1>1. Init => Safety BY DEF Init, Safety, IndGlobal, HConsistent
     <1>2. Init => Inv2345_R0_0_I2 BY DEF Init, Inv2345_R0_0_I2, IndGlobal
     <1>3. Init => Inv10494_R0_1_I2 BY DEF Init, Inv10494_R0_1_I2, IndGlobal
     <1>4. Init => Inv627_R9_0_I2 BY DEF Init, Inv627_R9_0_I2, IndGlobal
