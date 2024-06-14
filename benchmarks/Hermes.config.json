@@ -142,6 +142,7 @@
     "simulate"  :  true,
     "tlaps_proof_config": {
         "assumes": [
+            "IsFiniteSet(H_NODES) /\\ H_NODES \\subseteq Nat"
         ],
         "lemma_def_expands": {
             "Safety": ["HConsistent"],
