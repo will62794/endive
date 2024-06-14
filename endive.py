@@ -2889,13 +2889,15 @@ class InductiveInvGen():
                 # Rank all existing invariant conjuncts based on the set of CTIs they eliminate.
                 existing_inv_cands = sorted(conjuncts_added_in_round, reverse=True, key = lambda conj : len(conj["ctis_eliminated"] - ctis_eliminated_this_iter))
 
-                top_new_inv_cand = new_inv_cands[0]
-                invi = int(top_new_inv_cand.replace("Inv", ""))
+                top_new_inv_cand = None
+                if len(new_inv_cands) > 0:    
+                    top_new_inv_cand = new_inv_cands[0]
+                    invi = int(top_new_inv_cand.replace("Inv", ""))
                 
                 # # Consider doing one quick re-check of all invariants at larger parameter bound?
                 # # No caching here.
                 # if "simulation_inv_check" in self.spec_config and self.spec_config["simulation_inv_check"] and "large_instance_inv_check_index" in self.spec_config:
-                if "large_instance_inv_check_index" in self.spec_config:
+                if "large_instance_inv_check_index" in self.spec_config and len(new_inv_cands) > 0:
                     logging.info("+ Doing re-checking at larger parameter bound")
                     depth = self.spec_config.get("simulation_inv_check_depth", 50)
                     num_states = 100000 # Make this relatively cheap.
@@ -2919,7 +2921,10 @@ class InductiveInvGen():
                         sorted_invs.remove(top_new_inv_cand)
                         continue
 
-                if len(existing_inv_cands) == 0:
+                if len(new_inv_cands) == 0 and len(existing_inv_cands) > 0:
+                    chosen_cand = existing_inv_cands[0]
+                    new_ctis_eliminated = existing_inv_cands[0]["ctis_eliminated"] - ctis_eliminated_this_iter
+                elif len(existing_inv_cands) == 0:
                     invi = int(top_new_inv_cand.replace("Inv", ""))
                     chosen_cand = {"inv": top_new_inv_cand, "invexp": orig_invs_sorted[invi], "ctis_eliminated": cti_states_eliminated_by_invs[top_new_inv_cand]}
                     new_ctis_eliminated = cti_states_eliminated_by_invs[top_new_inv_cand] - ctis_eliminated_this_iter
