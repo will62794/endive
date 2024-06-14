@@ -61,9 +61,9 @@ VALMessage == [
 Message ==  INVMessage \cup ACKMessage \cup VALMessage
 
 TypeOK ==  \* The type correctness invariant
-    /\ msgsINV \in INVMessage
-    /\ msgsVAL \in VALMessage
-    /\ msgsACK \in ACKMessage
+    /\ msgsINV \subseteq INVMessage
+    /\ msgsVAL \subseteq VALMessage
+    /\ msgsACK \subseteq ACKMessage
     /\ nodeRcvedAcks \in [H_NODES -> SUBSET H_NODES]
     /\ \A n \in H_NODES: nodeRcvedAcks[n] \subseteq (H_NODES \ {n})
     /\  nodeLastWriter  \in [H_NODES -> H_NODES]
