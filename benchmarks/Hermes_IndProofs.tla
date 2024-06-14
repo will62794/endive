@@ -70,7 +70,7 @@ IndGlobal ==
 \* mean variable slice size: 0
 
 
-ASSUME A1 == IsFiniteSet(H_NODES) /\ H_NODES \subseteq Nat /\ H_NODES # {}
+ASSUME A1 == IsFiniteSet(H_NODES) /\ H_NODES \subseteq Nat /\ H_NODES # {} /\ H_MAX_VERSION \in Nat
 USE A1
 
 
@@ -143,7 +143,14 @@ THEOREM L_2 == TypeOK /\ Inv10494_R0_1_I2 /\ Inv4_R0_1_I2 /\ Inv3096_R0_0_I2 /\ 
   \* (Inv2345_R0_0_I2,HCoordWriteReplayAction)
   <1>5. TypeOK /\ Inv2345_R0_0_I2 /\ HCoordWriteReplayAction => Inv2345_R0_0_I2' BY DEF TypeOK,HCoordWriteReplayAction,HCoordWriteReplay,Inv2345_R0_0_I2
   \* (Inv2345_R0_0_I2,HWriteAction)
-  <1>6. TypeOK /\ Inv2345_R0_0_I2 /\ HWriteAction => Inv2345_R0_0_I2' BY DEF TypeOK,HWriteAction,HWrite,Inv2345_R0_0_I2
+  <1>6. TypeOK /\ Inv2345_R0_0_I2 /\ HWriteAction => Inv2345_R0_0_I2' 
+    <2> SUFFICES ASSUME TypeOK /\ Inv2345_R0_0_I2 /\ HWriteAction,
+                        NEW VARI \in H_NODES',
+                        NEW VARMVALI \in msgsVAL'
+                 PROVE  (~(VARI \in aliveNodes) \/ (~(greaterTS(VARMVALI.version, VARMVALI.tieBreaker, nodeTS[VARI].version, nodeTS[VARI].tieBreaker))))'
+      BY DEF Inv2345_R0_0_I2
+    <2> QED
+      BY DEF TypeOK,HWriteAction,HWrite,Inv2345_R0_0_I2,VALMessage
   \* (Inv2345_R0_0_I2,HRcvAckAction)
   <1>7. TypeOK /\ Inv2345_R0_0_I2 /\ HRcvAckAction => Inv2345_R0_0_I2' BY DEF TypeOK,HRcvAckAction,HRcvAck,Inv2345_R0_0_I2
   \* (Inv2345_R0_0_I2,HSendValsAction)
@@ -244,6 +251,10 @@ THEOREM L_6 == TypeOK /\ Inv29_R2_0_I1 /\ Inv14828_R0_0_I2 /\ Inv548_R0_1_I2 /\ 
   <1>9. TypeOK /\ Inv3096_R0_0_I2 /\ NodeFailureAction => Inv3096_R0_0_I2' BY DEF TypeOK,NodeFailureAction,NodeFailure,Inv3096_R0_0_I2
 <1>10. QED BY <1>1,<1>2,<1>3,<1>4,<1>5,<1>6,<1>7,<1>8,<1>9 DEF Next
 
+LEMMA B1 == 
+    /\ \A VARMINVI \in msgsINV :  (~(VARMINVI.epochID > epochID) <=> (VARMINVI.epochID <= epochID))
+    /\ \A VARMINVI \in msgsINV, n \in Nat:  (~(VARMINVI.epochID > n) => ~(VARMINVI.epochID > n + 1))
+USE B1
 
 \*** Inv29_R2_0_I1
 THEOREM L_7 == TypeOK /\ Inv29_R2_0_I1 /\ Next => Inv29_R2_0_I1'
@@ -264,7 +275,20 @@ THEOREM L_7 == TypeOK /\ Inv29_R2_0_I1 /\ Next => Inv29_R2_0_I1'
   \* (Inv29_R2_0_I1,HSendValsAction)
   <1>8. TypeOK /\ Inv29_R2_0_I1 /\ HSendValsAction => Inv29_R2_0_I1' BY DEF TypeOK,HSendValsAction,HSendVals,Inv29_R2_0_I1,receivedAllAcks,VALMessage
   \* (Inv29_R2_0_I1,NodeFailureAction)
-  <1>9. TypeOK /\ Inv29_R2_0_I1 /\ NodeFailureAction => Inv29_R2_0_I1' BY DEF TypeOK,NodeFailureAction,NodeFailure,Inv29_R2_0_I1
+  <1>9. TypeOK /\ Inv29_R2_0_I1 /\ NodeFailureAction => Inv29_R2_0_I1' 
+    <2> SUFFICES ASSUME TypeOK /\ Inv29_R2_0_I1 /\ NodeFailureAction,
+                        NEW VARMINVI \in msgsINV'
+                 PROVE  (~(VARMINVI.epochID > epochID))'
+      BY DEF Inv29_R2_0_I1
+    <2>1. (VARMINVI \in msgsINV)
+          BY DEF TypeOK,NodeFailureAction,NodeFailure,Inv29_R2_0_I1, INVMessage
+     <2>2. (VARMINVI.epochID <= epochID)
+          BY DEF TypeOK,NodeFailureAction,NodeFailure,Inv29_R2_0_I1, INVMessage
+     <2>3. ~ (VARMINVI.epochID > (epochID + 1))
+           BY <2>2 DEF TypeOK,NodeFailureAction,NodeFailure,Inv29_R2_0_I1, INVMessage
+     
+    <2> QED
+      BY <2>1, <2>2, <2>3 DEF TypeOK,NodeFailureAction,NodeFailure,Inv29_R2_0_I1, INVMessage
 <1>10. QED BY <1>1,<1>2,<1>3,<1>4,<1>5,<1>6,<1>7,<1>8,<1>9 DEF Next
 
 
