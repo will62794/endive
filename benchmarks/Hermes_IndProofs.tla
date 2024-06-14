@@ -700,7 +700,17 @@ THEOREM L_14 == TypeOK /\ Inv3029_R2_0_I1 /\ Inv1666_R10_0_I1 /\ Next => Inv1666
   \* (Inv1666_R10_0_I1,HRcvInvNewerAction)
   <1>2. TypeOK /\ Inv3029_R2_0_I1 /\ Inv1666_R10_0_I1 /\ HRcvInvNewerAction => Inv1666_R10_0_I1' BY DEF TypeOK,Inv3029_R2_0_I1,HRcvInvNewerAction,HRcvInvNewer,Inv1666_R10_0_I1
   \* (Inv1666_R10_0_I1,HFollowerWriteReplayAction)
-  <1>3. TypeOK /\ Inv1666_R10_0_I1 /\ HFollowerWriteReplayAction => Inv1666_R10_0_I1' BY DEF TypeOK,HFollowerWriteReplayAction,HFollowerWriteReplay,Inv1666_R10_0_I1
+  <1>3. TypeOK /\ Inv1666_R10_0_I1 /\ HFollowerWriteReplayAction => Inv1666_R10_0_I1' 
+    <2> SUFFICES ASSUME TypeOK,
+                        Inv1666_R10_0_I1,
+                        TRUE,
+                        NEW n \in aliveNodes,
+                        HFollowerWriteReplay(n),
+                        NEW VARI \in H_NODES'
+                 PROVE  ((nodeTS[VARI] = nodeLastWriteTS[VARI]) \/ (~(nodeTS[VARI].tieBreaker = VARI)))'
+      BY DEF HFollowerWriteReplayAction, Inv1666_R10_0_I1
+    <2> QED
+      BY DEF TypeOK,HFollowerWriteReplayAction,HFollowerWriteReplay,Inv1666_R10_0_I1
   \* (Inv1666_R10_0_I1,HRcvValAction)
   <1>4. TypeOK /\ Inv1666_R10_0_I1 /\ HRcvValAction => Inv1666_R10_0_I1' BY DEF TypeOK,HRcvValAction,HRcvVal,Inv1666_R10_0_I1
   \* (Inv1666_R10_0_I1,HCoordWriteReplayAction)
@@ -1088,12 +1098,34 @@ THEOREM L_24 == TypeOK /\ Inv62_R15_1_I1 /\ Inv4085_R0_0_I2 /\ Inv2018_R0_0_I2 /
       BY DEF HRcvValAction, Inv890_R0_1_I2
     <2> USE DEF greaterOrEqualTS, greaterTS, equalTS
     <2> QED
-      BY DEF TypeOK,Inv62_R15_1_I1,HRcvValAction,HRcvVal,Inv890_R0_1_I2
+      BY FS_Subset, FS_Singleton DEF TypeOK,Inv62_R15_1_I1,HRcvValAction,HRcvVal,Inv890_R0_1_I2
   \* (Inv890_R0_1_I2,HCoordWriteReplayAction)
   <1> USE DEF greaterOrEqualTS, greaterTS, equalTS
-  <1>5. TypeOK /\ Inv890_R0_1_I2 /\ HCoordWriteReplayAction => Inv890_R0_1_I2' BY DEF TypeOK,HCoordWriteReplayAction,HCoordWriteReplay,Inv890_R0_1_I2
+  <1>5. TypeOK /\ Inv890_R0_1_I2 /\ HCoordWriteReplayAction => Inv890_R0_1_I2' 
+    <2> SUFFICES ASSUME TypeOK,
+                        Inv890_R0_1_I2,
+                        TRUE,
+                        NEW n \in aliveNodes,
+                        HCoordWriteReplay(n),
+                        NEW VARI \in H_NODES',
+                        NEW VARJ \in H_NODES'
+                 PROVE  ((greaterOrEqualTS(nodeTS[VARI].version, nodeTS[VARI].tieBreaker, nodeTS[VARJ].version, nodeTS[VARJ].tieBreaker)) \/ (~(nodeState[VARJ] = "valid")) \/ (~(receivedAllAcks(VARI) /\ nodeRcvedAcks = nodeRcvedAcks)))'
+      BY DEF HCoordWriteReplayAction, Inv890_R0_1_I2
+    <2> QED
+      BY DEF TypeOK,HCoordWriteReplayAction,HCoordWriteReplay,Inv890_R0_1_I2
   \* (Inv890_R0_1_I2,HWriteAction)
-  <1>6. TypeOK /\ Inv890_R0_1_I2 /\ HWriteAction => Inv890_R0_1_I2' BY DEF TypeOK,HWriteAction,HWrite,Inv890_R0_1_I2
+  <1>6. TypeOK /\ Inv890_R0_1_I2 /\ HWriteAction => Inv890_R0_1_I2' 
+    <2> SUFFICES ASSUME TypeOK,
+                        Inv890_R0_1_I2,
+                        TRUE,
+                        NEW n \in aliveNodes,
+                        HWrite(n),
+                        NEW VARI \in H_NODES',
+                        NEW VARJ \in H_NODES'
+                 PROVE  ((greaterOrEqualTS(nodeTS[VARI].version, nodeTS[VARI].tieBreaker, nodeTS[VARJ].version, nodeTS[VARJ].tieBreaker)) \/ (~(nodeState[VARJ] = "valid")) \/ (~(receivedAllAcks(VARI) /\ nodeRcvedAcks = nodeRcvedAcks)))'
+      BY DEF HWriteAction, Inv890_R0_1_I2
+    <2> QED
+      BY DEF TypeOK,HWriteAction,HWrite,Inv890_R0_1_I2
   \* (Inv890_R0_1_I2,HRcvAckAction)
   <1>7. TypeOK /\ Inv4085_R0_0_I2 /\ Inv2018_R0_0_I2 /\ Inv890_R0_1_I2 /\ HRcvAckAction => Inv890_R0_1_I2' BY DEF TypeOK,Inv4085_R0_0_I2,Inv2018_R0_0_I2,HRcvAckAction,HRcvAck,Inv890_R0_1_I2
   \* (Inv890_R0_1_I2,HSendValsAction)
@@ -1132,7 +1164,21 @@ THEOREM L_25 == TypeOK /\ Inv2345_R0_0_I2 /\ Inv1_R21_0_I0 /\ Inv5_R0_1_I2 /\ In
   \* (Inv62_R15_1_I1,HRcvAckAction)
   <1>7. TypeOK /\ Inv2345_R0_0_I2 /\ Inv1_R21_0_I0 /\ Inv62_R15_1_I1 /\ HRcvAckAction => Inv62_R15_1_I1' BY DEF TypeOK,Inv2345_R0_0_I2,Inv1_R21_0_I0,HRcvAckAction,HRcvAck,Inv62_R15_1_I1
   \* (Inv62_R15_1_I1,HSendValsAction)
-  <1>8. TypeOK /\ Inv5_R0_1_I2 /\ Inv3025_R1_0_I2 /\ Inv62_R15_1_I1 /\ HSendValsAction => Inv62_R15_1_I1' BY DEF TypeOK,Inv5_R0_1_I2,Inv3025_R1_0_I2,HSendValsAction,HSendVals,Inv62_R15_1_I1,receivedAllAcks,VALMessage
+  <1>8. TypeOK /\ Inv5_R0_1_I2 /\ Inv3025_R1_0_I2 /\ Inv62_R15_1_I1 /\ HSendValsAction => Inv62_R15_1_I1' 
+    <2> SUFFICES ASSUME TypeOK,
+                        Inv5_R0_1_I2,
+                        Inv3025_R1_0_I2,
+                        Inv62_R15_1_I1,
+                        TRUE,
+                        NEW n \in aliveNodes,
+                        HSendVals(n),
+                        NEW VARI \in H_NODES',
+                        NEW VARJ \in H_NODES',
+                        NEW VARMVALI \in msgsVAL'
+                 PROVE  (~(VARJ \in nodeRcvedAcks[VARI]) \/ (~(greaterTS(VARMVALI.version, VARMVALI.tieBreaker, nodeTS[VARI].version, nodeTS[VARI].tieBreaker))))'
+      BY DEF HSendValsAction, Inv62_R15_1_I1
+    <2> QED
+      BY FS_Subset, FS_Singleton DEF TypeOK,Inv5_R0_1_I2,Inv3025_R1_0_I2,HSendValsAction,HSendVals,Inv62_R15_1_I1,receivedAllAcks,VALMessage
   \* (Inv62_R15_1_I1,NodeFailureAction)
   <1>9. TypeOK /\ Inv62_R15_1_I1 /\ NodeFailureAction => Inv62_R15_1_I1' BY DEF TypeOK,NodeFailureAction,NodeFailure,Inv62_R15_1_I1
 <1>10. QED BY <1>1,<1>2,<1>3,<1>4,<1>5,<1>6,<1>7,<1>8,<1>9 DEF Next
@@ -1144,9 +1190,54 @@ THEOREM L_26 == TypeOK /\ Inv627_R9_0_I2 /\ Inv1666_R10_0_I1 /\ Inv4_R0_1_I2 /\ 
   \* (Inv618_R0_1_I2,HRcvInvAction)
   <1>1. TypeOK /\ Inv618_R0_1_I2 /\ HRcvInvAction => Inv618_R0_1_I2' BY DEF TypeOK,HRcvInvAction,HRcvInv,Inv618_R0_1_I2
   \* (Inv618_R0_1_I2,HRcvInvNewerAction)
-  <1>2. TypeOK /\ Inv618_R0_1_I2 /\ HRcvInvNewerAction => Inv618_R0_1_I2' BY DEF TypeOK,HRcvInvNewerAction,HRcvInvNewer,Inv618_R0_1_I2, ACKMessage
+  <1>2. TypeOK /\ Inv618_R0_1_I2 /\ HRcvInvNewerAction => Inv618_R0_1_I2' 
+    <2> SUFFICES ASSUME TypeOK,
+                        Inv618_R0_1_I2,
+                        TRUE,
+                        NEW n \in aliveNodes, NEW m \in msgsINV,
+                        n \in aliveNodes,
+                        m \in msgsINV,
+                        m.type     = "INV",
+                        m.epochID  = epochID,
+                        m.sender  # n,
+                        msgsACK' = msgsACK \cup {[type       |-> "ACK",
+                                                  sender     |-> n,   
+                                                  epochID    |-> epochID,
+                                                  version    |-> m.version,
+                                                  tieBreaker |-> m.tieBreaker]},
+                        nodeLastWriter' = [nodeLastWriter EXCEPT ![n] = m.sender],
+                        nodeTS' = [nodeTS EXCEPT ![n].version    = m.version, ![n].tieBreaker = m.tieBreaker],
+                        IF nodeState[n] \in {"valid", "invalid", "replay"}
+                             THEN 
+                             nodeState' = [nodeState EXCEPT ![n] = "invalid"]
+                             ELSE 
+                             nodeState' = [nodeState EXCEPT ![n] = "invalid_write"],
+                        UNCHANGED <<nodeLastWriteTS, aliveNodes, nodeRcvedAcks, epochID, nodeWriteEpochID, msgsVAL, msgsINV>>,
+                        NEW VARI \in H_NODES',
+                        NEW VARJ \in H_NODES',
+                        greaterTS(m.version, m.tieBreaker, nodeTS[n].version, nodeTS[n].tieBreaker)
+                 PROVE  ((greaterOrEqualTS(nodeTS[VARI].version, nodeTS[VARI].tieBreaker, nodeTS[VARJ].version, nodeTS[VARJ].tieBreaker)) \/ (~(nodeState[VARJ] = "write")) \/ (~(VARI \in nodeRcvedAcks[VARJ])))'
+      BY DEF HRcvInvNewer, HRcvInvNewerAction, Inv618_R0_1_I2
+    <2>1. CASE (m.version) > (nodeTS[n].version)
+      BY <2>1 DEF TypeOK,HRcvInvNewerAction,HRcvInvNewer,Inv618_R0_1_I2, ACKMessage
+    <2>2. CASE /\   (m.version) = (nodeTS[n].version)
+               /\  (m.tieBreaker) > (nodeTS[n].tieBreaker)
+      BY <2>2 DEF TypeOK,HRcvInvNewerAction,HRcvInvNewer,Inv618_R0_1_I2, ACKMessage
+    <2>3. QED
+      BY <2>1, <2>2 DEF greaterTS
   \* (Inv618_R0_1_I2,HFollowerWriteReplayAction)
-  <1>3. TypeOK /\ Inv618_R0_1_I2 /\ HFollowerWriteReplayAction => Inv618_R0_1_I2' BY DEF TypeOK,HFollowerWriteReplayAction,HFollowerWriteReplay,Inv618_R0_1_I2
+  <1>3. TypeOK /\ Inv618_R0_1_I2 /\ HFollowerWriteReplayAction => Inv618_R0_1_I2' 
+    <2> SUFFICES ASSUME TypeOK,
+                        Inv618_R0_1_I2,
+                        TRUE,
+                        NEW n \in aliveNodes,
+                        HFollowerWriteReplay(n),
+                        NEW VARI \in H_NODES',
+                        NEW VARJ \in H_NODES'
+                 PROVE  ((greaterOrEqualTS(nodeTS[VARI].version, nodeTS[VARI].tieBreaker, nodeTS[VARJ].version, nodeTS[VARJ].tieBreaker)) \/ (~(nodeState[VARJ] = "write")) \/ (~(VARI \in nodeRcvedAcks[VARJ])))'
+      BY DEF HFollowerWriteReplayAction, Inv618_R0_1_I2
+    <2> QED
+      BY DEF TypeOK,HFollowerWriteReplayAction,HFollowerWriteReplay,Inv618_R0_1_I2
   \* (Inv618_R0_1_I2,HRcvValAction)
   <1>4. TypeOK /\ Inv618_R0_1_I2 /\ HRcvValAction => Inv618_R0_1_I2' BY DEF TypeOK,HRcvValAction,HRcvVal,Inv618_R0_1_I2
   \* (Inv618_R0_1_I2,HCoordWriteReplayAction)
