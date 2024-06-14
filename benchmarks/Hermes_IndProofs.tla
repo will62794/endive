@@ -185,7 +185,7 @@ THEOREM L_0 == TypeOK /\ TypeOK /\ Next => TypeOK'
 <1>10. QED BY <1>1,<1>2,<1>3,<1>4,<1>5,<1>6,<1>7,<1>8,<1>9 DEF Next
 
 
-USE DEF greaterOrEqualTS, greaterTS, equalTS
+\*USE DEF greaterOrEqualTS, greaterTS, equalTS
 \* (ROOT SAFETY PROP)
 \*** Safety
 THEOREM L_1 == TypeOK /\ Inv2345_R0_0_I2 /\ Inv3096_R0_0_I2 /\ Inv14828_R0_0_I2 /\ Inv4085_R0_0_I2 /\ Inv13944_R0_0_I2 /\ Inv13951_R0_0_I2 /\ Inv2018_R0_0_I2 /\ Inv2701_R0_0_I2 /\ Inv4_R0_1_I2 /\ Inv3096_R0_0_I2 /\ Inv10494_R0_1_I2 /\ Inv2018_R0_0_I2 /\ Inv4836_R0_1_I2 /\ Inv14828_R0_0_I2 /\ Inv548_R0_1_I2 /\ Inv5_R0_1_I2 /\ Inv7971_R0_1_I2 /\ Inv890_R0_1_I2 /\ Inv618_R0_1_I2 /\ Safety /\ Next => Safety'
@@ -233,6 +233,8 @@ THEOREM L_1 == TypeOK /\ Inv2345_R0_0_I2 /\ Inv3096_R0_0_I2 /\ Inv14828_R0_0_I2 
 
 \*** Inv2345_R0_0_I2
 THEOREM L_2 == TypeOK /\ Inv10494_R0_1_I2 /\ Inv4_R0_1_I2 /\ Inv3096_R0_0_I2 /\ Inv3025_R1_0_I2 /\ Inv2018_R0_0_I2 /\ Inv7971_R0_1_I2 /\ Inv2345_R0_0_I2 /\ Next => Inv2345_R0_0_I2'
+    <1> USE DEF greaterOrEqualTS, greaterTS, equalTS
+  
   \* (Inv2345_R0_0_I2,HRcvInvAction)
   <1>1. TypeOK /\ Inv2345_R0_0_I2 /\ HRcvInvAction => Inv2345_R0_0_I2' BY DEF TypeOK,HRcvInvAction,HRcvInv,Inv2345_R0_0_I2
   \* (Inv2345_R0_0_I2,HRcvInvNewerAction)
@@ -270,6 +272,8 @@ THEOREM L_2 == TypeOK /\ Inv10494_R0_1_I2 /\ Inv4_R0_1_I2 /\ Inv3096_R0_0_I2 /\ 
 
 \*** Inv10494_R0_1_I2
 THEOREM L_3 == TypeOK /\ Inv627_R9_0_I2 /\ Inv5_R0_1_I2 /\ Inv3096_R0_0_I2 /\ Inv1666_R10_0_I1 /\ Inv10494_R0_1_I2 /\ Next => Inv10494_R0_1_I2'
+    <1> USE DEF greaterOrEqualTS, greaterTS, equalTS
+  
   \* (Inv10494_R0_1_I2,HRcvInvAction)
   <1>1. TypeOK /\ Inv10494_R0_1_I2 /\ HRcvInvAction => Inv10494_R0_1_I2' BY DEF TypeOK,HRcvInvAction,HRcvInv,Inv10494_R0_1_I2
   \* (Inv10494_R0_1_I2,HRcvInvNewerAction)
@@ -327,6 +331,8 @@ THEOREM L_3 == TypeOK /\ Inv627_R9_0_I2 /\ Inv5_R0_1_I2 /\ Inv3096_R0_0_I2 /\ In
 
 \*** Inv627_R9_0_I2
 THEOREM L_4 == TypeOK /\ Inv627_R9_0_I2 /\ Next => Inv627_R9_0_I2'
+    <1> USE DEF greaterOrEqualTS, greaterTS, equalTS
+ 
   \* (Inv627_R9_0_I2,HRcvInvAction)
   <1>1. TypeOK /\ Inv627_R9_0_I2 /\ HRcvInvAction => Inv627_R9_0_I2' BY DEF TypeOK,HRcvInvAction,HRcvInv,Inv627_R9_0_I2
   \* (Inv627_R9_0_I2,HRcvInvNewerAction)
@@ -406,6 +412,8 @@ THEOREM L_5 == TypeOK /\ Inv5_R0_1_I2 /\ Next => Inv5_R0_1_I2'
 
 \*** Inv3096_R0_0_I2
 THEOREM L_6 == TypeOK /\ Inv29_R2_0_I1 /\ Inv14828_R0_0_I2 /\ Inv548_R0_1_I2 /\ Inv2701_R0_0_I2 /\ Inv4085_R0_0_I2 /\ Inv3029_R2_0_I1 /\ Inv2018_R0_0_I2 /\ Inv3096_R0_0_I2 /\ Next => Inv3096_R0_0_I2'
+    <1> USE DEF greaterOrEqualTS, greaterTS, equalTS
+  
   \* (Inv3096_R0_0_I2,HRcvInvAction)
   <1>1. TypeOK /\ Inv3096_R0_0_I2 /\ HRcvInvAction => Inv3096_R0_0_I2' BY DEF TypeOK,HRcvInvAction,HRcvInv,Inv3096_R0_0_I2
   \* (Inv3096_R0_0_I2,HRcvInvNewerAction)
@@ -433,6 +441,8 @@ USE B1
 
 \*** Inv29_R2_0_I1
 THEOREM L_7 == TypeOK /\ Inv29_R2_0_I1 /\ Next => Inv29_R2_0_I1'
+    <1> USE DEF greaterOrEqualTS, greaterTS, equalTS
+  
   \* (Inv29_R2_0_I1,HRcvInvAction)
   <1>1. TypeOK /\ Inv29_R2_0_I1 /\ HRcvInvAction => Inv29_R2_0_I1' BY DEF TypeOK,HRcvInvAction,HRcvInv,Inv29_R2_0_I1
   \* (Inv29_R2_0_I1,HRcvInvNewerAction)
@@ -469,6 +479,8 @@ THEOREM L_7 == TypeOK /\ Inv29_R2_0_I1 /\ Next => Inv29_R2_0_I1'
 
 \*** Inv14828_R0_0_I2
 THEOREM L_8 == TypeOK /\ Inv3029_R2_0_I1 /\ Inv3096_R0_0_I2 /\ Inv14828_R0_0_I2 /\ Next => Inv14828_R0_0_I2'
+    <1> USE DEF greaterOrEqualTS, greaterTS, equalTS
+  
   \* (Inv14828_R0_0_I2,HRcvInvAction)
   <1>1. TypeOK /\ Inv14828_R0_0_I2 /\ HRcvInvAction => Inv14828_R0_0_I2' BY DEF TypeOK,HRcvInvAction,HRcvInv,Inv14828_R0_0_I2
   \* (Inv14828_R0_0_I2,HRcvInvNewerAction)
@@ -492,6 +504,8 @@ THEOREM L_8 == TypeOK /\ Inv3029_R2_0_I1 /\ Inv3096_R0_0_I2 /\ Inv14828_R0_0_I2 
 
 \*** Inv3029_R2_0_I1
 THEOREM L_9 == TypeOK /\ Inv3096_R0_0_I2 /\ Inv14828_R0_0_I2 /\ Inv3096_R0_0_I2 /\ Inv14828_R0_0_I2 /\ Inv3029_R2_0_I1 /\ Next => Inv3029_R2_0_I1'
+    <1> USE DEF greaterOrEqualTS, greaterTS, equalTS
+  
   \* (Inv3029_R2_0_I1,HRcvInvAction)
   <1>1. TypeOK /\ Inv3029_R2_0_I1 /\ HRcvInvAction => Inv3029_R2_0_I1' BY DEF TypeOK,HRcvInvAction,HRcvInv,Inv3029_R2_0_I1
   \* (Inv3029_R2_0_I1,HRcvInvNewerAction)
@@ -515,6 +529,7 @@ THEOREM L_9 == TypeOK /\ Inv3096_R0_0_I2 /\ Inv14828_R0_0_I2 /\ Inv3096_R0_0_I2 
 
 \*** Inv548_R0_1_I2
 THEOREM L_10 == TypeOK /\ Inv3029_R2_0_I1 /\ Inv548_R0_1_I2 /\ Next => Inv548_R0_1_I2'
+  <1> USE DEF greaterOrEqualTS, greaterTS, equalTS
   \* (Inv548_R0_1_I2,HRcvInvAction)
   <1>1. TypeOK /\ Inv548_R0_1_I2 /\ HRcvInvAction => Inv548_R0_1_I2' BY DEF TypeOK,HRcvInvAction,HRcvInv,Inv548_R0_1_I2
   \* (Inv548_R0_1_I2,HRcvInvNewerAction)
@@ -538,6 +553,7 @@ THEOREM L_10 == TypeOK /\ Inv3029_R2_0_I1 /\ Inv548_R0_1_I2 /\ Next => Inv548_R0
 
 \*** Inv2701_R0_0_I2
 THEOREM L_11 == TypeOK /\ Inv3029_R2_0_I1 /\ Inv2701_R0_0_I2 /\ Next => Inv2701_R0_0_I2'
+  <1> USE DEF greaterOrEqualTS, greaterTS, equalTS
   \* (Inv2701_R0_0_I2,HRcvInvAction)
   <1>1. TypeOK /\ Inv2701_R0_0_I2 /\ HRcvInvAction => Inv2701_R0_0_I2' BY DEF TypeOK,HRcvInvAction,HRcvInv,Inv2701_R0_0_I2
   \* (Inv2701_R0_0_I2,HRcvInvNewerAction)
@@ -591,7 +607,8 @@ THEOREM L_12 == TypeOK /\ Inv2345_R0_0_I2 /\ Inv3025_R1_0_I2 /\ Inv4085_R0_0_I2 
                         NEW VARJ \in H_NODES',
                         greaterTS(m.version, m.tieBreaker, nodeTS[n].version, nodeTS[n].tieBreaker)
                  PROVE  ((greaterOrEqualTS(nodeTS[VARI].version, nodeTS[VARI].tieBreaker, nodeTS[VARJ].version, nodeTS[VARJ].tieBreaker)) \/ (~(VARI \in aliveNodes) \/ (~(nodeState[VARJ] = "valid"))))'
-      BY SMTT(30) DEF HRcvInvNewer, HRcvInvNewerAction, Inv4085_R0_0_I2
+      BY DEF HRcvInvNewer, HRcvInvNewerAction, Inv4085_R0_0_I2
+    <2> USE DEF greaterOrEqualTS, greaterTS, equalTS
     <2>1. CASE (m.version) > (nodeTS[n].version)
       BY <2>1 DEF TypeOK,HRcvInvNewerAction,HRcvInvNewer,Inv4085_R0_0_I2
     <2>2. CASE /\   (m.version) = (nodeTS[n].version)
@@ -614,6 +631,7 @@ THEOREM L_12 == TypeOK /\ Inv2345_R0_0_I2 /\ Inv3025_R1_0_I2 /\ Inv4085_R0_0_I2 
     <2> QED
       BY FS_Subset, FS_Singleton DEF TypeOK,HFollowerWriteReplayAction,HFollowerWriteReplay,Inv4085_R0_0_I2, isAlive
   \* (Inv4085_R0_0_I2,HRcvValAction)
+  <1> USE DEF greaterOrEqualTS, greaterTS, equalTS
   <1>4. TypeOK /\ Inv2345_R0_0_I2 /\ Inv4085_R0_0_I2 /\ HRcvValAction => Inv4085_R0_0_I2' 
     <2> SUFFICES ASSUME TypeOK,
                         Inv2345_R0_0_I2,
@@ -652,6 +670,7 @@ THEOREM L_12 == TypeOK /\ Inv2345_R0_0_I2 /\ Inv3025_R1_0_I2 /\ Inv4085_R0_0_I2 
 
 \*** Inv3025_R1_0_I2
 THEOREM L_13 == TypeOK /\ Inv627_R9_0_I2 /\ Inv3096_R0_0_I2 /\ Inv1666_R10_0_I1 /\ Inv28_R17_0_I1 /\ Inv2018_R0_0_I2 /\ Inv3025_R1_0_I2 /\ Next => Inv3025_R1_0_I2'
+  <1> USE DEF greaterOrEqualTS, greaterTS, equalTS
   \* (Inv3025_R1_0_I2,HRcvInvAction)
   <1>1. TypeOK /\ Inv3025_R1_0_I2 /\ HRcvInvAction => Inv3025_R1_0_I2' BY DEF TypeOK,HRcvInvAction,HRcvInv,Inv3025_R1_0_I2
   \* (Inv3025_R1_0_I2,HRcvInvNewerAction)
@@ -675,6 +694,7 @@ THEOREM L_13 == TypeOK /\ Inv627_R9_0_I2 /\ Inv3096_R0_0_I2 /\ Inv1666_R10_0_I1 
 
 \*** Inv1666_R10_0_I1
 THEOREM L_14 == TypeOK /\ Inv3029_R2_0_I1 /\ Inv1666_R10_0_I1 /\ Next => Inv1666_R10_0_I1'
+    <1> USE DEF greaterOrEqualTS, greaterTS, equalTS
   \* (Inv1666_R10_0_I1,HRcvInvAction)
   <1>1. TypeOK /\ Inv1666_R10_0_I1 /\ HRcvInvAction => Inv1666_R10_0_I1' BY DEF TypeOK,HRcvInvAction,HRcvInv,Inv1666_R10_0_I1
   \* (Inv1666_R10_0_I1,HRcvInvNewerAction)
@@ -718,6 +738,7 @@ THEOREM L_14 == TypeOK /\ Inv3029_R2_0_I1 /\ Inv1666_R10_0_I1 /\ Next => Inv1666
 
 \*** Inv28_R17_0_I1
 THEOREM L_15 == TypeOK /\ Inv28_R17_0_I1 /\ Next => Inv28_R17_0_I1'
+ <1> USE DEF greaterOrEqualTS, greaterTS, equalTS
   \* (Inv28_R17_0_I1,HRcvInvAction)
   <1>1. TypeOK /\ Inv28_R17_0_I1 /\ HRcvInvAction => Inv28_R17_0_I1' BY DEF TypeOK,HRcvInvAction,HRcvInv,Inv28_R17_0_I1
   \* (Inv28_R17_0_I1,HRcvInvNewerAction)
@@ -761,6 +782,7 @@ THEOREM L_15 == TypeOK /\ Inv28_R17_0_I1 /\ Next => Inv28_R17_0_I1'
 
 \*** Inv2018_R0_0_I2
 THEOREM L_16 == TypeOK /\ Inv2018_R0_0_I2 /\ Next => Inv2018_R0_0_I2'
+ <1> USE DEF greaterOrEqualTS, greaterTS, equalTS
   \* (Inv2018_R0_0_I2,HRcvInvAction)
   <1>1. TypeOK /\ Inv2018_R0_0_I2 /\ HRcvInvAction => Inv2018_R0_0_I2' BY DEF TypeOK,HRcvInvAction,HRcvInv,Inv2018_R0_0_I2
   \* (Inv2018_R0_0_I2,HRcvInvNewerAction)
@@ -784,6 +806,7 @@ THEOREM L_16 == TypeOK /\ Inv2018_R0_0_I2 /\ Next => Inv2018_R0_0_I2'
 
 \*** Inv4_R0_1_I2
 THEOREM L_17 == TypeOK /\ Inv5_R0_1_I2 /\ Inv627_R9_0_I2 /\ Inv927_R9_0_I2 /\ Inv4_R0_1_I2 /\ Next => Inv4_R0_1_I2'
+ <1> USE DEF greaterOrEqualTS, greaterTS, equalTS
   \* (Inv4_R0_1_I2,HRcvInvAction)
   <1>1. TypeOK /\ Inv4_R0_1_I2 /\ HRcvInvAction => Inv4_R0_1_I2' BY DEF TypeOK,HRcvInvAction,HRcvInv,Inv4_R0_1_I2
   \* (Inv4_R0_1_I2,HRcvInvNewerAction)
@@ -807,6 +830,7 @@ THEOREM L_17 == TypeOK /\ Inv5_R0_1_I2 /\ Inv627_R9_0_I2 /\ Inv927_R9_0_I2 /\ In
 
 \*** Inv927_R9_0_I2
 THEOREM L_18 == TypeOK /\ Inv1_R21_0_I0 /\ Inv927_R9_0_I2 /\ Next => Inv927_R9_0_I2'
+ <1> USE DEF greaterOrEqualTS, greaterTS, equalTS
   \* (Inv927_R9_0_I2,HRcvInvAction)
   <1>1. TypeOK /\ Inv927_R9_0_I2 /\ HRcvInvAction => Inv927_R9_0_I2' BY DEF TypeOK,HRcvInvAction,HRcvInv,Inv927_R9_0_I2
   \* (Inv927_R9_0_I2,HRcvInvNewerAction)
@@ -830,6 +854,7 @@ THEOREM L_18 == TypeOK /\ Inv1_R21_0_I0 /\ Inv927_R9_0_I2 /\ Next => Inv927_R9_0
 
 \*** Inv1_R21_0_I0
 THEOREM L_19 == TypeOK /\ Inv1_R21_0_I0 /\ Next => Inv1_R21_0_I0'
+ <1> USE DEF greaterOrEqualTS, greaterTS, equalTS
   \* (Inv1_R21_0_I0,HRcvInvAction)
   <1>1. TypeOK /\ Inv1_R21_0_I0 /\ HRcvInvAction => Inv1_R21_0_I0' BY DEF TypeOK,HRcvInvAction,HRcvInv,Inv1_R21_0_I0
   \* (Inv1_R21_0_I0,HRcvInvNewerAction)
@@ -859,6 +884,7 @@ THEOREM L_19 == TypeOK /\ Inv1_R21_0_I0 /\ Next => Inv1_R21_0_I0'
 
 \*** Inv7971_R0_1_I2
 THEOREM L_20 == TypeOK /\ Inv2345_R0_0_I2 /\ Inv10494_R0_1_I2 /\ Inv7971_R0_1_I2 /\ Next => Inv7971_R0_1_I2'
+ <1> USE DEF greaterOrEqualTS, greaterTS, equalTS
   \* (Inv7971_R0_1_I2,HRcvInvAction)
   <1>1. TypeOK /\ Inv7971_R0_1_I2 /\ HRcvInvAction => Inv7971_R0_1_I2' BY DEF TypeOK,HRcvInvAction,HRcvInv,Inv7971_R0_1_I2
   \* (Inv7971_R0_1_I2,HRcvInvNewerAction)
@@ -918,6 +944,8 @@ THEOREM L_20 == TypeOK /\ Inv2345_R0_0_I2 /\ Inv10494_R0_1_I2 /\ Inv7971_R0_1_I2
 
 \*** Inv13944_R0_0_I2
 THEOREM L_21 == TypeOK /\ Inv2345_R0_0_I2 /\ Inv10494_R0_1_I2 /\ Inv13944_R0_0_I2 /\ Next => Inv13944_R0_0_I2'
+   <1> USE DEF greaterOrEqualTS, greaterTS, equalTS
+  
   \* (Inv13944_R0_0_I2,HRcvInvAction)
   <1>1. TypeOK /\ Inv13944_R0_0_I2 /\ HRcvInvAction => Inv13944_R0_0_I2' BY DEF TypeOK,HRcvInvAction,HRcvInv,Inv13944_R0_0_I2
   \* (Inv13944_R0_0_I2,HRcvInvNewerAction)
@@ -954,6 +982,8 @@ THEOREM L_21 == TypeOK /\ Inv2345_R0_0_I2 /\ Inv10494_R0_1_I2 /\ Inv13944_R0_0_I
 
 \*** Inv13951_R0_0_I2
 THEOREM L_22 == TypeOK /\ Inv3029_R2_0_I1 /\ Inv13951_R0_0_I2 /\ Next => Inv13951_R0_0_I2'
+ <1> USE DEF greaterOrEqualTS, greaterTS, equalTS
+
   \* (Inv13951_R0_0_I2,HRcvInvAction)
   <1>1. TypeOK /\ Inv13951_R0_0_I2 /\ HRcvInvAction => Inv13951_R0_0_I2' BY DEF TypeOK,HRcvInvAction,HRcvInv,Inv13951_R0_0_I2
   \* (Inv13951_R0_0_I2,HRcvInvNewerAction)
@@ -977,6 +1007,7 @@ THEOREM L_22 == TypeOK /\ Inv3029_R2_0_I1 /\ Inv13951_R0_0_I2 /\ Next => Inv1395
 
 \*** Inv4836_R0_1_I2
 THEOREM L_23 == TypeOK /\ Inv3029_R2_0_I1 /\ Inv4836_R0_1_I2 /\ Next => Inv4836_R0_1_I2'
+<1> USE DEF greaterOrEqualTS, greaterTS, equalTS
   \* (Inv4836_R0_1_I2,HRcvInvAction)
   <1>1. TypeOK /\ Inv4836_R0_1_I2 /\ HRcvInvAction => Inv4836_R0_1_I2' BY DEF TypeOK,HRcvInvAction,HRcvInv,Inv4836_R0_1_I2
   \* (Inv4836_R0_1_I2,HRcvInvNewerAction)
@@ -1000,6 +1031,7 @@ THEOREM L_23 == TypeOK /\ Inv3029_R2_0_I1 /\ Inv4836_R0_1_I2 /\ Next => Inv4836_
 
 \*** Inv890_R0_1_I2
 THEOREM L_24 == TypeOK /\ Inv62_R15_1_I1 /\ Inv4085_R0_0_I2 /\ Inv2018_R0_0_I2 /\ Inv5_R0_1_I2 /\ Inv3025_R1_0_I2 /\ Inv890_R0_1_I2 /\ Next => Inv890_R0_1_I2'
+  
   \* (Inv890_R0_1_I2,HRcvInvAction)
   <1> USE DEF receivedAllAcks
   <1>1. TypeOK /\ Inv890_R0_1_I2 /\ HRcvInvAction => Inv890_R0_1_I2' BY DEF TypeOK,HRcvInvAction,HRcvInv,Inv890_R0_1_I2
@@ -1032,6 +1064,7 @@ THEOREM L_24 == TypeOK /\ Inv62_R15_1_I1 /\ Inv4085_R0_0_I2 /\ Inv2018_R0_0_I2 /
                         greaterTS(m.version, m.tieBreaker, nodeTS[n].version, nodeTS[n].tieBreaker)
                  PROVE  ((greaterOrEqualTS(nodeTS[VARI].version, nodeTS[VARI].tieBreaker, nodeTS[VARJ].version, nodeTS[VARJ].tieBreaker)) \/ (~(nodeState[VARJ] = "valid")) \/ (~(receivedAllAcks(VARI) /\ nodeRcvedAcks = nodeRcvedAcks)))'
       BY DEF HRcvInvNewer, HRcvInvNewerAction, Inv890_R0_1_I2
+    <2> USE DEF greaterOrEqualTS, greaterTS, equalTS
     <2>1. CASE (m.version) > (nodeTS[n].version)
       BY <2>1 DEF TypeOK,HRcvInvNewerAction,HRcvInvNewer,Inv890_R0_1_I2
     <2>2. CASE /\   (m.version) = (nodeTS[n].version)
@@ -1040,7 +1073,7 @@ THEOREM L_24 == TypeOK /\ Inv62_R15_1_I1 /\ Inv4085_R0_0_I2 /\ Inv2018_R0_0_I2 /
     <2>3. QED
       BY <2>1, <2>2 DEF greaterTS
   \* (Inv890_R0_1_I2,HFollowerWriteReplayAction)
-  <1>3. TypeOK /\ Inv890_R0_1_I2 /\ HFollowerWriteReplayAction => Inv890_R0_1_I2' BY DEF TypeOK,HFollowerWriteReplayAction,HFollowerWriteReplay,Inv890_R0_1_I2
+  <1>3. TypeOK /\ Inv890_R0_1_I2 /\ HFollowerWriteReplayAction => Inv890_R0_1_I2' BY DEF TypeOK,HFollowerWriteReplayAction,HFollowerWriteReplay,Inv890_R0_1_I2, greaterOrEqualTS, greaterTS, equalTS
   \* (Inv890_R0_1_I2,HRcvValAction)
   <1>4. TypeOK /\ Inv62_R15_1_I1 /\ Inv890_R0_1_I2 /\ HRcvValAction => Inv890_R0_1_I2' 
     <2> SUFFICES ASSUME TypeOK,
@@ -1053,9 +1086,11 @@ THEOREM L_24 == TypeOK /\ Inv62_R15_1_I1 /\ Inv4085_R0_0_I2 /\ Inv2018_R0_0_I2 /
                         NEW VARJ \in H_NODES'
                  PROVE  ((greaterOrEqualTS(nodeTS[VARI].version, nodeTS[VARI].tieBreaker, nodeTS[VARJ].version, nodeTS[VARJ].tieBreaker)) \/ (~(nodeState[VARJ] = "valid")) \/ (~(receivedAllAcks(VARI) /\ nodeRcvedAcks = nodeRcvedAcks)))'
       BY DEF HRcvValAction, Inv890_R0_1_I2
+    <2> USE DEF greaterOrEqualTS, greaterTS, equalTS
     <2> QED
       BY DEF TypeOK,Inv62_R15_1_I1,HRcvValAction,HRcvVal,Inv890_R0_1_I2
   \* (Inv890_R0_1_I2,HCoordWriteReplayAction)
+  <1> USE DEF greaterOrEqualTS, greaterTS, equalTS
   <1>5. TypeOK /\ Inv890_R0_1_I2 /\ HCoordWriteReplayAction => Inv890_R0_1_I2' BY DEF TypeOK,HCoordWriteReplayAction,HCoordWriteReplay,Inv890_R0_1_I2
   \* (Inv890_R0_1_I2,HWriteAction)
   <1>6. TypeOK /\ Inv890_R0_1_I2 /\ HWriteAction => Inv890_R0_1_I2' BY DEF TypeOK,HWriteAction,HWrite,Inv890_R0_1_I2
@@ -1081,6 +1116,7 @@ THEOREM L_24 == TypeOK /\ Inv62_R15_1_I1 /\ Inv4085_R0_0_I2 /\ Inv2018_R0_0_I2 /
 
 \*** Inv62_R15_1_I1
 THEOREM L_25 == TypeOK /\ Inv2345_R0_0_I2 /\ Inv1_R21_0_I0 /\ Inv5_R0_1_I2 /\ Inv3025_R1_0_I2 /\ Inv62_R15_1_I1 /\ Next => Inv62_R15_1_I1'
+  <1> USE DEF greaterOrEqualTS, greaterTS, equalTS
   \* (Inv62_R15_1_I1,HRcvInvAction)
   <1>1. TypeOK /\ Inv62_R15_1_I1 /\ HRcvInvAction => Inv62_R15_1_I1' BY DEF TypeOK,HRcvInvAction,HRcvInv,Inv62_R15_1_I1
   \* (Inv62_R15_1_I1,HRcvInvNewerAction)
@@ -1104,6 +1140,7 @@ THEOREM L_25 == TypeOK /\ Inv2345_R0_0_I2 /\ Inv1_R21_0_I0 /\ Inv5_R0_1_I2 /\ In
 
 \*** Inv618_R0_1_I2
 THEOREM L_26 == TypeOK /\ Inv627_R9_0_I2 /\ Inv1666_R10_0_I1 /\ Inv4_R0_1_I2 /\ Inv2018_R0_0_I2 /\ Inv618_R0_1_I2 /\ Next => Inv618_R0_1_I2'
+  <1> USE DEF greaterOrEqualTS, greaterTS, equalTS
   \* (Inv618_R0_1_I2,HRcvInvAction)
   <1>1. TypeOK /\ Inv618_R0_1_I2 /\ HRcvInvAction => Inv618_R0_1_I2' BY DEF TypeOK,HRcvInvAction,HRcvInv,Inv618_R0_1_I2
   \* (Inv618_R0_1_I2,HRcvInvNewerAction)
@@ -1152,6 +1189,7 @@ THEOREM L_26 == TypeOK /\ Inv627_R9_0_I2 /\ Inv1666_R10_0_I1 /\ Inv4_R0_1_I2 /\ 
 
 \* Initiation.
 THEOREM Init => IndGlobal
+    <1> USE DEF greaterOrEqualTS, greaterTS, equalTS
     <1>0. Init => TypeOK 
       <2> SUFFICES ASSUME Init
                    PROVE  TypeOK
