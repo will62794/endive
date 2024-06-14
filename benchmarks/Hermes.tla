@@ -32,7 +32,7 @@ hvars == << msgsINV, msgsVAL, msgsACK, nodeTS, nodeState, nodeRcvedAcks, nodeLas
 INVMessage == [
     type: {"INV"}, 
     sender    : H_NODES,
-    epochID   : 0..(Cardinality(H_NODES) - 1),
+    epochID   : Nat,
     version   : Nat,  
     tieBreaker: H_NODES
 ] 
@@ -44,7 +44,7 @@ INVMessage == [
 ACKMessage == [
     type: {"ACK"}, 
     sender    : H_NODES,
-    epochID   : 0..(Cardinality(H_NODES) - 1),
+    epochID   : Nat,
     version   : Nat,  
     tieBreaker: H_NODES
 ]
