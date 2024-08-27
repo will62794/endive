@@ -15,6 +15,7 @@ import pickle
 import itertools
 import datetime
 from itertools import chain, combinations
+import hashlib
 
 import graphviz
 
@@ -36,6 +37,9 @@ LATEST_TLC_JAR = "tla2tools_2.18.jar"
 # Use local custom built TLC for now.
 # TLC_JAR = "../../tlaplus/tlatools/org.lamport.tlatools/dist/tla2tools.jar"
 TLC_JAR = "tla2tools-checkall.jar"
+
+def md5_short(s):
+    return hashlib.md5(s.encode()).hexdigest()[:4]
 
 def mean(lst):
     return sum(lst) / len(lst)
@@ -2926,13 +2930,13 @@ class InductiveInvGen():
                     new_ctis_eliminated = existing_inv_cands[0]["ctis_eliminated"] - ctis_eliminated_this_iter
                 elif len(existing_inv_cands) == 0:
                     invi = int(top_new_inv_cand.replace("Inv", ""))
-                    chosen_cand = {"inv": top_new_inv_cand, "invexp": orig_invs_sorted[invi], "ctis_eliminated": cti_states_eliminated_by_invs[top_new_inv_cand]}
+                    chosen_cand = {"inv": top_new_inv_cand + "_" + md5_short(orig_invs_sorted[invi]), "invexp": orig_invs_sorted[invi], "ctis_eliminated": cti_states_eliminated_by_invs[top_new_inv_cand]}
                     new_ctis_eliminated = cti_states_eliminated_by_invs[top_new_inv_cand] - ctis_eliminated_this_iter
                 else:
                     # Pick invariant for elimination.
                     if len((cti_states_eliminated_by_invs[top_new_inv_cand] - ctis_eliminated_this_iter)) > len(existing_inv_cands[0]["ctis_eliminated"] - ctis_eliminated_this_iter):
                         invi = int(top_new_inv_cand.replace("Inv", ""))
-                        chosen_cand = {"inv": top_new_inv_cand, "invexp": orig_invs_sorted[invi], "ctis_eliminated": cti_states_eliminated_by_invs[top_new_inv_cand]}
+                        chosen_cand = {"inv": top_new_inv_cand + "_" + md5_short(orig_invs_sorted[invi]), "invexp": orig_invs_sorted[invi], "ctis_eliminated": cti_states_eliminated_by_invs[top_new_inv_cand]}
                         new_ctis_eliminated = cti_states_eliminated_by_invs[top_new_inv_cand] - ctis_eliminated_this_iter
                     else:
                         chosen_cand = existing_inv_cands[0]
