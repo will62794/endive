@@ -4,7 +4,7 @@
 #SBATCH --constraint="[broadwell|cascadelake]"       # Newer processors.
 #SBATCH -N 1                   # Number of nodes
 #SBATCH -n 1                   # Number of tasks
-#SBATCH --cpus-per-task 32                  # Number of cores
+#SBATCH --cpus-per-task 28                  # Number of cores
 #SBATCH --array=1,2,3,4,5,6,7,8
 
 specname="AsyncRaft"
