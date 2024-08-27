@@ -449,10 +449,9 @@ AcceptAppendEntriesRequestAppend(m) ==
             logOk == LogOk(i, m)
             index == m.mprevLogIndex + 1
         IN 
-            /\ state[i] \in { Follower, Candidate }
+            /\ state[i] \in { Follower }
             /\ logOk
             /\ CanAppend(m, i)
-            /\ state' = [state EXCEPT ![i] = Follower]
             \* Only update the logs in this action. commit learning is done in a separate action.
             /\ log' = [log EXCEPT ![i] = Append(log[i], m.mentries[1])]
             /\ appendEntriesResponseMsgs' = appendEntriesResponseMsgs \cup {[
@@ -462,7 +461,7 @@ AcceptAppendEntriesRequestAppend(m) ==
                         mmatchIndex     |-> m.mprevLogIndex + Len(m.mentries),
                         msource         |-> i,
                         mdest           |-> j]}
-            /\ UNCHANGED <<votesGranted, commitIndex, nextIndex, matchIndex, votedFor, currentTerm, requestVoteRequestMsgs, requestVoteResponseMsgs, appendEntriesRequestMsgs>>
+            /\ UNCHANGED <<state, votesGranted, commitIndex, nextIndex, matchIndex, votedFor, currentTerm, requestVoteRequestMsgs, requestVoteResponseMsgs, appendEntriesRequestMsgs>>
        
 \* AcceptAppendEntriesRequestTruncate(m) ==
 \*     /\ m \in appendEntriesRequestMsgs
