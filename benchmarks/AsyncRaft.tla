@@ -501,7 +501,7 @@ AcceptAppendEntriesRequestLearnCommit(m) ==
             j     == m.msource
             logOk == LogOk(i, m)
         IN 
-            /\ state[i] \in { Follower, Candidate }
+            /\ state[i] \in { Follower }
             \* We can learn a commitIndex as long as the log check passes, and if we could append these log entries.
             \* We will not, however, advance our local commitIndex to a point beyond the end of our log. And,
             \* we don't actually update our log here, only our commitIndex.
@@ -512,10 +512,9 @@ AcceptAppendEntriesRequestLearnCommit(m) ==
             /\ CanAppend(m, i)
 
             /\ m.mcommitIndex > commitIndex[i] \* no need to ever decrement our commitIndex.
-            /\ state' = [state EXCEPT ![i] = Follower]
             /\ commitIndex' = [commitIndex EXCEPT ![i] = Min({m.mcommitIndex, Len(log[i])})]
             \* No need to send a response message since we are not updating our logs.
-            /\ UNCHANGED <<votesGranted, appendEntriesRequestMsgs, appendEntriesResponseMsgs, nextIndex, matchIndex, log, votedFor, currentTerm, requestVoteRequestMsgs, requestVoteResponseMsgs>>
+            /\ UNCHANGED <<state, votesGranted, appendEntriesRequestMsgs, appendEntriesResponseMsgs, nextIndex, matchIndex, log, votedFor, currentTerm, requestVoteRequestMsgs, requestVoteResponseMsgs>>
 
 
 \* ACTION: HandleAppendEntriesResponse
