@@ -85,11 +85,6 @@ TypeOKRandom ==
     /\ matchIndex \in [Server -> [Server -> LogIndicesWithZero]]        
     /\ log             \in [Server -> BoundedSeq(Terms, MaxLogLen)]
     /\ commitIndex     \in [Server -> LogIndicesWithZero]
-    \* Encode these basic invariants into type-correctness.
-    /\ \A m \in requestVoteRequestMsgs : m.msource # m.mdest
-    /\ \A m \in requestVoteResponseMsgs : m.msource # m.mdest
-    /\ \A m \in appendEntriesRequestMsgs : m.msource # m.mdest
-    /\ \A m \in appendEntriesResponseMsgs : m.msource # m.mdest
 
 Symmetry == Permutations(Server)
 
