@@ -24,8 +24,6 @@ EXTENDS AsyncRaft, Randomization
 \* \* We encode this in the type invariant for convenience.
 \* MaxMEntriesLen == 1
 
-SeqOf(S, n) == UNION {[1..m -> S] : m \in 0..n}
-BoundedSeq(S, n) == SeqOf(S, n)
 
 RequestVoteRequestTypeBounded == [
     mtype         : {RequestVoteRequest},

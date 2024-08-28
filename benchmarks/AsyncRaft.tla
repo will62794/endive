@@ -596,6 +596,10 @@ Terms == 0..MaxTerm
 LogIndices == 1..MaxLogLen
 LogIndicesWithZero == 0..MaxLogLen
 
+SeqOf(S, n) == UNION {[1..m -> S] : m \in 0..n}
+BoundedSeq(S, n) == SeqOf(S, n)
+BoundedSeqSub(S) == BoundedSeq(S, 3)
+
 \* In this spec we send at most 1 log entry per AppendEntries message. 
 \* We encode this in the type invariant for convenience.
 MaxMEntriesLen == 1
