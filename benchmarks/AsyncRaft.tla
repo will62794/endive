@@ -564,10 +564,6 @@ Test1 == \A s \in Server : \E r \in Server :
 Next == 
     \/ RequestVoteAction
     \/ UpdateTermAction
-    \* \/ UpdateTermRVReqAction
-    \* \/ UpdateTermRVResAction
-    \* \/ UpdateTermAEReqAction
-    \* \/ UpdateTermAEResAction
     \/ HandleRequestVoteRequestAction
     \/ HandleRequestVoteResponseAction
     \/ BecomeLeaderAction
