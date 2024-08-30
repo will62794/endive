@@ -788,6 +788,14 @@ StateConstraint ==
 \* Helper lemmas.
 \**************
 
+\* Ser of servers that have cast a vote for current candidate based on either record in votesGranted or requestVoteResponse messages. 
+GrantedVoteSet(cand) ==
+    votesGranted[cand] \cup {s \in Server : \E m \in requestVoteResponseMsgs : 
+                                                /\ m.mdest = cand 
+                                                /\ m.mvoteGranted 
+                                                /\ m.msource = s 
+                                                /\ m.mterm = currentTerm[cand]}
+
 \* START_PROOF
 
 \* Is log entry e = <<index, term>> in the log of node 'i'.
@@ -866,6 +874,13 @@ H_RequestVoteQuorumInTermImpliesNoOtherLogsInTerm ==
         (/\ state[s] = Candidate
          /\ ExistsRequestVoteResponseQuorum(currentTerm[s], s)) =>
             /\ \A n \in Server : \A ind \in DOMAIN log[n] : log[n][ind] # currentTerm[s]
+
+H_VoteQuorumLogTerms ==
+    \A s \in Server :
+        (/\ state[s] = Candidate
+         /\ GrantedVoteSet(s) \in Quorum) =>
+            /\ \A n \in Server : \A ind \in DOMAIN log[n] : log[n][ind] # currentTerm[s]
+
 
 H_RequestVoteRequestFromNodeInTermImpliesVotedForSelf == 
     \A m \in requestVoteRequestMsgs :
