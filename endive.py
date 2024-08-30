@@ -4324,13 +4324,16 @@ class InductiveInvGen():
                 # Get constant objects to use for checking CTIs.
                 cobjs = self.get_ctigen_constant_instances()
                 k_ctis_action = []
-                for cobj in cobjs:
-                    k_ctis_action_new, k_cti_traces = self.generate_ctis(props=[curr_obligation_pred_tup], 
-                                                                     specname_tag=curr_obligation, actions=[k_cti_action], 
-                                                                     ignore_vars=cti_ignore_vars, constants_obj=cobj)
-                    for c in k_ctis_action_new:
-                        c.constants_obj = cobj
-                    k_ctis_action += k_ctis_action_new
+                print(k_cti_action)
+                if self.action_filter is not None and k_cti_action in self.action_filter:
+                    for cobj in cobjs:
+                        k_ctis_action_new, k_cti_traces = self.generate_ctis(props=[curr_obligation_pred_tup], 
+                                                                        specname_tag=curr_obligation, actions=[k_cti_action], 
+                                                                        ignore_vars=cti_ignore_vars, constants_obj=cobj)
+                        for c in k_ctis_action_new:
+                            c.constants_obj = cobj
+                        print("NUM new ctis:", len(k_ctis_action_new))
+                        k_ctis_action += k_ctis_action_new
                     
                 # k_ctis_action, k_cti_traces = self.generate_ctis(props=[curr_obligation_pred_tup], specname_tag=curr_obligation, actions=[k_cti_action], ignore_vars=cti_ignore_vars)
                 
