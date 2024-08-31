@@ -1193,7 +1193,7 @@ H_LogMatching ==
         (\E j \in DOMAIN log[t] : i = j /\ log[s][i] = log[t][j]) => 
         (SubSeq(log[s],1,i) = SubSeq(log[t],1,i)) \* prefixes must be the same.
 
-H_LogMatchingAlt == H_LogMatching
+H_LogMatchAlt == H_LogMatching
 
 \* Log matching must hold between any two current AppendEntries requests.
 H_LogMatchingBetweenAppendEntriesMsgs ==

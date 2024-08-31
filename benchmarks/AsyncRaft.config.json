@@ -85,7 +85,7 @@
         "VARLOGINDI \\in DOMAIN log[VARI] /\\ log[VARI][VARLOGINDI] < currentTerm[VARI]",
         "VARLOGINDI \\in DOMAIN log[VARI] /\\ log[VARI][VARLOGINDI] > currentTerm[VARI]",
         "VARLOGINDI \\in DOMAIN log[VARI] /\\ log[VARI][VARLOGINDI] = currentTerm[VARJ]",
-        "H_LogMatchingAlt /\\ log = log",
+        "H_LogMatchAlt /\\ log = log",
         "Len(log[VARI]) >= commitIndex[VARI]",
         "Len(log[VARI]) >= commitIndex[VARJ]",
         "Len(log[VARJ]) >= commitIndex[VARJ]",
