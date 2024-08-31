@@ -437,8 +437,8 @@ CanAppend(m, i) ==
 \*    \/ /\ m.mentries = <<>>
 \*       /\ Len(log[i]) > m.mprevLogIndex
 
-\* TruncateLog(m, i) ==
-\*     [index \in 1..m.mprevLogIndex |-> log[i][index]]
+TruncateLog(m, i) ==
+    [index \in 1..m.mprevLogIndex |-> log[i][index]]
 
 AcceptAppendEntriesRequestAppend(m) ==
     /\ m \in appendEntriesRequestMsgs
@@ -463,34 +463,34 @@ AcceptAppendEntriesRequestAppend(m) ==
                         mdest           |-> j]}
             /\ UNCHANGED <<state, votesGranted, commitIndex, nextIndex, matchIndex, votedFor, currentTerm, requestVoteRequestMsgs, requestVoteResponseMsgs, appendEntriesRequestMsgs>>
        
-\* AcceptAppendEntriesRequestTruncate(m) ==
-\*     /\ m \in appendEntriesRequestMsgs
-\*     /\ m.mtype = AppendEntriesRequest
-\*     /\ m.mterm = currentTerm[m.mdest]
-\*     /\ LET  i     == m.mdest
-\*             j     == m.msource
-\*             logOk == LogOk(i, m)
-\*             index == m.mprevLogIndex + 1
-\*         IN 
-\*             /\ state[i] \in { Follower, Candidate }
-\*             /\ logOk
-\*             \* We only truncate if terms do not match and our log index
-\*             \* is >= the log of the sender. Note that we do not reset the commitIndex
-\*             \* here as well, since if safety holds, then we should never be truncating a 
-\*             \* portion of the log that is covered by a commitIndex.
-\*             /\ m.mentries # << >>
-\*             /\ Len(log[i]) >= index
-\*             /\ m.mentries[1] > log[i][index]
-\*             /\ state' = [state EXCEPT ![i] = Follower]
-\*             /\ log' = [log EXCEPT ![i] = TruncateLog(m, i)]
-\*             /\ appendEntriesResponseMsgs' = appendEntriesResponseMsgs \cup {[
-\*                         mtype           |-> AppendEntriesResponse,
-\*                         mterm           |-> currentTerm[i],
-\*                         msuccess        |-> TRUE,
-\*                         mmatchIndex     |-> m.mprevLogIndex,
-\*                         msource         |-> i,
-\*                         mdest           |-> j]}
-\*             /\ UNCHANGED <<votesGranted, nextIndex, matchIndex, commitIndex, votedFor, currentTerm, requestVoteRequestMsgs, requestVoteResponseMsgs, appendEntriesRequestMsgs>>
+AcceptAppendEntriesRequestTruncate(m) ==
+    /\ m \in appendEntriesRequestMsgs
+    /\ m.mtype = AppendEntriesRequest
+    /\ m.mterm = currentTerm[m.mdest]
+    /\ LET  i     == m.mdest
+            j     == m.msource
+            logOk == LogOk(i, m)
+            index == m.mprevLogIndex + 1
+        IN 
+            /\ state[i] \in { Follower, Candidate }
+            /\ logOk
+            \* We only truncate if terms do not match and our log index
+            \* is >= the log of the sender. Note that we do not reset the commitIndex
+            \* here as well, since if safety holds, then we should never be truncating a 
+            \* portion of the log that is covered by a commitIndex.
+            /\ m.mentries # << >>
+            /\ Len(log[i]) >= index
+            /\ m.mentries[1] > log[i][index]
+            /\ state' = [state EXCEPT ![i] = Follower]
+            /\ log' = [log EXCEPT ![i] = TruncateLog(m, i)]
+            /\ appendEntriesResponseMsgs' = appendEntriesResponseMsgs \cup {[
+                        mtype           |-> AppendEntriesResponse,
+                        mterm           |-> currentTerm[i],
+                        msuccess        |-> TRUE,
+                        mmatchIndex     |-> m.mprevLogIndex,
+                        msource         |-> i,
+                        mdest           |-> j]}
+            /\ UNCHANGED <<votesGranted, nextIndex, matchIndex, commitIndex, votedFor, currentTerm, requestVoteRequestMsgs, requestVoteResponseMsgs, appendEntriesRequestMsgs>>
 
 AcceptAppendEntriesRequestLearnCommit(m) ==
     /\ m \in appendEntriesRequestMsgs
@@ -546,19 +546,15 @@ UpdateTermAction == TRUE /\ \E m \in requestVoteRequestMsgs \cup requestVoteResp
 \* UpdateTermAEResAction == TRUE /\ \E m \in appendEntriesResponseMsgs : UpdateTermAERes(m.mterm, m.mdest)
 BecomeLeaderAction == TRUE /\ \E i \in Server : BecomeLeader(i)
 ClientRequestAction == TRUE /\ \E i \in Server : ClientRequest(i)
-AdvanceCommitIndexAction == TRUE /\ \E i \in Server : AdvanceCommitIndex(i)
+\* AdvanceCommitIndexAction == TRUE /\ \E i \in Server : AdvanceCommitIndex(i)
 AppendEntriesAction == TRUE /\ \E i,j \in Server : AppendEntries(i, j)
 HandleRequestVoteRequestAction == \E m \in requestVoteRequestMsgs : HandleRequestVoteRequest(m)
 HandleRequestVoteResponseAction == \E m \in requestVoteResponseMsgs : HandleRequestVoteResponse(m)
-RejectAppendEntriesRequestAction == \E m \in appendEntriesRequestMsgs : RejectAppendEntriesRequest(m)
+\* RejectAppendEntriesRequestAction == \E m \in appendEntriesRequestMsgs : RejectAppendEntriesRequest(m)
 AcceptAppendEntriesRequestAppendAction == \E m \in appendEntriesRequestMsgs : AcceptAppendEntriesRequestAppend(m)
 \* AcceptAppendEntriesRequestTruncateAction == TRUE /\ \E m \in appendEntriesRequestMsgs : AcceptAppendEntriesRequestTruncate(m)
 AcceptAppendEntriesRequestLearnCommitAction == \E m \in appendEntriesRequestMsgs : AcceptAppendEntriesRequestLearnCommit(m)
 HandleAppendEntriesResponseAction == \E m \in appendEntriesResponseMsgs : HandleAppendEntriesResponse(m)
-
-Test1 == \A s \in Server : \E r \in Server :
-            /\ state[s] = Leader
-            /\ state[s] \in {Follower}
 
 \* Defines how the variables may transition.
 Next == 
@@ -569,17 +565,27 @@ Next ==
     \/ BecomeLeaderAction
     \/ ClientRequestAction
     \/ AppendEntriesAction
-    \/ RejectAppendEntriesRequestAction
+    \* \/ RejectAppendEntriesRequestAction
     \/ AcceptAppendEntriesRequestAppendAction
     \/ AcceptAppendEntriesRequestLearnCommitAction
     \/ HandleAppendEntriesResponseAction 
-    \/ AdvanceCommitIndexAction
+    \* \/ AdvanceCommitIndexAction
     \* \/ AcceptAppendEntriesRequestTruncateAction \* (DISABLE FOR NOW FOR SMALLER PROOF)
 
 NextUnchanged == UNCHANGED vars
 
 L1 == ~(\E s \in Server : Len(log[s]) > 0)
 \* L1 == ~(requestVoteRequestMsgs # {})
+
+Test1 == 
+    ~(\E s,t \in Server : 
+        /\ s # t
+        /\ currentTerm[s] # currentTerm[t]
+        /\ Len(log[s]) > 0
+        /\ Len(log[t]) > 0
+        /\ log[s][1] # log[t][1]
+        /\ commitIndex[s] = 1
+        )
 
 CONSTANT 
     \* @type: Int;
@@ -636,7 +642,6 @@ AppendEntriesResponseType == [
     msource      : Server,
     mdest        : Server
 ]
-
 
 TypeOK == 
     /\ requestVoteRequestMsgs \in SUBSET RequestVoteRequestType
@@ -1188,6 +1193,8 @@ H_LogMatching ==
         (\E j \in DOMAIN log[t] : i = j /\ log[s][i] = log[t][j]) => 
         (SubSeq(log[s],1,i) = SubSeq(log[t],1,i)) \* prefixes must be the same.
 
+H_LogMatchingAlt == H_LogMatching
+
 \* Log matching must hold between any two current AppendEntries requests.
 H_LogMatchingBetweenAppendEntriesMsgs ==
     \A mi,mj \in appendEntriesRequestMsgs : 
@@ -1442,8 +1449,7 @@ H_NoLogDivergence ==
             \A index \in ((DOMAIN log[s1]) \cap (DOMAIN log[s2])) : 
                 \* If an index is covered by a commitIndex in both logs, then the 
                 \* entry must be the same between the two servers.
-                (index < commitIndex[s1] /\ index < commitIndex[s2]) =>
-                    log[s1][index] = log[s2][index]
+                (index < commitIndex[s1] /\ index < commitIndex[s2]) => log[s1][index] = log[s2][index]
 
 \* 
 \* Some sample inductive proof obligations
@@ -1779,5 +1785,104 @@ H_Inv10677_R1_1_I2 == \A VARI \in Server : \A VARJ \in Server : ((state[VARJ] = 
 
 H_Inv7_R1_0_I0 == (\A s \in Server : state[s] \in {Candidate,Leader} =>  (\A t \in votesGranted[s] :  /\ currentTerm[t] = currentTerm[s] => votedFor[t] = s ))
 H_Inv0_R1_1_I0 == (\A mi,mj \in requestVoteResponseMsgs : (/\ mi.mterm = mj.mterm /\ mi.msource = mj.msource /\ mi.mvoteGranted /\ mj.mvoteGranted) => mi.mdest = mj.mdest)
+H_Inv3556_R0_1_I1 == \A VARI \in Server : \A VARJ \in Server : \A VARREQVRES \in requestVoteResponseMsgs : ~((state[VARI] = Leader)) \/ (~(VARREQVRES.mterm = currentTerm[VARI] /\ VARREQVRES.msource = VARJ /\ VARREQVRES.mdest # VARI /\ VARREQVRES.mvoteGranted))
+
+L_Inv910 == \A VARI \in Server : ((state[VARI] = Follower)) \/ ((VARI \in votesGranted[VARI]))
+L_Inv18 == (\A s,t \in Server : \A m \in requestVoteResponseMsgs :( /\ state[s] \in {Candidate,Leader} /\ t \in votesGranted[s]) => ~(/\ m.mterm = currentTerm[s] /\ m.msource = t /\ m.mdest # s /\ m.mvoteGranted))
+L_Inv2962 == \A VARI \in Server : (votesGranted[VARI] \in Quorum) \/ (~((state[VARI] = Leader)))
+
+
+N_Inv30_R0_0_I0 == (\A s,t \in Server : ( /\ s # t /\ state[s] \in {Leader,Candidate} /\ state[t] \in {Leader,Candidate} /\ currentTerm[s] = currentTerm[t]) => votesGranted[s] \cap votesGranted[t] = {})
+N_Inv18_R0_1_I1 == (\A s,t \in Server : \A m \in requestVoteResponseMsgs :( /\ state[s] \in {Candidate,Leader} /\ t \in votesGranted[s]) => ~(/\ m.mterm = currentTerm[s] /\ m.msource = t /\ m.mdest # s /\ m.mvoteGranted))
+N_Inv2710_R0_1_I1 == \A VARI \in Server : (votesGranted[VARI] \in Quorum) \/ (~((state[VARI] = Leader)))
+N_Inv20_R0_1_I1 == \A VARREQVRES \in requestVoteResponseMsgs : (currentTerm[VARREQVRES.msource] >= VARREQVRES.mterm)
+N_Inv14_R1_1_I1 == \A VARI \in Server : \A VARJ \in Server : ((currentTerm[VARI] <= currentTerm[VARJ])) \/ (~((state[VARI] \in {Leader,Candidate} /\ VARJ \in votesGranted[VARI])))
+
+
+F_Inv1375_R0_0_I2 == \A VARI \in Server : \A VARJ \in Server : (VARI \in votesGranted[VARI]) \/ (~(VARJ \in votesGranted[VARI]))
+F_Inv1664_R0_0_I2 == \A VARI \in Server : \A VARJ \in Server : ~((currentTerm[VARI] > currentTerm[VARJ])) \/ (~((state[VARI] \in {Leader,Candidate} /\ VARJ \in votesGranted[VARI])))
+F_Inv11664_R0_0_I2 == \A VARI \in Server : \A VARJ \in Server : (votesGranted[VARI] \cap votesGranted[VARJ] = {}) \/ (~((state[VARJ] = Candidate))) \/ (~((state[VARI] = Candidate /\ VARI # VARJ /\ currentTerm[VARI] = currentTerm[VARJ])))
+F_Inv665_R0_0_I2 == \A VARI \in Server : ((state[VARI] = Follower)) \/ ((VARI \in votesGranted[VARI]))
+F_Inv1536_R0_0_I2 == \A VARI \in Server : (votesGranted[VARI] \in Quorum) \/ (~((state[VARI] = Leader)))
+F_Inv17_R0_1_I2 == (\A s,t \in Server : \A m \in requestVoteResponseMsgs :( /\ state[s] \in {Candidate,Leader} /\ t \in votesGranted[s]) => ~(/\ m.mterm = currentTerm[s] /\ m.msource = t /\ m.mdest # s /\ m.mvoteGranted))
+F_Inv19_R0_1_I2 == \A VARREQVRES \in requestVoteResponseMsgs : (currentTerm[VARREQVRES.msource] >= VARREQVRES.mterm)
+F_Inv14132_R0_1_I2 == \A VARI \in Server : \A VARJ \in Server : (votesGranted[VARI] \cap votesGranted[VARJ] = {}) \/ (~((state[VARJ] = Candidate))) \/ (~((state[VARI] = Leader /\ VARI # VARJ /\ currentTerm[VARI] = currentTerm[VARJ])))
+F_Inv8783_R0_1_I2 == \A VARI \in Server : (votesGranted[VARI] \in Quorum) \/ (~((state[VARI] \in {Leader,Candidate}))) \/ (~((state[VARI] = Leader)))
+F_Inv123_R1_0_I1 == \A VARI \in Server : \A VARREQVRES \in requestVoteResponseMsgs : (VARI \in votesGranted[VARI]) \/ (~(VARREQVRES.mdest = VARI))
+F_Inv3_R1_0_I1 == (\A mi,mj \in requestVoteResponseMsgs : (/\ mi.mterm = mj.mterm /\ mi.msource = mj.msource /\ mi.mvoteGranted /\ mj.mvoteGranted) => mi.mdest = mj.mdest)
+F_Inv10_R6_0_I0 == (\A s \in Server : state[s] \in {Candidate,Leader} =>  (\A t \in votesGranted[s] :  /\ currentTerm[t] = currentTerm[s] => votedFor[t] = s ))
+F_Inv173_R10_0_I1 == \A VARI \in Server : \A VARREQVM \in requestVoteRequestMsgs : (VARI \in votesGranted[VARI]) \/ (~(VARREQVM.msource = VARI))
+F_Inv5_R10_0_I1 == \A VARREQVM \in requestVoteRequestMsgs : (currentTerm[VARREQVM.msource] >= VARREQVM.mterm)
+F_Inv13_R11_0_I2 == \A VARI \in Server : \A VARJ \in Server : ((currentTerm[VARI] <= currentTerm[VARJ])) \/ (~(votedFor[VARI] = VARJ))
+F_Inv349_R11_0_I2 == \A VARREQVM \in requestVoteRequestMsgs : (votedFor[VARREQVM.msource] = VARREQVM.msource) \/ (~(currentTerm[VARREQVM.msource] = VARREQVM.mterm))
+F_Inv14784_R11_0_I2 == \A VARI \in Server : \A VARJ \in Server : \A VARREQVRES \in requestVoteResponseMsgs : (votedFor[VARREQVRES.msource] = VARREQVRES.mdest) \/ (~(VARREQVRES.mterm = currentTerm[VARI] /\ VARREQVRES.msource = VARJ /\ VARREQVRES.mdest # VARI /\ VARREQVRES.mvoteGranted)) \/ (~(VARREQVRES.mterm = currentTerm[VARJ]))
+F_Inv293_R11_0_I2 == \A VARREQVRES \in requestVoteResponseMsgs : (currentTerm[VARREQVRES.mdest] >= VARREQVRES.mterm) \/ (~(VARREQVRES.mvoteGranted))
+F_Inv430_R11_0_I2 == \A VARI \in Server : \A VARJ \in Server : \A VARREQVRES \in requestVoteResponseMsgs : ~(VARREQVRES.mterm = currentTerm[VARI] /\ VARREQVRES.msource = VARJ /\ VARREQVRES.mdest # VARI /\ VARREQVRES.mvoteGranted) \/ (~(votedFor[VARJ] = VARI))
+F_Inv429_R11_0_I2 == \A VARI \in Server : \A VARJ \in Server : \A VARREQVRES \in requestVoteResponseMsgs : ~(VARREQVRES.mterm = currentTerm[VARI] /\ VARREQVRES.msource = VARJ /\ VARREQVRES.mdest # VARI /\ VARREQVRES.mvoteGranted) \/ (~(votedFor[VARI] = VARJ))
+F_Inv4_R12_0_I0 == (\A m \in requestVoteResponseMsgs : m.mtype = RequestVoteResponse =>  /\ (m.mvoteGranted /\ (currentTerm[m.msource] = m.mterm)) => votedFor[m.msource] = m.mdest)
+F_Inv2430_R20_0_I2 == \A VARI \in Server : \A VARJ \in Server : ((currentTerm[VARJ] > currentTerm[VARI])) \/ ((votedFor[VARJ] = VARJ) \/ (~(votedFor[VARI] = VARJ)))
+F_Inv6299_R20_0_I2 == \A VARI \in Server : \A VARJ \in Server : \A VARREQVM \in requestVoteRequestMsgs : \A VARREQVRES \in requestVoteResponseMsgs : ~(VARREQVM.msource = VARJ) \/ (~(VARREQVM.mterm = currentTerm[VARI])) \/ (~(VARREQVRES.mterm = currentTerm[VARI] /\ VARREQVRES.msource = VARJ /\ VARREQVRES.mdest # VARI /\ VARREQVRES.mvoteGranted))
+
+
+\* AInv2100_R0_0_I2 == \A VARI \in Server : \A VARJ \in Server : ~((currentTerm[VARI] > currentTerm[VARJ])) \/ (~(\E INDK \in DOMAIN log[VARJ] : log[VARJ][INDK] = currentTerm[VARI]))
+
+
+
+AInv2099_bca2_R0_0_I2 == \A VARI \in Server : \A VARJ \in Server : ~((currentTerm[VARI] > currentTerm[VARJ])) \/ (~(\E INDK \in DOMAIN log[VARJ] : log[VARJ][INDK] = currentTerm[VARI]))
+\* The above invariant states that if a server VARI has a term that is greater than another server VARJ, then the log of VARJ must not contain the term of VARI.
+\* i.e. if you're in a lower term T, you can't have replicated a log entry in a higher term T+1?
+
+
+
+AInv2376_R0_0_I2 == \A VARI \in Server : \A VARJ \in Server : ~((state[VARI] = Leader /\ VARI # VARJ /\ currentTerm[VARI] = currentTerm[VARJ])) \/ (~((state[VARJ] = Leader)))
+
+
+AInv6278_d2f4_R3_1_I2 == 
+    \A VARI \in Server : \A VARJ \in Server : \A VARLOGINDI \in LogIndices : 
+        ~((state[VARI] = Leader /\ VARI # VARJ)) \/ (~((state[VARJ] = Leader))) \/ (~(VARLOGINDI \in DOMAIN log[VARI] /\ VARLOGINDI \in DOMAIN log[VARJ] /\ log[VARI][VARLOGINDI] = log[VARJ][VARLOGINDI]))
+
+AInv1305_84cf_R5_1_I4 == 
+    \A VARI \in Server : \A VARJ \in Server : \A VARLOGINDI \in LogIndices : 
+        ((state[VARI] = Candidate /\ VARI # VARJ /\ currentTerm[VARI] = currentTerm[VARJ])) \/ (~((state[VARI] \in {Leader,Candidate} /\ VARI # VARJ)) \/ (~(VARLOGINDI \in DOMAIN log[VARI] /\ log[VARI][VARLOGINDI] < currentTerm[VARI]))) \/ (~(\E INDK \in DOMAIN log[VARJ] : log[VARJ][INDK] = currentTerm[VARI]))
+
+AInv6959_22b6_R0_0_I2 == \A VARI \in Server : \A VARJ \in Server : ((state[VARI] \in {Follower,Candidate})) \/ (~(\E INDK \in DOMAIN log[VARJ] : log[VARJ][INDK] = currentTerm[VARI])) \/ ((IsPrefix(log[VARJ], log[VARI])))
+
+
+
+AInv17061_6a6e_R3_0_I2 == 
+    \A VARI \in Server : 
+    \A VARJ \in Server : 
+        ~((state[VARI] = Candidate /\ VARI # VARJ)) \/ (~(\E INDK \in DOMAIN log[VARJ] : log[VARJ][INDK] = currentTerm[VARI])) \/ (~(votesGranted[VARI] \in Quorum))
+
+
+AInv6948_22b6_R0_0_I2 == 
+    \A VARI \in Server : 
+    \A VARJ \in Server : 
+        \* ((state[VARI] \in {Follower,Candidate})) \/ (~(\E INDK \in DOMAIN log[VARJ] : log[VARJ][INDK] = currentTerm[VARI])) \/ ((IsPrefix(log[VARJ], log[VARI])))
+        (((state[VARI] \in {Leader})) /\ ~((IsPrefix(log[VARJ], log[VARI])))) => ~((\E INDK \in DOMAIN log[VARJ] : log[VARJ][INDK] = currentTerm[VARI]))
+
+
+AInv6858_3e34_R7_1_I3 == \A VARI \in Server : \A VARJ \in Server : \A VARLOGINDI \in LogIndices : (votesGranted[VARI] \in Quorum) \/ (~(\E INDK \in DOMAIN log[VARJ] : log[VARJ][INDK] = currentTerm[VARI])) \/ (~(VARLOGINDI \in DOMAIN log[VARJ])) \/ (~(GrantedVoteSet(VARI) \in Quorum /\ votesGranted = votesGranted /\ requestVoteResponseMsgs = requestVoteResponseMsgs))
+
+
+AInv67_bf9f_R0_0_I2 == \A VARI \in Server : \A VARLOGINDI \in LogIndices : ~(VARLOGINDI \in DOMAIN log[VARI] /\ log[VARI][VARLOGINDI] > currentTerm[VARI])
+AInv1859_f408_R0_0_I2 == \A VARI \in Server : \A VARLOGINDI \in LogIndices : ~((state[VARI] = Candidate)) \/ (~(VARLOGINDI \in DOMAIN log[VARI] /\ log[VARI][VARLOGINDI] = currentTerm[VARI]))
+AInv8798_9532_R0_0_I2 == \A VARI \in Server : \A VARJ \in Server : \A VARLOGINDI \in LogIndices : (IsPrefix(log[VARI], log[VARJ])) \/ (~(VARLOGINDI \in DOMAIN log[VARI] /\ log[VARI][VARLOGINDI] = currentTerm[VARJ])) \/ (~((state[VARJ] = Leader)))
+AInv1902_404d_R0_0_I2 == \A VARI \in Server : \A VARJ \in Server : ~((state[VARI] = Leader /\ VARI # VARJ /\ currentTerm[VARI] = currentTerm[VARJ])) \/ (~((state[VARJ] = Leader)))
+AInv8752_9532 == \A VARI \in Server : \A VARJ \in Server : \A VARLOGINDI \in LogIndices : (IsPrefix(log[VARI], log[VARJ])) \/ (~(VARLOGINDI \in DOMAIN log[VARI] /\ log[VARI][VARLOGINDI] = currentTerm[VARJ])) \/ (~((state[VARJ] = Leader)))
+
+
+
+AInv63_bf9f_R0_0_I2 == \A VARI \in Server : \A VARLOGINDI \in LogIndices : ~(VARLOGINDI \in DOMAIN log[VARI] /\ log[VARI][VARLOGINDI] > currentTerm[VARI])
+AInv1646_f408_R0_0_I2 == \A VARI \in Server : \A VARLOGINDI \in LogIndices : ~((state[VARI] = Candidate)) \/ (~(VARLOGINDI \in DOMAIN log[VARI] /\ log[VARI][VARLOGINDI] = currentTerm[VARI]))
+AInv6602_a71c_R0_0_I2 == \A VARI \in Server : \A VARJ \in Server : \A VARLOGINDI \in LogIndices : (VARLOGINDI \in DOMAIN log[VARI] /\ VARLOGINDI \in DOMAIN log[VARJ] /\ log[VARI][VARLOGINDI] = log[VARJ][VARLOGINDI]) \/ (~((state[VARJ] = Leader))) \/ (~(VARLOGINDI \in DOMAIN log[VARI] /\ log[VARI][VARLOGINDI] = currentTerm[VARJ]))
+AInv1685_404d_R0_0_I2 == \A VARI \in Server : \A VARJ \in Server : ~((state[VARI] = Leader /\ VARI # VARJ /\ currentTerm[VARI] = currentTerm[VARJ])) \/ (~((state[VARJ] = Leader)))
+AInv9737_e8d2_R0_0_I2 == \A VARI \in Server : \A VARJ \in Server : ~((state[VARI] = Leader /\ VARI # VARJ /\ currentTerm[VARI] = currentTerm[VARJ])) \/ (~(\E INDK \in DOMAIN log[VARJ] : log[VARJ][INDK] = currentTerm[VARI]) \/ (~(\E INDK \in DOMAIN log[VARJ] : ~\E INDI \in DOMAIN log[VARI] : (INDI = INDK /\ log[VARI][INDK] = log[VARJ][INDK]))))
+
+
+AInv7_2c32_R3_0_I2 == 
+    \A VARI \in Server : 
+    \A VARJ \in Server : 
+       ((currentTerm[VARI] <= currentTerm[VARJ])) \/ (~((state[VARI] \in {Leader,Candidate} /\ VARJ \in votesGranted[VARI])))
 
 ===============================================================================
