@@ -37,7 +37,7 @@ wait
 
 # Check for existence of "AsyncRaft" in bms.
 if [[ $bms == *"AsyncRaft"* ]]; then
-    for tag in "OnePrimaryPerTerm" "PrimaryHasEntriesItCreated" "OnePrimaryPerTerm_broken"
+    for tag in "OnePrimaryPerTerm" "PrimaryHasEntriesItCreated" "OnePrimaryPerTerm_broken" "LogMatching"
     do
         for seed in 1 2 3 4 5 6 7 8
         do
