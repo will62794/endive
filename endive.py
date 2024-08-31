@@ -4328,7 +4328,7 @@ class InductiveInvGen():
                 cobjs = self.get_ctigen_constant_instances()
                 k_ctis_action = []
                 print(k_cti_action)
-                if self.action_filter is not None and k_cti_action in self.action_filter:
+                if (self.action_filter is None) or (self.action_filter is not None and k_cti_action in self.action_filter):
                     for cobj in cobjs:
                         k_ctis_action_new, k_cti_traces = self.generate_ctis(props=[curr_obligation_pred_tup], 
                                                                         specname_tag=curr_obligation, actions=[k_cti_action], 
