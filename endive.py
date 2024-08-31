@@ -1034,6 +1034,9 @@ class InductiveInvGen():
                 if curr_line >= len(lines):
                     break
 
+            if curr_line >= len(lines):
+                break
+
             # Parse invariant name of next CTI trace.
             res = re.match("Error: Invariant (.*) is violated",lines[curr_line])
             inv_name = res.group(1).replace("_Constraint", "")
@@ -4930,13 +4933,15 @@ class InductiveInvGen():
                 color = "black"
                 fillcolor = "white"
                 coi = ""
-                shape = "ellipse"
+                shape = "rect"
                 fontsize="20pt"
                 penwidth="1"
                 lightgreen="#90EE90"
+                rounded=""
                 if n in self.proof_graph["nodes"]:
                     num_ctis_left = 0
                     node = self.proof_graph["nodes"][n]
+                    rounded=""
                     if "is_action" in node:
                         nlabel = n.split("_")[-1].replace("Action", "") # just show the action name.
                         label = nlabel
@@ -4997,9 +5002,10 @@ class InductiveInvGen():
                         if "failed" in node:
                             # color = "red"
                             fillcolor = "salmon"
+                        rounded=",rounded"
                 else:
                     label = n
-                dot.node(n, fillcolor=fillcolor, style="filled", color=color, label=label, shape=shape, fontsize=fontsize, penwidth=penwidth)
+                dot.node(n, fillcolor=fillcolor, style="filled"+rounded, color=color, label=label, shape=shape, fontsize=fontsize, penwidth=penwidth)
 
         for e in self.proof_graph["edges"]:
             dot.edge(e[0], e[1])
