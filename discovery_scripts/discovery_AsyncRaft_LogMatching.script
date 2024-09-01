@@ -9,14 +9,12 @@
 
 specname="AsyncRaft"
 
-ninvs_per_iter_group=50000
-
 # All optimizations.
 seed=$SLURM_ARRAY_TASK_ID
 source /home/schultz.w/bm_setup.sh "${specname}_LogMatching_${seed}"
 srun -o /scratch/schultz.w/endive_logs/${specname}_LogMatching/${specname}_LogMatching_output_${seed}.txt \
     python3 endive.py --spec benchmarks/$specname \
-    $common_flags --seed $seed --proof_tree_mode --auto_lemma_action_decomposition --enable_partitioned_state_caching --ninvs_per_iter_group $ninvs_per_iter_group \
+    $common_flags --seed $seed --proof_tree_mode --auto_lemma_action_decomposition --enable_partitioned_state_caching \
     --safety "H_LogMatching"
 
 

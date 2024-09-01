@@ -41,20 +41,24 @@ rm -rf benchmarks/states
 #
 
 tlc_workers=24
-num_ctigen_workers=16
+num_ctigen_workers=20
 cti_elimination_workers=1
 
 nrounds=45
-ninvs=200000
-max_num_ctis_per_round=500
+ninvs=500000
+max_num_ctis_per_round=2000
+ninvs_per_iter_group=80000
 target_sample_states=200000
+target_sample_time_limit_ms=150000
 num_simulate_traces=200000
 niters=5
+tlapm_install="/home/schultz.w/tlapm_install"
 
 common_flags=" --tlc_workers $tlc_workers --num_ctigen_workers $num_ctigen_workers --cti_elimination_workers=$cti_elimination_workers"
-common_flags+=" --debug --target_sample_time_limit_ms 10000 --num_simulate_traces $num_simulate_traces --target_sample_states $target_sample_states"
+common_flags+=" --debug --target_sample_time_limit_ms $target_sample_time_limit_ms --num_simulate_traces $num_simulate_traces --target_sample_states $target_sample_states"
 common_flags+=" --opt_quant_minimize --k_cti_induction_depth 1"
-common_flags+=" --ninvs $ninvs --max_num_ctis_per_round $max_num_ctis_per_round"
+common_flags+=" --ninvs $ninvs --max_num_ctis_per_round $max_num_ctis_per_round --ninvs_per_iter_group $ninvs_per_iter_group"
 common_flags+=" --save_dot --max_num_conjuncts_per_round 20 --niters $niters --nrounds $nrounds"
+common_flags+=" --tlapm_install $tlapm_install"
 
 time_limit_large="08:00:00"
