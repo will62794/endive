@@ -75,12 +75,13 @@
     },
     "preds_alt" : [],
     "safety"  :  "RConsistentInvariant",
+    "large_instance_inv_check_index": 1,
+    "cti_gen_instance_indexes": [0,1],
     "constants"  : {
         "R_NODES" : ["{33,44,55}", "{33,44,55,66}"],
         "R_MAX_VERSION" : ["4"],
         "R_MAX_EPOCH" : ["4"]
     },
-    "large_instance_inv_check_index": 1,
     "actions": [],
     "constraint"  :  "",
     "quant_inv"  :  "\\A VARI \\in rAliveNodes : \\A VARJ \\in rAliveNodes : \\A VARMVAL \\in rMsgsVAL : \\A VARMACK \\in rMsgsACK : \\A VARMINV \\in rMsgsINV : ",
