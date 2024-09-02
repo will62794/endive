@@ -94,8 +94,9 @@
     ],
     "preds_alt" : [],
     "safety"  :  "H_MutualExclusion",
+    "cti_gen_instance_indexes": [0],
     "constants"  : {
-        "N": ["1", "2", "3"],
+        "N": ["3"],
         "Nats": ["{0,1,2,3}"]
     },
     "actions": [
@@ -110,7 +111,7 @@
         "exitAction"
     ],
     "simulation_inv_check": true,
-    "simulation_inv_check_num_states": 3000000,
+    "simulation_inv_check_num_states": 12000000,
     "simulation_inv_check_depth": 60,
     "constraint"  :  "StateConstraint",
     "quant_inv"  :  "\\A VARI \\in Procs : \\A VARJ \\in Procs : ",
