@@ -98,8 +98,10 @@
     },
     "preds_alt" : [],
     "safety"  :  "H_MutualExclusion",
+    "large_instance_inv_check_index": 1,
+    "cti_gen_instance_indexes": [0,1],
     "constants"  : {
-        "N": ["1", "2", "3"],
+        "N": ["2", "3"],
         "Nat": ["{0,1,2,3}"]
     },
     "actions": [
