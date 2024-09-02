@@ -47,8 +47,7 @@
 (* by initializing the variables to arbitrarily chosen type-correct        *)
 (* values.                                                                 *)
 (***************************************************************************)
-EXTENDS Naturals, TLC
-
+EXTENDS Naturals, TLC, FiniteSets
 (***************************************************************************)
 (* We first declare N to be the number of processes, and we assume that N  *)
 (* is a natural number.                                                    *)
