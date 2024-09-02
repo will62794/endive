@@ -2806,7 +2806,9 @@ class InductiveInvGen():
             cti_states_eliminated_by_invs = {}
             for cti_constants_obj in self.get_ctigen_constant_instances():
                 k_ctis_loc = [c for c in orig_k_ctis if c.constants_obj == cti_constants_obj]
-                ret = self.check_cti_elimination([c for c in k_ctis_loc if str(hash(c)) not in eliminated_ctis], invs, [f"Inv{i}" for i in range(len(invs))], constants_obj=cti_constants_obj)
+                # ret = self.check_cti_elimination([c for c in k_ctis_loc if str(hash(c)) not in eliminated_ctis], invs, [f"Inv{i}" for i in range(len(invs))], constants_obj=cti_constants_obj)
+                #  Re-check overall CTI elimination for all candidates.
+                ret = self.check_cti_elimination([c for c in k_ctis_loc], invs, [f"Inv{i}" for i in range(len(invs))], constants_obj=cti_constants_obj)
 
                 for inv in ret["eliminated"]:
                     if inv not in cti_states_eliminated_by_invs:
@@ -2887,7 +2889,7 @@ class InductiveInvGen():
 
                         preds_in_cand = [p for p in preds if p in invexp]
                         # print("Set of predicates appearing in invexp:", preds_in_cand)
-                        print(f"({ind}) Num CTIs eliminated by {iv}:", len(new_ctis_eliminated_by_inv), "|", invexp, f"- (preds={preds_in_cand})")
+                        print(f"({ind}) Num new CTIs eliminated by {iv}:", len(new_ctis_eliminated_by_inv), ",total:",len(cti_states_eliminated_by_invs[iv]),  "|", invexp, f"- (preds={preds_in_cand})")
                         preds_in_top_cands.update(preds_in_cand)
                     preds_in_top_cands_agg.update(preds_in_top_cands)
                     if len(preds_in_top_cands) > 0:
