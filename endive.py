@@ -2023,11 +2023,19 @@ class InductiveInvGen():
         # check which subsets of vars are already in the cache.
         # if tuple(sorted(cache_states_with_ignored_vars)) not in self.state_projection_cache:
             logging.info(f"Computing {len(cache_states_with_ignored_var_sets_new)}/{len(cache_states_with_ignored_var_sets)} slices based on current cache.")
-            self.check_invariants([dummy_inv], tlc_workers=tlc_workers, max_depth=max_depth, 
-                                            cache_with_ignored=cache_states_with_ignored_var_sets_new, skip_checking=True,
+            # Limit number of subsets to cache at once to avoid overwhelming TLC memory.
+            MAX_NUM_SUBSETS = 5
+            cache_states_with_ignored_var_sets_curr = list(cache_states_with_ignored_var_sets_new)
+            while len(cache_states_with_ignored_var_sets_curr) > 0:
+                subsets_chunk = cache_states_with_ignored_var_sets_curr[:MAX_NUM_SUBSETS]
+                cache_states_with_ignored_var_sets_curr = cache_states_with_ignored_var_sets_curr[MAX_NUM_SUBSETS:]
+                logging.info(f"Computing {len(subsets_chunk)} slices in chunk ({len(cache_states_with_ignored_var_sets_curr)} remaining slices to compute).")
+                self.check_invariants([dummy_inv], tlc_workers=tlc_workers, max_depth=max_depth, 
+                                            cache_with_ignored=subsets_chunk, skip_checking=True,
                                             tlc_flags=simulation_inv_tlc_flags)
 
             if self.memoize_state_projection_caches:
+                # Mark all computed chunks as cached.
                 for c in cache_states_with_ignored_var_sets_new:
                     self.state_projection_cache[c] = True
         # else:
@@ -2549,14 +2557,17 @@ class InductiveInvGen():
                             predvar_set = p[1]
                             ignored = tuple(sorted([svar for svar in self.state_vars if svar not in predvar_set]))
                             ignored_var_subsets.append(ignored)
+
                         # print(ignored_var_subsets)
                         # Limit number of subsets to cache at once to avoid overwhelming TLC memory.
-                        MAX_NUM_SUBSETS = 5
-                        ignored_var_subsets_remaining = list(ignored_var_subsets)
-                        while len(ignored_var_subsets_remaining) > 0:
-                            subsets_chunk = ignored_var_subsets_remaining[:MAX_NUM_SUBSETS]
-                            self.cache_projected_states(subsets_chunk, max_depth=max_depth, tlc_workers=tlc_workers)
-                            ignored_var_subsets_remaining = ignored_var_subsets_remaining[MAX_NUM_SUBSETS:]
+                        # MAX_NUM_SUBSETS = 25
+                        # ignored_var_subsets_remaining = list(ignored_var_subsets)
+                        # while len(ignored_var_subsets_remaining) > 0:
+                            # subsets_chunk = ignored_var_subsets_remaining[:MAX_NUM_SUBSETS]
+                            # self.cache_projected_states(subsets_chunk, max_depth=max_depth, tlc_workers=tlc_workers)
+                            # ignored_var_subsets_remaining = ignored_var_subsets_remaining[MAX_NUM_SUBSETS:]
+                        
+                        self.cache_projected_states(list(ignored_var_subsets), max_depth=max_depth, tlc_workers=tlc_workers)
 
                         """
                         for p in pred_var_counts_tups[:]:
