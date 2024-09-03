@@ -164,8 +164,7 @@
         "AppendEntriesRequest" : "AppendEntriesRequest",
         "AppendEntriesResponse" : "AppendEntriesResponse",
         "MaxTerm" : ["3"],
-        "MaxLogLen" : ["2"],
-        "MaxNumVoteMsgs": ["0"]
+        "MaxLogLen" : ["2"]
     },
     "large_instance_inv_check_index": 1,
     "cti_gen_instance_indexes": [0,1],
@@ -173,9 +172,8 @@
     "quant_inv": "\\A VARI \\in Server : \\A VARJ \\in Server : \\E VARQ \\in Quorum : \\A VARM \\in appendEntriesRequestMsgs : \\A VARMAERES \\in appendEntriesResponseMsgs : \\A VARREQVM \\in requestVoteRequestMsgs : \\A VARREQVRES \\in requestVoteResponseMsgs : \\A VARLOGINDI \\in LogIndices : ",
     "quant_vars": ["VARI", "VARJ", "VARIND", "VARM", "VARLOGINDI"],
     "model_consts"  :  "CONSTANT n1,n2,n3,n4,n5",
-    "max_tlc_inv_depth": 23,
-    "simulation_inv_check": true,
-    "simulation_inv_check_num_states": 100000000,
+    "simulation_inv_check": false,
+    "simulation_inv_check_num_states": 40000000,
     "simulation_inv_check_depth": 70,
     "symmetry" : true,
     "typeok"  :  "TypeOKRandom",
