@@ -1127,6 +1127,7 @@ class InductiveInvGen():
                                         pre_props=None,
                                         specname_tag=None,
                                         ignore_vars=None,
+                                        continue_max_num=None,
                                         nworkers=1):
         """ Starts a single instance of TLC to generate CTIs.
         
@@ -1322,9 +1323,13 @@ class InductiveInvGen():
         ignore_vars_arg = ""
         if ignore_vars is not None:
             ignore_vars_arg = f"-cacheStatesIgnoreVars {','.join(sorted(ignore_vars))}"
+
+        continue_flag = "-continue"
+        # if continue_max_num:
+            # continue_flag += f" max_num={continue_max_num}"
         
-        args = (dirpath, sampling_args, TLC_JAR, ignore_vars_arg, mc.TLC_MAX_SET_SIZE, simulate_flag, simulate_depth, ctiseed, tag, nworkers, indcheckcfgfilename(action), indchecktlafilename)
-        cmd = self.java_exe + ' -Xss16M -Djava.io.tmpdir="%s" %s -cp %s tlc2.TLC %s -maxSetSize %d %s -depth %d -seed %d -noGenerateSpecTE -metadir states/indcheckrandom_%s -continue -deadlock -workers %d -config %s %s' % args
+        args = (dirpath, sampling_args, TLC_JAR, ignore_vars_arg, mc.TLC_MAX_SET_SIZE, simulate_flag, simulate_depth, ctiseed, tag, continue_flag, nworkers, indcheckcfgfilename(action), indchecktlafilename)
+        cmd = self.java_exe + ' -Xss16M -Djava.io.tmpdir="%s" %s -cp %s tlc2.TLC %s -maxSetSize %d %s -depth %d -seed %d -noGenerateSpecTE -metadir states/indcheckrandom_%s %s -deadlock -workers %d -config %s %s' % args
         logging.debug("TLC command: " + cmd)
         workdir = None
         if self.specdir != "":
@@ -1448,10 +1453,11 @@ class InductiveInvGen():
                                             typeok=typeok_override,
                                             constants_obj=constants_obj,
                                             sampling_target_num_init_states=self.target_sample_states // num_cti_worker_procs,
-                                            sampling_target_time_limit_ms=int((self.target_sample_time_limit_ms // num_cti_worker_procs) * 2.5),
+                                            sampling_target_time_limit_ms=int((self.target_sample_time_limit_ms // num_cti_worker_procs) * 1.5),
                                             defs_to_add=defs_to_add,
                                             pre_props=pre_props,
                                             specname_tag=specname_tag,
+                                            continue_max_num=self.MAX_NUM_CTIS_PER_ROUND,
                                             ignore_vars=ignore_vars)
                         
                         proc_obj = {"action": action, "proc": cti_subproc}
