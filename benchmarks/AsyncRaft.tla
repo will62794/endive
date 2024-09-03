@@ -788,6 +788,12 @@ CommittedEntriesReachMajority ==
 StateConstraint == 
     /\ \A s \in Server : currentTerm[s] <= MaxTerm
     /\ \A s \in Server : Len(log[s]) <= MaxLogLen
+    /\ Cardinality(requestVoteRequestMsgs) <= Cardinality(Server) + 2
+    /\ Cardinality(requestVoteResponseMsgs) <= Cardinality(Server) + 2
+    /\ Cardinality(appendEntriesRequestMsgs) <= Cardinality(Server) + 2
+    /\ Cardinality(appendEntriesResponseMsgs) <= Cardinality(Server) + 2
+
+Bait == Cardinality(requestVoteRequestMsgs) < 8
 
 \**************
 \* Helper lemmas.
@@ -1873,7 +1879,6 @@ AInv8752_9532 == \A VARI \in Server : \A VARJ \in Server : \A VARLOGINDI \in Log
 
 
 
-AInv63_bf9f_R0_0_I2 == \A VARI \in Server : \A VARLOGINDI \in LogIndices : ~(VARLOGINDI \in DOMAIN log[VARI] /\ log[VARI][VARLOGINDI] > currentTerm[VARI])
 AInv1646_f408_R0_0_I2 == \A VARI \in Server : \A VARLOGINDI \in LogIndices : ~((state[VARI] = Candidate)) \/ (~(VARLOGINDI \in DOMAIN log[VARI] /\ log[VARI][VARLOGINDI] = currentTerm[VARI]))
 AInv6602_a71c_R0_0_I2 == \A VARI \in Server : \A VARJ \in Server : \A VARLOGINDI \in LogIndices : (VARLOGINDI \in DOMAIN log[VARI] /\ VARLOGINDI \in DOMAIN log[VARJ] /\ log[VARI][VARLOGINDI] = log[VARJ][VARLOGINDI]) \/ (~((state[VARJ] = Leader))) \/ (~(VARLOGINDI \in DOMAIN log[VARI] /\ log[VARI][VARLOGINDI] = currentTerm[VARJ]))
 AInv1685_404d_R0_0_I2 == \A VARI \in Server : \A VARJ \in Server : ~((state[VARI] = Leader /\ VARI # VARJ /\ currentTerm[VARI] = currentTerm[VARJ])) \/ (~((state[VARJ] = Leader)))
@@ -1884,5 +1889,50 @@ AInv7_2c32_R3_0_I2 ==
     \A VARI \in Server : 
     \A VARJ \in Server : 
        ((currentTerm[VARI] <= currentTerm[VARJ])) \/ (~((state[VARI] \in {Leader,Candidate} /\ VARJ \in votesGranted[VARI])))
+
+
+
+-----------------------
+
+\* Candidate in term doesn't have log entry in term.
+AInv1646_f408 == 
+    \A VARI \in Server : 
+    \A VARLOGINDI \in LogIndices : 
+        ~((state[VARI] = Candidate)) \/ (~(VARLOGINDI \in DOMAIN log[VARI] /\ log[VARI][VARLOGINDI] = currentTerm[VARI]))
+
+\* One primary per term.
+AInv1685_404d == 
+    \A VARI \in Server : 
+    \A VARJ \in Server : 
+        ~((state[VARI] = Leader /\ VARI # VARJ /\ currentTerm[VARI] = currentTerm[VARJ])) \/ (~((state[VARJ] = Leader)))
+
+\* Another log can't have entry in term of leader if leader doesn't have it too.
+AInv22294_f055_R0_0_I2 == 
+    \A VARI \in Server : 
+    \A VARJ \in Server : 
+    \A VARLOGINDI \in LogIndices : 
+        (~(VARLOGINDI \in DOMAIN log[VARJ]) /\ ((((state[VARJ] = Leader)))) => (~(VARLOGINDI \in DOMAIN log[VARI] /\ log[VARI][VARLOGINDI] = currentTerm[VARJ])))
+
+\* Term of log entries is <= current term.
+AInv63_bf9f_R0_0_I2 == 
+    \A VARI \in Server : 
+    \A VARLOGINDI \in LogIndices : 
+        ~(VARLOGINDI \in DOMAIN log[VARI] /\ log[VARI][VARLOGINDI] > currentTerm[VARI])
+
+
+
+
+
+
+
+
+
+
+
+AInv30505_a1a3 == 
+    \A VARI \in Server : 
+    \A VARJ \in Server : 
+        (((state[VARI] = Candidate /\ VARI # VARJ)) /\ ((GrantedVoteSet(VARI) \in Quorum))) => (~(\E INDK \in DOMAIN log[VARJ] : log[VARJ][INDK] = currentTerm[VARI])) 
+
 
 ===============================================================================
