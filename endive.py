@@ -2825,7 +2825,8 @@ class InductiveInvGen():
                 k_ctis_loc = [c for c in orig_k_ctis if c.constants_obj == cti_constants_obj]
                 # ret = self.check_cti_elimination([c for c in k_ctis_loc if str(hash(c)) not in eliminated_ctis], invs, [f"Inv{i}" for i in range(len(invs))], constants_obj=cti_constants_obj)
                 #  Re-check overall CTI elimination for all candidates.
-                ret = self.check_cti_elimination([c for c in k_ctis_loc], invs, [f"Inv{i}" for i in range(len(invs))], constants_obj=cti_constants_obj)
+                # ret = self.check_cti_elimination([c for c in k_ctis_loc], invs, [f"Inv{i}" for i in range(len(invs))], constants_obj=cti_constants_obj)
+                ret = self.check_cti_elimination([c for c in k_ctis_loc], invs, sat_invs, constants_obj=cti_constants_obj)
 
                 for inv in ret["eliminated"]:
                     if inv not in cti_states_eliminated_by_invs:
