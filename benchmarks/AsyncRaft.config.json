@@ -172,7 +172,7 @@
     "quant_inv": "\\A VARI \\in Server : \\A VARJ \\in Server : \\E VARQ \\in Quorum : \\A VARM \\in appendEntriesRequestMsgs : \\A VARMAERES \\in appendEntriesResponseMsgs : \\A VARREQVM \\in requestVoteRequestMsgs : \\A VARREQVRES \\in requestVoteResponseMsgs : \\A VARLOGINDI \\in LogIndices : ",
     "quant_vars": ["VARI", "VARJ", "VARIND", "VARM", "VARLOGINDI"],
     "model_consts"  :  "CONSTANT n1,n2,n3,n4,n5",
-    "simulation_inv_check": false,
+    "simulation_inv_check": true,
     "simulation_inv_check_num_states": 40000000,
     "simulation_inv_check_depth": 70,
     "symmetry" : true,

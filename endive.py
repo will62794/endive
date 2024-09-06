@@ -2638,6 +2638,10 @@ class InductiveInvGen():
                             all_invs_to_check += invs_to_check
                             inv_group_counts.append(len(invs_to_check))
 
+                            # These no longer need to be checked.
+                            invs_to_check_names = set([iv[1] for iv in invs_to_check])
+                            main_invs_to_check = [mi for mi in main_invs_to_check if mi[1] not in invs_to_check_names]
+
 
                         # Check ALL invariants at once, each pred var batch at a time.
                         # local_sat_invs will return indices of invariants that were satisfied in the given 'all_invs_to_check' array.
@@ -2646,15 +2650,18 @@ class InductiveInvGen():
                                                                 max_depth=max_depth, 
                                                                 cache_with_ignored=ignored_var_sets, 
                                                                 cache_with_ignore_inv_counts=inv_group_counts,
-                                                                cache_state_load=True)     
-                        local_invs_sat = [m for (mind,m) in enumerate(all_invs_to_check) if f"Inv{mind}" in local_sat_invs]
-                        partition_sat_invs.update(set([f"Inv{iv[0]}" for iv in local_invs_sat]))
+                                                                cache_state_load=True) 
+                        print(local_sat_invs)
+                        # The returned set will index into invariants in 'all_invs_to_check'. 
+                        orig_invs_sat_indices = [all_invs_to_check[int(s.replace("Inv",""))][0] for s in local_sat_invs]
+                         
+                        # local_invs_sat = [m for (mind,m) in enumerate(all_invs_to_check) if f"Inv{mind}" in local_sat_invs]
+                        partition_sat_invs.update(set([f"Inv{idx}" for idx in orig_invs_sat_indices]))
 
 
                         logging.info(f"Found {len(partition_sat_invs)} partitioned sat invs")
 
-                    # Check all candidate invariants.
-                    logging.info("Checking main invariant candidate group.")
+
                         
                     # Use cached states if specified.
                     cache_load = False
@@ -2662,6 +2669,8 @@ class InductiveInvGen():
                         cache_load = True
 
                     if len(main_invs_to_check) > 0:
+                        # Check all candidate invariants.
+                        logging.info("Checking main invariant candidate group.")
                         # If we are not caching, then use simulation for checking invariants here, if specified.
                         tlc_flags = "" 
                         if "simulation_inv_check" in self.spec_config and self.spec_config["simulation_inv_check"] and not cache_load:
@@ -2925,6 +2934,18 @@ class InductiveInvGen():
                 # # No caching here.
                 # if "simulation_inv_check" in self.spec_config and self.spec_config["simulation_inv_check"] and "large_instance_inv_check_index" in self.spec_config:
                 if "large_instance_inv_check_index" in self.spec_config and len(new_inv_cands) > 0:
+                    logging.info("+ Doing re-checking at extra parameter bound")
+                    extra_constants_obj = list(self.get_config_constant_instances())[0]
+                    logging.info(f"config instance obj: {extra_constants_obj}")
+                    local_invs_to_check = [invs[invi]]
+                    new_sat_invs = self.check_invariants(local_invs_to_check, 
+                                                        tlc_workers=tlc_workers, max_depth=13,constants_obj=extra_constants_obj)
+                    if len(new_sat_invs) == 0:
+                        print("!!!!! ERROR: Some new conjuncts violated at extra bound.")
+                        # new_inv_cands.remove(top_new_inv_cand)
+                        sorted_invs.remove(top_new_inv_cand)
+                        continue
+
                     logging.info("+ Doing re-checking at larger parameter bound")
                     depth = self.spec_config.get("simulation_inv_check_depth", 50)
                     num_states = 100000 # Make this relatively cheap.
@@ -4662,9 +4683,9 @@ class InductiveInvGen():
 
                     # Only mark this node as failed if all its action nodes are failed.
                     supports = self.proof_graph_get_my_action_nodes(curr_obligation)
-                    if all(["failed" in self.proof_graph["nodes"][s] and self.proof_graph["nodes"][s]["failed"] for s in supports]):
-                        self.proof_graph["nodes"][curr_obligation]["failed"] = True
-                        break
+                    # if all(["failed" in self.proof_graph["nodes"][s] and self.proof_graph["nodes"][s]["failed"] for s in supports]):
+                    #     self.proof_graph["nodes"][curr_obligation]["failed"] = True
+                    #     break
 
                     # Only mark a lemma node as failed if all of its action nodes are failed too.
                     # supports = self.proof_graph_get_support_nodes(curr_obligation)
@@ -5541,7 +5562,6 @@ if __name__ == "__main__":
     logging.info("Total number of invariants generated: %d", indgen.get_total_num_invs_generated())
     logging.info("Total number of invariants checked: %d", indgen.get_total_num_invs_checked())
     logging.info("CTI generation duration: %f secs.", indgen.get_ctigen_duration())
-    logging.info("State caching duration: %f secs.", indgen.get_state_cache_duration())
     if indgen.proof_tree_mode:
         logging.info("Re-parsing duration: %f secs.", indgen.reparsing_duration_secs)
     logging.info("State caching duration: %f secs.", indgen.get_state_cache_duration())

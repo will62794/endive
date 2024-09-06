@@ -353,11 +353,11 @@ HandleRequestVoteRequest(m) ==
     /\ m.mterm <= currentTerm[m.mdest]
     /\ LET  i     == m.mdest
             j     == m.msource
-            \* logOk == \/ m.mlastLogTerm > LastTerm(log[i])
-            \*          \/ /\ m.mlastLogTerm = LastTerm(log[i])
-            \*             /\ m.mlastLogIndex >= Len(log[i])
+            logOk == \/ m.mlastLogTerm > LastTerm(log[i])
+                     \/ /\ m.mlastLogTerm = LastTerm(log[i])
+                        /\ m.mlastLogIndex >= Len(log[i])
             grant == /\ m.mterm = currentTerm[i]
-                    \*  /\ logOk
+                     /\ logOk
                      /\ votedFor[i] \in {Nil, j} 
                      IN
             /\ votedFor' = [votedFor EXCEPT ![i] = IF grant THEN j ELSE votedFor[i]]
@@ -367,7 +367,8 @@ HandleRequestVoteRequest(m) ==
                             mvoteGranted |-> grant,
                             msource      |-> i,
                             mdest        |-> j]}
-            /\ UNCHANGED <<state, currentTerm, votesGranted, nextIndex, matchIndex, log, commitIndex, appendEntriesRequestMsgs, appendEntriesResponseMsgs, requestVoteRequestMsgs>>
+            /\ requestVoteRequestMsgs' = requestVoteRequestMsgs \ {m} \* discard the message.
+            /\ UNCHANGED <<state, currentTerm, votesGranted, nextIndex, matchIndex, log, commitIndex, appendEntriesRequestMsgs, appendEntriesResponseMsgs>>
 
 \* ACTION: HandleRequestVoteResponse --------------------------------
 \* Server i receives a RequestVote response from server j with
@@ -788,10 +789,10 @@ CommittedEntriesReachMajority ==
 StateConstraint == 
     /\ \A s \in Server : currentTerm[s] <= MaxTerm
     /\ \A s \in Server : Len(log[s]) <= MaxLogLen
-    /\ Cardinality(requestVoteRequestMsgs) <= Cardinality(Server) + 2
-    /\ Cardinality(requestVoteResponseMsgs) <= Cardinality(Server) + 2
-    /\ Cardinality(appendEntriesRequestMsgs) <= Cardinality(Server) + 2
-    /\ Cardinality(appendEntriesResponseMsgs) <= Cardinality(Server) + 2
+    \* /\ Cardinality(requestVoteRequestMsgs) <= Cardinality(Server) + 1 
+    \* /\ Cardinality(requestVoteResponseMsgs) <= Cardinality(Server) + 1
+    \* /\ Cardinality(appendEntriesRequestMsgs) <= Cardinality(Server) + 1
+    \* /\ Cardinality(appendEntriesResponseMsgs) <= Cardinality(Server) + 1
 
 Bait == Cardinality(requestVoteRequestMsgs) < 8
 
