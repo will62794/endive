@@ -48,6 +48,8 @@
         "VARI \\in votesGranted[VARREQVRES.mdest]",
         "VARI \\in votesGranted[VARREQVRES.msource]",
         "VARJ \\in votesGranted[VARREQVRES.mdest]",
+        "votedFor[VARI] # Nil",
+        "votedFor[VARJ] # Nil",
         "votedFor[VARI] = VARI",
         "votedFor[VARJ] = VARJ",
         "votedFor[VARI] = VARJ",
@@ -62,6 +64,8 @@
         "VARI \\in VARQ /\\ currentTerm = currentTerm",
         "VARJ \\in VARQ /\\ currentTerm = currentTerm",
         "VARREQVM.mterm = currentTerm[VARI]",
+        "VARREQVM.mterm > currentTerm[VARI]",
+        "VARREQVM.mterm = currentTerm[VARJ]",
         "VARREQVM.msource = VARI",
         "VARREQVM.msource = VARJ",
         "\\E INDK \\in DOMAIN log[VARJ] : log[VARJ][INDK] = currentTerm[VARI]",
@@ -72,6 +76,7 @@
         "state[VARREQVM.msource] = Candidate",
         "state[VARREQVM.mdest] = Candidate",
         "state[VARREQVM.mdest] = Candidate",
+        "votedFor[VARREQVM.msource] # Nil",
         "votedFor[VARREQVM.msource] = VARREQVM.msource",
         "votedFor[VARREQVM.msource] = VARREQVM.mdest",
         "commitIndex[VARI] > VARM.mcommitIndex",
@@ -110,7 +115,8 @@
         "VARMAERES.mterm > currentTerm[VARMAERES.msource]",
         "VARMAERES.mterm = currentTerm[VARI]",
         "matchIndex[VARI][VARJ] = VARMAERES.mmatchIndex",
-        "VARMAERES.msuccess"
+        "VARMAERES.msuccess",
+        "H_LogEntryInTermImpliesSafeAtTerm /\\ currentTerm = currentTerm /\\ state = state /\\ log = log /\\ votedFor = votedFor"
     ],
     "action_local_preds":{
         "BecomeLeaderAction": [
