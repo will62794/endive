@@ -824,7 +824,8 @@ H_QuorumsSafeAtTerms ==
         (\E Q \in Quorum : 
          \A t \in Q : 
             /\ currentTerm[t] >= currentTerm[s]
-            /\ (currentTerm[t] = currentTerm[s]) => votedFor[t] = s)
+            /\ (currentTerm[t] = currentTerm[s]) => votedFor[t] = s
+            /\ (currentTerm[t] = currentTerm[s] /\ s # t) => state[t] # Leader)
 
 \* If two nodes are in the same term, then their votes granted
 \* sets cannot have intersecting voters.
