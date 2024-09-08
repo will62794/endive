@@ -46,8 +46,8 @@ cti_elimination_workers=1
 
 nrounds=45
 ninvs=500000
-max_num_ctis_per_round=1000
-ninvs_per_iter_group=80000
+max_num_ctis_per_round=800
+ninvs_per_iter_group=25000
 target_sample_states=200000
 target_sample_time_limit_ms=150000
 num_simulate_traces=200000
