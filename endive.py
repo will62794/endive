@@ -2905,7 +2905,7 @@ class InductiveInvGen():
                     top_num_eliminated = len(cti_states_eliminated_by_invs[new_inv_cands[0]] - ctis_eliminated_this_iter)
                     all_top_equiv_k = [civ for civ in new_inv_cands if len(cti_states_eliminated_by_invs[civ] - ctis_eliminated_this_iter) == top_num_eliminated]
                     # for ind,iv in enumerate(new_inv_cands[:top_k]):
-                    all_top_equiv_k = all_top_equiv_k[:3]
+                    all_top_equiv_k = all_top_equiv_k[:1]
                     for ind,iv in enumerate(all_top_equiv_k):
                         # Don't consider invariants that don't eliminate any CTIs.
                         new_ctis_eliminated_by_inv = cti_states_eliminated_by_invs[iv] - ctis_eliminated_this_iter
