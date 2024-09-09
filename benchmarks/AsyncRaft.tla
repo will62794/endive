@@ -594,6 +594,9 @@ CONSTANT
 CONSTANT 
     \* @type: Int;
     MaxLogLen
+CONSTANT 
+    \* @type: Int;
+    MaxMsgCount
 
 Terms == 0..MaxTerm
 LogIndices == 1..MaxLogLen
@@ -789,12 +792,12 @@ CommittedEntriesReachMajority ==
 StateConstraint == 
     /\ \A s \in Server : currentTerm[s] <= MaxTerm
     /\ \A s \in Server : Len(log[s]) <= MaxLogLen
-    \* /\ Cardinality(requestVoteRequestMsgs) <= Cardinality(Server) + 1 
-    \* /\ Cardinality(requestVoteResponseMsgs) <= Cardinality(Server) + 1
-    \* /\ Cardinality(appendEntriesRequestMsgs) <= Cardinality(Server) + 1
-    \* /\ Cardinality(appendEntriesResponseMsgs) <= Cardinality(Server) + 1
+    /\ Cardinality(requestVoteRequestMsgs) <= MaxMsgCount
+    /\ Cardinality(requestVoteResponseMsgs) <= MaxMsgCount
+    /\ Cardinality(appendEntriesRequestMsgs) <= MaxMsgCount
+    /\ Cardinality(appendEntriesResponseMsgs) <= MaxMsgCount
 
-Bait == Cardinality(requestVoteRequestMsgs) < 8
+Bait == Cardinality(requestVoteResponseMsgs) < 10
 
 \**************
 \* Helper lemmas.

@@ -173,7 +173,8 @@
         "AppendEntriesRequest" : "AppendEntriesRequest",
         "AppendEntriesResponse" : "AppendEntriesResponse",
         "MaxTerm" : ["3"],
-        "MaxLogLen" : ["2"]
+        "MaxLogLen" : ["2"],
+        "MaxMsgCount": ["1000"]
     },
     "large_instance_inv_check_index": 1,
     "cti_gen_instance_indexes": [0,1],

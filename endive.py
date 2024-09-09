@@ -2936,10 +2936,12 @@ class InductiveInvGen():
                 if "large_instance_inv_check_index" in self.spec_config and len(new_inv_cands) > 0:
                     logging.info("+ Doing re-checking at extra parameter bound")
                     extra_constants_obj = list(self.get_config_constant_instances())[0]
+                    if self.specname == "AsyncRaft":
+                        extra_constants_obj["MaxMsgCount"] = 4
                     logging.info(f"config instance obj: {extra_constants_obj}")
                     local_invs_to_check = [invs[invi]]
                     new_sat_invs = self.check_invariants(local_invs_to_check, 
-                                                        tlc_workers=tlc_workers, max_depth=13,constants_obj=extra_constants_obj)
+                                                        tlc_workers=tlc_workers, max_depth=17,constants_obj=extra_constants_obj)
                     if len(new_sat_invs) == 0:
                         print("!!!!! ERROR: Some new conjuncts violated at extra bound.")
                         # new_inv_cands.remove(top_new_inv_cand)
