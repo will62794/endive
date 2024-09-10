@@ -2959,7 +2959,7 @@ class InductiveInvGen():
                     new_sat_invs = self.check_invariants(local_invs_to_check, 
                                                         tlc_workers=tlc_workers, max_depth=depth,
                                                         tlc_flags=quick_tlc_flags,constants_obj=larger_constants_obj)
-                    print(new_sat_invs)
+                    # print(new_sat_invs)
                     # violated = [c for ind,c in enumerate(new_conjuncts) if f"Inv{ind}" not in new_sat_invs]
                     print("num new sat invs out of new conjuncts:", len(new_sat_invs))
                     # print("violated new conjuncts:", violated)
