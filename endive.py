@@ -2940,7 +2940,7 @@ class InductiveInvGen():
                     logging.info(f"config instance obj: {extra_constants_obj}")
                     local_invs_to_check = [invs[invi]]
                     new_sat_invs = self.check_invariants(local_invs_to_check, 
-                                                        tlc_workers=tlc_workers, max_depth=17,constants_obj=extra_constants_obj)
+                                                        tlc_workers=tlc_workers, max_depth=19,constants_obj=extra_constants_obj)
                     if len(new_sat_invs) == 0:
                         print("!!!!! ERROR: Some new conjuncts violated at extra bound.")
                         # new_inv_cands.remove(top_new_inv_cand)
