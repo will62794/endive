@@ -2330,7 +2330,7 @@ class InductiveInvGen():
                     # print(orig_k_ctis)
                     # print(eliminated_ctis)
                     CTI_PRE_CHECK_THRESHOLD = 50
-                    if num_remaining_uneliminated < 0.15 * len(orig_k_ctis) or num_remaining_uneliminated < CTI_PRE_CHECK_THRESHOLD:
+                    if num_remaining_uneliminated < 0.25 * len(orig_k_ctis) or num_remaining_uneliminated < CTI_PRE_CHECK_THRESHOLD:
                         start = time.time()
                         invs = sorted(list(invs))
                         logging.info("Quick check of new CTI elimination.")
