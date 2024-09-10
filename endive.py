@@ -2651,7 +2651,6 @@ class InductiveInvGen():
                                                                 cache_with_ignored=ignored_var_sets, 
                                                                 cache_with_ignore_inv_counts=inv_group_counts,
                                                                 cache_state_load=True) 
-                        print(local_sat_invs)
                         # The returned set will index into invariants in 'all_invs_to_check'. 
                         orig_invs_sat_indices = [all_invs_to_check[int(s.replace("Inv",""))][0] for s in local_sat_invs]
                          
