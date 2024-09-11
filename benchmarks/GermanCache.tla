@@ -1,6 +1,6 @@
 ------------------------- MODULE GermanCache -------------------------
 
-EXTENDS Integers, Sequences, FiniteSets
+EXTENDS Integers, Sequences, FiniteSets, TLC
 
 CONSTANTS NODE_NUM, DATA_NUM
 ASSUME NODE_NUM \in Nat /\ NODE_NUM > 0
@@ -28,6 +28,8 @@ VARIABLES
     MemData,\* DATA, memory data
     AuxData \* DATA, latest value of cache line
 
+vars == <<Cache, Chan1, Chan2, Chan3, InvSet, ShrSet, ExGntd, CurCmd, CurPtr, MemData, AuxData>>
+
 Init ==
     /\ Cache = [i \in NODE |-> [State |-> "I", Data |-> 1]]
     /\ Chan1 = [i \in NODE |-> [Cmd |-> "Empty", Data |-> 1]]
@@ -41,7 +43,7 @@ Init ==
     /\ MemData = 1
     /\ AuxData = 1
 
-TypeInvariant ==
+TypeOK ==
     /\ Cache \in [NODE -> CACHE]
     /\ Chan1 \in [NODE -> MSG]
     /\ Chan2 \in [NODE -> MSG]
@@ -153,20 +155,32 @@ Store(i, d) ==
     /\ AuxData' = d
     /\ UNCHANGED <<Chan1, Chan2, Chan3, InvSet, ShrSet, ExGntd, CurCmd, CurPtr, MemData>>
 
+SendReqSAction == \E i \in NODE : SendReqS(i)
+SendReqEAction == \E i \in NODE : SendReqE(i)
+RecvReqSAction == \E i \in NODE : RecvReqS(i)
+RecvReqEAction == \E i \in NODE : RecvReqE(i)
+SendInvAction == \E i \in NODE : SendInv(i)
+SendInvAckAction == \E i \in NODE : SendInvAck(i)
+RecvInvAckAction == \E i \in NODE : RecvInvAck(i)
+SendGntSAction == \E i \in NODE : SendGntS(i)
+SendGntEAction == \E i \in NODE : SendGntE(i)
+RecvGntSAction == \E i \in NODE : RecvGntS(i)
+RecvGntEAction == \E i \in NODE : RecvGntE(i)
+StoreAction == \E i \in NODE, d \in DATA : Store(i, d)
+
 Next ==
-    \E i \in NODE : 
-        \/ SendReqS(i)
-        \/ SendReqE(i)
-        \/ RecvReqS(i)
-        \/ RecvReqE(i)
-        \/ SendInv(i)
-        \/ SendInvAck(i)
-        \/ RecvInvAck(i)
-        \/ SendGntS(i)
-        \/ SendGntE(i)
-        \/ RecvGntS(i)
-        \/ RecvGntE(i)
-        \/ \E d \in DATA : Store(i, d)
+    \/ SendReqSAction
+    \/ SendReqEAction
+    \/ RecvReqSAction
+    \/ RecvReqEAction
+    \/ SendInvAction
+    \/ SendInvAckAction
+    \/ RecvInvAckAction
+    \/ SendGntSAction
+    \/ SendGntEAction
+    \/ RecvGntSAction
+    \/ RecvGntEAction
+    \/ StoreAction
 
 \* Invariant properties.
 
@@ -184,5 +198,8 @@ DataProp ==
 Invariant ==
     /\ CtrlProp
     /\ DataProp
+
+NextUnchanged == UNCHANGED vars
+CTICost == 0
 
 ====

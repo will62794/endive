@@ -1,0 +1,57 @@
+{
+    "preds"  :  [
+        "Cache[VARI].State = \"E\"",
+        "Cache[VARJ].State = \"E\"",
+        "Cache[VARI].State = \"I\"",
+        "Cache[VARJ].State = \"I\"",
+        "Cache[VARI].State = \"S\"",
+        "Cache[VARJ].State = \"S\"",
+        "Chan2[VARI].Cmd = \"Empty\"",
+        "Chan2[VARJ].Cmd = \"Empty\"",
+        "Chan2[VARI].Cmd = \"Inv\"",
+        "Chan2[VARJ].Cmd = \"Inv\"",
+        "Chan2[VARI].Cmd = \"GntE\"",
+        "Chan2[VARJ].Cmd = \"GntE\"",
+        "CurCmd = \"ReqE\"",
+        "CurCmd = \"ReqS\"",
+        "Chan3[VARI].Cmd = \"InvAck\"",
+        "Chan3[VARJ].Cmd = \"InvAck\"",
+        "Chan3[VARI].Cmd = \"Empty\"",
+        "Chan3[VARJ].Cmd = \"Empty\"",
+        "ExGntd",
+        "ShrSet[VARI]",
+        "ShrSet[VARJ]",
+        "Chan2[VARI].Data = MemData",
+        "Chan3[VARI].Data = MemData",
+        "CurPtr = VARI",
+        "CurPtr = VARJ"
+    ],
+    "action_local_preds":{
+    },
+    "preds_alt" : [],
+    "safety"  :  "CtrlProp",
+    "constants": {
+        "NODE_NUM": 3,
+        "DATA_NUM": 2
+    },
+    "cti_gen_instance_indexes": [0],
+    "quant_inv": "\\A VARI \\in NODE : \\A VARJ \\in NODE : ",
+    "quant_vars": ["VARI", "VARJ"],
+    "model_consts"  :  "",
+    "simulation_inv_check": false,
+    "simulation_inv_check_num_states": 20000000,
+    "simulation_inv_check_depth": 70,
+    "symmetry" : false,
+    "constraint"  :  "",
+    "typeok"  :  "TypeOK",
+    "try_final_minimize": false,
+    "simulate"  :  true,
+    "tlaps_proof_config": {
+        "assumes": [
+        ],
+        "lemma_def_expands": {
+        },
+        "action_def_expands":{
+        }
+    }
+}
