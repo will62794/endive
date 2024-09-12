@@ -5377,7 +5377,7 @@ if __name__ == "__main__":
     parser.add_argument('--config_file', help='Config file override.', required=False, type=str, default=None)
     
     parser.add_argument('--max_num_conjuncts_per_round', help='Max number of conjuncts to learn per round.', type=int, default=10000)
-    parser.add_argument('--max_duration_secs_per_round', help='Max number of seconds to spend on each iteration.', type=int, default=10000)
+    parser.add_argument('--max_duration_secs_per_round', help='Max number of seconds to spend on each iteration.', type=int, default=20000)
     parser.add_argument('--max_num_ctis_per_round', help='Max number of CTIs per round.', type=int, default=10000)
     parser.add_argument('--num_ctigen_workers', help='Max number of TLC workers for CTI generation.', type=int, default=None)
     parser.add_argument('--k_cti_induction_depth', help='CTI k-induction depth.', type=int, default=1)
