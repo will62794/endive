@@ -2,6 +2,10 @@
     "preds"  :  [
         "clock[VARI] < clock[VARJ]",
         "clock[VARI] = clock[VARJ]",
+        "clock[VARJ] = req[VARI][VARI]",
+        "clock[VARJ] > req[VARI][VARI]",
+        "\\A mi \\in 1 .. Len(network[VARJ][VARI]) : network[VARJ][VARI][mi].type = \"req\" => network[VARJ][VARI][mi].clock > req[VARI][VARI]",
+        "\\A mi \\in 1 .. Len(network[VARI][VARJ]) : network[VARI][VARJ][mi].type = \"req\" => network[VARI][VARJ][mi].clock = req[VARI][VARI]",
         "VARI \\in ack[VARI]",
         "VARI \\in ack[VARJ]",
         "VARJ \\in ack[VARI]",
