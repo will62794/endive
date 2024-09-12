@@ -6,6 +6,12 @@
         "Cache[VARJ].State = \"I\"",
         "Cache[VARI].State = \"S\"",
         "Cache[VARJ].State = \"S\"",
+        "Chan1[VARI].Cmd = \"Empty\"",
+        "Chan1[VARJ].Cmd = \"Empty\"",
+        "Chan1[VARI].Cmd = \"ReqS\"",
+        "Chan1[VARJ].Cmd = \"ReqS\"",
+        "Chan1[VARI].Cmd = \"ReqE\"",
+        "Chan1[VARJ].Cmd = \"ReqE\"",
         "Chan2[VARI].Cmd = \"Empty\"",
         "Chan2[VARJ].Cmd = \"Empty\"",
         "Chan2[VARI].Cmd = \"Inv\"",
@@ -32,7 +38,7 @@
     "action_local_preds":{
     },
     "preds_alt" : [],
-    "safety"  :  "CtrlProp",
+    "safety"  :  "CtrlProp1",
     "large_instance_inv_check_index": 1,
     "constants": {
         "NODE_NUM": 3,
