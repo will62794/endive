@@ -61,7 +61,7 @@ logdir="/scratch/schultz.w/endive_logs"
 for folder in $(ssh $xfer "ls $logdir")
 do
     echo "Fetching logs for $folder"
-    scp -O -r $xfer:$logdir/$folder discovery_data &
+    scp -O -r $xfer:$logdir/$folder discovery_data/endive_logs &
 done
 wait
 
