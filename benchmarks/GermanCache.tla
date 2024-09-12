@@ -184,6 +184,12 @@ Next ==
 
 \* Invariant properties.
 
+CtrlProp1 ==
+    \A i, j \in NODE :
+        i /= j =>
+            /\ (Cache[i].State = "E" => Cache[j].State = "I")
+
+
 CtrlProp ==
     \A i, j \in NODE :
         i /= j =>
@@ -201,5 +207,5 @@ Invariant ==
 
 NextUnchanged == UNCHANGED vars
 CTICost == 0
-
+LInv41_2037_R0_0_I1 == \A VARI \in NODE : \A VARJ \in NODE : (Cache[VARI].State = "I") \/ (~(Chan2[VARJ].Cmd = "GntE"))
 ====
