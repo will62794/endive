@@ -44,8 +44,8 @@ tlc_workers=24
 num_ctigen_workers=20
 cti_elimination_workers=1
 
-nrounds=45
-ninvs=500000
+nrounds=70
+ninvs=1000000
 max_num_ctis_per_round=800
 ninvs_per_iter_group=25000
 target_sample_states=200000
