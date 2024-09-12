@@ -12,6 +12,8 @@
         "\\A VOTHER \\in Proc \\ {VARI} : beats(VARI,VOTHER) /\\ req = req",
         "VARI \\in crit",
         "VARJ \\in crit",
+        "req[VARI][VARI] = 0",
+        "req[VARI][VARI] > 0",
         "req[VARI][VARJ] = 0",
         "req[VARI][VARJ] > 0",
         "req[VARI][VARJ] > req[VARJ][VARJ]",
@@ -46,6 +48,7 @@
         "network[VARI][VARJ] # <<>> /\\ Head(network[VARI][VARJ]).clock = clock[VARI]",
         "network[VARI][VARJ] # <<>> /\\ Head(network[VARI][VARJ]).clock > clock[VARI]",
         "beats(VARI,VARJ) /\\ req = req",
+        "beats(VARJ,VARI) /\\ req = req",
         "Precedes(network[VARI][VARJ], \"req\", \"rel\")",
         "Precedes(network[VARJ][VARI], \"req\", \"rel\")",
         "Precedes(network[VARJ][VARI], \"ack\", \"req\")",
@@ -68,7 +71,7 @@
     "constants"  : {
         "N": "3",
         "maxClock": "4",
-        "Nats": "{0,1,2,3,4}"
+        "Nats": "{0,1,2,3,4,5}"
     },
     "actions": [],
     "constraint"  :  "ClockConstraint",
