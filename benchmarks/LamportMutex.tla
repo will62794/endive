@@ -171,12 +171,12 @@ ReceiveRelease(p,q) ==
 (* Next-state relation.                                                    *)
 (***************************************************************************)
 
-RequestAction == \E p \in Proc : Request(p) 
-EnterAction == \E p \in Proc : Enter(p)
-ExitAction == \E p \in Proc : Exit(p)
-ReceiveRequestAction == \E p \in Proc : \E q \in Proc \ {p} : ReceiveRequest(p,q)
-ReceiveAckAction == \E p \in Proc : \E q \in Proc \ {p} : ReceiveAck(p,q)
-ReceiveReleaseAction == \E p \in Proc : \E q \in Proc \ {p} : ReceiveRelease(p,q)
+RequestAction == TRUE /\ \E p \in Proc : Request(p) 
+EnterAction == TRUE /\ \E p \in Proc : Enter(p)
+ExitAction == TRUE /\ \E p \in Proc : Exit(p)
+ReceiveRequestAction == TRUE /\ \E p \in Proc : \E q \in Proc \ {p} : ReceiveRequest(p,q)
+ReceiveAckAction == TRUE /\ \E p \in Proc : \E q \in Proc \ {p} : ReceiveAck(p,q)
+ReceiveReleaseAction == TRUE /\ \E p \in Proc : \E q \in Proc \ {p} : ReceiveRelease(p,q)
 
 Next ==
     \/ RequestAction
@@ -229,6 +229,16 @@ H_Inv92_R5_0_I1_def == \A VARI \in Proc : (VARI \in ack[VARI]) \/ ((ack[VARI] = 
 HInv19_R0_0_I1 == \A VARI \in Proc : ~(VARI \in crit)
 
 H_Inv565 == \A VARI \in Proc : \A VARJ \in Proc : ~(network[VARI][VARJ] # <<>> /\ Head(network[VARI][VARJ]).type = "ack") \/ (~(req[VARI][VARJ] > req[VARJ][VARJ]))
+
+LInv6058_971a_R0_0_I2 == 
+    \A VARI \in Proc : 
+    \A VARJ \in Proc : 
+        (ack[VARI] = {}) \/ (~(VARJ \in crit) \/ (~(beats(VARI,VARJ) /\ req = req)))
+
+LInv5855_236a == 
+    \A VARI \in Proc : 
+    \A VARJ \in Proc : 
+      (ack[VARI] = {}) \/ (~(VARJ \in crit)) \/ (~(beats(VARI,VARJ) /\ req = req))
 
 
 A_Inv364_R0_0_I1 == \A VARI \in Proc : \A VARJ \in Proc : ~(VARI \in ack[VARJ]) \/ (~(req[VARI][VARJ] > req[VARJ][VARJ]))
