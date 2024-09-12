@@ -5,7 +5,7 @@
 (* L. Lamport:  Time, Clocks and the Ordering of Events in a Distributed   *)
 (* System. CACM 21(7):558-565, 1978.                                       *)
 (***************************************************************************)
-EXTENDS Naturals, Sequences, TLC, Randomization
+EXTENDS Naturals, Sequences, TLC, Randomization, FiniteSets
 
 (***************************************************************************)
 (* The parameter N represents the number of processes.                     *)
@@ -212,6 +212,11 @@ Mutex == \A p,q \in crit : p = q
 CTICost == 0
 NextUnchanged == UNCHANGED vars
 
+Contains(s,mtype) == \E i \in 1 .. Len(s) : s[i].type = mtype
+Count(s,mt) == Cardinality({i \in 1 .. Len(s) : s[i].type = mt})
+Precedes(s,mt1,mt2) == \A i,j \in 1 .. Len(s) : s[i].type = mt1 /\ s[j].type = mt2 => i < j
+
+LInv5091_971a_R0_0_I2 == \A VARI \in Proc : \A VARJ \in Proc : (ack[VARI] = {}) \/ (~(VARJ \in crit) \/ (~(beats(VARI,VARJ) /\ req = req)))
 
 H_Inv36_R0_0_I1_def == \A VARI \in Proc : \A VARJ \in Proc : (VARI # VARJ /\ ack = ack) \/ (~(network[VARI][VARJ] # <<>>))
 H_Inv306_R1_0_I1_def == \A VARI \in Proc : (ack[VARI] = Proc) \/ (~(VARI \in crit))
