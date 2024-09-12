@@ -85,8 +85,11 @@
         "num[nxt[VARJ]] = 0",
         "<<num[VARI], VARI>> \\prec <<num[nxt[VARI]], nxt[VARI]>>",
         "<<num[VARI], VARI>> \\prec <<num[nxt[VARJ]], nxt[VARJ]>>",
-        "<<num[VARI],VARI>> \\prec <<num[VARJ],VARJ>>"
+        "<<num[VARI],VARI>> \\prec <<num[VARJ],VARJ>>",
+        "(VARJ \\in unchecked[nxt[VARJ]]) \\/ ((max[nxt[VARJ]] >= num[VARJ]) \\/ ((pc[VARI] = \"e3\")))",
+        "(VARI \\in unchecked[VARJ]) \\/ (~(pc[VARJ] = \"e2\")) \\/ ((max[VARJ] >= num[VARI])) \\/ (~(pc[VARI] \\in {\"w1\",\"w2\"}))"
     ],
+
     "action_local_preds":{
         "w1bAction": [
         ],
