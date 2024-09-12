@@ -52,7 +52,17 @@ scp -O -r "$xfer:$bmdir/LamportMutex_broken_grammar/endive/benchmarks/LamportMut
 scp -O -r "$xfer:$bmdir/consensus_epr_broken_grammar/endive/benchmarks/consensus_epr_ind-proof-tree-sd3.pdf" $local_dir/consensus_epr_broken_grammar_ind-proof-tree-sd3.pdf
 scp -O -r "$xfer:$bmdir/consensus_epr_broken_grammar_2/endive/benchmarks/consensus_epr_ind-proof-tree-sd3.pdf" $local_dir/consensus_epr_broken_grammar_2_ind-proof-tree-sd3.pdf
 
+echo "-----------"
 echo "Fetching logs"
-scp -O -r $xfer:/scratch/schultz.w/endive_logs discovery_data
+logdir="/scratch/schultz.w/endive_logs"
+# scp -O -r $xfer:/scratch/schultz.w/endive_logs discovery_data
+
+# Iterate over each folder in logdir and fetch in parallel.
+for folder in $(ssh $xfer "ls $logdir")
+do
+    echo "Fetching logs for $folder"
+    scp -O -r $xfer:$logdir/$folder discovery_data &
+done
+wait
 
 ./discovery_job_status.sh
