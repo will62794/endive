@@ -37,7 +37,19 @@
         "network[VARI][VARJ] # <<>> /\\ req[VARI][VARJ] = Head(network[VARI][VARJ]).clock",
         "network[VARI][VARJ] # <<>> /\\ Head(network[VARI][VARJ]).clock = clock[VARI]",
         "network[VARI][VARJ] # <<>> /\\ Head(network[VARI][VARJ]).clock > clock[VARI]",
-        "beats(VARI,VARJ) /\\ req = req"
+        "beats(VARI,VARJ) /\\ req = req",
+        "\\E mi \\in 1 .. Len(network[VARI][VARJ]) : network[VARI][VARJ][mi].type = \"ack\"",
+        "\\E mi \\in 1 .. Len(network[VARJ][VARI]) : network[VARJ][VARI][mi].type = \"ack\"",
+        "\\E mi \\in 1 .. Len(network[VARI][VARJ]) : network[VARI][VARJ][mi].type = \"rel\"",
+        "\\E mi \\in 1 .. Len(network[VARJ][VARI]) : network[VARJ][VARI][mi].type = \"rel\"",
+        "\\E mi \\in 1 .. Len(network[VARI][VARJ]) : network[VARI][VARJ][mi].type = \"req\"",
+        "\\E mi \\in 1 .. Len(network[VARJ][VARI]) : network[VARJ][VARI][mi].type = \"req\"",
+        "Precedes(network[VARI][VARJ], \"req\", \"rel\")",
+        "Precedes(network[VARI][VARJ], \"req\", \"ack\")",
+        "Precedes(network[VARI][VARJ], \"rel\", \"ack\")",
+        "Count(network[VARI][VARJ], \"req\") <= 1",
+        "Count(network[VARI][VARJ], \"rel\") <= 1",
+        "Count(network[VARI][VARJ], \"ack\") <= 1"
     ],
     "action_local_preds":{
     },
@@ -45,8 +57,8 @@
     "safety"  :  "Mutex",
     "constants"  : {
         "N": "3",
-        "maxClock": "3",
-        "Nats": "{0,1,2,3}"
+        "maxClock": "4",
+        "Nats": "{0,1,2,3,4}"
     },
     "actions": [],
     "constraint"  :  "ClockConstraint",

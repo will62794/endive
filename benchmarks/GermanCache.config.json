@@ -19,20 +19,24 @@
         "Chan3[VARI].Cmd = \"Empty\"",
         "Chan3[VARJ].Cmd = \"Empty\"",
         "ExGntd",
+        "InvSet[VARI]",
+        "InvSet[VARJ]",
         "ShrSet[VARI]",
         "ShrSet[VARJ]",
         "Chan2[VARI].Data = MemData",
         "Chan3[VARI].Data = MemData",
         "CurPtr = VARI",
-        "CurPtr = VARJ"
+        "CurPtr = VARJ",
+        "VARI # VARJ"
     ],
     "action_local_preds":{
     },
     "preds_alt" : [],
     "safety"  :  "CtrlProp",
+    "large_instance_inv_check_index": 1,
     "constants": {
         "NODE_NUM": 3,
-        "DATA_NUM": 2
+        "DATA_NUM": [2,3]
     },
     "cti_gen_instance_indexes": [0],
     "quant_inv": "\\A VARI \\in NODE : \\A VARJ \\in NODE : ",
