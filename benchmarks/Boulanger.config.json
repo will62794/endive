@@ -94,10 +94,11 @@
     ],
     "preds_alt" : [],
     "safety"  :  "H_MutualExclusion",
-    "cti_gen_instance_indexes": [0],
+    "cti_gen_instance_indexes": [0,1],
+    "main_inv_check_index": 1,
     "constants"  : {
-        "N": ["3"],
-        "Nats": ["{0,1,2,3}"]
+        "N": ["2", "3"],
+        "Nat": ["{0,1,2,3}"]
     },
     "actions": [
         "ncsAction",
@@ -110,7 +111,7 @@
         "csAction",
         "exitAction"
     ],
-    "simulation_inv_check": true,
+    "simulation_inv_check": false,
     "simulation_inv_check_num_states": 12000000,
     "simulation_inv_check_depth": 60,
     "constraint"  :  "StateConstraint",
