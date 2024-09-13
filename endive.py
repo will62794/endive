@@ -1321,7 +1321,7 @@ class InductiveInvGen():
         
         sampling_args = f"-Dtlc2.tool.impl.Tool.autoInitStatesSampling=true -Dtlc2.tool.impl.Tool.autoInitSamplingTimeLimitMS={sampling_target_time_limit_ms} -Dtlc2.tool.impl.Tool.autoInitSamplingTargetNumInitStates={sampling_target_num_init_states}"
         ignore_vars_arg = ""
-        if ignore_vars is not None:
+        if ignore_vars is not None and len(ignore_vars) > 0:
             ignore_vars_arg = f"-cacheStatesIgnoreVars {','.join(sorted(ignore_vars))}"
 
         continue_flag = "-continue"
