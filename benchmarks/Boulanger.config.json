@@ -98,7 +98,7 @@
     "main_inv_check_index": 1,
     "constants"  : {
         "N": ["2", "3"],
-        "Nat": ["{0,1,2,3}"]
+        "Nats": ["{0,1,2,3}"]
     },
     "actions": [
         "ncsAction",
