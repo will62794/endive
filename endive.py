@@ -4510,24 +4510,11 @@ class InductiveInvGen():
                 cti_action_invs_found = [c for c in cti_action_invs_found if not cti_action_inv_is_failed(c)]
 
 
-                # # Re-parse spec object to include definitions of any newly generate strengthening lemmas.
-                # # if len(self.strengthening_conjuncts) > 0:
-                # if len(self.proof_graph["nodes"]) > 0:
-                #     specname = f"{self.specname}_lemma_parse"
-                #     rootpath = f"benchmarks/{specname}"
-                #     # self.make_check_invariants_spec([], rootpath, defs_to_add=self.strengthening_conjuncts + [curr_obligation])
-                #     # self.make_check_invariants_spec([], rootpath, defs_to_add=[curr_obligation_pred_tup] + self.strengthening_conjuncts)
-                #     node_conjuncts = [(n, self.proof_graph["nodes"][n]["expr"], "") for n in self.proof_graph["nodes"] if "is_lemma" in self.proof_graph["nodes"][n]]
-                #     self.make_check_invariants_spec([], rootpath, defs_to_add=node_conjuncts)
-                #     # self.make_check_invariants_spec([], rootpath, defs_to_add=self.strengthening_conjuncts)
+                # Re-parse spec object to include definitions of any newly generate strengthening lemmas.
+                if len(self.proof_graph["nodes"]) > 0:
+                    self.reparse_spec_with_proof_graph_defs()
 
-                #     logging.info("Re-parsing spec for any newly discovered lemma definitions.")
-                #     s1 = time.time()
-                #     self.spec_obj_with_lemmas = tlaparse.parse_tla_file(self.specdir, specname)
-                #     self.reparsing_duration_secs += (time.time() - s1)
-                #     logging.info("Done re-parsing. Total time spent parsing so far: {:.2f}s".format(self.reparsing_duration_secs))
-
-                defs = self.spec_obj_with_lemmas.get_all_user_defs(level="1")
+                # defs = self.spec_obj_with_lemmas.get_all_user_defs(level="1")
                 # for d in defs:
                     # print(d)
                 
