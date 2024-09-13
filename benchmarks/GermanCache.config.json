@@ -39,12 +39,12 @@
     },
     "preds_alt" : [],
     "safety"  :  "CtrlProp1",
-    "large_instance_inv_check_index": 1,
+    "main_inv_check_index": 1,
     "constants": {
-        "NODE_NUM": 3,
-        "DATA_NUM": [2,3]
+        "NODE_NUM": [2,3],
+        "DATA_NUM": [2]
     },
-    "cti_gen_instance_indexes": [0],
+    "cti_gen_instance_indexes": [0,1],
     "quant_inv": "\\A VARI \\in NODE : \\A VARJ \\in NODE : ",
     "quant_vars": ["VARI", "VARJ"],
     "model_consts"  :  "",
@@ -58,8 +58,11 @@
     "simulate"  :  true,
     "tlaps_proof_config": {
         "assumes": [
+            "\\E N \\in Nat : NODE = 1..N /\\ IsFiniteSet(NODE) /\\ NODE # {}",
+            "\\E N \\in Nat : DATA = 1..N /\\ IsFiniteSet(DATA) /\\ DATA # {}"
         ],
         "lemma_def_expands": {
+            "Safety": ["CtrlProp1", "MSG", "MSG_CMD", "CACHE", "CACHE_STATE"]
         },
         "action_def_expands":{
         }

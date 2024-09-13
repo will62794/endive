@@ -1993,7 +1993,7 @@ class InductiveInvGen():
         }
 
 
-    def cache_projected_states(self, cache_states_with_ignored_var_sets, max_depth=2**30, tlc_workers=6):
+    def cache_projected_states(self, cache_states_with_ignored_var_sets, max_depth=2**30, tlc_workers=6, constants_obj=None):
         # Ensure references to variable slice sets are always sorted to maintain consistent order.
         cache_states_with_ignored_var_sets = sorted([tuple(sorted(c)) for c in cache_states_with_ignored_var_sets])
 
@@ -2032,7 +2032,7 @@ class InductiveInvGen():
                 logging.info(f"Computing {len(subsets_chunk)} slices in chunk ({len(cache_states_with_ignored_var_sets_curr)} remaining slices to compute).")
                 self.check_invariants([dummy_inv], tlc_workers=tlc_workers, max_depth=max_depth, 
                                             cache_with_ignored=subsets_chunk, skip_checking=True,
-                                            tlc_flags=simulation_inv_tlc_flags)
+                                            tlc_flags=simulation_inv_tlc_flags, constants_obj=constants_obj)
 
             if self.memoize_state_projection_caches:
                 # Mark all computed chunks as cached.
@@ -2386,6 +2386,7 @@ class InductiveInvGen():
                         # print(c)
                         defs = self.spec_obj_with_lemmas.get_all_user_defs(level=["1"])
                         # print(defs)
+                        # print(c[0])
                         if c[0] in defs:
                             conjunct_vars = set(self.spec_obj_with_lemmas.get_vars_in_def(c[0])[0])
                             var_slice_set = set(var_slice)
@@ -2534,6 +2535,12 @@ class InductiveInvGen():
 
                     invcheck_start = time.time()
 
+                    if "main_inv_check_index" in self.spec_config:
+                        main_inv_check_index = self.spec_config["main_inv_check_index"]
+                        invcheck_constants_obj = self.get_ctigen_constant_instances()[main_inv_check_index]
+                    else:
+                        invcheck_constants_obj = self.get_ctigen_constant_instances()[0]
+
                     #
                     # Consider the top few predicate var counts and test projected property checking.
                     # (EXPERIMENTAL)
@@ -2567,7 +2574,7 @@ class InductiveInvGen():
                             # self.cache_projected_states(subsets_chunk, max_depth=max_depth, tlc_workers=tlc_workers)
                             # ignored_var_subsets_remaining = ignored_var_subsets_remaining[MAX_NUM_SUBSETS:]
                         
-                        self.cache_projected_states(list(ignored_var_subsets), max_depth=max_depth, tlc_workers=tlc_workers)
+                        self.cache_projected_states(list(ignored_var_subsets), max_depth=max_depth, tlc_workers=tlc_workers, constants_obj=invcheck_constants_obj)
 
                         """
                         for p in pred_var_counts_tups[:]:
@@ -2650,7 +2657,8 @@ class InductiveInvGen():
                                                                 max_depth=max_depth, 
                                                                 cache_with_ignored=ignored_var_sets, 
                                                                 cache_with_ignore_inv_counts=inv_group_counts,
-                                                                cache_state_load=True) 
+                                                                cache_state_load=True,
+                                                                constants_obj=invcheck_constants_obj) 
                         # The returned set will index into invariants in 'all_invs_to_check'. 
                         orig_invs_sat_indices = [all_invs_to_check[int(s.replace("Inv",""))][0] for s in local_sat_invs]
                          
@@ -2691,7 +2699,8 @@ class InductiveInvGen():
                             cache_states_with_ignored_vars_arg = [sorted(cache_states_with_ignored_vars)]
                         main_sat_invs = self.check_invariants([mi[1] for mi in main_invs_to_check], tlc_workers=tlc_workers, 
                                                               max_depth=max_depth, cache_state_load=cache_load, 
-                                                              cache_with_ignored=cache_states_with_ignored_vars_arg, tlc_flags=tlc_flags)
+                                                              cache_with_ignored=cache_states_with_ignored_vars_arg, tlc_flags=tlc_flags,
+                                                              constants_obj=invcheck_constants_obj)
                         main_invs_to_check_sat = [m for (mind,m) in enumerate(main_invs_to_check) if f"Inv{mind}" in main_sat_invs]
                         sat_invs = set([f"Inv{iv[0]}" for iv in main_invs_to_check_sat])
                     
