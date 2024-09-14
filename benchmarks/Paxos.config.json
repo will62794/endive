@@ -53,6 +53,8 @@
         "VotedFor(ACCI,BALK,VALI)/\\ msgs2b = msgs2b",
         "VotedFor(ACCI,BALK,VALJ)/\\ msgs2b = msgs2b",
         "VALI=VALJ /\\ maxBal = maxBal",
+        "VALI=VALJ /\\ msgs2b = msgs2b",
+        "VALI=VALJ /\\ msgs2a = msgs2a",
         "SafeAt(BALI, VALI) /\\ maxBal = maxBal /\\ msgs2b = msgs2b",
         "SafeAt(BALI, VALJ) /\\ maxBal = maxBal /\\ msgs2b = msgs2b",
         "SafeAt(BALJ, VALI) /\\ maxBal = maxBal /\\ msgs2b = msgs2b",

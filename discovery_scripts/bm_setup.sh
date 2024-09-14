@@ -59,6 +59,6 @@ common_flags+=" --debug --target_sample_time_limit_ms $target_sample_time_limit_
 common_flags+=" --opt_quant_minimize --k_cti_induction_depth 1"
 common_flags+=" --ninvs $ninvs --max_num_ctis_per_round $max_num_ctis_per_round --ninvs_per_iter_group $ninvs_per_iter_group"
 common_flags+=" --save_dot --max_num_conjuncts_per_round 20 --niters $niters --nrounds $nrounds"
-common_flags+=" --tlapm_install $tlapm_install"
+common_flags+=" --tlapm_install $tlapm_install --do_tlaps_induction_checks"
 
 time_limit_large="08:00:00"

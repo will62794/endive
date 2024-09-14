@@ -4305,7 +4305,7 @@ class InductiveInvGen():
             # Check obligation initially with TLAPS to see which actions can be discharged. Then, for any 
             # actions that fail to be discharged, generate CTIs for them using TLC.
             #
-            do_tlaps_inductive_check = True
+            do_tlaps_inductive_check = self.all_args["do_tlaps_induction_checks"]
 
             if do_tlaps_inductive_check:
                 proof_node = StructuredProofNode("L_" + curr_obligation_pred_tup[0], curr_obligation_pred_tup[0])
@@ -4340,9 +4340,9 @@ class InductiveInvGen():
                             print(lemma_source_map[start_line], obl_states[bid]["status"])
 
                 logging.info(f"Checked local proof obligation with TLAPS in {time.time() - st}s.")
-            print("TLAPS UNPROVED:")
-            for ob in unproved_obls:
-                print(" ", ob)
+                print("TLAPS UNPROVED:")
+                for ob in unproved_obls:
+                    print(" ", ob)
 
             # Re-parse spec object to include definitions of any newly generate strengthening lemmas.
             # if len(self.strengthening_conjuncts) > 0:
@@ -4351,7 +4351,15 @@ class InductiveInvGen():
 
             # Now, for any obligations that failed to be discharged by TLAPS, we try to generate CTIs for them.
             k_ctis = set()
-            for (k_cti_lemma, k_cti_action) in unproved_obls:
+
+            if not do_tlaps_inductive_check:
+                # Check CTIs for all actions.
+                logging.info("Checking CTIs for all actions without TLAPS.")
+                obls_to_check_ctis = [(curr_obligation, a) for a in self.actions]
+            else:
+                obls_to_check_ctis = unproved_obls
+
+            for (k_cti_lemma, k_cti_action) in obls_to_check_ctis:
 
                 action_tstart = time.time()
 
@@ -5400,6 +5408,7 @@ if __name__ == "__main__":
     parser.add_argument('--include_existing_conjuncts', help='Whether to include existing conjuncts as invariant candidates during CTI elimination.', default=True, action='store_true')
     parser.add_argument('--reprove_failed_nodes', help='Try to reprove failed nodes in loaded proof graph.', default=False, action='store_true')
     parser.add_argument('--tlapm_install_dir', help='TLAPM binary to use if needed.', required=False, default="/usr/local", type=str)
+    parser.add_argument('--do_tlaps_induction_checks', help='check inducttion with tlapm.', required=False, default=False, action='store_true')
 
     # Apalache related commands.
     parser.add_argument('--use_apalache_ctigen', help='Use Apalache for CTI generation (experimental).', required=False, default=False, action='store_true')
