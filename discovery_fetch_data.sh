@@ -14,7 +14,7 @@ mkdir -p $local_dir
 mkdir -p $local_dir/json
 
 # Fetch proof graph stuff.
-bms="TwoPhase consensus_epr LamportMutex Hermes ZeusReliableCommit Boulanger Bakery AsyncRaft GermanCache"
+bms="TwoPhase consensus_epr LamportMutex Hermes ZeusReliableCommit Boulanger Bakery AsyncRaft GermanCache Paxos"
 # If list of arguments passed, use that instead.
 if [ $# -gt 0 ]; then
     bms=$@
