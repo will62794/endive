@@ -96,10 +96,12 @@
     "simulate"  :  true,
     "tlaps_proof_config": {
         "assumes": [
+
         ],
         "global_def_expands":[
             "Contains",
-            "Count"
+            "Count",
+            "Proc"
         ],
         "lemma_def_expands": {
             "Safety": ["Mutex"]
