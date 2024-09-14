@@ -97,6 +97,10 @@
     "tlaps_proof_config": {
         "assumes": [
         ],
+        "global_def_expands":[
+            "Contains",
+            "Count"
+        ],
         "lemma_def_expands": {
             "Safety": ["Mutex"]
         },
