@@ -59,7 +59,7 @@ IndGlobal ==
 \* min in-degree: 0
 \* mean variable slice size: 0
 
-ASSUME A0 == N \in Nat /\ Procs \subseteq Nat /\ IsFiniteSet(Procs)
+ASSUME A0 == N \in Nat /\ Procs = 1..N /\ IsFiniteSet(Procs)
 
 \*** TypeOK
 THEOREM L_0 == TypeOK /\ TypeOK /\ Next => TypeOK'
@@ -112,13 +112,41 @@ THEOREM L_1 == TypeOK /\ Inv23439_af2b_R0_0_I2 /\ Safety /\ Next => Safety'
   \* (Safety,e3aAction)
   <1>6. TypeOK /\ Safety /\ e3aAction => Safety' BY DEF TypeOK,e3aAction,e3a,Safety,\prec,H_MutualExclusion
   \* (Safety,e3bAction)
-  <1>7. TypeOK /\ Safety /\ e3bAction => Safety' BY DEF TypeOK,e3bAction,e3b,Safety,\prec,\prec,H_MutualExclusion
+  <1>7. TypeOK /\ Safety /\ e3bAction => Safety' 
+    <2> SUFFICES ASSUME TypeOK,
+                        Safety,
+                        TRUE,
+                        NEW self \in Procs,
+                        pc[self] = "e3",
+                        NEW i \in {j \in Nat : j > max[self]},
+                        num' = [num EXCEPT ![self] = i],
+                        pc' = [pc EXCEPT ![self] = "e4"],
+                        UNCHANGED << flag, unchecked, max, nxt >>
+                 PROVE  Safety'
+      BY DEF e3b, e3bAction
+    <2> QED
+      BY DEF TypeOK,e3bAction,e3b,Safety,\prec,\prec,H_MutualExclusion
   \* (Safety,e4aAction)
   <1>8. TypeOK /\ Safety /\ e4aAction => Safety' BY DEF TypeOK,e4aAction,e4a,Safety,\prec,H_MutualExclusion
   \* (Safety,e4bAction)
   <1>9. TypeOK /\ Safety /\ e4bAction => Safety' BY DEF TypeOK,e4bAction,e4b,Safety,\prec,\prec,H_MutualExclusion
   \* (Safety,w1aAction)
-  <1>10. TypeOK /\ Safety /\ w1aAction => Safety' BY DEF TypeOK,w1aAction,w1a,Safety,\prec,\prec,H_MutualExclusion
+  <1>10. TypeOK /\ Safety /\ w1aAction => Safety' 
+    <2> SUFFICES ASSUME TypeOK,
+                        Safety,
+                        TRUE,
+                        NEW self \in Procs,
+                        pc[self] = "w1",
+                        unchecked[self] # {},
+                        NEW i \in unchecked[self],
+                        nxt' = [nxt EXCEPT ![self] = i],
+                        ~ flag[nxt'[self]],
+                        pc' = [pc EXCEPT ![self] = "w2"],
+                        UNCHANGED << num, flag, unchecked, max >>
+                 PROVE  Safety'
+      BY DEF w1a, w1aAction
+    <2> QED
+      BY DEF TypeOK,w1aAction,w1a,Safety,\prec,\prec,H_MutualExclusion
   \* (Safety,w1bAction)
   <1>11. TypeOK /\ Inv23439_af2b_R0_0_I2 /\ Safety /\ w1bAction => Safety' BY DEF TypeOK,Inv23439_af2b_R0_0_I2,w1bAction,w1b,Safety,\prec,\prec,H_MutualExclusion
   \* (Safety,w2Action)
@@ -276,7 +304,28 @@ THEOREM L_6 == TypeOK /\ Inv1_b58a_R13_0_I1 /\ Inv738_26ef_R13_1_I2 /\ Inv0_b3ba
   \* (Inv0_b3ba_R10_0_I0,e1bAction)
   <1>3. TypeOK /\ Inv0_b3ba_R10_0_I0 /\ e1bAction => Inv0_b3ba_R10_0_I0' BY DEF TypeOK,e1bAction,e1b,Inv0_b3ba_R10_0_I0,\prec
   \* (Inv0_b3ba_R10_0_I0,e2aAction)
-  <1>4. TypeOK /\ Inv1_b58a_R13_0_I1 /\ Inv0_b3ba_R10_0_I0 /\ e2aAction => Inv0_b3ba_R10_0_I0' BY DEF TypeOK,Inv1_b58a_R13_0_I1,e2aAction,e2a,Inv0_b3ba_R10_0_I0,\prec,Procs
+  <1>4. TypeOK /\ Inv1_b58a_R13_0_I1 /\ Inv0_b3ba_R10_0_I0 /\ e2aAction => Inv0_b3ba_R10_0_I0' 
+    <2> SUFFICES ASSUME TypeOK /\ Inv1_b58a_R13_0_I1 /\ Inv0_b3ba_R10_0_I0 /\ e2aAction,
+                        NEW VARI \in Procs',
+                        NEW VARJ \in Procs'
+                 PROVE  ((VARI \in unchecked[VARJ]) \/ ((pc[VARJ] = "e1") \/ (~(max[VARI] < num[VARJ]) \/ (~(pc[VARI] = "e2"))) \/ (~(unchecked[VARI] = {}))) \/ (~(pc[VARJ] \in {"w1","w2"})))'
+      BY DEF Inv0_b3ba_R10_0_I0
+    <2> QED
+      <3> SUFFICES ASSUME NEW self \in Procs,
+                          pc[self] = "e2",
+                          unchecked[self] # {},
+                          NEW i \in unchecked[self],
+                          /\ unchecked' = [unchecked EXCEPT ![self] = unchecked[self] \ {i}]
+                          /\ IF num[i] > max[self]
+                              THEN /\ max' = [max EXCEPT ![self] = num[i]]
+                              ELSE /\ max' = max,
+                          pc' = [pc EXCEPT ![self] = "e2"],
+                          UNCHANGED << num, flag, nxt >>
+                   PROVE  ((VARI \in unchecked[VARJ]) \/ ((pc[VARJ] = "e1") \/ (~(max[VARI] < num[VARJ]) \/ (~(pc[VARI] = "e2"))) \/ (~(unchecked[VARI] = {}))) \/ (~(pc[VARJ] \in {"w1","w2"})))'
+        BY DEF e2a, e2aAction
+      <3> QED
+        BY DEF TypeOK,Inv1_b58a_R13_0_I1,e2aAction,e2a,Inv0_b3ba_R10_0_I0,\prec,Procs
+      
   \* (Inv0_b3ba_R10_0_I0,e2bAction)
   <1>5. TypeOK /\ Inv0_b3ba_R10_0_I0 /\ e2bAction => Inv0_b3ba_R10_0_I0' BY DEF TypeOK,e2bAction,e2b,Inv0_b3ba_R10_0_I0,\prec
   \* (Inv0_b3ba_R10_0_I0,e3aAction)
@@ -364,7 +413,31 @@ THEOREM L_8 == TypeOK /\ Inv48_180c_R17_0_I1 /\ Inv738_26ef_R13_1_I2 /\ Next => 
   \* (Inv738_26ef_R13_1_I2,csAction)
   <1>13. TypeOK /\ Inv738_26ef_R13_1_I2 /\ csAction => Inv738_26ef_R13_1_I2' BY DEF TypeOK,csAction,cs,Inv738_26ef_R13_1_I2,\prec
   \* (Inv738_26ef_R13_1_I2,exitAction)
-  <1>14. TypeOK /\ Inv738_26ef_R13_1_I2 /\ exitAction => Inv738_26ef_R13_1_I2' BY DEF TypeOK,exitAction,exit,Inv738_26ef_R13_1_I2,\prec
+  <1>14. TypeOK /\ Inv738_26ef_R13_1_I2 /\ exitAction => Inv738_26ef_R13_1_I2' 
+    <2> SUFFICES ASSUME TypeOK,
+                        Inv738_26ef_R13_1_I2,
+                        TRUE,
+                        NEW self \in Procs,
+                        pc[self] = "exit",
+                        UNCHANGED << flag, unchecked, max, nxt >>,
+                        NEW VARI \in Procs',
+                        NEW VARJ \in Procs',
+                        \/ /\ \E k \in Nat:
+                                num' = [num EXCEPT ![self] = k]
+                           /\ pc' = [pc EXCEPT ![self] = "exit"]
+                        \/ /\ num' = [num EXCEPT ![self] = 0]
+                           /\ pc' = [pc EXCEPT ![self] = "ncs"]
+                 PROVE  (((VARJ \in unchecked[nxt[VARJ]]) \/ ((max[nxt[VARJ]] >= num[VARJ]) \/ ((pc[VARI] = "e3")))) \/ (~(pc[VARJ] = "w2")) \/ (~((pc[nxt[VARJ]] = "e2"))))'
+      BY DEF Inv738_26ef_R13_1_I2, exit, exitAction
+    <2>1. CASE /\ \E k \in Nat:
+                    num' = [num EXCEPT ![self] = k]
+               /\ pc' = [pc EXCEPT ![self] = "exit"]
+      BY <2>1 DEF TypeOK,exitAction,exit,Inv738_26ef_R13_1_I2,\prec
+    <2>2. CASE /\ num' = [num EXCEPT ![self] = 0]
+               /\ pc' = [pc EXCEPT ![self] = "ncs"]
+      BY <2>2 DEF TypeOK,exitAction,exit,Inv738_26ef_R13_1_I2,\prec
+    <2>3. QED
+      BY <2>1, <2>2
 <1>15. QED BY <1>1,<1>2,<1>3,<1>4,<1>5,<1>6,<1>7,<1>8,<1>9,<1>10,<1>11,<1>12,<1>13,<1>14 DEF Next
 
 
@@ -778,9 +851,26 @@ THEOREM L_20 == TypeOK /\ Inv26_b6ff_R2_0_I3 /\ Inv4559_3f08_R1_1_I2 /\ Next => 
 \* Initiation.
 THEOREM Init => IndGlobal
     <1> USE A0
- DEF \prec
-    <1>0. Init => TypeOK BY DEF Init, TypeOK, IndGlobal
-    <1>1. Init => Safety BY DEF Init, Safety, IndGlobal
+ DEF \prec, ProcSet
+    <1>0. Init => TypeOK 
+      <2> SUFFICES ASSUME Init
+                   PROVE  TypeOK
+        OBVIOUS
+      <2>1. num \in [Procs -> Nat]
+        BY DEF Init, TypeOK, IndGlobal
+      <2>2. flag \in [Procs -> BOOLEAN]
+        BY DEF Init, TypeOK, IndGlobal
+      <2>3. unchecked \in [Procs -> SUBSET Procs]
+        BY DEF Init, TypeOK, IndGlobal
+      <2>4. max \in [Procs -> Nat]
+        BY DEF Init, TypeOK, IndGlobal
+      <2>5. nxt \in [Procs -> Procs]
+        BY DEF Init, TypeOK, IndGlobal
+      <2>6. pc \in [Procs -> {"ncs", "e1", "e2", "e3", "e4", "w1", "w2", "cs", "exit"}]
+        BY DEF Init, TypeOK, IndGlobal
+      <2>7. QED
+        BY <2>1, <2>2, <2>3, <2>4, <2>5, <2>6 DEF TypeOK
+    <1>1. Init => Safety BY DEF Init, Safety, IndGlobal, H_MutualExclusion
     <1>2. Init => Inv23439_af2b_R0_0_I2 BY DEF Init, Inv23439_af2b_R0_0_I2, IndGlobal
     <1>3. Init => Inv3155_48f3_R1_0_I2 BY DEF Init, Inv3155_48f3_R1_0_I2, IndGlobal
     <1>4. Init => Inv6938_a43e_R2_0_I3 BY DEF Init, Inv6938_a43e_R2_0_I3, IndGlobal
@@ -2029,6 +2119,6 @@ THEOREM IndGlobal /\ Next => IndGlobal'
 \* Inv21195_R4_0_I3 == \A VARI \in Procs : ~(nxt[VARI] = VARI) \/ (~(unchecked[VARI] = {})) \/ (~(pc[VARI] = "w1"))
 =============================================================================
 \* Modification History
-\* Last modified Wed Apr 17 14:50:56 EDT 2024 by willyschultz
+\* Last modified Sat Sep 14 14:19:51 EDT 2024 by willyschultz
 \* Last modified Tue Dec 18 13:48:46 PST 2018 by lamport
 \* Created Thu Nov 21 15:54:32 PST 2013 by lamport
