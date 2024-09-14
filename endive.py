@@ -2381,22 +2381,26 @@ class InductiveInvGen():
 
                 if self.proof_tree_mode and iteration >= iter_to_start_adding_existing_conjuncts and self.all_args["include_existing_conjuncts"]:
                     added = 0
-                    for c in self.strengthening_conjuncts:
+                    # Also allow original safety property to be included.
+                    for c in self.strengthening_conjuncts + [("Safety", self.safety, self.safety)]: 
                         # Only include strengthening conjunct if its variables are in this slice.
                         # print(c)
                         defs = self.spec_obj_with_lemmas.get_all_user_defs(level=["1"])
                         # print(defs)
                         # print(c[0])
-                        if c[0] in defs:
-                            conjunct_vars = set(self.spec_obj_with_lemmas.get_vars_in_def(c[0])[0])
+                        defname = c[0]
+                        if c[0] == "Safety":
+                            defname = c[1]
+                        if defname in defs:
+                            conjunct_vars = set(self.spec_obj_with_lemmas.get_vars_in_def(defname)[0])
                             var_slice_set = set(var_slice)
-                            # print("conjunct_vars", c[0], conjunct_vars)
-                            # print("var_slice", var_slice_set)
+                            print("conjunct_vars", defname, conjunct_vars)
+                            print("var_slice", var_slice_set)
                             if set(conjunct_vars).issubset(var_slice_set):
                                 logging.info(f"Adding strengthening conjunct {c} to invs since it is in the var slice.")
                                 invs.add(c[2])
                                 added += 1
-                    logging.info(f"Added {added}/{len(self.strengthening_conjuncts)} existing strengthening conjuncts to candidate invariant set.")
+                    logging.info(f"Added {added}/{len(self.strengthening_conjuncts)+1} existing strengthening conjuncts (+ root safety property) to candidate invariant set.")
 
 
                 #
