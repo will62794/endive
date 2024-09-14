@@ -2801,7 +2801,7 @@ class InductiveInvGen():
                     logging.info("No invariants found. Continuing to next iteration.")
                     iteration += 1
                 # Re-render the proof graph.
-                if self.save_dot and len(self.proof_graph["edges"]) > 0:
+                if self.proof_tree_mode and self.save_dot and len(self.proof_graph["edges"]) > 0:
                     # Render updated proof graph as we go.
                     self.render_proof_graph()  
                 continue
