@@ -39,6 +39,13 @@
         "CurPtr = VARJ",
         "VARI # VARJ"
     ],
+    "other_preds":[
+        "InvSet = ShrSet",
+        "\\A vinv \\in NODE : InvSet[vinv]",
+        "\\A vinv \\in NODE : ~InvSet[vinv]",
+        "\\A vshr \\in NODE : ShrSet[vshr]",
+        "\\A vshr \\in NODE : ~ShrSet[vshr]"
+    ],
     "action_local_preds":{
     },
     "preds_alt" : [],
