@@ -286,13 +286,20 @@ w2Cond(self) ==
     \/ /\ previous[self] # -1
        /\ num[nxt[self]] # previous[self]
 
-w2(self) == 
+w2a(self) == 
     /\ pc[self] = "w2"
     /\ w2Cond(self)
     /\ unchecked' = [unchecked EXCEPT ![self] = unchecked[self] \ {nxt[self]}]
-    /\ IF unchecked'[self] = {}
-        THEN /\ pc' = [pc EXCEPT ![self] = "cs"]
-        ELSE /\ pc' = [pc EXCEPT ![self] = "w1"]
+    /\ unchecked'[self] = {}
+    /\ pc' = [pc EXCEPT ![self] = "cs"]
+    /\ UNCHANGED << num, flag, max, nxt, previous >>
+
+w2b(self) == 
+    /\ pc[self] = "w2"
+    /\ w2Cond(self)
+    /\ unchecked' = [unchecked EXCEPT ![self] = unchecked[self] \ {nxt[self]}]
+    /\ ~(unchecked'[self] = {})
+    /\ pc' = [pc EXCEPT ![self] = "w1"]
     /\ UNCHANGED << num, flag, max, nxt, previous >>
 
 w2Prev(self) == 
@@ -315,7 +322,7 @@ exit(self) == /\ pc[self] = "exit"
               /\ UNCHANGED << flag, unchecked, max, nxt, previous >>
 
 p(self) == ncs(self) \/ e1(self) \/ e2(self) \/ e3(self) \/ e4(self)
-              \/ w1(self) \/ w2(self) \/ cs(self) \/ exit(self)
+              \/ w1(self) \/ w2a(self) \/ w2b(self) \/ cs(self) \/ exit(self)
 
 ncsAction ==  TRUE /\ \E self \in Procs : ncs(self) 
 e1Action ==   TRUE /\ \E self \in Procs : e1(self) 
@@ -327,7 +334,8 @@ e3MaxAction ==   TRUE /\ \E self \in Procs : e3Max(self)
 e4Action ==   TRUE /\ \E self \in Procs : e4(self)
 w1Action ==   TRUE /\ \E self \in Procs : w1(self) 
 w1NegAction ==   TRUE /\ \E self \in Procs : w1Neg(self) 
-w2Action ==   TRUE /\ \E self \in Procs : w2(self) 
+w2aAction ==   TRUE /\ \E self \in Procs : w2a(self) 
+w2bAction ==   TRUE /\ \E self \in Procs : w2b(self) 
 w2PrevAction ==   TRUE /\ \E self \in Procs : w2Prev(self) 
 csAction ==   TRUE /\ \E self \in Procs : cs(self) 
 exitAction == TRUE /\ \E self \in Procs : exit(self)
@@ -343,7 +351,8 @@ Next ==
     \/ e4Action
     \/ w1Action
     \/ w1NegAction
-    \/ w2Action
+    \/ w2aAction
+    \/ w2bAction
     \/ w2PrevAction
     \/ csAction
     \/ exitAction
