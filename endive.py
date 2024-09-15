@@ -4398,8 +4398,14 @@ class InductiveInvGen():
                                                                         ignore_vars=cti_ignore_vars, constants_obj=cobj)
                         for c in k_ctis_action_new:
                             c.constants_obj = cobj
-                        print("NUM new ctis:", len(k_ctis_action_new))
-                        k_ctis_action += k_ctis_action_new
+                        print("Number of new action ctis:", len(k_ctis_action_new))
+                        if len(k_ctis_action_new) > self.MAX_NUM_CTIS_PER_ROUND:
+                            logging.info(f"Limiting num k-CTIs to {self.MAX_NUM_CTIS_PER_ROUND} of {len(k_ctis_action_new)} total found.")
+                            sorted_k_ctis_new = sorted(list(k_ctis_action_new))
+                            random.shuffle(sorted_k_ctis_new)
+                            k_ctis_action += sorted_k_ctis_new[:self.MAX_NUM_CTIS_PER_ROUND]
+                        else:
+                            k_ctis_action += k_ctis_action_new
                     
                 # k_ctis_action, k_cti_traces = self.generate_ctis(props=[curr_obligation_pred_tup], specname_tag=curr_obligation, actions=[k_cti_action], ignore_vars=cti_ignore_vars)
                 
@@ -4428,12 +4434,13 @@ class InductiveInvGen():
             subround = 0
 
             # Limit number of CTIs if necessary.
-            if len(k_ctis) > self.MAX_NUM_CTIS_PER_ROUND:
-                logging.info(f"Limiting num k-CTIs to {self.MAX_NUM_CTIS_PER_ROUND} of {len(k_ctis)} total found.")
-                # Sort CTIS to give a consistent order first, and then shuffle to ensure sample diversity.
-                sorted_k_ctis = sorted(list(k_ctis))
-                random.shuffle(sorted_k_ctis)
-                k_ctis = set(sorted_k_ctis[:self.MAX_NUM_CTIS_PER_ROUND])
+            # Limiting is done above per action now.
+            # if len(k_ctis) > self.MAX_NUM_CTIS_PER_ROUND:
+            #     logging.info(f"Limiting num k-CTIs to {self.MAX_NUM_CTIS_PER_ROUND} of {len(k_ctis)} total found.")
+            #     # Sort CTIS to give a consistent order first, and then shuffle to ensure sample diversity.
+            #     sorted_k_ctis = sorted(list(k_ctis))
+            #     random.shuffle(sorted_k_ctis)
+            #     k_ctis = set(sorted_k_ctis[:self.MAX_NUM_CTIS_PER_ROUND])
             
             if len(k_ctis) == 0:
                 is_root_node = self.proof_graph["nodes"][curr_obligation]["order"] == 1
