@@ -2378,7 +2378,7 @@ class InductiveInvGen():
                 # two. 
                 # Not sure how much effect this may have on quality of learned invariants or proof graphs.
                 iter_to_start_adding_existing_conjuncts = 1
-
+                safety_conjunct_vars = set()
                 if self.proof_tree_mode and iteration >= iter_to_start_adding_existing_conjuncts and self.all_args["include_existing_conjuncts"]:
                     added = 0
                     # Also allow original safety property to be included.
@@ -2394,6 +2394,8 @@ class InductiveInvGen():
                         if defname in defs:
                             conjunct_vars = set(self.spec_obj_with_lemmas.get_vars_in_def(defname)[0])
                             var_slice_set = set(var_slice)
+                            if c[0] == "Safety":
+                                safety_conjunct_vars = conjunct_vars
                             print("conjunct_vars", defname, conjunct_vars)
                             print("var_slice", var_slice_set)
                             if set(conjunct_vars).issubset(var_slice_set):
@@ -2446,9 +2448,12 @@ class InductiveInvGen():
                         # but for now we just hack it and have a few rules for checking which variables appear in a predicate.
                         return (f"{v}[" in qi) or (f"{v} " in qi) or (f"{v}:" in qi) or (f"{v})" in qi) or (qi.endswith(v))
                     svars = []
-                    for s in self.state_vars:
-                        if svar_in_inv(s, xinv):
-                            svars.append(s)
+                    if xinv == self.safety:
+                        svars = safety_conjunct_vars
+                    else:
+                        for s in self.state_vars:
+                            if svar_in_inv(s, xinv):
+                                svars.append(s)
                     k = tuple(sorted(svars))
                     pred_var_sets_for_invs.append(k)
                     # print("pred var set for inv:", k, xinv)
