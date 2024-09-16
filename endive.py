@@ -2128,8 +2128,8 @@ class InductiveInvGen():
             max_depth = self.spec_config["max_tlc_inv_depth"]
 
         # Run one caching run with all state variables for sake of metrics.
-        logging.info("Running initial full state caching upfront for stats reporting.")
-        self.cache_projected_states([[]], max_depth=max_depth, tlc_workers=tlc_workers)
+        # logging.info("Running initial full state caching upfront for stats reporting.")
+        # self.cache_projected_states([[]], max_depth=max_depth, tlc_workers=tlc_workers)
 
         # Upfront caching run for this round. If we are doing partitioned state caching, don't bother doing
         # this caching step upfront, since we will do it below when first trying to check invariants.

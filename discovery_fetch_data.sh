@@ -25,6 +25,7 @@ do
     # Fetch rendered proof tree and proof graph object.
     echo "fetching $bm"
     scp -O -r "$xfer:$bmdir/${bm}_[0-9]/endive/benchmarks/${bm}_ind-proof-tree-sd[0-9].*" $local_dir &
+    scp -O -r "$xfer:$bmdir/${bm}_[0-9]/endive/binned_histogram_25_${bm}._sd1.pdf" $local_dir &
     scp -O -r "$xfer:$bmdir/${bm}_[0-9]/endive/benchmarks/${bm}_IndDecompProof_*.tla" $local_dir &
 done
 wait
