@@ -554,7 +554,7 @@ class StructuredProof():
         if len(assumes_name_list) > 0:
             spec_lines += "    <1> USE " + ",".join(assumes_name_list) + "\n"
         if len(global_def_expands) > 0:
-            spec_lines += " DEF " + ",".join(global_def_expands) + "\n"
+            spec_lines += "<1> USE DEF " + ",".join(global_def_expands) + "\n"
         for ind,n in enumerate(nodes):
             # Decomposed proof obligation for each oncjunction.
             spec_lines +=  f"    <1>{ind}. Init => {n.expr} BY DEF Init, {n.expr}, IndGlobal\n"
