@@ -49,6 +49,11 @@ def median(lst):
     s = sorted(lst)
     return (s[n//2] + s[~n//2]) / 2
 
+def percentile(lst, p):
+    n = len(lst)
+    s = sorted(lst)
+    return s[int(n*p)]
+
 def powerset(iterable, min_size=0):
     "powerset([1,2,3]) --> () (1,) (2,) (3,) (1,2) (1,3) (2,3) (1,2,3)"
     s = list(iterable)
@@ -232,6 +237,8 @@ class InductiveInvGen():
         self.total_duration_secs = 0
         self.total_num_ctis_eliminated = 0
         self.total_num_cti_elimination_rounds = 0
+
+        self.slicing_stats = {"state_slices": {}, "grammar_slices": {}}
 
         # Clear and create directory for generated files if needed.
         os.system(f"rm -rf {os.path.join(self.specdir, GEN_TLA_DIR)}")
@@ -849,11 +856,12 @@ class InductiveInvGen():
         slice_stats = ret["slice_stats"]
         # Print slices sorted by size.
         for (ind,ignore_vars,size) in sorted(slice_stats, key = lambda s : s[2], reverse=True):
-            slice_vars = [s for s in self.state_vars if s not in ignore_vars]
+            slice_vars = sorted([s for s in self.state_vars if s not in ignore_vars])
             full_str = ""
             if sorted(slice_vars) == sorted(self.state_vars):
                 full_str = "(FULL state space)"
             print("slice_stats:", ind, slice_vars, size, full_str)
+            self.slicing_stats["state_slices"][tuple(slice_vars)] = size 
             
         slice_sizes = [s[2] for s in slice_stats]
         if len(slice_sizes) > 0:
@@ -2113,6 +2121,9 @@ class InductiveInvGen():
         if "max_tlc_inv_depth" in self.spec_config:
             max_depth = self.spec_config["max_tlc_inv_depth"]
 
+        # Run one caching run with all state variables for sake of metrics.
+        logging.info("Running initial full state caching upfront for stats reporting.")
+        self.cache_projected_states([[]], max_depth=max_depth, tlc_workers=tlc_workers)
 
         # Upfront caching run for this round. If we are doing partitioned state caching, don't bother doing
         # this caching step upfront, since we will do it below when first trying to check invariants.
@@ -4680,6 +4691,9 @@ class InductiveInvGen():
                 logging.info(f"[ END CTI elimination Round {roundi}, subround {subround}. ]")
 
                 print("Elimination round stats:", self.cti_elimination_round_stats)
+                
+                print("Slicing stats:")
+                print(self.slicing_stats)
 
                 # Update timing spent on proof node.
                 if action_node in self.proof_graph["nodes"]:
@@ -4755,7 +4769,15 @@ class InductiveInvGen():
             logging.info(f"(Round {roundi}) Cumulative Invariant checking duration: %f secs.", indgen.get_invcheck_duration())
             logging.info(f"(Round {roundi}) Cumulative CTI elimination checks duration: %f secs.", indgen.get_ctielimcheck_duration())
 
-            logging.info("")
+
+            state_slice_sizes = [self.slicing_stats["state_slices"][k] for k in self.slicing_stats["state_slices"]]
+            logging.info(f"State slices ({len(state_slice_sizes)}): {self.slicing_stats['state_slices']}")
+            logging.info(f"State slice sizes: {state_slice_sizes}")
+            logging.info(f"State slice max: {max(state_slice_sizes)}")
+            median_pct =  median(state_slice_sizes) / max(state_slice_sizes)
+            logging.info(f"State slice median: {median(state_slice_sizes)} ({round(median_pct * 100, 3)} %)")
+            logging.info(f"State slice 75th percentile: {percentile(state_slice_sizes, 0.75)} ({round(percentile(state_slice_sizes, 0.75) / max(state_slice_sizes) * 100, 3)} %)")
+
 
 #
 #
