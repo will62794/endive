@@ -144,6 +144,9 @@
             " \\A s,t \\in Server : (/\\ state[s] = Candidate /\\ t \\in votesGranted[s]) =>  /\\ currentTerm[t] = currentTerm[s] => votedFor[t] = s",
             "H_LogEntryInTermImpliesSafeAtTerm /\\ currentTerm = currentTerm /\\ state = state /\\ log = log /\\ votedFor = votedFor",
             "H_QuorumsSafeAtTerms /\\ currentTerm = currentTerm /\\ state = state /\\ votedFor = votedFor"
+        ],
+        "AcceptAppendEntriesRequestAppendAction": [
+            "H_LogEntryInTermImpliesSafeAtTermAppendEntries /\\ currentTerm = currentTerm /\\ state = state /\\ log = log /\\ votedFor = votedFor /\\ appendEntriesRequestMsgs = appendEntriesRequestMsgs"
         ]
     },
     "action_local_preds_KNOWN":{
