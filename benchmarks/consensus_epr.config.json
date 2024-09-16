@@ -28,9 +28,11 @@
     ],
     "preds_alt" : [],
     "safety"  :  "H_NoConflictingValues",
+    "main_inv_check_index": 1,
+    "cti_gen_instance_indexes": [0,1],
     "constants"  :  {
-        "Node": ["{n1}", "{n1,n2}", "{n1,n2,n3}"],
-        "Value": ["{v1}","{v1,v2}"],
+        "Node": ["{n1,n2}", "{n1,n2,n3}"],
+        "Value": ["{v1,v2}"],
         "n1": "n1",
         "n2": "n2",
         "n3": "n3",
