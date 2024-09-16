@@ -4780,6 +4780,7 @@ class InductiveInvGen():
 
 
             state_slice_sizes = [self.slicing_stats["state_slices"][k] for k in self.slicing_stats["state_slices"]]
+            state_slice_max = max(state_slice_sizes)
             logging.info(f"State slices ({len(state_slice_sizes)}): {self.slicing_stats['state_slices']}")
             logging.info(f"State slice sizes: {state_slice_sizes}")
             logging.info(f"State slice max: {max(state_slice_sizes)}")
@@ -4792,8 +4793,10 @@ class InductiveInvGen():
             try:
                 plt.figure(figsize=(6, 3))
 
-                # Create histogram with bins of width 25
-                plt.hist(state_slice_sizes, bins=12, edgecolor='black')
+                # Create histogram.
+                state_slice_sizes.remove(max(state_slice_sizes))
+                nbins=12
+                plt.hist(state_slice_sizes, bins=range(0, state_slice_max, state_slice_max//nbins ), edgecolor='black', cumulative=False)
 
                 # Labels and title
 
