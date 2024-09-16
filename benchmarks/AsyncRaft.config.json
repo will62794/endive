@@ -25,6 +25,8 @@
         "(state[VARI] = Candidate /\\ VARI # VARJ /\\ currentTerm[VARI] = currentTerm[VARJ])",
         "(state[VARI] = Follower /\\ VARI # VARJ)",
         "(state[VARJ] \\in {Leader,Candidate} /\\ VARI # VARJ)",
+        "votesGranted[VARI] = {}",
+        "votesGranted[VARJ] = {}",
         "votesGranted[VARI] \\in Quorum",
         "votesGranted[VARJ] \\in Quorum",
         "GrantedVoteSet(VARI) \\in Quorum /\\ votesGranted = votesGranted /\\ requestVoteResponseMsgs = requestVoteResponseMsgs",
@@ -33,6 +35,7 @@
         "VARJ \\in votesGranted[VARI]",
         "VARI \\in votesGranted[VARJ]",
         "votesGranted[VARI] \\cap votesGranted[VARJ] = {}",
+        "(\\A t \\in votesGranted[VARI] : /\\ currentTerm[t] = currentTerm[VARI] => votedFor[t] = VARI )",
         "VARREQVRES.mterm = currentTerm[VARI]",
         "VARREQVRES.mterm = currentTerm[VARJ]",
         "VARREQVRES.msource = VARI",
@@ -54,6 +57,7 @@
         "votedFor[VARJ] = VARJ",
         "votedFor[VARI] = VARJ",
         "votedFor[VARJ] = VARI",
+        "votedFor[VARI] # Nil /\\ VARI \\in votesGranted[votedFor[VARI]]",
         "votedFor[VARREQVRES.msource] = VARREQVRES.mdest",
         "(commitIndex[VARI] > 0)",
         "CanAppend(VARMAEREQ, VARI) /\\ log = log",
@@ -82,7 +86,6 @@
         "votedFor[VARREQVM.msource] = VARREQVM.msource",
         "votedFor[VARREQVM.msource] = VARREQVM.mdest",
         "commitIndex[VARI] > VARMAEREQ.mcommitIndex",
-        "VARMAEREQ.mcommitIndex > 0",
         "VARMAEREQ.mprevLogIndex = nextIndex[VARI][VARJ]",
         "VARMAEREQ.mprevLogTerm = currentTerm[VARI]",
         "VARLOGINDI = VARMAEREQ.mprevLogIndex + 1",
@@ -139,7 +142,8 @@
         "HandleRequestVoteRequestAction": [
             "\\A s,t \\in Server :  (/\\ state[s] = Candidate /\\ t \\in votesGranted[s]) => /\\ currentTerm[t] >= currentTerm[s]",
             " \\A s,t \\in Server : (/\\ state[s] = Candidate /\\ t \\in votesGranted[s]) =>  /\\ currentTerm[t] = currentTerm[s] => votedFor[t] = s",
-            "H_LogEntryInTermImpliesSafeAtTerm /\\ currentTerm = currentTerm /\\ state = state /\\ log = log /\\ votedFor = votedFor"
+            "H_LogEntryInTermImpliesSafeAtTerm /\\ currentTerm = currentTerm /\\ state = state /\\ log = log /\\ votedFor = votedFor",
+            "H_QuorumsSafeAtTerms /\\ currentTerm = currentTerm /\\ state = state /\\ votedFor = votedFor"
         ]
     },
     "action_local_preds_KNOWN":{

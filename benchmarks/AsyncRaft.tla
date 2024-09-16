@@ -1112,7 +1112,7 @@ H_LogEntryInTermImpliesSafeAtTerm ==
         \E Q \in Quorum : 
         \E u \in Server : 
             /\ currentTerm[u] >= log[s][i]
-            /\ (currentTerm[u] = log[s][i]) => (state[u] = Leader)
+            /\ (currentTerm[u] = log[s][i]) => (state[u] = Leader /\ votesGranted[u] = Q)
             /\ \A n \in Q : 
                 /\ currentTerm[n] >= log[s][i]
                 /\ currentTerm[n] = log[s][i] => (votedFor[n] = u)
