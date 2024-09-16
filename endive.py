@@ -2567,6 +2567,9 @@ class InductiveInvGen():
                     else:
                         invcheck_constants_obj = self.get_ctigen_constant_instances()[0]
 
+                    logging.info("Running initial full state caching upfront for stats reporting.")
+                    self.cache_projected_states([[]], max_depth=max_depth, tlc_workers=tlc_workers, constants_obj=invcheck_constants_obj)
+
                     #
                     # Consider the top few predicate var counts and test projected property checking.
                     # (EXPERIMENTAL)
