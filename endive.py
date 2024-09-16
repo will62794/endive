@@ -25,6 +25,12 @@ from proofs import *
 from mc import CTI,Trace,State
 import tlaps
 
+try:
+    import matplotlib.pyplot as plt
+except ImportError: 
+    print("matplotlib not installed, skipping plotting.")
+    plt = None
+
 
 DEBUG = False
 # MAC_FAST_JAVA_EXE = "/usr/local/zulu15.32.15-ca-jdk15.0.3-macosx_aarch64/bin/java"
@@ -4777,6 +4783,42 @@ class InductiveInvGen():
             median_pct =  median(state_slice_sizes) / max(state_slice_sizes)
             logging.info(f"State slice median: {median(state_slice_sizes)} ({round(median_pct * 100, 3)} %)")
             logging.info(f"State slice 75th percentile: {percentile(state_slice_sizes, 0.75)} ({round(percentile(state_slice_sizes, 0.75) / max(state_slice_sizes) * 100, 3)} %)")
+
+
+            # Create a histogram with buckets of width 25
+            try:
+                plt.figure(figsize=(6, 3))
+
+                # Create histogram with bins of width 25
+                plt.hist(state_slice_sizes, bins=12, edgecolor='black')
+
+                # Labels and title
+
+                # no labeling of x-ticks.
+                # plt.xticks(range(0, max(state_slice_sizes), 25))
+                plt.tick_params(
+                    axis='x',          # changes apply to the x-axis
+                    which='both',      # both major and minor ticks are affected
+                    bottom=False,      # ticks along the bottom edge are off
+                    top=False,         # ticks along the top edge are off
+                    labelbottom=False) # labels along the bottom edge are off
+                plt.tick_params(
+                    axis='y',          # changes apply to the x-axis
+                    which='both',      # both major and minor ticks are affected
+                    bottom=False,      # ticks along the bottom edge are off
+                    top=False,         # ticks along the top edge are off
+                    labelbottom=False) # labels along the bottom edge are off
+
+
+                # plt.xlabel('State slice counts')
+                # plt.ylabel('State slice size')
+
+                # Save the plot as an SVG file
+                svg_binned_histogram_25_path = f'binned_histogram_25_{self.specname}._sd{self.seed}.pdf'
+                plt.savefig(svg_binned_histogram_25_path, format='pdf')
+            except Exception as e:
+                print(e)
+                pass
 
 
 #

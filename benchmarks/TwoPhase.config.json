@@ -35,7 +35,7 @@
     "quant_vars"  :  ["VARRMI", "VARRMJ"],
     "quant_inv_alt"  :  null,
     "model_consts"  :  "CONSTANT rm1,rm2,rm3",
-    "symmetry" : true,
+    "symmetry" : false,
     "typeok"  :  "TypeOK",
     "simulate"  :  true,
     "tlaps_proof_config": {
