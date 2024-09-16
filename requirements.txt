@@ -2,3 +2,4 @@ graphviz
 flask
 flask_cors
 dot2tex
+matplotlib
