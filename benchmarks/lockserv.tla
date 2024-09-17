@@ -1,5 +1,5 @@
 ---- MODULE lockserv ----
-EXTENDS TLC
+EXTENDS TLC, Naturals
 
 CONSTANT Node
 
@@ -42,12 +42,19 @@ RecvUnlock(n) ==
     /\ server_holds_lock' = TRUE
     /\ UNCHANGED <<lock_msg, grant_msg, holds_lock>>
 
+
+SendLockAction == TRUE /\ \E n \in Node : SendLock(n)
+RecvLockAction == TRUE /\ \E n \in Node : RecvLock(n)
+RecvGrantAction == TRUE /\ \E n \in Node : RecvGrant(n)
+UnlockAction == TRUE /\ \E n \in Node : Unlock(n)
+RecvUnlockAction == TRUE /\ \E n \in Node : RecvUnlock(n)
+
 Next ==
-    \/ \E n \in Node : SendLock(n)
-    \/ \E n \in Node : RecvLock(n)
-    \/ \E n \in Node : RecvGrant(n)
-    \/ \E n \in Node : Unlock(n)
-    \/ \E n \in Node : RecvUnlock(n)
+    \/ SendLockAction
+    \/ RecvLockAction
+    \/ RecvGrantAction
+    \/ UnlockAction
+    \/ RecvUnlockAction
 
 Init == 
     /\ lock_msg = [n \in Node |-> FALSE]
@@ -68,4 +75,5 @@ NextUnchanged == UNCHANGED vars
 \* No two clients think they hold the lock simultaneously.
 Mutex == \A x,y \in Node : (holds_lock[x] /\ holds_lock[y]) => (x = y)
 
+CTICost == 0
 ====

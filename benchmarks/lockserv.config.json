@@ -13,13 +13,30 @@
     ],
     "preds_alt" : [],
     "safety"  :  "Mutex",
-    "constants"  :  "CONSTANTS\nNode={n1,n2,n3}\nn1=n1\nn2=n2\nn3=n3\n",
+    "constants"  :  {
+        "Node": "{n1,n2,n3,n4,n5}",
+        "n1": "n1",
+        "n2": "n2",
+        "n3": "n3",
+        "n4": "n4",
+        "n5": "n5"
+    },
     "constraint"  :  "",
     "quant_inv"  :  "\\A VARI \\in Node : \\A VARJ \\in Node : ",
     "quant_inv_alt"  :  null,
     "quant_vars": ["VARI", "VARJ"],
-    "model_consts"  :  "CONSTANT n1,n2,n3",
+    "model_consts"  :  "CONSTANT n1,n2,n3,n4,n5",
     "symmetry" : false,
     "typeok"  :  "TypeOK",
-    "simulate"  :  true      
+    "simulate"  :  true,
+    "tlaps_proof_config": {
+        "assumes": [
+        ],
+        "global_def_expands":[
+        ],
+        "lemma_def_expands": {
+        },
+        "action_def_expands":{
+        }
+    }    
 }
