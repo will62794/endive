@@ -2986,8 +2986,8 @@ class InductiveInvGen():
                         continue
 
                     logging.info("+ Doing re-checking at larger parameter bound")
-                    depth = self.spec_config.get("simulation_inv_check_depth", 50)
-                    num_states = 100000 # Make this relatively cheap.
+                    depth = self.spec_config.get("simulation_inv_check_depth", 100)
+                    num_states = 2000000 # Make this relatively cheap.
                     num = num_states // depth // tlc_workers
                     quick_tlc_flags = f"-depth {depth} -simulate num={num}"
                     larger_constants_obj = list(self.get_config_constant_instances())[self.spec_config["large_instance_inv_check_index"]]
