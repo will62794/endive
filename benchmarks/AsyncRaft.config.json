@@ -124,7 +124,9 @@
         "VARMAERES.mterm > currentTerm[VARMAERES.msource]",
         "VARMAERES.mterm = currentTerm[VARI]",
         "matchIndex[VARI][VARJ] = VARMAERES.mmatchIndex",
-        "VARMAERES.msuccess"
+        "VARMAERES.msuccess",
+        "H_LogTermsMonotonic /\\ log = log",
+        "H_QuorumsSafeAtTerms /\\ currentTerm = currentTerm /\\ state = state /\\ votedFor = votedFor"
     ],
     "action_local_preds":{
         "ClientRequestAction": [
