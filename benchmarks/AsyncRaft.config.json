@@ -125,8 +125,13 @@
         "VARMAERES.mterm = currentTerm[VARI]",
         "matchIndex[VARI][VARJ] = VARMAERES.mmatchIndex",
         "VARMAERES.msuccess",
-        "H_LogTermsMonotonic /\\ log = log",
         "H_QuorumsSafeAtTerms /\\ currentTerm = currentTerm /\\ state = state /\\ votedFor = votedFor"
+    ],
+    "older_preds" : [
+        "VARMAEREQ.mcommitIndex > 0",
+        "(LogOk(VARI, VARMAEREQ) /\\ log = log) \\/ (~(VARMAEREQ.mentries # <<>> /\\ VARMAEREQ.mentries[1] = currentTerm[VARI] /\\ state[VARI] = Leader))",
+        "H_PrimaryHasEntriesItCreated /\\ log = log /\\ state = state /\\ currentTerm = currentTerm"
+
     ],
     "action_local_preds":{
         "ClientRequestAction": [
