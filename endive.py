@@ -244,7 +244,7 @@ class InductiveInvGen():
         self.total_num_ctis_eliminated = 0
         self.total_num_cti_elimination_rounds = 0
 
-        self.slicing_stats = {"state_slices": {}, "grammar_slices": {}}
+        self.slicing_stats = {"state_slices": {}, "pred_slices": []}
 
         # Clear and create directory for generated files if needed.
         os.system(f"rm -rf {os.path.join(self.specdir, GEN_TLA_DIR)}")
@@ -2305,6 +2305,8 @@ class InductiveInvGen():
                 if "action_local_preds" in self.spec_config and proof_graph_action in self.spec_config["action_local_preds"] and iteration > 1:
                     # Avoid action local preds after 1st round.
                     preds = [p for p in preds if (p not in self.spec_config["action_local_preds"][proof_graph_action])]
+
+                self.slicing_stats["pred_slices"].append(preds)
 
                 all_invs = mc.generate_invs(
                     preds, self.num_invs_per_iter_group, min_num_conjuncts=min_conjs, max_num_conjuncts=max_conjs, 
@@ -4780,7 +4782,9 @@ class InductiveInvGen():
 
 
             state_slice_sizes = [self.slicing_stats["state_slices"][k] for k in self.slicing_stats["state_slices"]]
+            pred_slice_sizes = [len(k) for k in self.slicing_stats["pred_slices"]]
             state_slice_max = max(state_slice_sizes)
+            logging.info(f"Pred slices median ({len(pred_slice_sizes)}): {median(pred_slice_sizes)} (of {len(self.preds)} total preds)")
             logging.info(f"State slices ({len(state_slice_sizes)}): {self.slicing_stats['state_slices']}")
             logging.info(f"State slice sizes: {state_slice_sizes}")
             logging.info(f"State slice max: {max(state_slice_sizes)}")
