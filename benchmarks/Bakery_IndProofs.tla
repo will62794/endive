@@ -1050,9 +1050,9 @@ THEOREM L_27 == TypeOK /\ Inv80_b6ff_R2_0_I3 /\ Inv4521_3f08_R1_1_I2 /\ Next => 
 \* Initiation.
 THEOREM Init => IndGlobal
     <1> USE A0
-<1> USE DEF \prec
-    <1>0. Init => TypeOK BY DEF Init, TypeOK, IndGlobal
-    <1>1. Init => Safety BY DEF Init, Safety, IndGlobal
+<1> USE DEF \prec, Procs, ProcSet
+    <1>0. Init => TypeOK BY DEF Init, TypeOK, IndGlobal, Procs, ProcSet
+    <1>1. Init => Safety BY DEF Init, Safety, IndGlobal, H_MutualExclusion
     <1>2. Init => Inv4690_2f61_R0_0_I2 BY DEF Init, Inv4690_2f61_R0_0_I2, IndGlobal
     <1>3. Init => Inv4520_48f3_R1_0_I2 BY DEF Init, Inv4520_48f3_R1_0_I2, IndGlobal
     <1>4. Init => Inv10_8778_R2_0_I3 BY DEF Init, Inv10_8778_R2_0_I3, IndGlobal
@@ -2302,6 +2302,6 @@ THEOREM IndGlobal /\ Next => IndGlobal'
 \* Inv21195_R4_0_I3 == \A VARI \in Procs : ~(nxt[VARI] = VARI) \/ (~(unchecked[VARI] = {})) \/ (~(pc[VARI] = "w1"))
 =============================================================================
 \* Modification History
-\* Last modified Wed Oct 02 15:54:33 EDT 2024 by willyschultz
+\* Last modified Wed Oct 02 17:18:06 EDT 2024 by willyschultz
 \* Last modified Tue Dec 18 13:48:46 PST 2018 by lamport
 \* Created Thu Nov 21 15:54:32 PST 2013 by lamport
