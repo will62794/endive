@@ -4144,6 +4144,46 @@ class InductiveInvGen():
             # Use the latest one.
             cobjs = [constant_instances[-1]]
         return cobjs
+    
+    def tlaps_induction_check(self, obligation_pred):
+        lemma_nodes = [n for n in self.proof_graph["nodes"] if "is_lemma" in self.proof_graph["nodes"][n]]
+
+        proof_node = StructuredProofNode("L_" + obligation_pred, obligation_pred)
+        if obligation_pred[0] == "Safety":
+            proof_node = StructuredProofNode("L_" + obligation_pred, self.safety)
+        local_proof = StructuredProof(proof_node, specname=self.specname, actions=self.actions)
+        ret = local_proof.to_tlaps_proof_skeleton(
+                            self.spec_config["tlaps_proof_config"], 
+                            add_lemma_defs=[(n, self.proof_graph["nodes"][n]["expr"]) for n in lemma_nodes], 
+                            seed=111115, workdir="benchmarks/gen_tla",tag=obligation_pred,
+                            include_typeok=False)
+        tla_proof_file = ret["tlaps_filename"]
+        lemma_source_map = ret["lemma_source_map"]
+        print("LEMMA SOURCE MAP:")
+        for m in lemma_source_map:
+            print(m, lemma_source_map[m])
+        logging.info("Checking local proof obligations with TLAPS.")
+        st = time.time()
+        proof_stats = tlaps.tlapm_check_proof(tla_proof_file, stretch=0.2, nthreads=4, smt_timeout=3, tlapm_install_dir=self.tlapm_install_dir)
+        obl_states = proof_stats["obligation_states"]
+
+        print("--- TLAPS Checks --- ")
+        unproved_obls = []
+        for bid in obl_states:
+            if obl_states[bid]["status"] not in ["trivial"]:
+                start_line = int(obl_states[bid]["loc"]["startPos"][0])
+                if start_line in lemma_source_map:
+                    act = lemma_source_map[start_line][1]
+                    status = obl_states[bid]["status"]
+                    if status == "failed":
+                        unproved_obls.append(lemma_source_map[start_line])
+                    print(lemma_source_map[start_line], obl_states[bid]["status"])
+
+        logging.info(f"Checked local proof obligation with TLAPS in {time.time() - st}s.")
+        print("TLAPS UNPROVED:")
+        for ob in unproved_obls:
+            print(" ", ob)    
+        return unproved_obls   
 
     def do_invgen_proof_tree_mode(self):
         """ Do localized invariant synthesis based on an inductive proof graph structure."""
@@ -4360,41 +4400,7 @@ class InductiveInvGen():
             do_tlaps_inductive_check = self.all_args["do_tlaps_induction_checks"]
 
             if do_tlaps_inductive_check:
-                proof_node = StructuredProofNode("L_" + curr_obligation_pred_tup[0], curr_obligation_pred_tup[0])
-                if curr_obligation_pred_tup[0] == "Safety":
-                    proof_node = StructuredProofNode("L_" + curr_obligation_pred_tup[0], self.safety)
-                local_proof = StructuredProof(proof_node, specname=self.specname, actions=self.actions)
-                ret = local_proof.to_tlaps_proof_skeleton(
-                                    self.spec_config["tlaps_proof_config"], 
-                                    add_lemma_defs=[(n, self.proof_graph["nodes"][n]["expr"]) for n in lemma_nodes], 
-                                    seed=111115, workdir="benchmarks/gen_tla",tag=curr_obligation_pred_tup[0],
-                                    include_typeok=False)
-                tla_proof_file = ret["tlaps_filename"]
-                lemma_source_map = ret["lemma_source_map"]
-                print("LEMMA SOURCE MAP:")
-                for m in lemma_source_map:
-                    print(m, lemma_source_map[m])
-                logging.info("Checking local proof obligations with TLAPS.")
-                st = time.time()
-                proof_stats = tlaps.tlapm_check_proof(tla_proof_file, stretch=0.2, nthreads=4, smt_timeout=3, tlapm_install_dir=self.tlapm_install_dir)
-                obl_states = proof_stats["obligation_states"]
-
-                print("--- TLAPS Checks --- ")
-                unproved_obls = []
-                for bid in obl_states:
-                    if obl_states[bid]["status"] not in ["trivial"]:
-                        start_line = int(obl_states[bid]["loc"]["startPos"][0])
-                        if start_line in lemma_source_map:
-                            act = lemma_source_map[start_line][1]
-                            status = obl_states[bid]["status"]
-                            if status == "failed":
-                                unproved_obls.append(lemma_source_map[start_line])
-                            print(lemma_source_map[start_line], obl_states[bid]["status"])
-
-                logging.info(f"Checked local proof obligation with TLAPS in {time.time() - st}s.")
-                print("TLAPS UNPROVED:")
-                for ob in unproved_obls:
-                    print(" ", ob)
+                unproved_obls = self.tlaps_induction_check(curr_obligation_pred_tup[0])
 
             # Re-parse spec object to include definitions of any newly generate strengthening lemmas.
             # if len(self.strengthening_conjuncts) > 0:
