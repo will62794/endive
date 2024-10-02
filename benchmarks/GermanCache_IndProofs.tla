@@ -5,73 +5,72 @@ EXTENDS GermanCache
 USE DEF CtrlProp1
 USE DEF MSG, MSG_CMD, CACHE, CACHE_STATE
 
-
 \* Proof Graph Stats
 \* ==================
-\* seed: 1
+\* seed: 7
 \* num proof graph nodes: 46
 \* num proof obligations: 552
 Safety == CtrlProp1
 Inv122_03a2_R0_0_I1 == \A VARI \in NODE : \A VARJ \in NODE : (Cache[VARJ].State = "I") \/ (~(Chan2[VARI].Cmd = "GntE"))
-Inv10_3662_R0_1_I1 == \A VARI \in NODE : \A VARJ \in NODE : ~(Cache[VARI].State = "E") \/ (~(Chan2[VARJ].Cmd = "GntS"))
-Inv5427_0d22_R1_0_I2 == \A VARI \in NODE : \A VARJ \in NODE : (Chan2[VARI].Cmd = "Empty") \/ (~(Chan2[VARJ].Cmd = "GntE") \/ (~(VARI # VARJ)))
-Inv32_1336_R1_1_I1 == \A VARI \in NODE : \A VARJ \in NODE : ~(Chan2[VARI].Cmd = "GntE") \/ (~(Chan2[VARJ].Cmd = "GntS"))
+Inv11_3662_R0_1_I1 == \A VARI \in NODE : \A VARJ \in NODE : ~(Cache[VARI].State = "E") \/ (~(Chan2[VARJ].Cmd = "GntS"))
+Inv5378_0d22_R1_0_I2 == \A VARI \in NODE : \A VARJ \in NODE : (Chan2[VARI].Cmd = "Empty") \/ (~(Chan2[VARJ].Cmd = "GntE") \/ (~(VARI # VARJ)))
+Inv33_1336_R1_1_I1 == \A VARI \in NODE : \A VARJ \in NODE : ~(Chan2[VARI].Cmd = "GntE") \/ (~(Chan2[VARJ].Cmd = "GntS"))
 Inv22_d756_R1_2_I1 == \A VARI \in NODE : (Cache[VARI].State = "I") \/ ((ShrSet[VARI]))
 Inv12_513a_R2_1_I1 == \A VARI \in NODE : (ExGntd) \/ (~(Cache[VARI].State = "E"))
 Inv1_85ad_R3_0_I1 == \A VARI \in NODE : (Chan2[VARI].Cmd = "Empty") \/ ((ShrSet[VARI]))
 Inv5_a2c7_R3_1_I1 == \A VARI \in NODE : (ExGntd) \/ (~(Chan2[VARI].Cmd = "GntE"))
-Inv6423_fc2f_R3_2_I2 == \A VARI \in NODE : \A VARJ \in NODE : ~(Chan2[VARI].Cmd = "GntE") \/ (~(InvSet[VARJ]) \/ (~(VARI # VARJ)))
+Inv6410_fc2f_R3_2_I2 == \A VARI \in NODE : \A VARJ \in NODE : ~(Chan2[VARI].Cmd = "GntE") \/ (~(InvSet[VARJ]) \/ (~(VARI # VARJ)))
 Inv11_e00a_R5_0_I1 == \A VARI \in NODE : (ShrSet[VARI]) \/ (~(Chan2[VARI].Cmd = "GntE"))
 Inv12_4ccb_R5_1_I1 == \A VARI \in NODE : (ShrSet[VARI]) \/ (~(Chan2[VARI].Cmd = "GntS"))
 Inv10_8267_R5_2_I1 == \A VARI \in NODE : (Cache[VARI].State = "I") \/ ((Chan3[VARI].Cmd = "Empty"))
 Inv7_7199_R6_1_I1 == \A VARI \in NODE : \A VARJ \in NODE : (Chan3[VARI].Cmd = "Empty") \/ (~(Cache[VARJ].State = "E"))
 Inv1_eb94_R7_0_I1 == \A VARI \in NODE : (Chan2[VARI].Cmd = "Empty") \/ ((Chan3[VARI].Cmd = "Empty"))
-Inv104_0f39_R7_1_I1 == \A VARI \in NODE : (ShrSet[VARI]) \/ (~(InvSet[VARI]))
+Inv111_0f39_R7_1_I1 == \A VARI \in NODE : (ShrSet[VARI]) \/ (~(InvSet[VARI]))
 Inv15_5b11_R8_0_I1 == \A VARI \in NODE : \A VARJ \in NODE : (Chan3[VARI].Cmd = "Empty") \/ (~(Chan2[VARJ].Cmd = "GntE"))
-Inv9619_4ca8_R9_0_I2 == \A VARI \in NODE : \A VARJ \in NODE : ~(Chan2[VARJ].Cmd = "GntE") \/ (~(VARI # VARJ)) \/ (~(ShrSet[VARI]))
+Inv9560_0995_R9_0_I2 == \A VARI \in NODE : \A VARJ \in NODE : ~(Chan2[VARI].Cmd = "GntE") \/ (~(VARI # VARJ)) \/ (~(ShrSet[VARJ]))
 Inv11_c03f_R12_0_I1 == \A VARJ \in NODE : (Chan2[VARJ].Cmd = "Empty") \/ ((Chan3[VARJ].Cmd = "Empty"))
-Inv8923_9eca_R13_1_I2 == \A VARI \in NODE : \A VARJ \in NODE : ~(Cache[VARI].State = "E") \/ (~(Chan2[VARJ].Cmd = "Inv") \/ (~(VARI # VARJ)))
-Inv14_9e93_R14_0_I1 == \A VARI \in NODE : (Chan3[VARI].Cmd = "Empty") \/ ((ShrSet[VARI]))
-Inv2748_0201_R14_1_I2 == \A VARI \in NODE : (Chan3[VARI].Cmd = "Empty") \/ ((CurCmd = "ReqE")) \/ ((ExGntd))
+Inv40_2bf0_R13_1_I1 == \A VARI \in NODE : ~(Cache[VARI].State = "I") \/ (~(Chan2[VARI].Cmd = "Inv"))
+Inv17_9e93_R14_0_I1 == \A VARI \in NODE : (Chan3[VARI].Cmd = "Empty") \/ ((ShrSet[VARI]))
+Inv4424_0201_R14_1_I2 == \A VARI \in NODE : (Chan3[VARI].Cmd = "Empty") \/ ((CurCmd = "ReqE")) \/ ((ExGntd))
 Inv13_45c1_R14_2_I1 == \A VARI \in NODE : (Chan3[VARI].Cmd = "Empty") \/ (~(InvSet[VARI]))
 Inv26_259c_R15_0_I1 == \A VARJ \in NODE : (Chan3[VARJ].Cmd = "Empty") \/ (~(InvSet[VARJ]))
 Inv64_c47d_R16_1_I1 == \A VARI \in NODE : \A VARJ \in NODE : ~(Chan2[VARI].Cmd = "GntE") \/ (~(Chan2[VARJ].Cmd = "Inv"))
-Inv3306_6920_R19_1_I2 == \A VARI \in NODE : \A VARJ \in NODE : ~(Cache[VARI].State = "E") \/ (~(InvSet[VARJ]) \/ (~(VARI # VARJ)))
+Inv4763_b566_R19_0_I2 == \A VARI \in NODE : ~(Cache[VARI].State = "I") \/ (~(Chan2[VARI].Cmd = "Empty") \/ (~(InvSet[VARI])))
 Inv39_7204_R20_0_I1 == \A VARI \in NODE : (ShrSet[VARI]) \/ (~(Chan2[VARI].Cmd = "Inv"))
-Inv1036_a1d6_R21_0_I3 == \A VARI \in NODE : \A VARJ \in NODE : (Chan3[VARI].Cmd = "Empty") \/ (~(ExGntd)) \/ ((Chan3[VARJ].Cmd = "Empty")) \/ (~(VARI # VARJ))
-Inv1611_1275_R21_1_I2 == \A VARI \in NODE : (CurCmd = "ReqE") \/ ((ExGntd) \/ (~(Chan2[VARI].Cmd = "Inv")))
-Inv3716_575b_R22_0_I2 == \A VARI \in NODE : (Chan3[VARI].Cmd = "Empty") \/ ((CurCmd = "ReqE") \/ ((CurCmd = "ReqS")))
+Inv1057_089e_R21_0_I3 == \A VARI \in NODE : \A VARJ \in NODE : (Chan3[VARI].Cmd = "Empty") \/ (~(ExGntd) \/ (~(VARI # VARJ))) \/ ((Chan3[VARJ].Cmd = "Empty"))
+Inv2458_2a15_R21_1_I2 == \A VARI \in NODE : (CurCmd = "ReqE") \/ (~(Chan2[VARI].Cmd = "Inv")) \/ ((ExGntd))
+Inv4043_dbee_R22_0_I2 == \A VARI \in NODE : (Chan3[VARI].Cmd = "Empty") \/ ((CurCmd = "ReqE")) \/ ((CurCmd = "ReqS"))
 Inv76_d564_R22_2_I1 == \A VARI \in NODE : ~(Chan2[VARI].Cmd = "Inv") \/ (~(InvSet[VARI]))
-Inv6436_bea9_R25_1_I2 == \A VARI \in NODE : \A VARJ \in NODE : ~(Cache[VARI].State = "E") \/ (~(ShrSet[VARJ])) \/ (~(VARI # VARJ))
+Inv1103_d53b_R25_0_I4 == \A VARJ \in NODE : (CurCmd = "ReqE") \/ ((InvSet[VARJ])) \/ (~(Chan2[VARJ].Cmd = "Empty")) \/ (~(Cache[VARJ].State = "I")) \/ ((CurCmd = "ReqS")) \/ (~(ShrSet[VARJ]))
 Inv20_5035_R26_0_I1 == \A VARI \in NODE : (Chan3[VARI].Cmd = "Empty") \/ (~(Chan2[VARI].Cmd = "Inv"))
 Inv13_812b_R27_1_I1 == \A VARI \in NODE : (Chan3[VARI].Cmd = "Empty") \/ ((Chan3[VARI].Cmd = "InvAck"))
 Inv50_ba79_R27_1_I1 == \A VARI \in NODE : ~(Cache[VARI].State = "S") \/ (~(ExGntd))
-Inv45_2bf0_R27_1_I1 == \A VARI \in NODE : ~(Cache[VARI].State = "I") \/ (~(Chan2[VARI].Cmd = "Inv"))
-Inv3857_1b30_R28_0_I2 == \A VARI \in NODE : \A VARJ \in NODE : (Chan3[VARI].Cmd = "Empty") \/ (~(Chan2[VARJ].Cmd = "Inv") \/ (~(ExGntd)))
-Inv651_b778_R29_2_I2 == \A VARI \in NODE : (CurCmd = "ReqE") \/ ((CurCmd = "ReqS")) \/ (~(Chan2[VARI].Cmd = "Inv"))
+Inv2146_6e63_R28_0_I2 == \A VARI \in NODE : \A VARJ \in NODE : (Chan3[VARI].Cmd = "Empty") \/ (~(ExGntd)) \/ (~(Chan2[VARJ].Cmd = "Inv"))
+Inv1149_870b_R29_2_I2 == \A VARJ \in NODE : (CurCmd = "ReqE") \/ ((CurCmd = "ReqS") \/ (~(Chan2[VARJ].Cmd = "Inv")))
+Inv957_c432_R31_0_I2 == \A VARI \in NODE : (ExGntd) \/ ((InvSet[VARI] = ShrSet[VARI]) \/ (~(CurCmd = "ReqS")))
 Inv43_39a8_R34_0_I1 == \A VARI \in NODE : ~(Chan2[VARI].Cmd = "GntS") \/ (~(ExGntd))
-Inv1511_683a_R35_0_I2 == \A VARI \in NODE : ~(Cache[VARI].State = "I") \/ (~(Chan2[VARI].Cmd = "Empty")) \/ (~(InvSet[VARI]))
-Inv28_f7af_R36_1_I2 == \A VARJ \in NODE : (Cache[VARJ].State = "E") \/ (~(Chan2[VARJ].Cmd = "Inv")) \/ (~(ExGntd))
-Inv1067_2e74_R36_2_I2 == \A VARI \in NODE : \A VARJ \in NODE : (Chan3[VARJ].Cmd = "Empty") \/ (~(ExGntd) \/ (~(InvSet[VARI])))
-Inv2445_d313_R39_0_I4 == \A VARJ \in NODE : (Chan2[VARJ].Cmd = "Inv") \/ ((CurCmd = "ReqE") \/ ((CurCmd = "ReqS") \/ (~(Cache[VARJ].State = "I") \/ (~(ShrSet[VARJ])))) \/ (~(Chan2[VARJ].Cmd = "Empty")))
-Inv100_1def_R41_3_I1 == \A VARJ \in NODE : ~(Chan2[VARJ].Cmd = "Inv") \/ (~(InvSet[VARJ]))
-Inv654_d73e_R42_0_I4 == \A VARI \in NODE : \A VARJ \in NODE : (Cache[VARI].State = "S") \/ (~(Cache[VARJ].State = "I")) \/ ((ExGntd)) \/ (~(CurCmd = "ReqS")) \/ (~(ShrSet[VARI])) \/ (~(Chan2[VARI].Cmd = "Empty"))
-Inv2246_d6a1_R44_1_I3 == \A VARI \in NODE : \A VARJ \in NODE : (Chan3[VARI].Cmd = "Empty") \/ (~(ExGntd) \/ (~(ShrSet[VARJ])) \/ (~(VARI # VARJ)))
+Inv687_881e_R35_2_I2 == \A VARI \in NODE : \A VARJ \in NODE : (Chan3[VARI].Cmd = "Empty") \/ (~(ExGntd)) \/ (~(InvSet[VARJ]))
+Inv1942_3576_R37_0_I3 == \A VARI \in NODE : \A VARJ \in NODE : (Chan3[VARJ].Cmd = "Empty") \/ ((InvSet[VARI] = ShrSet[VARI]) \/ (~(ExGntd) \/ (~(VARI # VARJ))))
+Inv1000_d532_R39_3_I2 == \A VARI \in NODE : \A VARJ \in NODE : ~(Chan2[VARJ].Cmd = "Inv") \/ (~(InvSet[VARI])) \/ (~(ExGntd))
+Inv111_3e57_R40_1_I2 == \A VARI \in NODE : ~(Chan2[VARI].Cmd = "Inv") \/ (~(InvSet[VARI] = ShrSet[VARI]))
+Inv848_bea9_R40_1_I2 == \A VARI \in NODE : \A VARJ \in NODE : ~(Cache[VARI].State = "E") \/ (~(ShrSet[VARJ])) \/ (~(VARI # VARJ))
+Inv23009_51f5_R41_3_I3 == \A VARI \in NODE : \A VARJ \in NODE : ~(ExGntd) \/ (~(InvSet[VARI]) \/ (~(InvSet[VARJ]) \/ (~(VARI # VARJ))))
+Inv7513_6fbd_R44_0_I3 == \A VARI \in NODE : \A VARJ \in NODE : (InvSet[VARI] = ShrSet[VARI]) \/ (~(ExGntd)) \/ (~(VARI # VARJ)) \/ (~(ShrSet[VARJ]))
 
 IndGlobal == 
   /\ TypeOK
   /\ Safety
   /\ Inv122_03a2_R0_0_I1
-  /\ Inv5427_0d22_R1_0_I2
+  /\ Inv5378_0d22_R1_0_I2
   /\ Inv1_85ad_R3_0_I1
   /\ Inv1_eb94_R7_0_I1
-  /\ Inv14_9e93_R14_0_I1
+  /\ Inv17_9e93_R14_0_I1
   /\ Inv39_7204_R20_0_I1
   /\ Inv20_5035_R26_0_I1
   /\ Inv13_45c1_R14_2_I1
-  /\ Inv3716_575b_R22_0_I2
-  /\ Inv2748_0201_R14_1_I2
-  /\ Inv1036_a1d6_R21_0_I3
+  /\ Inv4043_dbee_R22_0_I2
+  /\ Inv4424_0201_R14_1_I2
+  /\ Inv1057_089e_R21_0_I3
   /\ Inv11_c03f_R12_0_I1
   /\ Inv13_812b_R27_1_I1
   /\ Inv50_ba79_R27_1_I1
@@ -83,32 +82,32 @@ IndGlobal ==
   /\ Inv7_7199_R6_1_I1
   /\ Inv15_5b11_R8_0_I1
   /\ Inv64_c47d_R16_1_I1
-  /\ Inv6423_fc2f_R3_2_I2
-  /\ Inv9619_4ca8_R9_0_I2
+  /\ Inv6410_fc2f_R3_2_I2
+  /\ Inv9560_0995_R9_0_I2
   /\ Inv5_a2c7_R3_1_I1
-  /\ Inv104_0f39_R7_1_I1
+  /\ Inv111_0f39_R7_1_I1
   /\ Inv26_259c_R15_0_I1
   /\ Inv76_d564_R22_2_I1
-  /\ Inv651_b778_R29_2_I2
-  /\ Inv1611_1275_R21_1_I2
-  /\ Inv3857_1b30_R28_0_I2
-  /\ Inv28_f7af_R36_1_I2
-  /\ Inv1511_683a_R35_0_I2
-  /\ Inv2445_d313_R39_0_I4
-  /\ Inv654_d73e_R42_0_I4
-  /\ Inv2246_d6a1_R44_1_I3
-  /\ Inv6436_bea9_R25_1_I2
+  /\ Inv1149_870b_R29_2_I2
+  /\ Inv2458_2a15_R21_1_I2
+  /\ Inv2146_6e63_R28_0_I2
+  /\ Inv40_2bf0_R13_1_I1
+  /\ Inv4763_b566_R19_0_I2
+  /\ Inv1103_d53b_R25_0_I4
+  /\ Inv957_c432_R31_0_I2
+  /\ Inv1942_3576_R37_0_I3
+  /\ Inv111_3e57_R40_1_I2
+  /\ Inv1000_d532_R39_3_I2
+  /\ Inv23009_51f5_R41_3_I3
+  /\ Inv7513_6fbd_R44_0_I3
+  /\ Inv848_bea9_R40_1_I2
   /\ Inv12_513a_R2_1_I1
-  /\ Inv8923_9eca_R13_1_I2
-  /\ Inv3306_6920_R19_1_I2
-  /\ Inv1067_2e74_R36_2_I2
-  /\ Inv100_1def_R41_3_I1
-  /\ Inv45_2bf0_R27_1_I1
-  /\ Inv32_1336_R1_1_I1
-  /\ Inv10_3662_R0_1_I1
+  /\ Inv687_881e_R35_2_I2
+  /\ Inv33_1336_R1_1_I1
+  /\ Inv11_3662_R0_1_I1
 
 
-\* mean in-degree: 2.391304347826087
+\* mean in-degree: 2.4347826086956523
 \* median in-degree: 2
 \* max in-degree: 7
 \* min in-degree: 0
@@ -176,7 +175,7 @@ THEOREM L_0 == TypeOK /\ TypeOK /\ Next => TypeOK'
 
 \* (ROOT SAFETY PROP)
 \*** Safety
-THEOREM L_1 == TypeOK /\ Inv10_3662_R0_1_I1 /\ Inv122_03a2_R0_0_I1 /\ Safety /\ Next => Safety'
+THEOREM L_1 == TypeOK /\ Inv11_3662_R0_1_I1 /\ Inv122_03a2_R0_0_I1 /\ Safety /\ Next => Safety'
   <1>. USE A0,A1
   \* (Safety,SendReqEAction)
   <1>1. TypeOK /\ Safety /\ SendReqEAction => Safety' BY DEF TypeOK,SendReqEAction,SendReqE,Safety,CtrlProp1,MSG,MSG_CMD,CACHE,CACHE_STATE
@@ -195,7 +194,7 @@ THEOREM L_1 == TypeOK /\ Inv10_3662_R0_1_I1 /\ Inv122_03a2_R0_0_I1 /\ Safety /\ 
   \* (Safety,SendGntEAction)
   <1>8. TypeOK /\ Safety /\ SendGntEAction => Safety' BY DEF TypeOK,SendGntEAction,SendGntE,Safety,CtrlProp1,MSG,MSG_CMD,CACHE,CACHE_STATE
   \* (Safety,RecvGntSAction)
-  <1>9. TypeOK /\ Inv10_3662_R0_1_I1 /\ Safety /\ RecvGntSAction => Safety' BY DEF TypeOK,Inv10_3662_R0_1_I1,RecvGntSAction,RecvGntS,Safety,CtrlProp1,MSG,MSG_CMD,CACHE,CACHE_STATE
+  <1>9. TypeOK /\ Inv11_3662_R0_1_I1 /\ Safety /\ RecvGntSAction => Safety' BY DEF TypeOK,Inv11_3662_R0_1_I1,RecvGntSAction,RecvGntS,Safety,CtrlProp1,MSG,MSG_CMD,CACHE,CACHE_STATE
   \* (Safety,RecvGntEAction)
   <1>10. TypeOK /\ Inv122_03a2_R0_0_I1 /\ Safety /\ RecvGntEAction => Safety' BY DEF TypeOK,Inv122_03a2_R0_0_I1,RecvGntEAction,RecvGntE,Safety,CtrlProp1,MSG,MSG_CMD,CACHE,CACHE_STATE
   \* (Safety,StoreAction)
@@ -206,7 +205,7 @@ THEOREM L_1 == TypeOK /\ Inv10_3662_R0_1_I1 /\ Inv122_03a2_R0_0_I1 /\ Safety /\ 
 
 
 \*** Inv122_03a2_R0_0_I1
-THEOREM L_2 == TypeOK /\ Inv22_d756_R1_2_I1 /\ Inv32_1336_R1_1_I1 /\ Inv5427_0d22_R1_0_I2 /\ Inv122_03a2_R0_0_I1 /\ Next => Inv122_03a2_R0_0_I1'
+THEOREM L_2 == TypeOK /\ Inv22_d756_R1_2_I1 /\ Inv33_1336_R1_1_I1 /\ Inv5378_0d22_R1_0_I2 /\ Inv122_03a2_R0_0_I1 /\ Next => Inv122_03a2_R0_0_I1'
   <1>. USE A0,A1
   \* (Inv122_03a2_R0_0_I1,SendReqEAction)
   <1>1. TypeOK /\ Inv122_03a2_R0_0_I1 /\ SendReqEAction => Inv122_03a2_R0_0_I1' BY DEF TypeOK,SendReqEAction,SendReqE,Inv122_03a2_R0_0_I1
@@ -225,9 +224,9 @@ THEOREM L_2 == TypeOK /\ Inv22_d756_R1_2_I1 /\ Inv32_1336_R1_1_I1 /\ Inv5427_0d2
   \* (Inv122_03a2_R0_0_I1,SendGntEAction)
   <1>8. TypeOK /\ Inv22_d756_R1_2_I1 /\ Inv122_03a2_R0_0_I1 /\ SendGntEAction => Inv122_03a2_R0_0_I1' BY DEF TypeOK,Inv22_d756_R1_2_I1,SendGntEAction,SendGntE,Inv122_03a2_R0_0_I1
   \* (Inv122_03a2_R0_0_I1,RecvGntSAction)
-  <1>9. TypeOK /\ Inv32_1336_R1_1_I1 /\ Inv122_03a2_R0_0_I1 /\ RecvGntSAction => Inv122_03a2_R0_0_I1' BY DEF TypeOK,Inv32_1336_R1_1_I1,RecvGntSAction,RecvGntS,Inv122_03a2_R0_0_I1
+  <1>9. TypeOK /\ Inv33_1336_R1_1_I1 /\ Inv122_03a2_R0_0_I1 /\ RecvGntSAction => Inv122_03a2_R0_0_I1' BY DEF TypeOK,Inv33_1336_R1_1_I1,RecvGntSAction,RecvGntS,Inv122_03a2_R0_0_I1
   \* (Inv122_03a2_R0_0_I1,RecvGntEAction)
-  <1>10. TypeOK /\ Inv5427_0d22_R1_0_I2 /\ Inv122_03a2_R0_0_I1 /\ RecvGntEAction => Inv122_03a2_R0_0_I1' BY DEF TypeOK,Inv5427_0d22_R1_0_I2,RecvGntEAction,RecvGntE,Inv122_03a2_R0_0_I1
+  <1>10. TypeOK /\ Inv5378_0d22_R1_0_I2 /\ Inv122_03a2_R0_0_I1 /\ RecvGntEAction => Inv122_03a2_R0_0_I1' BY DEF TypeOK,Inv5378_0d22_R1_0_I2,RecvGntEAction,RecvGntE,Inv122_03a2_R0_0_I1
   \* (Inv122_03a2_R0_0_I1,StoreAction)
   <1>11. TypeOK /\ Inv122_03a2_R0_0_I1 /\ StoreAction => Inv122_03a2_R0_0_I1' BY DEF TypeOK,StoreAction,Store,Inv122_03a2_R0_0_I1
   \* (Inv122_03a2_R0_0_I1,SendReqSAction)
@@ -235,38 +234,38 @@ THEOREM L_2 == TypeOK /\ Inv22_d756_R1_2_I1 /\ Inv32_1336_R1_1_I1 /\ Inv5427_0d2
 <1>13. QED BY <1>1,<1>2,<1>3,<1>4,<1>5,<1>6,<1>7,<1>8,<1>9,<1>10,<1>11,<1>12 DEF Next
 
 
-\*** Inv5427_0d22_R1_0_I2
-THEOREM L_3 == TypeOK /\ Inv6423_fc2f_R3_2_I2 /\ Inv5_a2c7_R3_1_I1 /\ Inv1_85ad_R3_0_I1 /\ Inv5427_0d22_R1_0_I2 /\ Next => Inv5427_0d22_R1_0_I2'
+\*** Inv5378_0d22_R1_0_I2
+THEOREM L_3 == TypeOK /\ Inv6410_fc2f_R3_2_I2 /\ Inv5_a2c7_R3_1_I1 /\ Inv1_85ad_R3_0_I1 /\ Inv5378_0d22_R1_0_I2 /\ Next => Inv5378_0d22_R1_0_I2'
   <1>. USE A0,A1
-  \* (Inv5427_0d22_R1_0_I2,SendReqEAction)
-  <1>1. TypeOK /\ Inv5427_0d22_R1_0_I2 /\ SendReqEAction => Inv5427_0d22_R1_0_I2' BY DEF TypeOK,SendReqEAction,SendReqE,Inv5427_0d22_R1_0_I2
-  \* (Inv5427_0d22_R1_0_I2,RecvReqSAction)
-  <1>2. TypeOK /\ Inv5427_0d22_R1_0_I2 /\ RecvReqSAction => Inv5427_0d22_R1_0_I2' BY DEF TypeOK,RecvReqSAction,RecvReqS,Inv5427_0d22_R1_0_I2
-  \* (Inv5427_0d22_R1_0_I2,RecvReqEAction)
-  <1>3. TypeOK /\ Inv5427_0d22_R1_0_I2 /\ RecvReqEAction => Inv5427_0d22_R1_0_I2' BY DEF TypeOK,RecvReqEAction,RecvReqE,Inv5427_0d22_R1_0_I2
-  \* (Inv5427_0d22_R1_0_I2,SendInvAction)
-  <1>4. TypeOK /\ Inv6423_fc2f_R3_2_I2 /\ Inv5427_0d22_R1_0_I2 /\ SendInvAction => Inv5427_0d22_R1_0_I2' BY DEF TypeOK,Inv6423_fc2f_R3_2_I2,SendInvAction,SendInv,Inv5427_0d22_R1_0_I2
-  \* (Inv5427_0d22_R1_0_I2,SendInvAckAction)
-  <1>5. TypeOK /\ Inv5427_0d22_R1_0_I2 /\ SendInvAckAction => Inv5427_0d22_R1_0_I2' BY DEF TypeOK,SendInvAckAction,SendInvAck,Inv5427_0d22_R1_0_I2
-  \* (Inv5427_0d22_R1_0_I2,RecvInvAckAction)
-  <1>6. TypeOK /\ Inv5427_0d22_R1_0_I2 /\ RecvInvAckAction => Inv5427_0d22_R1_0_I2' BY DEF TypeOK,RecvInvAckAction,RecvInvAck,Inv5427_0d22_R1_0_I2
-  \* (Inv5427_0d22_R1_0_I2,SendGntSAction)
-  <1>7. TypeOK /\ Inv5_a2c7_R3_1_I1 /\ Inv5427_0d22_R1_0_I2 /\ SendGntSAction => Inv5427_0d22_R1_0_I2' BY DEF TypeOK,Inv5_a2c7_R3_1_I1,SendGntSAction,SendGntS,Inv5427_0d22_R1_0_I2
-  \* (Inv5427_0d22_R1_0_I2,SendGntEAction)
-  <1>8. TypeOK /\ Inv1_85ad_R3_0_I1 /\ Inv5427_0d22_R1_0_I2 /\ SendGntEAction => Inv5427_0d22_R1_0_I2' BY DEF TypeOK,Inv1_85ad_R3_0_I1,SendGntEAction,SendGntE,Inv5427_0d22_R1_0_I2
-  \* (Inv5427_0d22_R1_0_I2,RecvGntSAction)
-  <1>9. TypeOK /\ Inv5427_0d22_R1_0_I2 /\ RecvGntSAction => Inv5427_0d22_R1_0_I2' BY DEF TypeOK,RecvGntSAction,RecvGntS,Inv5427_0d22_R1_0_I2
-  \* (Inv5427_0d22_R1_0_I2,RecvGntEAction)
-  <1>10. TypeOK /\ Inv5427_0d22_R1_0_I2 /\ RecvGntEAction => Inv5427_0d22_R1_0_I2' BY DEF TypeOK,RecvGntEAction,RecvGntE,Inv5427_0d22_R1_0_I2
-  \* (Inv5427_0d22_R1_0_I2,StoreAction)
-  <1>11. TypeOK /\ Inv5427_0d22_R1_0_I2 /\ StoreAction => Inv5427_0d22_R1_0_I2' BY DEF TypeOK,StoreAction,Store,Inv5427_0d22_R1_0_I2
-  \* (Inv5427_0d22_R1_0_I2,SendReqSAction)
-  <1>12. TypeOK /\ Inv5427_0d22_R1_0_I2 /\ SendReqSAction => Inv5427_0d22_R1_0_I2' BY DEF TypeOK,SendReqSAction,SendReqS,Inv5427_0d22_R1_0_I2
+  \* (Inv5378_0d22_R1_0_I2,SendReqEAction)
+  <1>1. TypeOK /\ Inv5378_0d22_R1_0_I2 /\ SendReqEAction => Inv5378_0d22_R1_0_I2' BY DEF TypeOK,SendReqEAction,SendReqE,Inv5378_0d22_R1_0_I2
+  \* (Inv5378_0d22_R1_0_I2,RecvReqSAction)
+  <1>2. TypeOK /\ Inv5378_0d22_R1_0_I2 /\ RecvReqSAction => Inv5378_0d22_R1_0_I2' BY DEF TypeOK,RecvReqSAction,RecvReqS,Inv5378_0d22_R1_0_I2
+  \* (Inv5378_0d22_R1_0_I2,RecvReqEAction)
+  <1>3. TypeOK /\ Inv5378_0d22_R1_0_I2 /\ RecvReqEAction => Inv5378_0d22_R1_0_I2' BY DEF TypeOK,RecvReqEAction,RecvReqE,Inv5378_0d22_R1_0_I2
+  \* (Inv5378_0d22_R1_0_I2,SendInvAction)
+  <1>4. TypeOK /\ Inv6410_fc2f_R3_2_I2 /\ Inv5378_0d22_R1_0_I2 /\ SendInvAction => Inv5378_0d22_R1_0_I2' BY DEF TypeOK,Inv6410_fc2f_R3_2_I2,SendInvAction,SendInv,Inv5378_0d22_R1_0_I2
+  \* (Inv5378_0d22_R1_0_I2,SendInvAckAction)
+  <1>5. TypeOK /\ Inv5378_0d22_R1_0_I2 /\ SendInvAckAction => Inv5378_0d22_R1_0_I2' BY DEF TypeOK,SendInvAckAction,SendInvAck,Inv5378_0d22_R1_0_I2
+  \* (Inv5378_0d22_R1_0_I2,RecvInvAckAction)
+  <1>6. TypeOK /\ Inv5378_0d22_R1_0_I2 /\ RecvInvAckAction => Inv5378_0d22_R1_0_I2' BY DEF TypeOK,RecvInvAckAction,RecvInvAck,Inv5378_0d22_R1_0_I2
+  \* (Inv5378_0d22_R1_0_I2,SendGntSAction)
+  <1>7. TypeOK /\ Inv5_a2c7_R3_1_I1 /\ Inv5378_0d22_R1_0_I2 /\ SendGntSAction => Inv5378_0d22_R1_0_I2' BY DEF TypeOK,Inv5_a2c7_R3_1_I1,SendGntSAction,SendGntS,Inv5378_0d22_R1_0_I2
+  \* (Inv5378_0d22_R1_0_I2,SendGntEAction)
+  <1>8. TypeOK /\ Inv1_85ad_R3_0_I1 /\ Inv5378_0d22_R1_0_I2 /\ SendGntEAction => Inv5378_0d22_R1_0_I2' BY DEF TypeOK,Inv1_85ad_R3_0_I1,SendGntEAction,SendGntE,Inv5378_0d22_R1_0_I2
+  \* (Inv5378_0d22_R1_0_I2,RecvGntSAction)
+  <1>9. TypeOK /\ Inv5378_0d22_R1_0_I2 /\ RecvGntSAction => Inv5378_0d22_R1_0_I2' BY DEF TypeOK,RecvGntSAction,RecvGntS,Inv5378_0d22_R1_0_I2
+  \* (Inv5378_0d22_R1_0_I2,RecvGntEAction)
+  <1>10. TypeOK /\ Inv5378_0d22_R1_0_I2 /\ RecvGntEAction => Inv5378_0d22_R1_0_I2' BY DEF TypeOK,RecvGntEAction,RecvGntE,Inv5378_0d22_R1_0_I2
+  \* (Inv5378_0d22_R1_0_I2,StoreAction)
+  <1>11. TypeOK /\ Inv5378_0d22_R1_0_I2 /\ StoreAction => Inv5378_0d22_R1_0_I2' BY DEF TypeOK,StoreAction,Store,Inv5378_0d22_R1_0_I2
+  \* (Inv5378_0d22_R1_0_I2,SendReqSAction)
+  <1>12. TypeOK /\ Inv5378_0d22_R1_0_I2 /\ SendReqSAction => Inv5378_0d22_R1_0_I2' BY DEF TypeOK,SendReqSAction,SendReqS,Inv5378_0d22_R1_0_I2
 <1>13. QED BY <1>1,<1>2,<1>3,<1>4,<1>5,<1>6,<1>7,<1>8,<1>9,<1>10,<1>11,<1>12 DEF Next
 
 
 \*** Inv1_85ad_R3_0_I1
-THEOREM L_4 == TypeOK /\ Inv104_0f39_R7_1_I1 /\ Inv1_eb94_R7_0_I1 /\ Inv1_85ad_R3_0_I1 /\ Next => Inv1_85ad_R3_0_I1'
+THEOREM L_4 == TypeOK /\ Inv111_0f39_R7_1_I1 /\ Inv1_eb94_R7_0_I1 /\ Inv1_85ad_R3_0_I1 /\ Next => Inv1_85ad_R3_0_I1'
   <1>. USE A0,A1
   \* (Inv1_85ad_R3_0_I1,SendReqEAction)
   <1>1. TypeOK /\ Inv1_85ad_R3_0_I1 /\ SendReqEAction => Inv1_85ad_R3_0_I1' BY DEF TypeOK,SendReqEAction,SendReqE,Inv1_85ad_R3_0_I1
@@ -275,7 +274,7 @@ THEOREM L_4 == TypeOK /\ Inv104_0f39_R7_1_I1 /\ Inv1_eb94_R7_0_I1 /\ Inv1_85ad_R
   \* (Inv1_85ad_R3_0_I1,RecvReqEAction)
   <1>3. TypeOK /\ Inv1_85ad_R3_0_I1 /\ RecvReqEAction => Inv1_85ad_R3_0_I1' BY DEF TypeOK,RecvReqEAction,RecvReqE,Inv1_85ad_R3_0_I1
   \* (Inv1_85ad_R3_0_I1,SendInvAction)
-  <1>4. TypeOK /\ Inv104_0f39_R7_1_I1 /\ Inv1_85ad_R3_0_I1 /\ SendInvAction => Inv1_85ad_R3_0_I1' BY DEF TypeOK,Inv104_0f39_R7_1_I1,SendInvAction,SendInv,Inv1_85ad_R3_0_I1
+  <1>4. TypeOK /\ Inv111_0f39_R7_1_I1 /\ Inv1_85ad_R3_0_I1 /\ SendInvAction => Inv1_85ad_R3_0_I1' BY DEF TypeOK,Inv111_0f39_R7_1_I1,SendInvAction,SendInv,Inv1_85ad_R3_0_I1
   \* (Inv1_85ad_R3_0_I1,SendInvAckAction)
   <1>5. TypeOK /\ Inv1_85ad_R3_0_I1 /\ SendInvAckAction => Inv1_85ad_R3_0_I1' BY DEF TypeOK,SendInvAckAction,SendInvAck,Inv1_85ad_R3_0_I1
   \* (Inv1_85ad_R3_0_I1,RecvInvAckAction)
@@ -296,7 +295,7 @@ THEOREM L_4 == TypeOK /\ Inv104_0f39_R7_1_I1 /\ Inv1_eb94_R7_0_I1 /\ Inv1_85ad_R
 
 
 \*** Inv1_eb94_R7_0_I1
-THEOREM L_5 == TypeOK /\ Inv13_45c1_R14_2_I1 /\ Inv2748_0201_R14_1_I2 /\ Inv14_9e93_R14_0_I1 /\ Inv1_eb94_R7_0_I1 /\ Next => Inv1_eb94_R7_0_I1'
+THEOREM L_5 == TypeOK /\ Inv13_45c1_R14_2_I1 /\ Inv4424_0201_R14_1_I2 /\ Inv17_9e93_R14_0_I1 /\ Inv1_eb94_R7_0_I1 /\ Next => Inv1_eb94_R7_0_I1'
   <1>. USE A0,A1
   \* (Inv1_eb94_R7_0_I1,SendReqEAction)
   <1>1. TypeOK /\ Inv1_eb94_R7_0_I1 /\ SendReqEAction => Inv1_eb94_R7_0_I1' BY DEF TypeOK,SendReqEAction,SendReqE,Inv1_eb94_R7_0_I1
@@ -311,9 +310,9 @@ THEOREM L_5 == TypeOK /\ Inv13_45c1_R14_2_I1 /\ Inv2748_0201_R14_1_I2 /\ Inv14_9
   \* (Inv1_eb94_R7_0_I1,RecvInvAckAction)
   <1>6. TypeOK /\ Inv1_eb94_R7_0_I1 /\ RecvInvAckAction => Inv1_eb94_R7_0_I1' BY DEF TypeOK,RecvInvAckAction,RecvInvAck,Inv1_eb94_R7_0_I1
   \* (Inv1_eb94_R7_0_I1,SendGntSAction)
-  <1>7. TypeOK /\ Inv2748_0201_R14_1_I2 /\ Inv1_eb94_R7_0_I1 /\ SendGntSAction => Inv1_eb94_R7_0_I1' BY DEF TypeOK,Inv2748_0201_R14_1_I2,SendGntSAction,SendGntS,Inv1_eb94_R7_0_I1
+  <1>7. TypeOK /\ Inv4424_0201_R14_1_I2 /\ Inv1_eb94_R7_0_I1 /\ SendGntSAction => Inv1_eb94_R7_0_I1' BY DEF TypeOK,Inv4424_0201_R14_1_I2,SendGntSAction,SendGntS,Inv1_eb94_R7_0_I1
   \* (Inv1_eb94_R7_0_I1,SendGntEAction)
-  <1>8. TypeOK /\ Inv14_9e93_R14_0_I1 /\ Inv1_eb94_R7_0_I1 /\ SendGntEAction => Inv1_eb94_R7_0_I1' BY DEF TypeOK,Inv14_9e93_R14_0_I1,SendGntEAction,SendGntE,Inv1_eb94_R7_0_I1
+  <1>8. TypeOK /\ Inv17_9e93_R14_0_I1 /\ Inv1_eb94_R7_0_I1 /\ SendGntEAction => Inv1_eb94_R7_0_I1' BY DEF TypeOK,Inv17_9e93_R14_0_I1,SendGntEAction,SendGntE,Inv1_eb94_R7_0_I1
   \* (Inv1_eb94_R7_0_I1,RecvGntSAction)
   <1>9. TypeOK /\ Inv1_eb94_R7_0_I1 /\ RecvGntSAction => Inv1_eb94_R7_0_I1' BY DEF TypeOK,RecvGntSAction,RecvGntS,Inv1_eb94_R7_0_I1
   \* (Inv1_eb94_R7_0_I1,RecvGntEAction)
@@ -325,38 +324,38 @@ THEOREM L_5 == TypeOK /\ Inv13_45c1_R14_2_I1 /\ Inv2748_0201_R14_1_I2 /\ Inv14_9
 <1>13. QED BY <1>1,<1>2,<1>3,<1>4,<1>5,<1>6,<1>7,<1>8,<1>9,<1>10,<1>11,<1>12 DEF Next
 
 
-\*** Inv14_9e93_R14_0_I1
-THEOREM L_6 == TypeOK /\ Inv39_7204_R20_0_I1 /\ Inv14_9e93_R14_0_I1 /\ Next => Inv14_9e93_R14_0_I1'
+\*** Inv17_9e93_R14_0_I1
+THEOREM L_6 == TypeOK /\ Inv39_7204_R20_0_I1 /\ Inv17_9e93_R14_0_I1 /\ Next => Inv17_9e93_R14_0_I1'
   <1>. USE A0,A1
-  \* (Inv14_9e93_R14_0_I1,SendReqEAction)
-  <1>1. TypeOK /\ Inv14_9e93_R14_0_I1 /\ SendReqEAction => Inv14_9e93_R14_0_I1' BY DEF TypeOK,SendReqEAction,SendReqE,Inv14_9e93_R14_0_I1
-  \* (Inv14_9e93_R14_0_I1,RecvReqSAction)
-  <1>2. TypeOK /\ Inv14_9e93_R14_0_I1 /\ RecvReqSAction => Inv14_9e93_R14_0_I1' BY DEF TypeOK,RecvReqSAction,RecvReqS,Inv14_9e93_R14_0_I1
-  \* (Inv14_9e93_R14_0_I1,RecvReqEAction)
-  <1>3. TypeOK /\ Inv14_9e93_R14_0_I1 /\ RecvReqEAction => Inv14_9e93_R14_0_I1' BY DEF TypeOK,RecvReqEAction,RecvReqE,Inv14_9e93_R14_0_I1
-  \* (Inv14_9e93_R14_0_I1,SendInvAction)
-  <1>4. TypeOK /\ Inv14_9e93_R14_0_I1 /\ SendInvAction => Inv14_9e93_R14_0_I1' BY DEF TypeOK,SendInvAction,SendInv,Inv14_9e93_R14_0_I1
-  \* (Inv14_9e93_R14_0_I1,SendInvAckAction)
-  <1>5. TypeOK /\ Inv39_7204_R20_0_I1 /\ Inv14_9e93_R14_0_I1 /\ SendInvAckAction => Inv14_9e93_R14_0_I1' BY DEF TypeOK,Inv39_7204_R20_0_I1,SendInvAckAction,SendInvAck,Inv14_9e93_R14_0_I1
-  \* (Inv14_9e93_R14_0_I1,RecvInvAckAction)
-  <1>6. TypeOK /\ Inv14_9e93_R14_0_I1 /\ RecvInvAckAction => Inv14_9e93_R14_0_I1' BY DEF TypeOK,RecvInvAckAction,RecvInvAck,Inv14_9e93_R14_0_I1
-  \* (Inv14_9e93_R14_0_I1,SendGntSAction)
-  <1>7. TypeOK /\ Inv14_9e93_R14_0_I1 /\ SendGntSAction => Inv14_9e93_R14_0_I1' BY DEF TypeOK,SendGntSAction,SendGntS,Inv14_9e93_R14_0_I1
-  \* (Inv14_9e93_R14_0_I1,SendGntEAction)
-  <1>8. TypeOK /\ Inv14_9e93_R14_0_I1 /\ SendGntEAction => Inv14_9e93_R14_0_I1' BY DEF TypeOK,SendGntEAction,SendGntE,Inv14_9e93_R14_0_I1
-  \* (Inv14_9e93_R14_0_I1,RecvGntSAction)
-  <1>9. TypeOK /\ Inv14_9e93_R14_0_I1 /\ RecvGntSAction => Inv14_9e93_R14_0_I1' BY DEF TypeOK,RecvGntSAction,RecvGntS,Inv14_9e93_R14_0_I1
-  \* (Inv14_9e93_R14_0_I1,RecvGntEAction)
-  <1>10. TypeOK /\ Inv14_9e93_R14_0_I1 /\ RecvGntEAction => Inv14_9e93_R14_0_I1' BY DEF TypeOK,RecvGntEAction,RecvGntE,Inv14_9e93_R14_0_I1
-  \* (Inv14_9e93_R14_0_I1,StoreAction)
-  <1>11. TypeOK /\ Inv14_9e93_R14_0_I1 /\ StoreAction => Inv14_9e93_R14_0_I1' BY DEF TypeOK,StoreAction,Store,Inv14_9e93_R14_0_I1
-  \* (Inv14_9e93_R14_0_I1,SendReqSAction)
-  <1>12. TypeOK /\ Inv14_9e93_R14_0_I1 /\ SendReqSAction => Inv14_9e93_R14_0_I1' BY DEF TypeOK,SendReqSAction,SendReqS,Inv14_9e93_R14_0_I1
+  \* (Inv17_9e93_R14_0_I1,SendReqEAction)
+  <1>1. TypeOK /\ Inv17_9e93_R14_0_I1 /\ SendReqEAction => Inv17_9e93_R14_0_I1' BY DEF TypeOK,SendReqEAction,SendReqE,Inv17_9e93_R14_0_I1
+  \* (Inv17_9e93_R14_0_I1,RecvReqSAction)
+  <1>2. TypeOK /\ Inv17_9e93_R14_0_I1 /\ RecvReqSAction => Inv17_9e93_R14_0_I1' BY DEF TypeOK,RecvReqSAction,RecvReqS,Inv17_9e93_R14_0_I1
+  \* (Inv17_9e93_R14_0_I1,RecvReqEAction)
+  <1>3. TypeOK /\ Inv17_9e93_R14_0_I1 /\ RecvReqEAction => Inv17_9e93_R14_0_I1' BY DEF TypeOK,RecvReqEAction,RecvReqE,Inv17_9e93_R14_0_I1
+  \* (Inv17_9e93_R14_0_I1,SendInvAction)
+  <1>4. TypeOK /\ Inv17_9e93_R14_0_I1 /\ SendInvAction => Inv17_9e93_R14_0_I1' BY DEF TypeOK,SendInvAction,SendInv,Inv17_9e93_R14_0_I1
+  \* (Inv17_9e93_R14_0_I1,SendInvAckAction)
+  <1>5. TypeOK /\ Inv39_7204_R20_0_I1 /\ Inv17_9e93_R14_0_I1 /\ SendInvAckAction => Inv17_9e93_R14_0_I1' BY DEF TypeOK,Inv39_7204_R20_0_I1,SendInvAckAction,SendInvAck,Inv17_9e93_R14_0_I1
+  \* (Inv17_9e93_R14_0_I1,RecvInvAckAction)
+  <1>6. TypeOK /\ Inv17_9e93_R14_0_I1 /\ RecvInvAckAction => Inv17_9e93_R14_0_I1' BY DEF TypeOK,RecvInvAckAction,RecvInvAck,Inv17_9e93_R14_0_I1
+  \* (Inv17_9e93_R14_0_I1,SendGntSAction)
+  <1>7. TypeOK /\ Inv17_9e93_R14_0_I1 /\ SendGntSAction => Inv17_9e93_R14_0_I1' BY DEF TypeOK,SendGntSAction,SendGntS,Inv17_9e93_R14_0_I1
+  \* (Inv17_9e93_R14_0_I1,SendGntEAction)
+  <1>8. TypeOK /\ Inv17_9e93_R14_0_I1 /\ SendGntEAction => Inv17_9e93_R14_0_I1' BY DEF TypeOK,SendGntEAction,SendGntE,Inv17_9e93_R14_0_I1
+  \* (Inv17_9e93_R14_0_I1,RecvGntSAction)
+  <1>9. TypeOK /\ Inv17_9e93_R14_0_I1 /\ RecvGntSAction => Inv17_9e93_R14_0_I1' BY DEF TypeOK,RecvGntSAction,RecvGntS,Inv17_9e93_R14_0_I1
+  \* (Inv17_9e93_R14_0_I1,RecvGntEAction)
+  <1>10. TypeOK /\ Inv17_9e93_R14_0_I1 /\ RecvGntEAction => Inv17_9e93_R14_0_I1' BY DEF TypeOK,RecvGntEAction,RecvGntE,Inv17_9e93_R14_0_I1
+  \* (Inv17_9e93_R14_0_I1,StoreAction)
+  <1>11. TypeOK /\ Inv17_9e93_R14_0_I1 /\ StoreAction => Inv17_9e93_R14_0_I1' BY DEF TypeOK,StoreAction,Store,Inv17_9e93_R14_0_I1
+  \* (Inv17_9e93_R14_0_I1,SendReqSAction)
+  <1>12. TypeOK /\ Inv17_9e93_R14_0_I1 /\ SendReqSAction => Inv17_9e93_R14_0_I1' BY DEF TypeOK,SendReqSAction,SendReqS,Inv17_9e93_R14_0_I1
 <1>13. QED BY <1>1,<1>2,<1>3,<1>4,<1>5,<1>6,<1>7,<1>8,<1>9,<1>10,<1>11,<1>12 DEF Next
 
 
 \*** Inv39_7204_R20_0_I1
-THEOREM L_7 == TypeOK /\ Inv104_0f39_R7_1_I1 /\ Inv20_5035_R26_0_I1 /\ Inv39_7204_R20_0_I1 /\ Next => Inv39_7204_R20_0_I1'
+THEOREM L_7 == TypeOK /\ Inv111_0f39_R7_1_I1 /\ Inv20_5035_R26_0_I1 /\ Inv39_7204_R20_0_I1 /\ Next => Inv39_7204_R20_0_I1'
   <1>. USE A0,A1
   \* (Inv39_7204_R20_0_I1,SendReqEAction)
   <1>1. TypeOK /\ Inv39_7204_R20_0_I1 /\ SendReqEAction => Inv39_7204_R20_0_I1' BY DEF TypeOK,SendReqEAction,SendReqE,Inv39_7204_R20_0_I1
@@ -365,7 +364,7 @@ THEOREM L_7 == TypeOK /\ Inv104_0f39_R7_1_I1 /\ Inv20_5035_R26_0_I1 /\ Inv39_720
   \* (Inv39_7204_R20_0_I1,RecvReqEAction)
   <1>3. TypeOK /\ Inv39_7204_R20_0_I1 /\ RecvReqEAction => Inv39_7204_R20_0_I1' BY DEF TypeOK,RecvReqEAction,RecvReqE,Inv39_7204_R20_0_I1
   \* (Inv39_7204_R20_0_I1,SendInvAction)
-  <1>4. TypeOK /\ Inv104_0f39_R7_1_I1 /\ Inv39_7204_R20_0_I1 /\ SendInvAction => Inv39_7204_R20_0_I1' BY DEF TypeOK,Inv104_0f39_R7_1_I1,SendInvAction,SendInv,Inv39_7204_R20_0_I1
+  <1>4. TypeOK /\ Inv111_0f39_R7_1_I1 /\ Inv39_7204_R20_0_I1 /\ SendInvAction => Inv39_7204_R20_0_I1' BY DEF TypeOK,Inv111_0f39_R7_1_I1,SendInvAction,SendInv,Inv39_7204_R20_0_I1
   \* (Inv39_7204_R20_0_I1,SendInvAckAction)
   <1>5. TypeOK /\ Inv39_7204_R20_0_I1 /\ SendInvAckAction => Inv39_7204_R20_0_I1' BY DEF TypeOK,SendInvAckAction,SendInvAck,Inv39_7204_R20_0_I1
   \* (Inv39_7204_R20_0_I1,RecvInvAckAction)
@@ -416,14 +415,14 @@ THEOREM L_8 == TypeOK /\ Inv13_45c1_R14_2_I1 /\ Inv20_5035_R26_0_I1 /\ Next => I
 
 
 \*** Inv13_45c1_R14_2_I1
-THEOREM L_9 == TypeOK /\ Inv3716_575b_R22_0_I2 /\ Inv3716_575b_R22_0_I2 /\ Inv76_d564_R22_2_I1 /\ Inv13_45c1_R14_2_I1 /\ Next => Inv13_45c1_R14_2_I1'
+THEOREM L_9 == TypeOK /\ Inv4043_dbee_R22_0_I2 /\ Inv4043_dbee_R22_0_I2 /\ Inv76_d564_R22_2_I1 /\ Inv13_45c1_R14_2_I1 /\ Next => Inv13_45c1_R14_2_I1'
   <1>. USE A0,A1
   \* (Inv13_45c1_R14_2_I1,SendReqEAction)
   <1>1. TypeOK /\ Inv13_45c1_R14_2_I1 /\ SendReqEAction => Inv13_45c1_R14_2_I1' BY DEF TypeOK,SendReqEAction,SendReqE,Inv13_45c1_R14_2_I1
   \* (Inv13_45c1_R14_2_I1,RecvReqSAction)
-  <1>2. TypeOK /\ Inv3716_575b_R22_0_I2 /\ Inv13_45c1_R14_2_I1 /\ RecvReqSAction => Inv13_45c1_R14_2_I1' BY DEF TypeOK,Inv3716_575b_R22_0_I2,RecvReqSAction,RecvReqS,Inv13_45c1_R14_2_I1
+  <1>2. TypeOK /\ Inv4043_dbee_R22_0_I2 /\ Inv13_45c1_R14_2_I1 /\ RecvReqSAction => Inv13_45c1_R14_2_I1' BY DEF TypeOK,Inv4043_dbee_R22_0_I2,RecvReqSAction,RecvReqS,Inv13_45c1_R14_2_I1
   \* (Inv13_45c1_R14_2_I1,RecvReqEAction)
-  <1>3. TypeOK /\ Inv3716_575b_R22_0_I2 /\ Inv13_45c1_R14_2_I1 /\ RecvReqEAction => Inv13_45c1_R14_2_I1' BY DEF TypeOK,Inv3716_575b_R22_0_I2,RecvReqEAction,RecvReqE,Inv13_45c1_R14_2_I1
+  <1>3. TypeOK /\ Inv4043_dbee_R22_0_I2 /\ Inv13_45c1_R14_2_I1 /\ RecvReqEAction => Inv13_45c1_R14_2_I1' BY DEF TypeOK,Inv4043_dbee_R22_0_I2,RecvReqEAction,RecvReqE,Inv13_45c1_R14_2_I1
   \* (Inv13_45c1_R14_2_I1,SendInvAction)
   <1>4. TypeOK /\ Inv13_45c1_R14_2_I1 /\ SendInvAction => Inv13_45c1_R14_2_I1' BY DEF TypeOK,SendInvAction,SendInv,Inv13_45c1_R14_2_I1
   \* (Inv13_45c1_R14_2_I1,SendInvAckAction)
@@ -445,98 +444,98 @@ THEOREM L_9 == TypeOK /\ Inv3716_575b_R22_0_I2 /\ Inv3716_575b_R22_0_I2 /\ Inv76
 <1>13. QED BY <1>1,<1>2,<1>3,<1>4,<1>5,<1>6,<1>7,<1>8,<1>9,<1>10,<1>11,<1>12 DEF Next
 
 
-\*** Inv3716_575b_R22_0_I2
-THEOREM L_10 == TypeOK /\ Inv651_b778_R29_2_I2 /\ Inv2748_0201_R14_1_I2 /\ Inv14_9e93_R14_0_I1 /\ Inv3716_575b_R22_0_I2 /\ Next => Inv3716_575b_R22_0_I2'
+\*** Inv4043_dbee_R22_0_I2
+THEOREM L_10 == TypeOK /\ Inv1149_870b_R29_2_I2 /\ Inv4424_0201_R14_1_I2 /\ Inv17_9e93_R14_0_I1 /\ Inv4043_dbee_R22_0_I2 /\ Next => Inv4043_dbee_R22_0_I2'
   <1>. USE A0,A1
-  \* (Inv3716_575b_R22_0_I2,SendReqEAction)
-  <1>1. TypeOK /\ Inv3716_575b_R22_0_I2 /\ SendReqEAction => Inv3716_575b_R22_0_I2' BY DEF TypeOK,SendReqEAction,SendReqE,Inv3716_575b_R22_0_I2
-  \* (Inv3716_575b_R22_0_I2,RecvReqSAction)
-  <1>2. TypeOK /\ Inv3716_575b_R22_0_I2 /\ RecvReqSAction => Inv3716_575b_R22_0_I2' BY DEF TypeOK,RecvReqSAction,RecvReqS,Inv3716_575b_R22_0_I2
-  \* (Inv3716_575b_R22_0_I2,RecvReqEAction)
-  <1>3. TypeOK /\ Inv3716_575b_R22_0_I2 /\ RecvReqEAction => Inv3716_575b_R22_0_I2' BY DEF TypeOK,RecvReqEAction,RecvReqE,Inv3716_575b_R22_0_I2
-  \* (Inv3716_575b_R22_0_I2,SendInvAction)
-  <1>4. TypeOK /\ Inv3716_575b_R22_0_I2 /\ SendInvAction => Inv3716_575b_R22_0_I2' BY DEF TypeOK,SendInvAction,SendInv,Inv3716_575b_R22_0_I2
-  \* (Inv3716_575b_R22_0_I2,SendInvAckAction)
-  <1>5. TypeOK /\ Inv651_b778_R29_2_I2 /\ Inv3716_575b_R22_0_I2 /\ SendInvAckAction => Inv3716_575b_R22_0_I2' BY DEF TypeOK,Inv651_b778_R29_2_I2,SendInvAckAction,SendInvAck,Inv3716_575b_R22_0_I2
-  \* (Inv3716_575b_R22_0_I2,RecvInvAckAction)
-  <1>6. TypeOK /\ Inv3716_575b_R22_0_I2 /\ RecvInvAckAction => Inv3716_575b_R22_0_I2' BY DEF TypeOK,RecvInvAckAction,RecvInvAck,Inv3716_575b_R22_0_I2
-  \* (Inv3716_575b_R22_0_I2,SendGntSAction)
-  <1>7. TypeOK /\ Inv2748_0201_R14_1_I2 /\ Inv3716_575b_R22_0_I2 /\ SendGntSAction => Inv3716_575b_R22_0_I2' BY DEF TypeOK,Inv2748_0201_R14_1_I2,SendGntSAction,SendGntS,Inv3716_575b_R22_0_I2
-  \* (Inv3716_575b_R22_0_I2,SendGntEAction)
-  <1>8. TypeOK /\ Inv14_9e93_R14_0_I1 /\ Inv3716_575b_R22_0_I2 /\ SendGntEAction => Inv3716_575b_R22_0_I2' BY DEF TypeOK,Inv14_9e93_R14_0_I1,SendGntEAction,SendGntE,Inv3716_575b_R22_0_I2
-  \* (Inv3716_575b_R22_0_I2,RecvGntSAction)
-  <1>9. TypeOK /\ Inv3716_575b_R22_0_I2 /\ RecvGntSAction => Inv3716_575b_R22_0_I2' BY DEF TypeOK,RecvGntSAction,RecvGntS,Inv3716_575b_R22_0_I2
-  \* (Inv3716_575b_R22_0_I2,RecvGntEAction)
-  <1>10. TypeOK /\ Inv3716_575b_R22_0_I2 /\ RecvGntEAction => Inv3716_575b_R22_0_I2' BY DEF TypeOK,RecvGntEAction,RecvGntE,Inv3716_575b_R22_0_I2
-  \* (Inv3716_575b_R22_0_I2,StoreAction)
-  <1>11. TypeOK /\ Inv3716_575b_R22_0_I2 /\ StoreAction => Inv3716_575b_R22_0_I2' BY DEF TypeOK,StoreAction,Store,Inv3716_575b_R22_0_I2
-  \* (Inv3716_575b_R22_0_I2,SendReqSAction)
-  <1>12. TypeOK /\ Inv3716_575b_R22_0_I2 /\ SendReqSAction => Inv3716_575b_R22_0_I2' BY DEF TypeOK,SendReqSAction,SendReqS,Inv3716_575b_R22_0_I2
+  \* (Inv4043_dbee_R22_0_I2,SendReqEAction)
+  <1>1. TypeOK /\ Inv4043_dbee_R22_0_I2 /\ SendReqEAction => Inv4043_dbee_R22_0_I2' BY DEF TypeOK,SendReqEAction,SendReqE,Inv4043_dbee_R22_0_I2
+  \* (Inv4043_dbee_R22_0_I2,RecvReqSAction)
+  <1>2. TypeOK /\ Inv4043_dbee_R22_0_I2 /\ RecvReqSAction => Inv4043_dbee_R22_0_I2' BY DEF TypeOK,RecvReqSAction,RecvReqS,Inv4043_dbee_R22_0_I2
+  \* (Inv4043_dbee_R22_0_I2,RecvReqEAction)
+  <1>3. TypeOK /\ Inv4043_dbee_R22_0_I2 /\ RecvReqEAction => Inv4043_dbee_R22_0_I2' BY DEF TypeOK,RecvReqEAction,RecvReqE,Inv4043_dbee_R22_0_I2
+  \* (Inv4043_dbee_R22_0_I2,SendInvAction)
+  <1>4. TypeOK /\ Inv4043_dbee_R22_0_I2 /\ SendInvAction => Inv4043_dbee_R22_0_I2' BY DEF TypeOK,SendInvAction,SendInv,Inv4043_dbee_R22_0_I2
+  \* (Inv4043_dbee_R22_0_I2,SendInvAckAction)
+  <1>5. TypeOK /\ Inv1149_870b_R29_2_I2 /\ Inv4043_dbee_R22_0_I2 /\ SendInvAckAction => Inv4043_dbee_R22_0_I2' BY DEF TypeOK,Inv1149_870b_R29_2_I2,SendInvAckAction,SendInvAck,Inv4043_dbee_R22_0_I2
+  \* (Inv4043_dbee_R22_0_I2,RecvInvAckAction)
+  <1>6. TypeOK /\ Inv4043_dbee_R22_0_I2 /\ RecvInvAckAction => Inv4043_dbee_R22_0_I2' BY DEF TypeOK,RecvInvAckAction,RecvInvAck,Inv4043_dbee_R22_0_I2
+  \* (Inv4043_dbee_R22_0_I2,SendGntSAction)
+  <1>7. TypeOK /\ Inv4424_0201_R14_1_I2 /\ Inv4043_dbee_R22_0_I2 /\ SendGntSAction => Inv4043_dbee_R22_0_I2' BY DEF TypeOK,Inv4424_0201_R14_1_I2,SendGntSAction,SendGntS,Inv4043_dbee_R22_0_I2
+  \* (Inv4043_dbee_R22_0_I2,SendGntEAction)
+  <1>8. TypeOK /\ Inv17_9e93_R14_0_I1 /\ Inv4043_dbee_R22_0_I2 /\ SendGntEAction => Inv4043_dbee_R22_0_I2' BY DEF TypeOK,Inv17_9e93_R14_0_I1,SendGntEAction,SendGntE,Inv4043_dbee_R22_0_I2
+  \* (Inv4043_dbee_R22_0_I2,RecvGntSAction)
+  <1>9. TypeOK /\ Inv4043_dbee_R22_0_I2 /\ RecvGntSAction => Inv4043_dbee_R22_0_I2' BY DEF TypeOK,RecvGntSAction,RecvGntS,Inv4043_dbee_R22_0_I2
+  \* (Inv4043_dbee_R22_0_I2,RecvGntEAction)
+  <1>10. TypeOK /\ Inv4043_dbee_R22_0_I2 /\ RecvGntEAction => Inv4043_dbee_R22_0_I2' BY DEF TypeOK,RecvGntEAction,RecvGntE,Inv4043_dbee_R22_0_I2
+  \* (Inv4043_dbee_R22_0_I2,StoreAction)
+  <1>11. TypeOK /\ Inv4043_dbee_R22_0_I2 /\ StoreAction => Inv4043_dbee_R22_0_I2' BY DEF TypeOK,StoreAction,Store,Inv4043_dbee_R22_0_I2
+  \* (Inv4043_dbee_R22_0_I2,SendReqSAction)
+  <1>12. TypeOK /\ Inv4043_dbee_R22_0_I2 /\ SendReqSAction => Inv4043_dbee_R22_0_I2' BY DEF TypeOK,SendReqSAction,SendReqS,Inv4043_dbee_R22_0_I2
 <1>13. QED BY <1>1,<1>2,<1>3,<1>4,<1>5,<1>6,<1>7,<1>8,<1>9,<1>10,<1>11,<1>12 DEF Next
 
 
-\*** Inv2748_0201_R14_1_I2
-THEOREM L_11 == TypeOK /\ Inv1611_1275_R21_1_I2 /\ Inv1036_a1d6_R21_0_I3 /\ Inv2748_0201_R14_1_I2 /\ Next => Inv2748_0201_R14_1_I2'
+\*** Inv4424_0201_R14_1_I2
+THEOREM L_11 == TypeOK /\ Inv2458_2a15_R21_1_I2 /\ Inv1057_089e_R21_0_I3 /\ Inv4424_0201_R14_1_I2 /\ Next => Inv4424_0201_R14_1_I2'
   <1>. USE A0,A1
-  \* (Inv2748_0201_R14_1_I2,SendReqEAction)
-  <1>1. TypeOK /\ Inv2748_0201_R14_1_I2 /\ SendReqEAction => Inv2748_0201_R14_1_I2' BY DEF TypeOK,SendReqEAction,SendReqE,Inv2748_0201_R14_1_I2
-  \* (Inv2748_0201_R14_1_I2,RecvReqSAction)
-  <1>2. TypeOK /\ Inv2748_0201_R14_1_I2 /\ RecvReqSAction => Inv2748_0201_R14_1_I2' BY DEF TypeOK,RecvReqSAction,RecvReqS,Inv2748_0201_R14_1_I2
-  \* (Inv2748_0201_R14_1_I2,RecvReqEAction)
-  <1>3. TypeOK /\ Inv2748_0201_R14_1_I2 /\ RecvReqEAction => Inv2748_0201_R14_1_I2' BY DEF TypeOK,RecvReqEAction,RecvReqE,Inv2748_0201_R14_1_I2
-  \* (Inv2748_0201_R14_1_I2,SendInvAction)
-  <1>4. TypeOK /\ Inv2748_0201_R14_1_I2 /\ SendInvAction => Inv2748_0201_R14_1_I2' BY DEF TypeOK,SendInvAction,SendInv,Inv2748_0201_R14_1_I2
-  \* (Inv2748_0201_R14_1_I2,SendInvAckAction)
-  <1>5. TypeOK /\ Inv1611_1275_R21_1_I2 /\ Inv2748_0201_R14_1_I2 /\ SendInvAckAction => Inv2748_0201_R14_1_I2' BY DEF TypeOK,Inv1611_1275_R21_1_I2,SendInvAckAction,SendInvAck,Inv2748_0201_R14_1_I2
-  \* (Inv2748_0201_R14_1_I2,RecvInvAckAction)
-  <1>6. TypeOK /\ Inv1036_a1d6_R21_0_I3 /\ Inv2748_0201_R14_1_I2 /\ RecvInvAckAction => Inv2748_0201_R14_1_I2' BY DEF TypeOK,Inv1036_a1d6_R21_0_I3,RecvInvAckAction,RecvInvAck,Inv2748_0201_R14_1_I2
-  \* (Inv2748_0201_R14_1_I2,SendGntSAction)
-  <1>7. TypeOK /\ Inv2748_0201_R14_1_I2 /\ SendGntSAction => Inv2748_0201_R14_1_I2' BY DEF TypeOK,SendGntSAction,SendGntS,Inv2748_0201_R14_1_I2
-  \* (Inv2748_0201_R14_1_I2,SendGntEAction)
-  <1>8. TypeOK /\ Inv2748_0201_R14_1_I2 /\ SendGntEAction => Inv2748_0201_R14_1_I2' BY DEF TypeOK,SendGntEAction,SendGntE,Inv2748_0201_R14_1_I2
-  \* (Inv2748_0201_R14_1_I2,RecvGntSAction)
-  <1>9. TypeOK /\ Inv2748_0201_R14_1_I2 /\ RecvGntSAction => Inv2748_0201_R14_1_I2' BY DEF TypeOK,RecvGntSAction,RecvGntS,Inv2748_0201_R14_1_I2
-  \* (Inv2748_0201_R14_1_I2,RecvGntEAction)
-  <1>10. TypeOK /\ Inv2748_0201_R14_1_I2 /\ RecvGntEAction => Inv2748_0201_R14_1_I2' BY DEF TypeOK,RecvGntEAction,RecvGntE,Inv2748_0201_R14_1_I2
-  \* (Inv2748_0201_R14_1_I2,StoreAction)
-  <1>11. TypeOK /\ Inv2748_0201_R14_1_I2 /\ StoreAction => Inv2748_0201_R14_1_I2' BY DEF TypeOK,StoreAction,Store,Inv2748_0201_R14_1_I2
-  \* (Inv2748_0201_R14_1_I2,SendReqSAction)
-  <1>12. TypeOK /\ Inv2748_0201_R14_1_I2 /\ SendReqSAction => Inv2748_0201_R14_1_I2' BY DEF TypeOK,SendReqSAction,SendReqS,Inv2748_0201_R14_1_I2
+  \* (Inv4424_0201_R14_1_I2,SendReqEAction)
+  <1>1. TypeOK /\ Inv4424_0201_R14_1_I2 /\ SendReqEAction => Inv4424_0201_R14_1_I2' BY DEF TypeOK,SendReqEAction,SendReqE,Inv4424_0201_R14_1_I2
+  \* (Inv4424_0201_R14_1_I2,RecvReqSAction)
+  <1>2. TypeOK /\ Inv4424_0201_R14_1_I2 /\ RecvReqSAction => Inv4424_0201_R14_1_I2' BY DEF TypeOK,RecvReqSAction,RecvReqS,Inv4424_0201_R14_1_I2
+  \* (Inv4424_0201_R14_1_I2,RecvReqEAction)
+  <1>3. TypeOK /\ Inv4424_0201_R14_1_I2 /\ RecvReqEAction => Inv4424_0201_R14_1_I2' BY DEF TypeOK,RecvReqEAction,RecvReqE,Inv4424_0201_R14_1_I2
+  \* (Inv4424_0201_R14_1_I2,SendInvAction)
+  <1>4. TypeOK /\ Inv4424_0201_R14_1_I2 /\ SendInvAction => Inv4424_0201_R14_1_I2' BY DEF TypeOK,SendInvAction,SendInv,Inv4424_0201_R14_1_I2
+  \* (Inv4424_0201_R14_1_I2,SendInvAckAction)
+  <1>5. TypeOK /\ Inv2458_2a15_R21_1_I2 /\ Inv4424_0201_R14_1_I2 /\ SendInvAckAction => Inv4424_0201_R14_1_I2' BY DEF TypeOK,Inv2458_2a15_R21_1_I2,SendInvAckAction,SendInvAck,Inv4424_0201_R14_1_I2
+  \* (Inv4424_0201_R14_1_I2,RecvInvAckAction)
+  <1>6. TypeOK /\ Inv1057_089e_R21_0_I3 /\ Inv4424_0201_R14_1_I2 /\ RecvInvAckAction => Inv4424_0201_R14_1_I2' BY DEF TypeOK,Inv1057_089e_R21_0_I3,RecvInvAckAction,RecvInvAck,Inv4424_0201_R14_1_I2
+  \* (Inv4424_0201_R14_1_I2,SendGntSAction)
+  <1>7. TypeOK /\ Inv4424_0201_R14_1_I2 /\ SendGntSAction => Inv4424_0201_R14_1_I2' BY DEF TypeOK,SendGntSAction,SendGntS,Inv4424_0201_R14_1_I2
+  \* (Inv4424_0201_R14_1_I2,SendGntEAction)
+  <1>8. TypeOK /\ Inv4424_0201_R14_1_I2 /\ SendGntEAction => Inv4424_0201_R14_1_I2' BY DEF TypeOK,SendGntEAction,SendGntE,Inv4424_0201_R14_1_I2
+  \* (Inv4424_0201_R14_1_I2,RecvGntSAction)
+  <1>9. TypeOK /\ Inv4424_0201_R14_1_I2 /\ RecvGntSAction => Inv4424_0201_R14_1_I2' BY DEF TypeOK,RecvGntSAction,RecvGntS,Inv4424_0201_R14_1_I2
+  \* (Inv4424_0201_R14_1_I2,RecvGntEAction)
+  <1>10. TypeOK /\ Inv4424_0201_R14_1_I2 /\ RecvGntEAction => Inv4424_0201_R14_1_I2' BY DEF TypeOK,RecvGntEAction,RecvGntE,Inv4424_0201_R14_1_I2
+  \* (Inv4424_0201_R14_1_I2,StoreAction)
+  <1>11. TypeOK /\ Inv4424_0201_R14_1_I2 /\ StoreAction => Inv4424_0201_R14_1_I2' BY DEF TypeOK,StoreAction,Store,Inv4424_0201_R14_1_I2
+  \* (Inv4424_0201_R14_1_I2,SendReqSAction)
+  <1>12. TypeOK /\ Inv4424_0201_R14_1_I2 /\ SendReqSAction => Inv4424_0201_R14_1_I2' BY DEF TypeOK,SendReqSAction,SendReqS,Inv4424_0201_R14_1_I2
 <1>13. QED BY <1>1,<1>2,<1>3,<1>4,<1>5,<1>6,<1>7,<1>8,<1>9,<1>10,<1>11,<1>12 DEF Next
 
 
-\*** Inv1036_a1d6_R21_0_I3
-THEOREM L_12 == TypeOK /\ Inv11_c03f_R12_0_I1 /\ Inv13_812b_R27_1_I1 /\ Inv50_ba79_R27_1_I1 /\ Inv7_7199_R6_1_I1 /\ Inv45_2bf0_R27_1_I1 /\ Inv14_9e93_R14_0_I1 /\ Inv1036_a1d6_R21_0_I3 /\ Next => Inv1036_a1d6_R21_0_I3'
+\*** Inv1057_089e_R21_0_I3
+THEOREM L_12 == TypeOK /\ Inv11_c03f_R12_0_I1 /\ Inv13_812b_R27_1_I1 /\ Inv50_ba79_R27_1_I1 /\ Inv7_7199_R6_1_I1 /\ Inv40_2bf0_R13_1_I1 /\ Inv17_9e93_R14_0_I1 /\ Inv1057_089e_R21_0_I3 /\ Next => Inv1057_089e_R21_0_I3'
   <1>. USE A0,A1
-  \* (Inv1036_a1d6_R21_0_I3,SendReqEAction)
-  <1>1. TypeOK /\ Inv1036_a1d6_R21_0_I3 /\ SendReqEAction => Inv1036_a1d6_R21_0_I3' BY DEF TypeOK,SendReqEAction,SendReqE,Inv1036_a1d6_R21_0_I3
-  \* (Inv1036_a1d6_R21_0_I3,RecvReqSAction)
-  <1>2. TypeOK /\ Inv1036_a1d6_R21_0_I3 /\ RecvReqSAction => Inv1036_a1d6_R21_0_I3' BY DEF TypeOK,RecvReqSAction,RecvReqS,Inv1036_a1d6_R21_0_I3
-  \* (Inv1036_a1d6_R21_0_I3,RecvReqEAction)
-  <1>3. TypeOK /\ Inv1036_a1d6_R21_0_I3 /\ RecvReqEAction => Inv1036_a1d6_R21_0_I3' BY DEF TypeOK,RecvReqEAction,RecvReqE,Inv1036_a1d6_R21_0_I3
-  \* (Inv1036_a1d6_R21_0_I3,SendInvAction)
-  <1>4. TypeOK /\ Inv1036_a1d6_R21_0_I3 /\ SendInvAction => Inv1036_a1d6_R21_0_I3' BY DEF TypeOK,SendInvAction,SendInv,Inv1036_a1d6_R21_0_I3
-  \* (Inv1036_a1d6_R21_0_I3,SendInvAckAction)
-  <1>5. TypeOK /\ Inv11_c03f_R12_0_I1 /\ Inv13_812b_R27_1_I1 /\ Inv50_ba79_R27_1_I1 /\ Inv7_7199_R6_1_I1 /\ Inv45_2bf0_R27_1_I1 /\ Inv1036_a1d6_R21_0_I3 /\ SendInvAckAction => Inv1036_a1d6_R21_0_I3' BY DEF TypeOK,Inv11_c03f_R12_0_I1,Inv13_812b_R27_1_I1,Inv50_ba79_R27_1_I1,Inv7_7199_R6_1_I1,Inv45_2bf0_R27_1_I1,SendInvAckAction,SendInvAck,Inv1036_a1d6_R21_0_I3
-  \* (Inv1036_a1d6_R21_0_I3,RecvInvAckAction)
-  <1>6. TypeOK /\ Inv1036_a1d6_R21_0_I3 /\ RecvInvAckAction => Inv1036_a1d6_R21_0_I3' BY DEF TypeOK,RecvInvAckAction,RecvInvAck,Inv1036_a1d6_R21_0_I3
-  \* (Inv1036_a1d6_R21_0_I3,SendGntSAction)
-  <1>7. TypeOK /\ Inv1036_a1d6_R21_0_I3 /\ SendGntSAction => Inv1036_a1d6_R21_0_I3' BY DEF TypeOK,SendGntSAction,SendGntS,Inv1036_a1d6_R21_0_I3
-  \* (Inv1036_a1d6_R21_0_I3,SendGntEAction)
-  <1>8. TypeOK /\ Inv14_9e93_R14_0_I1 /\ Inv1036_a1d6_R21_0_I3 /\ SendGntEAction => Inv1036_a1d6_R21_0_I3' BY DEF TypeOK,Inv14_9e93_R14_0_I1,SendGntEAction,SendGntE,Inv1036_a1d6_R21_0_I3
-  \* (Inv1036_a1d6_R21_0_I3,RecvGntSAction)
-  <1>9. TypeOK /\ Inv1036_a1d6_R21_0_I3 /\ RecvGntSAction => Inv1036_a1d6_R21_0_I3' BY DEF TypeOK,RecvGntSAction,RecvGntS,Inv1036_a1d6_R21_0_I3
-  \* (Inv1036_a1d6_R21_0_I3,RecvGntEAction)
-  <1>10. TypeOK /\ Inv1036_a1d6_R21_0_I3 /\ RecvGntEAction => Inv1036_a1d6_R21_0_I3' BY DEF TypeOK,RecvGntEAction,RecvGntE,Inv1036_a1d6_R21_0_I3
-  \* (Inv1036_a1d6_R21_0_I3,StoreAction)
-  <1>11. TypeOK /\ Inv1036_a1d6_R21_0_I3 /\ StoreAction => Inv1036_a1d6_R21_0_I3' BY DEF TypeOK,StoreAction,Store,Inv1036_a1d6_R21_0_I3
-  \* (Inv1036_a1d6_R21_0_I3,SendReqSAction)
-  <1>12. TypeOK /\ Inv1036_a1d6_R21_0_I3 /\ SendReqSAction => Inv1036_a1d6_R21_0_I3' BY DEF TypeOK,SendReqSAction,SendReqS,Inv1036_a1d6_R21_0_I3
+  \* (Inv1057_089e_R21_0_I3,SendReqEAction)
+  <1>1. TypeOK /\ Inv1057_089e_R21_0_I3 /\ SendReqEAction => Inv1057_089e_R21_0_I3' BY DEF TypeOK,SendReqEAction,SendReqE,Inv1057_089e_R21_0_I3
+  \* (Inv1057_089e_R21_0_I3,RecvReqSAction)
+  <1>2. TypeOK /\ Inv1057_089e_R21_0_I3 /\ RecvReqSAction => Inv1057_089e_R21_0_I3' BY DEF TypeOK,RecvReqSAction,RecvReqS,Inv1057_089e_R21_0_I3
+  \* (Inv1057_089e_R21_0_I3,RecvReqEAction)
+  <1>3. TypeOK /\ Inv1057_089e_R21_0_I3 /\ RecvReqEAction => Inv1057_089e_R21_0_I3' BY DEF TypeOK,RecvReqEAction,RecvReqE,Inv1057_089e_R21_0_I3
+  \* (Inv1057_089e_R21_0_I3,SendInvAction)
+  <1>4. TypeOK /\ Inv1057_089e_R21_0_I3 /\ SendInvAction => Inv1057_089e_R21_0_I3' BY DEF TypeOK,SendInvAction,SendInv,Inv1057_089e_R21_0_I3
+  \* (Inv1057_089e_R21_0_I3,SendInvAckAction)
+  <1>5. TypeOK /\ Inv11_c03f_R12_0_I1 /\ Inv13_812b_R27_1_I1 /\ Inv50_ba79_R27_1_I1 /\ Inv7_7199_R6_1_I1 /\ Inv40_2bf0_R13_1_I1 /\ Inv1057_089e_R21_0_I3 /\ SendInvAckAction => Inv1057_089e_R21_0_I3' BY DEF TypeOK,Inv11_c03f_R12_0_I1,Inv13_812b_R27_1_I1,Inv50_ba79_R27_1_I1,Inv7_7199_R6_1_I1,Inv40_2bf0_R13_1_I1,SendInvAckAction,SendInvAck,Inv1057_089e_R21_0_I3
+  \* (Inv1057_089e_R21_0_I3,RecvInvAckAction)
+  <1>6. TypeOK /\ Inv1057_089e_R21_0_I3 /\ RecvInvAckAction => Inv1057_089e_R21_0_I3' BY DEF TypeOK,RecvInvAckAction,RecvInvAck,Inv1057_089e_R21_0_I3
+  \* (Inv1057_089e_R21_0_I3,SendGntSAction)
+  <1>7. TypeOK /\ Inv1057_089e_R21_0_I3 /\ SendGntSAction => Inv1057_089e_R21_0_I3' BY DEF TypeOK,SendGntSAction,SendGntS,Inv1057_089e_R21_0_I3
+  \* (Inv1057_089e_R21_0_I3,SendGntEAction)
+  <1>8. TypeOK /\ Inv17_9e93_R14_0_I1 /\ Inv1057_089e_R21_0_I3 /\ SendGntEAction => Inv1057_089e_R21_0_I3' BY DEF TypeOK,Inv17_9e93_R14_0_I1,SendGntEAction,SendGntE,Inv1057_089e_R21_0_I3
+  \* (Inv1057_089e_R21_0_I3,RecvGntSAction)
+  <1>9. TypeOK /\ Inv1057_089e_R21_0_I3 /\ RecvGntSAction => Inv1057_089e_R21_0_I3' BY DEF TypeOK,RecvGntSAction,RecvGntS,Inv1057_089e_R21_0_I3
+  \* (Inv1057_089e_R21_0_I3,RecvGntEAction)
+  <1>10. TypeOK /\ Inv1057_089e_R21_0_I3 /\ RecvGntEAction => Inv1057_089e_R21_0_I3' BY DEF TypeOK,RecvGntEAction,RecvGntE,Inv1057_089e_R21_0_I3
+  \* (Inv1057_089e_R21_0_I3,StoreAction)
+  <1>11. TypeOK /\ Inv1057_089e_R21_0_I3 /\ StoreAction => Inv1057_089e_R21_0_I3' BY DEF TypeOK,StoreAction,Store,Inv1057_089e_R21_0_I3
+  \* (Inv1057_089e_R21_0_I3,SendReqSAction)
+  <1>12. TypeOK /\ Inv1057_089e_R21_0_I3 /\ SendReqSAction => Inv1057_089e_R21_0_I3' BY DEF TypeOK,SendReqSAction,SendReqS,Inv1057_089e_R21_0_I3
 <1>13. QED BY <1>1,<1>2,<1>3,<1>4,<1>5,<1>6,<1>7,<1>8,<1>9,<1>10,<1>11,<1>12 DEF Next
 
 
 \*** Inv11_c03f_R12_0_I1
-THEOREM L_13 == TypeOK /\ Inv13_45c1_R14_2_I1 /\ Inv2748_0201_R14_1_I2 /\ Inv14_9e93_R14_0_I1 /\ Inv11_c03f_R12_0_I1 /\ Next => Inv11_c03f_R12_0_I1'
+THEOREM L_13 == TypeOK /\ Inv13_45c1_R14_2_I1 /\ Inv4424_0201_R14_1_I2 /\ Inv17_9e93_R14_0_I1 /\ Inv11_c03f_R12_0_I1 /\ Next => Inv11_c03f_R12_0_I1'
   <1>. USE A0,A1
   \* (Inv11_c03f_R12_0_I1,SendReqEAction)
   <1>1. TypeOK /\ Inv11_c03f_R12_0_I1 /\ SendReqEAction => Inv11_c03f_R12_0_I1' BY DEF TypeOK,SendReqEAction,SendReqE,Inv11_c03f_R12_0_I1
@@ -551,9 +550,9 @@ THEOREM L_13 == TypeOK /\ Inv13_45c1_R14_2_I1 /\ Inv2748_0201_R14_1_I2 /\ Inv14_
   \* (Inv11_c03f_R12_0_I1,RecvInvAckAction)
   <1>6. TypeOK /\ Inv11_c03f_R12_0_I1 /\ RecvInvAckAction => Inv11_c03f_R12_0_I1' BY DEF TypeOK,RecvInvAckAction,RecvInvAck,Inv11_c03f_R12_0_I1
   \* (Inv11_c03f_R12_0_I1,SendGntSAction)
-  <1>7. TypeOK /\ Inv2748_0201_R14_1_I2 /\ Inv11_c03f_R12_0_I1 /\ SendGntSAction => Inv11_c03f_R12_0_I1' BY DEF TypeOK,Inv2748_0201_R14_1_I2,SendGntSAction,SendGntS,Inv11_c03f_R12_0_I1
+  <1>7. TypeOK /\ Inv4424_0201_R14_1_I2 /\ Inv11_c03f_R12_0_I1 /\ SendGntSAction => Inv11_c03f_R12_0_I1' BY DEF TypeOK,Inv4424_0201_R14_1_I2,SendGntSAction,SendGntS,Inv11_c03f_R12_0_I1
   \* (Inv11_c03f_R12_0_I1,SendGntEAction)
-  <1>8. TypeOK /\ Inv14_9e93_R14_0_I1 /\ Inv11_c03f_R12_0_I1 /\ SendGntEAction => Inv11_c03f_R12_0_I1' BY DEF TypeOK,Inv14_9e93_R14_0_I1,SendGntEAction,SendGntE,Inv11_c03f_R12_0_I1
+  <1>8. TypeOK /\ Inv17_9e93_R14_0_I1 /\ Inv11_c03f_R12_0_I1 /\ SendGntEAction => Inv11_c03f_R12_0_I1' BY DEF TypeOK,Inv17_9e93_R14_0_I1,SendGntEAction,SendGntE,Inv11_c03f_R12_0_I1
   \* (Inv11_c03f_R12_0_I1,RecvGntSAction)
   <1>9. TypeOK /\ Inv11_c03f_R12_0_I1 /\ RecvGntSAction => Inv11_c03f_R12_0_I1' BY DEF TypeOK,RecvGntSAction,RecvGntS,Inv11_c03f_R12_0_I1
   \* (Inv11_c03f_R12_0_I1,RecvGntEAction)
@@ -776,7 +775,7 @@ THEOREM L_20 == TypeOK /\ Inv11_c03f_R12_0_I1 /\ Inv11_c03f_R12_0_I1 /\ Inv10_82
 
 
 \*** Inv7_7199_R6_1_I1
-THEOREM L_21 == TypeOK /\ Inv8923_9eca_R13_1_I2 /\ Inv15_5b11_R8_0_I1 /\ Inv7_7199_R6_1_I1 /\ Next => Inv7_7199_R6_1_I1'
+THEOREM L_21 == TypeOK /\ Safety /\ Inv40_2bf0_R13_1_I1 /\ Inv15_5b11_R8_0_I1 /\ Inv7_7199_R6_1_I1 /\ Next => Inv7_7199_R6_1_I1'
   <1>. USE A0,A1
   \* (Inv7_7199_R6_1_I1,SendReqEAction)
   <1>1. TypeOK /\ Inv7_7199_R6_1_I1 /\ SendReqEAction => Inv7_7199_R6_1_I1' BY DEF TypeOK,SendReqEAction,SendReqE,Inv7_7199_R6_1_I1
@@ -787,7 +786,7 @@ THEOREM L_21 == TypeOK /\ Inv8923_9eca_R13_1_I2 /\ Inv15_5b11_R8_0_I1 /\ Inv7_71
   \* (Inv7_7199_R6_1_I1,SendInvAction)
   <1>4. TypeOK /\ Inv7_7199_R6_1_I1 /\ SendInvAction => Inv7_7199_R6_1_I1' BY DEF TypeOK,SendInvAction,SendInv,Inv7_7199_R6_1_I1
   \* (Inv7_7199_R6_1_I1,SendInvAckAction)
-  <1>5. TypeOK /\ Inv8923_9eca_R13_1_I2 /\ Inv7_7199_R6_1_I1 /\ SendInvAckAction => Inv7_7199_R6_1_I1' BY DEF TypeOK,Inv8923_9eca_R13_1_I2,SendInvAckAction,SendInvAck,Inv7_7199_R6_1_I1
+  <1>5. TypeOK /\ Safety /\ Inv40_2bf0_R13_1_I1 /\ Inv7_7199_R6_1_I1 /\ SendInvAckAction => Inv7_7199_R6_1_I1' BY DEF TypeOK,Safety,Inv40_2bf0_R13_1_I1,SendInvAckAction,SendInvAck,Inv7_7199_R6_1_I1
   \* (Inv7_7199_R6_1_I1,RecvInvAckAction)
   <1>6. TypeOK /\ Inv7_7199_R6_1_I1 /\ RecvInvAckAction => Inv7_7199_R6_1_I1' BY DEF TypeOK,RecvInvAckAction,RecvInvAck,Inv7_7199_R6_1_I1
   \* (Inv7_7199_R6_1_I1,SendGntSAction)
@@ -806,7 +805,7 @@ THEOREM L_21 == TypeOK /\ Inv8923_9eca_R13_1_I2 /\ Inv15_5b11_R8_0_I1 /\ Inv7_71
 
 
 \*** Inv15_5b11_R8_0_I1
-THEOREM L_22 == TypeOK /\ Inv64_c47d_R16_1_I1 /\ Inv14_9e93_R14_0_I1 /\ Inv15_5b11_R8_0_I1 /\ Next => Inv15_5b11_R8_0_I1'
+THEOREM L_22 == TypeOK /\ Inv64_c47d_R16_1_I1 /\ Inv17_9e93_R14_0_I1 /\ Inv15_5b11_R8_0_I1 /\ Next => Inv15_5b11_R8_0_I1'
   <1>. USE A0,A1
   \* (Inv15_5b11_R8_0_I1,SendReqEAction)
   <1>1. TypeOK /\ Inv15_5b11_R8_0_I1 /\ SendReqEAction => Inv15_5b11_R8_0_I1' BY DEF TypeOK,SendReqEAction,SendReqE,Inv15_5b11_R8_0_I1
@@ -823,7 +822,7 @@ THEOREM L_22 == TypeOK /\ Inv64_c47d_R16_1_I1 /\ Inv14_9e93_R14_0_I1 /\ Inv15_5b
   \* (Inv15_5b11_R8_0_I1,SendGntSAction)
   <1>7. TypeOK /\ Inv15_5b11_R8_0_I1 /\ SendGntSAction => Inv15_5b11_R8_0_I1' BY DEF TypeOK,SendGntSAction,SendGntS,Inv15_5b11_R8_0_I1
   \* (Inv15_5b11_R8_0_I1,SendGntEAction)
-  <1>8. TypeOK /\ Inv14_9e93_R14_0_I1 /\ Inv15_5b11_R8_0_I1 /\ SendGntEAction => Inv15_5b11_R8_0_I1' BY DEF TypeOK,Inv14_9e93_R14_0_I1,SendGntEAction,SendGntE,Inv15_5b11_R8_0_I1
+  <1>8. TypeOK /\ Inv17_9e93_R14_0_I1 /\ Inv15_5b11_R8_0_I1 /\ SendGntEAction => Inv15_5b11_R8_0_I1' BY DEF TypeOK,Inv17_9e93_R14_0_I1,SendGntEAction,SendGntE,Inv15_5b11_R8_0_I1
   \* (Inv15_5b11_R8_0_I1,RecvGntSAction)
   <1>9. TypeOK /\ Inv15_5b11_R8_0_I1 /\ RecvGntSAction => Inv15_5b11_R8_0_I1' BY DEF TypeOK,RecvGntSAction,RecvGntS,Inv15_5b11_R8_0_I1
   \* (Inv15_5b11_R8_0_I1,RecvGntEAction)
@@ -836,7 +835,7 @@ THEOREM L_22 == TypeOK /\ Inv64_c47d_R16_1_I1 /\ Inv14_9e93_R14_0_I1 /\ Inv15_5b
 
 
 \*** Inv64_c47d_R16_1_I1
-THEOREM L_23 == TypeOK /\ Inv6423_fc2f_R3_2_I2 /\ Inv39_7204_R20_0_I1 /\ Inv64_c47d_R16_1_I1 /\ Next => Inv64_c47d_R16_1_I1'
+THEOREM L_23 == TypeOK /\ Inv6410_fc2f_R3_2_I2 /\ Inv39_7204_R20_0_I1 /\ Inv64_c47d_R16_1_I1 /\ Next => Inv64_c47d_R16_1_I1'
   <1>. USE A0,A1
   \* (Inv64_c47d_R16_1_I1,SendReqEAction)
   <1>1. TypeOK /\ Inv64_c47d_R16_1_I1 /\ SendReqEAction => Inv64_c47d_R16_1_I1' BY DEF TypeOK,SendReqEAction,SendReqE,Inv64_c47d_R16_1_I1
@@ -845,7 +844,7 @@ THEOREM L_23 == TypeOK /\ Inv6423_fc2f_R3_2_I2 /\ Inv39_7204_R20_0_I1 /\ Inv64_c
   \* (Inv64_c47d_R16_1_I1,RecvReqEAction)
   <1>3. TypeOK /\ Inv64_c47d_R16_1_I1 /\ RecvReqEAction => Inv64_c47d_R16_1_I1' BY DEF TypeOK,RecvReqEAction,RecvReqE,Inv64_c47d_R16_1_I1
   \* (Inv64_c47d_R16_1_I1,SendInvAction)
-  <1>4. TypeOK /\ Inv6423_fc2f_R3_2_I2 /\ Inv64_c47d_R16_1_I1 /\ SendInvAction => Inv64_c47d_R16_1_I1' BY DEF TypeOK,Inv6423_fc2f_R3_2_I2,SendInvAction,SendInv,Inv64_c47d_R16_1_I1
+  <1>4. TypeOK /\ Inv6410_fc2f_R3_2_I2 /\ Inv64_c47d_R16_1_I1 /\ SendInvAction => Inv64_c47d_R16_1_I1' BY DEF TypeOK,Inv6410_fc2f_R3_2_I2,SendInvAction,SendInv,Inv64_c47d_R16_1_I1
   \* (Inv64_c47d_R16_1_I1,SendInvAckAction)
   <1>5. TypeOK /\ Inv64_c47d_R16_1_I1 /\ SendInvAckAction => Inv64_c47d_R16_1_I1' BY DEF TypeOK,SendInvAckAction,SendInvAck,Inv64_c47d_R16_1_I1
   \* (Inv64_c47d_R16_1_I1,RecvInvAckAction)
@@ -865,63 +864,63 @@ THEOREM L_23 == TypeOK /\ Inv6423_fc2f_R3_2_I2 /\ Inv39_7204_R20_0_I1 /\ Inv64_c
 <1>13. QED BY <1>1,<1>2,<1>3,<1>4,<1>5,<1>6,<1>7,<1>8,<1>9,<1>10,<1>11,<1>12 DEF Next
 
 
-\*** Inv6423_fc2f_R3_2_I2
-THEOREM L_24 == TypeOK /\ Inv9619_4ca8_R9_0_I2 /\ Inv9619_4ca8_R9_0_I2 /\ Inv104_0f39_R7_1_I1 /\ Inv6423_fc2f_R3_2_I2 /\ Next => Inv6423_fc2f_R3_2_I2'
+\*** Inv6410_fc2f_R3_2_I2
+THEOREM L_24 == TypeOK /\ Inv9560_0995_R9_0_I2 /\ Inv9560_0995_R9_0_I2 /\ Inv111_0f39_R7_1_I1 /\ Inv6410_fc2f_R3_2_I2 /\ Next => Inv6410_fc2f_R3_2_I2'
   <1>. USE A0,A1
-  \* (Inv6423_fc2f_R3_2_I2,SendReqEAction)
-  <1>1. TypeOK /\ Inv6423_fc2f_R3_2_I2 /\ SendReqEAction => Inv6423_fc2f_R3_2_I2' BY DEF TypeOK,SendReqEAction,SendReqE,Inv6423_fc2f_R3_2_I2
-  \* (Inv6423_fc2f_R3_2_I2,RecvReqSAction)
-  <1>2. TypeOK /\ Inv9619_4ca8_R9_0_I2 /\ Inv6423_fc2f_R3_2_I2 /\ RecvReqSAction => Inv6423_fc2f_R3_2_I2' BY DEF TypeOK,Inv9619_4ca8_R9_0_I2,RecvReqSAction,RecvReqS,Inv6423_fc2f_R3_2_I2
-  \* (Inv6423_fc2f_R3_2_I2,RecvReqEAction)
-  <1>3. TypeOK /\ Inv9619_4ca8_R9_0_I2 /\ Inv6423_fc2f_R3_2_I2 /\ RecvReqEAction => Inv6423_fc2f_R3_2_I2' BY DEF TypeOK,Inv9619_4ca8_R9_0_I2,RecvReqEAction,RecvReqE,Inv6423_fc2f_R3_2_I2
-  \* (Inv6423_fc2f_R3_2_I2,SendInvAction)
-  <1>4. TypeOK /\ Inv6423_fc2f_R3_2_I2 /\ SendInvAction => Inv6423_fc2f_R3_2_I2' BY DEF TypeOK,SendInvAction,SendInv,Inv6423_fc2f_R3_2_I2
-  \* (Inv6423_fc2f_R3_2_I2,SendInvAckAction)
-  <1>5. TypeOK /\ Inv6423_fc2f_R3_2_I2 /\ SendInvAckAction => Inv6423_fc2f_R3_2_I2' BY DEF TypeOK,SendInvAckAction,SendInvAck,Inv6423_fc2f_R3_2_I2
-  \* (Inv6423_fc2f_R3_2_I2,RecvInvAckAction)
-  <1>6. TypeOK /\ Inv6423_fc2f_R3_2_I2 /\ RecvInvAckAction => Inv6423_fc2f_R3_2_I2' BY DEF TypeOK,RecvInvAckAction,RecvInvAck,Inv6423_fc2f_R3_2_I2
-  \* (Inv6423_fc2f_R3_2_I2,SendGntSAction)
-  <1>7. TypeOK /\ Inv6423_fc2f_R3_2_I2 /\ SendGntSAction => Inv6423_fc2f_R3_2_I2' BY DEF TypeOK,SendGntSAction,SendGntS,Inv6423_fc2f_R3_2_I2
-  \* (Inv6423_fc2f_R3_2_I2,SendGntEAction)
-  <1>8. TypeOK /\ Inv104_0f39_R7_1_I1 /\ Inv6423_fc2f_R3_2_I2 /\ SendGntEAction => Inv6423_fc2f_R3_2_I2' BY DEF TypeOK,Inv104_0f39_R7_1_I1,SendGntEAction,SendGntE,Inv6423_fc2f_R3_2_I2
-  \* (Inv6423_fc2f_R3_2_I2,RecvGntSAction)
-  <1>9. TypeOK /\ Inv6423_fc2f_R3_2_I2 /\ RecvGntSAction => Inv6423_fc2f_R3_2_I2' BY DEF TypeOK,RecvGntSAction,RecvGntS,Inv6423_fc2f_R3_2_I2
-  \* (Inv6423_fc2f_R3_2_I2,RecvGntEAction)
-  <1>10. TypeOK /\ Inv6423_fc2f_R3_2_I2 /\ RecvGntEAction => Inv6423_fc2f_R3_2_I2' BY DEF TypeOK,RecvGntEAction,RecvGntE,Inv6423_fc2f_R3_2_I2
-  \* (Inv6423_fc2f_R3_2_I2,StoreAction)
-  <1>11. TypeOK /\ Inv6423_fc2f_R3_2_I2 /\ StoreAction => Inv6423_fc2f_R3_2_I2' BY DEF TypeOK,StoreAction,Store,Inv6423_fc2f_R3_2_I2
-  \* (Inv6423_fc2f_R3_2_I2,SendReqSAction)
-  <1>12. TypeOK /\ Inv6423_fc2f_R3_2_I2 /\ SendReqSAction => Inv6423_fc2f_R3_2_I2' BY DEF TypeOK,SendReqSAction,SendReqS,Inv6423_fc2f_R3_2_I2
+  \* (Inv6410_fc2f_R3_2_I2,SendReqEAction)
+  <1>1. TypeOK /\ Inv6410_fc2f_R3_2_I2 /\ SendReqEAction => Inv6410_fc2f_R3_2_I2' BY DEF TypeOK,SendReqEAction,SendReqE,Inv6410_fc2f_R3_2_I2
+  \* (Inv6410_fc2f_R3_2_I2,RecvReqSAction)
+  <1>2. TypeOK /\ Inv9560_0995_R9_0_I2 /\ Inv6410_fc2f_R3_2_I2 /\ RecvReqSAction => Inv6410_fc2f_R3_2_I2' BY DEF TypeOK,Inv9560_0995_R9_0_I2,RecvReqSAction,RecvReqS,Inv6410_fc2f_R3_2_I2
+  \* (Inv6410_fc2f_R3_2_I2,RecvReqEAction)
+  <1>3. TypeOK /\ Inv9560_0995_R9_0_I2 /\ Inv6410_fc2f_R3_2_I2 /\ RecvReqEAction => Inv6410_fc2f_R3_2_I2' BY DEF TypeOK,Inv9560_0995_R9_0_I2,RecvReqEAction,RecvReqE,Inv6410_fc2f_R3_2_I2
+  \* (Inv6410_fc2f_R3_2_I2,SendInvAction)
+  <1>4. TypeOK /\ Inv6410_fc2f_R3_2_I2 /\ SendInvAction => Inv6410_fc2f_R3_2_I2' BY DEF TypeOK,SendInvAction,SendInv,Inv6410_fc2f_R3_2_I2
+  \* (Inv6410_fc2f_R3_2_I2,SendInvAckAction)
+  <1>5. TypeOK /\ Inv6410_fc2f_R3_2_I2 /\ SendInvAckAction => Inv6410_fc2f_R3_2_I2' BY DEF TypeOK,SendInvAckAction,SendInvAck,Inv6410_fc2f_R3_2_I2
+  \* (Inv6410_fc2f_R3_2_I2,RecvInvAckAction)
+  <1>6. TypeOK /\ Inv6410_fc2f_R3_2_I2 /\ RecvInvAckAction => Inv6410_fc2f_R3_2_I2' BY DEF TypeOK,RecvInvAckAction,RecvInvAck,Inv6410_fc2f_R3_2_I2
+  \* (Inv6410_fc2f_R3_2_I2,SendGntSAction)
+  <1>7. TypeOK /\ Inv6410_fc2f_R3_2_I2 /\ SendGntSAction => Inv6410_fc2f_R3_2_I2' BY DEF TypeOK,SendGntSAction,SendGntS,Inv6410_fc2f_R3_2_I2
+  \* (Inv6410_fc2f_R3_2_I2,SendGntEAction)
+  <1>8. TypeOK /\ Inv111_0f39_R7_1_I1 /\ Inv6410_fc2f_R3_2_I2 /\ SendGntEAction => Inv6410_fc2f_R3_2_I2' BY DEF TypeOK,Inv111_0f39_R7_1_I1,SendGntEAction,SendGntE,Inv6410_fc2f_R3_2_I2
+  \* (Inv6410_fc2f_R3_2_I2,RecvGntSAction)
+  <1>9. TypeOK /\ Inv6410_fc2f_R3_2_I2 /\ RecvGntSAction => Inv6410_fc2f_R3_2_I2' BY DEF TypeOK,RecvGntSAction,RecvGntS,Inv6410_fc2f_R3_2_I2
+  \* (Inv6410_fc2f_R3_2_I2,RecvGntEAction)
+  <1>10. TypeOK /\ Inv6410_fc2f_R3_2_I2 /\ RecvGntEAction => Inv6410_fc2f_R3_2_I2' BY DEF TypeOK,RecvGntEAction,RecvGntE,Inv6410_fc2f_R3_2_I2
+  \* (Inv6410_fc2f_R3_2_I2,StoreAction)
+  <1>11. TypeOK /\ Inv6410_fc2f_R3_2_I2 /\ StoreAction => Inv6410_fc2f_R3_2_I2' BY DEF TypeOK,StoreAction,Store,Inv6410_fc2f_R3_2_I2
+  \* (Inv6410_fc2f_R3_2_I2,SendReqSAction)
+  <1>12. TypeOK /\ Inv6410_fc2f_R3_2_I2 /\ SendReqSAction => Inv6410_fc2f_R3_2_I2' BY DEF TypeOK,SendReqSAction,SendReqS,Inv6410_fc2f_R3_2_I2
 <1>13. QED BY <1>1,<1>2,<1>3,<1>4,<1>5,<1>6,<1>7,<1>8,<1>9,<1>10,<1>11,<1>12 DEF Next
 
 
-\*** Inv9619_4ca8_R9_0_I2
-THEOREM L_25 == TypeOK /\ Inv5_a2c7_R3_1_I1 /\ Inv5_a2c7_R3_1_I1 /\ Inv9619_4ca8_R9_0_I2 /\ Next => Inv9619_4ca8_R9_0_I2'
+\*** Inv9560_0995_R9_0_I2
+THEOREM L_25 == TypeOK /\ Inv5_a2c7_R3_1_I1 /\ Inv5_a2c7_R3_1_I1 /\ Inv9560_0995_R9_0_I2 /\ Next => Inv9560_0995_R9_0_I2'
   <1>. USE A0,A1
-  \* (Inv9619_4ca8_R9_0_I2,SendReqEAction)
-  <1>1. TypeOK /\ Inv9619_4ca8_R9_0_I2 /\ SendReqEAction => Inv9619_4ca8_R9_0_I2' BY DEF TypeOK,SendReqEAction,SendReqE,Inv9619_4ca8_R9_0_I2
-  \* (Inv9619_4ca8_R9_0_I2,RecvReqSAction)
-  <1>2. TypeOK /\ Inv9619_4ca8_R9_0_I2 /\ RecvReqSAction => Inv9619_4ca8_R9_0_I2' BY DEF TypeOK,RecvReqSAction,RecvReqS,Inv9619_4ca8_R9_0_I2
-  \* (Inv9619_4ca8_R9_0_I2,RecvReqEAction)
-  <1>3. TypeOK /\ Inv9619_4ca8_R9_0_I2 /\ RecvReqEAction => Inv9619_4ca8_R9_0_I2' BY DEF TypeOK,RecvReqEAction,RecvReqE,Inv9619_4ca8_R9_0_I2
-  \* (Inv9619_4ca8_R9_0_I2,SendInvAction)
-  <1>4. TypeOK /\ Inv9619_4ca8_R9_0_I2 /\ SendInvAction => Inv9619_4ca8_R9_0_I2' BY DEF TypeOK,SendInvAction,SendInv,Inv9619_4ca8_R9_0_I2
-  \* (Inv9619_4ca8_R9_0_I2,SendInvAckAction)
-  <1>5. TypeOK /\ Inv9619_4ca8_R9_0_I2 /\ SendInvAckAction => Inv9619_4ca8_R9_0_I2' BY DEF TypeOK,SendInvAckAction,SendInvAck,Inv9619_4ca8_R9_0_I2
-  \* (Inv9619_4ca8_R9_0_I2,RecvInvAckAction)
-  <1>6. TypeOK /\ Inv9619_4ca8_R9_0_I2 /\ RecvInvAckAction => Inv9619_4ca8_R9_0_I2' BY DEF TypeOK,RecvInvAckAction,RecvInvAck,Inv9619_4ca8_R9_0_I2
-  \* (Inv9619_4ca8_R9_0_I2,SendGntSAction)
-  <1>7. TypeOK /\ Inv5_a2c7_R3_1_I1 /\ Inv9619_4ca8_R9_0_I2 /\ SendGntSAction => Inv9619_4ca8_R9_0_I2' BY DEF TypeOK,Inv5_a2c7_R3_1_I1,SendGntSAction,SendGntS,Inv9619_4ca8_R9_0_I2
-  \* (Inv9619_4ca8_R9_0_I2,SendGntEAction)
-  <1>8. TypeOK /\ Inv5_a2c7_R3_1_I1 /\ Inv9619_4ca8_R9_0_I2 /\ SendGntEAction => Inv9619_4ca8_R9_0_I2' BY DEF TypeOK,Inv5_a2c7_R3_1_I1,SendGntEAction,SendGntE,Inv9619_4ca8_R9_0_I2
-  \* (Inv9619_4ca8_R9_0_I2,RecvGntSAction)
-  <1>9. TypeOK /\ Inv9619_4ca8_R9_0_I2 /\ RecvGntSAction => Inv9619_4ca8_R9_0_I2' BY DEF TypeOK,RecvGntSAction,RecvGntS,Inv9619_4ca8_R9_0_I2
-  \* (Inv9619_4ca8_R9_0_I2,RecvGntEAction)
-  <1>10. TypeOK /\ Inv9619_4ca8_R9_0_I2 /\ RecvGntEAction => Inv9619_4ca8_R9_0_I2' BY DEF TypeOK,RecvGntEAction,RecvGntE,Inv9619_4ca8_R9_0_I2
-  \* (Inv9619_4ca8_R9_0_I2,StoreAction)
-  <1>11. TypeOK /\ Inv9619_4ca8_R9_0_I2 /\ StoreAction => Inv9619_4ca8_R9_0_I2' BY DEF TypeOK,StoreAction,Store,Inv9619_4ca8_R9_0_I2
-  \* (Inv9619_4ca8_R9_0_I2,SendReqSAction)
-  <1>12. TypeOK /\ Inv9619_4ca8_R9_0_I2 /\ SendReqSAction => Inv9619_4ca8_R9_0_I2' BY DEF TypeOK,SendReqSAction,SendReqS,Inv9619_4ca8_R9_0_I2
+  \* (Inv9560_0995_R9_0_I2,SendReqEAction)
+  <1>1. TypeOK /\ Inv9560_0995_R9_0_I2 /\ SendReqEAction => Inv9560_0995_R9_0_I2' BY DEF TypeOK,SendReqEAction,SendReqE,Inv9560_0995_R9_0_I2
+  \* (Inv9560_0995_R9_0_I2,RecvReqSAction)
+  <1>2. TypeOK /\ Inv9560_0995_R9_0_I2 /\ RecvReqSAction => Inv9560_0995_R9_0_I2' BY DEF TypeOK,RecvReqSAction,RecvReqS,Inv9560_0995_R9_0_I2
+  \* (Inv9560_0995_R9_0_I2,RecvReqEAction)
+  <1>3. TypeOK /\ Inv9560_0995_R9_0_I2 /\ RecvReqEAction => Inv9560_0995_R9_0_I2' BY DEF TypeOK,RecvReqEAction,RecvReqE,Inv9560_0995_R9_0_I2
+  \* (Inv9560_0995_R9_0_I2,SendInvAction)
+  <1>4. TypeOK /\ Inv9560_0995_R9_0_I2 /\ SendInvAction => Inv9560_0995_R9_0_I2' BY DEF TypeOK,SendInvAction,SendInv,Inv9560_0995_R9_0_I2
+  \* (Inv9560_0995_R9_0_I2,SendInvAckAction)
+  <1>5. TypeOK /\ Inv9560_0995_R9_0_I2 /\ SendInvAckAction => Inv9560_0995_R9_0_I2' BY DEF TypeOK,SendInvAckAction,SendInvAck,Inv9560_0995_R9_0_I2
+  \* (Inv9560_0995_R9_0_I2,RecvInvAckAction)
+  <1>6. TypeOK /\ Inv9560_0995_R9_0_I2 /\ RecvInvAckAction => Inv9560_0995_R9_0_I2' BY DEF TypeOK,RecvInvAckAction,RecvInvAck,Inv9560_0995_R9_0_I2
+  \* (Inv9560_0995_R9_0_I2,SendGntSAction)
+  <1>7. TypeOK /\ Inv5_a2c7_R3_1_I1 /\ Inv9560_0995_R9_0_I2 /\ SendGntSAction => Inv9560_0995_R9_0_I2' BY DEF TypeOK,Inv5_a2c7_R3_1_I1,SendGntSAction,SendGntS,Inv9560_0995_R9_0_I2
+  \* (Inv9560_0995_R9_0_I2,SendGntEAction)
+  <1>8. TypeOK /\ Inv5_a2c7_R3_1_I1 /\ Inv9560_0995_R9_0_I2 /\ SendGntEAction => Inv9560_0995_R9_0_I2' BY DEF TypeOK,Inv5_a2c7_R3_1_I1,SendGntEAction,SendGntE,Inv9560_0995_R9_0_I2
+  \* (Inv9560_0995_R9_0_I2,RecvGntSAction)
+  <1>9. TypeOK /\ Inv9560_0995_R9_0_I2 /\ RecvGntSAction => Inv9560_0995_R9_0_I2' BY DEF TypeOK,RecvGntSAction,RecvGntS,Inv9560_0995_R9_0_I2
+  \* (Inv9560_0995_R9_0_I2,RecvGntEAction)
+  <1>10. TypeOK /\ Inv9560_0995_R9_0_I2 /\ RecvGntEAction => Inv9560_0995_R9_0_I2' BY DEF TypeOK,RecvGntEAction,RecvGntE,Inv9560_0995_R9_0_I2
+  \* (Inv9560_0995_R9_0_I2,StoreAction)
+  <1>11. TypeOK /\ Inv9560_0995_R9_0_I2 /\ StoreAction => Inv9560_0995_R9_0_I2' BY DEF TypeOK,StoreAction,Store,Inv9560_0995_R9_0_I2
+  \* (Inv9560_0995_R9_0_I2,SendReqSAction)
+  <1>12. TypeOK /\ Inv9560_0995_R9_0_I2 /\ SendReqSAction => Inv9560_0995_R9_0_I2' BY DEF TypeOK,SendReqSAction,SendReqS,Inv9560_0995_R9_0_I2
 <1>13. QED BY <1>1,<1>2,<1>3,<1>4,<1>5,<1>6,<1>7,<1>8,<1>9,<1>10,<1>11,<1>12 DEF Next
 
 
@@ -955,45 +954,45 @@ THEOREM L_26 == TypeOK /\ Inv15_5b11_R8_0_I1 /\ Inv5_a2c7_R3_1_I1 /\ Next => Inv
 <1>13. QED BY <1>1,<1>2,<1>3,<1>4,<1>5,<1>6,<1>7,<1>8,<1>9,<1>10,<1>11,<1>12 DEF Next
 
 
-\*** Inv104_0f39_R7_1_I1
-THEOREM L_27 == TypeOK /\ Inv26_259c_R15_0_I1 /\ Inv104_0f39_R7_1_I1 /\ Next => Inv104_0f39_R7_1_I1'
+\*** Inv111_0f39_R7_1_I1
+THEOREM L_27 == TypeOK /\ Inv26_259c_R15_0_I1 /\ Inv111_0f39_R7_1_I1 /\ Next => Inv111_0f39_R7_1_I1'
   <1>. USE A0,A1
-  \* (Inv104_0f39_R7_1_I1,SendReqEAction)
-  <1>1. TypeOK /\ Inv104_0f39_R7_1_I1 /\ SendReqEAction => Inv104_0f39_R7_1_I1' BY DEF TypeOK,SendReqEAction,SendReqE,Inv104_0f39_R7_1_I1
-  \* (Inv104_0f39_R7_1_I1,RecvReqSAction)
-  <1>2. TypeOK /\ Inv104_0f39_R7_1_I1 /\ RecvReqSAction => Inv104_0f39_R7_1_I1' BY DEF TypeOK,RecvReqSAction,RecvReqS,Inv104_0f39_R7_1_I1
-  \* (Inv104_0f39_R7_1_I1,RecvReqEAction)
-  <1>3. TypeOK /\ Inv104_0f39_R7_1_I1 /\ RecvReqEAction => Inv104_0f39_R7_1_I1' BY DEF TypeOK,RecvReqEAction,RecvReqE,Inv104_0f39_R7_1_I1
-  \* (Inv104_0f39_R7_1_I1,SendInvAction)
-  <1>4. TypeOK /\ Inv104_0f39_R7_1_I1 /\ SendInvAction => Inv104_0f39_R7_1_I1' BY DEF TypeOK,SendInvAction,SendInv,Inv104_0f39_R7_1_I1
-  \* (Inv104_0f39_R7_1_I1,SendInvAckAction)
-  <1>5. TypeOK /\ Inv104_0f39_R7_1_I1 /\ SendInvAckAction => Inv104_0f39_R7_1_I1' BY DEF TypeOK,SendInvAckAction,SendInvAck,Inv104_0f39_R7_1_I1
-  \* (Inv104_0f39_R7_1_I1,RecvInvAckAction)
-  <1>6. TypeOK /\ Inv26_259c_R15_0_I1 /\ Inv104_0f39_R7_1_I1 /\ RecvInvAckAction => Inv104_0f39_R7_1_I1' BY DEF TypeOK,Inv26_259c_R15_0_I1,RecvInvAckAction,RecvInvAck,Inv104_0f39_R7_1_I1
-  \* (Inv104_0f39_R7_1_I1,SendGntSAction)
-  <1>7. TypeOK /\ Inv104_0f39_R7_1_I1 /\ SendGntSAction => Inv104_0f39_R7_1_I1' BY DEF TypeOK,SendGntSAction,SendGntS,Inv104_0f39_R7_1_I1
-  \* (Inv104_0f39_R7_1_I1,SendGntEAction)
-  <1>8. TypeOK /\ Inv104_0f39_R7_1_I1 /\ SendGntEAction => Inv104_0f39_R7_1_I1' BY DEF TypeOK,SendGntEAction,SendGntE,Inv104_0f39_R7_1_I1
-  \* (Inv104_0f39_R7_1_I1,RecvGntSAction)
-  <1>9. TypeOK /\ Inv104_0f39_R7_1_I1 /\ RecvGntSAction => Inv104_0f39_R7_1_I1' BY DEF TypeOK,RecvGntSAction,RecvGntS,Inv104_0f39_R7_1_I1
-  \* (Inv104_0f39_R7_1_I1,RecvGntEAction)
-  <1>10. TypeOK /\ Inv104_0f39_R7_1_I1 /\ RecvGntEAction => Inv104_0f39_R7_1_I1' BY DEF TypeOK,RecvGntEAction,RecvGntE,Inv104_0f39_R7_1_I1
-  \* (Inv104_0f39_R7_1_I1,StoreAction)
-  <1>11. TypeOK /\ Inv104_0f39_R7_1_I1 /\ StoreAction => Inv104_0f39_R7_1_I1' BY DEF TypeOK,StoreAction,Store,Inv104_0f39_R7_1_I1
-  \* (Inv104_0f39_R7_1_I1,SendReqSAction)
-  <1>12. TypeOK /\ Inv104_0f39_R7_1_I1 /\ SendReqSAction => Inv104_0f39_R7_1_I1' BY DEF TypeOK,SendReqSAction,SendReqS,Inv104_0f39_R7_1_I1
+  \* (Inv111_0f39_R7_1_I1,SendReqEAction)
+  <1>1. TypeOK /\ Inv111_0f39_R7_1_I1 /\ SendReqEAction => Inv111_0f39_R7_1_I1' BY DEF TypeOK,SendReqEAction,SendReqE,Inv111_0f39_R7_1_I1
+  \* (Inv111_0f39_R7_1_I1,RecvReqSAction)
+  <1>2. TypeOK /\ Inv111_0f39_R7_1_I1 /\ RecvReqSAction => Inv111_0f39_R7_1_I1' BY DEF TypeOK,RecvReqSAction,RecvReqS,Inv111_0f39_R7_1_I1
+  \* (Inv111_0f39_R7_1_I1,RecvReqEAction)
+  <1>3. TypeOK /\ Inv111_0f39_R7_1_I1 /\ RecvReqEAction => Inv111_0f39_R7_1_I1' BY DEF TypeOK,RecvReqEAction,RecvReqE,Inv111_0f39_R7_1_I1
+  \* (Inv111_0f39_R7_1_I1,SendInvAction)
+  <1>4. TypeOK /\ Inv111_0f39_R7_1_I1 /\ SendInvAction => Inv111_0f39_R7_1_I1' BY DEF TypeOK,SendInvAction,SendInv,Inv111_0f39_R7_1_I1
+  \* (Inv111_0f39_R7_1_I1,SendInvAckAction)
+  <1>5. TypeOK /\ Inv111_0f39_R7_1_I1 /\ SendInvAckAction => Inv111_0f39_R7_1_I1' BY DEF TypeOK,SendInvAckAction,SendInvAck,Inv111_0f39_R7_1_I1
+  \* (Inv111_0f39_R7_1_I1,RecvInvAckAction)
+  <1>6. TypeOK /\ Inv26_259c_R15_0_I1 /\ Inv111_0f39_R7_1_I1 /\ RecvInvAckAction => Inv111_0f39_R7_1_I1' BY DEF TypeOK,Inv26_259c_R15_0_I1,RecvInvAckAction,RecvInvAck,Inv111_0f39_R7_1_I1
+  \* (Inv111_0f39_R7_1_I1,SendGntSAction)
+  <1>7. TypeOK /\ Inv111_0f39_R7_1_I1 /\ SendGntSAction => Inv111_0f39_R7_1_I1' BY DEF TypeOK,SendGntSAction,SendGntS,Inv111_0f39_R7_1_I1
+  \* (Inv111_0f39_R7_1_I1,SendGntEAction)
+  <1>8. TypeOK /\ Inv111_0f39_R7_1_I1 /\ SendGntEAction => Inv111_0f39_R7_1_I1' BY DEF TypeOK,SendGntEAction,SendGntE,Inv111_0f39_R7_1_I1
+  \* (Inv111_0f39_R7_1_I1,RecvGntSAction)
+  <1>9. TypeOK /\ Inv111_0f39_R7_1_I1 /\ RecvGntSAction => Inv111_0f39_R7_1_I1' BY DEF TypeOK,RecvGntSAction,RecvGntS,Inv111_0f39_R7_1_I1
+  \* (Inv111_0f39_R7_1_I1,RecvGntEAction)
+  <1>10. TypeOK /\ Inv111_0f39_R7_1_I1 /\ RecvGntEAction => Inv111_0f39_R7_1_I1' BY DEF TypeOK,RecvGntEAction,RecvGntE,Inv111_0f39_R7_1_I1
+  \* (Inv111_0f39_R7_1_I1,StoreAction)
+  <1>11. TypeOK /\ Inv111_0f39_R7_1_I1 /\ StoreAction => Inv111_0f39_R7_1_I1' BY DEF TypeOK,StoreAction,Store,Inv111_0f39_R7_1_I1
+  \* (Inv111_0f39_R7_1_I1,SendReqSAction)
+  <1>12. TypeOK /\ Inv111_0f39_R7_1_I1 /\ SendReqSAction => Inv111_0f39_R7_1_I1' BY DEF TypeOK,SendReqSAction,SendReqS,Inv111_0f39_R7_1_I1
 <1>13. QED BY <1>1,<1>2,<1>3,<1>4,<1>5,<1>6,<1>7,<1>8,<1>9,<1>10,<1>11,<1>12 DEF Next
 
 
 \*** Inv26_259c_R15_0_I1
-THEOREM L_28 == TypeOK /\ Inv3716_575b_R22_0_I2 /\ Inv3716_575b_R22_0_I2 /\ Inv76_d564_R22_2_I1 /\ Inv26_259c_R15_0_I1 /\ Next => Inv26_259c_R15_0_I1'
+THEOREM L_28 == TypeOK /\ Inv4043_dbee_R22_0_I2 /\ Inv4043_dbee_R22_0_I2 /\ Inv76_d564_R22_2_I1 /\ Inv26_259c_R15_0_I1 /\ Next => Inv26_259c_R15_0_I1'
   <1>. USE A0,A1
   \* (Inv26_259c_R15_0_I1,SendReqEAction)
   <1>1. TypeOK /\ Inv26_259c_R15_0_I1 /\ SendReqEAction => Inv26_259c_R15_0_I1' BY DEF TypeOK,SendReqEAction,SendReqE,Inv26_259c_R15_0_I1
   \* (Inv26_259c_R15_0_I1,RecvReqSAction)
-  <1>2. TypeOK /\ Inv3716_575b_R22_0_I2 /\ Inv26_259c_R15_0_I1 /\ RecvReqSAction => Inv26_259c_R15_0_I1' BY DEF TypeOK,Inv3716_575b_R22_0_I2,RecvReqSAction,RecvReqS,Inv26_259c_R15_0_I1
+  <1>2. TypeOK /\ Inv4043_dbee_R22_0_I2 /\ Inv26_259c_R15_0_I1 /\ RecvReqSAction => Inv26_259c_R15_0_I1' BY DEF TypeOK,Inv4043_dbee_R22_0_I2,RecvReqSAction,RecvReqS,Inv26_259c_R15_0_I1
   \* (Inv26_259c_R15_0_I1,RecvReqEAction)
-  <1>3. TypeOK /\ Inv3716_575b_R22_0_I2 /\ Inv26_259c_R15_0_I1 /\ RecvReqEAction => Inv26_259c_R15_0_I1' BY DEF TypeOK,Inv3716_575b_R22_0_I2,RecvReqEAction,RecvReqE,Inv26_259c_R15_0_I1
+  <1>3. TypeOK /\ Inv4043_dbee_R22_0_I2 /\ Inv26_259c_R15_0_I1 /\ RecvReqEAction => Inv26_259c_R15_0_I1' BY DEF TypeOK,Inv4043_dbee_R22_0_I2,RecvReqEAction,RecvReqE,Inv26_259c_R15_0_I1
   \* (Inv26_259c_R15_0_I1,SendInvAction)
   <1>4. TypeOK /\ Inv26_259c_R15_0_I1 /\ SendInvAction => Inv26_259c_R15_0_I1' BY DEF TypeOK,SendInvAction,SendInv,Inv26_259c_R15_0_I1
   \* (Inv26_259c_R15_0_I1,SendInvAckAction)
@@ -1016,14 +1015,14 @@ THEOREM L_28 == TypeOK /\ Inv3716_575b_R22_0_I2 /\ Inv3716_575b_R22_0_I2 /\ Inv7
 
 
 \*** Inv76_d564_R22_2_I1
-THEOREM L_29 == TypeOK /\ Inv651_b778_R29_2_I2 /\ Inv651_b778_R29_2_I2 /\ Inv76_d564_R22_2_I1 /\ Next => Inv76_d564_R22_2_I1'
+THEOREM L_29 == TypeOK /\ Inv1149_870b_R29_2_I2 /\ Inv1149_870b_R29_2_I2 /\ Inv76_d564_R22_2_I1 /\ Next => Inv76_d564_R22_2_I1'
   <1>. USE A0,A1
   \* (Inv76_d564_R22_2_I1,SendReqEAction)
   <1>1. TypeOK /\ Inv76_d564_R22_2_I1 /\ SendReqEAction => Inv76_d564_R22_2_I1' BY DEF TypeOK,SendReqEAction,SendReqE,Inv76_d564_R22_2_I1
   \* (Inv76_d564_R22_2_I1,RecvReqSAction)
-  <1>2. TypeOK /\ Inv651_b778_R29_2_I2 /\ Inv76_d564_R22_2_I1 /\ RecvReqSAction => Inv76_d564_R22_2_I1' BY DEF TypeOK,Inv651_b778_R29_2_I2,RecvReqSAction,RecvReqS,Inv76_d564_R22_2_I1
+  <1>2. TypeOK /\ Inv1149_870b_R29_2_I2 /\ Inv76_d564_R22_2_I1 /\ RecvReqSAction => Inv76_d564_R22_2_I1' BY DEF TypeOK,Inv1149_870b_R29_2_I2,RecvReqSAction,RecvReqS,Inv76_d564_R22_2_I1
   \* (Inv76_d564_R22_2_I1,RecvReqEAction)
-  <1>3. TypeOK /\ Inv651_b778_R29_2_I2 /\ Inv76_d564_R22_2_I1 /\ RecvReqEAction => Inv76_d564_R22_2_I1' BY DEF TypeOK,Inv651_b778_R29_2_I2,RecvReqEAction,RecvReqE,Inv76_d564_R22_2_I1
+  <1>3. TypeOK /\ Inv1149_870b_R29_2_I2 /\ Inv76_d564_R22_2_I1 /\ RecvReqEAction => Inv76_d564_R22_2_I1' BY DEF TypeOK,Inv1149_870b_R29_2_I2,RecvReqEAction,RecvReqE,Inv76_d564_R22_2_I1
   \* (Inv76_d564_R22_2_I1,SendInvAction)
   <1>4. TypeOK /\ Inv76_d564_R22_2_I1 /\ SendInvAction => Inv76_d564_R22_2_I1' BY DEF TypeOK,SendInvAction,SendInv,Inv76_d564_R22_2_I1
   \* (Inv76_d564_R22_2_I1,SendInvAckAction)
@@ -1045,278 +1044,464 @@ THEOREM L_29 == TypeOK /\ Inv651_b778_R29_2_I2 /\ Inv651_b778_R29_2_I2 /\ Inv76_
 <1>13. QED BY <1>1,<1>2,<1>3,<1>4,<1>5,<1>6,<1>7,<1>8,<1>9,<1>10,<1>11,<1>12 DEF Next
 
 
-\*** Inv651_b778_R29_2_I2
-THEOREM L_30 == TypeOK /\ Inv1611_1275_R21_1_I2 /\ Inv39_7204_R20_0_I1 /\ Inv651_b778_R29_2_I2 /\ Next => Inv651_b778_R29_2_I2'
+\*** Inv1149_870b_R29_2_I2
+THEOREM L_30 == TypeOK /\ Inv2458_2a15_R21_1_I2 /\ Inv39_7204_R20_0_I1 /\ Inv1149_870b_R29_2_I2 /\ Next => Inv1149_870b_R29_2_I2'
   <1>. USE A0,A1
-  \* (Inv651_b778_R29_2_I2,SendReqEAction)
-  <1>1. TypeOK /\ Inv651_b778_R29_2_I2 /\ SendReqEAction => Inv651_b778_R29_2_I2' BY DEF TypeOK,SendReqEAction,SendReqE,Inv651_b778_R29_2_I2
-  \* (Inv651_b778_R29_2_I2,RecvReqSAction)
-  <1>2. TypeOK /\ Inv651_b778_R29_2_I2 /\ RecvReqSAction => Inv651_b778_R29_2_I2' BY DEF TypeOK,RecvReqSAction,RecvReqS,Inv651_b778_R29_2_I2
-  \* (Inv651_b778_R29_2_I2,RecvReqEAction)
-  <1>3. TypeOK /\ Inv651_b778_R29_2_I2 /\ RecvReqEAction => Inv651_b778_R29_2_I2' BY DEF TypeOK,RecvReqEAction,RecvReqE,Inv651_b778_R29_2_I2
-  \* (Inv651_b778_R29_2_I2,SendInvAction)
-  <1>4. TypeOK /\ Inv651_b778_R29_2_I2 /\ SendInvAction => Inv651_b778_R29_2_I2' BY DEF TypeOK,SendInvAction,SendInv,Inv651_b778_R29_2_I2
-  \* (Inv651_b778_R29_2_I2,SendInvAckAction)
-  <1>5. TypeOK /\ Inv651_b778_R29_2_I2 /\ SendInvAckAction => Inv651_b778_R29_2_I2' BY DEF TypeOK,SendInvAckAction,SendInvAck,Inv651_b778_R29_2_I2
-  \* (Inv651_b778_R29_2_I2,RecvInvAckAction)
-  <1>6. TypeOK /\ Inv651_b778_R29_2_I2 /\ RecvInvAckAction => Inv651_b778_R29_2_I2' BY DEF TypeOK,RecvInvAckAction,RecvInvAck,Inv651_b778_R29_2_I2
-  \* (Inv651_b778_R29_2_I2,SendGntSAction)
-  <1>7. TypeOK /\ Inv1611_1275_R21_1_I2 /\ Inv651_b778_R29_2_I2 /\ SendGntSAction => Inv651_b778_R29_2_I2' BY DEF TypeOK,Inv1611_1275_R21_1_I2,SendGntSAction,SendGntS,Inv651_b778_R29_2_I2
-  \* (Inv651_b778_R29_2_I2,SendGntEAction)
-  <1>8. TypeOK /\ Inv39_7204_R20_0_I1 /\ Inv651_b778_R29_2_I2 /\ SendGntEAction => Inv651_b778_R29_2_I2' BY DEF TypeOK,Inv39_7204_R20_0_I1,SendGntEAction,SendGntE,Inv651_b778_R29_2_I2
-  \* (Inv651_b778_R29_2_I2,RecvGntSAction)
-  <1>9. TypeOK /\ Inv651_b778_R29_2_I2 /\ RecvGntSAction => Inv651_b778_R29_2_I2' BY DEF TypeOK,RecvGntSAction,RecvGntS,Inv651_b778_R29_2_I2
-  \* (Inv651_b778_R29_2_I2,RecvGntEAction)
-  <1>10. TypeOK /\ Inv651_b778_R29_2_I2 /\ RecvGntEAction => Inv651_b778_R29_2_I2' BY DEF TypeOK,RecvGntEAction,RecvGntE,Inv651_b778_R29_2_I2
-  \* (Inv651_b778_R29_2_I2,StoreAction)
-  <1>11. TypeOK /\ Inv651_b778_R29_2_I2 /\ StoreAction => Inv651_b778_R29_2_I2' BY DEF TypeOK,StoreAction,Store,Inv651_b778_R29_2_I2
-  \* (Inv651_b778_R29_2_I2,SendReqSAction)
-  <1>12. TypeOK /\ Inv651_b778_R29_2_I2 /\ SendReqSAction => Inv651_b778_R29_2_I2' BY DEF TypeOK,SendReqSAction,SendReqS,Inv651_b778_R29_2_I2
+  \* (Inv1149_870b_R29_2_I2,SendReqEAction)
+  <1>1. TypeOK /\ Inv1149_870b_R29_2_I2 /\ SendReqEAction => Inv1149_870b_R29_2_I2' BY DEF TypeOK,SendReqEAction,SendReqE,Inv1149_870b_R29_2_I2
+  \* (Inv1149_870b_R29_2_I2,RecvReqSAction)
+  <1>2. TypeOK /\ Inv1149_870b_R29_2_I2 /\ RecvReqSAction => Inv1149_870b_R29_2_I2' BY DEF TypeOK,RecvReqSAction,RecvReqS,Inv1149_870b_R29_2_I2
+  \* (Inv1149_870b_R29_2_I2,RecvReqEAction)
+  <1>3. TypeOK /\ Inv1149_870b_R29_2_I2 /\ RecvReqEAction => Inv1149_870b_R29_2_I2' BY DEF TypeOK,RecvReqEAction,RecvReqE,Inv1149_870b_R29_2_I2
+  \* (Inv1149_870b_R29_2_I2,SendInvAction)
+  <1>4. TypeOK /\ Inv1149_870b_R29_2_I2 /\ SendInvAction => Inv1149_870b_R29_2_I2' BY DEF TypeOK,SendInvAction,SendInv,Inv1149_870b_R29_2_I2
+  \* (Inv1149_870b_R29_2_I2,SendInvAckAction)
+  <1>5. TypeOK /\ Inv1149_870b_R29_2_I2 /\ SendInvAckAction => Inv1149_870b_R29_2_I2' BY DEF TypeOK,SendInvAckAction,SendInvAck,Inv1149_870b_R29_2_I2
+  \* (Inv1149_870b_R29_2_I2,RecvInvAckAction)
+  <1>6. TypeOK /\ Inv1149_870b_R29_2_I2 /\ RecvInvAckAction => Inv1149_870b_R29_2_I2' BY DEF TypeOK,RecvInvAckAction,RecvInvAck,Inv1149_870b_R29_2_I2
+  \* (Inv1149_870b_R29_2_I2,SendGntSAction)
+  <1>7. TypeOK /\ Inv2458_2a15_R21_1_I2 /\ Inv1149_870b_R29_2_I2 /\ SendGntSAction => Inv1149_870b_R29_2_I2' BY DEF TypeOK,Inv2458_2a15_R21_1_I2,SendGntSAction,SendGntS,Inv1149_870b_R29_2_I2
+  \* (Inv1149_870b_R29_2_I2,SendGntEAction)
+  <1>8. TypeOK /\ Inv39_7204_R20_0_I1 /\ Inv1149_870b_R29_2_I2 /\ SendGntEAction => Inv1149_870b_R29_2_I2' BY DEF TypeOK,Inv39_7204_R20_0_I1,SendGntEAction,SendGntE,Inv1149_870b_R29_2_I2
+  \* (Inv1149_870b_R29_2_I2,RecvGntSAction)
+  <1>9. TypeOK /\ Inv1149_870b_R29_2_I2 /\ RecvGntSAction => Inv1149_870b_R29_2_I2' BY DEF TypeOK,RecvGntSAction,RecvGntS,Inv1149_870b_R29_2_I2
+  \* (Inv1149_870b_R29_2_I2,RecvGntEAction)
+  <1>10. TypeOK /\ Inv1149_870b_R29_2_I2 /\ RecvGntEAction => Inv1149_870b_R29_2_I2' BY DEF TypeOK,RecvGntEAction,RecvGntE,Inv1149_870b_R29_2_I2
+  \* (Inv1149_870b_R29_2_I2,StoreAction)
+  <1>11. TypeOK /\ Inv1149_870b_R29_2_I2 /\ StoreAction => Inv1149_870b_R29_2_I2' BY DEF TypeOK,StoreAction,Store,Inv1149_870b_R29_2_I2
+  \* (Inv1149_870b_R29_2_I2,SendReqSAction)
+  <1>12. TypeOK /\ Inv1149_870b_R29_2_I2 /\ SendReqSAction => Inv1149_870b_R29_2_I2' BY DEF TypeOK,SendReqSAction,SendReqS,Inv1149_870b_R29_2_I2
 <1>13. QED BY <1>1,<1>2,<1>3,<1>4,<1>5,<1>6,<1>7,<1>8,<1>9,<1>10,<1>11,<1>12 DEF Next
 
 
-\*** Inv1611_1275_R21_1_I2
-THEOREM L_31 == TypeOK /\ Inv3857_1b30_R28_0_I2 /\ Inv1611_1275_R21_1_I2 /\ Next => Inv1611_1275_R21_1_I2'
+\*** Inv2458_2a15_R21_1_I2
+THEOREM L_31 == TypeOK /\ Inv2146_6e63_R28_0_I2 /\ Inv2458_2a15_R21_1_I2 /\ Next => Inv2458_2a15_R21_1_I2'
   <1>. USE A0,A1
-  \* (Inv1611_1275_R21_1_I2,SendReqEAction)
-  <1>1. TypeOK /\ Inv1611_1275_R21_1_I2 /\ SendReqEAction => Inv1611_1275_R21_1_I2' BY DEF TypeOK,SendReqEAction,SendReqE,Inv1611_1275_R21_1_I2
-  \* (Inv1611_1275_R21_1_I2,RecvReqSAction)
-  <1>2. TypeOK /\ Inv1611_1275_R21_1_I2 /\ RecvReqSAction => Inv1611_1275_R21_1_I2' BY DEF TypeOK,RecvReqSAction,RecvReqS,Inv1611_1275_R21_1_I2
-  \* (Inv1611_1275_R21_1_I2,RecvReqEAction)
-  <1>3. TypeOK /\ Inv1611_1275_R21_1_I2 /\ RecvReqEAction => Inv1611_1275_R21_1_I2' BY DEF TypeOK,RecvReqEAction,RecvReqE,Inv1611_1275_R21_1_I2
-  \* (Inv1611_1275_R21_1_I2,SendInvAction)
-  <1>4. TypeOK /\ Inv1611_1275_R21_1_I2 /\ SendInvAction => Inv1611_1275_R21_1_I2' BY DEF TypeOK,SendInvAction,SendInv,Inv1611_1275_R21_1_I2
-  \* (Inv1611_1275_R21_1_I2,SendInvAckAction)
-  <1>5. TypeOK /\ Inv1611_1275_R21_1_I2 /\ SendInvAckAction => Inv1611_1275_R21_1_I2' BY DEF TypeOK,SendInvAckAction,SendInvAck,Inv1611_1275_R21_1_I2
-  \* (Inv1611_1275_R21_1_I2,RecvInvAckAction)
-  <1>6. TypeOK /\ Inv3857_1b30_R28_0_I2 /\ Inv1611_1275_R21_1_I2 /\ RecvInvAckAction => Inv1611_1275_R21_1_I2' BY DEF TypeOK,Inv3857_1b30_R28_0_I2,RecvInvAckAction,RecvInvAck,Inv1611_1275_R21_1_I2
-  \* (Inv1611_1275_R21_1_I2,SendGntSAction)
-  <1>7. TypeOK /\ Inv1611_1275_R21_1_I2 /\ SendGntSAction => Inv1611_1275_R21_1_I2' BY DEF TypeOK,SendGntSAction,SendGntS,Inv1611_1275_R21_1_I2
-  \* (Inv1611_1275_R21_1_I2,SendGntEAction)
-  <1>8. TypeOK /\ Inv1611_1275_R21_1_I2 /\ SendGntEAction => Inv1611_1275_R21_1_I2' BY DEF TypeOK,SendGntEAction,SendGntE,Inv1611_1275_R21_1_I2
-  \* (Inv1611_1275_R21_1_I2,RecvGntSAction)
-  <1>9. TypeOK /\ Inv1611_1275_R21_1_I2 /\ RecvGntSAction => Inv1611_1275_R21_1_I2' BY DEF TypeOK,RecvGntSAction,RecvGntS,Inv1611_1275_R21_1_I2
-  \* (Inv1611_1275_R21_1_I2,RecvGntEAction)
-  <1>10. TypeOK /\ Inv1611_1275_R21_1_I2 /\ RecvGntEAction => Inv1611_1275_R21_1_I2' BY DEF TypeOK,RecvGntEAction,RecvGntE,Inv1611_1275_R21_1_I2
-  \* (Inv1611_1275_R21_1_I2,StoreAction)
-  <1>11. TypeOK /\ Inv1611_1275_R21_1_I2 /\ StoreAction => Inv1611_1275_R21_1_I2' BY DEF TypeOK,StoreAction,Store,Inv1611_1275_R21_1_I2
-  \* (Inv1611_1275_R21_1_I2,SendReqSAction)
-  <1>12. TypeOK /\ Inv1611_1275_R21_1_I2 /\ SendReqSAction => Inv1611_1275_R21_1_I2' BY DEF TypeOK,SendReqSAction,SendReqS,Inv1611_1275_R21_1_I2
+  \* (Inv2458_2a15_R21_1_I2,SendReqEAction)
+  <1>1. TypeOK /\ Inv2458_2a15_R21_1_I2 /\ SendReqEAction => Inv2458_2a15_R21_1_I2' BY DEF TypeOK,SendReqEAction,SendReqE,Inv2458_2a15_R21_1_I2
+  \* (Inv2458_2a15_R21_1_I2,RecvReqSAction)
+  <1>2. TypeOK /\ Inv2458_2a15_R21_1_I2 /\ RecvReqSAction => Inv2458_2a15_R21_1_I2' BY DEF TypeOK,RecvReqSAction,RecvReqS,Inv2458_2a15_R21_1_I2
+  \* (Inv2458_2a15_R21_1_I2,RecvReqEAction)
+  <1>3. TypeOK /\ Inv2458_2a15_R21_1_I2 /\ RecvReqEAction => Inv2458_2a15_R21_1_I2' BY DEF TypeOK,RecvReqEAction,RecvReqE,Inv2458_2a15_R21_1_I2
+  \* (Inv2458_2a15_R21_1_I2,SendInvAction)
+  <1>4. TypeOK /\ Inv2458_2a15_R21_1_I2 /\ SendInvAction => Inv2458_2a15_R21_1_I2' BY DEF TypeOK,SendInvAction,SendInv,Inv2458_2a15_R21_1_I2
+  \* (Inv2458_2a15_R21_1_I2,SendInvAckAction)
+  <1>5. TypeOK /\ Inv2458_2a15_R21_1_I2 /\ SendInvAckAction => Inv2458_2a15_R21_1_I2' BY DEF TypeOK,SendInvAckAction,SendInvAck,Inv2458_2a15_R21_1_I2
+  \* (Inv2458_2a15_R21_1_I2,RecvInvAckAction)
+  <1>6. TypeOK /\ Inv2146_6e63_R28_0_I2 /\ Inv2458_2a15_R21_1_I2 /\ RecvInvAckAction => Inv2458_2a15_R21_1_I2' BY DEF TypeOK,Inv2146_6e63_R28_0_I2,RecvInvAckAction,RecvInvAck,Inv2458_2a15_R21_1_I2
+  \* (Inv2458_2a15_R21_1_I2,SendGntSAction)
+  <1>7. TypeOK /\ Inv2458_2a15_R21_1_I2 /\ SendGntSAction => Inv2458_2a15_R21_1_I2' BY DEF TypeOK,SendGntSAction,SendGntS,Inv2458_2a15_R21_1_I2
+  \* (Inv2458_2a15_R21_1_I2,SendGntEAction)
+  <1>8. TypeOK /\ Inv2458_2a15_R21_1_I2 /\ SendGntEAction => Inv2458_2a15_R21_1_I2' BY DEF TypeOK,SendGntEAction,SendGntE,Inv2458_2a15_R21_1_I2
+  \* (Inv2458_2a15_R21_1_I2,RecvGntSAction)
+  <1>9. TypeOK /\ Inv2458_2a15_R21_1_I2 /\ RecvGntSAction => Inv2458_2a15_R21_1_I2' BY DEF TypeOK,RecvGntSAction,RecvGntS,Inv2458_2a15_R21_1_I2
+  \* (Inv2458_2a15_R21_1_I2,RecvGntEAction)
+  <1>10. TypeOK /\ Inv2458_2a15_R21_1_I2 /\ RecvGntEAction => Inv2458_2a15_R21_1_I2' BY DEF TypeOK,RecvGntEAction,RecvGntE,Inv2458_2a15_R21_1_I2
+  \* (Inv2458_2a15_R21_1_I2,StoreAction)
+  <1>11. TypeOK /\ Inv2458_2a15_R21_1_I2 /\ StoreAction => Inv2458_2a15_R21_1_I2' BY DEF TypeOK,StoreAction,Store,Inv2458_2a15_R21_1_I2
+  \* (Inv2458_2a15_R21_1_I2,SendReqSAction)
+  <1>12. TypeOK /\ Inv2458_2a15_R21_1_I2 /\ SendReqSAction => Inv2458_2a15_R21_1_I2' BY DEF TypeOK,SendReqSAction,SendReqS,Inv2458_2a15_R21_1_I2
 <1>13. QED BY <1>1,<1>2,<1>3,<1>4,<1>5,<1>6,<1>7,<1>8,<1>9,<1>10,<1>11,<1>12 DEF Next
 
 
-\*** Inv3857_1b30_R28_0_I2
-THEOREM L_32 == TypeOK /\ Inv1067_2e74_R36_2_I2 /\ Inv28_f7af_R36_1_I2 /\ Inv8923_9eca_R13_1_I2 /\ Inv39_7204_R20_0_I1 /\ Inv3857_1b30_R28_0_I2 /\ Next => Inv3857_1b30_R28_0_I2'
+\*** Inv2146_6e63_R28_0_I2
+THEOREM L_32 == TypeOK /\ Inv687_881e_R35_2_I2 /\ Inv50_ba79_R27_1_I1 /\ Inv40_2bf0_R13_1_I1 /\ Safety /\ Inv39_7204_R20_0_I1 /\ Inv2146_6e63_R28_0_I2 /\ Next => Inv2146_6e63_R28_0_I2'
   <1>. USE A0,A1
-  \* (Inv3857_1b30_R28_0_I2,SendReqEAction)
-  <1>1. TypeOK /\ Inv3857_1b30_R28_0_I2 /\ SendReqEAction => Inv3857_1b30_R28_0_I2' BY DEF TypeOK,SendReqEAction,SendReqE,Inv3857_1b30_R28_0_I2
-  \* (Inv3857_1b30_R28_0_I2,RecvReqSAction)
-  <1>2. TypeOK /\ Inv3857_1b30_R28_0_I2 /\ RecvReqSAction => Inv3857_1b30_R28_0_I2' BY DEF TypeOK,RecvReqSAction,RecvReqS,Inv3857_1b30_R28_0_I2
-  \* (Inv3857_1b30_R28_0_I2,RecvReqEAction)
-  <1>3. TypeOK /\ Inv3857_1b30_R28_0_I2 /\ RecvReqEAction => Inv3857_1b30_R28_0_I2' BY DEF TypeOK,RecvReqEAction,RecvReqE,Inv3857_1b30_R28_0_I2
-  \* (Inv3857_1b30_R28_0_I2,SendInvAction)
-  <1>4. TypeOK /\ Inv1067_2e74_R36_2_I2 /\ Inv3857_1b30_R28_0_I2 /\ SendInvAction => Inv3857_1b30_R28_0_I2' BY DEF TypeOK,Inv1067_2e74_R36_2_I2,SendInvAction,SendInv,Inv3857_1b30_R28_0_I2
-  \* (Inv3857_1b30_R28_0_I2,SendInvAckAction)
-  <1>5. TypeOK /\ Inv28_f7af_R36_1_I2 /\ Inv8923_9eca_R13_1_I2 /\ Inv3857_1b30_R28_0_I2 /\ SendInvAckAction => Inv3857_1b30_R28_0_I2' BY DEF TypeOK,Inv28_f7af_R36_1_I2,Inv8923_9eca_R13_1_I2,SendInvAckAction,SendInvAck,Inv3857_1b30_R28_0_I2
-  \* (Inv3857_1b30_R28_0_I2,RecvInvAckAction)
-  <1>6. TypeOK /\ Inv3857_1b30_R28_0_I2 /\ RecvInvAckAction => Inv3857_1b30_R28_0_I2' BY DEF TypeOK,RecvInvAckAction,RecvInvAck,Inv3857_1b30_R28_0_I2
-  \* (Inv3857_1b30_R28_0_I2,SendGntSAction)
-  <1>7. TypeOK /\ Inv3857_1b30_R28_0_I2 /\ SendGntSAction => Inv3857_1b30_R28_0_I2' BY DEF TypeOK,SendGntSAction,SendGntS,Inv3857_1b30_R28_0_I2
-  \* (Inv3857_1b30_R28_0_I2,SendGntEAction)
-  <1>8. TypeOK /\ Inv39_7204_R20_0_I1 /\ Inv3857_1b30_R28_0_I2 /\ SendGntEAction => Inv3857_1b30_R28_0_I2' BY DEF TypeOK,Inv39_7204_R20_0_I1,SendGntEAction,SendGntE,Inv3857_1b30_R28_0_I2
-  \* (Inv3857_1b30_R28_0_I2,RecvGntSAction)
-  <1>9. TypeOK /\ Inv3857_1b30_R28_0_I2 /\ RecvGntSAction => Inv3857_1b30_R28_0_I2' BY DEF TypeOK,RecvGntSAction,RecvGntS,Inv3857_1b30_R28_0_I2
-  \* (Inv3857_1b30_R28_0_I2,RecvGntEAction)
-  <1>10. TypeOK /\ Inv3857_1b30_R28_0_I2 /\ RecvGntEAction => Inv3857_1b30_R28_0_I2' BY DEF TypeOK,RecvGntEAction,RecvGntE,Inv3857_1b30_R28_0_I2
-  \* (Inv3857_1b30_R28_0_I2,StoreAction)
-  <1>11. TypeOK /\ Inv3857_1b30_R28_0_I2 /\ StoreAction => Inv3857_1b30_R28_0_I2' BY DEF TypeOK,StoreAction,Store,Inv3857_1b30_R28_0_I2
-  \* (Inv3857_1b30_R28_0_I2,SendReqSAction)
-  <1>12. TypeOK /\ Inv3857_1b30_R28_0_I2 /\ SendReqSAction => Inv3857_1b30_R28_0_I2' BY DEF TypeOK,SendReqSAction,SendReqS,Inv3857_1b30_R28_0_I2
+  \* (Inv2146_6e63_R28_0_I2,SendReqEAction)
+  <1>1. TypeOK /\ Inv2146_6e63_R28_0_I2 /\ SendReqEAction => Inv2146_6e63_R28_0_I2' BY DEF TypeOK,SendReqEAction,SendReqE,Inv2146_6e63_R28_0_I2
+  \* (Inv2146_6e63_R28_0_I2,RecvReqSAction)
+  <1>2. TypeOK /\ Inv2146_6e63_R28_0_I2 /\ RecvReqSAction => Inv2146_6e63_R28_0_I2' BY DEF TypeOK,RecvReqSAction,RecvReqS,Inv2146_6e63_R28_0_I2
+  \* (Inv2146_6e63_R28_0_I2,RecvReqEAction)
+  <1>3. TypeOK /\ Inv2146_6e63_R28_0_I2 /\ RecvReqEAction => Inv2146_6e63_R28_0_I2' BY DEF TypeOK,RecvReqEAction,RecvReqE,Inv2146_6e63_R28_0_I2
+  \* (Inv2146_6e63_R28_0_I2,SendInvAction)
+  <1>4. TypeOK /\ Inv687_881e_R35_2_I2 /\ Inv2146_6e63_R28_0_I2 /\ SendInvAction => Inv2146_6e63_R28_0_I2' BY DEF TypeOK,Inv687_881e_R35_2_I2,SendInvAction,SendInv,Inv2146_6e63_R28_0_I2
+  \* (Inv2146_6e63_R28_0_I2,SendInvAckAction)
+  <1>5. TypeOK /\ Inv50_ba79_R27_1_I1 /\ Inv40_2bf0_R13_1_I1 /\ Safety /\ Inv2146_6e63_R28_0_I2 /\ SendInvAckAction => Inv2146_6e63_R28_0_I2' BY DEF TypeOK,Inv50_ba79_R27_1_I1,Inv40_2bf0_R13_1_I1,Safety,SendInvAckAction,SendInvAck,Inv2146_6e63_R28_0_I2
+  \* (Inv2146_6e63_R28_0_I2,RecvInvAckAction)
+  <1>6. TypeOK /\ Inv2146_6e63_R28_0_I2 /\ RecvInvAckAction => Inv2146_6e63_R28_0_I2' BY DEF TypeOK,RecvInvAckAction,RecvInvAck,Inv2146_6e63_R28_0_I2
+  \* (Inv2146_6e63_R28_0_I2,SendGntSAction)
+  <1>7. TypeOK /\ Inv2146_6e63_R28_0_I2 /\ SendGntSAction => Inv2146_6e63_R28_0_I2' BY DEF TypeOK,SendGntSAction,SendGntS,Inv2146_6e63_R28_0_I2
+  \* (Inv2146_6e63_R28_0_I2,SendGntEAction)
+  <1>8. TypeOK /\ Inv39_7204_R20_0_I1 /\ Inv2146_6e63_R28_0_I2 /\ SendGntEAction => Inv2146_6e63_R28_0_I2' BY DEF TypeOK,Inv39_7204_R20_0_I1,SendGntEAction,SendGntE,Inv2146_6e63_R28_0_I2
+  \* (Inv2146_6e63_R28_0_I2,RecvGntSAction)
+  <1>9. TypeOK /\ Inv2146_6e63_R28_0_I2 /\ RecvGntSAction => Inv2146_6e63_R28_0_I2' BY DEF TypeOK,RecvGntSAction,RecvGntS,Inv2146_6e63_R28_0_I2
+  \* (Inv2146_6e63_R28_0_I2,RecvGntEAction)
+  <1>10. TypeOK /\ Inv2146_6e63_R28_0_I2 /\ RecvGntEAction => Inv2146_6e63_R28_0_I2' BY DEF TypeOK,RecvGntEAction,RecvGntE,Inv2146_6e63_R28_0_I2
+  \* (Inv2146_6e63_R28_0_I2,StoreAction)
+  <1>11. TypeOK /\ Inv2146_6e63_R28_0_I2 /\ StoreAction => Inv2146_6e63_R28_0_I2' BY DEF TypeOK,StoreAction,Store,Inv2146_6e63_R28_0_I2
+  \* (Inv2146_6e63_R28_0_I2,SendReqSAction)
+  <1>12. TypeOK /\ Inv2146_6e63_R28_0_I2 /\ SendReqSAction => Inv2146_6e63_R28_0_I2' BY DEF TypeOK,SendReqSAction,SendReqS,Inv2146_6e63_R28_0_I2
 <1>13. QED BY <1>1,<1>2,<1>3,<1>4,<1>5,<1>6,<1>7,<1>8,<1>9,<1>10,<1>11,<1>12 DEF Next
 
 
-\*** Inv28_f7af_R36_1_I2
-THEOREM L_33 == TypeOK /\ Inv50_ba79_R27_1_I1 /\ Inv1511_683a_R35_0_I2 /\ Inv39_7204_R20_0_I1 /\ Inv28_f7af_R36_1_I2 /\ Next => Inv28_f7af_R36_1_I2'
+\*** Inv40_2bf0_R13_1_I1
+THEOREM L_33 == TypeOK /\ Inv4763_b566_R19_0_I2 /\ Inv40_2bf0_R13_1_I1 /\ Next => Inv40_2bf0_R13_1_I1'
   <1>. USE A0,A1
-  \* (Inv28_f7af_R36_1_I2,SendReqEAction)
-  <1>1. TypeOK /\ Inv28_f7af_R36_1_I2 /\ SendReqEAction => Inv28_f7af_R36_1_I2' BY DEF TypeOK,SendReqEAction,SendReqE,Inv28_f7af_R36_1_I2
-  \* (Inv28_f7af_R36_1_I2,RecvReqSAction)
-  <1>2. TypeOK /\ Inv28_f7af_R36_1_I2 /\ RecvReqSAction => Inv28_f7af_R36_1_I2' BY DEF TypeOK,RecvReqSAction,RecvReqS,Inv28_f7af_R36_1_I2
-  \* (Inv28_f7af_R36_1_I2,RecvReqEAction)
-  <1>3. TypeOK /\ Inv28_f7af_R36_1_I2 /\ RecvReqEAction => Inv28_f7af_R36_1_I2' BY DEF TypeOK,RecvReqEAction,RecvReqE,Inv28_f7af_R36_1_I2
-  \* (Inv28_f7af_R36_1_I2,SendInvAction)
-  <1>4. TypeOK /\ Inv50_ba79_R27_1_I1 /\ Inv1511_683a_R35_0_I2 /\ Inv28_f7af_R36_1_I2 /\ SendInvAction => Inv28_f7af_R36_1_I2' BY DEF TypeOK,Inv50_ba79_R27_1_I1,Inv1511_683a_R35_0_I2,SendInvAction,SendInv,Inv28_f7af_R36_1_I2
-  \* (Inv28_f7af_R36_1_I2,SendInvAckAction)
-  <1>5. TypeOK /\ Inv28_f7af_R36_1_I2 /\ SendInvAckAction => Inv28_f7af_R36_1_I2' BY DEF TypeOK,SendInvAckAction,SendInvAck,Inv28_f7af_R36_1_I2
-  \* (Inv28_f7af_R36_1_I2,RecvInvAckAction)
-  <1>6. TypeOK /\ Inv28_f7af_R36_1_I2 /\ RecvInvAckAction => Inv28_f7af_R36_1_I2' BY DEF TypeOK,RecvInvAckAction,RecvInvAck,Inv28_f7af_R36_1_I2
-  \* (Inv28_f7af_R36_1_I2,SendGntSAction)
-  <1>7. TypeOK /\ Inv28_f7af_R36_1_I2 /\ SendGntSAction => Inv28_f7af_R36_1_I2' BY DEF TypeOK,SendGntSAction,SendGntS,Inv28_f7af_R36_1_I2
-  \* (Inv28_f7af_R36_1_I2,SendGntEAction)
-  <1>8. TypeOK /\ Inv39_7204_R20_0_I1 /\ Inv28_f7af_R36_1_I2 /\ SendGntEAction => Inv28_f7af_R36_1_I2' BY DEF TypeOK,Inv39_7204_R20_0_I1,SendGntEAction,SendGntE,Inv28_f7af_R36_1_I2
-  \* (Inv28_f7af_R36_1_I2,RecvGntSAction)
-  <1>9. TypeOK /\ Inv28_f7af_R36_1_I2 /\ RecvGntSAction => Inv28_f7af_R36_1_I2' BY DEF TypeOK,RecvGntSAction,RecvGntS,Inv28_f7af_R36_1_I2
-  \* (Inv28_f7af_R36_1_I2,RecvGntEAction)
-  <1>10. TypeOK /\ Inv28_f7af_R36_1_I2 /\ RecvGntEAction => Inv28_f7af_R36_1_I2' BY DEF TypeOK,RecvGntEAction,RecvGntE,Inv28_f7af_R36_1_I2
-  \* (Inv28_f7af_R36_1_I2,StoreAction)
-  <1>11. TypeOK /\ Inv28_f7af_R36_1_I2 /\ StoreAction => Inv28_f7af_R36_1_I2' BY DEF TypeOK,StoreAction,Store,Inv28_f7af_R36_1_I2
-  \* (Inv28_f7af_R36_1_I2,SendReqSAction)
-  <1>12. TypeOK /\ Inv28_f7af_R36_1_I2 /\ SendReqSAction => Inv28_f7af_R36_1_I2' BY DEF TypeOK,SendReqSAction,SendReqS,Inv28_f7af_R36_1_I2
+  \* (Inv40_2bf0_R13_1_I1,SendReqEAction)
+  <1>1. TypeOK /\ Inv40_2bf0_R13_1_I1 /\ SendReqEAction => Inv40_2bf0_R13_1_I1' BY DEF TypeOK,SendReqEAction,SendReqE,Inv40_2bf0_R13_1_I1
+  \* (Inv40_2bf0_R13_1_I1,RecvReqSAction)
+  <1>2. TypeOK /\ Inv40_2bf0_R13_1_I1 /\ RecvReqSAction => Inv40_2bf0_R13_1_I1' BY DEF TypeOK,RecvReqSAction,RecvReqS,Inv40_2bf0_R13_1_I1
+  \* (Inv40_2bf0_R13_1_I1,RecvReqEAction)
+  <1>3. TypeOK /\ Inv40_2bf0_R13_1_I1 /\ RecvReqEAction => Inv40_2bf0_R13_1_I1' BY DEF TypeOK,RecvReqEAction,RecvReqE,Inv40_2bf0_R13_1_I1
+  \* (Inv40_2bf0_R13_1_I1,SendInvAction)
+  <1>4. TypeOK /\ Inv4763_b566_R19_0_I2 /\ Inv40_2bf0_R13_1_I1 /\ SendInvAction => Inv40_2bf0_R13_1_I1' BY DEF TypeOK,Inv4763_b566_R19_0_I2,SendInvAction,SendInv,Inv40_2bf0_R13_1_I1
+  \* (Inv40_2bf0_R13_1_I1,SendInvAckAction)
+  <1>5. TypeOK /\ Inv40_2bf0_R13_1_I1 /\ SendInvAckAction => Inv40_2bf0_R13_1_I1' BY DEF TypeOK,SendInvAckAction,SendInvAck,Inv40_2bf0_R13_1_I1
+  \* (Inv40_2bf0_R13_1_I1,RecvInvAckAction)
+  <1>6. TypeOK /\ Inv40_2bf0_R13_1_I1 /\ RecvInvAckAction => Inv40_2bf0_R13_1_I1' BY DEF TypeOK,RecvInvAckAction,RecvInvAck,Inv40_2bf0_R13_1_I1
+  \* (Inv40_2bf0_R13_1_I1,SendGntSAction)
+  <1>7. TypeOK /\ Inv40_2bf0_R13_1_I1 /\ SendGntSAction => Inv40_2bf0_R13_1_I1' BY DEF TypeOK,SendGntSAction,SendGntS,Inv40_2bf0_R13_1_I1
+  \* (Inv40_2bf0_R13_1_I1,SendGntEAction)
+  <1>8. TypeOK /\ Inv40_2bf0_R13_1_I1 /\ SendGntEAction => Inv40_2bf0_R13_1_I1' BY DEF TypeOK,SendGntEAction,SendGntE,Inv40_2bf0_R13_1_I1
+  \* (Inv40_2bf0_R13_1_I1,RecvGntSAction)
+  <1>9. TypeOK /\ Inv40_2bf0_R13_1_I1 /\ RecvGntSAction => Inv40_2bf0_R13_1_I1' BY DEF TypeOK,RecvGntSAction,RecvGntS,Inv40_2bf0_R13_1_I1
+  \* (Inv40_2bf0_R13_1_I1,RecvGntEAction)
+  <1>10. TypeOK /\ Inv40_2bf0_R13_1_I1 /\ RecvGntEAction => Inv40_2bf0_R13_1_I1' BY DEF TypeOK,RecvGntEAction,RecvGntE,Inv40_2bf0_R13_1_I1
+  \* (Inv40_2bf0_R13_1_I1,StoreAction)
+  <1>11. TypeOK /\ Inv40_2bf0_R13_1_I1 /\ StoreAction => Inv40_2bf0_R13_1_I1' BY DEF TypeOK,StoreAction,Store,Inv40_2bf0_R13_1_I1
+  \* (Inv40_2bf0_R13_1_I1,SendReqSAction)
+  <1>12. TypeOK /\ Inv40_2bf0_R13_1_I1 /\ SendReqSAction => Inv40_2bf0_R13_1_I1' BY DEF TypeOK,SendReqSAction,SendReqS,Inv40_2bf0_R13_1_I1
 <1>13. QED BY <1>1,<1>2,<1>3,<1>4,<1>5,<1>6,<1>7,<1>8,<1>9,<1>10,<1>11,<1>12 DEF Next
 
 
-\*** Inv1511_683a_R35_0_I2
-THEOREM L_34 == TypeOK /\ Inv2445_d313_R39_0_I4 /\ Inv2445_d313_R39_0_I4 /\ Inv76_d564_R22_2_I1 /\ Inv1511_683a_R35_0_I2 /\ Next => Inv1511_683a_R35_0_I2'
+\*** Inv4763_b566_R19_0_I2
+THEOREM L_34 == TypeOK /\ Inv1103_d53b_R25_0_I4 /\ Inv1103_d53b_R25_0_I4 /\ Inv76_d564_R22_2_I1 /\ Inv4763_b566_R19_0_I2 /\ Next => Inv4763_b566_R19_0_I2'
   <1>. USE A0,A1
-  \* (Inv1511_683a_R35_0_I2,SendReqEAction)
-  <1>1. TypeOK /\ Inv1511_683a_R35_0_I2 /\ SendReqEAction => Inv1511_683a_R35_0_I2' BY DEF TypeOK,SendReqEAction,SendReqE,Inv1511_683a_R35_0_I2
-  \* (Inv1511_683a_R35_0_I2,RecvReqSAction)
-  <1>2. TypeOK /\ Inv2445_d313_R39_0_I4 /\ Inv1511_683a_R35_0_I2 /\ RecvReqSAction => Inv1511_683a_R35_0_I2' BY DEF TypeOK,Inv2445_d313_R39_0_I4,RecvReqSAction,RecvReqS,Inv1511_683a_R35_0_I2
-  \* (Inv1511_683a_R35_0_I2,RecvReqEAction)
-  <1>3. TypeOK /\ Inv2445_d313_R39_0_I4 /\ Inv1511_683a_R35_0_I2 /\ RecvReqEAction => Inv1511_683a_R35_0_I2' BY DEF TypeOK,Inv2445_d313_R39_0_I4,RecvReqEAction,RecvReqE,Inv1511_683a_R35_0_I2
-  \* (Inv1511_683a_R35_0_I2,SendInvAction)
-  <1>4. TypeOK /\ Inv1511_683a_R35_0_I2 /\ SendInvAction => Inv1511_683a_R35_0_I2' BY DEF TypeOK,SendInvAction,SendInv,Inv1511_683a_R35_0_I2
-  \* (Inv1511_683a_R35_0_I2,SendInvAckAction)
-  <1>5. TypeOK /\ Inv76_d564_R22_2_I1 /\ Inv1511_683a_R35_0_I2 /\ SendInvAckAction => Inv1511_683a_R35_0_I2' BY DEF TypeOK,Inv76_d564_R22_2_I1,SendInvAckAction,SendInvAck,Inv1511_683a_R35_0_I2
-  \* (Inv1511_683a_R35_0_I2,RecvInvAckAction)
-  <1>6. TypeOK /\ Inv1511_683a_R35_0_I2 /\ RecvInvAckAction => Inv1511_683a_R35_0_I2' BY DEF TypeOK,RecvInvAckAction,RecvInvAck,Inv1511_683a_R35_0_I2
-  \* (Inv1511_683a_R35_0_I2,SendGntSAction)
-  <1>7. TypeOK /\ Inv1511_683a_R35_0_I2 /\ SendGntSAction => Inv1511_683a_R35_0_I2' BY DEF TypeOK,SendGntSAction,SendGntS,Inv1511_683a_R35_0_I2
-  \* (Inv1511_683a_R35_0_I2,SendGntEAction)
-  <1>8. TypeOK /\ Inv1511_683a_R35_0_I2 /\ SendGntEAction => Inv1511_683a_R35_0_I2' BY DEF TypeOK,SendGntEAction,SendGntE,Inv1511_683a_R35_0_I2
-  \* (Inv1511_683a_R35_0_I2,RecvGntSAction)
-  <1>9. TypeOK /\ Inv1511_683a_R35_0_I2 /\ RecvGntSAction => Inv1511_683a_R35_0_I2' BY DEF TypeOK,RecvGntSAction,RecvGntS,Inv1511_683a_R35_0_I2
-  \* (Inv1511_683a_R35_0_I2,RecvGntEAction)
-  <1>10. TypeOK /\ Inv1511_683a_R35_0_I2 /\ RecvGntEAction => Inv1511_683a_R35_0_I2' BY DEF TypeOK,RecvGntEAction,RecvGntE,Inv1511_683a_R35_0_I2
-  \* (Inv1511_683a_R35_0_I2,StoreAction)
-  <1>11. TypeOK /\ Inv1511_683a_R35_0_I2 /\ StoreAction => Inv1511_683a_R35_0_I2' BY DEF TypeOK,StoreAction,Store,Inv1511_683a_R35_0_I2
-  \* (Inv1511_683a_R35_0_I2,SendReqSAction)
-  <1>12. TypeOK /\ Inv1511_683a_R35_0_I2 /\ SendReqSAction => Inv1511_683a_R35_0_I2' BY DEF TypeOK,SendReqSAction,SendReqS,Inv1511_683a_R35_0_I2
+  \* (Inv4763_b566_R19_0_I2,SendReqEAction)
+  <1>1. TypeOK /\ Inv4763_b566_R19_0_I2 /\ SendReqEAction => Inv4763_b566_R19_0_I2' BY DEF TypeOK,SendReqEAction,SendReqE,Inv4763_b566_R19_0_I2
+  \* (Inv4763_b566_R19_0_I2,RecvReqSAction)
+  <1>2. TypeOK /\ Inv1103_d53b_R25_0_I4 /\ Inv4763_b566_R19_0_I2 /\ RecvReqSAction => Inv4763_b566_R19_0_I2' BY DEF TypeOK,Inv1103_d53b_R25_0_I4,RecvReqSAction,RecvReqS,Inv4763_b566_R19_0_I2
+  \* (Inv4763_b566_R19_0_I2,RecvReqEAction)
+  <1>3. TypeOK /\ Inv1103_d53b_R25_0_I4 /\ Inv4763_b566_R19_0_I2 /\ RecvReqEAction => Inv4763_b566_R19_0_I2' BY DEF TypeOK,Inv1103_d53b_R25_0_I4,RecvReqEAction,RecvReqE,Inv4763_b566_R19_0_I2
+  \* (Inv4763_b566_R19_0_I2,SendInvAction)
+  <1>4. TypeOK /\ Inv4763_b566_R19_0_I2 /\ SendInvAction => Inv4763_b566_R19_0_I2' BY DEF TypeOK,SendInvAction,SendInv,Inv4763_b566_R19_0_I2
+  \* (Inv4763_b566_R19_0_I2,SendInvAckAction)
+  <1>5. TypeOK /\ Inv76_d564_R22_2_I1 /\ Inv4763_b566_R19_0_I2 /\ SendInvAckAction => Inv4763_b566_R19_0_I2' BY DEF TypeOK,Inv76_d564_R22_2_I1,SendInvAckAction,SendInvAck,Inv4763_b566_R19_0_I2
+  \* (Inv4763_b566_R19_0_I2,RecvInvAckAction)
+  <1>6. TypeOK /\ Inv4763_b566_R19_0_I2 /\ RecvInvAckAction => Inv4763_b566_R19_0_I2' BY DEF TypeOK,RecvInvAckAction,RecvInvAck,Inv4763_b566_R19_0_I2
+  \* (Inv4763_b566_R19_0_I2,SendGntSAction)
+  <1>7. TypeOK /\ Inv4763_b566_R19_0_I2 /\ SendGntSAction => Inv4763_b566_R19_0_I2' BY DEF TypeOK,SendGntSAction,SendGntS,Inv4763_b566_R19_0_I2
+  \* (Inv4763_b566_R19_0_I2,SendGntEAction)
+  <1>8. TypeOK /\ Inv4763_b566_R19_0_I2 /\ SendGntEAction => Inv4763_b566_R19_0_I2' BY DEF TypeOK,SendGntEAction,SendGntE,Inv4763_b566_R19_0_I2
+  \* (Inv4763_b566_R19_0_I2,RecvGntSAction)
+  <1>9. TypeOK /\ Inv4763_b566_R19_0_I2 /\ RecvGntSAction => Inv4763_b566_R19_0_I2' BY DEF TypeOK,RecvGntSAction,RecvGntS,Inv4763_b566_R19_0_I2
+  \* (Inv4763_b566_R19_0_I2,RecvGntEAction)
+  <1>10. TypeOK /\ Inv4763_b566_R19_0_I2 /\ RecvGntEAction => Inv4763_b566_R19_0_I2' BY DEF TypeOK,RecvGntEAction,RecvGntE,Inv4763_b566_R19_0_I2
+  \* (Inv4763_b566_R19_0_I2,StoreAction)
+  <1>11. TypeOK /\ Inv4763_b566_R19_0_I2 /\ StoreAction => Inv4763_b566_R19_0_I2' BY DEF TypeOK,StoreAction,Store,Inv4763_b566_R19_0_I2
+  \* (Inv4763_b566_R19_0_I2,SendReqSAction)
+  <1>12. TypeOK /\ Inv4763_b566_R19_0_I2 /\ SendReqSAction => Inv4763_b566_R19_0_I2' BY DEF TypeOK,SendReqSAction,SendReqS,Inv4763_b566_R19_0_I2
 <1>13. QED BY <1>1,<1>2,<1>3,<1>4,<1>5,<1>6,<1>7,<1>8,<1>9,<1>10,<1>11,<1>12 DEF Next
 
 
-\*** Inv2445_d313_R39_0_I4
-THEOREM L_35 == TypeOK /\ Inv651_b778_R29_2_I2 /\ Inv654_d73e_R42_0_I4 /\ Inv2445_d313_R39_0_I4 /\ Next => Inv2445_d313_R39_0_I4'
+\*** Inv1103_d53b_R25_0_I4
+THEOREM L_35 == TypeOK /\ Inv1149_870b_R29_2_I2 /\ Inv957_c432_R31_0_I2 /\ Inv1103_d53b_R25_0_I4 /\ Next => Inv1103_d53b_R25_0_I4'
   <1>. USE A0,A1
-  \* (Inv2445_d313_R39_0_I4,SendReqEAction)
-  <1>1. TypeOK /\ Inv2445_d313_R39_0_I4 /\ SendReqEAction => Inv2445_d313_R39_0_I4' BY DEF TypeOK,SendReqEAction,SendReqE,Inv2445_d313_R39_0_I4
-  \* (Inv2445_d313_R39_0_I4,RecvReqSAction)
-  <1>2. TypeOK /\ Inv2445_d313_R39_0_I4 /\ RecvReqSAction => Inv2445_d313_R39_0_I4' BY DEF TypeOK,RecvReqSAction,RecvReqS,Inv2445_d313_R39_0_I4
-  \* (Inv2445_d313_R39_0_I4,RecvReqEAction)
-  <1>3. TypeOK /\ Inv2445_d313_R39_0_I4 /\ RecvReqEAction => Inv2445_d313_R39_0_I4' BY DEF TypeOK,RecvReqEAction,RecvReqE,Inv2445_d313_R39_0_I4
-  \* (Inv2445_d313_R39_0_I4,SendInvAction)
-  <1>4. TypeOK /\ Inv2445_d313_R39_0_I4 /\ SendInvAction => Inv2445_d313_R39_0_I4' BY DEF TypeOK,SendInvAction,SendInv,Inv2445_d313_R39_0_I4
-  \* (Inv2445_d313_R39_0_I4,SendInvAckAction)
-  <1>5. TypeOK /\ Inv651_b778_R29_2_I2 /\ Inv2445_d313_R39_0_I4 /\ SendInvAckAction => Inv2445_d313_R39_0_I4' BY DEF TypeOK,Inv651_b778_R29_2_I2,SendInvAckAction,SendInvAck,Inv2445_d313_R39_0_I4
-  \* (Inv2445_d313_R39_0_I4,RecvInvAckAction)
-  <1>6. TypeOK /\ Inv2445_d313_R39_0_I4 /\ RecvInvAckAction => Inv2445_d313_R39_0_I4' BY DEF TypeOK,RecvInvAckAction,RecvInvAck,Inv2445_d313_R39_0_I4
-  \* (Inv2445_d313_R39_0_I4,SendGntSAction)
-  <1>7. TypeOK /\ Inv654_d73e_R42_0_I4 /\ Inv2445_d313_R39_0_I4 /\ SendGntSAction => Inv2445_d313_R39_0_I4' BY DEF TypeOK,Inv654_d73e_R42_0_I4,SendGntSAction,SendGntS,Inv2445_d313_R39_0_I4
-  \* (Inv2445_d313_R39_0_I4,SendGntEAction)
-  <1>8. TypeOK /\ Inv2445_d313_R39_0_I4 /\ SendGntEAction => Inv2445_d313_R39_0_I4' BY DEF TypeOK,SendGntEAction,SendGntE,Inv2445_d313_R39_0_I4
-  \* (Inv2445_d313_R39_0_I4,RecvGntSAction)
-  <1>9. TypeOK /\ Inv2445_d313_R39_0_I4 /\ RecvGntSAction => Inv2445_d313_R39_0_I4' BY DEF TypeOK,RecvGntSAction,RecvGntS,Inv2445_d313_R39_0_I4
-  \* (Inv2445_d313_R39_0_I4,RecvGntEAction)
-  <1>10. TypeOK /\ Inv2445_d313_R39_0_I4 /\ RecvGntEAction => Inv2445_d313_R39_0_I4' BY DEF TypeOK,RecvGntEAction,RecvGntE,Inv2445_d313_R39_0_I4
-  \* (Inv2445_d313_R39_0_I4,StoreAction)
-  <1>11. TypeOK /\ Inv2445_d313_R39_0_I4 /\ StoreAction => Inv2445_d313_R39_0_I4' BY DEF TypeOK,StoreAction,Store,Inv2445_d313_R39_0_I4
-  \* (Inv2445_d313_R39_0_I4,SendReqSAction)
-  <1>12. TypeOK /\ Inv2445_d313_R39_0_I4 /\ SendReqSAction => Inv2445_d313_R39_0_I4' BY DEF TypeOK,SendReqSAction,SendReqS,Inv2445_d313_R39_0_I4
+  \* (Inv1103_d53b_R25_0_I4,SendReqEAction)
+  <1>1. TypeOK /\ Inv1103_d53b_R25_0_I4 /\ SendReqEAction => Inv1103_d53b_R25_0_I4' BY DEF TypeOK,SendReqEAction,SendReqE,Inv1103_d53b_R25_0_I4
+  \* (Inv1103_d53b_R25_0_I4,RecvReqSAction)
+  <1>2. TypeOK /\ Inv1103_d53b_R25_0_I4 /\ RecvReqSAction => Inv1103_d53b_R25_0_I4' BY DEF TypeOK,RecvReqSAction,RecvReqS,Inv1103_d53b_R25_0_I4
+  \* (Inv1103_d53b_R25_0_I4,RecvReqEAction)
+  <1>3. TypeOK /\ Inv1103_d53b_R25_0_I4 /\ RecvReqEAction => Inv1103_d53b_R25_0_I4' BY DEF TypeOK,RecvReqEAction,RecvReqE,Inv1103_d53b_R25_0_I4
+  \* (Inv1103_d53b_R25_0_I4,SendInvAction)
+  <1>4. TypeOK /\ Inv1103_d53b_R25_0_I4 /\ SendInvAction => Inv1103_d53b_R25_0_I4' BY DEF TypeOK,SendInvAction,SendInv,Inv1103_d53b_R25_0_I4
+  \* (Inv1103_d53b_R25_0_I4,SendInvAckAction)
+  <1>5. TypeOK /\ Inv1149_870b_R29_2_I2 /\ Inv1103_d53b_R25_0_I4 /\ SendInvAckAction => Inv1103_d53b_R25_0_I4' BY DEF TypeOK,Inv1149_870b_R29_2_I2,SendInvAckAction,SendInvAck,Inv1103_d53b_R25_0_I4
+  \* (Inv1103_d53b_R25_0_I4,RecvInvAckAction)
+  <1>6. TypeOK /\ Inv1103_d53b_R25_0_I4 /\ RecvInvAckAction => Inv1103_d53b_R25_0_I4' BY DEF TypeOK,RecvInvAckAction,RecvInvAck,Inv1103_d53b_R25_0_I4
+  \* (Inv1103_d53b_R25_0_I4,SendGntSAction)
+  <1>7. TypeOK /\ Inv957_c432_R31_0_I2 /\ Inv1103_d53b_R25_0_I4 /\ SendGntSAction => Inv1103_d53b_R25_0_I4' BY DEF TypeOK,Inv957_c432_R31_0_I2,SendGntSAction,SendGntS,Inv1103_d53b_R25_0_I4
+  \* (Inv1103_d53b_R25_0_I4,SendGntEAction)
+  <1>8. TypeOK /\ Inv1103_d53b_R25_0_I4 /\ SendGntEAction => Inv1103_d53b_R25_0_I4' BY DEF TypeOK,SendGntEAction,SendGntE,Inv1103_d53b_R25_0_I4
+  \* (Inv1103_d53b_R25_0_I4,RecvGntSAction)
+  <1>9. TypeOK /\ Inv1103_d53b_R25_0_I4 /\ RecvGntSAction => Inv1103_d53b_R25_0_I4' BY DEF TypeOK,RecvGntSAction,RecvGntS,Inv1103_d53b_R25_0_I4
+  \* (Inv1103_d53b_R25_0_I4,RecvGntEAction)
+  <1>10. TypeOK /\ Inv1103_d53b_R25_0_I4 /\ RecvGntEAction => Inv1103_d53b_R25_0_I4' BY DEF TypeOK,RecvGntEAction,RecvGntE,Inv1103_d53b_R25_0_I4
+  \* (Inv1103_d53b_R25_0_I4,StoreAction)
+  <1>11. TypeOK /\ Inv1103_d53b_R25_0_I4 /\ StoreAction => Inv1103_d53b_R25_0_I4' BY DEF TypeOK,StoreAction,Store,Inv1103_d53b_R25_0_I4
+  \* (Inv1103_d53b_R25_0_I4,SendReqSAction)
+  <1>12. TypeOK /\ Inv1103_d53b_R25_0_I4 /\ SendReqSAction => Inv1103_d53b_R25_0_I4' BY DEF TypeOK,SendReqSAction,SendReqS,Inv1103_d53b_R25_0_I4
 <1>13. QED BY <1>1,<1>2,<1>3,<1>4,<1>5,<1>6,<1>7,<1>8,<1>9,<1>10,<1>11,<1>12 DEF Next
 
 
-\*** Inv654_d73e_R42_0_I4
-THEOREM L_36 == TypeOK /\ Inv2445_d313_R39_0_I4 /\ Inv12_513a_R2_1_I1 /\ Inv1611_1275_R21_1_I2 /\ Inv2246_d6a1_R44_1_I3 /\ Inv5_a2c7_R3_1_I1 /\ Inv654_d73e_R42_0_I4 /\ Next => Inv654_d73e_R42_0_I4'
+\*** Inv957_c432_R31_0_I2
+THEOREM L_36 == TypeOK /\ Inv26_259c_R15_0_I1 /\ Inv1942_3576_R37_0_I3 /\ Inv957_c432_R31_0_I2 /\ Next => Inv957_c432_R31_0_I2'
   <1>. USE A0,A1
-  \* (Inv654_d73e_R42_0_I4,SendReqEAction)
-  <1>1. TypeOK /\ Inv654_d73e_R42_0_I4 /\ SendReqEAction => Inv654_d73e_R42_0_I4' BY DEF TypeOK,SendReqEAction,SendReqE,Inv654_d73e_R42_0_I4
-  \* (Inv654_d73e_R42_0_I4,RecvReqSAction)
-  <1>2. TypeOK /\ Inv2445_d313_R39_0_I4 /\ Inv12_513a_R2_1_I1 /\ Inv654_d73e_R42_0_I4 /\ RecvReqSAction => Inv654_d73e_R42_0_I4' BY DEF TypeOK,Inv2445_d313_R39_0_I4,Inv12_513a_R2_1_I1,RecvReqSAction,RecvReqS,Inv654_d73e_R42_0_I4
-  \* (Inv654_d73e_R42_0_I4,RecvReqEAction)
-  <1>3. TypeOK /\ Inv654_d73e_R42_0_I4 /\ RecvReqEAction => Inv654_d73e_R42_0_I4' BY DEF TypeOK,RecvReqEAction,RecvReqE,Inv654_d73e_R42_0_I4
-  \* (Inv654_d73e_R42_0_I4,SendInvAction)
-  <1>4. TypeOK /\ Inv654_d73e_R42_0_I4 /\ SendInvAction => Inv654_d73e_R42_0_I4' BY DEF TypeOK,SendInvAction,SendInv,Inv654_d73e_R42_0_I4
-  \* (Inv654_d73e_R42_0_I4,SendInvAckAction)
-  <1>5. TypeOK /\ Inv1611_1275_R21_1_I2 /\ Inv654_d73e_R42_0_I4 /\ SendInvAckAction => Inv654_d73e_R42_0_I4' BY DEF TypeOK,Inv1611_1275_R21_1_I2,SendInvAckAction,SendInvAck,Inv654_d73e_R42_0_I4
-  \* (Inv654_d73e_R42_0_I4,RecvInvAckAction)
-  <1>6. TypeOK /\ Inv2246_d6a1_R44_1_I3 /\ Inv654_d73e_R42_0_I4 /\ RecvInvAckAction => Inv654_d73e_R42_0_I4' BY DEF TypeOK,Inv2246_d6a1_R44_1_I3,RecvInvAckAction,RecvInvAck,Inv654_d73e_R42_0_I4
-  \* (Inv654_d73e_R42_0_I4,SendGntSAction)
-  <1>7. TypeOK /\ Inv654_d73e_R42_0_I4 /\ SendGntSAction => Inv654_d73e_R42_0_I4' BY DEF TypeOK,SendGntSAction,SendGntS,Inv654_d73e_R42_0_I4
-  \* (Inv654_d73e_R42_0_I4,SendGntEAction)
-  <1>8. TypeOK /\ Inv654_d73e_R42_0_I4 /\ SendGntEAction => Inv654_d73e_R42_0_I4' BY DEF TypeOK,SendGntEAction,SendGntE,Inv654_d73e_R42_0_I4
-  \* (Inv654_d73e_R42_0_I4,RecvGntSAction)
-  <1>9. TypeOK /\ Inv654_d73e_R42_0_I4 /\ RecvGntSAction => Inv654_d73e_R42_0_I4' BY DEF TypeOK,RecvGntSAction,RecvGntS,Inv654_d73e_R42_0_I4
-  \* (Inv654_d73e_R42_0_I4,RecvGntEAction)
-  <1>10. TypeOK /\ Inv5_a2c7_R3_1_I1 /\ Inv654_d73e_R42_0_I4 /\ RecvGntEAction => Inv654_d73e_R42_0_I4' BY DEF TypeOK,Inv5_a2c7_R3_1_I1,RecvGntEAction,RecvGntE,Inv654_d73e_R42_0_I4
-  \* (Inv654_d73e_R42_0_I4,StoreAction)
-  <1>11. TypeOK /\ Inv654_d73e_R42_0_I4 /\ StoreAction => Inv654_d73e_R42_0_I4' BY DEF TypeOK,StoreAction,Store,Inv654_d73e_R42_0_I4
-  \* (Inv654_d73e_R42_0_I4,SendReqSAction)
-  <1>12. TypeOK /\ Inv654_d73e_R42_0_I4 /\ SendReqSAction => Inv654_d73e_R42_0_I4' BY DEF TypeOK,SendReqSAction,SendReqS,Inv654_d73e_R42_0_I4
+  \* (Inv957_c432_R31_0_I2,SendReqEAction)
+  <1>1. TypeOK /\ Inv957_c432_R31_0_I2 /\ SendReqEAction => Inv957_c432_R31_0_I2' BY DEF TypeOK,SendReqEAction,SendReqE,Inv957_c432_R31_0_I2
+  \* (Inv957_c432_R31_0_I2,RecvReqSAction)
+  <1>2. TypeOK /\ Inv957_c432_R31_0_I2 /\ RecvReqSAction => Inv957_c432_R31_0_I2' BY DEF TypeOK,RecvReqSAction,RecvReqS,Inv957_c432_R31_0_I2
+  \* (Inv957_c432_R31_0_I2,RecvReqEAction)
+  <1>3. TypeOK /\ Inv957_c432_R31_0_I2 /\ RecvReqEAction => Inv957_c432_R31_0_I2' BY DEF TypeOK,RecvReqEAction,RecvReqE,Inv957_c432_R31_0_I2
+  \* (Inv957_c432_R31_0_I2,SendInvAction)
+  <1>4. TypeOK /\ Inv957_c432_R31_0_I2 /\ SendInvAction => Inv957_c432_R31_0_I2' BY DEF TypeOK,SendInvAction,SendInv,Inv957_c432_R31_0_I2
+  \* (Inv957_c432_R31_0_I2,SendInvAckAction)
+  <1>5. TypeOK /\ Inv957_c432_R31_0_I2 /\ SendInvAckAction => Inv957_c432_R31_0_I2' BY DEF TypeOK,SendInvAckAction,SendInvAck,Inv957_c432_R31_0_I2
+  \* (Inv957_c432_R31_0_I2,RecvInvAckAction)
+  <1>6. TypeOK /\ Inv26_259c_R15_0_I1 /\ Inv1942_3576_R37_0_I3 /\ Inv957_c432_R31_0_I2 /\ RecvInvAckAction => Inv957_c432_R31_0_I2' 
+    <2> SUFFICES ASSUME TypeOK,
+                        Inv26_259c_R15_0_I1,
+                        Inv1942_3576_R37_0_I3,
+                        Inv957_c432_R31_0_I2,
+                        TRUE,
+                        NEW i \in NODE,
+                        RecvInvAck(i),
+                        NEW VARI \in NODE'
+                 PROVE  ((ExGntd) \/ ((InvSet[VARI] = ShrSet[VARI]) \/ (~(CurCmd = "ReqS"))))'
+      BY DEF Inv957_c432_R31_0_I2, RecvInvAckAction
+    <2> QED
+      BY DEF TypeOK,Inv26_259c_R15_0_I1,Inv1942_3576_R37_0_I3,RecvInvAckAction,RecvInvAck,Inv957_c432_R31_0_I2
+  \* (Inv957_c432_R31_0_I2,SendGntSAction)
+  <1>7. TypeOK /\ Inv957_c432_R31_0_I2 /\ SendGntSAction => Inv957_c432_R31_0_I2' BY DEF TypeOK,SendGntSAction,SendGntS,Inv957_c432_R31_0_I2
+  \* (Inv957_c432_R31_0_I2,SendGntEAction)
+  <1>8. TypeOK /\ Inv957_c432_R31_0_I2 /\ SendGntEAction => Inv957_c432_R31_0_I2' BY DEF TypeOK,SendGntEAction,SendGntE,Inv957_c432_R31_0_I2
+  \* (Inv957_c432_R31_0_I2,RecvGntSAction)
+  <1>9. TypeOK /\ Inv957_c432_R31_0_I2 /\ RecvGntSAction => Inv957_c432_R31_0_I2' BY DEF TypeOK,RecvGntSAction,RecvGntS,Inv957_c432_R31_0_I2
+  \* (Inv957_c432_R31_0_I2,RecvGntEAction)
+  <1>10. TypeOK /\ Inv957_c432_R31_0_I2 /\ RecvGntEAction => Inv957_c432_R31_0_I2' BY DEF TypeOK,RecvGntEAction,RecvGntE,Inv957_c432_R31_0_I2
+  \* (Inv957_c432_R31_0_I2,StoreAction)
+  <1>11. TypeOK /\ Inv957_c432_R31_0_I2 /\ StoreAction => Inv957_c432_R31_0_I2' BY DEF TypeOK,StoreAction,Store,Inv957_c432_R31_0_I2
+  \* (Inv957_c432_R31_0_I2,SendReqSAction)
+  <1>12. TypeOK /\ Inv957_c432_R31_0_I2 /\ SendReqSAction => Inv957_c432_R31_0_I2' BY DEF TypeOK,SendReqSAction,SendReqS,Inv957_c432_R31_0_I2
 <1>13. QED BY <1>1,<1>2,<1>3,<1>4,<1>5,<1>6,<1>7,<1>8,<1>9,<1>10,<1>11,<1>12 DEF Next
 
 
-\*** Inv2246_d6a1_R44_1_I3
-THEOREM L_37 == TypeOK /\ Inv1_85ad_R3_0_I1 /\ Inv28_f7af_R36_1_I2 /\ Inv6436_bea9_R25_1_I2 /\ Inv14_9e93_R14_0_I1 /\ Inv2246_d6a1_R44_1_I3 /\ Next => Inv2246_d6a1_R44_1_I3'
+\*** Inv1942_3576_R37_0_I3
+THEOREM L_37 == TypeOK /\ Inv687_881e_R35_2_I2 /\ Inv111_3e57_R40_1_I2 /\ Inv1000_d532_R39_3_I2 /\ Inv848_bea9_R40_1_I2 /\ Inv50_ba79_R27_1_I1 /\ Inv40_2bf0_R13_1_I1 /\ Inv17_9e93_R14_0_I1 /\ Inv1942_3576_R37_0_I3 /\ Next => Inv1942_3576_R37_0_I3'
   <1>. USE A0,A1
-  \* (Inv2246_d6a1_R44_1_I3,SendReqEAction)
-  <1>1. TypeOK /\ Inv2246_d6a1_R44_1_I3 /\ SendReqEAction => Inv2246_d6a1_R44_1_I3' BY DEF TypeOK,SendReqEAction,SendReqE,Inv2246_d6a1_R44_1_I3
-  \* (Inv2246_d6a1_R44_1_I3,RecvReqSAction)
-  <1>2. TypeOK /\ Inv2246_d6a1_R44_1_I3 /\ RecvReqSAction => Inv2246_d6a1_R44_1_I3' BY DEF TypeOK,RecvReqSAction,RecvReqS,Inv2246_d6a1_R44_1_I3
-  \* (Inv2246_d6a1_R44_1_I3,RecvReqEAction)
-  <1>3. TypeOK /\ Inv2246_d6a1_R44_1_I3 /\ RecvReqEAction => Inv2246_d6a1_R44_1_I3' BY DEF TypeOK,RecvReqEAction,RecvReqE,Inv2246_d6a1_R44_1_I3
-  \* (Inv2246_d6a1_R44_1_I3,SendInvAction)
-  <1>4. TypeOK /\ Inv2246_d6a1_R44_1_I3 /\ SendInvAction => Inv2246_d6a1_R44_1_I3' BY DEF TypeOK,SendInvAction,SendInv,Inv2246_d6a1_R44_1_I3
-  \* (Inv2246_d6a1_R44_1_I3,SendInvAckAction)
-  <1>5. TypeOK /\ Inv1_85ad_R3_0_I1 /\ Inv28_f7af_R36_1_I2 /\ Inv6436_bea9_R25_1_I2 /\ Inv2246_d6a1_R44_1_I3 /\ SendInvAckAction => Inv2246_d6a1_R44_1_I3' BY DEF TypeOK,Inv1_85ad_R3_0_I1,Inv28_f7af_R36_1_I2,Inv6436_bea9_R25_1_I2,SendInvAckAction,SendInvAck,Inv2246_d6a1_R44_1_I3
-  \* (Inv2246_d6a1_R44_1_I3,RecvInvAckAction)
-  <1>6. TypeOK /\ Inv2246_d6a1_R44_1_I3 /\ RecvInvAckAction => Inv2246_d6a1_R44_1_I3' BY DEF TypeOK,RecvInvAckAction,RecvInvAck,Inv2246_d6a1_R44_1_I3
-  \* (Inv2246_d6a1_R44_1_I3,SendGntSAction)
-  <1>7. TypeOK /\ Inv2246_d6a1_R44_1_I3 /\ SendGntSAction => Inv2246_d6a1_R44_1_I3' BY DEF TypeOK,SendGntSAction,SendGntS,Inv2246_d6a1_R44_1_I3
-  \* (Inv2246_d6a1_R44_1_I3,SendGntEAction)
-  <1>8. TypeOK /\ Inv14_9e93_R14_0_I1 /\ Inv2246_d6a1_R44_1_I3 /\ SendGntEAction => Inv2246_d6a1_R44_1_I3' BY DEF TypeOK,Inv14_9e93_R14_0_I1,SendGntEAction,SendGntE,Inv2246_d6a1_R44_1_I3
-  \* (Inv2246_d6a1_R44_1_I3,RecvGntSAction)
-  <1>9. TypeOK /\ Inv2246_d6a1_R44_1_I3 /\ RecvGntSAction => Inv2246_d6a1_R44_1_I3' BY DEF TypeOK,RecvGntSAction,RecvGntS,Inv2246_d6a1_R44_1_I3
-  \* (Inv2246_d6a1_R44_1_I3,RecvGntEAction)
-  <1>10. TypeOK /\ Inv2246_d6a1_R44_1_I3 /\ RecvGntEAction => Inv2246_d6a1_R44_1_I3' BY DEF TypeOK,RecvGntEAction,RecvGntE,Inv2246_d6a1_R44_1_I3
-  \* (Inv2246_d6a1_R44_1_I3,StoreAction)
-  <1>11. TypeOK /\ Inv2246_d6a1_R44_1_I3 /\ StoreAction => Inv2246_d6a1_R44_1_I3' BY DEF TypeOK,StoreAction,Store,Inv2246_d6a1_R44_1_I3
-  \* (Inv2246_d6a1_R44_1_I3,SendReqSAction)
-  <1>12. TypeOK /\ Inv2246_d6a1_R44_1_I3 /\ SendReqSAction => Inv2246_d6a1_R44_1_I3' BY DEF TypeOK,SendReqSAction,SendReqS,Inv2246_d6a1_R44_1_I3
+  \* (Inv1942_3576_R37_0_I3,SendReqEAction)
+  <1>1. TypeOK /\ Inv1942_3576_R37_0_I3 /\ SendReqEAction => Inv1942_3576_R37_0_I3' BY DEF TypeOK,SendReqEAction,SendReqE,Inv1942_3576_R37_0_I3
+  \* (Inv1942_3576_R37_0_I3,RecvReqSAction)
+  <1>2. TypeOK /\ Inv1942_3576_R37_0_I3 /\ RecvReqSAction => Inv1942_3576_R37_0_I3' BY DEF TypeOK,RecvReqSAction,RecvReqS,Inv1942_3576_R37_0_I3
+  \* (Inv1942_3576_R37_0_I3,RecvReqEAction)
+  <1>3. TypeOK /\ Inv1942_3576_R37_0_I3 /\ RecvReqEAction => Inv1942_3576_R37_0_I3' BY DEF TypeOK,RecvReqEAction,RecvReqE,Inv1942_3576_R37_0_I3
+  \* (Inv1942_3576_R37_0_I3,SendInvAction)
+  <1>4. TypeOK /\ Inv687_881e_R35_2_I2 /\ Inv1942_3576_R37_0_I3 /\ SendInvAction => Inv1942_3576_R37_0_I3' 
+    <2> SUFFICES ASSUME TypeOK,
+                        Inv687_881e_R35_2_I2,
+                        Inv1942_3576_R37_0_I3,
+                        TRUE,
+                        NEW i \in NODE,
+                        Chan2[i].Cmd = "Empty",
+                        InvSet[i] = TRUE,
+                        Chan2' = [Chan2 EXCEPT ![i].Cmd = "Inv"],
+                        InvSet' = [InvSet EXCEPT ![i] = FALSE],
+                        UNCHANGED <<Cache, Chan1, Chan3, ShrSet, ExGntd, CurCmd, CurPtr, MemData, AuxData>>,
+                        NEW VARI \in NODE',
+                        NEW VARJ \in NODE',
+                        CurCmd = "ReqE" \/ (CurCmd = "ReqS" /\ ExGntd = TRUE)
+                 PROVE  ((Chan3[VARJ].Cmd = "Empty") \/ ((InvSet[VARI] = ShrSet[VARI]) \/ (~(ExGntd) \/ (~(VARI # VARJ)))))'
+      BY DEF Inv1942_3576_R37_0_I3, SendInv, SendInvAction
+    <2>1. CASE CurCmd = "ReqE"
+      BY <2>1 DEF TypeOK,Inv687_881e_R35_2_I2,SendInvAction,SendInv,Inv1942_3576_R37_0_I3
+    <2>2. CASE CurCmd = "ReqS" /\ ExGntd = TRUE
+      BY <2>2 DEF TypeOK,Inv687_881e_R35_2_I2,SendInvAction,SendInv,Inv1942_3576_R37_0_I3
+    <2>3. QED
+      BY <2>1, <2>2
+  \* (Inv1942_3576_R37_0_I3,SendInvAckAction)
+  <1>5. TypeOK /\ Inv111_3e57_R40_1_I2 /\ Inv1000_d532_R39_3_I2 /\ Inv848_bea9_R40_1_I2 /\ Inv50_ba79_R27_1_I1 /\ Inv40_2bf0_R13_1_I1 /\ Inv1942_3576_R37_0_I3 /\ SendInvAckAction => Inv1942_3576_R37_0_I3' BY DEF TypeOK,Inv111_3e57_R40_1_I2,Inv1000_d532_R39_3_I2,Inv848_bea9_R40_1_I2,Inv50_ba79_R27_1_I1,Inv40_2bf0_R13_1_I1,SendInvAckAction,SendInvAck,Inv1942_3576_R37_0_I3
+  \* (Inv1942_3576_R37_0_I3,RecvInvAckAction)
+  <1>6. TypeOK /\ Inv1942_3576_R37_0_I3 /\ RecvInvAckAction => Inv1942_3576_R37_0_I3' BY DEF TypeOK,RecvInvAckAction,RecvInvAck,Inv1942_3576_R37_0_I3
+  \* (Inv1942_3576_R37_0_I3,SendGntSAction)
+  <1>7. TypeOK /\ Inv1942_3576_R37_0_I3 /\ SendGntSAction => Inv1942_3576_R37_0_I3' BY DEF TypeOK,SendGntSAction,SendGntS,Inv1942_3576_R37_0_I3
+  \* (Inv1942_3576_R37_0_I3,SendGntEAction)
+  <1>8. TypeOK /\ Inv17_9e93_R14_0_I1 /\ Inv1942_3576_R37_0_I3 /\ SendGntEAction => Inv1942_3576_R37_0_I3' BY DEF TypeOK,Inv17_9e93_R14_0_I1,SendGntEAction,SendGntE,Inv1942_3576_R37_0_I3
+  \* (Inv1942_3576_R37_0_I3,RecvGntSAction)
+  <1>9. TypeOK /\ Inv1942_3576_R37_0_I3 /\ RecvGntSAction => Inv1942_3576_R37_0_I3' BY DEF TypeOK,RecvGntSAction,RecvGntS,Inv1942_3576_R37_0_I3
+  \* (Inv1942_3576_R37_0_I3,RecvGntEAction)
+  <1>10. TypeOK /\ Inv1942_3576_R37_0_I3 /\ RecvGntEAction => Inv1942_3576_R37_0_I3' BY DEF TypeOK,RecvGntEAction,RecvGntE,Inv1942_3576_R37_0_I3
+  \* (Inv1942_3576_R37_0_I3,StoreAction)
+  <1>11. TypeOK /\ Inv1942_3576_R37_0_I3 /\ StoreAction => Inv1942_3576_R37_0_I3' BY DEF TypeOK,StoreAction,Store,Inv1942_3576_R37_0_I3
+  \* (Inv1942_3576_R37_0_I3,SendReqSAction)
+  <1>12. TypeOK /\ Inv1942_3576_R37_0_I3 /\ SendReqSAction => Inv1942_3576_R37_0_I3' BY DEF TypeOK,SendReqSAction,SendReqS,Inv1942_3576_R37_0_I3
 <1>13. QED BY <1>1,<1>2,<1>3,<1>4,<1>5,<1>6,<1>7,<1>8,<1>9,<1>10,<1>11,<1>12 DEF Next
 
 
-\*** Inv6436_bea9_R25_1_I2
-THEOREM L_38 == TypeOK /\ Inv12_513a_R2_1_I1 /\ Inv12_513a_R2_1_I1 /\ Inv9619_4ca8_R9_0_I2 /\ Inv6436_bea9_R25_1_I2 /\ Next => Inv6436_bea9_R25_1_I2'
+\*** Inv111_3e57_R40_1_I2
+THEOREM L_38 == TypeOK /\ Inv1149_870b_R29_2_I2 /\ Inv1149_870b_R29_2_I2 /\ Inv111_0f39_R7_1_I1 /\ Inv20_5035_R26_0_I1 /\ Inv111_3e57_R40_1_I2 /\ Next => Inv111_3e57_R40_1_I2'
   <1>. USE A0,A1
-  \* (Inv6436_bea9_R25_1_I2,SendReqEAction)
-  <1>1. TypeOK /\ Inv6436_bea9_R25_1_I2 /\ SendReqEAction => Inv6436_bea9_R25_1_I2' BY DEF TypeOK,SendReqEAction,SendReqE,Inv6436_bea9_R25_1_I2
-  \* (Inv6436_bea9_R25_1_I2,RecvReqSAction)
-  <1>2. TypeOK /\ Inv6436_bea9_R25_1_I2 /\ RecvReqSAction => Inv6436_bea9_R25_1_I2' BY DEF TypeOK,RecvReqSAction,RecvReqS,Inv6436_bea9_R25_1_I2
-  \* (Inv6436_bea9_R25_1_I2,RecvReqEAction)
-  <1>3. TypeOK /\ Inv6436_bea9_R25_1_I2 /\ RecvReqEAction => Inv6436_bea9_R25_1_I2' BY DEF TypeOK,RecvReqEAction,RecvReqE,Inv6436_bea9_R25_1_I2
-  \* (Inv6436_bea9_R25_1_I2,SendInvAction)
-  <1>4. TypeOK /\ Inv6436_bea9_R25_1_I2 /\ SendInvAction => Inv6436_bea9_R25_1_I2' BY DEF TypeOK,SendInvAction,SendInv,Inv6436_bea9_R25_1_I2
-  \* (Inv6436_bea9_R25_1_I2,SendInvAckAction)
-  <1>5. TypeOK /\ Inv6436_bea9_R25_1_I2 /\ SendInvAckAction => Inv6436_bea9_R25_1_I2' BY DEF TypeOK,SendInvAckAction,SendInvAck,Inv6436_bea9_R25_1_I2
-  \* (Inv6436_bea9_R25_1_I2,RecvInvAckAction)
-  <1>6. TypeOK /\ Inv6436_bea9_R25_1_I2 /\ RecvInvAckAction => Inv6436_bea9_R25_1_I2' BY DEF TypeOK,RecvInvAckAction,RecvInvAck,Inv6436_bea9_R25_1_I2
-  \* (Inv6436_bea9_R25_1_I2,SendGntSAction)
-  <1>7. TypeOK /\ Inv12_513a_R2_1_I1 /\ Inv6436_bea9_R25_1_I2 /\ SendGntSAction => Inv6436_bea9_R25_1_I2' BY DEF TypeOK,Inv12_513a_R2_1_I1,SendGntSAction,SendGntS,Inv6436_bea9_R25_1_I2
-  \* (Inv6436_bea9_R25_1_I2,SendGntEAction)
-  <1>8. TypeOK /\ Inv12_513a_R2_1_I1 /\ Inv6436_bea9_R25_1_I2 /\ SendGntEAction => Inv6436_bea9_R25_1_I2' BY DEF TypeOK,Inv12_513a_R2_1_I1,SendGntEAction,SendGntE,Inv6436_bea9_R25_1_I2
-  \* (Inv6436_bea9_R25_1_I2,RecvGntSAction)
-  <1>9. TypeOK /\ Inv6436_bea9_R25_1_I2 /\ RecvGntSAction => Inv6436_bea9_R25_1_I2' BY DEF TypeOK,RecvGntSAction,RecvGntS,Inv6436_bea9_R25_1_I2
-  \* (Inv6436_bea9_R25_1_I2,RecvGntEAction)
-  <1>10. TypeOK /\ Inv9619_4ca8_R9_0_I2 /\ Inv6436_bea9_R25_1_I2 /\ RecvGntEAction => Inv6436_bea9_R25_1_I2' BY DEF TypeOK,Inv9619_4ca8_R9_0_I2,RecvGntEAction,RecvGntE,Inv6436_bea9_R25_1_I2
-  \* (Inv6436_bea9_R25_1_I2,StoreAction)
-  <1>11. TypeOK /\ Inv6436_bea9_R25_1_I2 /\ StoreAction => Inv6436_bea9_R25_1_I2' BY DEF TypeOK,StoreAction,Store,Inv6436_bea9_R25_1_I2
-  \* (Inv6436_bea9_R25_1_I2,SendReqSAction)
-  <1>12. TypeOK /\ Inv6436_bea9_R25_1_I2 /\ SendReqSAction => Inv6436_bea9_R25_1_I2' BY DEF TypeOK,SendReqSAction,SendReqS,Inv6436_bea9_R25_1_I2
+  \* (Inv111_3e57_R40_1_I2,SendReqEAction)
+  <1>1. TypeOK /\ Inv111_3e57_R40_1_I2 /\ SendReqEAction => Inv111_3e57_R40_1_I2' BY DEF TypeOK,SendReqEAction,SendReqE,Inv111_3e57_R40_1_I2
+  \* (Inv111_3e57_R40_1_I2,RecvReqSAction)
+  <1>2. TypeOK /\ Inv1149_870b_R29_2_I2 /\ Inv111_3e57_R40_1_I2 /\ RecvReqSAction => Inv111_3e57_R40_1_I2' BY DEF TypeOK,Inv1149_870b_R29_2_I2,RecvReqSAction,RecvReqS,Inv111_3e57_R40_1_I2
+  \* (Inv111_3e57_R40_1_I2,RecvReqEAction)
+  <1>3. TypeOK /\ Inv1149_870b_R29_2_I2 /\ Inv111_3e57_R40_1_I2 /\ RecvReqEAction => Inv111_3e57_R40_1_I2' BY DEF TypeOK,Inv1149_870b_R29_2_I2,RecvReqEAction,RecvReqE,Inv111_3e57_R40_1_I2
+  \* (Inv111_3e57_R40_1_I2,SendInvAction)
+  <1>4. TypeOK /\ Inv111_0f39_R7_1_I1 /\ Inv111_3e57_R40_1_I2 /\ SendInvAction => Inv111_3e57_R40_1_I2' BY DEF TypeOK,Inv111_0f39_R7_1_I1,SendInvAction,SendInv,Inv111_3e57_R40_1_I2
+  \* (Inv111_3e57_R40_1_I2,SendInvAckAction)
+  <1>5. TypeOK /\ Inv111_3e57_R40_1_I2 /\ SendInvAckAction => Inv111_3e57_R40_1_I2' BY DEF TypeOK,SendInvAckAction,SendInvAck,Inv111_3e57_R40_1_I2
+  \* (Inv111_3e57_R40_1_I2,RecvInvAckAction)
+  <1>6. TypeOK /\ Inv20_5035_R26_0_I1 /\ Inv111_3e57_R40_1_I2 /\ RecvInvAckAction => Inv111_3e57_R40_1_I2' BY DEF TypeOK,Inv20_5035_R26_0_I1,RecvInvAckAction,RecvInvAck,Inv111_3e57_R40_1_I2
+  \* (Inv111_3e57_R40_1_I2,SendGntSAction)
+  <1>7. TypeOK /\ Inv111_3e57_R40_1_I2 /\ SendGntSAction => Inv111_3e57_R40_1_I2' BY DEF TypeOK,SendGntSAction,SendGntS,Inv111_3e57_R40_1_I2
+  \* (Inv111_3e57_R40_1_I2,SendGntEAction)
+  <1>8. TypeOK /\ Inv111_3e57_R40_1_I2 /\ SendGntEAction => Inv111_3e57_R40_1_I2' BY DEF TypeOK,SendGntEAction,SendGntE,Inv111_3e57_R40_1_I2
+  \* (Inv111_3e57_R40_1_I2,RecvGntSAction)
+  <1>9. TypeOK /\ Inv111_3e57_R40_1_I2 /\ RecvGntSAction => Inv111_3e57_R40_1_I2' BY DEF TypeOK,RecvGntSAction,RecvGntS,Inv111_3e57_R40_1_I2
+  \* (Inv111_3e57_R40_1_I2,RecvGntEAction)
+  <1>10. TypeOK /\ Inv111_3e57_R40_1_I2 /\ RecvGntEAction => Inv111_3e57_R40_1_I2' BY DEF TypeOK,RecvGntEAction,RecvGntE,Inv111_3e57_R40_1_I2
+  \* (Inv111_3e57_R40_1_I2,StoreAction)
+  <1>11. TypeOK /\ Inv111_3e57_R40_1_I2 /\ StoreAction => Inv111_3e57_R40_1_I2' BY DEF TypeOK,StoreAction,Store,Inv111_3e57_R40_1_I2
+  \* (Inv111_3e57_R40_1_I2,SendReqSAction)
+  <1>12. TypeOK /\ Inv111_3e57_R40_1_I2 /\ SendReqSAction => Inv111_3e57_R40_1_I2' BY DEF TypeOK,SendReqSAction,SendReqS,Inv111_3e57_R40_1_I2
+<1>13. QED BY <1>1,<1>2,<1>3,<1>4,<1>5,<1>6,<1>7,<1>8,<1>9,<1>10,<1>11,<1>12 DEF Next
+
+
+\*** Inv1000_d532_R39_3_I2
+THEOREM L_39 == TypeOK /\ Inv1149_870b_R29_2_I2 /\ Inv1149_870b_R29_2_I2 /\ Inv23009_51f5_R41_3_I3 /\ Inv111_0f39_R7_1_I1 /\ Inv1000_d532_R39_3_I2 /\ Next => Inv1000_d532_R39_3_I2'
+  <1>. USE A0,A1
+  \* (Inv1000_d532_R39_3_I2,SendReqEAction)
+  <1>1. TypeOK /\ Inv1000_d532_R39_3_I2 /\ SendReqEAction => Inv1000_d532_R39_3_I2' BY DEF TypeOK,SendReqEAction,SendReqE,Inv1000_d532_R39_3_I2
+  \* (Inv1000_d532_R39_3_I2,RecvReqSAction)
+  <1>2. TypeOK /\ Inv1149_870b_R29_2_I2 /\ Inv1000_d532_R39_3_I2 /\ RecvReqSAction => Inv1000_d532_R39_3_I2' BY DEF TypeOK,Inv1149_870b_R29_2_I2,RecvReqSAction,RecvReqS,Inv1000_d532_R39_3_I2
+  \* (Inv1000_d532_R39_3_I2,RecvReqEAction)
+  <1>3. TypeOK /\ Inv1149_870b_R29_2_I2 /\ Inv1000_d532_R39_3_I2 /\ RecvReqEAction => Inv1000_d532_R39_3_I2' BY DEF TypeOK,Inv1149_870b_R29_2_I2,RecvReqEAction,RecvReqE,Inv1000_d532_R39_3_I2
+  \* (Inv1000_d532_R39_3_I2,SendInvAction)
+  <1>4. TypeOK /\ Inv23009_51f5_R41_3_I3 /\ Inv1000_d532_R39_3_I2 /\ SendInvAction => Inv1000_d532_R39_3_I2' BY DEF TypeOK,Inv23009_51f5_R41_3_I3,SendInvAction,SendInv,Inv1000_d532_R39_3_I2
+  \* (Inv1000_d532_R39_3_I2,SendInvAckAction)
+  <1>5. TypeOK /\ Inv1000_d532_R39_3_I2 /\ SendInvAckAction => Inv1000_d532_R39_3_I2' BY DEF TypeOK,SendInvAckAction,SendInvAck,Inv1000_d532_R39_3_I2
+  \* (Inv1000_d532_R39_3_I2,RecvInvAckAction)
+  <1>6. TypeOK /\ Inv1000_d532_R39_3_I2 /\ RecvInvAckAction => Inv1000_d532_R39_3_I2' BY DEF TypeOK,RecvInvAckAction,RecvInvAck,Inv1000_d532_R39_3_I2
+  \* (Inv1000_d532_R39_3_I2,SendGntSAction)
+  <1>7. TypeOK /\ Inv1000_d532_R39_3_I2 /\ SendGntSAction => Inv1000_d532_R39_3_I2' BY DEF TypeOK,SendGntSAction,SendGntS,Inv1000_d532_R39_3_I2
+  \* (Inv1000_d532_R39_3_I2,SendGntEAction)
+  <1>8. TypeOK /\ Inv111_0f39_R7_1_I1 /\ Inv1000_d532_R39_3_I2 /\ SendGntEAction => Inv1000_d532_R39_3_I2' BY DEF TypeOK,Inv111_0f39_R7_1_I1,SendGntEAction,SendGntE,Inv1000_d532_R39_3_I2
+  \* (Inv1000_d532_R39_3_I2,RecvGntSAction)
+  <1>9. TypeOK /\ Inv1000_d532_R39_3_I2 /\ RecvGntSAction => Inv1000_d532_R39_3_I2' BY DEF TypeOK,RecvGntSAction,RecvGntS,Inv1000_d532_R39_3_I2
+  \* (Inv1000_d532_R39_3_I2,RecvGntEAction)
+  <1>10. TypeOK /\ Inv1000_d532_R39_3_I2 /\ RecvGntEAction => Inv1000_d532_R39_3_I2' BY DEF TypeOK,RecvGntEAction,RecvGntE,Inv1000_d532_R39_3_I2
+  \* (Inv1000_d532_R39_3_I2,StoreAction)
+  <1>11. TypeOK /\ Inv1000_d532_R39_3_I2 /\ StoreAction => Inv1000_d532_R39_3_I2' BY DEF TypeOK,StoreAction,Store,Inv1000_d532_R39_3_I2
+  \* (Inv1000_d532_R39_3_I2,SendReqSAction)
+  <1>12. TypeOK /\ Inv1000_d532_R39_3_I2 /\ SendReqSAction => Inv1000_d532_R39_3_I2' BY DEF TypeOK,SendReqSAction,SendReqS,Inv1000_d532_R39_3_I2
+<1>13. QED BY <1>1,<1>2,<1>3,<1>4,<1>5,<1>6,<1>7,<1>8,<1>9,<1>10,<1>11,<1>12 DEF Next
+
+
+\*** Inv23009_51f5_R41_3_I3
+THEOREM L_40 == TypeOK /\ Inv7513_6fbd_R44_0_I3 /\ Inv7513_6fbd_R44_0_I3 /\ Inv111_0f39_R7_1_I1 /\ Inv23009_51f5_R41_3_I3 /\ Next => Inv23009_51f5_R41_3_I3'
+  <1>. USE A0,A1
+  \* (Inv23009_51f5_R41_3_I3,SendReqEAction)
+  <1>1. TypeOK /\ Inv23009_51f5_R41_3_I3 /\ SendReqEAction => Inv23009_51f5_R41_3_I3' BY DEF TypeOK,SendReqEAction,SendReqE,Inv23009_51f5_R41_3_I3
+  \* (Inv23009_51f5_R41_3_I3,RecvReqSAction)
+  <1>2. TypeOK /\ Inv7513_6fbd_R44_0_I3 /\ Inv23009_51f5_R41_3_I3 /\ RecvReqSAction => Inv23009_51f5_R41_3_I3' BY DEF TypeOK,Inv7513_6fbd_R44_0_I3,RecvReqSAction,RecvReqS,Inv23009_51f5_R41_3_I3
+  \* (Inv23009_51f5_R41_3_I3,RecvReqEAction)
+  <1>3. TypeOK /\ Inv7513_6fbd_R44_0_I3 /\ Inv23009_51f5_R41_3_I3 /\ RecvReqEAction => Inv23009_51f5_R41_3_I3' BY DEF TypeOK,Inv7513_6fbd_R44_0_I3,RecvReqEAction,RecvReqE,Inv23009_51f5_R41_3_I3
+  \* (Inv23009_51f5_R41_3_I3,SendInvAction)
+  <1>4. TypeOK /\ Inv23009_51f5_R41_3_I3 /\ SendInvAction => Inv23009_51f5_R41_3_I3' BY DEF TypeOK,SendInvAction,SendInv,Inv23009_51f5_R41_3_I3
+  \* (Inv23009_51f5_R41_3_I3,SendInvAckAction)
+  <1>5. TypeOK /\ Inv23009_51f5_R41_3_I3 /\ SendInvAckAction => Inv23009_51f5_R41_3_I3' BY DEF TypeOK,SendInvAckAction,SendInvAck,Inv23009_51f5_R41_3_I3
+  \* (Inv23009_51f5_R41_3_I3,RecvInvAckAction)
+  <1>6. TypeOK /\ Inv23009_51f5_R41_3_I3 /\ RecvInvAckAction => Inv23009_51f5_R41_3_I3' BY DEF TypeOK,RecvInvAckAction,RecvInvAck,Inv23009_51f5_R41_3_I3
+  \* (Inv23009_51f5_R41_3_I3,SendGntSAction)
+  <1>7. TypeOK /\ Inv23009_51f5_R41_3_I3 /\ SendGntSAction => Inv23009_51f5_R41_3_I3' BY DEF TypeOK,SendGntSAction,SendGntS,Inv23009_51f5_R41_3_I3
+  \* (Inv23009_51f5_R41_3_I3,SendGntEAction)
+  <1>8. TypeOK /\ Inv111_0f39_R7_1_I1 /\ Inv23009_51f5_R41_3_I3 /\ SendGntEAction => Inv23009_51f5_R41_3_I3' BY DEF TypeOK,Inv111_0f39_R7_1_I1,SendGntEAction,SendGntE,Inv23009_51f5_R41_3_I3
+  \* (Inv23009_51f5_R41_3_I3,RecvGntSAction)
+  <1>9. TypeOK /\ Inv23009_51f5_R41_3_I3 /\ RecvGntSAction => Inv23009_51f5_R41_3_I3' BY DEF TypeOK,RecvGntSAction,RecvGntS,Inv23009_51f5_R41_3_I3
+  \* (Inv23009_51f5_R41_3_I3,RecvGntEAction)
+  <1>10. TypeOK /\ Inv23009_51f5_R41_3_I3 /\ RecvGntEAction => Inv23009_51f5_R41_3_I3' BY DEF TypeOK,RecvGntEAction,RecvGntE,Inv23009_51f5_R41_3_I3
+  \* (Inv23009_51f5_R41_3_I3,StoreAction)
+  <1>11. TypeOK /\ Inv23009_51f5_R41_3_I3 /\ StoreAction => Inv23009_51f5_R41_3_I3' BY DEF TypeOK,StoreAction,Store,Inv23009_51f5_R41_3_I3
+  \* (Inv23009_51f5_R41_3_I3,SendReqSAction)
+  <1>12. TypeOK /\ Inv23009_51f5_R41_3_I3 /\ SendReqSAction => Inv23009_51f5_R41_3_I3' BY DEF TypeOK,SendReqSAction,SendReqS,Inv23009_51f5_R41_3_I3
+<1>13. QED BY <1>1,<1>2,<1>3,<1>4,<1>5,<1>6,<1>7,<1>8,<1>9,<1>10,<1>11,<1>12 DEF Next
+
+
+\*** Inv7513_6fbd_R44_0_I3
+THEOREM L_41 == TypeOK /\ Inv23009_51f5_R41_3_I3 /\ Inv111_0f39_R7_1_I1 /\ Inv7513_6fbd_R44_0_I3 /\ Next => Inv7513_6fbd_R44_0_I3'
+  <1>. USE A0,A1
+  \* (Inv7513_6fbd_R44_0_I3,SendReqEAction)
+  <1>1. TypeOK /\ Inv7513_6fbd_R44_0_I3 /\ SendReqEAction => Inv7513_6fbd_R44_0_I3' BY DEF TypeOK,SendReqEAction,SendReqE,Inv7513_6fbd_R44_0_I3
+  \* (Inv7513_6fbd_R44_0_I3,RecvReqSAction)
+  <1>2. TypeOK /\ Inv7513_6fbd_R44_0_I3 /\ RecvReqSAction => Inv7513_6fbd_R44_0_I3' BY DEF TypeOK,RecvReqSAction,RecvReqS,Inv7513_6fbd_R44_0_I3
+  \* (Inv7513_6fbd_R44_0_I3,RecvReqEAction)
+  <1>3. TypeOK /\ Inv7513_6fbd_R44_0_I3 /\ RecvReqEAction => Inv7513_6fbd_R44_0_I3' BY DEF TypeOK,RecvReqEAction,RecvReqE,Inv7513_6fbd_R44_0_I3
+  \* (Inv7513_6fbd_R44_0_I3,SendInvAction)
+  <1>4. TypeOK /\ Inv23009_51f5_R41_3_I3 /\ Inv7513_6fbd_R44_0_I3 /\ SendInvAction => Inv7513_6fbd_R44_0_I3' 
+    <2> SUFFICES ASSUME TypeOK,
+                        Inv23009_51f5_R41_3_I3,
+                        Inv7513_6fbd_R44_0_I3,
+                        TRUE,
+                        NEW i \in NODE,
+                        Chan2[i].Cmd = "Empty",
+                        InvSet[i] = TRUE,
+                        Chan2' = [Chan2 EXCEPT ![i].Cmd = "Inv"],
+                        InvSet' = [InvSet EXCEPT ![i] = FALSE],
+                        UNCHANGED <<Cache, Chan1, Chan3, ShrSet, ExGntd, CurCmd, CurPtr, MemData, AuxData>>,
+                        NEW VARI \in NODE',
+                        NEW VARJ \in NODE',
+                        CurCmd = "ReqE" \/ (CurCmd = "ReqS" /\ ExGntd = TRUE)
+                 PROVE  ((InvSet[VARI] = ShrSet[VARI]) \/ (~(ExGntd)) \/ (~(VARI # VARJ)) \/ (~(ShrSet[VARJ])))'
+      BY DEF Inv7513_6fbd_R44_0_I3, SendInv, SendInvAction
+    <2>1. CASE CurCmd = "ReqE"
+      BY <2>1 DEF TypeOK,Inv23009_51f5_R41_3_I3,SendInvAction,SendInv,Inv7513_6fbd_R44_0_I3
+    <2>2. CASE CurCmd = "ReqS" /\ ExGntd = TRUE
+      BY <2>2 DEF TypeOK,Inv23009_51f5_R41_3_I3,SendInvAction,SendInv,Inv7513_6fbd_R44_0_I3
+    <2>3. QED
+      BY <2>1, <2>2
+  \* (Inv7513_6fbd_R44_0_I3,SendInvAckAction)
+  <1>5. TypeOK /\ Inv7513_6fbd_R44_0_I3 /\ SendInvAckAction => Inv7513_6fbd_R44_0_I3' BY DEF TypeOK,SendInvAckAction,SendInvAck,Inv7513_6fbd_R44_0_I3
+  \* (Inv7513_6fbd_R44_0_I3,RecvInvAckAction)
+  <1>6. TypeOK /\ Inv7513_6fbd_R44_0_I3 /\ RecvInvAckAction => Inv7513_6fbd_R44_0_I3' BY DEF TypeOK,RecvInvAckAction,RecvInvAck,Inv7513_6fbd_R44_0_I3
+  \* (Inv7513_6fbd_R44_0_I3,SendGntSAction)
+  <1>7. TypeOK /\ Inv7513_6fbd_R44_0_I3 /\ SendGntSAction => Inv7513_6fbd_R44_0_I3' BY DEF TypeOK,SendGntSAction,SendGntS,Inv7513_6fbd_R44_0_I3
+  \* (Inv7513_6fbd_R44_0_I3,SendGntEAction)
+  <1>8. TypeOK /\ Inv111_0f39_R7_1_I1 /\ Inv7513_6fbd_R44_0_I3 /\ SendGntEAction => Inv7513_6fbd_R44_0_I3' 
+    <2> SUFFICES ASSUME TypeOK,
+                        Inv111_0f39_R7_1_I1,
+                        Inv7513_6fbd_R44_0_I3,
+                        TRUE,
+                        NEW i \in NODE,
+                        SendGntE(i),
+                        NEW VARI \in NODE',
+                        NEW VARJ \in NODE'
+                 PROVE  ((InvSet[VARI] = ShrSet[VARI]) \/ (~(ExGntd)) \/ (~(VARI # VARJ)) \/ (~(ShrSet[VARJ])))'
+      BY DEF Inv7513_6fbd_R44_0_I3, SendGntEAction
+    <2> QED
+      BY DEF TypeOK,Inv111_0f39_R7_1_I1,SendGntEAction,SendGntE,Inv7513_6fbd_R44_0_I3
+  \* (Inv7513_6fbd_R44_0_I3,RecvGntSAction)
+  <1>9. TypeOK /\ Inv7513_6fbd_R44_0_I3 /\ RecvGntSAction => Inv7513_6fbd_R44_0_I3' BY DEF TypeOK,RecvGntSAction,RecvGntS,Inv7513_6fbd_R44_0_I3
+  \* (Inv7513_6fbd_R44_0_I3,RecvGntEAction)
+  <1>10. TypeOK /\ Inv7513_6fbd_R44_0_I3 /\ RecvGntEAction => Inv7513_6fbd_R44_0_I3' BY DEF TypeOK,RecvGntEAction,RecvGntE,Inv7513_6fbd_R44_0_I3
+  \* (Inv7513_6fbd_R44_0_I3,StoreAction)
+  <1>11. TypeOK /\ Inv7513_6fbd_R44_0_I3 /\ StoreAction => Inv7513_6fbd_R44_0_I3' BY DEF TypeOK,StoreAction,Store,Inv7513_6fbd_R44_0_I3
+  \* (Inv7513_6fbd_R44_0_I3,SendReqSAction)
+  <1>12. TypeOK /\ Inv7513_6fbd_R44_0_I3 /\ SendReqSAction => Inv7513_6fbd_R44_0_I3' BY DEF TypeOK,SendReqSAction,SendReqS,Inv7513_6fbd_R44_0_I3
+<1>13. QED BY <1>1,<1>2,<1>3,<1>4,<1>5,<1>6,<1>7,<1>8,<1>9,<1>10,<1>11,<1>12 DEF Next
+
+
+\*** Inv848_bea9_R40_1_I2
+THEOREM L_42 == TypeOK /\ Inv12_513a_R2_1_I1 /\ Inv12_513a_R2_1_I1 /\ Inv9560_0995_R9_0_I2 /\ Inv848_bea9_R40_1_I2 /\ Next => Inv848_bea9_R40_1_I2'
+  <1>. USE A0,A1
+  \* (Inv848_bea9_R40_1_I2,SendReqEAction)
+  <1>1. TypeOK /\ Inv848_bea9_R40_1_I2 /\ SendReqEAction => Inv848_bea9_R40_1_I2' BY DEF TypeOK,SendReqEAction,SendReqE,Inv848_bea9_R40_1_I2
+  \* (Inv848_bea9_R40_1_I2,RecvReqSAction)
+  <1>2. TypeOK /\ Inv848_bea9_R40_1_I2 /\ RecvReqSAction => Inv848_bea9_R40_1_I2' BY DEF TypeOK,RecvReqSAction,RecvReqS,Inv848_bea9_R40_1_I2
+  \* (Inv848_bea9_R40_1_I2,RecvReqEAction)
+  <1>3. TypeOK /\ Inv848_bea9_R40_1_I2 /\ RecvReqEAction => Inv848_bea9_R40_1_I2' BY DEF TypeOK,RecvReqEAction,RecvReqE,Inv848_bea9_R40_1_I2
+  \* (Inv848_bea9_R40_1_I2,SendInvAction)
+  <1>4. TypeOK /\ Inv848_bea9_R40_1_I2 /\ SendInvAction => Inv848_bea9_R40_1_I2' BY DEF TypeOK,SendInvAction,SendInv,Inv848_bea9_R40_1_I2
+  \* (Inv848_bea9_R40_1_I2,SendInvAckAction)
+  <1>5. TypeOK /\ Inv848_bea9_R40_1_I2 /\ SendInvAckAction => Inv848_bea9_R40_1_I2' BY DEF TypeOK,SendInvAckAction,SendInvAck,Inv848_bea9_R40_1_I2
+  \* (Inv848_bea9_R40_1_I2,RecvInvAckAction)
+  <1>6. TypeOK /\ Inv848_bea9_R40_1_I2 /\ RecvInvAckAction => Inv848_bea9_R40_1_I2' BY DEF TypeOK,RecvInvAckAction,RecvInvAck,Inv848_bea9_R40_1_I2
+  \* (Inv848_bea9_R40_1_I2,SendGntSAction)
+  <1>7. TypeOK /\ Inv12_513a_R2_1_I1 /\ Inv848_bea9_R40_1_I2 /\ SendGntSAction => Inv848_bea9_R40_1_I2' BY DEF TypeOK,Inv12_513a_R2_1_I1,SendGntSAction,SendGntS,Inv848_bea9_R40_1_I2
+  \* (Inv848_bea9_R40_1_I2,SendGntEAction)
+  <1>8. TypeOK /\ Inv12_513a_R2_1_I1 /\ Inv848_bea9_R40_1_I2 /\ SendGntEAction => Inv848_bea9_R40_1_I2' BY DEF TypeOK,Inv12_513a_R2_1_I1,SendGntEAction,SendGntE,Inv848_bea9_R40_1_I2
+  \* (Inv848_bea9_R40_1_I2,RecvGntSAction)
+  <1>9. TypeOK /\ Inv848_bea9_R40_1_I2 /\ RecvGntSAction => Inv848_bea9_R40_1_I2' BY DEF TypeOK,RecvGntSAction,RecvGntS,Inv848_bea9_R40_1_I2
+  \* (Inv848_bea9_R40_1_I2,RecvGntEAction)
+  <1>10. TypeOK /\ Inv9560_0995_R9_0_I2 /\ Inv848_bea9_R40_1_I2 /\ RecvGntEAction => Inv848_bea9_R40_1_I2' BY DEF TypeOK,Inv9560_0995_R9_0_I2,RecvGntEAction,RecvGntE,Inv848_bea9_R40_1_I2
+  \* (Inv848_bea9_R40_1_I2,StoreAction)
+  <1>11. TypeOK /\ Inv848_bea9_R40_1_I2 /\ StoreAction => Inv848_bea9_R40_1_I2' BY DEF TypeOK,StoreAction,Store,Inv848_bea9_R40_1_I2
+  \* (Inv848_bea9_R40_1_I2,SendReqSAction)
+  <1>12. TypeOK /\ Inv848_bea9_R40_1_I2 /\ SendReqSAction => Inv848_bea9_R40_1_I2' BY DEF TypeOK,SendReqSAction,SendReqS,Inv848_bea9_R40_1_I2
 <1>13. QED BY <1>1,<1>2,<1>3,<1>4,<1>5,<1>6,<1>7,<1>8,<1>9,<1>10,<1>11,<1>12 DEF Next
 
 
 \*** Inv12_513a_R2_1_I1
-THEOREM L_39 == TypeOK /\ Inv7_7199_R6_1_I1 /\ Inv5_a2c7_R3_1_I1 /\ Inv12_513a_R2_1_I1 /\ Next => Inv12_513a_R2_1_I1'
+THEOREM L_43 == TypeOK /\ Inv7_7199_R6_1_I1 /\ Inv5_a2c7_R3_1_I1 /\ Inv12_513a_R2_1_I1 /\ Next => Inv12_513a_R2_1_I1'
   <1>. USE A0,A1
   \* (Inv12_513a_R2_1_I1,SendReqEAction)
   <1>1. TypeOK /\ Inv12_513a_R2_1_I1 /\ SendReqEAction => Inv12_513a_R2_1_I1' BY DEF TypeOK,SendReqEAction,SendReqE,Inv12_513a_R2_1_I1
@@ -1345,213 +1530,93 @@ THEOREM L_39 == TypeOK /\ Inv7_7199_R6_1_I1 /\ Inv5_a2c7_R3_1_I1 /\ Inv12_513a_R
 <1>13. QED BY <1>1,<1>2,<1>3,<1>4,<1>5,<1>6,<1>7,<1>8,<1>9,<1>10,<1>11,<1>12 DEF Next
 
 
-\*** Inv8923_9eca_R13_1_I2
-THEOREM L_40 == TypeOK /\ Inv3306_6920_R19_1_I2 /\ Inv64_c47d_R16_1_I1 /\ Inv8923_9eca_R13_1_I2 /\ Next => Inv8923_9eca_R13_1_I2'
+\*** Inv687_881e_R35_2_I2
+THEOREM L_44 == TypeOK /\ Inv4043_dbee_R22_0_I2 /\ Inv4043_dbee_R22_0_I2 /\ Inv1000_d532_R39_3_I2 /\ Inv111_0f39_R7_1_I1 /\ Inv687_881e_R35_2_I2 /\ Next => Inv687_881e_R35_2_I2'
   <1>. USE A0,A1
-  \* (Inv8923_9eca_R13_1_I2,SendReqEAction)
-  <1>1. TypeOK /\ Inv8923_9eca_R13_1_I2 /\ SendReqEAction => Inv8923_9eca_R13_1_I2' BY DEF TypeOK,SendReqEAction,SendReqE,Inv8923_9eca_R13_1_I2
-  \* (Inv8923_9eca_R13_1_I2,RecvReqSAction)
-  <1>2. TypeOK /\ Inv8923_9eca_R13_1_I2 /\ RecvReqSAction => Inv8923_9eca_R13_1_I2' BY DEF TypeOK,RecvReqSAction,RecvReqS,Inv8923_9eca_R13_1_I2
-  \* (Inv8923_9eca_R13_1_I2,RecvReqEAction)
-  <1>3. TypeOK /\ Inv8923_9eca_R13_1_I2 /\ RecvReqEAction => Inv8923_9eca_R13_1_I2' BY DEF TypeOK,RecvReqEAction,RecvReqE,Inv8923_9eca_R13_1_I2
-  \* (Inv8923_9eca_R13_1_I2,SendInvAction)
-  <1>4. TypeOK /\ Inv3306_6920_R19_1_I2 /\ Inv8923_9eca_R13_1_I2 /\ SendInvAction => Inv8923_9eca_R13_1_I2' BY DEF TypeOK,Inv3306_6920_R19_1_I2,SendInvAction,SendInv,Inv8923_9eca_R13_1_I2
-  \* (Inv8923_9eca_R13_1_I2,SendInvAckAction)
-  <1>5. TypeOK /\ Inv8923_9eca_R13_1_I2 /\ SendInvAckAction => Inv8923_9eca_R13_1_I2' BY DEF TypeOK,SendInvAckAction,SendInvAck,Inv8923_9eca_R13_1_I2
-  \* (Inv8923_9eca_R13_1_I2,RecvInvAckAction)
-  <1>6. TypeOK /\ Inv8923_9eca_R13_1_I2 /\ RecvInvAckAction => Inv8923_9eca_R13_1_I2' BY DEF TypeOK,RecvInvAckAction,RecvInvAck,Inv8923_9eca_R13_1_I2
-  \* (Inv8923_9eca_R13_1_I2,SendGntSAction)
-  <1>7. TypeOK /\ Inv8923_9eca_R13_1_I2 /\ SendGntSAction => Inv8923_9eca_R13_1_I2' BY DEF TypeOK,SendGntSAction,SendGntS,Inv8923_9eca_R13_1_I2
-  \* (Inv8923_9eca_R13_1_I2,SendGntEAction)
-  <1>8. TypeOK /\ Inv8923_9eca_R13_1_I2 /\ SendGntEAction => Inv8923_9eca_R13_1_I2' BY DEF TypeOK,SendGntEAction,SendGntE,Inv8923_9eca_R13_1_I2
-  \* (Inv8923_9eca_R13_1_I2,RecvGntSAction)
-  <1>9. TypeOK /\ Inv8923_9eca_R13_1_I2 /\ RecvGntSAction => Inv8923_9eca_R13_1_I2' BY DEF TypeOK,RecvGntSAction,RecvGntS,Inv8923_9eca_R13_1_I2
-  \* (Inv8923_9eca_R13_1_I2,RecvGntEAction)
-  <1>10. TypeOK /\ Inv64_c47d_R16_1_I1 /\ Inv8923_9eca_R13_1_I2 /\ RecvGntEAction => Inv8923_9eca_R13_1_I2' BY DEF TypeOK,Inv64_c47d_R16_1_I1,RecvGntEAction,RecvGntE,Inv8923_9eca_R13_1_I2
-  \* (Inv8923_9eca_R13_1_I2,StoreAction)
-  <1>11. TypeOK /\ Inv8923_9eca_R13_1_I2 /\ StoreAction => Inv8923_9eca_R13_1_I2' BY DEF TypeOK,StoreAction,Store,Inv8923_9eca_R13_1_I2
-  \* (Inv8923_9eca_R13_1_I2,SendReqSAction)
-  <1>12. TypeOK /\ Inv8923_9eca_R13_1_I2 /\ SendReqSAction => Inv8923_9eca_R13_1_I2' BY DEF TypeOK,SendReqSAction,SendReqS,Inv8923_9eca_R13_1_I2
+  \* (Inv687_881e_R35_2_I2,SendReqEAction)
+  <1>1. TypeOK /\ Inv687_881e_R35_2_I2 /\ SendReqEAction => Inv687_881e_R35_2_I2' BY DEF TypeOK,SendReqEAction,SendReqE,Inv687_881e_R35_2_I2
+  \* (Inv687_881e_R35_2_I2,RecvReqSAction)
+  <1>2. TypeOK /\ Inv4043_dbee_R22_0_I2 /\ Inv687_881e_R35_2_I2 /\ RecvReqSAction => Inv687_881e_R35_2_I2' BY DEF TypeOK,Inv4043_dbee_R22_0_I2,RecvReqSAction,RecvReqS,Inv687_881e_R35_2_I2
+  \* (Inv687_881e_R35_2_I2,RecvReqEAction)
+  <1>3. TypeOK /\ Inv4043_dbee_R22_0_I2 /\ Inv687_881e_R35_2_I2 /\ RecvReqEAction => Inv687_881e_R35_2_I2' BY DEF TypeOK,Inv4043_dbee_R22_0_I2,RecvReqEAction,RecvReqE,Inv687_881e_R35_2_I2
+  \* (Inv687_881e_R35_2_I2,SendInvAction)
+  <1>4. TypeOK /\ Inv687_881e_R35_2_I2 /\ SendInvAction => Inv687_881e_R35_2_I2' BY DEF TypeOK,SendInvAction,SendInv,Inv687_881e_R35_2_I2
+  \* (Inv687_881e_R35_2_I2,SendInvAckAction)
+  <1>5. TypeOK /\ Inv1000_d532_R39_3_I2 /\ Inv687_881e_R35_2_I2 /\ SendInvAckAction => Inv687_881e_R35_2_I2' BY DEF TypeOK,Inv1000_d532_R39_3_I2,SendInvAckAction,SendInvAck,Inv687_881e_R35_2_I2
+  \* (Inv687_881e_R35_2_I2,RecvInvAckAction)
+  <1>6. TypeOK /\ Inv687_881e_R35_2_I2 /\ RecvInvAckAction => Inv687_881e_R35_2_I2' BY DEF TypeOK,RecvInvAckAction,RecvInvAck,Inv687_881e_R35_2_I2
+  \* (Inv687_881e_R35_2_I2,SendGntSAction)
+  <1>7. TypeOK /\ Inv687_881e_R35_2_I2 /\ SendGntSAction => Inv687_881e_R35_2_I2' BY DEF TypeOK,SendGntSAction,SendGntS,Inv687_881e_R35_2_I2
+  \* (Inv687_881e_R35_2_I2,SendGntEAction)
+  <1>8. TypeOK /\ Inv111_0f39_R7_1_I1 /\ Inv687_881e_R35_2_I2 /\ SendGntEAction => Inv687_881e_R35_2_I2' BY DEF TypeOK,Inv111_0f39_R7_1_I1,SendGntEAction,SendGntE,Inv687_881e_R35_2_I2
+  \* (Inv687_881e_R35_2_I2,RecvGntSAction)
+  <1>9. TypeOK /\ Inv687_881e_R35_2_I2 /\ RecvGntSAction => Inv687_881e_R35_2_I2' BY DEF TypeOK,RecvGntSAction,RecvGntS,Inv687_881e_R35_2_I2
+  \* (Inv687_881e_R35_2_I2,RecvGntEAction)
+  <1>10. TypeOK /\ Inv687_881e_R35_2_I2 /\ RecvGntEAction => Inv687_881e_R35_2_I2' BY DEF TypeOK,RecvGntEAction,RecvGntE,Inv687_881e_R35_2_I2
+  \* (Inv687_881e_R35_2_I2,StoreAction)
+  <1>11. TypeOK /\ Inv687_881e_R35_2_I2 /\ StoreAction => Inv687_881e_R35_2_I2' BY DEF TypeOK,StoreAction,Store,Inv687_881e_R35_2_I2
+  \* (Inv687_881e_R35_2_I2,SendReqSAction)
+  <1>12. TypeOK /\ Inv687_881e_R35_2_I2 /\ SendReqSAction => Inv687_881e_R35_2_I2' BY DEF TypeOK,SendReqSAction,SendReqS,Inv687_881e_R35_2_I2
 <1>13. QED BY <1>1,<1>2,<1>3,<1>4,<1>5,<1>6,<1>7,<1>8,<1>9,<1>10,<1>11,<1>12 DEF Next
 
 
-\*** Inv3306_6920_R19_1_I2
-THEOREM L_41 == TypeOK /\ Inv6436_bea9_R25_1_I2 /\ Inv6436_bea9_R25_1_I2 /\ Inv6423_fc2f_R3_2_I2 /\ Inv3306_6920_R19_1_I2 /\ Next => Inv3306_6920_R19_1_I2'
+\*** Inv33_1336_R1_1_I1
+THEOREM L_45 == TypeOK /\ Inv5_a2c7_R3_1_I1 /\ Inv1_85ad_R3_0_I1 /\ Inv33_1336_R1_1_I1 /\ Next => Inv33_1336_R1_1_I1'
   <1>. USE A0,A1
-  \* (Inv3306_6920_R19_1_I2,SendReqEAction)
-  <1>1. TypeOK /\ Inv3306_6920_R19_1_I2 /\ SendReqEAction => Inv3306_6920_R19_1_I2' BY DEF TypeOK,SendReqEAction,SendReqE,Inv3306_6920_R19_1_I2
-  \* (Inv3306_6920_R19_1_I2,RecvReqSAction)
-  <1>2. TypeOK /\ Inv6436_bea9_R25_1_I2 /\ Inv3306_6920_R19_1_I2 /\ RecvReqSAction => Inv3306_6920_R19_1_I2' BY DEF TypeOK,Inv6436_bea9_R25_1_I2,RecvReqSAction,RecvReqS,Inv3306_6920_R19_1_I2
-  \* (Inv3306_6920_R19_1_I2,RecvReqEAction)
-  <1>3. TypeOK /\ Inv6436_bea9_R25_1_I2 /\ Inv3306_6920_R19_1_I2 /\ RecvReqEAction => Inv3306_6920_R19_1_I2' BY DEF TypeOK,Inv6436_bea9_R25_1_I2,RecvReqEAction,RecvReqE,Inv3306_6920_R19_1_I2
-  \* (Inv3306_6920_R19_1_I2,SendInvAction)
-  <1>4. TypeOK /\ Inv3306_6920_R19_1_I2 /\ SendInvAction => Inv3306_6920_R19_1_I2' BY DEF TypeOK,SendInvAction,SendInv,Inv3306_6920_R19_1_I2
-  \* (Inv3306_6920_R19_1_I2,SendInvAckAction)
-  <1>5. TypeOK /\ Inv3306_6920_R19_1_I2 /\ SendInvAckAction => Inv3306_6920_R19_1_I2' BY DEF TypeOK,SendInvAckAction,SendInvAck,Inv3306_6920_R19_1_I2
-  \* (Inv3306_6920_R19_1_I2,RecvInvAckAction)
-  <1>6. TypeOK /\ Inv3306_6920_R19_1_I2 /\ RecvInvAckAction => Inv3306_6920_R19_1_I2' BY DEF TypeOK,RecvInvAckAction,RecvInvAck,Inv3306_6920_R19_1_I2
-  \* (Inv3306_6920_R19_1_I2,SendGntSAction)
-  <1>7. TypeOK /\ Inv3306_6920_R19_1_I2 /\ SendGntSAction => Inv3306_6920_R19_1_I2' BY DEF TypeOK,SendGntSAction,SendGntS,Inv3306_6920_R19_1_I2
-  \* (Inv3306_6920_R19_1_I2,SendGntEAction)
-  <1>8. TypeOK /\ Inv3306_6920_R19_1_I2 /\ SendGntEAction => Inv3306_6920_R19_1_I2' BY DEF TypeOK,SendGntEAction,SendGntE,Inv3306_6920_R19_1_I2
-  \* (Inv3306_6920_R19_1_I2,RecvGntSAction)
-  <1>9. TypeOK /\ Inv3306_6920_R19_1_I2 /\ RecvGntSAction => Inv3306_6920_R19_1_I2' BY DEF TypeOK,RecvGntSAction,RecvGntS,Inv3306_6920_R19_1_I2
-  \* (Inv3306_6920_R19_1_I2,RecvGntEAction)
-  <1>10. TypeOK /\ Inv6423_fc2f_R3_2_I2 /\ Inv3306_6920_R19_1_I2 /\ RecvGntEAction => Inv3306_6920_R19_1_I2' BY DEF TypeOK,Inv6423_fc2f_R3_2_I2,RecvGntEAction,RecvGntE,Inv3306_6920_R19_1_I2
-  \* (Inv3306_6920_R19_1_I2,StoreAction)
-  <1>11. TypeOK /\ Inv3306_6920_R19_1_I2 /\ StoreAction => Inv3306_6920_R19_1_I2' BY DEF TypeOK,StoreAction,Store,Inv3306_6920_R19_1_I2
-  \* (Inv3306_6920_R19_1_I2,SendReqSAction)
-  <1>12. TypeOK /\ Inv3306_6920_R19_1_I2 /\ SendReqSAction => Inv3306_6920_R19_1_I2' BY DEF TypeOK,SendReqSAction,SendReqS,Inv3306_6920_R19_1_I2
+  \* (Inv33_1336_R1_1_I1,SendReqEAction)
+  <1>1. TypeOK /\ Inv33_1336_R1_1_I1 /\ SendReqEAction => Inv33_1336_R1_1_I1' BY DEF TypeOK,SendReqEAction,SendReqE,Inv33_1336_R1_1_I1
+  \* (Inv33_1336_R1_1_I1,RecvReqSAction)
+  <1>2. TypeOK /\ Inv33_1336_R1_1_I1 /\ RecvReqSAction => Inv33_1336_R1_1_I1' BY DEF TypeOK,RecvReqSAction,RecvReqS,Inv33_1336_R1_1_I1
+  \* (Inv33_1336_R1_1_I1,RecvReqEAction)
+  <1>3. TypeOK /\ Inv33_1336_R1_1_I1 /\ RecvReqEAction => Inv33_1336_R1_1_I1' BY DEF TypeOK,RecvReqEAction,RecvReqE,Inv33_1336_R1_1_I1
+  \* (Inv33_1336_R1_1_I1,SendInvAction)
+  <1>4. TypeOK /\ Inv33_1336_R1_1_I1 /\ SendInvAction => Inv33_1336_R1_1_I1' BY DEF TypeOK,SendInvAction,SendInv,Inv33_1336_R1_1_I1
+  \* (Inv33_1336_R1_1_I1,SendInvAckAction)
+  <1>5. TypeOK /\ Inv33_1336_R1_1_I1 /\ SendInvAckAction => Inv33_1336_R1_1_I1' BY DEF TypeOK,SendInvAckAction,SendInvAck,Inv33_1336_R1_1_I1
+  \* (Inv33_1336_R1_1_I1,RecvInvAckAction)
+  <1>6. TypeOK /\ Inv33_1336_R1_1_I1 /\ RecvInvAckAction => Inv33_1336_R1_1_I1' BY DEF TypeOK,RecvInvAckAction,RecvInvAck,Inv33_1336_R1_1_I1
+  \* (Inv33_1336_R1_1_I1,SendGntSAction)
+  <1>7. TypeOK /\ Inv5_a2c7_R3_1_I1 /\ Inv33_1336_R1_1_I1 /\ SendGntSAction => Inv33_1336_R1_1_I1' BY DEF TypeOK,Inv5_a2c7_R3_1_I1,SendGntSAction,SendGntS,Inv33_1336_R1_1_I1
+  \* (Inv33_1336_R1_1_I1,SendGntEAction)
+  <1>8. TypeOK /\ Inv1_85ad_R3_0_I1 /\ Inv33_1336_R1_1_I1 /\ SendGntEAction => Inv33_1336_R1_1_I1' BY DEF TypeOK,Inv1_85ad_R3_0_I1,SendGntEAction,SendGntE,Inv33_1336_R1_1_I1
+  \* (Inv33_1336_R1_1_I1,RecvGntSAction)
+  <1>9. TypeOK /\ Inv33_1336_R1_1_I1 /\ RecvGntSAction => Inv33_1336_R1_1_I1' BY DEF TypeOK,RecvGntSAction,RecvGntS,Inv33_1336_R1_1_I1
+  \* (Inv33_1336_R1_1_I1,RecvGntEAction)
+  <1>10. TypeOK /\ Inv33_1336_R1_1_I1 /\ RecvGntEAction => Inv33_1336_R1_1_I1' BY DEF TypeOK,RecvGntEAction,RecvGntE,Inv33_1336_R1_1_I1
+  \* (Inv33_1336_R1_1_I1,StoreAction)
+  <1>11. TypeOK /\ Inv33_1336_R1_1_I1 /\ StoreAction => Inv33_1336_R1_1_I1' BY DEF TypeOK,StoreAction,Store,Inv33_1336_R1_1_I1
+  \* (Inv33_1336_R1_1_I1,SendReqSAction)
+  <1>12. TypeOK /\ Inv33_1336_R1_1_I1 /\ SendReqSAction => Inv33_1336_R1_1_I1' BY DEF TypeOK,SendReqSAction,SendReqS,Inv33_1336_R1_1_I1
 <1>13. QED BY <1>1,<1>2,<1>3,<1>4,<1>5,<1>6,<1>7,<1>8,<1>9,<1>10,<1>11,<1>12 DEF Next
 
 
-\*** Inv1067_2e74_R36_2_I2
-THEOREM L_42 == TypeOK /\ Inv3716_575b_R22_0_I2 /\ Inv3716_575b_R22_0_I2 /\ Inv100_1def_R41_3_I1 /\ Inv50_ba79_R27_1_I1 /\ Inv45_2bf0_R27_1_I1 /\ Inv3306_6920_R19_1_I2 /\ Inv104_0f39_R7_1_I1 /\ Inv1067_2e74_R36_2_I2 /\ Next => Inv1067_2e74_R36_2_I2'
+\*** Inv11_3662_R0_1_I1
+THEOREM L_46 == TypeOK /\ Inv12_513a_R2_1_I1 /\ Inv33_1336_R1_1_I1 /\ Inv11_3662_R0_1_I1 /\ Next => Inv11_3662_R0_1_I1'
   <1>. USE A0,A1
-  \* (Inv1067_2e74_R36_2_I2,SendReqEAction)
-  <1>1. TypeOK /\ Inv1067_2e74_R36_2_I2 /\ SendReqEAction => Inv1067_2e74_R36_2_I2' BY DEF TypeOK,SendReqEAction,SendReqE,Inv1067_2e74_R36_2_I2
-  \* (Inv1067_2e74_R36_2_I2,RecvReqSAction)
-  <1>2. TypeOK /\ Inv3716_575b_R22_0_I2 /\ Inv1067_2e74_R36_2_I2 /\ RecvReqSAction => Inv1067_2e74_R36_2_I2' BY DEF TypeOK,Inv3716_575b_R22_0_I2,RecvReqSAction,RecvReqS,Inv1067_2e74_R36_2_I2
-  \* (Inv1067_2e74_R36_2_I2,RecvReqEAction)
-  <1>3. TypeOK /\ Inv3716_575b_R22_0_I2 /\ Inv1067_2e74_R36_2_I2 /\ RecvReqEAction => Inv1067_2e74_R36_2_I2' BY DEF TypeOK,Inv3716_575b_R22_0_I2,RecvReqEAction,RecvReqE,Inv1067_2e74_R36_2_I2
-  \* (Inv1067_2e74_R36_2_I2,SendInvAction)
-  <1>4. TypeOK /\ Inv1067_2e74_R36_2_I2 /\ SendInvAction => Inv1067_2e74_R36_2_I2' BY DEF TypeOK,SendInvAction,SendInv,Inv1067_2e74_R36_2_I2
-  \* (Inv1067_2e74_R36_2_I2,SendInvAckAction)
-  <1>5. TypeOK /\ Inv100_1def_R41_3_I1 /\ Inv50_ba79_R27_1_I1 /\ Inv45_2bf0_R27_1_I1 /\ Inv3306_6920_R19_1_I2 /\ Inv1067_2e74_R36_2_I2 /\ SendInvAckAction => Inv1067_2e74_R36_2_I2' BY DEF TypeOK,Inv100_1def_R41_3_I1,Inv50_ba79_R27_1_I1,Inv45_2bf0_R27_1_I1,Inv3306_6920_R19_1_I2,SendInvAckAction,SendInvAck,Inv1067_2e74_R36_2_I2
-  \* (Inv1067_2e74_R36_2_I2,RecvInvAckAction)
-  <1>6. TypeOK /\ Inv1067_2e74_R36_2_I2 /\ RecvInvAckAction => Inv1067_2e74_R36_2_I2' BY DEF TypeOK,RecvInvAckAction,RecvInvAck,Inv1067_2e74_R36_2_I2
-  \* (Inv1067_2e74_R36_2_I2,SendGntSAction)
-  <1>7. TypeOK /\ Inv1067_2e74_R36_2_I2 /\ SendGntSAction => Inv1067_2e74_R36_2_I2' BY DEF TypeOK,SendGntSAction,SendGntS,Inv1067_2e74_R36_2_I2
-  \* (Inv1067_2e74_R36_2_I2,SendGntEAction)
-  <1>8. TypeOK /\ Inv104_0f39_R7_1_I1 /\ Inv1067_2e74_R36_2_I2 /\ SendGntEAction => Inv1067_2e74_R36_2_I2' BY DEF TypeOK,Inv104_0f39_R7_1_I1,SendGntEAction,SendGntE,Inv1067_2e74_R36_2_I2
-  \* (Inv1067_2e74_R36_2_I2,RecvGntSAction)
-  <1>9. TypeOK /\ Inv1067_2e74_R36_2_I2 /\ RecvGntSAction => Inv1067_2e74_R36_2_I2' BY DEF TypeOK,RecvGntSAction,RecvGntS,Inv1067_2e74_R36_2_I2
-  \* (Inv1067_2e74_R36_2_I2,RecvGntEAction)
-  <1>10. TypeOK /\ Inv1067_2e74_R36_2_I2 /\ RecvGntEAction => Inv1067_2e74_R36_2_I2' BY DEF TypeOK,RecvGntEAction,RecvGntE,Inv1067_2e74_R36_2_I2
-  \* (Inv1067_2e74_R36_2_I2,StoreAction)
-  <1>11. TypeOK /\ Inv1067_2e74_R36_2_I2 /\ StoreAction => Inv1067_2e74_R36_2_I2' BY DEF TypeOK,StoreAction,Store,Inv1067_2e74_R36_2_I2
-  \* (Inv1067_2e74_R36_2_I2,SendReqSAction)
-  <1>12. TypeOK /\ Inv1067_2e74_R36_2_I2 /\ SendReqSAction => Inv1067_2e74_R36_2_I2' BY DEF TypeOK,SendReqSAction,SendReqS,Inv1067_2e74_R36_2_I2
-<1>13. QED BY <1>1,<1>2,<1>3,<1>4,<1>5,<1>6,<1>7,<1>8,<1>9,<1>10,<1>11,<1>12 DEF Next
-
-
-\*** Inv100_1def_R41_3_I1
-THEOREM L_43 == TypeOK /\ Inv651_b778_R29_2_I2 /\ Inv651_b778_R29_2_I2 /\ Inv100_1def_R41_3_I1 /\ Next => Inv100_1def_R41_3_I1'
-  <1>. USE A0,A1
-  \* (Inv100_1def_R41_3_I1,SendReqEAction)
-  <1>1. TypeOK /\ Inv100_1def_R41_3_I1 /\ SendReqEAction => Inv100_1def_R41_3_I1' BY DEF TypeOK,SendReqEAction,SendReqE,Inv100_1def_R41_3_I1
-  \* (Inv100_1def_R41_3_I1,RecvReqSAction)
-  <1>2. TypeOK /\ Inv651_b778_R29_2_I2 /\ Inv100_1def_R41_3_I1 /\ RecvReqSAction => Inv100_1def_R41_3_I1' BY DEF TypeOK,Inv651_b778_R29_2_I2,RecvReqSAction,RecvReqS,Inv100_1def_R41_3_I1
-  \* (Inv100_1def_R41_3_I1,RecvReqEAction)
-  <1>3. TypeOK /\ Inv651_b778_R29_2_I2 /\ Inv100_1def_R41_3_I1 /\ RecvReqEAction => Inv100_1def_R41_3_I1' BY DEF TypeOK,Inv651_b778_R29_2_I2,RecvReqEAction,RecvReqE,Inv100_1def_R41_3_I1
-  \* (Inv100_1def_R41_3_I1,SendInvAction)
-  <1>4. TypeOK /\ Inv100_1def_R41_3_I1 /\ SendInvAction => Inv100_1def_R41_3_I1' BY DEF TypeOK,SendInvAction,SendInv,Inv100_1def_R41_3_I1
-  \* (Inv100_1def_R41_3_I1,SendInvAckAction)
-  <1>5. TypeOK /\ Inv100_1def_R41_3_I1 /\ SendInvAckAction => Inv100_1def_R41_3_I1' BY DEF TypeOK,SendInvAckAction,SendInvAck,Inv100_1def_R41_3_I1
-  \* (Inv100_1def_R41_3_I1,RecvInvAckAction)
-  <1>6. TypeOK /\ Inv100_1def_R41_3_I1 /\ RecvInvAckAction => Inv100_1def_R41_3_I1' BY DEF TypeOK,RecvInvAckAction,RecvInvAck,Inv100_1def_R41_3_I1
-  \* (Inv100_1def_R41_3_I1,SendGntSAction)
-  <1>7. TypeOK /\ Inv100_1def_R41_3_I1 /\ SendGntSAction => Inv100_1def_R41_3_I1' BY DEF TypeOK,SendGntSAction,SendGntS,Inv100_1def_R41_3_I1
-  \* (Inv100_1def_R41_3_I1,SendGntEAction)
-  <1>8. TypeOK /\ Inv100_1def_R41_3_I1 /\ SendGntEAction => Inv100_1def_R41_3_I1' BY DEF TypeOK,SendGntEAction,SendGntE,Inv100_1def_R41_3_I1
-  \* (Inv100_1def_R41_3_I1,RecvGntSAction)
-  <1>9. TypeOK /\ Inv100_1def_R41_3_I1 /\ RecvGntSAction => Inv100_1def_R41_3_I1' BY DEF TypeOK,RecvGntSAction,RecvGntS,Inv100_1def_R41_3_I1
-  \* (Inv100_1def_R41_3_I1,RecvGntEAction)
-  <1>10. TypeOK /\ Inv100_1def_R41_3_I1 /\ RecvGntEAction => Inv100_1def_R41_3_I1' BY DEF TypeOK,RecvGntEAction,RecvGntE,Inv100_1def_R41_3_I1
-  \* (Inv100_1def_R41_3_I1,StoreAction)
-  <1>11. TypeOK /\ Inv100_1def_R41_3_I1 /\ StoreAction => Inv100_1def_R41_3_I1' BY DEF TypeOK,StoreAction,Store,Inv100_1def_R41_3_I1
-  \* (Inv100_1def_R41_3_I1,SendReqSAction)
-  <1>12. TypeOK /\ Inv100_1def_R41_3_I1 /\ SendReqSAction => Inv100_1def_R41_3_I1' BY DEF TypeOK,SendReqSAction,SendReqS,Inv100_1def_R41_3_I1
-<1>13. QED BY <1>1,<1>2,<1>3,<1>4,<1>5,<1>6,<1>7,<1>8,<1>9,<1>10,<1>11,<1>12 DEF Next
-
-
-\*** Inv45_2bf0_R27_1_I1
-THEOREM L_44 == TypeOK /\ Inv1511_683a_R35_0_I2 /\ Inv45_2bf0_R27_1_I1 /\ Next => Inv45_2bf0_R27_1_I1'
-  <1>. USE A0,A1
-  \* (Inv45_2bf0_R27_1_I1,SendReqEAction)
-  <1>1. TypeOK /\ Inv45_2bf0_R27_1_I1 /\ SendReqEAction => Inv45_2bf0_R27_1_I1' BY DEF TypeOK,SendReqEAction,SendReqE,Inv45_2bf0_R27_1_I1
-  \* (Inv45_2bf0_R27_1_I1,RecvReqSAction)
-  <1>2. TypeOK /\ Inv45_2bf0_R27_1_I1 /\ RecvReqSAction => Inv45_2bf0_R27_1_I1' BY DEF TypeOK,RecvReqSAction,RecvReqS,Inv45_2bf0_R27_1_I1
-  \* (Inv45_2bf0_R27_1_I1,RecvReqEAction)
-  <1>3. TypeOK /\ Inv45_2bf0_R27_1_I1 /\ RecvReqEAction => Inv45_2bf0_R27_1_I1' BY DEF TypeOK,RecvReqEAction,RecvReqE,Inv45_2bf0_R27_1_I1
-  \* (Inv45_2bf0_R27_1_I1,SendInvAction)
-  <1>4. TypeOK /\ Inv1511_683a_R35_0_I2 /\ Inv45_2bf0_R27_1_I1 /\ SendInvAction => Inv45_2bf0_R27_1_I1' BY DEF TypeOK,Inv1511_683a_R35_0_I2,SendInvAction,SendInv,Inv45_2bf0_R27_1_I1
-  \* (Inv45_2bf0_R27_1_I1,SendInvAckAction)
-  <1>5. TypeOK /\ Inv45_2bf0_R27_1_I1 /\ SendInvAckAction => Inv45_2bf0_R27_1_I1' BY DEF TypeOK,SendInvAckAction,SendInvAck,Inv45_2bf0_R27_1_I1
-  \* (Inv45_2bf0_R27_1_I1,RecvInvAckAction)
-  <1>6. TypeOK /\ Inv45_2bf0_R27_1_I1 /\ RecvInvAckAction => Inv45_2bf0_R27_1_I1' BY DEF TypeOK,RecvInvAckAction,RecvInvAck,Inv45_2bf0_R27_1_I1
-  \* (Inv45_2bf0_R27_1_I1,SendGntSAction)
-  <1>7. TypeOK /\ Inv45_2bf0_R27_1_I1 /\ SendGntSAction => Inv45_2bf0_R27_1_I1' BY DEF TypeOK,SendGntSAction,SendGntS,Inv45_2bf0_R27_1_I1
-  \* (Inv45_2bf0_R27_1_I1,SendGntEAction)
-  <1>8. TypeOK /\ Inv45_2bf0_R27_1_I1 /\ SendGntEAction => Inv45_2bf0_R27_1_I1' BY DEF TypeOK,SendGntEAction,SendGntE,Inv45_2bf0_R27_1_I1
-  \* (Inv45_2bf0_R27_1_I1,RecvGntSAction)
-  <1>9. TypeOK /\ Inv45_2bf0_R27_1_I1 /\ RecvGntSAction => Inv45_2bf0_R27_1_I1' BY DEF TypeOK,RecvGntSAction,RecvGntS,Inv45_2bf0_R27_1_I1
-  \* (Inv45_2bf0_R27_1_I1,RecvGntEAction)
-  <1>10. TypeOK /\ Inv45_2bf0_R27_1_I1 /\ RecvGntEAction => Inv45_2bf0_R27_1_I1' BY DEF TypeOK,RecvGntEAction,RecvGntE,Inv45_2bf0_R27_1_I1
-  \* (Inv45_2bf0_R27_1_I1,StoreAction)
-  <1>11. TypeOK /\ Inv45_2bf0_R27_1_I1 /\ StoreAction => Inv45_2bf0_R27_1_I1' BY DEF TypeOK,StoreAction,Store,Inv45_2bf0_R27_1_I1
-  \* (Inv45_2bf0_R27_1_I1,SendReqSAction)
-  <1>12. TypeOK /\ Inv45_2bf0_R27_1_I1 /\ SendReqSAction => Inv45_2bf0_R27_1_I1' BY DEF TypeOK,SendReqSAction,SendReqS,Inv45_2bf0_R27_1_I1
-<1>13. QED BY <1>1,<1>2,<1>3,<1>4,<1>5,<1>6,<1>7,<1>8,<1>9,<1>10,<1>11,<1>12 DEF Next
-
-
-\*** Inv32_1336_R1_1_I1
-THEOREM L_45 == TypeOK /\ Inv5_a2c7_R3_1_I1 /\ Inv1_85ad_R3_0_I1 /\ Inv32_1336_R1_1_I1 /\ Next => Inv32_1336_R1_1_I1'
-  <1>. USE A0,A1
-  \* (Inv32_1336_R1_1_I1,SendReqEAction)
-  <1>1. TypeOK /\ Inv32_1336_R1_1_I1 /\ SendReqEAction => Inv32_1336_R1_1_I1' BY DEF TypeOK,SendReqEAction,SendReqE,Inv32_1336_R1_1_I1
-  \* (Inv32_1336_R1_1_I1,RecvReqSAction)
-  <1>2. TypeOK /\ Inv32_1336_R1_1_I1 /\ RecvReqSAction => Inv32_1336_R1_1_I1' BY DEF TypeOK,RecvReqSAction,RecvReqS,Inv32_1336_R1_1_I1
-  \* (Inv32_1336_R1_1_I1,RecvReqEAction)
-  <1>3. TypeOK /\ Inv32_1336_R1_1_I1 /\ RecvReqEAction => Inv32_1336_R1_1_I1' BY DEF TypeOK,RecvReqEAction,RecvReqE,Inv32_1336_R1_1_I1
-  \* (Inv32_1336_R1_1_I1,SendInvAction)
-  <1>4. TypeOK /\ Inv32_1336_R1_1_I1 /\ SendInvAction => Inv32_1336_R1_1_I1' BY DEF TypeOK,SendInvAction,SendInv,Inv32_1336_R1_1_I1
-  \* (Inv32_1336_R1_1_I1,SendInvAckAction)
-  <1>5. TypeOK /\ Inv32_1336_R1_1_I1 /\ SendInvAckAction => Inv32_1336_R1_1_I1' BY DEF TypeOK,SendInvAckAction,SendInvAck,Inv32_1336_R1_1_I1
-  \* (Inv32_1336_R1_1_I1,RecvInvAckAction)
-  <1>6. TypeOK /\ Inv32_1336_R1_1_I1 /\ RecvInvAckAction => Inv32_1336_R1_1_I1' BY DEF TypeOK,RecvInvAckAction,RecvInvAck,Inv32_1336_R1_1_I1
-  \* (Inv32_1336_R1_1_I1,SendGntSAction)
-  <1>7. TypeOK /\ Inv5_a2c7_R3_1_I1 /\ Inv32_1336_R1_1_I1 /\ SendGntSAction => Inv32_1336_R1_1_I1' BY DEF TypeOK,Inv5_a2c7_R3_1_I1,SendGntSAction,SendGntS,Inv32_1336_R1_1_I1
-  \* (Inv32_1336_R1_1_I1,SendGntEAction)
-  <1>8. TypeOK /\ Inv1_85ad_R3_0_I1 /\ Inv32_1336_R1_1_I1 /\ SendGntEAction => Inv32_1336_R1_1_I1' BY DEF TypeOK,Inv1_85ad_R3_0_I1,SendGntEAction,SendGntE,Inv32_1336_R1_1_I1
-  \* (Inv32_1336_R1_1_I1,RecvGntSAction)
-  <1>9. TypeOK /\ Inv32_1336_R1_1_I1 /\ RecvGntSAction => Inv32_1336_R1_1_I1' BY DEF TypeOK,RecvGntSAction,RecvGntS,Inv32_1336_R1_1_I1
-  \* (Inv32_1336_R1_1_I1,RecvGntEAction)
-  <1>10. TypeOK /\ Inv32_1336_R1_1_I1 /\ RecvGntEAction => Inv32_1336_R1_1_I1' BY DEF TypeOK,RecvGntEAction,RecvGntE,Inv32_1336_R1_1_I1
-  \* (Inv32_1336_R1_1_I1,StoreAction)
-  <1>11. TypeOK /\ Inv32_1336_R1_1_I1 /\ StoreAction => Inv32_1336_R1_1_I1' BY DEF TypeOK,StoreAction,Store,Inv32_1336_R1_1_I1
-  \* (Inv32_1336_R1_1_I1,SendReqSAction)
-  <1>12. TypeOK /\ Inv32_1336_R1_1_I1 /\ SendReqSAction => Inv32_1336_R1_1_I1' BY DEF TypeOK,SendReqSAction,SendReqS,Inv32_1336_R1_1_I1
-<1>13. QED BY <1>1,<1>2,<1>3,<1>4,<1>5,<1>6,<1>7,<1>8,<1>9,<1>10,<1>11,<1>12 DEF Next
-
-
-\*** Inv10_3662_R0_1_I1
-THEOREM L_46 == TypeOK /\ Inv12_513a_R2_1_I1 /\ Inv32_1336_R1_1_I1 /\ Inv10_3662_R0_1_I1 /\ Next => Inv10_3662_R0_1_I1'
-  <1>. USE A0,A1
-  \* (Inv10_3662_R0_1_I1,SendReqEAction)
-  <1>1. TypeOK /\ Inv10_3662_R0_1_I1 /\ SendReqEAction => Inv10_3662_R0_1_I1' BY DEF TypeOK,SendReqEAction,SendReqE,Inv10_3662_R0_1_I1
-  \* (Inv10_3662_R0_1_I1,RecvReqSAction)
-  <1>2. TypeOK /\ Inv10_3662_R0_1_I1 /\ RecvReqSAction => Inv10_3662_R0_1_I1' BY DEF TypeOK,RecvReqSAction,RecvReqS,Inv10_3662_R0_1_I1
-  \* (Inv10_3662_R0_1_I1,RecvReqEAction)
-  <1>3. TypeOK /\ Inv10_3662_R0_1_I1 /\ RecvReqEAction => Inv10_3662_R0_1_I1' BY DEF TypeOK,RecvReqEAction,RecvReqE,Inv10_3662_R0_1_I1
-  \* (Inv10_3662_R0_1_I1,SendInvAction)
-  <1>4. TypeOK /\ Inv10_3662_R0_1_I1 /\ SendInvAction => Inv10_3662_R0_1_I1' BY DEF TypeOK,SendInvAction,SendInv,Inv10_3662_R0_1_I1
-  \* (Inv10_3662_R0_1_I1,SendInvAckAction)
-  <1>5. TypeOK /\ Inv10_3662_R0_1_I1 /\ SendInvAckAction => Inv10_3662_R0_1_I1' BY DEF TypeOK,SendInvAckAction,SendInvAck,Inv10_3662_R0_1_I1
-  \* (Inv10_3662_R0_1_I1,RecvInvAckAction)
-  <1>6. TypeOK /\ Inv10_3662_R0_1_I1 /\ RecvInvAckAction => Inv10_3662_R0_1_I1' BY DEF TypeOK,RecvInvAckAction,RecvInvAck,Inv10_3662_R0_1_I1
-  \* (Inv10_3662_R0_1_I1,SendGntSAction)
-  <1>7. TypeOK /\ Inv12_513a_R2_1_I1 /\ Inv10_3662_R0_1_I1 /\ SendGntSAction => Inv10_3662_R0_1_I1' BY DEF TypeOK,Inv12_513a_R2_1_I1,SendGntSAction,SendGntS,Inv10_3662_R0_1_I1
-  \* (Inv10_3662_R0_1_I1,SendGntEAction)
-  <1>8. TypeOK /\ Inv10_3662_R0_1_I1 /\ SendGntEAction => Inv10_3662_R0_1_I1' BY DEF TypeOK,SendGntEAction,SendGntE,Inv10_3662_R0_1_I1
-  \* (Inv10_3662_R0_1_I1,RecvGntSAction)
-  <1>9. TypeOK /\ Inv10_3662_R0_1_I1 /\ RecvGntSAction => Inv10_3662_R0_1_I1' BY DEF TypeOK,RecvGntSAction,RecvGntS,Inv10_3662_R0_1_I1
-  \* (Inv10_3662_R0_1_I1,RecvGntEAction)
-  <1>10. TypeOK /\ Inv32_1336_R1_1_I1 /\ Inv10_3662_R0_1_I1 /\ RecvGntEAction => Inv10_3662_R0_1_I1' BY DEF TypeOK,Inv32_1336_R1_1_I1,RecvGntEAction,RecvGntE,Inv10_3662_R0_1_I1
-  \* (Inv10_3662_R0_1_I1,StoreAction)
-  <1>11. TypeOK /\ Inv10_3662_R0_1_I1 /\ StoreAction => Inv10_3662_R0_1_I1' BY DEF TypeOK,StoreAction,Store,Inv10_3662_R0_1_I1
-  \* (Inv10_3662_R0_1_I1,SendReqSAction)
-  <1>12. TypeOK /\ Inv10_3662_R0_1_I1 /\ SendReqSAction => Inv10_3662_R0_1_I1' BY DEF TypeOK,SendReqSAction,SendReqS,Inv10_3662_R0_1_I1
+  \* (Inv11_3662_R0_1_I1,SendReqEAction)
+  <1>1. TypeOK /\ Inv11_3662_R0_1_I1 /\ SendReqEAction => Inv11_3662_R0_1_I1' BY DEF TypeOK,SendReqEAction,SendReqE,Inv11_3662_R0_1_I1
+  \* (Inv11_3662_R0_1_I1,RecvReqSAction)
+  <1>2. TypeOK /\ Inv11_3662_R0_1_I1 /\ RecvReqSAction => Inv11_3662_R0_1_I1' BY DEF TypeOK,RecvReqSAction,RecvReqS,Inv11_3662_R0_1_I1
+  \* (Inv11_3662_R0_1_I1,RecvReqEAction)
+  <1>3. TypeOK /\ Inv11_3662_R0_1_I1 /\ RecvReqEAction => Inv11_3662_R0_1_I1' BY DEF TypeOK,RecvReqEAction,RecvReqE,Inv11_3662_R0_1_I1
+  \* (Inv11_3662_R0_1_I1,SendInvAction)
+  <1>4. TypeOK /\ Inv11_3662_R0_1_I1 /\ SendInvAction => Inv11_3662_R0_1_I1' BY DEF TypeOK,SendInvAction,SendInv,Inv11_3662_R0_1_I1
+  \* (Inv11_3662_R0_1_I1,SendInvAckAction)
+  <1>5. TypeOK /\ Inv11_3662_R0_1_I1 /\ SendInvAckAction => Inv11_3662_R0_1_I1' BY DEF TypeOK,SendInvAckAction,SendInvAck,Inv11_3662_R0_1_I1
+  \* (Inv11_3662_R0_1_I1,RecvInvAckAction)
+  <1>6. TypeOK /\ Inv11_3662_R0_1_I1 /\ RecvInvAckAction => Inv11_3662_R0_1_I1' BY DEF TypeOK,RecvInvAckAction,RecvInvAck,Inv11_3662_R0_1_I1
+  \* (Inv11_3662_R0_1_I1,SendGntSAction)
+  <1>7. TypeOK /\ Inv12_513a_R2_1_I1 /\ Inv11_3662_R0_1_I1 /\ SendGntSAction => Inv11_3662_R0_1_I1' BY DEF TypeOK,Inv12_513a_R2_1_I1,SendGntSAction,SendGntS,Inv11_3662_R0_1_I1
+  \* (Inv11_3662_R0_1_I1,SendGntEAction)
+  <1>8. TypeOK /\ Inv11_3662_R0_1_I1 /\ SendGntEAction => Inv11_3662_R0_1_I1' BY DEF TypeOK,SendGntEAction,SendGntE,Inv11_3662_R0_1_I1
+  \* (Inv11_3662_R0_1_I1,RecvGntSAction)
+  <1>9. TypeOK /\ Inv11_3662_R0_1_I1 /\ RecvGntSAction => Inv11_3662_R0_1_I1' BY DEF TypeOK,RecvGntSAction,RecvGntS,Inv11_3662_R0_1_I1
+  \* (Inv11_3662_R0_1_I1,RecvGntEAction)
+  <1>10. TypeOK /\ Inv33_1336_R1_1_I1 /\ Inv11_3662_R0_1_I1 /\ RecvGntEAction => Inv11_3662_R0_1_I1' BY DEF TypeOK,Inv33_1336_R1_1_I1,RecvGntEAction,RecvGntE,Inv11_3662_R0_1_I1
+  \* (Inv11_3662_R0_1_I1,StoreAction)
+  <1>11. TypeOK /\ Inv11_3662_R0_1_I1 /\ StoreAction => Inv11_3662_R0_1_I1' BY DEF TypeOK,StoreAction,Store,Inv11_3662_R0_1_I1
+  \* (Inv11_3662_R0_1_I1,SendReqSAction)
+  <1>12. TypeOK /\ Inv11_3662_R0_1_I1 /\ SendReqSAction => Inv11_3662_R0_1_I1' BY DEF TypeOK,SendReqSAction,SendReqS,Inv11_3662_R0_1_I1
 <1>13. QED BY <1>1,<1>2,<1>3,<1>4,<1>5,<1>6,<1>7,<1>8,<1>9,<1>10,<1>11,<1>12 DEF Next
 
 \* Initiation.
@@ -1587,16 +1652,16 @@ THEOREM Init => IndGlobal
         BY <2>1, <2>10, <2>11, <2>2, <2>3, <2>4, <2>5, <2>6, <2>7, <2>8, <2>9 DEF TypeOK
     <1>1. Init => Safety BY DEF Init, Safety, IndGlobal
     <1>2. Init => Inv122_03a2_R0_0_I1 BY DEF Init, Inv122_03a2_R0_0_I1, IndGlobal
-    <1>3. Init => Inv5427_0d22_R1_0_I2 BY DEF Init, Inv5427_0d22_R1_0_I2, IndGlobal
+    <1>3. Init => Inv5378_0d22_R1_0_I2 BY DEF Init, Inv5378_0d22_R1_0_I2, IndGlobal
     <1>4. Init => Inv1_85ad_R3_0_I1 BY DEF Init, Inv1_85ad_R3_0_I1, IndGlobal
     <1>5. Init => Inv1_eb94_R7_0_I1 BY DEF Init, Inv1_eb94_R7_0_I1, IndGlobal
-    <1>6. Init => Inv14_9e93_R14_0_I1 BY DEF Init, Inv14_9e93_R14_0_I1, IndGlobal
+    <1>6. Init => Inv17_9e93_R14_0_I1 BY DEF Init, Inv17_9e93_R14_0_I1, IndGlobal
     <1>7. Init => Inv39_7204_R20_0_I1 BY DEF Init, Inv39_7204_R20_0_I1, IndGlobal
     <1>8. Init => Inv20_5035_R26_0_I1 BY DEF Init, Inv20_5035_R26_0_I1, IndGlobal
     <1>9. Init => Inv13_45c1_R14_2_I1 BY DEF Init, Inv13_45c1_R14_2_I1, IndGlobal
-    <1>10. Init => Inv3716_575b_R22_0_I2 BY DEF Init, Inv3716_575b_R22_0_I2, IndGlobal
-    <1>11. Init => Inv2748_0201_R14_1_I2 BY DEF Init, Inv2748_0201_R14_1_I2, IndGlobal
-    <1>12. Init => Inv1036_a1d6_R21_0_I3 BY DEF Init, Inv1036_a1d6_R21_0_I3, IndGlobal
+    <1>10. Init => Inv4043_dbee_R22_0_I2 BY DEF Init, Inv4043_dbee_R22_0_I2, IndGlobal
+    <1>11. Init => Inv4424_0201_R14_1_I2 BY DEF Init, Inv4424_0201_R14_1_I2, IndGlobal
+    <1>12. Init => Inv1057_089e_R21_0_I3 BY DEF Init, Inv1057_089e_R21_0_I3, IndGlobal
     <1>13. Init => Inv11_c03f_R12_0_I1 BY DEF Init, Inv11_c03f_R12_0_I1, IndGlobal
     <1>14. Init => Inv13_812b_R27_1_I1 BY DEF Init, Inv13_812b_R27_1_I1, IndGlobal
     <1>15. Init => Inv50_ba79_R27_1_I1 BY DEF Init, Inv50_ba79_R27_1_I1, IndGlobal
@@ -1608,34 +1673,33 @@ THEOREM Init => IndGlobal
     <1>21. Init => Inv7_7199_R6_1_I1 BY DEF Init, Inv7_7199_R6_1_I1, IndGlobal
     <1>22. Init => Inv15_5b11_R8_0_I1 BY DEF Init, Inv15_5b11_R8_0_I1, IndGlobal
     <1>23. Init => Inv64_c47d_R16_1_I1 BY DEF Init, Inv64_c47d_R16_1_I1, IndGlobal
-    <1>24. Init => Inv6423_fc2f_R3_2_I2 BY DEF Init, Inv6423_fc2f_R3_2_I2, IndGlobal
-    <1>25. Init => Inv9619_4ca8_R9_0_I2 BY DEF Init, Inv9619_4ca8_R9_0_I2, IndGlobal
+    <1>24. Init => Inv6410_fc2f_R3_2_I2 BY DEF Init, Inv6410_fc2f_R3_2_I2, IndGlobal
+    <1>25. Init => Inv9560_0995_R9_0_I2 BY DEF Init, Inv9560_0995_R9_0_I2, IndGlobal
     <1>26. Init => Inv5_a2c7_R3_1_I1 BY DEF Init, Inv5_a2c7_R3_1_I1, IndGlobal
-    <1>27. Init => Inv104_0f39_R7_1_I1 BY DEF Init, Inv104_0f39_R7_1_I1, IndGlobal
+    <1>27. Init => Inv111_0f39_R7_1_I1 BY DEF Init, Inv111_0f39_R7_1_I1, IndGlobal
     <1>28. Init => Inv26_259c_R15_0_I1 BY DEF Init, Inv26_259c_R15_0_I1, IndGlobal
     <1>29. Init => Inv76_d564_R22_2_I1 BY DEF Init, Inv76_d564_R22_2_I1, IndGlobal
-    <1>30. Init => Inv651_b778_R29_2_I2 BY DEF Init, Inv651_b778_R29_2_I2, IndGlobal
-    <1>31. Init => Inv1611_1275_R21_1_I2 BY DEF Init, Inv1611_1275_R21_1_I2, IndGlobal
-    <1>32. Init => Inv3857_1b30_R28_0_I2 BY DEF Init, Inv3857_1b30_R28_0_I2, IndGlobal
-    <1>33. Init => Inv28_f7af_R36_1_I2 BY DEF Init, Inv28_f7af_R36_1_I2, IndGlobal
-    <1>34. Init => Inv1511_683a_R35_0_I2 BY DEF Init, Inv1511_683a_R35_0_I2, IndGlobal
-    <1>35. Init => Inv2445_d313_R39_0_I4 BY DEF Init, Inv2445_d313_R39_0_I4, IndGlobal
-    <1>36. Init => Inv654_d73e_R42_0_I4 BY DEF Init, Inv654_d73e_R42_0_I4, IndGlobal
-    <1>37. Init => Inv2246_d6a1_R44_1_I3 BY DEF Init, Inv2246_d6a1_R44_1_I3, IndGlobal
-    <1>38. Init => Inv6436_bea9_R25_1_I2 BY DEF Init, Inv6436_bea9_R25_1_I2, IndGlobal
-    <1>39. Init => Inv12_513a_R2_1_I1 BY DEF Init, Inv12_513a_R2_1_I1, IndGlobal
-    <1>40. Init => Inv8923_9eca_R13_1_I2 BY DEF Init, Inv8923_9eca_R13_1_I2, IndGlobal
-    <1>41. Init => Inv3306_6920_R19_1_I2 BY DEF Init, Inv3306_6920_R19_1_I2, IndGlobal
-    <1>42. Init => Inv1067_2e74_R36_2_I2 BY DEF Init, Inv1067_2e74_R36_2_I2, IndGlobal
-    <1>43. Init => Inv100_1def_R41_3_I1 BY DEF Init, Inv100_1def_R41_3_I1, IndGlobal
-    <1>44. Init => Inv45_2bf0_R27_1_I1 BY DEF Init, Inv45_2bf0_R27_1_I1, IndGlobal
-    <1>45. Init => Inv32_1336_R1_1_I1 BY DEF Init, Inv32_1336_R1_1_I1, IndGlobal
-    <1>46. Init => Inv10_3662_R0_1_I1 BY DEF Init, Inv10_3662_R0_1_I1, IndGlobal
+    <1>30. Init => Inv1149_870b_R29_2_I2 BY DEF Init, Inv1149_870b_R29_2_I2, IndGlobal
+    <1>31. Init => Inv2458_2a15_R21_1_I2 BY DEF Init, Inv2458_2a15_R21_1_I2, IndGlobal
+    <1>32. Init => Inv2146_6e63_R28_0_I2 BY DEF Init, Inv2146_6e63_R28_0_I2, IndGlobal
+    <1>33. Init => Inv40_2bf0_R13_1_I1 BY DEF Init, Inv40_2bf0_R13_1_I1, IndGlobal
+    <1>34. Init => Inv4763_b566_R19_0_I2 BY DEF Init, Inv4763_b566_R19_0_I2, IndGlobal
+    <1>35. Init => Inv1103_d53b_R25_0_I4 BY DEF Init, Inv1103_d53b_R25_0_I4, IndGlobal
+    <1>36. Init => Inv957_c432_R31_0_I2 BY DEF Init, Inv957_c432_R31_0_I2, IndGlobal
+    <1>37. Init => Inv1942_3576_R37_0_I3 BY DEF Init, Inv1942_3576_R37_0_I3, IndGlobal
+    <1>38. Init => Inv111_3e57_R40_1_I2 BY DEF Init, Inv111_3e57_R40_1_I2, IndGlobal
+    <1>39. Init => Inv1000_d532_R39_3_I2 BY DEF Init, Inv1000_d532_R39_3_I2, IndGlobal
+    <1>40. Init => Inv23009_51f5_R41_3_I3 BY DEF Init, Inv23009_51f5_R41_3_I3, IndGlobal
+    <1>41. Init => Inv7513_6fbd_R44_0_I3 BY DEF Init, Inv7513_6fbd_R44_0_I3, IndGlobal
+    <1>42. Init => Inv848_bea9_R40_1_I2 BY DEF Init, Inv848_bea9_R40_1_I2, IndGlobal
+    <1>43. Init => Inv12_513a_R2_1_I1 BY DEF Init, Inv12_513a_R2_1_I1, IndGlobal
+    <1>44. Init => Inv687_881e_R35_2_I2 BY DEF Init, Inv687_881e_R35_2_I2, IndGlobal
+    <1>45. Init => Inv33_1336_R1_1_I1 BY DEF Init, Inv33_1336_R1_1_I1, IndGlobal
+    <1>46. Init => Inv11_3662_R0_1_I1 BY DEF Init, Inv11_3662_R0_1_I1, IndGlobal
     <1>a. QED BY <1>0,<1>1,<1>2,<1>3,<1>4,<1>5,<1>6,<1>7,<1>8,<1>9,<1>10,<1>11,<1>12,<1>13,<1>14,<1>15,<1>16,<1>17,<1>18,<1>19,<1>20,<1>21,<1>22,<1>23,<1>24,<1>25,<1>26,<1>27,<1>28,<1>29,<1>30,<1>31,<1>32,<1>33,<1>34,<1>35,<1>36,<1>37,<1>38,<1>39,<1>40,<1>41,<1>42,<1>43,<1>44,<1>45,<1>46 DEF IndGlobal
 
 \* Consecution.
 THEOREM IndGlobal /\ Next => IndGlobal'
   BY L_0,L_1,L_2,L_3,L_4,L_5,L_6,L_7,L_8,L_9,L_10,L_11,L_12,L_13,L_14,L_15,L_16,L_17,L_18,L_19,L_20,L_21,L_22,L_23,L_24,L_25,L_26,L_27,L_28,L_29,L_30,L_31,L_32,L_33,L_34,L_35,L_36,L_37,L_38,L_39,L_40,L_41,L_42,L_43,L_44,L_45,L_46 DEF Next, IndGlobal
-
 
 ====
