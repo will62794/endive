@@ -4183,7 +4183,57 @@ class InductiveInvGen():
         print("TLAPS UNPROVED:")
         for ob in unproved_obls:
             print(" ", ob)    
-        return unproved_obls   
+        return unproved_obls  
+
+    def generate_per_action_ctis(self, obls_to_check_ctis, obl_pred_tup, obl):
+        k_ctis = set()
+
+        for (k_cti_lemma, k_cti_action) in obls_to_check_ctis:
+
+            action_tstart = time.time()
+
+            logging.info(f"Computing COI for {(k_cti_lemma, k_cti_action)}")
+            # actions_real_defs = [a.replace("Action", "") for a in actions]
+            lemma_action_coi = {}
+
+            k_cti_action_opname = k_cti_action.replace("Action", "")
+            ret = self.spec_obj_with_lemmas.get_vars_in_def(k_cti_action_opname)
+            vars_in_action,action_updated_vars = ret
+            print("vars in action:", vars_in_action)
+            print("action updated vars:", action_updated_vars)
+            vars_in_action_non_updated,_ = self.spec_obj_with_lemmas.get_vars_in_def(k_cti_action_opname, ignore_update_expressions=True)
+            logging.info(f"Getting variables in lemma definition: {k_cti_lemma}")
+            vars_in_lemma_defs = self.spec_obj_with_lemmas.get_vars_in_def(k_cti_lemma)[0]
+
+            lemma_action_coi = self.spec_obj_with_lemmas.compute_coi(None, None, None,action_updated_vars, vars_in_action_non_updated, vars_in_lemma_defs)
+            print("Lemma-action COI")
+            print(lemma_action_coi)
+
+            cti_ignore_vars = [s for s in self.state_vars if s not in lemma_action_coi]
+
+            # Get constant objects to use for checking CTIs.
+            cobjs = self.get_ctigen_constant_instances()
+            k_ctis_action = []
+            print(k_cti_action)
+            if (self.action_filter is None) or (self.action_filter is not None and k_cti_action in self.action_filter):
+                for cobj in cobjs:
+                    k_ctis_action_new, k_cti_traces = self.generate_ctis(props=[obl_pred_tup], 
+                                                                    specname_tag=obl, actions=[k_cti_action], 
+                                                                    ignore_vars=cti_ignore_vars, constants_obj=cobj)
+                    for c in k_ctis_action_new:
+                        c.constants_obj = cobj
+                    print("Number of new action ctis:", len(k_ctis_action_new))
+                    if len(k_ctis_action_new) > self.MAX_NUM_CTIS_PER_ROUND:
+                        logging.info(f"Limiting num k-CTIs to {self.MAX_NUM_CTIS_PER_ROUND} of {len(k_ctis_action_new)} total found.")
+                        sorted_k_ctis_new = sorted(list(k_ctis_action_new))
+                        random.shuffle(sorted_k_ctis_new)
+                        k_ctis_action += sorted_k_ctis_new[:self.MAX_NUM_CTIS_PER_ROUND]
+                    else:
+                        k_ctis_action += k_ctis_action_new 
+            
+            k_ctis.update(k_ctis_action)
+            logging.info("Number of action k-CTIs found: {}. (took {:.2f} secs)".format(len(k_ctis_action), (time.time()-action_tstart)))
+        return k_ctis
 
     def do_invgen_proof_tree_mode(self):
         """ Do localized invariant synthesis based on an inductive proof graph structure."""
@@ -4233,8 +4283,6 @@ class InductiveInvGen():
 
         # For proof tree we look for single step inductive support lemmas.
         self.simulate_depth = 1
-
-        count = 0
 
         logging.info("Extracting variables present in each grammar predicate.")
         vars_in_preds = self.extract_vars_from_preds()
@@ -4417,49 +4465,7 @@ class InductiveInvGen():
             else:
                 obls_to_check_ctis = unproved_obls
 
-            for (k_cti_lemma, k_cti_action) in obls_to_check_ctis:
-
-                action_tstart = time.time()
-
-
-                logging.info(f"Computing COI for {(k_cti_lemma, k_cti_action)}")
-                # actions_real_defs = [a.replace("Action", "") for a in actions]
-                lemma_action_coi = {}
-
-                k_cti_action_opname = k_cti_action.replace("Action", "")
-                ret = self.spec_obj_with_lemmas.get_vars_in_def(k_cti_action_opname)
-                vars_in_action,action_updated_vars = ret
-                print("vars in action:", vars_in_action)
-                print("action updated vars:", action_updated_vars)
-                vars_in_action_non_updated,_ = self.spec_obj_with_lemmas.get_vars_in_def(k_cti_action_opname, ignore_update_expressions=True)
-                logging.info(f"Getting variables in lemma definition: {k_cti_lemma}")
-                vars_in_lemma_defs = self.spec_obj_with_lemmas.get_vars_in_def(k_cti_lemma)[0]
-
-                lemma_action_coi = self.spec_obj_with_lemmas.compute_coi(None, None, None,action_updated_vars, vars_in_action_non_updated, vars_in_lemma_defs)
-                print("Lemma-action COI")
-                print(lemma_action_coi)
-
-                cti_ignore_vars = [s for s in self.state_vars if s not in lemma_action_coi]
-
-                # Get constant objects to use for checking CTIs.
-                cobjs = self.get_ctigen_constant_instances()
-                k_ctis_action = []
-                print(k_cti_action)
-                if (self.action_filter is None) or (self.action_filter is not None and k_cti_action in self.action_filter):
-                    for cobj in cobjs:
-                        k_ctis_action_new, k_cti_traces = self.generate_ctis(props=[curr_obligation_pred_tup], 
-                                                                        specname_tag=curr_obligation, actions=[k_cti_action], 
-                                                                        ignore_vars=cti_ignore_vars, constants_obj=cobj)
-                        for c in k_ctis_action_new:
-                            c.constants_obj = cobj
-                        print("Number of new action ctis:", len(k_ctis_action_new))
-                        if len(k_ctis_action_new) > self.MAX_NUM_CTIS_PER_ROUND:
-                            logging.info(f"Limiting num k-CTIs to {self.MAX_NUM_CTIS_PER_ROUND} of {len(k_ctis_action_new)} total found.")
-                            sorted_k_ctis_new = sorted(list(k_ctis_action_new))
-                            random.shuffle(sorted_k_ctis_new)
-                            k_ctis_action += sorted_k_ctis_new[:self.MAX_NUM_CTIS_PER_ROUND]
-                        else:
-                            k_ctis_action += k_ctis_action_new
+            k_ctis = self.generate_per_action_ctis(obls_to_check_ctis, curr_obligation_pred_tup, curr_obligation)
                     
                 # k_ctis_action, k_cti_traces = self.generate_ctis(props=[curr_obligation_pred_tup], specname_tag=curr_obligation, actions=[k_cti_action], ignore_vars=cti_ignore_vars)
                 
@@ -4475,11 +4481,6 @@ class InductiveInvGen():
                 # logging.info(f"num full ctis: {len(k_ctis_action)}")
                 # logging.info(f"num unique ctis: {len(uniq_k_ctis)}")
                 # k_ctis.update(uniq_k_ctis)
-
-                k_ctis.update(k_ctis_action)
-                count += 1
-                logging.info("Number of action k-CTIs found: {}. (took {:.2f} secs)".format(len(k_ctis_action), (time.time()-action_tstart)))
-
 
             # for kcti in k_ctis:
                 # print(str(kcti))
