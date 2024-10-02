@@ -823,7 +823,8 @@ class InductiveInvGen():
                          cache_with_ignore_inv_counts=None,
                          cache_state_load=False,
                          invcheck_file_path=None, tlc_flags="",
-                         constants_obj=None):
+                         constants_obj=None,
+                         recache_seed_set=None):
         """ Check which of the given invariants are valid. """
         ta = time.time()
         # invcheck_tla = "---- MODULE %s_InvCheck_%d ----\n" % (self.specname,self.seed)
@@ -857,7 +858,8 @@ class InductiveInvGen():
                                 max_depth=max_depth,
                                 cache_with_ignored=cache_with_ignored,
                                 cache_with_ignore_inv_counts=cache_with_ignore_inv_counts,
-                                cache_state_load = cache_state_load, tlc_flags=tlc_flags)
+                                cache_state_load = cache_state_load, tlc_flags=tlc_flags,
+                                recache_seed_set=recache_seed_set)
         invs_violated = ret["invs_violated"]
         slice_stats = ret["slice_stats"]
         # Print slices sorted by size.
@@ -2007,7 +2009,7 @@ class InductiveInvGen():
         }
 
 
-    def cache_projected_states(self, cache_states_with_ignored_var_sets, max_depth=2**30, tlc_workers=6, constants_obj=None):
+    def cache_projected_states(self, cache_states_with_ignored_var_sets, max_depth=2**30, tlc_workers=6, constants_obj=None, recache_seed_set=None):
         # Ensure references to variable slice sets are always sorted to maintain consistent order.
         cache_states_with_ignored_var_sets = sorted([tuple(sorted(c)) for c in cache_states_with_ignored_var_sets])
 
@@ -2031,6 +2033,10 @@ class InductiveInvGen():
         self.memoize_state_projection_caches = True
 
         cache_states_with_ignored_var_sets_new = [c for c in cache_states_with_ignored_var_sets if c not in self.state_projection_cache]
+
+        # Sort by size for caching efficiency.
+        cache_states_with_ignored_var_sets_new = sorted(cache_states_with_ignored_var_sets_new, key=len, reverse=False)
+
         if len(cache_states_with_ignored_var_sets_new) == 0:
             logging.info(f"State projection caches for all {len(cache_states_with_ignored_var_sets)} slices were already computed.")
         else:
@@ -2043,15 +2049,30 @@ class InductiveInvGen():
             while len(cache_states_with_ignored_var_sets_curr) > 0:
                 subsets_chunk = cache_states_with_ignored_var_sets_curr[:MAX_NUM_SUBSETS]
                 cache_states_with_ignored_var_sets_curr = cache_states_with_ignored_var_sets_curr[MAX_NUM_SUBSETS:]
+
+                # If there already exists a state set in the cache that is a superset of these, then you can use that as a recache
+                # seed set.
+                covering_supersets = [s for s in self.state_projection_cache if all([set(s).issubset(set(c)) for c in subsets_chunk])]
+                min_covering_superset = None
+                print("covering supersets:", covering_supersets)
+                if len(covering_supersets) > 0:
+                    min_covering_superset = max(covering_supersets, key=len) 
+                    print("min covering superset:", min_covering_superset)
+                    if len(min_covering_superset) == 0:
+                        min_covering_superset = None
+
+                # TODO: Enable this when ready.
+                min_covering_superset = None
+
                 logging.info(f"Computing {len(subsets_chunk)} slices in chunk ({len(cache_states_with_ignored_var_sets_curr)} remaining slices to compute).")
                 self.check_invariants([dummy_inv], tlc_workers=tlc_workers, max_depth=max_depth, 
                                             cache_with_ignored=subsets_chunk, skip_checking=True,
-                                            tlc_flags=simulation_inv_tlc_flags, constants_obj=constants_obj)
+                                            tlc_flags=simulation_inv_tlc_flags, constants_obj=constants_obj, recache_seed_set=min_covering_superset)
 
-            if self.memoize_state_projection_caches:
-                # Mark all computed chunks as cached.
-                for c in cache_states_with_ignored_var_sets_new:
-                    self.state_projection_cache[c] = True
+                if self.memoize_state_projection_caches:
+                    # Mark all computed chunks as cached.
+                    for c in subsets_chunk:
+                        self.state_projection_cache[c] = True
         # else:
             # logging.info(f"State projection cache for slice {cache_states_with_ignored_vars} was already computed.")
         logging.info(f"state projection cache has {len(self.state_projection_cache)} var slices.")
@@ -2127,6 +2148,12 @@ class InductiveInvGen():
         if "max_tlc_inv_depth" in self.spec_config:
             max_depth = self.spec_config["max_tlc_inv_depth"]
 
+        if "main_inv_check_index" in self.spec_config:
+            main_inv_check_index = self.spec_config["main_inv_check_index"]
+            invcheck_constants_obj = self.get_ctigen_constant_instances()[main_inv_check_index]
+        else:
+            invcheck_constants_obj = self.get_ctigen_constant_instances()[0]
+
         # Run one caching run with all state variables for sake of metrics.
         # logging.info("Running initial full state caching upfront for stats reporting.")
         # self.cache_projected_states([[]], max_depth=max_depth, tlc_workers=tlc_workers)
@@ -2134,7 +2161,7 @@ class InductiveInvGen():
         # Upfront caching run for this round. If we are doing partitioned state caching, don't bother doing
         # this caching step upfront, since we will do it below when first trying to check invariants.
         if self.auto_lemma_action_decomposition and not self.enable_partitioned_state_caching:
-            self.cache_projected_states([cache_states_with_ignored_vars], max_depth=max_depth, tlc_workers=tlc_workers)
+            self.cache_projected_states([cache_states_with_ignored_vars], max_depth=max_depth, tlc_workers=tlc_workers, constants_obj=invcheck_constants_obj)
             logging.info("Finished initial state caching.")
         else:
             logging.info("Skipping initial state caching step for round since we are running with partitioned state caching.")
@@ -2143,12 +2170,12 @@ class InductiveInvGen():
         # Otherwise cache a sampled set.
         SMALL_VAR_COUNT = 5
         if self.auto_lemma_action_decomposition and self.enable_partitioned_state_caching and len(self.state_vars) <= SMALL_VAR_COUNT:
-            all_var_sets = list(powerset(self.state_vars))
+            all_var_sets = sorted(list(powerset(self.state_vars)), key=len)
             all_var_sets_count = len(all_var_sets)
             if len(self.state_vars) > SMALL_VAR_COUNT:
                 all_var_sets = random.sample(all_var_sets, 2**SMALL_VAR_COUNT)
             logging.info(f"Caching {len(all_var_sets)} var sets upfront out of {all_var_sets_count} total, since {len(self.state_vars)} total state vars.")
-            self.cache_projected_states(all_var_sets, max_depth=max_depth, tlc_workers=tlc_workers)
+            self.cache_projected_states(all_var_sets, max_depth=max_depth, tlc_workers=tlc_workers, constants_obj=invcheck_constants_obj)
 
         inv_candidates_generated_in_round = set()
         num_ctis_remaining = None
@@ -2562,12 +2589,6 @@ class InductiveInvGen():
                             print(p)
 
                     invcheck_start = time.time()
-
-                    if "main_inv_check_index" in self.spec_config:
-                        main_inv_check_index = self.spec_config["main_inv_check_index"]
-                        invcheck_constants_obj = self.get_ctigen_constant_instances()[main_inv_check_index]
-                    else:
-                        invcheck_constants_obj = self.get_ctigen_constant_instances()[0]
 
                     logging.info("Running initial full state caching upfront for stats reporting.")
                     self.cache_projected_states([[]], max_depth=max_depth, tlc_workers=tlc_workers, constants_obj=invcheck_constants_obj)

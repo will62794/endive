@@ -450,7 +450,8 @@ def runtlc(spec,config=None,tlc_workers=6,cwd=None,tlcjar="tla2tools-checkall.ja
            max_depth=2**30, 
            cache_with_ignored=None, 
            cache_with_ignore_inv_counts=None,
-           cache_state_load=False):
+           cache_state_load=False,
+           recache_seed_set=None):
     # Make a best effort to attempt to avoid collisions between different
     # instances of TLC running on the same machine.
     dirpath = tempfile.mkdtemp()
@@ -460,6 +461,11 @@ def runtlc(spec,config=None,tlc_workers=6,cwd=None,tlcjar="tla2tools-checkall.ja
         cacheFlags = f"-cacheStates cache"
     if cache_state_load:
         cacheFlags = f"-cacheStates load"
+
+    if recache_seed_set is not None:
+        recache_set_str = ",".join(recache_seed_set)
+        cacheFlags = f"-cacheStates recache \"{recache_set_str}\""
+
     if cache_with_ignored is not None:
         # Ignored var sets are specified in the command line arg like: v1,v2|v1,v3,v4|v1,v5
         cacheWithIgnoredVarSets = "|".join([",".join(cvars) for cvars in cache_with_ignored])
@@ -511,7 +517,8 @@ def runtlc_check_violated_invariants(spec,config=None, tlc_workers=6, cwd=None, 
                                      max_depth=2**30, 
                                      cache_with_ignored=None, 
                                      cache_with_ignore_inv_counts=None,
-                                     cache_state_load=False, tlc_flags=""):
+                                     cache_state_load=False, tlc_flags="",
+                                     recache_seed_set=None):
     #
     # TODO: Check for this type of error:
     # 'Error: The invariant of Inv91 is equal to FALSE'
@@ -520,7 +527,8 @@ def runtlc_check_violated_invariants(spec,config=None, tlc_workers=6, cwd=None, 
                     java=java, max_depth=max_depth, 
                     cache_with_ignored=cache_with_ignored, 
                     cache_with_ignore_inv_counts=cache_with_ignore_inv_counts,
-                    cache_state_load=cache_state_load, tlc_flags=tlc_flags)
+                    cache_state_load=cache_state_load, tlc_flags=tlc_flags,
+                    recache_seed_set=recache_seed_set)
     invs_violated = set()
     for l in greplines("is violated", lines):
         res = re.match(".*Invariant (Inv.*) is violated",l)
