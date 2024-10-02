@@ -5,61 +5,75 @@ EXTENDS Bakery, FiniteSets, TLAPS, FiniteSetTheorems
 
 \* Proof Graph Stats
 \* ==================
-\* seed: 2
-\* num proof graph nodes: 20
-\* num proof obligations: 280
+\* seed: 1
+\* num proof graph nodes: 27
+\* num proof obligations: 378
 Safety == H_MutualExclusion
-Inv23439_af2b_R0_0_I2 == \A VARI \in Procs : \A VARJ \in Procs : ~(pc[VARI] = "w1") \/ (~(unchecked[VARI] = {})) \/ (~(pc[VARJ] = "cs"))
-Inv3155_48f3_R1_0_I2 == \A VARI \in Procs : \A VARJ \in Procs : (VARI \in unchecked[VARJ]) \/ (~(((pc[VARJ] \in {"w1","w2"}) /\ (pc[VARI] = "w1"))) \/ (~(VARJ \in (Procs \ unchecked[VARI]) \ {VARI})))
-Inv21465_bb1b_R1_1_I2 == \A VARI \in Procs : (pc[VARI] = "e2") \/ ((pc[VARI] \in {"w1","w2"}) \/ ((unchecked[VARI] = {})))
-Inv19891_1bc3_R1_1_I2 == \A VARI \in Procs : \A VARJ \in Procs : ~(<<num[VARI],VARI>> \prec <<num[VARJ],VARJ>>) \/ (~(pc[VARI] \in {"w1","w2"})) \/ (~(pc[VARJ] = "cs"))
-Inv12452_548a_R1_1_I2 == \A VARI \in Procs : \A VARJ \in Procs : (VARJ \in unchecked[VARI]) \/ (~(pc[VARJ] = "cs")) \/ (~(pc[VARI] \in {"w1","w2"}))
-Inv4559_3f08_R1_1_I2 == \A VARI \in Procs : ~(num[VARI] = 0) \/ (~(pc[VARI] = "cs"))
-Inv6938_a43e_R2_0_I3 == \A VARI \in Procs : \A VARJ \in Procs : (VARI \in unchecked[VARJ]) \/ (~(<<num[VARI],VARI>> \prec <<num[VARJ],VARJ>>) \/ (~(pc[VARI] \in {"e4","w1","w2"})) \/ (~(pc[VARJ] \in {"w1","w2"})))
-Inv26_b6ff_R2_0_I3 == \A VARI \in Procs : ~(num[VARI] = 0) \/ (~(pc[VARI] \in {"w1","w2"}))
-Inv1222_288c_R4_0_I2 == \A VARI \in Procs : \A VARJ \in Procs : (<<num[VARI],VARI>> \prec <<num[VARJ],VARJ>>) \/ (~(pc[VARI] = "cs") \/ (~(pc[VARJ] = "e4")))
-Inv14061_f302_R7_0_I3 == \A VARI \in Procs : \A VARJ \in Procs : (max[VARJ] >= num[VARI]) \/ (~(VARJ \in (Procs \ unchecked[VARI]) \ {VARI}) \/ (~(pc[VARJ] = "e3")) \/ (~(pc[VARI] \in {"w1","w2"})))
-Inv11_73d9_R7_1_I1 == \A VARJ \in Procs : ~(num[VARJ] = 0) \/ (~(pc[VARJ] \in {"e4","w1","w2"}))
-Inv10269_2818_R9_0_I2 == \A VARI \in Procs : \A VARJ \in Procs : ~(max[VARI] < num[VARJ]) \/ (~(pc[VARI] = "e3") \/ (~(pc[VARJ] = "cs")))
-Inv0_b3ba_R10_0_I0 == \A VARI \in Procs : \A VARJ \in Procs : ((VARI \in unchecked[VARJ]) \/ ((pc[VARJ] = "e1") \/ (~(max[VARI] < num[VARJ]) \/ (~(pc[VARI] = "e2"))) \/ (~(unchecked[VARI] = {}))) \/ (~(pc[VARJ] \in {"w1","w2"})))
-Inv5493_34f2_R10_1_I2 == \A VARI \in Procs : (max[nxt[VARI]] >= num[VARI]) \/ (~((pc[nxt[VARI]] = "e3")) \/ (~(pc[VARI] = "w2")))
-Inv2205_3e9d_R12_0_I3 == \A VARI \in Procs : \A VARJ \in Procs : (VARI \in unchecked[VARJ]) \/ ((max[VARJ] >= num[VARI]) \/ (~(pc[VARJ] = "e2"))) \/ (~(pc[VARI] = "cs"))
-Inv1_b58a_R13_0_I1 == \A VARI \in Procs : \A VARJ \in Procs : ((VARI \in unchecked[VARJ]) \/ (~(pc[VARJ] = "e2")) \/ ((max[VARJ] >= num[VARI])) \/ (~(pc[VARI] \in {"w1","w2"}))) \/ ((VARJ \in unchecked[VARI]))
-Inv738_26ef_R13_1_I2 == \A VARI \in Procs : \A VARJ \in Procs : ((VARJ \in unchecked[nxt[VARJ]]) \/ ((max[nxt[VARJ]] >= num[VARJ]) \/ ((pc[VARI] = "e3")))) \/ (~(pc[VARJ] = "w2")) \/ (~((pc[nxt[VARJ]] = "e2")))
-Inv296_b692_R14_1_I1 == \A VARI \in Procs : (flag[VARI]) \/ (~(pc[VARI] = "e3"))
-Inv48_180c_R17_0_I1 == \A VARI \in Procs : (flag[VARI]) \/ (~(pc[VARI] = "e2"))
+Inv4690_2f61_R0_0_I2 == \A VARI \in Procs : \A VARJ \in Procs : (VARI \in unchecked[VARJ]) \/ (~(pc[VARI] = "cs")) \/ (~(pc[VARJ] = "w1"))
+Inv4520_48f3_R1_0_I2 == \A VARI \in Procs : \A VARJ \in Procs : (VARI \in unchecked[VARJ]) \/ (~(((pc[VARJ] \in {"w1","w2"}) /\ (pc[VARI] = "w1"))) \/ (~(VARJ \in (Procs \ unchecked[VARI]) \ {VARI})))
+Inv24959_7f87_R1_1_I2 == \A VARJ \in Procs : (pc[VARJ] = "e2") \/ ((unchecked[VARJ] = {})) \/ ((pc[VARJ] \in {"w1","w2"}))
+Inv5819_32cd_R1_1_I2 == \A VARI \in Procs : \A VARJ \in Procs : (VARI \in unchecked[VARJ]) \/ (~(pc[VARI] = "cs") \/ (~(pc[VARJ] = "w2")))
+Inv4576_59b1_R1_1_I2 == \A VARI \in Procs : \A VARJ \in Procs : (<<num[VARI],VARI>> \prec <<num[VARJ],VARJ>>) \/ (~(pc[VARI] = "cs")) \/ (~(pc[VARJ] = "w2"))
+Inv4521_3f08_R1_1_I2 == \A VARI \in Procs : ~(num[VARI] = 0) \/ (~(pc[VARI] = "cs"))
+Inv10_8778_R2_0_I3 == \A VARJ \in Procs : ~(VARJ \in unchecked[VARJ])
+Inv5742_3d78_R2_0_I3 == \A VARI \in Procs : \A VARJ \in Procs : (VARI \in unchecked[VARJ]) \/ (~(<<num[VARI],VARI>> \prec <<num[VARJ],VARJ>>) \/ (~(pc[VARI] = "w2"))) \/ (~(pc[VARJ] = "w2"))
+Inv80_b6ff_R2_0_I3 == \A VARI \in Procs : ~(num[VARI] = 0) \/ (~(pc[VARI] \in {"w1","w2"}))
+Inv1922_5e75_R2_0_I3 == \A VARI \in Procs : \A VARJ \in Procs : (<<num[VARI],VARI>> \prec <<num[VARJ],VARJ>>) \/ (~(((pc[VARJ] \in {"w1","w2"}) /\ (pc[VARI] = "w1")))) \/ (~(VARJ \in (Procs \ unchecked[VARI]) \ {VARI}))
+Inv4606_2f6b_R5_0_I2 == \A VARI \in Procs : \A VARJ \in Procs : ~(<<num[VARI],VARI>> \prec <<num[VARJ],VARJ>>) \/ (~(pc[VARI] \in {"e4","w1","w2"})) \/ (~(pc[VARJ] = "cs"))
+Inv11_3838_R8_0_I2 == \A VARI \in Procs : ~(VARI \in unchecked[VARI])
+Inv61_df69_R8_0_I2 == \A VARI \in Procs : (nxt[VARI] \in unchecked[VARI]) \/ (~(pc[VARI] = "w2"))
+Inv1028_6ea5_R8_0_I2 == \A VARI \in Procs : \A VARJ \in Procs : (VARI \in unchecked[VARJ]) \/ (~(((pc[VARJ] \in {"w1","w2"}) /\ (pc[VARI] = "w1")))) \/ (~(<<num[VARI],VARI>> \prec <<num[VARJ],VARJ>>))
+Inv140_f68c_R9_0_I1 == \A VARI \in Procs : ~(num[VARI] = 0) \/ (~(pc[VARI] = "e4"))
+Inv4227_eecc_R10_0_I3 == \A VARI \in Procs : \A VARJ \in Procs : (VARI \in unchecked[VARJ]) \/ (~(<<num[VARI],VARI>> \prec <<num[VARJ],VARJ>>) \/ (~(pc[VARJ] \in {"w1","w2"}))) \/ (~(pc[VARI] \in {"e4","w1","w2"}))
+Inv32498_2818_R11_0_I2 == \A VARI \in Procs : \A VARJ \in Procs : ~(max[VARI] < num[VARJ]) \/ (~(pc[VARI] = "e3") \/ (~(pc[VARJ] = "cs")))
+Inv2740_e784_R16_0_I3 == \A VARI \in Procs : \A VARJ \in Procs : (VARI \in unchecked[VARJ]) \/ (~(max[VARI] < num[VARJ])) \/ (~(pc[VARI] = "e3")) \/ (~(pc[VARJ] \in {"w1","w2"}))
+Inv3293_1a1e_R17_0_I3 == \A VARI \in Procs : \A VARJ \in Procs : (VARJ \in unchecked[VARI]) \/ (~(pc[VARI] = "e2")) \/ (~(pc[VARJ] = "cs")) \/ (~(max[VARI] < num[VARJ]))
+Inv0_b3ba_R18_0_I0 == \A VARI \in Procs : \A VARJ \in Procs : ((VARI \in unchecked[VARJ]) \/ ((pc[VARJ] = "e1") \/ (~(max[VARI] < num[VARJ]) \/ (~(pc[VARI] = "e2"))) \/ (~(unchecked[VARI] = {}))) \/ (~(pc[VARJ] \in {"w1","w2"})))
+Inv6093_1c74_R18_1_I2 == \A VARI \in Procs : (max[nxt[VARI]] >= num[VARI]) \/ (~((pc[nxt[VARI]] = "e3"))) \/ (~(pc[VARI] = "w2"))
+Inv19_037d_R19_0_I1 == \A VARI \in Procs : \A VARJ \in Procs : ((VARI \in unchecked[VARJ]) \/ (~(pc[VARJ] = "e2")) \/ ((max[VARJ] >= num[VARI])) \/ (~(pc[VARI] \in {"w1","w2"}))) \/ (~(unchecked[VARI] = {}))
+Inv1_b58a_R20_0_I1 == \A VARI \in Procs : \A VARJ \in Procs : ((VARI \in unchecked[VARJ]) \/ (~(pc[VARJ] = "e2")) \/ ((max[VARJ] >= num[VARI])) \/ (~(pc[VARI] \in {"w1","w2"}))) \/ ((VARJ \in unchecked[VARI]))
+Inv350_b077_R20_1_I2 == \A VARI \in Procs : \A VARJ \in Procs : ((VARI \in unchecked[VARJ]) \/ (~(pc[VARJ] = "e2")) \/ ((max[VARJ] >= num[VARI])) \/ (~(pc[VARI] \in {"w1","w2"}))) \/ (~(nxt[VARI] = VARJ)) \/ (~(pc[VARI] = "w2"))
+Inv103_c9b1_R21_1_I1 == \A VARJ \in Procs : (flag[VARJ]) \/ (~(pc[VARJ] = "e3"))
+Inv40_180c_R24_0_I1 == \A VARI \in Procs : (flag[VARI]) \/ (~(pc[VARI] = "e2"))
 
 IndGlobal == 
   /\ TypeOK
   /\ Safety
-  /\ Inv23439_af2b_R0_0_I2
-  /\ Inv3155_48f3_R1_0_I2
-  /\ Inv6938_a43e_R2_0_I3
-  /\ Inv14061_f302_R7_0_I3
-  /\ Inv0_b3ba_R10_0_I0
-  /\ Inv1_b58a_R13_0_I1
-  /\ Inv738_26ef_R13_1_I2
-  /\ Inv48_180c_R17_0_I1
-  /\ Inv5493_34f2_R10_1_I2
-  /\ Inv296_b692_R14_1_I1
-  /\ Inv11_73d9_R7_1_I1
-  /\ Inv26_b6ff_R2_0_I3
-  /\ Inv21465_bb1b_R1_1_I2
-  /\ Inv19891_1bc3_R1_1_I2
-  /\ Inv1222_288c_R4_0_I2
-  /\ Inv10269_2818_R9_0_I2
-  /\ Inv2205_3e9d_R12_0_I3
-  /\ Inv12452_548a_R1_1_I2
-  /\ Inv4559_3f08_R1_1_I2
+  /\ Inv4690_2f61_R0_0_I2
+  /\ Inv4520_48f3_R1_0_I2
+  /\ Inv10_8778_R2_0_I3
+  /\ Inv5742_3d78_R2_0_I3
+  /\ Inv11_3838_R8_0_I2
+  /\ Inv61_df69_R8_0_I2
+  /\ Inv1922_5e75_R2_0_I3
+  /\ Inv4227_eecc_R10_0_I3
+  /\ Inv2740_e784_R16_0_I3
+  /\ Inv0_b3ba_R18_0_I0
+  /\ Inv1_b58a_R20_0_I1
+  /\ Inv350_b077_R20_1_I2
+  /\ Inv40_180c_R24_0_I1
+  /\ Inv6093_1c74_R18_1_I2
+  /\ Inv103_c9b1_R21_1_I1
+  /\ Inv80_b6ff_R2_0_I3
+  /\ Inv140_f68c_R9_0_I1
+  /\ Inv1028_6ea5_R8_0_I2
+  /\ Inv24959_7f87_R1_1_I2
+  /\ Inv5819_32cd_R1_1_I2
+  /\ Inv4576_59b1_R1_1_I2
+  /\ Inv4606_2f6b_R5_0_I2
+  /\ Inv32498_2818_R11_0_I2
+  /\ Inv3293_1a1e_R17_0_I3
+  /\ Inv19_037d_R19_0_I1
+  /\ Inv4521_3f08_R1_1_I2
 
 
-\* mean in-degree: 1.6
+\* mean in-degree: 1.7037037037037037
 \* median in-degree: 2
 \* max in-degree: 5
 \* min in-degree: 0
 \* mean variable slice size: 0
 
-ASSUME A0 == N \in Nat /\ Procs = 1..N /\ IsFiniteSet(Procs)
+ASSUME A0 == N \in Nat /\ Procs \subseteq Nat /\ IsFiniteSet(Procs)
 
 \*** TypeOK
 THEOREM L_0 == TypeOK /\ TypeOK /\ Next => TypeOK'
@@ -97,7 +111,7 @@ THEOREM L_0 == TypeOK /\ TypeOK /\ Next => TypeOK'
 
 \* (ROOT SAFETY PROP)
 \*** Safety
-THEOREM L_1 == TypeOK /\ Inv23439_af2b_R0_0_I2 /\ Safety /\ Next => Safety'
+THEOREM L_1 == TypeOK /\ Inv4690_2f61_R0_0_I2 /\ Safety /\ Next => Safety'
   <1>. USE A0
   \* (Safety,ncsAction)
   <1>1. TypeOK /\ Safety /\ ncsAction => Safety' BY DEF TypeOK,ncsAction,ncs,Safety,\prec,H_MutualExclusion
@@ -112,43 +126,15 @@ THEOREM L_1 == TypeOK /\ Inv23439_af2b_R0_0_I2 /\ Safety /\ Next => Safety'
   \* (Safety,e3aAction)
   <1>6. TypeOK /\ Safety /\ e3aAction => Safety' BY DEF TypeOK,e3aAction,e3a,Safety,\prec,H_MutualExclusion
   \* (Safety,e3bAction)
-  <1>7. TypeOK /\ Safety /\ e3bAction => Safety' 
-    <2> SUFFICES ASSUME TypeOK,
-                        Safety,
-                        TRUE,
-                        NEW self \in Procs,
-                        pc[self] = "e3",
-                        NEW i \in {j \in Nat : j > max[self]},
-                        num' = [num EXCEPT ![self] = i],
-                        pc' = [pc EXCEPT ![self] = "e4"],
-                        UNCHANGED << flag, unchecked, max, nxt >>
-                 PROVE  Safety'
-      BY DEF e3b, e3bAction
-    <2> QED
-      BY DEF TypeOK,e3bAction,e3b,Safety,\prec,\prec,H_MutualExclusion
+  <1>7. TypeOK /\ Safety /\ e3bAction => Safety' BY DEF TypeOK,e3bAction,e3b,Safety,\prec,\prec,H_MutualExclusion
   \* (Safety,e4aAction)
   <1>8. TypeOK /\ Safety /\ e4aAction => Safety' BY DEF TypeOK,e4aAction,e4a,Safety,\prec,H_MutualExclusion
   \* (Safety,e4bAction)
   <1>9. TypeOK /\ Safety /\ e4bAction => Safety' BY DEF TypeOK,e4bAction,e4b,Safety,\prec,\prec,H_MutualExclusion
   \* (Safety,w1aAction)
-  <1>10. TypeOK /\ Safety /\ w1aAction => Safety' 
-    <2> SUFFICES ASSUME TypeOK,
-                        Safety,
-                        TRUE,
-                        NEW self \in Procs,
-                        pc[self] = "w1",
-                        unchecked[self] # {},
-                        NEW i \in unchecked[self],
-                        nxt' = [nxt EXCEPT ![self] = i],
-                        ~ flag[nxt'[self]],
-                        pc' = [pc EXCEPT ![self] = "w2"],
-                        UNCHANGED << num, flag, unchecked, max >>
-                 PROVE  Safety'
-      BY DEF w1a, w1aAction
-    <2> QED
-      BY DEF TypeOK,w1aAction,w1a,Safety,\prec,\prec,H_MutualExclusion
+  <1>10. TypeOK /\ Safety /\ w1aAction => Safety' BY DEF TypeOK,w1aAction,w1a,Safety,\prec,\prec,H_MutualExclusion
   \* (Safety,w1bAction)
-  <1>11. TypeOK /\ Inv23439_af2b_R0_0_I2 /\ Safety /\ w1bAction => Safety' BY DEF TypeOK,Inv23439_af2b_R0_0_I2,w1bAction,w1b,Safety,\prec,\prec,H_MutualExclusion
+  <1>11. TypeOK /\ Inv4690_2f61_R0_0_I2 /\ Safety /\ w1bAction => Safety' BY DEF TypeOK,Inv4690_2f61_R0_0_I2,w1bAction,w1b,Safety,\prec,\prec,H_MutualExclusion
   \* (Safety,w2Action)
   <1>12. TypeOK /\ Safety /\ w2Action => Safety' BY DEF TypeOK,w2Action,w2,Safety,\prec,\prec,H_MutualExclusion
   \* (Safety,csAction)
@@ -158,749 +144,946 @@ THEOREM L_1 == TypeOK /\ Inv23439_af2b_R0_0_I2 /\ Safety /\ Next => Safety'
 <1>15. QED BY <1>1,<1>2,<1>3,<1>4,<1>5,<1>6,<1>7,<1>8,<1>9,<1>10,<1>11,<1>12,<1>13,<1>14 DEF Next
 
 
-\*** Inv23439_af2b_R0_0_I2
-THEOREM L_2 == TypeOK /\ Inv3155_48f3_R1_0_I2 /\ Inv21465_bb1b_R1_1_I2 /\ Inv19891_1bc3_R1_1_I2 /\ Inv12452_548a_R1_1_I2 /\ Inv4559_3f08_R1_1_I2 /\ Inv23439_af2b_R0_0_I2 /\ Next => Inv23439_af2b_R0_0_I2'
+\*** Inv4690_2f61_R0_0_I2
+THEOREM L_2 == TypeOK /\ Inv4520_48f3_R1_0_I2 /\ Inv24959_7f87_R1_1_I2 /\ Inv5819_32cd_R1_1_I2 /\ Inv4576_59b1_R1_1_I2 /\ Inv4521_3f08_R1_1_I2 /\ Inv4690_2f61_R0_0_I2 /\ Next => Inv4690_2f61_R0_0_I2'
   <1>. USE A0
-  \* (Inv23439_af2b_R0_0_I2,ncsAction)
-  <1>1. TypeOK /\ Inv23439_af2b_R0_0_I2 /\ ncsAction => Inv23439_af2b_R0_0_I2' BY DEF TypeOK,ncsAction,ncs,Inv23439_af2b_R0_0_I2,\prec
-  \* (Inv23439_af2b_R0_0_I2,e1aAction)
-  <1>2. TypeOK /\ Inv23439_af2b_R0_0_I2 /\ e1aAction => Inv23439_af2b_R0_0_I2' BY DEF TypeOK,e1aAction,e1a,Inv23439_af2b_R0_0_I2,\prec
-  \* (Inv23439_af2b_R0_0_I2,e1bAction)
-  <1>3. TypeOK /\ Inv23439_af2b_R0_0_I2 /\ e1bAction => Inv23439_af2b_R0_0_I2' BY DEF TypeOK,e1bAction,e1b,Inv23439_af2b_R0_0_I2,\prec
-  \* (Inv23439_af2b_R0_0_I2,e2aAction)
-  <1>4. TypeOK /\ Inv23439_af2b_R0_0_I2 /\ e2aAction => Inv23439_af2b_R0_0_I2' BY DEF TypeOK,e2aAction,e2a,Inv23439_af2b_R0_0_I2,\prec,Procs
-  \* (Inv23439_af2b_R0_0_I2,e2bAction)
-  <1>5. TypeOK /\ Inv23439_af2b_R0_0_I2 /\ e2bAction => Inv23439_af2b_R0_0_I2' BY DEF TypeOK,e2bAction,e2b,Inv23439_af2b_R0_0_I2,\prec
-  \* (Inv23439_af2b_R0_0_I2,e3aAction)
-  <1>6. TypeOK /\ Inv23439_af2b_R0_0_I2 /\ e3aAction => Inv23439_af2b_R0_0_I2' BY DEF TypeOK,e3aAction,e3a,Inv23439_af2b_R0_0_I2,\prec
-  \* (Inv23439_af2b_R0_0_I2,e3bAction)
-  <1>7. TypeOK /\ Inv23439_af2b_R0_0_I2 /\ e3bAction => Inv23439_af2b_R0_0_I2' BY DEF TypeOK,e3bAction,e3b,Inv23439_af2b_R0_0_I2,\prec,\prec
-  \* (Inv23439_af2b_R0_0_I2,e4aAction)
-  <1>8. TypeOK /\ Inv23439_af2b_R0_0_I2 /\ e4aAction => Inv23439_af2b_R0_0_I2' BY DEF TypeOK,e4aAction,e4a,Inv23439_af2b_R0_0_I2,\prec
-  \* (Inv23439_af2b_R0_0_I2,e4bAction)
-  <1>9. TypeOK /\ Inv23439_af2b_R0_0_I2 /\ e4bAction => Inv23439_af2b_R0_0_I2' BY DEF TypeOK,e4bAction,e4b,Inv23439_af2b_R0_0_I2,\prec,\prec
-  \* (Inv23439_af2b_R0_0_I2,w1aAction)
-  <1>10. TypeOK /\ Inv23439_af2b_R0_0_I2 /\ w1aAction => Inv23439_af2b_R0_0_I2' BY DEF TypeOK,w1aAction,w1a,Inv23439_af2b_R0_0_I2,\prec,\prec
-  \* (Inv23439_af2b_R0_0_I2,w1bAction)
-  <1>11. TypeOK /\ Inv3155_48f3_R1_0_I2 /\ Inv23439_af2b_R0_0_I2 /\ w1bAction => Inv23439_af2b_R0_0_I2' BY DEF TypeOK,Inv3155_48f3_R1_0_I2,w1bAction,w1b,Inv23439_af2b_R0_0_I2,\prec,\prec
-  \* (Inv23439_af2b_R0_0_I2,w2Action)
-  <1>12. TypeOK /\ Inv21465_bb1b_R1_1_I2 /\ Inv19891_1bc3_R1_1_I2 /\ Inv12452_548a_R1_1_I2 /\ Inv4559_3f08_R1_1_I2 /\ Inv23439_af2b_R0_0_I2 /\ w2Action => Inv23439_af2b_R0_0_I2' BY DEF TypeOK,Inv21465_bb1b_R1_1_I2,Inv19891_1bc3_R1_1_I2,Inv12452_548a_R1_1_I2,Inv4559_3f08_R1_1_I2,w2Action,w2,Inv23439_af2b_R0_0_I2,\prec,\prec
-  \* (Inv23439_af2b_R0_0_I2,csAction)
-  <1>13. TypeOK /\ Inv23439_af2b_R0_0_I2 /\ csAction => Inv23439_af2b_R0_0_I2' BY DEF TypeOK,csAction,cs,Inv23439_af2b_R0_0_I2,\prec
-  \* (Inv23439_af2b_R0_0_I2,exitAction)
-  <1>14. TypeOK /\ Inv23439_af2b_R0_0_I2 /\ exitAction => Inv23439_af2b_R0_0_I2' BY DEF TypeOK,exitAction,exit,Inv23439_af2b_R0_0_I2,\prec
+  \* (Inv4690_2f61_R0_0_I2,ncsAction)
+  <1>1. TypeOK /\ Inv4690_2f61_R0_0_I2 /\ ncsAction => Inv4690_2f61_R0_0_I2' BY DEF TypeOK,ncsAction,ncs,Inv4690_2f61_R0_0_I2,\prec
+  \* (Inv4690_2f61_R0_0_I2,e1aAction)
+  <1>2. TypeOK /\ Inv4690_2f61_R0_0_I2 /\ e1aAction => Inv4690_2f61_R0_0_I2' BY DEF TypeOK,e1aAction,e1a,Inv4690_2f61_R0_0_I2,\prec
+  \* (Inv4690_2f61_R0_0_I2,e1bAction)
+  <1>3. TypeOK /\ Inv4690_2f61_R0_0_I2 /\ e1bAction => Inv4690_2f61_R0_0_I2' BY DEF TypeOK,e1bAction,e1b,Inv4690_2f61_R0_0_I2,\prec
+  \* (Inv4690_2f61_R0_0_I2,e2aAction)
+  <1>4. TypeOK /\ Inv4690_2f61_R0_0_I2 /\ e2aAction => Inv4690_2f61_R0_0_I2' BY DEF TypeOK,e2aAction,e2a,Inv4690_2f61_R0_0_I2,\prec,Procs
+  \* (Inv4690_2f61_R0_0_I2,e2bAction)
+  <1>5. TypeOK /\ Inv4690_2f61_R0_0_I2 /\ e2bAction => Inv4690_2f61_R0_0_I2' BY DEF TypeOK,e2bAction,e2b,Inv4690_2f61_R0_0_I2,\prec
+  \* (Inv4690_2f61_R0_0_I2,e3aAction)
+  <1>6. TypeOK /\ Inv4690_2f61_R0_0_I2 /\ e3aAction => Inv4690_2f61_R0_0_I2' BY DEF TypeOK,e3aAction,e3a,Inv4690_2f61_R0_0_I2,\prec
+  \* (Inv4690_2f61_R0_0_I2,e3bAction)
+  <1>7. TypeOK /\ Inv4690_2f61_R0_0_I2 /\ e3bAction => Inv4690_2f61_R0_0_I2' BY DEF TypeOK,e3bAction,e3b,Inv4690_2f61_R0_0_I2,\prec,\prec
+  \* (Inv4690_2f61_R0_0_I2,e4aAction)
+  <1>8. TypeOK /\ Inv4690_2f61_R0_0_I2 /\ e4aAction => Inv4690_2f61_R0_0_I2' BY DEF TypeOK,e4aAction,e4a,Inv4690_2f61_R0_0_I2,\prec
+  \* (Inv4690_2f61_R0_0_I2,e4bAction)
+  <1>9. TypeOK /\ Inv4690_2f61_R0_0_I2 /\ e4bAction => Inv4690_2f61_R0_0_I2' BY DEF TypeOK,e4bAction,e4b,Inv4690_2f61_R0_0_I2,\prec,\prec
+  \* (Inv4690_2f61_R0_0_I2,w1aAction)
+  <1>10. TypeOK /\ Inv4690_2f61_R0_0_I2 /\ w1aAction => Inv4690_2f61_R0_0_I2' BY DEF TypeOK,w1aAction,w1a,Inv4690_2f61_R0_0_I2,\prec,\prec
+  \* (Inv4690_2f61_R0_0_I2,w1bAction)
+  <1>11. TypeOK /\ Inv4520_48f3_R1_0_I2 /\ Inv4690_2f61_R0_0_I2 /\ w1bAction => Inv4690_2f61_R0_0_I2' BY DEF TypeOK,Inv4520_48f3_R1_0_I2,w1bAction,w1b,Inv4690_2f61_R0_0_I2,\prec,\prec
+  \* (Inv4690_2f61_R0_0_I2,w2Action)
+  <1>12. TypeOK /\ Inv24959_7f87_R1_1_I2 /\ Inv5819_32cd_R1_1_I2 /\ Inv4576_59b1_R1_1_I2 /\ Inv4521_3f08_R1_1_I2 /\ Inv4690_2f61_R0_0_I2 /\ w2Action => Inv4690_2f61_R0_0_I2' BY DEF TypeOK,Inv24959_7f87_R1_1_I2,Inv5819_32cd_R1_1_I2,Inv4576_59b1_R1_1_I2,Inv4521_3f08_R1_1_I2,w2Action,w2,Inv4690_2f61_R0_0_I2,\prec,\prec
+  \* (Inv4690_2f61_R0_0_I2,csAction)
+  <1>13. TypeOK /\ Inv4690_2f61_R0_0_I2 /\ csAction => Inv4690_2f61_R0_0_I2' BY DEF TypeOK,csAction,cs,Inv4690_2f61_R0_0_I2,\prec
+  \* (Inv4690_2f61_R0_0_I2,exitAction)
+  <1>14. TypeOK /\ Inv4690_2f61_R0_0_I2 /\ exitAction => Inv4690_2f61_R0_0_I2' BY DEF TypeOK,exitAction,exit,Inv4690_2f61_R0_0_I2,\prec
 <1>15. QED BY <1>1,<1>2,<1>3,<1>4,<1>5,<1>6,<1>7,<1>8,<1>9,<1>10,<1>11,<1>12,<1>13,<1>14 DEF Next
 
 
-\*** Inv3155_48f3_R1_0_I2
-THEOREM L_3 == TypeOK /\ Inv6938_a43e_R2_0_I3 /\ Inv26_b6ff_R2_0_I3 /\ Inv3155_48f3_R1_0_I2 /\ Next => Inv3155_48f3_R1_0_I2'
+\*** Inv4520_48f3_R1_0_I2
+THEOREM L_3 == TypeOK /\ Inv10_8778_R2_0_I3 /\ Inv5742_3d78_R2_0_I3 /\ Inv80_b6ff_R2_0_I3 /\ Inv1922_5e75_R2_0_I3 /\ Inv4520_48f3_R1_0_I2 /\ Next => Inv4520_48f3_R1_0_I2'
   <1>. USE A0
-  \* (Inv3155_48f3_R1_0_I2,ncsAction)
-  <1>1. TypeOK /\ Inv3155_48f3_R1_0_I2 /\ ncsAction => Inv3155_48f3_R1_0_I2' BY DEF TypeOK,ncsAction,ncs,Inv3155_48f3_R1_0_I2,\prec
-  \* (Inv3155_48f3_R1_0_I2,e1aAction)
-  <1>2. TypeOK /\ Inv3155_48f3_R1_0_I2 /\ e1aAction => Inv3155_48f3_R1_0_I2' BY DEF TypeOK,e1aAction,e1a,Inv3155_48f3_R1_0_I2,\prec
-  \* (Inv3155_48f3_R1_0_I2,e1bAction)
-  <1>3. TypeOK /\ Inv3155_48f3_R1_0_I2 /\ e1bAction => Inv3155_48f3_R1_0_I2' BY DEF TypeOK,e1bAction,e1b,Inv3155_48f3_R1_0_I2,\prec
-  \* (Inv3155_48f3_R1_0_I2,e2aAction)
-  <1>4. TypeOK /\ Inv3155_48f3_R1_0_I2 /\ e2aAction => Inv3155_48f3_R1_0_I2' BY DEF TypeOK,e2aAction,e2a,Inv3155_48f3_R1_0_I2,\prec,Procs
-  \* (Inv3155_48f3_R1_0_I2,e2bAction)
-  <1>5. TypeOK /\ Inv3155_48f3_R1_0_I2 /\ e2bAction => Inv3155_48f3_R1_0_I2' BY DEF TypeOK,e2bAction,e2b,Inv3155_48f3_R1_0_I2,\prec
-  \* (Inv3155_48f3_R1_0_I2,e3aAction)
-  <1>6. TypeOK /\ Inv3155_48f3_R1_0_I2 /\ e3aAction => Inv3155_48f3_R1_0_I2' BY DEF TypeOK,e3aAction,e3a,Inv3155_48f3_R1_0_I2,\prec
-  \* (Inv3155_48f3_R1_0_I2,e3bAction)
-  <1>7. TypeOK /\ Inv3155_48f3_R1_0_I2 /\ e3bAction => Inv3155_48f3_R1_0_I2' BY DEF TypeOK,e3bAction,e3b,Inv3155_48f3_R1_0_I2,\prec,\prec
-  \* (Inv3155_48f3_R1_0_I2,e4aAction)
-  <1>8. TypeOK /\ Inv3155_48f3_R1_0_I2 /\ e4aAction => Inv3155_48f3_R1_0_I2' BY DEF TypeOK,e4aAction,e4a,Inv3155_48f3_R1_0_I2,\prec
-  \* (Inv3155_48f3_R1_0_I2,e4bAction)
-  <1>9. TypeOK /\ Inv3155_48f3_R1_0_I2 /\ e4bAction => Inv3155_48f3_R1_0_I2' BY DEF TypeOK,e4bAction,e4b,Inv3155_48f3_R1_0_I2,\prec,\prec
-  \* (Inv3155_48f3_R1_0_I2,w1aAction)
-  <1>10. TypeOK /\ Inv3155_48f3_R1_0_I2 /\ w1aAction => Inv3155_48f3_R1_0_I2' BY DEF TypeOK,w1aAction,w1a,Inv3155_48f3_R1_0_I2,\prec,\prec
-  \* (Inv3155_48f3_R1_0_I2,w1bAction)
-  <1>11. TypeOK /\ Inv3155_48f3_R1_0_I2 /\ w1bAction => Inv3155_48f3_R1_0_I2' BY DEF TypeOK,w1bAction,w1b,Inv3155_48f3_R1_0_I2,\prec,\prec
-  \* (Inv3155_48f3_R1_0_I2,w2Action)
-  <1>12. TypeOK /\ Inv6938_a43e_R2_0_I3 /\ Inv26_b6ff_R2_0_I3 /\ Inv3155_48f3_R1_0_I2 /\ w2Action => Inv3155_48f3_R1_0_I2' BY DEF TypeOK,Inv6938_a43e_R2_0_I3,Inv26_b6ff_R2_0_I3,w2Action,w2,Inv3155_48f3_R1_0_I2,\prec,\prec
-  \* (Inv3155_48f3_R1_0_I2,csAction)
-  <1>13. TypeOK /\ Inv3155_48f3_R1_0_I2 /\ csAction => Inv3155_48f3_R1_0_I2' BY DEF TypeOK,csAction,cs,Inv3155_48f3_R1_0_I2,\prec
-  \* (Inv3155_48f3_R1_0_I2,exitAction)
-  <1>14. TypeOK /\ Inv3155_48f3_R1_0_I2 /\ exitAction => Inv3155_48f3_R1_0_I2' BY DEF TypeOK,exitAction,exit,Inv3155_48f3_R1_0_I2,\prec
+  \* (Inv4520_48f3_R1_0_I2,ncsAction)
+  <1>1. TypeOK /\ Inv4520_48f3_R1_0_I2 /\ ncsAction => Inv4520_48f3_R1_0_I2' BY DEF TypeOK,ncsAction,ncs,Inv4520_48f3_R1_0_I2,\prec
+  \* (Inv4520_48f3_R1_0_I2,e1aAction)
+  <1>2. TypeOK /\ Inv4520_48f3_R1_0_I2 /\ e1aAction => Inv4520_48f3_R1_0_I2' BY DEF TypeOK,e1aAction,e1a,Inv4520_48f3_R1_0_I2,\prec
+  \* (Inv4520_48f3_R1_0_I2,e1bAction)
+  <1>3. TypeOK /\ Inv4520_48f3_R1_0_I2 /\ e1bAction => Inv4520_48f3_R1_0_I2' BY DEF TypeOK,e1bAction,e1b,Inv4520_48f3_R1_0_I2,\prec
+  \* (Inv4520_48f3_R1_0_I2,e2aAction)
+  <1>4. TypeOK /\ Inv4520_48f3_R1_0_I2 /\ e2aAction => Inv4520_48f3_R1_0_I2' BY DEF TypeOK,e2aAction,e2a,Inv4520_48f3_R1_0_I2,\prec,Procs
+  \* (Inv4520_48f3_R1_0_I2,e2bAction)
+  <1>5. TypeOK /\ Inv4520_48f3_R1_0_I2 /\ e2bAction => Inv4520_48f3_R1_0_I2' BY DEF TypeOK,e2bAction,e2b,Inv4520_48f3_R1_0_I2,\prec
+  \* (Inv4520_48f3_R1_0_I2,e3aAction)
+  <1>6. TypeOK /\ Inv4520_48f3_R1_0_I2 /\ e3aAction => Inv4520_48f3_R1_0_I2' BY DEF TypeOK,e3aAction,e3a,Inv4520_48f3_R1_0_I2,\prec
+  \* (Inv4520_48f3_R1_0_I2,e3bAction)
+  <1>7. TypeOK /\ Inv4520_48f3_R1_0_I2 /\ e3bAction => Inv4520_48f3_R1_0_I2' BY DEF TypeOK,e3bAction,e3b,Inv4520_48f3_R1_0_I2,\prec,\prec
+  \* (Inv4520_48f3_R1_0_I2,e4aAction)
+  <1>8. TypeOK /\ Inv4520_48f3_R1_0_I2 /\ e4aAction => Inv4520_48f3_R1_0_I2' BY DEF TypeOK,e4aAction,e4a,Inv4520_48f3_R1_0_I2,\prec
+  \* (Inv4520_48f3_R1_0_I2,e4bAction)
+  <1>9. TypeOK /\ Inv4520_48f3_R1_0_I2 /\ e4bAction => Inv4520_48f3_R1_0_I2' BY DEF TypeOK,e4bAction,e4b,Inv4520_48f3_R1_0_I2,\prec,\prec
+  \* (Inv4520_48f3_R1_0_I2,w1aAction)
+  <1>10. TypeOK /\ Inv4520_48f3_R1_0_I2 /\ w1aAction => Inv4520_48f3_R1_0_I2' BY DEF TypeOK,w1aAction,w1a,Inv4520_48f3_R1_0_I2,\prec,\prec
+  \* (Inv4520_48f3_R1_0_I2,w1bAction)
+  <1>11. TypeOK /\ Inv4520_48f3_R1_0_I2 /\ w1bAction => Inv4520_48f3_R1_0_I2' BY DEF TypeOK,w1bAction,w1b,Inv4520_48f3_R1_0_I2,\prec,\prec
+  \* (Inv4520_48f3_R1_0_I2,w2Action)
+  <1>12. TypeOK /\ Inv10_8778_R2_0_I3 /\ Inv5742_3d78_R2_0_I3 /\ Inv80_b6ff_R2_0_I3 /\ Inv1922_5e75_R2_0_I3 /\ Inv4520_48f3_R1_0_I2 /\ w2Action => Inv4520_48f3_R1_0_I2' BY DEF TypeOK,Inv10_8778_R2_0_I3,Inv5742_3d78_R2_0_I3,Inv80_b6ff_R2_0_I3,Inv1922_5e75_R2_0_I3,w2Action,w2,Inv4520_48f3_R1_0_I2,\prec,\prec
+  \* (Inv4520_48f3_R1_0_I2,csAction)
+  <1>13. TypeOK /\ Inv4520_48f3_R1_0_I2 /\ csAction => Inv4520_48f3_R1_0_I2' BY DEF TypeOK,csAction,cs,Inv4520_48f3_R1_0_I2,\prec
+  \* (Inv4520_48f3_R1_0_I2,exitAction)
+  <1>14. TypeOK /\ Inv4520_48f3_R1_0_I2 /\ exitAction => Inv4520_48f3_R1_0_I2' BY DEF TypeOK,exitAction,exit,Inv4520_48f3_R1_0_I2,\prec
 <1>15. QED BY <1>1,<1>2,<1>3,<1>4,<1>5,<1>6,<1>7,<1>8,<1>9,<1>10,<1>11,<1>12,<1>13,<1>14 DEF Next
 
 
-\*** Inv6938_a43e_R2_0_I3
-THEOREM L_4 == TypeOK /\ Inv14061_f302_R7_0_I3 /\ Inv11_73d9_R7_1_I1 /\ Inv6938_a43e_R2_0_I3 /\ Next => Inv6938_a43e_R2_0_I3'
+\*** Inv10_8778_R2_0_I3
+THEOREM L_4 == TypeOK /\ Inv10_8778_R2_0_I3 /\ Next => Inv10_8778_R2_0_I3'
   <1>. USE A0
-  \* (Inv6938_a43e_R2_0_I3,ncsAction)
-  <1>1. TypeOK /\ Inv6938_a43e_R2_0_I3 /\ ncsAction => Inv6938_a43e_R2_0_I3' BY DEF TypeOK,ncsAction,ncs,Inv6938_a43e_R2_0_I3,\prec
-  \* (Inv6938_a43e_R2_0_I3,e1aAction)
-  <1>2. TypeOK /\ Inv6938_a43e_R2_0_I3 /\ e1aAction => Inv6938_a43e_R2_0_I3' BY DEF TypeOK,e1aAction,e1a,Inv6938_a43e_R2_0_I3,\prec
-  \* (Inv6938_a43e_R2_0_I3,e1bAction)
-  <1>3. TypeOK /\ Inv6938_a43e_R2_0_I3 /\ e1bAction => Inv6938_a43e_R2_0_I3' BY DEF TypeOK,e1bAction,e1b,Inv6938_a43e_R2_0_I3,\prec
-  \* (Inv6938_a43e_R2_0_I3,e2aAction)
-  <1>4. TypeOK /\ Inv6938_a43e_R2_0_I3 /\ e2aAction => Inv6938_a43e_R2_0_I3' BY DEF TypeOK,e2aAction,e2a,Inv6938_a43e_R2_0_I3,\prec,Procs
-  \* (Inv6938_a43e_R2_0_I3,e2bAction)
-  <1>5. TypeOK /\ Inv6938_a43e_R2_0_I3 /\ e2bAction => Inv6938_a43e_R2_0_I3' BY DEF TypeOK,e2bAction,e2b,Inv6938_a43e_R2_0_I3,\prec
-  \* (Inv6938_a43e_R2_0_I3,e3aAction)
-  <1>6. TypeOK /\ Inv6938_a43e_R2_0_I3 /\ e3aAction => Inv6938_a43e_R2_0_I3' BY DEF TypeOK,e3aAction,e3a,Inv6938_a43e_R2_0_I3,\prec
-  \* (Inv6938_a43e_R2_0_I3,e3bAction)
-  <1>7. TypeOK /\ Inv14061_f302_R7_0_I3 /\ Inv6938_a43e_R2_0_I3 /\ e3bAction => Inv6938_a43e_R2_0_I3' BY DEF TypeOK,Inv14061_f302_R7_0_I3,e3bAction,e3b,Inv6938_a43e_R2_0_I3,\prec,\prec
-  \* (Inv6938_a43e_R2_0_I3,e4aAction)
-  <1>8. TypeOK /\ Inv6938_a43e_R2_0_I3 /\ e4aAction => Inv6938_a43e_R2_0_I3' BY DEF TypeOK,e4aAction,e4a,Inv6938_a43e_R2_0_I3,\prec
-  \* (Inv6938_a43e_R2_0_I3,e4bAction)
-  <1>9. TypeOK /\ Inv6938_a43e_R2_0_I3 /\ e4bAction => Inv6938_a43e_R2_0_I3' BY DEF TypeOK,e4bAction,e4b,Inv6938_a43e_R2_0_I3,\prec,\prec
-  \* (Inv6938_a43e_R2_0_I3,w1aAction)
-  <1>10. TypeOK /\ Inv6938_a43e_R2_0_I3 /\ w1aAction => Inv6938_a43e_R2_0_I3' BY DEF TypeOK,w1aAction,w1a,Inv6938_a43e_R2_0_I3,\prec,\prec
-  \* (Inv6938_a43e_R2_0_I3,w1bAction)
-  <1>11. TypeOK /\ Inv6938_a43e_R2_0_I3 /\ w1bAction => Inv6938_a43e_R2_0_I3' BY DEF TypeOK,w1bAction,w1b,Inv6938_a43e_R2_0_I3,\prec,\prec
-  \* (Inv6938_a43e_R2_0_I3,w2Action)
-  <1>12. TypeOK /\ Inv11_73d9_R7_1_I1 /\ Inv6938_a43e_R2_0_I3 /\ w2Action => Inv6938_a43e_R2_0_I3' BY DEF TypeOK,Inv11_73d9_R7_1_I1,w2Action,w2,Inv6938_a43e_R2_0_I3,\prec,\prec
-  \* (Inv6938_a43e_R2_0_I3,csAction)
-  <1>13. TypeOK /\ Inv6938_a43e_R2_0_I3 /\ csAction => Inv6938_a43e_R2_0_I3' BY DEF TypeOK,csAction,cs,Inv6938_a43e_R2_0_I3,\prec
-  \* (Inv6938_a43e_R2_0_I3,exitAction)
-  <1>14. TypeOK /\ Inv6938_a43e_R2_0_I3 /\ exitAction => Inv6938_a43e_R2_0_I3' BY DEF TypeOK,exitAction,exit,Inv6938_a43e_R2_0_I3,\prec
+  \* (Inv10_8778_R2_0_I3,ncsAction)
+  <1>1. TypeOK /\ Inv10_8778_R2_0_I3 /\ ncsAction => Inv10_8778_R2_0_I3' BY DEF TypeOK,ncsAction,ncs,Inv10_8778_R2_0_I3,\prec
+  \* (Inv10_8778_R2_0_I3,e1aAction)
+  <1>2. TypeOK /\ Inv10_8778_R2_0_I3 /\ e1aAction => Inv10_8778_R2_0_I3' BY DEF TypeOK,e1aAction,e1a,Inv10_8778_R2_0_I3,\prec
+  \* (Inv10_8778_R2_0_I3,e1bAction)
+  <1>3. TypeOK /\ Inv10_8778_R2_0_I3 /\ e1bAction => Inv10_8778_R2_0_I3' BY DEF TypeOK,e1bAction,e1b,Inv10_8778_R2_0_I3,\prec
+  \* (Inv10_8778_R2_0_I3,e2aAction)
+  <1>4. TypeOK /\ Inv10_8778_R2_0_I3 /\ e2aAction => Inv10_8778_R2_0_I3' BY DEF TypeOK,e2aAction,e2a,Inv10_8778_R2_0_I3,\prec,Procs
+  \* (Inv10_8778_R2_0_I3,e2bAction)
+  <1>5. TypeOK /\ Inv10_8778_R2_0_I3 /\ e2bAction => Inv10_8778_R2_0_I3' BY DEF TypeOK,e2bAction,e2b,Inv10_8778_R2_0_I3,\prec
+  \* (Inv10_8778_R2_0_I3,e3aAction)
+  <1>6. TypeOK /\ Inv10_8778_R2_0_I3 /\ e3aAction => Inv10_8778_R2_0_I3' BY DEF TypeOK,e3aAction,e3a,Inv10_8778_R2_0_I3,\prec
+  \* (Inv10_8778_R2_0_I3,e3bAction)
+  <1>7. TypeOK /\ Inv10_8778_R2_0_I3 /\ e3bAction => Inv10_8778_R2_0_I3' BY DEF TypeOK,e3bAction,e3b,Inv10_8778_R2_0_I3,\prec,\prec
+  \* (Inv10_8778_R2_0_I3,e4aAction)
+  <1>8. TypeOK /\ Inv10_8778_R2_0_I3 /\ e4aAction => Inv10_8778_R2_0_I3' BY DEF TypeOK,e4aAction,e4a,Inv10_8778_R2_0_I3,\prec
+  \* (Inv10_8778_R2_0_I3,e4bAction)
+  <1>9. TypeOK /\ Inv10_8778_R2_0_I3 /\ e4bAction => Inv10_8778_R2_0_I3' BY DEF TypeOK,e4bAction,e4b,Inv10_8778_R2_0_I3,\prec,\prec
+  \* (Inv10_8778_R2_0_I3,w1aAction)
+  <1>10. TypeOK /\ Inv10_8778_R2_0_I3 /\ w1aAction => Inv10_8778_R2_0_I3' BY DEF TypeOK,w1aAction,w1a,Inv10_8778_R2_0_I3,\prec,\prec
+  \* (Inv10_8778_R2_0_I3,w1bAction)
+  <1>11. TypeOK /\ Inv10_8778_R2_0_I3 /\ w1bAction => Inv10_8778_R2_0_I3' BY DEF TypeOK,w1bAction,w1b,Inv10_8778_R2_0_I3,\prec,\prec
+  \* (Inv10_8778_R2_0_I3,w2Action)
+  <1>12. TypeOK /\ Inv10_8778_R2_0_I3 /\ w2Action => Inv10_8778_R2_0_I3' BY DEF TypeOK,w2Action,w2,Inv10_8778_R2_0_I3,\prec,\prec
+  \* (Inv10_8778_R2_0_I3,csAction)
+  <1>13. TypeOK /\ Inv10_8778_R2_0_I3 /\ csAction => Inv10_8778_R2_0_I3' BY DEF TypeOK,csAction,cs,Inv10_8778_R2_0_I3,\prec
+  \* (Inv10_8778_R2_0_I3,exitAction)
+  <1>14. TypeOK /\ Inv10_8778_R2_0_I3 /\ exitAction => Inv10_8778_R2_0_I3' BY DEF TypeOK,exitAction,exit,Inv10_8778_R2_0_I3,\prec
 <1>15. QED BY <1>1,<1>2,<1>3,<1>4,<1>5,<1>6,<1>7,<1>8,<1>9,<1>10,<1>11,<1>12,<1>13,<1>14 DEF Next
 
 
-\*** Inv14061_f302_R7_0_I3
-THEOREM L_5 == TypeOK /\ Inv0_b3ba_R10_0_I0 /\ Inv5493_34f2_R10_1_I2 /\ Inv14061_f302_R7_0_I3 /\ Next => Inv14061_f302_R7_0_I3'
+\*** Inv5742_3d78_R2_0_I3
+THEOREM L_5 == TypeOK /\ Inv11_3838_R8_0_I2 /\ Inv61_df69_R8_0_I2 /\ Inv1922_5e75_R2_0_I3 /\ Inv1028_6ea5_R8_0_I2 /\ Inv5742_3d78_R2_0_I3 /\ Next => Inv5742_3d78_R2_0_I3'
   <1>. USE A0
-  \* (Inv14061_f302_R7_0_I3,ncsAction)
-  <1>1. TypeOK /\ Inv14061_f302_R7_0_I3 /\ ncsAction => Inv14061_f302_R7_0_I3' BY DEF TypeOK,ncsAction,ncs,Inv14061_f302_R7_0_I3,\prec
-  \* (Inv14061_f302_R7_0_I3,e1aAction)
-  <1>2. TypeOK /\ Inv14061_f302_R7_0_I3 /\ e1aAction => Inv14061_f302_R7_0_I3' BY DEF TypeOK,e1aAction,e1a,Inv14061_f302_R7_0_I3,\prec
-  \* (Inv14061_f302_R7_0_I3,e1bAction)
-  <1>3. TypeOK /\ Inv14061_f302_R7_0_I3 /\ e1bAction => Inv14061_f302_R7_0_I3' BY DEF TypeOK,e1bAction,e1b,Inv14061_f302_R7_0_I3,\prec
-  \* (Inv14061_f302_R7_0_I3,e2aAction)
-  <1>4. TypeOK /\ Inv14061_f302_R7_0_I3 /\ e2aAction => Inv14061_f302_R7_0_I3' BY DEF TypeOK,e2aAction,e2a,Inv14061_f302_R7_0_I3,\prec,Procs
-  \* (Inv14061_f302_R7_0_I3,e2bAction)
-  <1>5. TypeOK /\ Inv0_b3ba_R10_0_I0 /\ Inv14061_f302_R7_0_I3 /\ e2bAction => Inv14061_f302_R7_0_I3' BY DEF TypeOK,Inv0_b3ba_R10_0_I0,e2bAction,e2b,Inv14061_f302_R7_0_I3,\prec
-  \* (Inv14061_f302_R7_0_I3,e3aAction)
-  <1>6. TypeOK /\ Inv14061_f302_R7_0_I3 /\ e3aAction => Inv14061_f302_R7_0_I3' BY DEF TypeOK,e3aAction,e3a,Inv14061_f302_R7_0_I3,\prec
-  \* (Inv14061_f302_R7_0_I3,e3bAction)
-  <1>7. TypeOK /\ Inv14061_f302_R7_0_I3 /\ e3bAction => Inv14061_f302_R7_0_I3' BY DEF TypeOK,e3bAction,e3b,Inv14061_f302_R7_0_I3,\prec,\prec
-  \* (Inv14061_f302_R7_0_I3,e4aAction)
-  <1>8. TypeOK /\ Inv14061_f302_R7_0_I3 /\ e4aAction => Inv14061_f302_R7_0_I3' BY DEF TypeOK,e4aAction,e4a,Inv14061_f302_R7_0_I3,\prec
-  \* (Inv14061_f302_R7_0_I3,e4bAction)
-  <1>9. TypeOK /\ Inv14061_f302_R7_0_I3 /\ e4bAction => Inv14061_f302_R7_0_I3' BY DEF TypeOK,e4bAction,e4b,Inv14061_f302_R7_0_I3,\prec,\prec
-  \* (Inv14061_f302_R7_0_I3,w1aAction)
-  <1>10. TypeOK /\ Inv14061_f302_R7_0_I3 /\ w1aAction => Inv14061_f302_R7_0_I3' BY DEF TypeOK,w1aAction,w1a,Inv14061_f302_R7_0_I3,\prec,\prec
-  \* (Inv14061_f302_R7_0_I3,w1bAction)
-  <1>11. TypeOK /\ Inv14061_f302_R7_0_I3 /\ w1bAction => Inv14061_f302_R7_0_I3' BY DEF TypeOK,w1bAction,w1b,Inv14061_f302_R7_0_I3,\prec,\prec
-  \* (Inv14061_f302_R7_0_I3,w2Action)
-  <1>12. TypeOK /\ Inv5493_34f2_R10_1_I2 /\ Inv14061_f302_R7_0_I3 /\ w2Action => Inv14061_f302_R7_0_I3' BY DEF TypeOK,Inv5493_34f2_R10_1_I2,w2Action,w2,Inv14061_f302_R7_0_I3,\prec,\prec
-  \* (Inv14061_f302_R7_0_I3,csAction)
-  <1>13. TypeOK /\ Inv14061_f302_R7_0_I3 /\ csAction => Inv14061_f302_R7_0_I3' BY DEF TypeOK,csAction,cs,Inv14061_f302_R7_0_I3,\prec
-  \* (Inv14061_f302_R7_0_I3,exitAction)
-  <1>14. TypeOK /\ Inv14061_f302_R7_0_I3 /\ exitAction => Inv14061_f302_R7_0_I3' BY DEF TypeOK,exitAction,exit,Inv14061_f302_R7_0_I3,\prec
+  \* (Inv5742_3d78_R2_0_I3,ncsAction)
+  <1>1. TypeOK /\ Inv5742_3d78_R2_0_I3 /\ ncsAction => Inv5742_3d78_R2_0_I3' BY DEF TypeOK,ncsAction,ncs,Inv5742_3d78_R2_0_I3,\prec
+  \* (Inv5742_3d78_R2_0_I3,e1aAction)
+  <1>2. TypeOK /\ Inv5742_3d78_R2_0_I3 /\ e1aAction => Inv5742_3d78_R2_0_I3' BY DEF TypeOK,e1aAction,e1a,Inv5742_3d78_R2_0_I3,\prec
+  \* (Inv5742_3d78_R2_0_I3,e1bAction)
+  <1>3. TypeOK /\ Inv5742_3d78_R2_0_I3 /\ e1bAction => Inv5742_3d78_R2_0_I3' BY DEF TypeOK,e1bAction,e1b,Inv5742_3d78_R2_0_I3,\prec
+  \* (Inv5742_3d78_R2_0_I3,e2aAction)
+  <1>4. TypeOK /\ Inv5742_3d78_R2_0_I3 /\ e2aAction => Inv5742_3d78_R2_0_I3' BY DEF TypeOK,e2aAction,e2a,Inv5742_3d78_R2_0_I3,\prec,Procs
+  \* (Inv5742_3d78_R2_0_I3,e2bAction)
+  <1>5. TypeOK /\ Inv5742_3d78_R2_0_I3 /\ e2bAction => Inv5742_3d78_R2_0_I3' BY DEF TypeOK,e2bAction,e2b,Inv5742_3d78_R2_0_I3,\prec
+  \* (Inv5742_3d78_R2_0_I3,e3aAction)
+  <1>6. TypeOK /\ Inv5742_3d78_R2_0_I3 /\ e3aAction => Inv5742_3d78_R2_0_I3' BY DEF TypeOK,e3aAction,e3a,Inv5742_3d78_R2_0_I3,\prec
+  \* (Inv5742_3d78_R2_0_I3,e3bAction)
+  <1>7. TypeOK /\ Inv5742_3d78_R2_0_I3 /\ e3bAction => Inv5742_3d78_R2_0_I3' BY DEF TypeOK,e3bAction,e3b,Inv5742_3d78_R2_0_I3,\prec,\prec
+  \* (Inv5742_3d78_R2_0_I3,e4aAction)
+  <1>8. TypeOK /\ Inv5742_3d78_R2_0_I3 /\ e4aAction => Inv5742_3d78_R2_0_I3' BY DEF TypeOK,e4aAction,e4a,Inv5742_3d78_R2_0_I3,\prec
+  \* (Inv5742_3d78_R2_0_I3,e4bAction)
+  <1>9. TypeOK /\ Inv5742_3d78_R2_0_I3 /\ e4bAction => Inv5742_3d78_R2_0_I3' BY DEF TypeOK,e4bAction,e4b,Inv5742_3d78_R2_0_I3,\prec,\prec
+  \* (Inv5742_3d78_R2_0_I3,w1aAction)
+  <1>10. TypeOK /\ Inv11_3838_R8_0_I2 /\ Inv61_df69_R8_0_I2 /\ Inv1922_5e75_R2_0_I3 /\ Inv1028_6ea5_R8_0_I2 /\ Inv5742_3d78_R2_0_I3 /\ w1aAction => Inv5742_3d78_R2_0_I3' BY DEF TypeOK,Inv11_3838_R8_0_I2,Inv61_df69_R8_0_I2,Inv1922_5e75_R2_0_I3,Inv1028_6ea5_R8_0_I2,w1aAction,w1a,Inv5742_3d78_R2_0_I3,\prec,\prec
+  \* (Inv5742_3d78_R2_0_I3,w1bAction)
+  <1>11. TypeOK /\ Inv5742_3d78_R2_0_I3 /\ w1bAction => Inv5742_3d78_R2_0_I3' BY DEF TypeOK,w1bAction,w1b,Inv5742_3d78_R2_0_I3,\prec,\prec
+  \* (Inv5742_3d78_R2_0_I3,w2Action)
+  <1>12. TypeOK /\ Inv5742_3d78_R2_0_I3 /\ w2Action => Inv5742_3d78_R2_0_I3' BY DEF TypeOK,w2Action,w2,Inv5742_3d78_R2_0_I3,\prec,\prec
+  \* (Inv5742_3d78_R2_0_I3,csAction)
+  <1>13. TypeOK /\ Inv5742_3d78_R2_0_I3 /\ csAction => Inv5742_3d78_R2_0_I3' BY DEF TypeOK,csAction,cs,Inv5742_3d78_R2_0_I3,\prec
+  \* (Inv5742_3d78_R2_0_I3,exitAction)
+  <1>14. TypeOK /\ Inv5742_3d78_R2_0_I3 /\ exitAction => Inv5742_3d78_R2_0_I3' BY DEF TypeOK,exitAction,exit,Inv5742_3d78_R2_0_I3,\prec
 <1>15. QED BY <1>1,<1>2,<1>3,<1>4,<1>5,<1>6,<1>7,<1>8,<1>9,<1>10,<1>11,<1>12,<1>13,<1>14 DEF Next
 
 
-\*** Inv0_b3ba_R10_0_I0
-THEOREM L_6 == TypeOK /\ Inv1_b58a_R13_0_I1 /\ Inv738_26ef_R13_1_I2 /\ Inv0_b3ba_R10_0_I0 /\ Next => Inv0_b3ba_R10_0_I0'
+\*** Inv11_3838_R8_0_I2
+THEOREM L_6 == TypeOK /\ Inv11_3838_R8_0_I2 /\ Next => Inv11_3838_R8_0_I2'
   <1>. USE A0
-  \* (Inv0_b3ba_R10_0_I0,ncsAction)
-  <1>1. TypeOK /\ Inv0_b3ba_R10_0_I0 /\ ncsAction => Inv0_b3ba_R10_0_I0' BY DEF TypeOK,ncsAction,ncs,Inv0_b3ba_R10_0_I0,\prec
-  \* (Inv0_b3ba_R10_0_I0,e1aAction)
-  <1>2. TypeOK /\ Inv0_b3ba_R10_0_I0 /\ e1aAction => Inv0_b3ba_R10_0_I0' BY DEF TypeOK,e1aAction,e1a,Inv0_b3ba_R10_0_I0,\prec
-  \* (Inv0_b3ba_R10_0_I0,e1bAction)
-  <1>3. TypeOK /\ Inv0_b3ba_R10_0_I0 /\ e1bAction => Inv0_b3ba_R10_0_I0' BY DEF TypeOK,e1bAction,e1b,Inv0_b3ba_R10_0_I0,\prec
-  \* (Inv0_b3ba_R10_0_I0,e2aAction)
-  <1>4. TypeOK /\ Inv1_b58a_R13_0_I1 /\ Inv0_b3ba_R10_0_I0 /\ e2aAction => Inv0_b3ba_R10_0_I0' 
-    <2> SUFFICES ASSUME TypeOK /\ Inv1_b58a_R13_0_I1 /\ Inv0_b3ba_R10_0_I0 /\ e2aAction,
+  \* (Inv11_3838_R8_0_I2,ncsAction)
+  <1>1. TypeOK /\ Inv11_3838_R8_0_I2 /\ ncsAction => Inv11_3838_R8_0_I2' BY DEF TypeOK,ncsAction,ncs,Inv11_3838_R8_0_I2,\prec
+  \* (Inv11_3838_R8_0_I2,e1aAction)
+  <1>2. TypeOK /\ Inv11_3838_R8_0_I2 /\ e1aAction => Inv11_3838_R8_0_I2' BY DEF TypeOK,e1aAction,e1a,Inv11_3838_R8_0_I2,\prec
+  \* (Inv11_3838_R8_0_I2,e1bAction)
+  <1>3. TypeOK /\ Inv11_3838_R8_0_I2 /\ e1bAction => Inv11_3838_R8_0_I2' BY DEF TypeOK,e1bAction,e1b,Inv11_3838_R8_0_I2,\prec
+  \* (Inv11_3838_R8_0_I2,e2aAction)
+  <1>4. TypeOK /\ Inv11_3838_R8_0_I2 /\ e2aAction => Inv11_3838_R8_0_I2' BY DEF TypeOK,e2aAction,e2a,Inv11_3838_R8_0_I2,\prec,Procs
+  \* (Inv11_3838_R8_0_I2,e2bAction)
+  <1>5. TypeOK /\ Inv11_3838_R8_0_I2 /\ e2bAction => Inv11_3838_R8_0_I2' BY DEF TypeOK,e2bAction,e2b,Inv11_3838_R8_0_I2,\prec
+  \* (Inv11_3838_R8_0_I2,e3aAction)
+  <1>6. TypeOK /\ Inv11_3838_R8_0_I2 /\ e3aAction => Inv11_3838_R8_0_I2' BY DEF TypeOK,e3aAction,e3a,Inv11_3838_R8_0_I2,\prec
+  \* (Inv11_3838_R8_0_I2,e3bAction)
+  <1>7. TypeOK /\ Inv11_3838_R8_0_I2 /\ e3bAction => Inv11_3838_R8_0_I2' BY DEF TypeOK,e3bAction,e3b,Inv11_3838_R8_0_I2,\prec,\prec
+  \* (Inv11_3838_R8_0_I2,e4aAction)
+  <1>8. TypeOK /\ Inv11_3838_R8_0_I2 /\ e4aAction => Inv11_3838_R8_0_I2' BY DEF TypeOK,e4aAction,e4a,Inv11_3838_R8_0_I2,\prec
+  \* (Inv11_3838_R8_0_I2,e4bAction)
+  <1>9. TypeOK /\ Inv11_3838_R8_0_I2 /\ e4bAction => Inv11_3838_R8_0_I2' BY DEF TypeOK,e4bAction,e4b,Inv11_3838_R8_0_I2,\prec,\prec
+  \* (Inv11_3838_R8_0_I2,w1aAction)
+  <1>10. TypeOK /\ Inv11_3838_R8_0_I2 /\ w1aAction => Inv11_3838_R8_0_I2' BY DEF TypeOK,w1aAction,w1a,Inv11_3838_R8_0_I2,\prec,\prec
+  \* (Inv11_3838_R8_0_I2,w1bAction)
+  <1>11. TypeOK /\ Inv11_3838_R8_0_I2 /\ w1bAction => Inv11_3838_R8_0_I2' BY DEF TypeOK,w1bAction,w1b,Inv11_3838_R8_0_I2,\prec,\prec
+  \* (Inv11_3838_R8_0_I2,w2Action)
+  <1>12. TypeOK /\ Inv11_3838_R8_0_I2 /\ w2Action => Inv11_3838_R8_0_I2' BY DEF TypeOK,w2Action,w2,Inv11_3838_R8_0_I2,\prec,\prec
+  \* (Inv11_3838_R8_0_I2,csAction)
+  <1>13. TypeOK /\ Inv11_3838_R8_0_I2 /\ csAction => Inv11_3838_R8_0_I2' BY DEF TypeOK,csAction,cs,Inv11_3838_R8_0_I2,\prec
+  \* (Inv11_3838_R8_0_I2,exitAction)
+  <1>14. TypeOK /\ Inv11_3838_R8_0_I2 /\ exitAction => Inv11_3838_R8_0_I2' BY DEF TypeOK,exitAction,exit,Inv11_3838_R8_0_I2,\prec
+<1>15. QED BY <1>1,<1>2,<1>3,<1>4,<1>5,<1>6,<1>7,<1>8,<1>9,<1>10,<1>11,<1>12,<1>13,<1>14 DEF Next
+
+
+\*** Inv61_df69_R8_0_I2
+THEOREM L_7 == TypeOK /\ Inv61_df69_R8_0_I2 /\ Next => Inv61_df69_R8_0_I2'
+  <1>. USE A0
+  \* (Inv61_df69_R8_0_I2,ncsAction)
+  <1>1. TypeOK /\ Inv61_df69_R8_0_I2 /\ ncsAction => Inv61_df69_R8_0_I2' BY DEF TypeOK,ncsAction,ncs,Inv61_df69_R8_0_I2,\prec
+  \* (Inv61_df69_R8_0_I2,e1aAction)
+  <1>2. TypeOK /\ Inv61_df69_R8_0_I2 /\ e1aAction => Inv61_df69_R8_0_I2' BY DEF TypeOK,e1aAction,e1a,Inv61_df69_R8_0_I2,\prec
+  \* (Inv61_df69_R8_0_I2,e1bAction)
+  <1>3. TypeOK /\ Inv61_df69_R8_0_I2 /\ e1bAction => Inv61_df69_R8_0_I2' BY DEF TypeOK,e1bAction,e1b,Inv61_df69_R8_0_I2,\prec
+  \* (Inv61_df69_R8_0_I2,e2aAction)
+  <1>4. TypeOK /\ Inv61_df69_R8_0_I2 /\ e2aAction => Inv61_df69_R8_0_I2' BY DEF TypeOK,e2aAction,e2a,Inv61_df69_R8_0_I2,\prec,Procs
+  \* (Inv61_df69_R8_0_I2,e2bAction)
+  <1>5. TypeOK /\ Inv61_df69_R8_0_I2 /\ e2bAction => Inv61_df69_R8_0_I2' BY DEF TypeOK,e2bAction,e2b,Inv61_df69_R8_0_I2,\prec
+  \* (Inv61_df69_R8_0_I2,e3aAction)
+  <1>6. TypeOK /\ Inv61_df69_R8_0_I2 /\ e3aAction => Inv61_df69_R8_0_I2' BY DEF TypeOK,e3aAction,e3a,Inv61_df69_R8_0_I2,\prec
+  \* (Inv61_df69_R8_0_I2,e3bAction)
+  <1>7. TypeOK /\ Inv61_df69_R8_0_I2 /\ e3bAction => Inv61_df69_R8_0_I2' BY DEF TypeOK,e3bAction,e3b,Inv61_df69_R8_0_I2,\prec,\prec
+  \* (Inv61_df69_R8_0_I2,e4aAction)
+  <1>8. TypeOK /\ Inv61_df69_R8_0_I2 /\ e4aAction => Inv61_df69_R8_0_I2' BY DEF TypeOK,e4aAction,e4a,Inv61_df69_R8_0_I2,\prec
+  \* (Inv61_df69_R8_0_I2,e4bAction)
+  <1>9. TypeOK /\ Inv61_df69_R8_0_I2 /\ e4bAction => Inv61_df69_R8_0_I2' BY DEF TypeOK,e4bAction,e4b,Inv61_df69_R8_0_I2,\prec,\prec
+  \* (Inv61_df69_R8_0_I2,w1aAction)
+  <1>10. TypeOK /\ Inv61_df69_R8_0_I2 /\ w1aAction => Inv61_df69_R8_0_I2' BY DEF TypeOK,w1aAction,w1a,Inv61_df69_R8_0_I2,\prec,\prec
+  \* (Inv61_df69_R8_0_I2,w1bAction)
+  <1>11. TypeOK /\ Inv61_df69_R8_0_I2 /\ w1bAction => Inv61_df69_R8_0_I2' BY DEF TypeOK,w1bAction,w1b,Inv61_df69_R8_0_I2,\prec,\prec
+  \* (Inv61_df69_R8_0_I2,w2Action)
+  <1>12. TypeOK /\ Inv61_df69_R8_0_I2 /\ w2Action => Inv61_df69_R8_0_I2' BY DEF TypeOK,w2Action,w2,Inv61_df69_R8_0_I2,\prec,\prec
+  \* (Inv61_df69_R8_0_I2,csAction)
+  <1>13. TypeOK /\ Inv61_df69_R8_0_I2 /\ csAction => Inv61_df69_R8_0_I2' BY DEF TypeOK,csAction,cs,Inv61_df69_R8_0_I2,\prec
+  \* (Inv61_df69_R8_0_I2,exitAction)
+  <1>14. TypeOK /\ Inv61_df69_R8_0_I2 /\ exitAction => Inv61_df69_R8_0_I2' BY DEF TypeOK,exitAction,exit,Inv61_df69_R8_0_I2,\prec
+<1>15. QED BY <1>1,<1>2,<1>3,<1>4,<1>5,<1>6,<1>7,<1>8,<1>9,<1>10,<1>11,<1>12,<1>13,<1>14 DEF Next
+
+
+\*** Inv1922_5e75_R2_0_I3
+THEOREM L_8 == TypeOK /\ Inv4227_eecc_R10_0_I3 /\ Inv80_b6ff_R2_0_I3 /\ Inv4227_eecc_R10_0_I3 /\ Inv1922_5e75_R2_0_I3 /\ Next => Inv1922_5e75_R2_0_I3'
+  <1>. USE A0
+  \* (Inv1922_5e75_R2_0_I3,ncsAction)
+  <1>1. TypeOK /\ Inv1922_5e75_R2_0_I3 /\ ncsAction => Inv1922_5e75_R2_0_I3' BY DEF TypeOK,ncsAction,ncs,Inv1922_5e75_R2_0_I3,\prec
+  \* (Inv1922_5e75_R2_0_I3,e1aAction)
+  <1>2. TypeOK /\ Inv1922_5e75_R2_0_I3 /\ e1aAction => Inv1922_5e75_R2_0_I3' BY DEF TypeOK,e1aAction,e1a,Inv1922_5e75_R2_0_I3,\prec
+  \* (Inv1922_5e75_R2_0_I3,e1bAction)
+  <1>3. TypeOK /\ Inv1922_5e75_R2_0_I3 /\ e1bAction => Inv1922_5e75_R2_0_I3' BY DEF TypeOK,e1bAction,e1b,Inv1922_5e75_R2_0_I3,\prec
+  \* (Inv1922_5e75_R2_0_I3,e2aAction)
+  <1>4. TypeOK /\ Inv1922_5e75_R2_0_I3 /\ e2aAction => Inv1922_5e75_R2_0_I3' BY DEF TypeOK,e2aAction,e2a,Inv1922_5e75_R2_0_I3,\prec,Procs
+  \* (Inv1922_5e75_R2_0_I3,e2bAction)
+  <1>5. TypeOK /\ Inv1922_5e75_R2_0_I3 /\ e2bAction => Inv1922_5e75_R2_0_I3' BY DEF TypeOK,e2bAction,e2b,Inv1922_5e75_R2_0_I3,\prec
+  \* (Inv1922_5e75_R2_0_I3,e3aAction)
+  <1>6. TypeOK /\ Inv1922_5e75_R2_0_I3 /\ e3aAction => Inv1922_5e75_R2_0_I3' BY DEF TypeOK,e3aAction,e3a,Inv1922_5e75_R2_0_I3,\prec
+  \* (Inv1922_5e75_R2_0_I3,e3bAction)
+  <1>7. TypeOK /\ Inv1922_5e75_R2_0_I3 /\ e3bAction => Inv1922_5e75_R2_0_I3' BY DEF TypeOK,e3bAction,e3b,Inv1922_5e75_R2_0_I3,\prec,\prec
+  \* (Inv1922_5e75_R2_0_I3,e4aAction)
+  <1>8. TypeOK /\ Inv1922_5e75_R2_0_I3 /\ e4aAction => Inv1922_5e75_R2_0_I3' BY DEF TypeOK,e4aAction,e4a,Inv1922_5e75_R2_0_I3,\prec
+  \* (Inv1922_5e75_R2_0_I3,e4bAction)
+  <1>9. TypeOK /\ Inv4227_eecc_R10_0_I3 /\ Inv1922_5e75_R2_0_I3 /\ e4bAction => Inv1922_5e75_R2_0_I3' BY DEF TypeOK,Inv4227_eecc_R10_0_I3,e4bAction,e4b,Inv1922_5e75_R2_0_I3,\prec,\prec
+  \* (Inv1922_5e75_R2_0_I3,w1aAction)
+  <1>10. TypeOK /\ Inv1922_5e75_R2_0_I3 /\ w1aAction => Inv1922_5e75_R2_0_I3' BY DEF TypeOK,w1aAction,w1a,Inv1922_5e75_R2_0_I3,\prec,\prec
+  \* (Inv1922_5e75_R2_0_I3,w1bAction)
+  <1>11. TypeOK /\ Inv1922_5e75_R2_0_I3 /\ w1bAction => Inv1922_5e75_R2_0_I3' BY DEF TypeOK,w1bAction,w1b,Inv1922_5e75_R2_0_I3,\prec,\prec
+  \* (Inv1922_5e75_R2_0_I3,w2Action)
+  <1>12. TypeOK /\ Inv80_b6ff_R2_0_I3 /\ Inv4227_eecc_R10_0_I3 /\ Inv1922_5e75_R2_0_I3 /\ w2Action => Inv1922_5e75_R2_0_I3' BY DEF TypeOK,Inv80_b6ff_R2_0_I3,Inv4227_eecc_R10_0_I3,w2Action,w2,Inv1922_5e75_R2_0_I3,\prec,\prec
+  \* (Inv1922_5e75_R2_0_I3,csAction)
+  <1>13. TypeOK /\ Inv1922_5e75_R2_0_I3 /\ csAction => Inv1922_5e75_R2_0_I3' BY DEF TypeOK,csAction,cs,Inv1922_5e75_R2_0_I3,\prec
+  \* (Inv1922_5e75_R2_0_I3,exitAction)
+  <1>14. TypeOK /\ Inv1922_5e75_R2_0_I3 /\ exitAction => Inv1922_5e75_R2_0_I3' BY DEF TypeOK,exitAction,exit,Inv1922_5e75_R2_0_I3,\prec
+<1>15. QED BY <1>1,<1>2,<1>3,<1>4,<1>5,<1>6,<1>7,<1>8,<1>9,<1>10,<1>11,<1>12,<1>13,<1>14 DEF Next
+
+
+\*** Inv4227_eecc_R10_0_I3
+THEOREM L_9 == TypeOK /\ Inv2740_e784_R16_0_I3 /\ Inv11_3838_R8_0_I2 /\ Inv80_b6ff_R2_0_I3 /\ Inv140_f68c_R9_0_I1 /\ Inv4227_eecc_R10_0_I3 /\ Next => Inv4227_eecc_R10_0_I3'
+  <1>. USE A0
+  \* (Inv4227_eecc_R10_0_I3,ncsAction)
+  <1>1. TypeOK /\ Inv4227_eecc_R10_0_I3 /\ ncsAction => Inv4227_eecc_R10_0_I3' BY DEF TypeOK,ncsAction,ncs,Inv4227_eecc_R10_0_I3,\prec
+  \* (Inv4227_eecc_R10_0_I3,e1aAction)
+  <1>2. TypeOK /\ Inv4227_eecc_R10_0_I3 /\ e1aAction => Inv4227_eecc_R10_0_I3' BY DEF TypeOK,e1aAction,e1a,Inv4227_eecc_R10_0_I3,\prec
+  \* (Inv4227_eecc_R10_0_I3,e1bAction)
+  <1>3. TypeOK /\ Inv4227_eecc_R10_0_I3 /\ e1bAction => Inv4227_eecc_R10_0_I3' BY DEF TypeOK,e1bAction,e1b,Inv4227_eecc_R10_0_I3,\prec
+  \* (Inv4227_eecc_R10_0_I3,e2aAction)
+  <1>4. TypeOK /\ Inv4227_eecc_R10_0_I3 /\ e2aAction => Inv4227_eecc_R10_0_I3' BY DEF TypeOK,e2aAction,e2a,Inv4227_eecc_R10_0_I3,\prec,Procs
+  \* (Inv4227_eecc_R10_0_I3,e2bAction)
+  <1>5. TypeOK /\ Inv4227_eecc_R10_0_I3 /\ e2bAction => Inv4227_eecc_R10_0_I3' BY DEF TypeOK,e2bAction,e2b,Inv4227_eecc_R10_0_I3,\prec
+  \* (Inv4227_eecc_R10_0_I3,e3aAction)
+  <1>6. TypeOK /\ Inv4227_eecc_R10_0_I3 /\ e3aAction => Inv4227_eecc_R10_0_I3' BY DEF TypeOK,e3aAction,e3a,Inv4227_eecc_R10_0_I3,\prec
+  \* (Inv4227_eecc_R10_0_I3,e3bAction)
+  <1>7. TypeOK /\ Inv2740_e784_R16_0_I3 /\ Inv4227_eecc_R10_0_I3 /\ e3bAction => Inv4227_eecc_R10_0_I3' BY DEF TypeOK,Inv2740_e784_R16_0_I3,e3bAction,e3b,Inv4227_eecc_R10_0_I3,\prec,\prec
+  \* (Inv4227_eecc_R10_0_I3,e4aAction)
+  <1>8. TypeOK /\ Inv4227_eecc_R10_0_I3 /\ e4aAction => Inv4227_eecc_R10_0_I3' BY DEF TypeOK,e4aAction,e4a,Inv4227_eecc_R10_0_I3,\prec
+  \* (Inv4227_eecc_R10_0_I3,e4bAction)
+  <1>9. TypeOK /\ Inv4227_eecc_R10_0_I3 /\ e4bAction => Inv4227_eecc_R10_0_I3' BY DEF TypeOK,e4bAction,e4b,Inv4227_eecc_R10_0_I3,\prec,\prec
+  \* (Inv4227_eecc_R10_0_I3,w1aAction)
+  <1>10. TypeOK /\ Inv4227_eecc_R10_0_I3 /\ w1aAction => Inv4227_eecc_R10_0_I3' BY DEF TypeOK,w1aAction,w1a,Inv4227_eecc_R10_0_I3,\prec,\prec
+  \* (Inv4227_eecc_R10_0_I3,w1bAction)
+  <1>11. TypeOK /\ Inv4227_eecc_R10_0_I3 /\ w1bAction => Inv4227_eecc_R10_0_I3' BY DEF TypeOK,w1bAction,w1b,Inv4227_eecc_R10_0_I3,\prec,\prec
+  \* (Inv4227_eecc_R10_0_I3,w2Action)
+  <1>12. TypeOK /\ Inv11_3838_R8_0_I2 /\ Inv80_b6ff_R2_0_I3 /\ Inv140_f68c_R9_0_I1 /\ Inv4227_eecc_R10_0_I3 /\ w2Action => Inv4227_eecc_R10_0_I3' BY DEF TypeOK,Inv11_3838_R8_0_I2,Inv80_b6ff_R2_0_I3,Inv140_f68c_R9_0_I1,w2Action,w2,Inv4227_eecc_R10_0_I3,\prec,\prec
+  \* (Inv4227_eecc_R10_0_I3,csAction)
+  <1>13. TypeOK /\ Inv4227_eecc_R10_0_I3 /\ csAction => Inv4227_eecc_R10_0_I3' BY DEF TypeOK,csAction,cs,Inv4227_eecc_R10_0_I3,\prec
+  \* (Inv4227_eecc_R10_0_I3,exitAction)
+  <1>14. TypeOK /\ Inv4227_eecc_R10_0_I3 /\ exitAction => Inv4227_eecc_R10_0_I3' BY DEF TypeOK,exitAction,exit,Inv4227_eecc_R10_0_I3,\prec
+<1>15. QED BY <1>1,<1>2,<1>3,<1>4,<1>5,<1>6,<1>7,<1>8,<1>9,<1>10,<1>11,<1>12,<1>13,<1>14 DEF Next
+
+
+\*** Inv2740_e784_R16_0_I3
+THEOREM L_10 == TypeOK /\ Inv0_b3ba_R18_0_I0 /\ Inv6093_1c74_R18_1_I2 /\ Inv2740_e784_R16_0_I3 /\ Next => Inv2740_e784_R16_0_I3'
+  <1>. USE A0
+  \* (Inv2740_e784_R16_0_I3,ncsAction)
+  <1>1. TypeOK /\ Inv2740_e784_R16_0_I3 /\ ncsAction => Inv2740_e784_R16_0_I3' BY DEF TypeOK,ncsAction,ncs,Inv2740_e784_R16_0_I3,\prec
+  \* (Inv2740_e784_R16_0_I3,e1aAction)
+  <1>2. TypeOK /\ Inv2740_e784_R16_0_I3 /\ e1aAction => Inv2740_e784_R16_0_I3' BY DEF TypeOK,e1aAction,e1a,Inv2740_e784_R16_0_I3,\prec
+  \* (Inv2740_e784_R16_0_I3,e1bAction)
+  <1>3. TypeOK /\ Inv2740_e784_R16_0_I3 /\ e1bAction => Inv2740_e784_R16_0_I3' BY DEF TypeOK,e1bAction,e1b,Inv2740_e784_R16_0_I3,\prec
+  \* (Inv2740_e784_R16_0_I3,e2aAction)
+  <1>4. TypeOK /\ Inv2740_e784_R16_0_I3 /\ e2aAction => Inv2740_e784_R16_0_I3' BY DEF TypeOK,e2aAction,e2a,Inv2740_e784_R16_0_I3,\prec,Procs
+  \* (Inv2740_e784_R16_0_I3,e2bAction)
+  <1>5. TypeOK /\ Inv0_b3ba_R18_0_I0 /\ Inv2740_e784_R16_0_I3 /\ e2bAction => Inv2740_e784_R16_0_I3' BY DEF TypeOK,Inv0_b3ba_R18_0_I0,e2bAction,e2b,Inv2740_e784_R16_0_I3,\prec
+  \* (Inv2740_e784_R16_0_I3,e3aAction)
+  <1>6. TypeOK /\ Inv2740_e784_R16_0_I3 /\ e3aAction => Inv2740_e784_R16_0_I3' BY DEF TypeOK,e3aAction,e3a,Inv2740_e784_R16_0_I3,\prec
+  \* (Inv2740_e784_R16_0_I3,e3bAction)
+  <1>7. TypeOK /\ Inv2740_e784_R16_0_I3 /\ e3bAction => Inv2740_e784_R16_0_I3' BY DEF TypeOK,e3bAction,e3b,Inv2740_e784_R16_0_I3,\prec,\prec
+  \* (Inv2740_e784_R16_0_I3,e4aAction)
+  <1>8. TypeOK /\ Inv2740_e784_R16_0_I3 /\ e4aAction => Inv2740_e784_R16_0_I3' BY DEF TypeOK,e4aAction,e4a,Inv2740_e784_R16_0_I3,\prec
+  \* (Inv2740_e784_R16_0_I3,e4bAction)
+  <1>9. TypeOK /\ Inv2740_e784_R16_0_I3 /\ e4bAction => Inv2740_e784_R16_0_I3' BY DEF TypeOK,e4bAction,e4b,Inv2740_e784_R16_0_I3,\prec,\prec
+  \* (Inv2740_e784_R16_0_I3,w1aAction)
+  <1>10. TypeOK /\ Inv2740_e784_R16_0_I3 /\ w1aAction => Inv2740_e784_R16_0_I3' BY DEF TypeOK,w1aAction,w1a,Inv2740_e784_R16_0_I3,\prec,\prec
+  \* (Inv2740_e784_R16_0_I3,w1bAction)
+  <1>11. TypeOK /\ Inv2740_e784_R16_0_I3 /\ w1bAction => Inv2740_e784_R16_0_I3' BY DEF TypeOK,w1bAction,w1b,Inv2740_e784_R16_0_I3,\prec,\prec
+  \* (Inv2740_e784_R16_0_I3,w2Action)
+  <1>12. TypeOK /\ Inv6093_1c74_R18_1_I2 /\ Inv2740_e784_R16_0_I3 /\ w2Action => Inv2740_e784_R16_0_I3' BY DEF TypeOK,Inv6093_1c74_R18_1_I2,w2Action,w2,Inv2740_e784_R16_0_I3,\prec,\prec
+  \* (Inv2740_e784_R16_0_I3,csAction)
+  <1>13. TypeOK /\ Inv2740_e784_R16_0_I3 /\ csAction => Inv2740_e784_R16_0_I3' BY DEF TypeOK,csAction,cs,Inv2740_e784_R16_0_I3,\prec
+  \* (Inv2740_e784_R16_0_I3,exitAction)
+  <1>14. TypeOK /\ Inv2740_e784_R16_0_I3 /\ exitAction => Inv2740_e784_R16_0_I3' BY DEF TypeOK,exitAction,exit,Inv2740_e784_R16_0_I3,\prec
+<1>15. QED BY <1>1,<1>2,<1>3,<1>4,<1>5,<1>6,<1>7,<1>8,<1>9,<1>10,<1>11,<1>12,<1>13,<1>14 DEF Next
+
+
+\*** Inv0_b3ba_R18_0_I0
+THEOREM L_11 == TypeOK /\ Inv1_b58a_R20_0_I1 /\ Inv350_b077_R20_1_I2 /\ Inv0_b3ba_R18_0_I0 /\ Next => Inv0_b3ba_R18_0_I0'
+  <1>. USE A0
+  \* (Inv0_b3ba_R18_0_I0,ncsAction)
+  <1>1. TypeOK /\ Inv0_b3ba_R18_0_I0 /\ ncsAction => Inv0_b3ba_R18_0_I0' BY DEF TypeOK,ncsAction,ncs,Inv0_b3ba_R18_0_I0,\prec
+  \* (Inv0_b3ba_R18_0_I0,e1aAction)
+  <1>2. TypeOK /\ Inv0_b3ba_R18_0_I0 /\ e1aAction => Inv0_b3ba_R18_0_I0' BY DEF TypeOK,e1aAction,e1a,Inv0_b3ba_R18_0_I0,\prec
+  \* (Inv0_b3ba_R18_0_I0,e1bAction)
+  <1>3. TypeOK /\ Inv0_b3ba_R18_0_I0 /\ e1bAction => Inv0_b3ba_R18_0_I0' BY DEF TypeOK,e1bAction,e1b,Inv0_b3ba_R18_0_I0,\prec
+  \* (Inv0_b3ba_R18_0_I0,e2aAction)
+  <1>4. TypeOK /\ Inv1_b58a_R20_0_I1 /\ Inv0_b3ba_R18_0_I0 /\ e2aAction => Inv0_b3ba_R18_0_I0' 
+    <2> SUFFICES ASSUME TypeOK,
+                        Inv1_b58a_R20_0_I1,
+                        Inv0_b3ba_R18_0_I0,
+                        TRUE,
+                        NEW self \in Procs,
+                        pc[self] = "e2",
+                        unchecked[self] # {},
+                        NEW i \in unchecked[self],
+                        /\ unchecked' = [unchecked EXCEPT ![self] = unchecked[self] \ {i}]
+                        /\ IF num[i] > max[self]
+                            THEN /\ max' = [max EXCEPT ![self] = num[i]]
+                            ELSE /\ max' = max,
+                        pc' = [pc EXCEPT ![self] = "e2"],
+                        UNCHANGED << num, flag, nxt >>,
                         NEW VARI \in Procs',
                         NEW VARJ \in Procs'
                  PROVE  ((VARI \in unchecked[VARJ]) \/ ((pc[VARJ] = "e1") \/ (~(max[VARI] < num[VARJ]) \/ (~(pc[VARI] = "e2"))) \/ (~(unchecked[VARI] = {}))) \/ (~(pc[VARJ] \in {"w1","w2"})))'
-      BY DEF Inv0_b3ba_R10_0_I0
+      BY DEF Inv0_b3ba_R18_0_I0, e2a, e2aAction
     <2> QED
-      <3> SUFFICES ASSUME NEW self \in Procs,
-                          pc[self] = "e2",
-                          unchecked[self] # {},
-                          NEW i \in unchecked[self],
-                          /\ unchecked' = [unchecked EXCEPT ![self] = unchecked[self] \ {i}]
-                          /\ IF num[i] > max[self]
-                              THEN /\ max' = [max EXCEPT ![self] = num[i]]
-                              ELSE /\ max' = max,
-                          pc' = [pc EXCEPT ![self] = "e2"],
-                          UNCHANGED << num, flag, nxt >>
-                   PROVE  ((VARI \in unchecked[VARJ]) \/ ((pc[VARJ] = "e1") \/ (~(max[VARI] < num[VARJ]) \/ (~(pc[VARI] = "e2"))) \/ (~(unchecked[VARI] = {}))) \/ (~(pc[VARJ] \in {"w1","w2"})))'
-        BY DEF e2a, e2aAction
-      <3> QED
-        BY DEF TypeOK,Inv1_b58a_R13_0_I1,e2aAction,e2a,Inv0_b3ba_R10_0_I0,\prec,Procs
-      
-  \* (Inv0_b3ba_R10_0_I0,e2bAction)
-  <1>5. TypeOK /\ Inv0_b3ba_R10_0_I0 /\ e2bAction => Inv0_b3ba_R10_0_I0' BY DEF TypeOK,e2bAction,e2b,Inv0_b3ba_R10_0_I0,\prec
-  \* (Inv0_b3ba_R10_0_I0,e3aAction)
-  <1>6. TypeOK /\ Inv0_b3ba_R10_0_I0 /\ e3aAction => Inv0_b3ba_R10_0_I0' BY DEF TypeOK,e3aAction,e3a,Inv0_b3ba_R10_0_I0,\prec
-  \* (Inv0_b3ba_R10_0_I0,e3bAction)
-  <1>7. TypeOK /\ Inv0_b3ba_R10_0_I0 /\ e3bAction => Inv0_b3ba_R10_0_I0' BY DEF TypeOK,e3bAction,e3b,Inv0_b3ba_R10_0_I0,\prec,\prec
-  \* (Inv0_b3ba_R10_0_I0,e4aAction)
-  <1>8. TypeOK /\ Inv0_b3ba_R10_0_I0 /\ e4aAction => Inv0_b3ba_R10_0_I0' BY DEF TypeOK,e4aAction,e4a,Inv0_b3ba_R10_0_I0,\prec
-  \* (Inv0_b3ba_R10_0_I0,e4bAction)
-  <1>9. TypeOK /\ Inv0_b3ba_R10_0_I0 /\ e4bAction => Inv0_b3ba_R10_0_I0' BY DEF TypeOK,e4bAction,e4b,Inv0_b3ba_R10_0_I0,\prec,\prec
-  \* (Inv0_b3ba_R10_0_I0,w1aAction)
-  <1>10. TypeOK /\ Inv0_b3ba_R10_0_I0 /\ w1aAction => Inv0_b3ba_R10_0_I0' BY DEF TypeOK,w1aAction,w1a,Inv0_b3ba_R10_0_I0,\prec,\prec
-  \* (Inv0_b3ba_R10_0_I0,w1bAction)
-  <1>11. TypeOK /\ Inv0_b3ba_R10_0_I0 /\ w1bAction => Inv0_b3ba_R10_0_I0' BY DEF TypeOK,w1bAction,w1b,Inv0_b3ba_R10_0_I0,\prec,\prec
-  \* (Inv0_b3ba_R10_0_I0,w2Action)
-  <1>12. TypeOK /\ Inv738_26ef_R13_1_I2 /\ Inv0_b3ba_R10_0_I0 /\ w2Action => Inv0_b3ba_R10_0_I0' BY DEF TypeOK,Inv738_26ef_R13_1_I2,w2Action,w2,Inv0_b3ba_R10_0_I0,\prec,\prec
-  \* (Inv0_b3ba_R10_0_I0,csAction)
-  <1>13. TypeOK /\ Inv0_b3ba_R10_0_I0 /\ csAction => Inv0_b3ba_R10_0_I0' BY DEF TypeOK,csAction,cs,Inv0_b3ba_R10_0_I0,\prec
-  \* (Inv0_b3ba_R10_0_I0,exitAction)
-  <1>14. TypeOK /\ Inv0_b3ba_R10_0_I0 /\ exitAction => Inv0_b3ba_R10_0_I0' BY DEF TypeOK,exitAction,exit,Inv0_b3ba_R10_0_I0,\prec
+      BY SMTT(60) DEF TypeOK,Inv1_b58a_R20_0_I1,e2aAction,e2a,Inv0_b3ba_R18_0_I0,\prec,Procs
+  \* (Inv0_b3ba_R18_0_I0,e2bAction)
+  <1>5. TypeOK /\ Inv0_b3ba_R18_0_I0 /\ e2bAction => Inv0_b3ba_R18_0_I0' BY DEF TypeOK,e2bAction,e2b,Inv0_b3ba_R18_0_I0,\prec
+  \* (Inv0_b3ba_R18_0_I0,e3aAction)
+  <1>6. TypeOK /\ Inv0_b3ba_R18_0_I0 /\ e3aAction => Inv0_b3ba_R18_0_I0' BY DEF TypeOK,e3aAction,e3a,Inv0_b3ba_R18_0_I0,\prec
+  \* (Inv0_b3ba_R18_0_I0,e3bAction)
+  <1>7. TypeOK /\ Inv0_b3ba_R18_0_I0 /\ e3bAction => Inv0_b3ba_R18_0_I0' BY DEF TypeOK,e3bAction,e3b,Inv0_b3ba_R18_0_I0,\prec,\prec
+  \* (Inv0_b3ba_R18_0_I0,e4aAction)
+  <1>8. TypeOK /\ Inv0_b3ba_R18_0_I0 /\ e4aAction => Inv0_b3ba_R18_0_I0' BY DEF TypeOK,e4aAction,e4a,Inv0_b3ba_R18_0_I0,\prec
+  \* (Inv0_b3ba_R18_0_I0,e4bAction)
+  <1>9. TypeOK /\ Inv0_b3ba_R18_0_I0 /\ e4bAction => Inv0_b3ba_R18_0_I0' BY DEF TypeOK,e4bAction,e4b,Inv0_b3ba_R18_0_I0,\prec,\prec
+  \* (Inv0_b3ba_R18_0_I0,w1aAction)
+  <1>10. TypeOK /\ Inv0_b3ba_R18_0_I0 /\ w1aAction => Inv0_b3ba_R18_0_I0' BY DEF TypeOK,w1aAction,w1a,Inv0_b3ba_R18_0_I0,\prec,\prec
+  \* (Inv0_b3ba_R18_0_I0,w1bAction)
+  <1>11. TypeOK /\ Inv0_b3ba_R18_0_I0 /\ w1bAction => Inv0_b3ba_R18_0_I0' BY DEF TypeOK,w1bAction,w1b,Inv0_b3ba_R18_0_I0,\prec,\prec
+  \* (Inv0_b3ba_R18_0_I0,w2Action)
+  <1>12. TypeOK /\ Inv350_b077_R20_1_I2 /\ Inv0_b3ba_R18_0_I0 /\ w2Action => Inv0_b3ba_R18_0_I0' BY DEF TypeOK,Inv350_b077_R20_1_I2,w2Action,w2,Inv0_b3ba_R18_0_I0,\prec,\prec
+  \* (Inv0_b3ba_R18_0_I0,csAction)
+  <1>13. TypeOK /\ Inv0_b3ba_R18_0_I0 /\ csAction => Inv0_b3ba_R18_0_I0' BY DEF TypeOK,csAction,cs,Inv0_b3ba_R18_0_I0,\prec
+  \* (Inv0_b3ba_R18_0_I0,exitAction)
+  <1>14. TypeOK /\ Inv0_b3ba_R18_0_I0 /\ exitAction => Inv0_b3ba_R18_0_I0' BY DEF TypeOK,exitAction,exit,Inv0_b3ba_R18_0_I0,\prec
 <1>15. QED BY <1>1,<1>2,<1>3,<1>4,<1>5,<1>6,<1>7,<1>8,<1>9,<1>10,<1>11,<1>12,<1>13,<1>14 DEF Next
 
 
-\*** Inv1_b58a_R13_0_I1
-THEOREM L_7 == TypeOK /\ Inv738_26ef_R13_1_I2 /\ Inv1_b58a_R13_0_I1 /\ Next => Inv1_b58a_R13_0_I1'
+\*** Inv1_b58a_R20_0_I1
+THEOREM L_12 == TypeOK /\ Inv350_b077_R20_1_I2 /\ Inv1_b58a_R20_0_I1 /\ Next => Inv1_b58a_R20_0_I1'
   <1>. USE A0
-  \* (Inv1_b58a_R13_0_I1,ncsAction)
-  <1>1. TypeOK /\ Inv1_b58a_R13_0_I1 /\ ncsAction => Inv1_b58a_R13_0_I1' BY DEF TypeOK,ncsAction,ncs,Inv1_b58a_R13_0_I1,\prec
-  \* (Inv1_b58a_R13_0_I1,e1aAction)
-  <1>2. TypeOK /\ Inv1_b58a_R13_0_I1 /\ e1aAction => Inv1_b58a_R13_0_I1' BY DEF TypeOK,e1aAction,e1a,Inv1_b58a_R13_0_I1,\prec
-  \* (Inv1_b58a_R13_0_I1,e1bAction)
-  <1>3. TypeOK /\ Inv1_b58a_R13_0_I1 /\ e1bAction => Inv1_b58a_R13_0_I1' BY DEF TypeOK,e1bAction,e1b,Inv1_b58a_R13_0_I1,\prec
-  \* (Inv1_b58a_R13_0_I1,e2aAction)
-  <1>4. TypeOK /\ Inv1_b58a_R13_0_I1 /\ e2aAction => Inv1_b58a_R13_0_I1' BY DEF TypeOK,e2aAction,e2a,Inv1_b58a_R13_0_I1,\prec,Procs
-  \* (Inv1_b58a_R13_0_I1,e2bAction)
-  <1>5. TypeOK /\ Inv1_b58a_R13_0_I1 /\ e2bAction => Inv1_b58a_R13_0_I1' BY DEF TypeOK,e2bAction,e2b,Inv1_b58a_R13_0_I1,\prec
-  \* (Inv1_b58a_R13_0_I1,e3aAction)
-  <1>6. TypeOK /\ Inv1_b58a_R13_0_I1 /\ e3aAction => Inv1_b58a_R13_0_I1' BY DEF TypeOK,e3aAction,e3a,Inv1_b58a_R13_0_I1,\prec
-  \* (Inv1_b58a_R13_0_I1,e3bAction)
-  <1>7. TypeOK /\ Inv1_b58a_R13_0_I1 /\ e3bAction => Inv1_b58a_R13_0_I1' BY DEF TypeOK,e3bAction,e3b,Inv1_b58a_R13_0_I1,\prec,\prec
-  \* (Inv1_b58a_R13_0_I1,e4aAction)
-  <1>8. TypeOK /\ Inv1_b58a_R13_0_I1 /\ e4aAction => Inv1_b58a_R13_0_I1' BY DEF TypeOK,e4aAction,e4a,Inv1_b58a_R13_0_I1,\prec
-  \* (Inv1_b58a_R13_0_I1,e4bAction)
-  <1>9. TypeOK /\ Inv1_b58a_R13_0_I1 /\ e4bAction => Inv1_b58a_R13_0_I1' BY DEF TypeOK,e4bAction,e4b,Inv1_b58a_R13_0_I1,\prec,\prec
-  \* (Inv1_b58a_R13_0_I1,w1aAction)
-  <1>10. TypeOK /\ Inv1_b58a_R13_0_I1 /\ w1aAction => Inv1_b58a_R13_0_I1' BY DEF TypeOK,w1aAction,w1a,Inv1_b58a_R13_0_I1,\prec,\prec
-  \* (Inv1_b58a_R13_0_I1,w1bAction)
-  <1>11. TypeOK /\ Inv1_b58a_R13_0_I1 /\ w1bAction => Inv1_b58a_R13_0_I1' BY DEF TypeOK,w1bAction,w1b,Inv1_b58a_R13_0_I1,\prec,\prec
-  \* (Inv1_b58a_R13_0_I1,w2Action)
-  <1>12. TypeOK /\ Inv738_26ef_R13_1_I2 /\ Inv1_b58a_R13_0_I1 /\ w2Action => Inv1_b58a_R13_0_I1' BY DEF TypeOK,Inv738_26ef_R13_1_I2,w2Action,w2,Inv1_b58a_R13_0_I1,\prec,\prec
-  \* (Inv1_b58a_R13_0_I1,csAction)
-  <1>13. TypeOK /\ Inv1_b58a_R13_0_I1 /\ csAction => Inv1_b58a_R13_0_I1' BY DEF TypeOK,csAction,cs,Inv1_b58a_R13_0_I1,\prec
-  \* (Inv1_b58a_R13_0_I1,exitAction)
-  <1>14. TypeOK /\ Inv1_b58a_R13_0_I1 /\ exitAction => Inv1_b58a_R13_0_I1' BY DEF TypeOK,exitAction,exit,Inv1_b58a_R13_0_I1,\prec
+  \* (Inv1_b58a_R20_0_I1,ncsAction)
+  <1>1. TypeOK /\ Inv1_b58a_R20_0_I1 /\ ncsAction => Inv1_b58a_R20_0_I1' BY DEF TypeOK,ncsAction,ncs,Inv1_b58a_R20_0_I1,\prec
+  \* (Inv1_b58a_R20_0_I1,e1aAction)
+  <1>2. TypeOK /\ Inv1_b58a_R20_0_I1 /\ e1aAction => Inv1_b58a_R20_0_I1' BY DEF TypeOK,e1aAction,e1a,Inv1_b58a_R20_0_I1,\prec
+  \* (Inv1_b58a_R20_0_I1,e1bAction)
+  <1>3. TypeOK /\ Inv1_b58a_R20_0_I1 /\ e1bAction => Inv1_b58a_R20_0_I1' BY DEF TypeOK,e1bAction,e1b,Inv1_b58a_R20_0_I1,\prec
+  \* (Inv1_b58a_R20_0_I1,e2aAction)
+  <1>4. TypeOK /\ Inv1_b58a_R20_0_I1 /\ e2aAction => Inv1_b58a_R20_0_I1' BY DEF TypeOK,e2aAction,e2a,Inv1_b58a_R20_0_I1,\prec,Procs
+  \* (Inv1_b58a_R20_0_I1,e2bAction)
+  <1>5. TypeOK /\ Inv1_b58a_R20_0_I1 /\ e2bAction => Inv1_b58a_R20_0_I1' BY DEF TypeOK,e2bAction,e2b,Inv1_b58a_R20_0_I1,\prec
+  \* (Inv1_b58a_R20_0_I1,e3aAction)
+  <1>6. TypeOK /\ Inv1_b58a_R20_0_I1 /\ e3aAction => Inv1_b58a_R20_0_I1' BY DEF TypeOK,e3aAction,e3a,Inv1_b58a_R20_0_I1,\prec
+  \* (Inv1_b58a_R20_0_I1,e3bAction)
+  <1>7. TypeOK /\ Inv1_b58a_R20_0_I1 /\ e3bAction => Inv1_b58a_R20_0_I1' BY DEF TypeOK,e3bAction,e3b,Inv1_b58a_R20_0_I1,\prec,\prec
+  \* (Inv1_b58a_R20_0_I1,e4aAction)
+  <1>8. TypeOK /\ Inv1_b58a_R20_0_I1 /\ e4aAction => Inv1_b58a_R20_0_I1' BY DEF TypeOK,e4aAction,e4a,Inv1_b58a_R20_0_I1,\prec
+  \* (Inv1_b58a_R20_0_I1,e4bAction)
+  <1>9. TypeOK /\ Inv1_b58a_R20_0_I1 /\ e4bAction => Inv1_b58a_R20_0_I1' BY DEF TypeOK,e4bAction,e4b,Inv1_b58a_R20_0_I1,\prec,\prec
+  \* (Inv1_b58a_R20_0_I1,w1aAction)
+  <1>10. TypeOK /\ Inv1_b58a_R20_0_I1 /\ w1aAction => Inv1_b58a_R20_0_I1' BY DEF TypeOK,w1aAction,w1a,Inv1_b58a_R20_0_I1,\prec,\prec
+  \* (Inv1_b58a_R20_0_I1,w1bAction)
+  <1>11. TypeOK /\ Inv1_b58a_R20_0_I1 /\ w1bAction => Inv1_b58a_R20_0_I1' BY DEF TypeOK,w1bAction,w1b,Inv1_b58a_R20_0_I1,\prec,\prec
+  \* (Inv1_b58a_R20_0_I1,w2Action)
+  <1>12. TypeOK /\ Inv350_b077_R20_1_I2 /\ Inv1_b58a_R20_0_I1 /\ w2Action => Inv1_b58a_R20_0_I1' BY DEF TypeOK,Inv350_b077_R20_1_I2,w2Action,w2,Inv1_b58a_R20_0_I1,\prec,\prec
+  \* (Inv1_b58a_R20_0_I1,csAction)
+  <1>13. TypeOK /\ Inv1_b58a_R20_0_I1 /\ csAction => Inv1_b58a_R20_0_I1' BY DEF TypeOK,csAction,cs,Inv1_b58a_R20_0_I1,\prec
+  \* (Inv1_b58a_R20_0_I1,exitAction)
+  <1>14. TypeOK /\ Inv1_b58a_R20_0_I1 /\ exitAction => Inv1_b58a_R20_0_I1' BY DEF TypeOK,exitAction,exit,Inv1_b58a_R20_0_I1,\prec
 <1>15. QED BY <1>1,<1>2,<1>3,<1>4,<1>5,<1>6,<1>7,<1>8,<1>9,<1>10,<1>11,<1>12,<1>13,<1>14 DEF Next
 
 
-\*** Inv738_26ef_R13_1_I2
-THEOREM L_8 == TypeOK /\ Inv48_180c_R17_0_I1 /\ Inv738_26ef_R13_1_I2 /\ Next => Inv738_26ef_R13_1_I2'
+\*** Inv350_b077_R20_1_I2
+THEOREM L_13 == TypeOK /\ Inv40_180c_R24_0_I1 /\ Inv350_b077_R20_1_I2 /\ Next => Inv350_b077_R20_1_I2'
   <1>. USE A0
-  \* (Inv738_26ef_R13_1_I2,ncsAction)
-  <1>1. TypeOK /\ Inv738_26ef_R13_1_I2 /\ ncsAction => Inv738_26ef_R13_1_I2' BY DEF TypeOK,ncsAction,ncs,Inv738_26ef_R13_1_I2,\prec
-  \* (Inv738_26ef_R13_1_I2,e1aAction)
-  <1>2. TypeOK /\ Inv738_26ef_R13_1_I2 /\ e1aAction => Inv738_26ef_R13_1_I2' BY DEF TypeOK,e1aAction,e1a,Inv738_26ef_R13_1_I2,\prec
-  \* (Inv738_26ef_R13_1_I2,e1bAction)
-  <1>3. TypeOK /\ Inv738_26ef_R13_1_I2 /\ e1bAction => Inv738_26ef_R13_1_I2' BY DEF TypeOK,e1bAction,e1b,Inv738_26ef_R13_1_I2,\prec
-  \* (Inv738_26ef_R13_1_I2,e2aAction)
-  <1>4. TypeOK /\ Inv738_26ef_R13_1_I2 /\ e2aAction => Inv738_26ef_R13_1_I2' BY DEF TypeOK,e2aAction,e2a,Inv738_26ef_R13_1_I2,\prec,Procs
-  \* (Inv738_26ef_R13_1_I2,e2bAction)
-  <1>5. TypeOK /\ Inv738_26ef_R13_1_I2 /\ e2bAction => Inv738_26ef_R13_1_I2' BY DEF TypeOK,e2bAction,e2b,Inv738_26ef_R13_1_I2,\prec
-  \* (Inv738_26ef_R13_1_I2,e3aAction)
-  <1>6. TypeOK /\ Inv738_26ef_R13_1_I2 /\ e3aAction => Inv738_26ef_R13_1_I2' BY DEF TypeOK,e3aAction,e3a,Inv738_26ef_R13_1_I2,\prec
-  \* (Inv738_26ef_R13_1_I2,e3bAction)
-  <1>7. TypeOK /\ Inv738_26ef_R13_1_I2 /\ e3bAction => Inv738_26ef_R13_1_I2' BY DEF TypeOK,e3bAction,e3b,Inv738_26ef_R13_1_I2,\prec,\prec
-  \* (Inv738_26ef_R13_1_I2,e4aAction)
-  <1>8. TypeOK /\ Inv738_26ef_R13_1_I2 /\ e4aAction => Inv738_26ef_R13_1_I2' BY DEF TypeOK,e4aAction,e4a,Inv738_26ef_R13_1_I2,\prec
-  \* (Inv738_26ef_R13_1_I2,e4bAction)
-  <1>9. TypeOK /\ Inv738_26ef_R13_1_I2 /\ e4bAction => Inv738_26ef_R13_1_I2' BY DEF TypeOK,e4bAction,e4b,Inv738_26ef_R13_1_I2,\prec,\prec
-  \* (Inv738_26ef_R13_1_I2,w1aAction)
-  <1>10. TypeOK /\ Inv48_180c_R17_0_I1 /\ Inv738_26ef_R13_1_I2 /\ w1aAction => Inv738_26ef_R13_1_I2' BY DEF TypeOK,Inv48_180c_R17_0_I1,w1aAction,w1a,Inv738_26ef_R13_1_I2,\prec,\prec
-  \* (Inv738_26ef_R13_1_I2,w1bAction)
-  <1>11. TypeOK /\ Inv738_26ef_R13_1_I2 /\ w1bAction => Inv738_26ef_R13_1_I2' BY DEF TypeOK,w1bAction,w1b,Inv738_26ef_R13_1_I2,\prec,\prec
-  \* (Inv738_26ef_R13_1_I2,w2Action)
-  <1>12. TypeOK /\ Inv738_26ef_R13_1_I2 /\ w2Action => Inv738_26ef_R13_1_I2' BY DEF TypeOK,w2Action,w2,Inv738_26ef_R13_1_I2,\prec,\prec
-  \* (Inv738_26ef_R13_1_I2,csAction)
-  <1>13. TypeOK /\ Inv738_26ef_R13_1_I2 /\ csAction => Inv738_26ef_R13_1_I2' BY DEF TypeOK,csAction,cs,Inv738_26ef_R13_1_I2,\prec
-  \* (Inv738_26ef_R13_1_I2,exitAction)
-  <1>14. TypeOK /\ Inv738_26ef_R13_1_I2 /\ exitAction => Inv738_26ef_R13_1_I2' 
-    <2> SUFFICES ASSUME TypeOK,
-                        Inv738_26ef_R13_1_I2,
-                        TRUE,
-                        NEW self \in Procs,
-                        pc[self] = "exit",
-                        UNCHANGED << flag, unchecked, max, nxt >>,
-                        NEW VARI \in Procs',
-                        NEW VARJ \in Procs',
-                        \/ /\ \E k \in Nat:
-                                num' = [num EXCEPT ![self] = k]
-                           /\ pc' = [pc EXCEPT ![self] = "exit"]
-                        \/ /\ num' = [num EXCEPT ![self] = 0]
-                           /\ pc' = [pc EXCEPT ![self] = "ncs"]
-                 PROVE  (((VARJ \in unchecked[nxt[VARJ]]) \/ ((max[nxt[VARJ]] >= num[VARJ]) \/ ((pc[VARI] = "e3")))) \/ (~(pc[VARJ] = "w2")) \/ (~((pc[nxt[VARJ]] = "e2"))))'
-      BY DEF Inv738_26ef_R13_1_I2, exit, exitAction
-    <2>1. CASE /\ \E k \in Nat:
-                    num' = [num EXCEPT ![self] = k]
-               /\ pc' = [pc EXCEPT ![self] = "exit"]
-      BY <2>1 DEF TypeOK,exitAction,exit,Inv738_26ef_R13_1_I2,\prec
-    <2>2. CASE /\ num' = [num EXCEPT ![self] = 0]
-               /\ pc' = [pc EXCEPT ![self] = "ncs"]
-      BY <2>2 DEF TypeOK,exitAction,exit,Inv738_26ef_R13_1_I2,\prec
-    <2>3. QED
-      BY <2>1, <2>2
+  \* (Inv350_b077_R20_1_I2,ncsAction)
+  <1>1. TypeOK /\ Inv350_b077_R20_1_I2 /\ ncsAction => Inv350_b077_R20_1_I2' BY DEF TypeOK,ncsAction,ncs,Inv350_b077_R20_1_I2,\prec
+  \* (Inv350_b077_R20_1_I2,e1aAction)
+  <1>2. TypeOK /\ Inv350_b077_R20_1_I2 /\ e1aAction => Inv350_b077_R20_1_I2' BY DEF TypeOK,e1aAction,e1a,Inv350_b077_R20_1_I2,\prec
+  \* (Inv350_b077_R20_1_I2,e1bAction)
+  <1>3. TypeOK /\ Inv350_b077_R20_1_I2 /\ e1bAction => Inv350_b077_R20_1_I2' BY DEF TypeOK,e1bAction,e1b,Inv350_b077_R20_1_I2,\prec
+  \* (Inv350_b077_R20_1_I2,e2aAction)
+  <1>4. TypeOK /\ Inv350_b077_R20_1_I2 /\ e2aAction => Inv350_b077_R20_1_I2' BY DEF TypeOK,e2aAction,e2a,Inv350_b077_R20_1_I2,\prec,Procs
+  \* (Inv350_b077_R20_1_I2,e2bAction)
+  <1>5. TypeOK /\ Inv350_b077_R20_1_I2 /\ e2bAction => Inv350_b077_R20_1_I2' BY DEF TypeOK,e2bAction,e2b,Inv350_b077_R20_1_I2,\prec
+  \* (Inv350_b077_R20_1_I2,e3aAction)
+  <1>6. TypeOK /\ Inv350_b077_R20_1_I2 /\ e3aAction => Inv350_b077_R20_1_I2' BY DEF TypeOK,e3aAction,e3a,Inv350_b077_R20_1_I2,\prec
+  \* (Inv350_b077_R20_1_I2,e3bAction)
+  <1>7. TypeOK /\ Inv350_b077_R20_1_I2 /\ e3bAction => Inv350_b077_R20_1_I2' BY DEF TypeOK,e3bAction,e3b,Inv350_b077_R20_1_I2,\prec,\prec
+  \* (Inv350_b077_R20_1_I2,e4aAction)
+  <1>8. TypeOK /\ Inv350_b077_R20_1_I2 /\ e4aAction => Inv350_b077_R20_1_I2' BY DEF TypeOK,e4aAction,e4a,Inv350_b077_R20_1_I2,\prec
+  \* (Inv350_b077_R20_1_I2,e4bAction)
+  <1>9. TypeOK /\ Inv350_b077_R20_1_I2 /\ e4bAction => Inv350_b077_R20_1_I2' BY DEF TypeOK,e4bAction,e4b,Inv350_b077_R20_1_I2,\prec,\prec
+  \* (Inv350_b077_R20_1_I2,w1aAction)
+  <1>10. TypeOK /\ Inv40_180c_R24_0_I1 /\ Inv350_b077_R20_1_I2 /\ w1aAction => Inv350_b077_R20_1_I2' BY DEF TypeOK,Inv40_180c_R24_0_I1,w1aAction,w1a,Inv350_b077_R20_1_I2,\prec,\prec
+  \* (Inv350_b077_R20_1_I2,w1bAction)
+  <1>11. TypeOK /\ Inv350_b077_R20_1_I2 /\ w1bAction => Inv350_b077_R20_1_I2' BY DEF TypeOK,w1bAction,w1b,Inv350_b077_R20_1_I2,\prec,\prec
+  \* (Inv350_b077_R20_1_I2,w2Action)
+  <1>12. TypeOK /\ Inv350_b077_R20_1_I2 /\ w2Action => Inv350_b077_R20_1_I2' BY DEF TypeOK,w2Action,w2,Inv350_b077_R20_1_I2,\prec,\prec
+  \* (Inv350_b077_R20_1_I2,csAction)
+  <1>13. TypeOK /\ Inv350_b077_R20_1_I2 /\ csAction => Inv350_b077_R20_1_I2' BY DEF TypeOK,csAction,cs,Inv350_b077_R20_1_I2,\prec
+  \* (Inv350_b077_R20_1_I2,exitAction)
+  <1>14. TypeOK /\ Inv350_b077_R20_1_I2 /\ exitAction => Inv350_b077_R20_1_I2' BY DEF TypeOK,exitAction,exit,Inv350_b077_R20_1_I2,\prec
 <1>15. QED BY <1>1,<1>2,<1>3,<1>4,<1>5,<1>6,<1>7,<1>8,<1>9,<1>10,<1>11,<1>12,<1>13,<1>14 DEF Next
 
 
-\*** Inv48_180c_R17_0_I1
-THEOREM L_9 == TypeOK /\ Inv48_180c_R17_0_I1 /\ Next => Inv48_180c_R17_0_I1'
+\*** Inv40_180c_R24_0_I1
+THEOREM L_14 == TypeOK /\ Inv40_180c_R24_0_I1 /\ Next => Inv40_180c_R24_0_I1'
   <1>. USE A0
-  \* (Inv48_180c_R17_0_I1,ncsAction)
-  <1>1. TypeOK /\ Inv48_180c_R17_0_I1 /\ ncsAction => Inv48_180c_R17_0_I1' BY DEF TypeOK,ncsAction,ncs,Inv48_180c_R17_0_I1,\prec
-  \* (Inv48_180c_R17_0_I1,e1aAction)
-  <1>2. TypeOK /\ Inv48_180c_R17_0_I1 /\ e1aAction => Inv48_180c_R17_0_I1' BY DEF TypeOK,e1aAction,e1a,Inv48_180c_R17_0_I1,\prec
-  \* (Inv48_180c_R17_0_I1,e1bAction)
-  <1>3. TypeOK /\ Inv48_180c_R17_0_I1 /\ e1bAction => Inv48_180c_R17_0_I1' BY DEF TypeOK,e1bAction,e1b,Inv48_180c_R17_0_I1,\prec
-  \* (Inv48_180c_R17_0_I1,e2aAction)
-  <1>4. TypeOK /\ Inv48_180c_R17_0_I1 /\ e2aAction => Inv48_180c_R17_0_I1' BY DEF TypeOK,e2aAction,e2a,Inv48_180c_R17_0_I1,\prec,Procs
-  \* (Inv48_180c_R17_0_I1,e2bAction)
-  <1>5. TypeOK /\ Inv48_180c_R17_0_I1 /\ e2bAction => Inv48_180c_R17_0_I1' BY DEF TypeOK,e2bAction,e2b,Inv48_180c_R17_0_I1,\prec
-  \* (Inv48_180c_R17_0_I1,e3aAction)
-  <1>6. TypeOK /\ Inv48_180c_R17_0_I1 /\ e3aAction => Inv48_180c_R17_0_I1' BY DEF TypeOK,e3aAction,e3a,Inv48_180c_R17_0_I1,\prec
-  \* (Inv48_180c_R17_0_I1,e3bAction)
-  <1>7. TypeOK /\ Inv48_180c_R17_0_I1 /\ e3bAction => Inv48_180c_R17_0_I1' BY DEF TypeOK,e3bAction,e3b,Inv48_180c_R17_0_I1,\prec,\prec
-  \* (Inv48_180c_R17_0_I1,e4aAction)
-  <1>8. TypeOK /\ Inv48_180c_R17_0_I1 /\ e4aAction => Inv48_180c_R17_0_I1' BY DEF TypeOK,e4aAction,e4a,Inv48_180c_R17_0_I1,\prec
-  \* (Inv48_180c_R17_0_I1,e4bAction)
-  <1>9. TypeOK /\ Inv48_180c_R17_0_I1 /\ e4bAction => Inv48_180c_R17_0_I1' BY DEF TypeOK,e4bAction,e4b,Inv48_180c_R17_0_I1,\prec,\prec
-  \* (Inv48_180c_R17_0_I1,w1aAction)
-  <1>10. TypeOK /\ Inv48_180c_R17_0_I1 /\ w1aAction => Inv48_180c_R17_0_I1' BY DEF TypeOK,w1aAction,w1a,Inv48_180c_R17_0_I1,\prec,\prec
-  \* (Inv48_180c_R17_0_I1,w1bAction)
-  <1>11. TypeOK /\ Inv48_180c_R17_0_I1 /\ w1bAction => Inv48_180c_R17_0_I1' BY DEF TypeOK,w1bAction,w1b,Inv48_180c_R17_0_I1,\prec,\prec
-  \* (Inv48_180c_R17_0_I1,w2Action)
-  <1>12. TypeOK /\ Inv48_180c_R17_0_I1 /\ w2Action => Inv48_180c_R17_0_I1' BY DEF TypeOK,w2Action,w2,Inv48_180c_R17_0_I1,\prec,\prec
-  \* (Inv48_180c_R17_0_I1,csAction)
-  <1>13. TypeOK /\ Inv48_180c_R17_0_I1 /\ csAction => Inv48_180c_R17_0_I1' BY DEF TypeOK,csAction,cs,Inv48_180c_R17_0_I1,\prec
-  \* (Inv48_180c_R17_0_I1,exitAction)
-  <1>14. TypeOK /\ Inv48_180c_R17_0_I1 /\ exitAction => Inv48_180c_R17_0_I1' BY DEF TypeOK,exitAction,exit,Inv48_180c_R17_0_I1,\prec
+  \* (Inv40_180c_R24_0_I1,ncsAction)
+  <1>1. TypeOK /\ Inv40_180c_R24_0_I1 /\ ncsAction => Inv40_180c_R24_0_I1' BY DEF TypeOK,ncsAction,ncs,Inv40_180c_R24_0_I1,\prec
+  \* (Inv40_180c_R24_0_I1,e1aAction)
+  <1>2. TypeOK /\ Inv40_180c_R24_0_I1 /\ e1aAction => Inv40_180c_R24_0_I1' BY DEF TypeOK,e1aAction,e1a,Inv40_180c_R24_0_I1,\prec
+  \* (Inv40_180c_R24_0_I1,e1bAction)
+  <1>3. TypeOK /\ Inv40_180c_R24_0_I1 /\ e1bAction => Inv40_180c_R24_0_I1' BY DEF TypeOK,e1bAction,e1b,Inv40_180c_R24_0_I1,\prec
+  \* (Inv40_180c_R24_0_I1,e2aAction)
+  <1>4. TypeOK /\ Inv40_180c_R24_0_I1 /\ e2aAction => Inv40_180c_R24_0_I1' BY DEF TypeOK,e2aAction,e2a,Inv40_180c_R24_0_I1,\prec,Procs
+  \* (Inv40_180c_R24_0_I1,e2bAction)
+  <1>5. TypeOK /\ Inv40_180c_R24_0_I1 /\ e2bAction => Inv40_180c_R24_0_I1' BY DEF TypeOK,e2bAction,e2b,Inv40_180c_R24_0_I1,\prec
+  \* (Inv40_180c_R24_0_I1,e3aAction)
+  <1>6. TypeOK /\ Inv40_180c_R24_0_I1 /\ e3aAction => Inv40_180c_R24_0_I1' BY DEF TypeOK,e3aAction,e3a,Inv40_180c_R24_0_I1,\prec
+  \* (Inv40_180c_R24_0_I1,e3bAction)
+  <1>7. TypeOK /\ Inv40_180c_R24_0_I1 /\ e3bAction => Inv40_180c_R24_0_I1' BY DEF TypeOK,e3bAction,e3b,Inv40_180c_R24_0_I1,\prec,\prec
+  \* (Inv40_180c_R24_0_I1,e4aAction)
+  <1>8. TypeOK /\ Inv40_180c_R24_0_I1 /\ e4aAction => Inv40_180c_R24_0_I1' BY DEF TypeOK,e4aAction,e4a,Inv40_180c_R24_0_I1,\prec
+  \* (Inv40_180c_R24_0_I1,e4bAction)
+  <1>9. TypeOK /\ Inv40_180c_R24_0_I1 /\ e4bAction => Inv40_180c_R24_0_I1' BY DEF TypeOK,e4bAction,e4b,Inv40_180c_R24_0_I1,\prec,\prec
+  \* (Inv40_180c_R24_0_I1,w1aAction)
+  <1>10. TypeOK /\ Inv40_180c_R24_0_I1 /\ w1aAction => Inv40_180c_R24_0_I1' BY DEF TypeOK,w1aAction,w1a,Inv40_180c_R24_0_I1,\prec,\prec
+  \* (Inv40_180c_R24_0_I1,w1bAction)
+  <1>11. TypeOK /\ Inv40_180c_R24_0_I1 /\ w1bAction => Inv40_180c_R24_0_I1' BY DEF TypeOK,w1bAction,w1b,Inv40_180c_R24_0_I1,\prec,\prec
+  \* (Inv40_180c_R24_0_I1,w2Action)
+  <1>12. TypeOK /\ Inv40_180c_R24_0_I1 /\ w2Action => Inv40_180c_R24_0_I1' BY DEF TypeOK,w2Action,w2,Inv40_180c_R24_0_I1,\prec,\prec
+  \* (Inv40_180c_R24_0_I1,csAction)
+  <1>13. TypeOK /\ Inv40_180c_R24_0_I1 /\ csAction => Inv40_180c_R24_0_I1' BY DEF TypeOK,csAction,cs,Inv40_180c_R24_0_I1,\prec
+  \* (Inv40_180c_R24_0_I1,exitAction)
+  <1>14. TypeOK /\ Inv40_180c_R24_0_I1 /\ exitAction => Inv40_180c_R24_0_I1' BY DEF TypeOK,exitAction,exit,Inv40_180c_R24_0_I1,\prec
 <1>15. QED BY <1>1,<1>2,<1>3,<1>4,<1>5,<1>6,<1>7,<1>8,<1>9,<1>10,<1>11,<1>12,<1>13,<1>14 DEF Next
 
 
-\*** Inv5493_34f2_R10_1_I2
-THEOREM L_10 == TypeOK /\ Inv738_26ef_R13_1_I2 /\ Inv296_b692_R14_1_I1 /\ Inv5493_34f2_R10_1_I2 /\ Next => Inv5493_34f2_R10_1_I2'
+\*** Inv6093_1c74_R18_1_I2
+THEOREM L_15 == TypeOK /\ Inv350_b077_R20_1_I2 /\ Inv103_c9b1_R21_1_I1 /\ Inv6093_1c74_R18_1_I2 /\ Next => Inv6093_1c74_R18_1_I2'
   <1>. USE A0
-  \* (Inv5493_34f2_R10_1_I2,ncsAction)
-  <1>1. TypeOK /\ Inv5493_34f2_R10_1_I2 /\ ncsAction => Inv5493_34f2_R10_1_I2' BY DEF TypeOK,ncsAction,ncs,Inv5493_34f2_R10_1_I2,\prec
-  \* (Inv5493_34f2_R10_1_I2,e1aAction)
-  <1>2. TypeOK /\ Inv5493_34f2_R10_1_I2 /\ e1aAction => Inv5493_34f2_R10_1_I2' BY DEF TypeOK,e1aAction,e1a,Inv5493_34f2_R10_1_I2,\prec
-  \* (Inv5493_34f2_R10_1_I2,e1bAction)
-  <1>3. TypeOK /\ Inv5493_34f2_R10_1_I2 /\ e1bAction => Inv5493_34f2_R10_1_I2' BY DEF TypeOK,e1bAction,e1b,Inv5493_34f2_R10_1_I2,\prec
-  \* (Inv5493_34f2_R10_1_I2,e2aAction)
-  <1>4. TypeOK /\ Inv5493_34f2_R10_1_I2 /\ e2aAction => Inv5493_34f2_R10_1_I2' BY DEF TypeOK,e2aAction,e2a,Inv5493_34f2_R10_1_I2,\prec,Procs
-  \* (Inv5493_34f2_R10_1_I2,e2bAction)
-  <1>5. TypeOK /\ Inv738_26ef_R13_1_I2 /\ Inv5493_34f2_R10_1_I2 /\ e2bAction => Inv5493_34f2_R10_1_I2' BY DEF TypeOK,Inv738_26ef_R13_1_I2,e2bAction,e2b,Inv5493_34f2_R10_1_I2,\prec
-  \* (Inv5493_34f2_R10_1_I2,e3aAction)
-  <1>6. TypeOK /\ Inv5493_34f2_R10_1_I2 /\ e3aAction => Inv5493_34f2_R10_1_I2' BY DEF TypeOK,e3aAction,e3a,Inv5493_34f2_R10_1_I2,\prec
-  \* (Inv5493_34f2_R10_1_I2,e3bAction)
-  <1>7. TypeOK /\ Inv5493_34f2_R10_1_I2 /\ e3bAction => Inv5493_34f2_R10_1_I2' BY DEF TypeOK,e3bAction,e3b,Inv5493_34f2_R10_1_I2,\prec,\prec
-  \* (Inv5493_34f2_R10_1_I2,e4aAction)
-  <1>8. TypeOK /\ Inv5493_34f2_R10_1_I2 /\ e4aAction => Inv5493_34f2_R10_1_I2' BY DEF TypeOK,e4aAction,e4a,Inv5493_34f2_R10_1_I2,\prec
-  \* (Inv5493_34f2_R10_1_I2,e4bAction)
-  <1>9. TypeOK /\ Inv5493_34f2_R10_1_I2 /\ e4bAction => Inv5493_34f2_R10_1_I2' BY DEF TypeOK,e4bAction,e4b,Inv5493_34f2_R10_1_I2,\prec,\prec
-  \* (Inv5493_34f2_R10_1_I2,w1aAction)
-  <1>10. TypeOK /\ Inv296_b692_R14_1_I1 /\ Inv5493_34f2_R10_1_I2 /\ w1aAction => Inv5493_34f2_R10_1_I2' BY DEF TypeOK,Inv296_b692_R14_1_I1,w1aAction,w1a,Inv5493_34f2_R10_1_I2,\prec,\prec
-  \* (Inv5493_34f2_R10_1_I2,w1bAction)
-  <1>11. TypeOK /\ Inv5493_34f2_R10_1_I2 /\ w1bAction => Inv5493_34f2_R10_1_I2' BY DEF TypeOK,w1bAction,w1b,Inv5493_34f2_R10_1_I2,\prec,\prec
-  \* (Inv5493_34f2_R10_1_I2,w2Action)
-  <1>12. TypeOK /\ Inv5493_34f2_R10_1_I2 /\ w2Action => Inv5493_34f2_R10_1_I2' BY DEF TypeOK,w2Action,w2,Inv5493_34f2_R10_1_I2,\prec,\prec
-  \* (Inv5493_34f2_R10_1_I2,csAction)
-  <1>13. TypeOK /\ Inv5493_34f2_R10_1_I2 /\ csAction => Inv5493_34f2_R10_1_I2' BY DEF TypeOK,csAction,cs,Inv5493_34f2_R10_1_I2,\prec
-  \* (Inv5493_34f2_R10_1_I2,exitAction)
-  <1>14. TypeOK /\ Inv5493_34f2_R10_1_I2 /\ exitAction => Inv5493_34f2_R10_1_I2' BY DEF TypeOK,exitAction,exit,Inv5493_34f2_R10_1_I2,\prec
+  \* (Inv6093_1c74_R18_1_I2,ncsAction)
+  <1>1. TypeOK /\ Inv6093_1c74_R18_1_I2 /\ ncsAction => Inv6093_1c74_R18_1_I2' BY DEF TypeOK,ncsAction,ncs,Inv6093_1c74_R18_1_I2,\prec
+  \* (Inv6093_1c74_R18_1_I2,e1aAction)
+  <1>2. TypeOK /\ Inv6093_1c74_R18_1_I2 /\ e1aAction => Inv6093_1c74_R18_1_I2' BY DEF TypeOK,e1aAction,e1a,Inv6093_1c74_R18_1_I2,\prec
+  \* (Inv6093_1c74_R18_1_I2,e1bAction)
+  <1>3. TypeOK /\ Inv6093_1c74_R18_1_I2 /\ e1bAction => Inv6093_1c74_R18_1_I2' BY DEF TypeOK,e1bAction,e1b,Inv6093_1c74_R18_1_I2,\prec
+  \* (Inv6093_1c74_R18_1_I2,e2aAction)
+  <1>4. TypeOK /\ Inv6093_1c74_R18_1_I2 /\ e2aAction => Inv6093_1c74_R18_1_I2' BY DEF TypeOK,e2aAction,e2a,Inv6093_1c74_R18_1_I2,\prec,Procs
+  \* (Inv6093_1c74_R18_1_I2,e2bAction)
+  <1>5. TypeOK /\ Inv350_b077_R20_1_I2 /\ Inv6093_1c74_R18_1_I2 /\ e2bAction => Inv6093_1c74_R18_1_I2' BY DEF TypeOK,Inv350_b077_R20_1_I2,e2bAction,e2b,Inv6093_1c74_R18_1_I2,\prec
+  \* (Inv6093_1c74_R18_1_I2,e3aAction)
+  <1>6. TypeOK /\ Inv6093_1c74_R18_1_I2 /\ e3aAction => Inv6093_1c74_R18_1_I2' BY DEF TypeOK,e3aAction,e3a,Inv6093_1c74_R18_1_I2,\prec
+  \* (Inv6093_1c74_R18_1_I2,e3bAction)
+  <1>7. TypeOK /\ Inv6093_1c74_R18_1_I2 /\ e3bAction => Inv6093_1c74_R18_1_I2' BY DEF TypeOK,e3bAction,e3b,Inv6093_1c74_R18_1_I2,\prec,\prec
+  \* (Inv6093_1c74_R18_1_I2,e4aAction)
+  <1>8. TypeOK /\ Inv6093_1c74_R18_1_I2 /\ e4aAction => Inv6093_1c74_R18_1_I2' BY DEF TypeOK,e4aAction,e4a,Inv6093_1c74_R18_1_I2,\prec
+  \* (Inv6093_1c74_R18_1_I2,e4bAction)
+  <1>9. TypeOK /\ Inv6093_1c74_R18_1_I2 /\ e4bAction => Inv6093_1c74_R18_1_I2' BY DEF TypeOK,e4bAction,e4b,Inv6093_1c74_R18_1_I2,\prec,\prec
+  \* (Inv6093_1c74_R18_1_I2,w1aAction)
+  <1>10. TypeOK /\ Inv103_c9b1_R21_1_I1 /\ Inv6093_1c74_R18_1_I2 /\ w1aAction => Inv6093_1c74_R18_1_I2' BY DEF TypeOK,Inv103_c9b1_R21_1_I1,w1aAction,w1a,Inv6093_1c74_R18_1_I2,\prec,\prec
+  \* (Inv6093_1c74_R18_1_I2,w1bAction)
+  <1>11. TypeOK /\ Inv6093_1c74_R18_1_I2 /\ w1bAction => Inv6093_1c74_R18_1_I2' BY DEF TypeOK,w1bAction,w1b,Inv6093_1c74_R18_1_I2,\prec,\prec
+  \* (Inv6093_1c74_R18_1_I2,w2Action)
+  <1>12. TypeOK /\ Inv6093_1c74_R18_1_I2 /\ w2Action => Inv6093_1c74_R18_1_I2' BY DEF TypeOK,w2Action,w2,Inv6093_1c74_R18_1_I2,\prec,\prec
+  \* (Inv6093_1c74_R18_1_I2,csAction)
+  <1>13. TypeOK /\ Inv6093_1c74_R18_1_I2 /\ csAction => Inv6093_1c74_R18_1_I2' BY DEF TypeOK,csAction,cs,Inv6093_1c74_R18_1_I2,\prec
+  \* (Inv6093_1c74_R18_1_I2,exitAction)
+  <1>14. TypeOK /\ Inv6093_1c74_R18_1_I2 /\ exitAction => Inv6093_1c74_R18_1_I2' BY DEF TypeOK,exitAction,exit,Inv6093_1c74_R18_1_I2,\prec
 <1>15. QED BY <1>1,<1>2,<1>3,<1>4,<1>5,<1>6,<1>7,<1>8,<1>9,<1>10,<1>11,<1>12,<1>13,<1>14 DEF Next
 
 
-\*** Inv296_b692_R14_1_I1
-THEOREM L_11 == TypeOK /\ Inv48_180c_R17_0_I1 /\ Inv296_b692_R14_1_I1 /\ Next => Inv296_b692_R14_1_I1'
+\*** Inv103_c9b1_R21_1_I1
+THEOREM L_16 == TypeOK /\ Inv40_180c_R24_0_I1 /\ Inv103_c9b1_R21_1_I1 /\ Next => Inv103_c9b1_R21_1_I1'
   <1>. USE A0
-  \* (Inv296_b692_R14_1_I1,ncsAction)
-  <1>1. TypeOK /\ Inv296_b692_R14_1_I1 /\ ncsAction => Inv296_b692_R14_1_I1' BY DEF TypeOK,ncsAction,ncs,Inv296_b692_R14_1_I1,\prec
-  \* (Inv296_b692_R14_1_I1,e1aAction)
-  <1>2. TypeOK /\ Inv296_b692_R14_1_I1 /\ e1aAction => Inv296_b692_R14_1_I1' BY DEF TypeOK,e1aAction,e1a,Inv296_b692_R14_1_I1,\prec
-  \* (Inv296_b692_R14_1_I1,e1bAction)
-  <1>3. TypeOK /\ Inv296_b692_R14_1_I1 /\ e1bAction => Inv296_b692_R14_1_I1' BY DEF TypeOK,e1bAction,e1b,Inv296_b692_R14_1_I1,\prec
-  \* (Inv296_b692_R14_1_I1,e2aAction)
-  <1>4. TypeOK /\ Inv296_b692_R14_1_I1 /\ e2aAction => Inv296_b692_R14_1_I1' BY DEF TypeOK,e2aAction,e2a,Inv296_b692_R14_1_I1,\prec,Procs
-  \* (Inv296_b692_R14_1_I1,e2bAction)
-  <1>5. TypeOK /\ Inv48_180c_R17_0_I1 /\ Inv296_b692_R14_1_I1 /\ e2bAction => Inv296_b692_R14_1_I1' BY DEF TypeOK,Inv48_180c_R17_0_I1,e2bAction,e2b,Inv296_b692_R14_1_I1,\prec
-  \* (Inv296_b692_R14_1_I1,e3aAction)
-  <1>6. TypeOK /\ Inv296_b692_R14_1_I1 /\ e3aAction => Inv296_b692_R14_1_I1' BY DEF TypeOK,e3aAction,e3a,Inv296_b692_R14_1_I1,\prec
-  \* (Inv296_b692_R14_1_I1,e3bAction)
-  <1>7. TypeOK /\ Inv296_b692_R14_1_I1 /\ e3bAction => Inv296_b692_R14_1_I1' BY DEF TypeOK,e3bAction,e3b,Inv296_b692_R14_1_I1,\prec,\prec
-  \* (Inv296_b692_R14_1_I1,e4aAction)
-  <1>8. TypeOK /\ Inv296_b692_R14_1_I1 /\ e4aAction => Inv296_b692_R14_1_I1' BY DEF TypeOK,e4aAction,e4a,Inv296_b692_R14_1_I1,\prec
-  \* (Inv296_b692_R14_1_I1,e4bAction)
-  <1>9. TypeOK /\ Inv296_b692_R14_1_I1 /\ e4bAction => Inv296_b692_R14_1_I1' BY DEF TypeOK,e4bAction,e4b,Inv296_b692_R14_1_I1,\prec,\prec
-  \* (Inv296_b692_R14_1_I1,w1aAction)
-  <1>10. TypeOK /\ Inv296_b692_R14_1_I1 /\ w1aAction => Inv296_b692_R14_1_I1' BY DEF TypeOK,w1aAction,w1a,Inv296_b692_R14_1_I1,\prec,\prec
-  \* (Inv296_b692_R14_1_I1,w1bAction)
-  <1>11. TypeOK /\ Inv296_b692_R14_1_I1 /\ w1bAction => Inv296_b692_R14_1_I1' BY DEF TypeOK,w1bAction,w1b,Inv296_b692_R14_1_I1,\prec,\prec
-  \* (Inv296_b692_R14_1_I1,w2Action)
-  <1>12. TypeOK /\ Inv296_b692_R14_1_I1 /\ w2Action => Inv296_b692_R14_1_I1' BY DEF TypeOK,w2Action,w2,Inv296_b692_R14_1_I1,\prec,\prec
-  \* (Inv296_b692_R14_1_I1,csAction)
-  <1>13. TypeOK /\ Inv296_b692_R14_1_I1 /\ csAction => Inv296_b692_R14_1_I1' BY DEF TypeOK,csAction,cs,Inv296_b692_R14_1_I1,\prec
-  \* (Inv296_b692_R14_1_I1,exitAction)
-  <1>14. TypeOK /\ Inv296_b692_R14_1_I1 /\ exitAction => Inv296_b692_R14_1_I1' BY DEF TypeOK,exitAction,exit,Inv296_b692_R14_1_I1,\prec
+  \* (Inv103_c9b1_R21_1_I1,ncsAction)
+  <1>1. TypeOK /\ Inv103_c9b1_R21_1_I1 /\ ncsAction => Inv103_c9b1_R21_1_I1' BY DEF TypeOK,ncsAction,ncs,Inv103_c9b1_R21_1_I1,\prec
+  \* (Inv103_c9b1_R21_1_I1,e1aAction)
+  <1>2. TypeOK /\ Inv103_c9b1_R21_1_I1 /\ e1aAction => Inv103_c9b1_R21_1_I1' BY DEF TypeOK,e1aAction,e1a,Inv103_c9b1_R21_1_I1,\prec
+  \* (Inv103_c9b1_R21_1_I1,e1bAction)
+  <1>3. TypeOK /\ Inv103_c9b1_R21_1_I1 /\ e1bAction => Inv103_c9b1_R21_1_I1' BY DEF TypeOK,e1bAction,e1b,Inv103_c9b1_R21_1_I1,\prec
+  \* (Inv103_c9b1_R21_1_I1,e2aAction)
+  <1>4. TypeOK /\ Inv103_c9b1_R21_1_I1 /\ e2aAction => Inv103_c9b1_R21_1_I1' BY DEF TypeOK,e2aAction,e2a,Inv103_c9b1_R21_1_I1,\prec,Procs
+  \* (Inv103_c9b1_R21_1_I1,e2bAction)
+  <1>5. TypeOK /\ Inv40_180c_R24_0_I1 /\ Inv103_c9b1_R21_1_I1 /\ e2bAction => Inv103_c9b1_R21_1_I1' BY DEF TypeOK,Inv40_180c_R24_0_I1,e2bAction,e2b,Inv103_c9b1_R21_1_I1,\prec
+  \* (Inv103_c9b1_R21_1_I1,e3aAction)
+  <1>6. TypeOK /\ Inv103_c9b1_R21_1_I1 /\ e3aAction => Inv103_c9b1_R21_1_I1' BY DEF TypeOK,e3aAction,e3a,Inv103_c9b1_R21_1_I1,\prec
+  \* (Inv103_c9b1_R21_1_I1,e3bAction)
+  <1>7. TypeOK /\ Inv103_c9b1_R21_1_I1 /\ e3bAction => Inv103_c9b1_R21_1_I1' BY DEF TypeOK,e3bAction,e3b,Inv103_c9b1_R21_1_I1,\prec,\prec
+  \* (Inv103_c9b1_R21_1_I1,e4aAction)
+  <1>8. TypeOK /\ Inv103_c9b1_R21_1_I1 /\ e4aAction => Inv103_c9b1_R21_1_I1' BY DEF TypeOK,e4aAction,e4a,Inv103_c9b1_R21_1_I1,\prec
+  \* (Inv103_c9b1_R21_1_I1,e4bAction)
+  <1>9. TypeOK /\ Inv103_c9b1_R21_1_I1 /\ e4bAction => Inv103_c9b1_R21_1_I1' BY DEF TypeOK,e4bAction,e4b,Inv103_c9b1_R21_1_I1,\prec,\prec
+  \* (Inv103_c9b1_R21_1_I1,w1aAction)
+  <1>10. TypeOK /\ Inv103_c9b1_R21_1_I1 /\ w1aAction => Inv103_c9b1_R21_1_I1' BY DEF TypeOK,w1aAction,w1a,Inv103_c9b1_R21_1_I1,\prec,\prec
+  \* (Inv103_c9b1_R21_1_I1,w1bAction)
+  <1>11. TypeOK /\ Inv103_c9b1_R21_1_I1 /\ w1bAction => Inv103_c9b1_R21_1_I1' BY DEF TypeOK,w1bAction,w1b,Inv103_c9b1_R21_1_I1,\prec,\prec
+  \* (Inv103_c9b1_R21_1_I1,w2Action)
+  <1>12. TypeOK /\ Inv103_c9b1_R21_1_I1 /\ w2Action => Inv103_c9b1_R21_1_I1' BY DEF TypeOK,w2Action,w2,Inv103_c9b1_R21_1_I1,\prec,\prec
+  \* (Inv103_c9b1_R21_1_I1,csAction)
+  <1>13. TypeOK /\ Inv103_c9b1_R21_1_I1 /\ csAction => Inv103_c9b1_R21_1_I1' BY DEF TypeOK,csAction,cs,Inv103_c9b1_R21_1_I1,\prec
+  \* (Inv103_c9b1_R21_1_I1,exitAction)
+  <1>14. TypeOK /\ Inv103_c9b1_R21_1_I1 /\ exitAction => Inv103_c9b1_R21_1_I1' BY DEF TypeOK,exitAction,exit,Inv103_c9b1_R21_1_I1,\prec
 <1>15. QED BY <1>1,<1>2,<1>3,<1>4,<1>5,<1>6,<1>7,<1>8,<1>9,<1>10,<1>11,<1>12,<1>13,<1>14 DEF Next
 
 
-\*** Inv11_73d9_R7_1_I1
-THEOREM L_12 == TypeOK /\ Inv11_73d9_R7_1_I1 /\ Next => Inv11_73d9_R7_1_I1'
+\*** Inv80_b6ff_R2_0_I3
+THEOREM L_17 == TypeOK /\ Inv140_f68c_R9_0_I1 /\ Inv80_b6ff_R2_0_I3 /\ Next => Inv80_b6ff_R2_0_I3'
   <1>. USE A0
-  \* (Inv11_73d9_R7_1_I1,ncsAction)
-  <1>1. TypeOK /\ Inv11_73d9_R7_1_I1 /\ ncsAction => Inv11_73d9_R7_1_I1' BY DEF TypeOK,ncsAction,ncs,Inv11_73d9_R7_1_I1,\prec
-  \* (Inv11_73d9_R7_1_I1,e1aAction)
-  <1>2. TypeOK /\ Inv11_73d9_R7_1_I1 /\ e1aAction => Inv11_73d9_R7_1_I1' BY DEF TypeOK,e1aAction,e1a,Inv11_73d9_R7_1_I1,\prec
-  \* (Inv11_73d9_R7_1_I1,e1bAction)
-  <1>3. TypeOK /\ Inv11_73d9_R7_1_I1 /\ e1bAction => Inv11_73d9_R7_1_I1' BY DEF TypeOK,e1bAction,e1b,Inv11_73d9_R7_1_I1,\prec
-  \* (Inv11_73d9_R7_1_I1,e2aAction)
-  <1>4. TypeOK /\ Inv11_73d9_R7_1_I1 /\ e2aAction => Inv11_73d9_R7_1_I1' BY DEF TypeOK,e2aAction,e2a,Inv11_73d9_R7_1_I1,\prec,Procs
-  \* (Inv11_73d9_R7_1_I1,e2bAction)
-  <1>5. TypeOK /\ Inv11_73d9_R7_1_I1 /\ e2bAction => Inv11_73d9_R7_1_I1' BY DEF TypeOK,e2bAction,e2b,Inv11_73d9_R7_1_I1,\prec
-  \* (Inv11_73d9_R7_1_I1,e3aAction)
-  <1>6. TypeOK /\ Inv11_73d9_R7_1_I1 /\ e3aAction => Inv11_73d9_R7_1_I1' BY DEF TypeOK,e3aAction,e3a,Inv11_73d9_R7_1_I1,\prec
-  \* (Inv11_73d9_R7_1_I1,e3bAction)
-  <1>7. TypeOK /\ Inv11_73d9_R7_1_I1 /\ e3bAction => Inv11_73d9_R7_1_I1' BY DEF TypeOK,e3bAction,e3b,Inv11_73d9_R7_1_I1,\prec,\prec
-  \* (Inv11_73d9_R7_1_I1,e4aAction)
-  <1>8. TypeOK /\ Inv11_73d9_R7_1_I1 /\ e4aAction => Inv11_73d9_R7_1_I1' BY DEF TypeOK,e4aAction,e4a,Inv11_73d9_R7_1_I1,\prec
-  \* (Inv11_73d9_R7_1_I1,e4bAction)
-  <1>9. TypeOK /\ Inv11_73d9_R7_1_I1 /\ e4bAction => Inv11_73d9_R7_1_I1' BY DEF TypeOK,e4bAction,e4b,Inv11_73d9_R7_1_I1,\prec,\prec
-  \* (Inv11_73d9_R7_1_I1,w1aAction)
-  <1>10. TypeOK /\ Inv11_73d9_R7_1_I1 /\ w1aAction => Inv11_73d9_R7_1_I1' BY DEF TypeOK,w1aAction,w1a,Inv11_73d9_R7_1_I1,\prec,\prec
-  \* (Inv11_73d9_R7_1_I1,w1bAction)
-  <1>11. TypeOK /\ Inv11_73d9_R7_1_I1 /\ w1bAction => Inv11_73d9_R7_1_I1' BY DEF TypeOK,w1bAction,w1b,Inv11_73d9_R7_1_I1,\prec,\prec
-  \* (Inv11_73d9_R7_1_I1,w2Action)
-  <1>12. TypeOK /\ Inv11_73d9_R7_1_I1 /\ w2Action => Inv11_73d9_R7_1_I1' BY DEF TypeOK,w2Action,w2,Inv11_73d9_R7_1_I1,\prec,\prec
-  \* (Inv11_73d9_R7_1_I1,csAction)
-  <1>13. TypeOK /\ Inv11_73d9_R7_1_I1 /\ csAction => Inv11_73d9_R7_1_I1' BY DEF TypeOK,csAction,cs,Inv11_73d9_R7_1_I1,\prec
-  \* (Inv11_73d9_R7_1_I1,exitAction)
-  <1>14. TypeOK /\ Inv11_73d9_R7_1_I1 /\ exitAction => Inv11_73d9_R7_1_I1' BY DEF TypeOK,exitAction,exit,Inv11_73d9_R7_1_I1,\prec
+  \* (Inv80_b6ff_R2_0_I3,ncsAction)
+  <1>1. TypeOK /\ Inv80_b6ff_R2_0_I3 /\ ncsAction => Inv80_b6ff_R2_0_I3' BY DEF TypeOK,ncsAction,ncs,Inv80_b6ff_R2_0_I3,\prec
+  \* (Inv80_b6ff_R2_0_I3,e1aAction)
+  <1>2. TypeOK /\ Inv80_b6ff_R2_0_I3 /\ e1aAction => Inv80_b6ff_R2_0_I3' BY DEF TypeOK,e1aAction,e1a,Inv80_b6ff_R2_0_I3,\prec
+  \* (Inv80_b6ff_R2_0_I3,e1bAction)
+  <1>3. TypeOK /\ Inv80_b6ff_R2_0_I3 /\ e1bAction => Inv80_b6ff_R2_0_I3' BY DEF TypeOK,e1bAction,e1b,Inv80_b6ff_R2_0_I3,\prec
+  \* (Inv80_b6ff_R2_0_I3,e2aAction)
+  <1>4. TypeOK /\ Inv80_b6ff_R2_0_I3 /\ e2aAction => Inv80_b6ff_R2_0_I3' BY DEF TypeOK,e2aAction,e2a,Inv80_b6ff_R2_0_I3,\prec,Procs
+  \* (Inv80_b6ff_R2_0_I3,e2bAction)
+  <1>5. TypeOK /\ Inv80_b6ff_R2_0_I3 /\ e2bAction => Inv80_b6ff_R2_0_I3' BY DEF TypeOK,e2bAction,e2b,Inv80_b6ff_R2_0_I3,\prec
+  \* (Inv80_b6ff_R2_0_I3,e3aAction)
+  <1>6. TypeOK /\ Inv80_b6ff_R2_0_I3 /\ e3aAction => Inv80_b6ff_R2_0_I3' BY DEF TypeOK,e3aAction,e3a,Inv80_b6ff_R2_0_I3,\prec
+  \* (Inv80_b6ff_R2_0_I3,e3bAction)
+  <1>7. TypeOK /\ Inv80_b6ff_R2_0_I3 /\ e3bAction => Inv80_b6ff_R2_0_I3' BY DEF TypeOK,e3bAction,e3b,Inv80_b6ff_R2_0_I3,\prec,\prec
+  \* (Inv80_b6ff_R2_0_I3,e4aAction)
+  <1>8. TypeOK /\ Inv80_b6ff_R2_0_I3 /\ e4aAction => Inv80_b6ff_R2_0_I3' BY DEF TypeOK,e4aAction,e4a,Inv80_b6ff_R2_0_I3,\prec
+  \* (Inv80_b6ff_R2_0_I3,e4bAction)
+  <1>9. TypeOK /\ Inv140_f68c_R9_0_I1 /\ Inv80_b6ff_R2_0_I3 /\ e4bAction => Inv80_b6ff_R2_0_I3' BY DEF TypeOK,Inv140_f68c_R9_0_I1,e4bAction,e4b,Inv80_b6ff_R2_0_I3,\prec,\prec
+  \* (Inv80_b6ff_R2_0_I3,w1aAction)
+  <1>10. TypeOK /\ Inv80_b6ff_R2_0_I3 /\ w1aAction => Inv80_b6ff_R2_0_I3' BY DEF TypeOK,w1aAction,w1a,Inv80_b6ff_R2_0_I3,\prec,\prec
+  \* (Inv80_b6ff_R2_0_I3,w1bAction)
+  <1>11. TypeOK /\ Inv80_b6ff_R2_0_I3 /\ w1bAction => Inv80_b6ff_R2_0_I3' BY DEF TypeOK,w1bAction,w1b,Inv80_b6ff_R2_0_I3,\prec,\prec
+  \* (Inv80_b6ff_R2_0_I3,w2Action)
+  <1>12. TypeOK /\ Inv80_b6ff_R2_0_I3 /\ w2Action => Inv80_b6ff_R2_0_I3' BY DEF TypeOK,w2Action,w2,Inv80_b6ff_R2_0_I3,\prec,\prec
+  \* (Inv80_b6ff_R2_0_I3,csAction)
+  <1>13. TypeOK /\ Inv80_b6ff_R2_0_I3 /\ csAction => Inv80_b6ff_R2_0_I3' BY DEF TypeOK,csAction,cs,Inv80_b6ff_R2_0_I3,\prec
+  \* (Inv80_b6ff_R2_0_I3,exitAction)
+  <1>14. TypeOK /\ Inv80_b6ff_R2_0_I3 /\ exitAction => Inv80_b6ff_R2_0_I3' BY DEF TypeOK,exitAction,exit,Inv80_b6ff_R2_0_I3,\prec
 <1>15. QED BY <1>1,<1>2,<1>3,<1>4,<1>5,<1>6,<1>7,<1>8,<1>9,<1>10,<1>11,<1>12,<1>13,<1>14 DEF Next
 
 
-\*** Inv26_b6ff_R2_0_I3
-THEOREM L_13 == TypeOK /\ Inv11_73d9_R7_1_I1 /\ Inv26_b6ff_R2_0_I3 /\ Next => Inv26_b6ff_R2_0_I3'
+\*** Inv140_f68c_R9_0_I1
+THEOREM L_18 == TypeOK /\ Inv140_f68c_R9_0_I1 /\ Next => Inv140_f68c_R9_0_I1'
   <1>. USE A0
-  \* (Inv26_b6ff_R2_0_I3,ncsAction)
-  <1>1. TypeOK /\ Inv26_b6ff_R2_0_I3 /\ ncsAction => Inv26_b6ff_R2_0_I3' BY DEF TypeOK,ncsAction,ncs,Inv26_b6ff_R2_0_I3,\prec
-  \* (Inv26_b6ff_R2_0_I3,e1aAction)
-  <1>2. TypeOK /\ Inv26_b6ff_R2_0_I3 /\ e1aAction => Inv26_b6ff_R2_0_I3' BY DEF TypeOK,e1aAction,e1a,Inv26_b6ff_R2_0_I3,\prec
-  \* (Inv26_b6ff_R2_0_I3,e1bAction)
-  <1>3. TypeOK /\ Inv26_b6ff_R2_0_I3 /\ e1bAction => Inv26_b6ff_R2_0_I3' BY DEF TypeOK,e1bAction,e1b,Inv26_b6ff_R2_0_I3,\prec
-  \* (Inv26_b6ff_R2_0_I3,e2aAction)
-  <1>4. TypeOK /\ Inv26_b6ff_R2_0_I3 /\ e2aAction => Inv26_b6ff_R2_0_I3' BY DEF TypeOK,e2aAction,e2a,Inv26_b6ff_R2_0_I3,\prec,Procs
-  \* (Inv26_b6ff_R2_0_I3,e2bAction)
-  <1>5. TypeOK /\ Inv26_b6ff_R2_0_I3 /\ e2bAction => Inv26_b6ff_R2_0_I3' BY DEF TypeOK,e2bAction,e2b,Inv26_b6ff_R2_0_I3,\prec
-  \* (Inv26_b6ff_R2_0_I3,e3aAction)
-  <1>6. TypeOK /\ Inv26_b6ff_R2_0_I3 /\ e3aAction => Inv26_b6ff_R2_0_I3' BY DEF TypeOK,e3aAction,e3a,Inv26_b6ff_R2_0_I3,\prec
-  \* (Inv26_b6ff_R2_0_I3,e3bAction)
-  <1>7. TypeOK /\ Inv26_b6ff_R2_0_I3 /\ e3bAction => Inv26_b6ff_R2_0_I3' BY DEF TypeOK,e3bAction,e3b,Inv26_b6ff_R2_0_I3,\prec,\prec
-  \* (Inv26_b6ff_R2_0_I3,e4aAction)
-  <1>8. TypeOK /\ Inv26_b6ff_R2_0_I3 /\ e4aAction => Inv26_b6ff_R2_0_I3' BY DEF TypeOK,e4aAction,e4a,Inv26_b6ff_R2_0_I3,\prec
-  \* (Inv26_b6ff_R2_0_I3,e4bAction)
-  <1>9. TypeOK /\ Inv11_73d9_R7_1_I1 /\ Inv26_b6ff_R2_0_I3 /\ e4bAction => Inv26_b6ff_R2_0_I3' BY DEF TypeOK,Inv11_73d9_R7_1_I1,e4bAction,e4b,Inv26_b6ff_R2_0_I3,\prec,\prec
-  \* (Inv26_b6ff_R2_0_I3,w1aAction)
-  <1>10. TypeOK /\ Inv26_b6ff_R2_0_I3 /\ w1aAction => Inv26_b6ff_R2_0_I3' BY DEF TypeOK,w1aAction,w1a,Inv26_b6ff_R2_0_I3,\prec,\prec
-  \* (Inv26_b6ff_R2_0_I3,w1bAction)
-  <1>11. TypeOK /\ Inv26_b6ff_R2_0_I3 /\ w1bAction => Inv26_b6ff_R2_0_I3' BY DEF TypeOK,w1bAction,w1b,Inv26_b6ff_R2_0_I3,\prec,\prec
-  \* (Inv26_b6ff_R2_0_I3,w2Action)
-  <1>12. TypeOK /\ Inv26_b6ff_R2_0_I3 /\ w2Action => Inv26_b6ff_R2_0_I3' BY DEF TypeOK,w2Action,w2,Inv26_b6ff_R2_0_I3,\prec,\prec
-  \* (Inv26_b6ff_R2_0_I3,csAction)
-  <1>13. TypeOK /\ Inv26_b6ff_R2_0_I3 /\ csAction => Inv26_b6ff_R2_0_I3' BY DEF TypeOK,csAction,cs,Inv26_b6ff_R2_0_I3,\prec
-  \* (Inv26_b6ff_R2_0_I3,exitAction)
-  <1>14. TypeOK /\ Inv26_b6ff_R2_0_I3 /\ exitAction => Inv26_b6ff_R2_0_I3' BY DEF TypeOK,exitAction,exit,Inv26_b6ff_R2_0_I3,\prec
+  \* (Inv140_f68c_R9_0_I1,ncsAction)
+  <1>1. TypeOK /\ Inv140_f68c_R9_0_I1 /\ ncsAction => Inv140_f68c_R9_0_I1' BY DEF TypeOK,ncsAction,ncs,Inv140_f68c_R9_0_I1,\prec
+  \* (Inv140_f68c_R9_0_I1,e1aAction)
+  <1>2. TypeOK /\ Inv140_f68c_R9_0_I1 /\ e1aAction => Inv140_f68c_R9_0_I1' BY DEF TypeOK,e1aAction,e1a,Inv140_f68c_R9_0_I1,\prec
+  \* (Inv140_f68c_R9_0_I1,e1bAction)
+  <1>3. TypeOK /\ Inv140_f68c_R9_0_I1 /\ e1bAction => Inv140_f68c_R9_0_I1' BY DEF TypeOK,e1bAction,e1b,Inv140_f68c_R9_0_I1,\prec
+  \* (Inv140_f68c_R9_0_I1,e2aAction)
+  <1>4. TypeOK /\ Inv140_f68c_R9_0_I1 /\ e2aAction => Inv140_f68c_R9_0_I1' BY DEF TypeOK,e2aAction,e2a,Inv140_f68c_R9_0_I1,\prec,Procs
+  \* (Inv140_f68c_R9_0_I1,e2bAction)
+  <1>5. TypeOK /\ Inv140_f68c_R9_0_I1 /\ e2bAction => Inv140_f68c_R9_0_I1' BY DEF TypeOK,e2bAction,e2b,Inv140_f68c_R9_0_I1,\prec
+  \* (Inv140_f68c_R9_0_I1,e3aAction)
+  <1>6. TypeOK /\ Inv140_f68c_R9_0_I1 /\ e3aAction => Inv140_f68c_R9_0_I1' BY DEF TypeOK,e3aAction,e3a,Inv140_f68c_R9_0_I1,\prec
+  \* (Inv140_f68c_R9_0_I1,e3bAction)
+  <1>7. TypeOK /\ Inv140_f68c_R9_0_I1 /\ e3bAction => Inv140_f68c_R9_0_I1' BY DEF TypeOK,e3bAction,e3b,Inv140_f68c_R9_0_I1,\prec,\prec
+  \* (Inv140_f68c_R9_0_I1,e4aAction)
+  <1>8. TypeOK /\ Inv140_f68c_R9_0_I1 /\ e4aAction => Inv140_f68c_R9_0_I1' BY DEF TypeOK,e4aAction,e4a,Inv140_f68c_R9_0_I1,\prec
+  \* (Inv140_f68c_R9_0_I1,e4bAction)
+  <1>9. TypeOK /\ Inv140_f68c_R9_0_I1 /\ e4bAction => Inv140_f68c_R9_0_I1' BY DEF TypeOK,e4bAction,e4b,Inv140_f68c_R9_0_I1,\prec,\prec
+  \* (Inv140_f68c_R9_0_I1,w1aAction)
+  <1>10. TypeOK /\ Inv140_f68c_R9_0_I1 /\ w1aAction => Inv140_f68c_R9_0_I1' BY DEF TypeOK,w1aAction,w1a,Inv140_f68c_R9_0_I1,\prec,\prec
+  \* (Inv140_f68c_R9_0_I1,w1bAction)
+  <1>11. TypeOK /\ Inv140_f68c_R9_0_I1 /\ w1bAction => Inv140_f68c_R9_0_I1' BY DEF TypeOK,w1bAction,w1b,Inv140_f68c_R9_0_I1,\prec,\prec
+  \* (Inv140_f68c_R9_0_I1,w2Action)
+  <1>12. TypeOK /\ Inv140_f68c_R9_0_I1 /\ w2Action => Inv140_f68c_R9_0_I1' BY DEF TypeOK,w2Action,w2,Inv140_f68c_R9_0_I1,\prec,\prec
+  \* (Inv140_f68c_R9_0_I1,csAction)
+  <1>13. TypeOK /\ Inv140_f68c_R9_0_I1 /\ csAction => Inv140_f68c_R9_0_I1' BY DEF TypeOK,csAction,cs,Inv140_f68c_R9_0_I1,\prec
+  \* (Inv140_f68c_R9_0_I1,exitAction)
+  <1>14. TypeOK /\ Inv140_f68c_R9_0_I1 /\ exitAction => Inv140_f68c_R9_0_I1' BY DEF TypeOK,exitAction,exit,Inv140_f68c_R9_0_I1,\prec
 <1>15. QED BY <1>1,<1>2,<1>3,<1>4,<1>5,<1>6,<1>7,<1>8,<1>9,<1>10,<1>11,<1>12,<1>13,<1>14 DEF Next
 
 
-\*** Inv21465_bb1b_R1_1_I2
-THEOREM L_14 == TypeOK /\ Inv21465_bb1b_R1_1_I2 /\ Next => Inv21465_bb1b_R1_1_I2'
+\*** Inv1028_6ea5_R8_0_I2
+THEOREM L_19 == TypeOK /\ Inv4227_eecc_R10_0_I3 /\ Inv4227_eecc_R10_0_I3 /\ Inv80_b6ff_R2_0_I3 /\ Inv1028_6ea5_R8_0_I2 /\ Next => Inv1028_6ea5_R8_0_I2'
   <1>. USE A0
-  \* (Inv21465_bb1b_R1_1_I2,ncsAction)
-  <1>1. TypeOK /\ Inv21465_bb1b_R1_1_I2 /\ ncsAction => Inv21465_bb1b_R1_1_I2' BY DEF TypeOK,ncsAction,ncs,Inv21465_bb1b_R1_1_I2,\prec
-  \* (Inv21465_bb1b_R1_1_I2,e1aAction)
-  <1>2. TypeOK /\ Inv21465_bb1b_R1_1_I2 /\ e1aAction => Inv21465_bb1b_R1_1_I2' BY DEF TypeOK,e1aAction,e1a,Inv21465_bb1b_R1_1_I2,\prec
-  \* (Inv21465_bb1b_R1_1_I2,e1bAction)
-  <1>3. TypeOK /\ Inv21465_bb1b_R1_1_I2 /\ e1bAction => Inv21465_bb1b_R1_1_I2' BY DEF TypeOK,e1bAction,e1b,Inv21465_bb1b_R1_1_I2,\prec
-  \* (Inv21465_bb1b_R1_1_I2,e2aAction)
-  <1>4. TypeOK /\ Inv21465_bb1b_R1_1_I2 /\ e2aAction => Inv21465_bb1b_R1_1_I2' BY DEF TypeOK,e2aAction,e2a,Inv21465_bb1b_R1_1_I2,\prec,Procs
-  \* (Inv21465_bb1b_R1_1_I2,e2bAction)
-  <1>5. TypeOK /\ Inv21465_bb1b_R1_1_I2 /\ e2bAction => Inv21465_bb1b_R1_1_I2' BY DEF TypeOK,e2bAction,e2b,Inv21465_bb1b_R1_1_I2,\prec
-  \* (Inv21465_bb1b_R1_1_I2,e3aAction)
-  <1>6. TypeOK /\ Inv21465_bb1b_R1_1_I2 /\ e3aAction => Inv21465_bb1b_R1_1_I2' BY DEF TypeOK,e3aAction,e3a,Inv21465_bb1b_R1_1_I2,\prec
-  \* (Inv21465_bb1b_R1_1_I2,e3bAction)
-  <1>7. TypeOK /\ Inv21465_bb1b_R1_1_I2 /\ e3bAction => Inv21465_bb1b_R1_1_I2' BY DEF TypeOK,e3bAction,e3b,Inv21465_bb1b_R1_1_I2,\prec,\prec
-  \* (Inv21465_bb1b_R1_1_I2,e4aAction)
-  <1>8. TypeOK /\ Inv21465_bb1b_R1_1_I2 /\ e4aAction => Inv21465_bb1b_R1_1_I2' BY DEF TypeOK,e4aAction,e4a,Inv21465_bb1b_R1_1_I2,\prec
-  \* (Inv21465_bb1b_R1_1_I2,e4bAction)
-  <1>9. TypeOK /\ Inv21465_bb1b_R1_1_I2 /\ e4bAction => Inv21465_bb1b_R1_1_I2' BY DEF TypeOK,e4bAction,e4b,Inv21465_bb1b_R1_1_I2,\prec,\prec
-  \* (Inv21465_bb1b_R1_1_I2,w1aAction)
-  <1>10. TypeOK /\ Inv21465_bb1b_R1_1_I2 /\ w1aAction => Inv21465_bb1b_R1_1_I2' BY DEF TypeOK,w1aAction,w1a,Inv21465_bb1b_R1_1_I2,\prec,\prec
-  \* (Inv21465_bb1b_R1_1_I2,w1bAction)
-  <1>11. TypeOK /\ Inv21465_bb1b_R1_1_I2 /\ w1bAction => Inv21465_bb1b_R1_1_I2' BY DEF TypeOK,w1bAction,w1b,Inv21465_bb1b_R1_1_I2,\prec,\prec
-  \* (Inv21465_bb1b_R1_1_I2,w2Action)
-  <1>12. TypeOK /\ Inv21465_bb1b_R1_1_I2 /\ w2Action => Inv21465_bb1b_R1_1_I2' BY DEF TypeOK,w2Action,w2,Inv21465_bb1b_R1_1_I2,\prec,\prec
-  \* (Inv21465_bb1b_R1_1_I2,csAction)
-  <1>13. TypeOK /\ Inv21465_bb1b_R1_1_I2 /\ csAction => Inv21465_bb1b_R1_1_I2' BY DEF TypeOK,csAction,cs,Inv21465_bb1b_R1_1_I2,\prec
-  \* (Inv21465_bb1b_R1_1_I2,exitAction)
-  <1>14. TypeOK /\ Inv21465_bb1b_R1_1_I2 /\ exitAction => Inv21465_bb1b_R1_1_I2' BY DEF TypeOK,exitAction,exit,Inv21465_bb1b_R1_1_I2,\prec
+  \* (Inv1028_6ea5_R8_0_I2,ncsAction)
+  <1>1. TypeOK /\ Inv1028_6ea5_R8_0_I2 /\ ncsAction => Inv1028_6ea5_R8_0_I2' BY DEF TypeOK,ncsAction,ncs,Inv1028_6ea5_R8_0_I2,\prec
+  \* (Inv1028_6ea5_R8_0_I2,e1aAction)
+  <1>2. TypeOK /\ Inv1028_6ea5_R8_0_I2 /\ e1aAction => Inv1028_6ea5_R8_0_I2' BY DEF TypeOK,e1aAction,e1a,Inv1028_6ea5_R8_0_I2,\prec
+  \* (Inv1028_6ea5_R8_0_I2,e1bAction)
+  <1>3. TypeOK /\ Inv1028_6ea5_R8_0_I2 /\ e1bAction => Inv1028_6ea5_R8_0_I2' BY DEF TypeOK,e1bAction,e1b,Inv1028_6ea5_R8_0_I2,\prec
+  \* (Inv1028_6ea5_R8_0_I2,e2aAction)
+  <1>4. TypeOK /\ Inv1028_6ea5_R8_0_I2 /\ e2aAction => Inv1028_6ea5_R8_0_I2' BY DEF TypeOK,e2aAction,e2a,Inv1028_6ea5_R8_0_I2,\prec,Procs
+  \* (Inv1028_6ea5_R8_0_I2,e2bAction)
+  <1>5. TypeOK /\ Inv1028_6ea5_R8_0_I2 /\ e2bAction => Inv1028_6ea5_R8_0_I2' BY DEF TypeOK,e2bAction,e2b,Inv1028_6ea5_R8_0_I2,\prec
+  \* (Inv1028_6ea5_R8_0_I2,e3aAction)
+  <1>6. TypeOK /\ Inv1028_6ea5_R8_0_I2 /\ e3aAction => Inv1028_6ea5_R8_0_I2' BY DEF TypeOK,e3aAction,e3a,Inv1028_6ea5_R8_0_I2,\prec
+  \* (Inv1028_6ea5_R8_0_I2,e3bAction)
+  <1>7. TypeOK /\ Inv1028_6ea5_R8_0_I2 /\ e3bAction => Inv1028_6ea5_R8_0_I2' BY DEF TypeOK,e3bAction,e3b,Inv1028_6ea5_R8_0_I2,\prec,\prec
+  \* (Inv1028_6ea5_R8_0_I2,e4aAction)
+  <1>8. TypeOK /\ Inv1028_6ea5_R8_0_I2 /\ e4aAction => Inv1028_6ea5_R8_0_I2' BY DEF TypeOK,e4aAction,e4a,Inv1028_6ea5_R8_0_I2,\prec
+  \* (Inv1028_6ea5_R8_0_I2,e4bAction)
+  <1>9. TypeOK /\ Inv4227_eecc_R10_0_I3 /\ Inv1028_6ea5_R8_0_I2 /\ e4bAction => Inv1028_6ea5_R8_0_I2' BY DEF TypeOK,Inv4227_eecc_R10_0_I3,e4bAction,e4b,Inv1028_6ea5_R8_0_I2,\prec,\prec
+  \* (Inv1028_6ea5_R8_0_I2,w1aAction)
+  <1>10. TypeOK /\ Inv1028_6ea5_R8_0_I2 /\ w1aAction => Inv1028_6ea5_R8_0_I2' BY DEF TypeOK,w1aAction,w1a,Inv1028_6ea5_R8_0_I2,\prec,\prec
+  \* (Inv1028_6ea5_R8_0_I2,w1bAction)
+  <1>11. TypeOK /\ Inv1028_6ea5_R8_0_I2 /\ w1bAction => Inv1028_6ea5_R8_0_I2' BY DEF TypeOK,w1bAction,w1b,Inv1028_6ea5_R8_0_I2,\prec,\prec
+  \* (Inv1028_6ea5_R8_0_I2,w2Action)
+  <1>12. TypeOK /\ Inv4227_eecc_R10_0_I3 /\ Inv80_b6ff_R2_0_I3 /\ Inv1028_6ea5_R8_0_I2 /\ w2Action => Inv1028_6ea5_R8_0_I2' BY DEF TypeOK,Inv4227_eecc_R10_0_I3,Inv80_b6ff_R2_0_I3,w2Action,w2,Inv1028_6ea5_R8_0_I2,\prec,\prec
+  \* (Inv1028_6ea5_R8_0_I2,csAction)
+  <1>13. TypeOK /\ Inv1028_6ea5_R8_0_I2 /\ csAction => Inv1028_6ea5_R8_0_I2' BY DEF TypeOK,csAction,cs,Inv1028_6ea5_R8_0_I2,\prec
+  \* (Inv1028_6ea5_R8_0_I2,exitAction)
+  <1>14. TypeOK /\ Inv1028_6ea5_R8_0_I2 /\ exitAction => Inv1028_6ea5_R8_0_I2' BY DEF TypeOK,exitAction,exit,Inv1028_6ea5_R8_0_I2,\prec
 <1>15. QED BY <1>1,<1>2,<1>3,<1>4,<1>5,<1>6,<1>7,<1>8,<1>9,<1>10,<1>11,<1>12,<1>13,<1>14 DEF Next
 
 
-\*** Inv19891_1bc3_R1_1_I2
-THEOREM L_15 == TypeOK /\ Inv1222_288c_R4_0_I2 /\ Inv6938_a43e_R2_0_I3 /\ Inv19891_1bc3_R1_1_I2 /\ Next => Inv19891_1bc3_R1_1_I2'
+\*** Inv24959_7f87_R1_1_I2
+THEOREM L_20 == TypeOK /\ Inv24959_7f87_R1_1_I2 /\ Next => Inv24959_7f87_R1_1_I2'
   <1>. USE A0
-  \* (Inv19891_1bc3_R1_1_I2,ncsAction)
-  <1>1. TypeOK /\ Inv19891_1bc3_R1_1_I2 /\ ncsAction => Inv19891_1bc3_R1_1_I2' BY DEF TypeOK,ncsAction,ncs,Inv19891_1bc3_R1_1_I2,\prec
-  \* (Inv19891_1bc3_R1_1_I2,e1aAction)
-  <1>2. TypeOK /\ Inv19891_1bc3_R1_1_I2 /\ e1aAction => Inv19891_1bc3_R1_1_I2' BY DEF TypeOK,e1aAction,e1a,Inv19891_1bc3_R1_1_I2,\prec
-  \* (Inv19891_1bc3_R1_1_I2,e1bAction)
-  <1>3. TypeOK /\ Inv19891_1bc3_R1_1_I2 /\ e1bAction => Inv19891_1bc3_R1_1_I2' BY DEF TypeOK,e1bAction,e1b,Inv19891_1bc3_R1_1_I2,\prec
-  \* (Inv19891_1bc3_R1_1_I2,e2aAction)
-  <1>4. TypeOK /\ Inv19891_1bc3_R1_1_I2 /\ e2aAction => Inv19891_1bc3_R1_1_I2' BY DEF TypeOK,e2aAction,e2a,Inv19891_1bc3_R1_1_I2,\prec,Procs
-  \* (Inv19891_1bc3_R1_1_I2,e2bAction)
-  <1>5. TypeOK /\ Inv19891_1bc3_R1_1_I2 /\ e2bAction => Inv19891_1bc3_R1_1_I2' BY DEF TypeOK,e2bAction,e2b,Inv19891_1bc3_R1_1_I2,\prec
-  \* (Inv19891_1bc3_R1_1_I2,e3aAction)
-  <1>6. TypeOK /\ Inv19891_1bc3_R1_1_I2 /\ e3aAction => Inv19891_1bc3_R1_1_I2' BY DEF TypeOK,e3aAction,e3a,Inv19891_1bc3_R1_1_I2,\prec
-  \* (Inv19891_1bc3_R1_1_I2,e3bAction)
-  <1>7. TypeOK /\ Inv19891_1bc3_R1_1_I2 /\ e3bAction => Inv19891_1bc3_R1_1_I2' BY DEF TypeOK,e3bAction,e3b,Inv19891_1bc3_R1_1_I2,\prec,\prec
-  \* (Inv19891_1bc3_R1_1_I2,e4aAction)
-  <1>8. TypeOK /\ Inv19891_1bc3_R1_1_I2 /\ e4aAction => Inv19891_1bc3_R1_1_I2' BY DEF TypeOK,e4aAction,e4a,Inv19891_1bc3_R1_1_I2,\prec
-  \* (Inv19891_1bc3_R1_1_I2,e4bAction)
-  <1>9. TypeOK /\ Inv1222_288c_R4_0_I2 /\ Inv19891_1bc3_R1_1_I2 /\ e4bAction => Inv19891_1bc3_R1_1_I2' BY DEF TypeOK,Inv1222_288c_R4_0_I2,e4bAction,e4b,Inv19891_1bc3_R1_1_I2,\prec,\prec
-  \* (Inv19891_1bc3_R1_1_I2,w1aAction)
-  <1>10. TypeOK /\ Inv19891_1bc3_R1_1_I2 /\ w1aAction => Inv19891_1bc3_R1_1_I2' BY DEF TypeOK,w1aAction,w1a,Inv19891_1bc3_R1_1_I2,\prec,\prec
-  \* (Inv19891_1bc3_R1_1_I2,w1bAction)
-  <1>11. TypeOK /\ Inv6938_a43e_R2_0_I3 /\ Inv19891_1bc3_R1_1_I2 /\ w1bAction => Inv19891_1bc3_R1_1_I2' BY DEF TypeOK,Inv6938_a43e_R2_0_I3,w1bAction,w1b,Inv19891_1bc3_R1_1_I2,\prec,\prec
-  \* (Inv19891_1bc3_R1_1_I2,w2Action)
-  <1>12. TypeOK /\ Inv19891_1bc3_R1_1_I2 /\ w2Action => Inv19891_1bc3_R1_1_I2' BY DEF TypeOK,w2Action,w2,Inv19891_1bc3_R1_1_I2,\prec,\prec
-  \* (Inv19891_1bc3_R1_1_I2,csAction)
-  <1>13. TypeOK /\ Inv19891_1bc3_R1_1_I2 /\ csAction => Inv19891_1bc3_R1_1_I2' BY DEF TypeOK,csAction,cs,Inv19891_1bc3_R1_1_I2,\prec
-  \* (Inv19891_1bc3_R1_1_I2,exitAction)
-  <1>14. TypeOK /\ Inv19891_1bc3_R1_1_I2 /\ exitAction => Inv19891_1bc3_R1_1_I2' BY DEF TypeOK,exitAction,exit,Inv19891_1bc3_R1_1_I2,\prec
+  \* (Inv24959_7f87_R1_1_I2,ncsAction)
+  <1>1. TypeOK /\ Inv24959_7f87_R1_1_I2 /\ ncsAction => Inv24959_7f87_R1_1_I2' BY DEF TypeOK,ncsAction,ncs,Inv24959_7f87_R1_1_I2,\prec
+  \* (Inv24959_7f87_R1_1_I2,e1aAction)
+  <1>2. TypeOK /\ Inv24959_7f87_R1_1_I2 /\ e1aAction => Inv24959_7f87_R1_1_I2' BY DEF TypeOK,e1aAction,e1a,Inv24959_7f87_R1_1_I2,\prec
+  \* (Inv24959_7f87_R1_1_I2,e1bAction)
+  <1>3. TypeOK /\ Inv24959_7f87_R1_1_I2 /\ e1bAction => Inv24959_7f87_R1_1_I2' BY DEF TypeOK,e1bAction,e1b,Inv24959_7f87_R1_1_I2,\prec
+  \* (Inv24959_7f87_R1_1_I2,e2aAction)
+  <1>4. TypeOK /\ Inv24959_7f87_R1_1_I2 /\ e2aAction => Inv24959_7f87_R1_1_I2' BY DEF TypeOK,e2aAction,e2a,Inv24959_7f87_R1_1_I2,\prec,Procs
+  \* (Inv24959_7f87_R1_1_I2,e2bAction)
+  <1>5. TypeOK /\ Inv24959_7f87_R1_1_I2 /\ e2bAction => Inv24959_7f87_R1_1_I2' BY DEF TypeOK,e2bAction,e2b,Inv24959_7f87_R1_1_I2,\prec
+  \* (Inv24959_7f87_R1_1_I2,e3aAction)
+  <1>6. TypeOK /\ Inv24959_7f87_R1_1_I2 /\ e3aAction => Inv24959_7f87_R1_1_I2' BY DEF TypeOK,e3aAction,e3a,Inv24959_7f87_R1_1_I2,\prec
+  \* (Inv24959_7f87_R1_1_I2,e3bAction)
+  <1>7. TypeOK /\ Inv24959_7f87_R1_1_I2 /\ e3bAction => Inv24959_7f87_R1_1_I2' BY DEF TypeOK,e3bAction,e3b,Inv24959_7f87_R1_1_I2,\prec,\prec
+  \* (Inv24959_7f87_R1_1_I2,e4aAction)
+  <1>8. TypeOK /\ Inv24959_7f87_R1_1_I2 /\ e4aAction => Inv24959_7f87_R1_1_I2' BY DEF TypeOK,e4aAction,e4a,Inv24959_7f87_R1_1_I2,\prec
+  \* (Inv24959_7f87_R1_1_I2,e4bAction)
+  <1>9. TypeOK /\ Inv24959_7f87_R1_1_I2 /\ e4bAction => Inv24959_7f87_R1_1_I2' BY DEF TypeOK,e4bAction,e4b,Inv24959_7f87_R1_1_I2,\prec,\prec
+  \* (Inv24959_7f87_R1_1_I2,w1aAction)
+  <1>10. TypeOK /\ Inv24959_7f87_R1_1_I2 /\ w1aAction => Inv24959_7f87_R1_1_I2' BY DEF TypeOK,w1aAction,w1a,Inv24959_7f87_R1_1_I2,\prec,\prec
+  \* (Inv24959_7f87_R1_1_I2,w1bAction)
+  <1>11. TypeOK /\ Inv24959_7f87_R1_1_I2 /\ w1bAction => Inv24959_7f87_R1_1_I2' BY DEF TypeOK,w1bAction,w1b,Inv24959_7f87_R1_1_I2,\prec,\prec
+  \* (Inv24959_7f87_R1_1_I2,w2Action)
+  <1>12. TypeOK /\ Inv24959_7f87_R1_1_I2 /\ w2Action => Inv24959_7f87_R1_1_I2' BY DEF TypeOK,w2Action,w2,Inv24959_7f87_R1_1_I2,\prec,\prec
+  \* (Inv24959_7f87_R1_1_I2,csAction)
+  <1>13. TypeOK /\ Inv24959_7f87_R1_1_I2 /\ csAction => Inv24959_7f87_R1_1_I2' BY DEF TypeOK,csAction,cs,Inv24959_7f87_R1_1_I2,\prec
+  \* (Inv24959_7f87_R1_1_I2,exitAction)
+  <1>14. TypeOK /\ Inv24959_7f87_R1_1_I2 /\ exitAction => Inv24959_7f87_R1_1_I2' BY DEF TypeOK,exitAction,exit,Inv24959_7f87_R1_1_I2,\prec
 <1>15. QED BY <1>1,<1>2,<1>3,<1>4,<1>5,<1>6,<1>7,<1>8,<1>9,<1>10,<1>11,<1>12,<1>13,<1>14 DEF Next
 
 
-\*** Inv1222_288c_R4_0_I2
-THEOREM L_16 == TypeOK /\ Inv10269_2818_R9_0_I2 /\ Inv6938_a43e_R2_0_I3 /\ Inv1222_288c_R4_0_I2 /\ Next => Inv1222_288c_R4_0_I2'
+\*** Inv5819_32cd_R1_1_I2
+THEOREM L_21 == TypeOK /\ Inv4690_2f61_R0_0_I2 /\ Inv4520_48f3_R1_0_I2 /\ Inv5819_32cd_R1_1_I2 /\ Next => Inv5819_32cd_R1_1_I2'
   <1>. USE A0
-  \* (Inv1222_288c_R4_0_I2,ncsAction)
-  <1>1. TypeOK /\ Inv1222_288c_R4_0_I2 /\ ncsAction => Inv1222_288c_R4_0_I2' BY DEF TypeOK,ncsAction,ncs,Inv1222_288c_R4_0_I2,\prec
-  \* (Inv1222_288c_R4_0_I2,e1aAction)
-  <1>2. TypeOK /\ Inv1222_288c_R4_0_I2 /\ e1aAction => Inv1222_288c_R4_0_I2' BY DEF TypeOK,e1aAction,e1a,Inv1222_288c_R4_0_I2,\prec
-  \* (Inv1222_288c_R4_0_I2,e1bAction)
-  <1>3. TypeOK /\ Inv1222_288c_R4_0_I2 /\ e1bAction => Inv1222_288c_R4_0_I2' BY DEF TypeOK,e1bAction,e1b,Inv1222_288c_R4_0_I2,\prec
-  \* (Inv1222_288c_R4_0_I2,e2aAction)
-  <1>4. TypeOK /\ Inv1222_288c_R4_0_I2 /\ e2aAction => Inv1222_288c_R4_0_I2' BY DEF TypeOK,e2aAction,e2a,Inv1222_288c_R4_0_I2,\prec,Procs
-  \* (Inv1222_288c_R4_0_I2,e2bAction)
-  <1>5. TypeOK /\ Inv1222_288c_R4_0_I2 /\ e2bAction => Inv1222_288c_R4_0_I2' BY DEF TypeOK,e2bAction,e2b,Inv1222_288c_R4_0_I2,\prec
-  \* (Inv1222_288c_R4_0_I2,e3aAction)
-  <1>6. TypeOK /\ Inv1222_288c_R4_0_I2 /\ e3aAction => Inv1222_288c_R4_0_I2' BY DEF TypeOK,e3aAction,e3a,Inv1222_288c_R4_0_I2,\prec
-  \* (Inv1222_288c_R4_0_I2,e3bAction)
-  <1>7. TypeOK /\ Inv10269_2818_R9_0_I2 /\ Inv1222_288c_R4_0_I2 /\ e3bAction => Inv1222_288c_R4_0_I2' BY DEF TypeOK,Inv10269_2818_R9_0_I2,e3bAction,e3b,Inv1222_288c_R4_0_I2,\prec,\prec
-  \* (Inv1222_288c_R4_0_I2,e4aAction)
-  <1>8. TypeOK /\ Inv1222_288c_R4_0_I2 /\ e4aAction => Inv1222_288c_R4_0_I2' BY DEF TypeOK,e4aAction,e4a,Inv1222_288c_R4_0_I2,\prec
-  \* (Inv1222_288c_R4_0_I2,e4bAction)
-  <1>9. TypeOK /\ Inv1222_288c_R4_0_I2 /\ e4bAction => Inv1222_288c_R4_0_I2' BY DEF TypeOK,e4bAction,e4b,Inv1222_288c_R4_0_I2,\prec,\prec
-  \* (Inv1222_288c_R4_0_I2,w1aAction)
-  <1>10. TypeOK /\ Inv1222_288c_R4_0_I2 /\ w1aAction => Inv1222_288c_R4_0_I2' BY DEF TypeOK,w1aAction,w1a,Inv1222_288c_R4_0_I2,\prec,\prec
-  \* (Inv1222_288c_R4_0_I2,w1bAction)
-  <1>11. TypeOK /\ Inv6938_a43e_R2_0_I3 /\ Inv1222_288c_R4_0_I2 /\ w1bAction => Inv1222_288c_R4_0_I2' BY DEF TypeOK,Inv6938_a43e_R2_0_I3,w1bAction,w1b,Inv1222_288c_R4_0_I2,\prec,\prec
-  \* (Inv1222_288c_R4_0_I2,w2Action)
-  <1>12. TypeOK /\ Inv1222_288c_R4_0_I2 /\ w2Action => Inv1222_288c_R4_0_I2' BY DEF TypeOK,w2Action,w2,Inv1222_288c_R4_0_I2,\prec,\prec
-  \* (Inv1222_288c_R4_0_I2,csAction)
-  <1>13. TypeOK /\ Inv1222_288c_R4_0_I2 /\ csAction => Inv1222_288c_R4_0_I2' BY DEF TypeOK,csAction,cs,Inv1222_288c_R4_0_I2,\prec
-  \* (Inv1222_288c_R4_0_I2,exitAction)
-  <1>14. TypeOK /\ Inv1222_288c_R4_0_I2 /\ exitAction => Inv1222_288c_R4_0_I2' BY DEF TypeOK,exitAction,exit,Inv1222_288c_R4_0_I2,\prec
+  \* (Inv5819_32cd_R1_1_I2,ncsAction)
+  <1>1. TypeOK /\ Inv5819_32cd_R1_1_I2 /\ ncsAction => Inv5819_32cd_R1_1_I2' BY DEF TypeOK,ncsAction,ncs,Inv5819_32cd_R1_1_I2,\prec
+  \* (Inv5819_32cd_R1_1_I2,e1aAction)
+  <1>2. TypeOK /\ Inv5819_32cd_R1_1_I2 /\ e1aAction => Inv5819_32cd_R1_1_I2' BY DEF TypeOK,e1aAction,e1a,Inv5819_32cd_R1_1_I2,\prec
+  \* (Inv5819_32cd_R1_1_I2,e1bAction)
+  <1>3. TypeOK /\ Inv5819_32cd_R1_1_I2 /\ e1bAction => Inv5819_32cd_R1_1_I2' BY DEF TypeOK,e1bAction,e1b,Inv5819_32cd_R1_1_I2,\prec
+  \* (Inv5819_32cd_R1_1_I2,e2aAction)
+  <1>4. TypeOK /\ Inv5819_32cd_R1_1_I2 /\ e2aAction => Inv5819_32cd_R1_1_I2' BY DEF TypeOK,e2aAction,e2a,Inv5819_32cd_R1_1_I2,\prec,Procs
+  \* (Inv5819_32cd_R1_1_I2,e2bAction)
+  <1>5. TypeOK /\ Inv5819_32cd_R1_1_I2 /\ e2bAction => Inv5819_32cd_R1_1_I2' BY DEF TypeOK,e2bAction,e2b,Inv5819_32cd_R1_1_I2,\prec
+  \* (Inv5819_32cd_R1_1_I2,e3aAction)
+  <1>6. TypeOK /\ Inv5819_32cd_R1_1_I2 /\ e3aAction => Inv5819_32cd_R1_1_I2' BY DEF TypeOK,e3aAction,e3a,Inv5819_32cd_R1_1_I2,\prec
+  \* (Inv5819_32cd_R1_1_I2,e3bAction)
+  <1>7. TypeOK /\ Inv5819_32cd_R1_1_I2 /\ e3bAction => Inv5819_32cd_R1_1_I2' BY DEF TypeOK,e3bAction,e3b,Inv5819_32cd_R1_1_I2,\prec,\prec
+  \* (Inv5819_32cd_R1_1_I2,e4aAction)
+  <1>8. TypeOK /\ Inv5819_32cd_R1_1_I2 /\ e4aAction => Inv5819_32cd_R1_1_I2' BY DEF TypeOK,e4aAction,e4a,Inv5819_32cd_R1_1_I2,\prec
+  \* (Inv5819_32cd_R1_1_I2,e4bAction)
+  <1>9. TypeOK /\ Inv5819_32cd_R1_1_I2 /\ e4bAction => Inv5819_32cd_R1_1_I2' BY DEF TypeOK,e4bAction,e4b,Inv5819_32cd_R1_1_I2,\prec,\prec
+  \* (Inv5819_32cd_R1_1_I2,w1aAction)
+  <1>10. TypeOK /\ Inv4690_2f61_R0_0_I2 /\ Inv5819_32cd_R1_1_I2 /\ w1aAction => Inv5819_32cd_R1_1_I2' BY DEF TypeOK,Inv4690_2f61_R0_0_I2,w1aAction,w1a,Inv5819_32cd_R1_1_I2,\prec,\prec
+  \* (Inv5819_32cd_R1_1_I2,w1bAction)
+  <1>11. TypeOK /\ Inv4520_48f3_R1_0_I2 /\ Inv5819_32cd_R1_1_I2 /\ w1bAction => Inv5819_32cd_R1_1_I2' BY DEF TypeOK,Inv4520_48f3_R1_0_I2,w1bAction,w1b,Inv5819_32cd_R1_1_I2,\prec,\prec
+  \* (Inv5819_32cd_R1_1_I2,w2Action)
+  <1>12. TypeOK /\ Inv5819_32cd_R1_1_I2 /\ w2Action => Inv5819_32cd_R1_1_I2' BY DEF TypeOK,w2Action,w2,Inv5819_32cd_R1_1_I2,\prec,\prec
+  \* (Inv5819_32cd_R1_1_I2,csAction)
+  <1>13. TypeOK /\ Inv5819_32cd_R1_1_I2 /\ csAction => Inv5819_32cd_R1_1_I2' BY DEF TypeOK,csAction,cs,Inv5819_32cd_R1_1_I2,\prec
+  \* (Inv5819_32cd_R1_1_I2,exitAction)
+  <1>14. TypeOK /\ Inv5819_32cd_R1_1_I2 /\ exitAction => Inv5819_32cd_R1_1_I2' BY DEF TypeOK,exitAction,exit,Inv5819_32cd_R1_1_I2,\prec
 <1>15. QED BY <1>1,<1>2,<1>3,<1>4,<1>5,<1>6,<1>7,<1>8,<1>9,<1>10,<1>11,<1>12,<1>13,<1>14 DEF Next
 
 
-\*** Inv10269_2818_R9_0_I2
-THEOREM L_17 == TypeOK /\ Inv2205_3e9d_R12_0_I3 /\ Inv14061_f302_R7_0_I3 /\ Inv10269_2818_R9_0_I2 /\ Next => Inv10269_2818_R9_0_I2'
+\*** Inv4576_59b1_R1_1_I2
+THEOREM L_22 == TypeOK /\ Inv4606_2f6b_R5_0_I2 /\ Inv1922_5e75_R2_0_I3 /\ Inv4576_59b1_R1_1_I2 /\ Next => Inv4576_59b1_R1_1_I2'
   <1>. USE A0
-  \* (Inv10269_2818_R9_0_I2,ncsAction)
-  <1>1. TypeOK /\ Inv10269_2818_R9_0_I2 /\ ncsAction => Inv10269_2818_R9_0_I2' BY DEF TypeOK,ncsAction,ncs,Inv10269_2818_R9_0_I2,\prec
-  \* (Inv10269_2818_R9_0_I2,e1aAction)
-  <1>2. TypeOK /\ Inv10269_2818_R9_0_I2 /\ e1aAction => Inv10269_2818_R9_0_I2' BY DEF TypeOK,e1aAction,e1a,Inv10269_2818_R9_0_I2,\prec
-  \* (Inv10269_2818_R9_0_I2,e1bAction)
-  <1>3. TypeOK /\ Inv10269_2818_R9_0_I2 /\ e1bAction => Inv10269_2818_R9_0_I2' BY DEF TypeOK,e1bAction,e1b,Inv10269_2818_R9_0_I2,\prec
-  \* (Inv10269_2818_R9_0_I2,e2aAction)
-  <1>4. TypeOK /\ Inv10269_2818_R9_0_I2 /\ e2aAction => Inv10269_2818_R9_0_I2' BY DEF TypeOK,e2aAction,e2a,Inv10269_2818_R9_0_I2,\prec,Procs
-  \* (Inv10269_2818_R9_0_I2,e2bAction)
-  <1>5. TypeOK /\ Inv2205_3e9d_R12_0_I3 /\ Inv10269_2818_R9_0_I2 /\ e2bAction => Inv10269_2818_R9_0_I2' BY DEF TypeOK,Inv2205_3e9d_R12_0_I3,e2bAction,e2b,Inv10269_2818_R9_0_I2,\prec
-  \* (Inv10269_2818_R9_0_I2,e3aAction)
-  <1>6. TypeOK /\ Inv10269_2818_R9_0_I2 /\ e3aAction => Inv10269_2818_R9_0_I2' BY DEF TypeOK,e3aAction,e3a,Inv10269_2818_R9_0_I2,\prec
-  \* (Inv10269_2818_R9_0_I2,e3bAction)
-  <1>7. TypeOK /\ Inv10269_2818_R9_0_I2 /\ e3bAction => Inv10269_2818_R9_0_I2' BY DEF TypeOK,e3bAction,e3b,Inv10269_2818_R9_0_I2,\prec,\prec
-  \* (Inv10269_2818_R9_0_I2,e4aAction)
-  <1>8. TypeOK /\ Inv10269_2818_R9_0_I2 /\ e4aAction => Inv10269_2818_R9_0_I2' BY DEF TypeOK,e4aAction,e4a,Inv10269_2818_R9_0_I2,\prec
-  \* (Inv10269_2818_R9_0_I2,e4bAction)
-  <1>9. TypeOK /\ Inv10269_2818_R9_0_I2 /\ e4bAction => Inv10269_2818_R9_0_I2' BY DEF TypeOK,e4bAction,e4b,Inv10269_2818_R9_0_I2,\prec,\prec
-  \* (Inv10269_2818_R9_0_I2,w1aAction)
-  <1>10. TypeOK /\ Inv10269_2818_R9_0_I2 /\ w1aAction => Inv10269_2818_R9_0_I2' BY DEF TypeOK,w1aAction,w1a,Inv10269_2818_R9_0_I2,\prec,\prec
-  \* (Inv10269_2818_R9_0_I2,w1bAction)
-  <1>11. TypeOK /\ Inv14061_f302_R7_0_I3 /\ Inv10269_2818_R9_0_I2 /\ w1bAction => Inv10269_2818_R9_0_I2' BY DEF TypeOK,Inv14061_f302_R7_0_I3,w1bAction,w1b,Inv10269_2818_R9_0_I2,\prec,\prec
-  \* (Inv10269_2818_R9_0_I2,w2Action)
-  <1>12. TypeOK /\ Inv10269_2818_R9_0_I2 /\ w2Action => Inv10269_2818_R9_0_I2' BY DEF TypeOK,w2Action,w2,Inv10269_2818_R9_0_I2,\prec,\prec
-  \* (Inv10269_2818_R9_0_I2,csAction)
-  <1>13. TypeOK /\ Inv10269_2818_R9_0_I2 /\ csAction => Inv10269_2818_R9_0_I2' BY DEF TypeOK,csAction,cs,Inv10269_2818_R9_0_I2,\prec
-  \* (Inv10269_2818_R9_0_I2,exitAction)
-  <1>14. TypeOK /\ Inv10269_2818_R9_0_I2 /\ exitAction => Inv10269_2818_R9_0_I2' BY DEF TypeOK,exitAction,exit,Inv10269_2818_R9_0_I2,\prec
+  \* (Inv4576_59b1_R1_1_I2,ncsAction)
+  <1>1. TypeOK /\ Inv4576_59b1_R1_1_I2 /\ ncsAction => Inv4576_59b1_R1_1_I2' BY DEF TypeOK,ncsAction,ncs,Inv4576_59b1_R1_1_I2,\prec
+  \* (Inv4576_59b1_R1_1_I2,e1aAction)
+  <1>2. TypeOK /\ Inv4576_59b1_R1_1_I2 /\ e1aAction => Inv4576_59b1_R1_1_I2' BY DEF TypeOK,e1aAction,e1a,Inv4576_59b1_R1_1_I2,\prec
+  \* (Inv4576_59b1_R1_1_I2,e1bAction)
+  <1>3. TypeOK /\ Inv4576_59b1_R1_1_I2 /\ e1bAction => Inv4576_59b1_R1_1_I2' BY DEF TypeOK,e1bAction,e1b,Inv4576_59b1_R1_1_I2,\prec
+  \* (Inv4576_59b1_R1_1_I2,e2aAction)
+  <1>4. TypeOK /\ Inv4576_59b1_R1_1_I2 /\ e2aAction => Inv4576_59b1_R1_1_I2' BY DEF TypeOK,e2aAction,e2a,Inv4576_59b1_R1_1_I2,\prec,Procs
+  \* (Inv4576_59b1_R1_1_I2,e2bAction)
+  <1>5. TypeOK /\ Inv4576_59b1_R1_1_I2 /\ e2bAction => Inv4576_59b1_R1_1_I2' BY DEF TypeOK,e2bAction,e2b,Inv4576_59b1_R1_1_I2,\prec
+  \* (Inv4576_59b1_R1_1_I2,e3aAction)
+  <1>6. TypeOK /\ Inv4576_59b1_R1_1_I2 /\ e3aAction => Inv4576_59b1_R1_1_I2' BY DEF TypeOK,e3aAction,e3a,Inv4576_59b1_R1_1_I2,\prec
+  \* (Inv4576_59b1_R1_1_I2,e3bAction)
+  <1>7. TypeOK /\ Inv4576_59b1_R1_1_I2 /\ e3bAction => Inv4576_59b1_R1_1_I2' BY DEF TypeOK,e3bAction,e3b,Inv4576_59b1_R1_1_I2,\prec,\prec
+  \* (Inv4576_59b1_R1_1_I2,e4aAction)
+  <1>8. TypeOK /\ Inv4576_59b1_R1_1_I2 /\ e4aAction => Inv4576_59b1_R1_1_I2' BY DEF TypeOK,e4aAction,e4a,Inv4576_59b1_R1_1_I2,\prec
+  \* (Inv4576_59b1_R1_1_I2,e4bAction)
+  <1>9. TypeOK /\ Inv4576_59b1_R1_1_I2 /\ e4bAction => Inv4576_59b1_R1_1_I2' BY DEF TypeOK,e4bAction,e4b,Inv4576_59b1_R1_1_I2,\prec,\prec
+  \* (Inv4576_59b1_R1_1_I2,w1aAction)
+  <1>10. TypeOK /\ Inv4606_2f6b_R5_0_I2 /\ Inv4576_59b1_R1_1_I2 /\ w1aAction => Inv4576_59b1_R1_1_I2' BY DEF TypeOK,Inv4606_2f6b_R5_0_I2,w1aAction,w1a,Inv4576_59b1_R1_1_I2,\prec,\prec
+  \* (Inv4576_59b1_R1_1_I2,w1bAction)
+  <1>11. TypeOK /\ Inv1922_5e75_R2_0_I3 /\ Inv4576_59b1_R1_1_I2 /\ w1bAction => Inv4576_59b1_R1_1_I2' BY DEF TypeOK,Inv1922_5e75_R2_0_I3,w1bAction,w1b,Inv4576_59b1_R1_1_I2,\prec,\prec
+  \* (Inv4576_59b1_R1_1_I2,w2Action)
+  <1>12. TypeOK /\ Inv4576_59b1_R1_1_I2 /\ w2Action => Inv4576_59b1_R1_1_I2' BY DEF TypeOK,w2Action,w2,Inv4576_59b1_R1_1_I2,\prec,\prec
+  \* (Inv4576_59b1_R1_1_I2,csAction)
+  <1>13. TypeOK /\ Inv4576_59b1_R1_1_I2 /\ csAction => Inv4576_59b1_R1_1_I2' BY DEF TypeOK,csAction,cs,Inv4576_59b1_R1_1_I2,\prec
+  \* (Inv4576_59b1_R1_1_I2,exitAction)
+  <1>14. TypeOK /\ Inv4576_59b1_R1_1_I2 /\ exitAction => Inv4576_59b1_R1_1_I2' BY DEF TypeOK,exitAction,exit,Inv4576_59b1_R1_1_I2,\prec
 <1>15. QED BY <1>1,<1>2,<1>3,<1>4,<1>5,<1>6,<1>7,<1>8,<1>9,<1>10,<1>11,<1>12,<1>13,<1>14 DEF Next
 
 
-\*** Inv2205_3e9d_R12_0_I3
-THEOREM L_18 == TypeOK /\ Inv1_b58a_R13_0_I1 /\ Inv2205_3e9d_R12_0_I3 /\ Next => Inv2205_3e9d_R12_0_I3'
+\*** Inv4606_2f6b_R5_0_I2
+THEOREM L_23 == TypeOK /\ Inv32498_2818_R11_0_I2 /\ Inv4227_eecc_R10_0_I3 /\ Inv4606_2f6b_R5_0_I2 /\ Next => Inv4606_2f6b_R5_0_I2'
   <1>. USE A0
-  \* (Inv2205_3e9d_R12_0_I3,ncsAction)
-  <1>1. TypeOK /\ Inv2205_3e9d_R12_0_I3 /\ ncsAction => Inv2205_3e9d_R12_0_I3' BY DEF TypeOK,ncsAction,ncs,Inv2205_3e9d_R12_0_I3,\prec
-  \* (Inv2205_3e9d_R12_0_I3,e1aAction)
-  <1>2. TypeOK /\ Inv2205_3e9d_R12_0_I3 /\ e1aAction => Inv2205_3e9d_R12_0_I3' BY DEF TypeOK,e1aAction,e1a,Inv2205_3e9d_R12_0_I3,\prec
-  \* (Inv2205_3e9d_R12_0_I3,e1bAction)
-  <1>3. TypeOK /\ Inv2205_3e9d_R12_0_I3 /\ e1bAction => Inv2205_3e9d_R12_0_I3' BY DEF TypeOK,e1bAction,e1b,Inv2205_3e9d_R12_0_I3,\prec
-  \* (Inv2205_3e9d_R12_0_I3,e2aAction)
-  <1>4. TypeOK /\ Inv2205_3e9d_R12_0_I3 /\ e2aAction => Inv2205_3e9d_R12_0_I3' BY DEF TypeOK,e2aAction,e2a,Inv2205_3e9d_R12_0_I3,\prec,Procs
-  \* (Inv2205_3e9d_R12_0_I3,e2bAction)
-  <1>5. TypeOK /\ Inv2205_3e9d_R12_0_I3 /\ e2bAction => Inv2205_3e9d_R12_0_I3' BY DEF TypeOK,e2bAction,e2b,Inv2205_3e9d_R12_0_I3,\prec
-  \* (Inv2205_3e9d_R12_0_I3,e3aAction)
-  <1>6. TypeOK /\ Inv2205_3e9d_R12_0_I3 /\ e3aAction => Inv2205_3e9d_R12_0_I3' BY DEF TypeOK,e3aAction,e3a,Inv2205_3e9d_R12_0_I3,\prec
-  \* (Inv2205_3e9d_R12_0_I3,e3bAction)
-  <1>7. TypeOK /\ Inv2205_3e9d_R12_0_I3 /\ e3bAction => Inv2205_3e9d_R12_0_I3' BY DEF TypeOK,e3bAction,e3b,Inv2205_3e9d_R12_0_I3,\prec,\prec
-  \* (Inv2205_3e9d_R12_0_I3,e4aAction)
-  <1>8. TypeOK /\ Inv2205_3e9d_R12_0_I3 /\ e4aAction => Inv2205_3e9d_R12_0_I3' BY DEF TypeOK,e4aAction,e4a,Inv2205_3e9d_R12_0_I3,\prec
-  \* (Inv2205_3e9d_R12_0_I3,e4bAction)
-  <1>9. TypeOK /\ Inv2205_3e9d_R12_0_I3 /\ e4bAction => Inv2205_3e9d_R12_0_I3' BY DEF TypeOK,e4bAction,e4b,Inv2205_3e9d_R12_0_I3,\prec,\prec
-  \* (Inv2205_3e9d_R12_0_I3,w1aAction)
-  <1>10. TypeOK /\ Inv2205_3e9d_R12_0_I3 /\ w1aAction => Inv2205_3e9d_R12_0_I3' BY DEF TypeOK,w1aAction,w1a,Inv2205_3e9d_R12_0_I3,\prec,\prec
-  \* (Inv2205_3e9d_R12_0_I3,w1bAction)
-  <1>11. TypeOK /\ Inv1_b58a_R13_0_I1 /\ Inv2205_3e9d_R12_0_I3 /\ w1bAction => Inv2205_3e9d_R12_0_I3' BY DEF TypeOK,Inv1_b58a_R13_0_I1,w1bAction,w1b,Inv2205_3e9d_R12_0_I3,\prec,\prec
-  \* (Inv2205_3e9d_R12_0_I3,w2Action)
-  <1>12. TypeOK /\ Inv2205_3e9d_R12_0_I3 /\ w2Action => Inv2205_3e9d_R12_0_I3' BY DEF TypeOK,w2Action,w2,Inv2205_3e9d_R12_0_I3,\prec,\prec
-  \* (Inv2205_3e9d_R12_0_I3,csAction)
-  <1>13. TypeOK /\ Inv2205_3e9d_R12_0_I3 /\ csAction => Inv2205_3e9d_R12_0_I3' BY DEF TypeOK,csAction,cs,Inv2205_3e9d_R12_0_I3,\prec
-  \* (Inv2205_3e9d_R12_0_I3,exitAction)
-  <1>14. TypeOK /\ Inv2205_3e9d_R12_0_I3 /\ exitAction => Inv2205_3e9d_R12_0_I3' BY DEF TypeOK,exitAction,exit,Inv2205_3e9d_R12_0_I3,\prec
+  \* (Inv4606_2f6b_R5_0_I2,ncsAction)
+  <1>1. TypeOK /\ Inv4606_2f6b_R5_0_I2 /\ ncsAction => Inv4606_2f6b_R5_0_I2' BY DEF TypeOK,ncsAction,ncs,Inv4606_2f6b_R5_0_I2,\prec
+  \* (Inv4606_2f6b_R5_0_I2,e1aAction)
+  <1>2. TypeOK /\ Inv4606_2f6b_R5_0_I2 /\ e1aAction => Inv4606_2f6b_R5_0_I2' BY DEF TypeOK,e1aAction,e1a,Inv4606_2f6b_R5_0_I2,\prec
+  \* (Inv4606_2f6b_R5_0_I2,e1bAction)
+  <1>3. TypeOK /\ Inv4606_2f6b_R5_0_I2 /\ e1bAction => Inv4606_2f6b_R5_0_I2' BY DEF TypeOK,e1bAction,e1b,Inv4606_2f6b_R5_0_I2,\prec
+  \* (Inv4606_2f6b_R5_0_I2,e2aAction)
+  <1>4. TypeOK /\ Inv4606_2f6b_R5_0_I2 /\ e2aAction => Inv4606_2f6b_R5_0_I2' BY DEF TypeOK,e2aAction,e2a,Inv4606_2f6b_R5_0_I2,\prec,Procs
+  \* (Inv4606_2f6b_R5_0_I2,e2bAction)
+  <1>5. TypeOK /\ Inv4606_2f6b_R5_0_I2 /\ e2bAction => Inv4606_2f6b_R5_0_I2' BY DEF TypeOK,e2bAction,e2b,Inv4606_2f6b_R5_0_I2,\prec
+  \* (Inv4606_2f6b_R5_0_I2,e3aAction)
+  <1>6. TypeOK /\ Inv4606_2f6b_R5_0_I2 /\ e3aAction => Inv4606_2f6b_R5_0_I2' BY DEF TypeOK,e3aAction,e3a,Inv4606_2f6b_R5_0_I2,\prec
+  \* (Inv4606_2f6b_R5_0_I2,e3bAction)
+  <1>7. TypeOK /\ Inv32498_2818_R11_0_I2 /\ Inv4606_2f6b_R5_0_I2 /\ e3bAction => Inv4606_2f6b_R5_0_I2' BY DEF TypeOK,Inv32498_2818_R11_0_I2,e3bAction,e3b,Inv4606_2f6b_R5_0_I2,\prec,\prec
+  \* (Inv4606_2f6b_R5_0_I2,e4aAction)
+  <1>8. TypeOK /\ Inv4606_2f6b_R5_0_I2 /\ e4aAction => Inv4606_2f6b_R5_0_I2' BY DEF TypeOK,e4aAction,e4a,Inv4606_2f6b_R5_0_I2,\prec
+  \* (Inv4606_2f6b_R5_0_I2,e4bAction)
+  <1>9. TypeOK /\ Inv4606_2f6b_R5_0_I2 /\ e4bAction => Inv4606_2f6b_R5_0_I2' BY DEF TypeOK,e4bAction,e4b,Inv4606_2f6b_R5_0_I2,\prec,\prec
+  \* (Inv4606_2f6b_R5_0_I2,w1aAction)
+  <1>10. TypeOK /\ Inv4606_2f6b_R5_0_I2 /\ w1aAction => Inv4606_2f6b_R5_0_I2' BY DEF TypeOK,w1aAction,w1a,Inv4606_2f6b_R5_0_I2,\prec,\prec
+  \* (Inv4606_2f6b_R5_0_I2,w1bAction)
+  <1>11. TypeOK /\ Inv4227_eecc_R10_0_I3 /\ Inv4606_2f6b_R5_0_I2 /\ w1bAction => Inv4606_2f6b_R5_0_I2' BY DEF TypeOK,Inv4227_eecc_R10_0_I3,w1bAction,w1b,Inv4606_2f6b_R5_0_I2,\prec,\prec
+  \* (Inv4606_2f6b_R5_0_I2,w2Action)
+  <1>12. TypeOK /\ Inv4606_2f6b_R5_0_I2 /\ w2Action => Inv4606_2f6b_R5_0_I2' BY DEF TypeOK,w2Action,w2,Inv4606_2f6b_R5_0_I2,\prec,\prec
+  \* (Inv4606_2f6b_R5_0_I2,csAction)
+  <1>13. TypeOK /\ Inv4606_2f6b_R5_0_I2 /\ csAction => Inv4606_2f6b_R5_0_I2' BY DEF TypeOK,csAction,cs,Inv4606_2f6b_R5_0_I2,\prec
+  \* (Inv4606_2f6b_R5_0_I2,exitAction)
+  <1>14. TypeOK /\ Inv4606_2f6b_R5_0_I2 /\ exitAction => Inv4606_2f6b_R5_0_I2' BY DEF TypeOK,exitAction,exit,Inv4606_2f6b_R5_0_I2,\prec
 <1>15. QED BY <1>1,<1>2,<1>3,<1>4,<1>5,<1>6,<1>7,<1>8,<1>9,<1>10,<1>11,<1>12,<1>13,<1>14 DEF Next
 
 
-\*** Inv12452_548a_R1_1_I2
-THEOREM L_19 == TypeOK /\ Inv3155_48f3_R1_0_I2 /\ Inv21465_bb1b_R1_1_I2 /\ Inv19891_1bc3_R1_1_I2 /\ Inv4559_3f08_R1_1_I2 /\ Inv12452_548a_R1_1_I2 /\ Next => Inv12452_548a_R1_1_I2'
+\*** Inv32498_2818_R11_0_I2
+THEOREM L_24 == TypeOK /\ Inv3293_1a1e_R17_0_I3 /\ Inv2740_e784_R16_0_I3 /\ Inv32498_2818_R11_0_I2 /\ Next => Inv32498_2818_R11_0_I2'
   <1>. USE A0
-  \* (Inv12452_548a_R1_1_I2,ncsAction)
-  <1>1. TypeOK /\ Inv12452_548a_R1_1_I2 /\ ncsAction => Inv12452_548a_R1_1_I2' BY DEF TypeOK,ncsAction,ncs,Inv12452_548a_R1_1_I2,\prec
-  \* (Inv12452_548a_R1_1_I2,e1aAction)
-  <1>2. TypeOK /\ Inv12452_548a_R1_1_I2 /\ e1aAction => Inv12452_548a_R1_1_I2' BY DEF TypeOK,e1aAction,e1a,Inv12452_548a_R1_1_I2,\prec
-  \* (Inv12452_548a_R1_1_I2,e1bAction)
-  <1>3. TypeOK /\ Inv12452_548a_R1_1_I2 /\ e1bAction => Inv12452_548a_R1_1_I2' BY DEF TypeOK,e1bAction,e1b,Inv12452_548a_R1_1_I2,\prec
-  \* (Inv12452_548a_R1_1_I2,e2aAction)
-  <1>4. TypeOK /\ Inv12452_548a_R1_1_I2 /\ e2aAction => Inv12452_548a_R1_1_I2' BY DEF TypeOK,e2aAction,e2a,Inv12452_548a_R1_1_I2,\prec,Procs
-  \* (Inv12452_548a_R1_1_I2,e2bAction)
-  <1>5. TypeOK /\ Inv12452_548a_R1_1_I2 /\ e2bAction => Inv12452_548a_R1_1_I2' BY DEF TypeOK,e2bAction,e2b,Inv12452_548a_R1_1_I2,\prec
-  \* (Inv12452_548a_R1_1_I2,e3aAction)
-  <1>6. TypeOK /\ Inv12452_548a_R1_1_I2 /\ e3aAction => Inv12452_548a_R1_1_I2' BY DEF TypeOK,e3aAction,e3a,Inv12452_548a_R1_1_I2,\prec
-  \* (Inv12452_548a_R1_1_I2,e3bAction)
-  <1>7. TypeOK /\ Inv12452_548a_R1_1_I2 /\ e3bAction => Inv12452_548a_R1_1_I2' BY DEF TypeOK,e3bAction,e3b,Inv12452_548a_R1_1_I2,\prec,\prec
-  \* (Inv12452_548a_R1_1_I2,e4aAction)
-  <1>8. TypeOK /\ Inv12452_548a_R1_1_I2 /\ e4aAction => Inv12452_548a_R1_1_I2' BY DEF TypeOK,e4aAction,e4a,Inv12452_548a_R1_1_I2,\prec
-  \* (Inv12452_548a_R1_1_I2,e4bAction)
-  <1>9. TypeOK /\ Inv12452_548a_R1_1_I2 /\ e4bAction => Inv12452_548a_R1_1_I2' BY DEF TypeOK,e4bAction,e4b,Inv12452_548a_R1_1_I2,\prec,\prec
-  \* (Inv12452_548a_R1_1_I2,w1aAction)
-  <1>10. TypeOK /\ Inv12452_548a_R1_1_I2 /\ w1aAction => Inv12452_548a_R1_1_I2' BY DEF TypeOK,w1aAction,w1a,Inv12452_548a_R1_1_I2,\prec,\prec
-  \* (Inv12452_548a_R1_1_I2,w1bAction)
-  <1>11. TypeOK /\ Inv3155_48f3_R1_0_I2 /\ Inv12452_548a_R1_1_I2 /\ w1bAction => Inv12452_548a_R1_1_I2' BY DEF TypeOK,Inv3155_48f3_R1_0_I2,w1bAction,w1b,Inv12452_548a_R1_1_I2,\prec,\prec
-  \* (Inv12452_548a_R1_1_I2,w2Action)
-  <1>12. TypeOK /\ Inv21465_bb1b_R1_1_I2 /\ Inv19891_1bc3_R1_1_I2 /\ Inv4559_3f08_R1_1_I2 /\ Inv12452_548a_R1_1_I2 /\ w2Action => Inv12452_548a_R1_1_I2' BY DEF TypeOK,Inv21465_bb1b_R1_1_I2,Inv19891_1bc3_R1_1_I2,Inv4559_3f08_R1_1_I2,w2Action,w2,Inv12452_548a_R1_1_I2,\prec,\prec
-  \* (Inv12452_548a_R1_1_I2,csAction)
-  <1>13. TypeOK /\ Inv12452_548a_R1_1_I2 /\ csAction => Inv12452_548a_R1_1_I2' BY DEF TypeOK,csAction,cs,Inv12452_548a_R1_1_I2,\prec
-  \* (Inv12452_548a_R1_1_I2,exitAction)
-  <1>14. TypeOK /\ Inv12452_548a_R1_1_I2 /\ exitAction => Inv12452_548a_R1_1_I2' BY DEF TypeOK,exitAction,exit,Inv12452_548a_R1_1_I2,\prec
+  \* (Inv32498_2818_R11_0_I2,ncsAction)
+  <1>1. TypeOK /\ Inv32498_2818_R11_0_I2 /\ ncsAction => Inv32498_2818_R11_0_I2' BY DEF TypeOK,ncsAction,ncs,Inv32498_2818_R11_0_I2,\prec
+  \* (Inv32498_2818_R11_0_I2,e1aAction)
+  <1>2. TypeOK /\ Inv32498_2818_R11_0_I2 /\ e1aAction => Inv32498_2818_R11_0_I2' BY DEF TypeOK,e1aAction,e1a,Inv32498_2818_R11_0_I2,\prec
+  \* (Inv32498_2818_R11_0_I2,e1bAction)
+  <1>3. TypeOK /\ Inv32498_2818_R11_0_I2 /\ e1bAction => Inv32498_2818_R11_0_I2' BY DEF TypeOK,e1bAction,e1b,Inv32498_2818_R11_0_I2,\prec
+  \* (Inv32498_2818_R11_0_I2,e2aAction)
+  <1>4. TypeOK /\ Inv32498_2818_R11_0_I2 /\ e2aAction => Inv32498_2818_R11_0_I2' BY DEF TypeOK,e2aAction,e2a,Inv32498_2818_R11_0_I2,\prec,Procs
+  \* (Inv32498_2818_R11_0_I2,e2bAction)
+  <1>5. TypeOK /\ Inv3293_1a1e_R17_0_I3 /\ Inv32498_2818_R11_0_I2 /\ e2bAction => Inv32498_2818_R11_0_I2' BY DEF TypeOK,Inv3293_1a1e_R17_0_I3,e2bAction,e2b,Inv32498_2818_R11_0_I2,\prec
+  \* (Inv32498_2818_R11_0_I2,e3aAction)
+  <1>6. TypeOK /\ Inv32498_2818_R11_0_I2 /\ e3aAction => Inv32498_2818_R11_0_I2' BY DEF TypeOK,e3aAction,e3a,Inv32498_2818_R11_0_I2,\prec
+  \* (Inv32498_2818_R11_0_I2,e3bAction)
+  <1>7. TypeOK /\ Inv32498_2818_R11_0_I2 /\ e3bAction => Inv32498_2818_R11_0_I2' BY DEF TypeOK,e3bAction,e3b,Inv32498_2818_R11_0_I2,\prec,\prec
+  \* (Inv32498_2818_R11_0_I2,e4aAction)
+  <1>8. TypeOK /\ Inv32498_2818_R11_0_I2 /\ e4aAction => Inv32498_2818_R11_0_I2' BY DEF TypeOK,e4aAction,e4a,Inv32498_2818_R11_0_I2,\prec
+  \* (Inv32498_2818_R11_0_I2,e4bAction)
+  <1>9. TypeOK /\ Inv32498_2818_R11_0_I2 /\ e4bAction => Inv32498_2818_R11_0_I2' BY DEF TypeOK,e4bAction,e4b,Inv32498_2818_R11_0_I2,\prec,\prec
+  \* (Inv32498_2818_R11_0_I2,w1aAction)
+  <1>10. TypeOK /\ Inv32498_2818_R11_0_I2 /\ w1aAction => Inv32498_2818_R11_0_I2' BY DEF TypeOK,w1aAction,w1a,Inv32498_2818_R11_0_I2,\prec,\prec
+  \* (Inv32498_2818_R11_0_I2,w1bAction)
+  <1>11. TypeOK /\ Inv2740_e784_R16_0_I3 /\ Inv32498_2818_R11_0_I2 /\ w1bAction => Inv32498_2818_R11_0_I2' BY DEF TypeOK,Inv2740_e784_R16_0_I3,w1bAction,w1b,Inv32498_2818_R11_0_I2,\prec,\prec
+  \* (Inv32498_2818_R11_0_I2,w2Action)
+  <1>12. TypeOK /\ Inv32498_2818_R11_0_I2 /\ w2Action => Inv32498_2818_R11_0_I2' BY DEF TypeOK,w2Action,w2,Inv32498_2818_R11_0_I2,\prec,\prec
+  \* (Inv32498_2818_R11_0_I2,csAction)
+  <1>13. TypeOK /\ Inv32498_2818_R11_0_I2 /\ csAction => Inv32498_2818_R11_0_I2' BY DEF TypeOK,csAction,cs,Inv32498_2818_R11_0_I2,\prec
+  \* (Inv32498_2818_R11_0_I2,exitAction)
+  <1>14. TypeOK /\ Inv32498_2818_R11_0_I2 /\ exitAction => Inv32498_2818_R11_0_I2' BY DEF TypeOK,exitAction,exit,Inv32498_2818_R11_0_I2,\prec
 <1>15. QED BY <1>1,<1>2,<1>3,<1>4,<1>5,<1>6,<1>7,<1>8,<1>9,<1>10,<1>11,<1>12,<1>13,<1>14 DEF Next
 
 
-\*** Inv4559_3f08_R1_1_I2
-THEOREM L_20 == TypeOK /\ Inv26_b6ff_R2_0_I3 /\ Inv4559_3f08_R1_1_I2 /\ Next => Inv4559_3f08_R1_1_I2'
+\*** Inv3293_1a1e_R17_0_I3
+THEOREM L_25 == TypeOK /\ Inv19_037d_R19_0_I1 /\ Inv3293_1a1e_R17_0_I3 /\ Next => Inv3293_1a1e_R17_0_I3'
   <1>. USE A0
-  \* (Inv4559_3f08_R1_1_I2,ncsAction)
-  <1>1. TypeOK /\ Inv4559_3f08_R1_1_I2 /\ ncsAction => Inv4559_3f08_R1_1_I2' BY DEF TypeOK,ncsAction,ncs,Inv4559_3f08_R1_1_I2,\prec
-  \* (Inv4559_3f08_R1_1_I2,e1aAction)
-  <1>2. TypeOK /\ Inv4559_3f08_R1_1_I2 /\ e1aAction => Inv4559_3f08_R1_1_I2' BY DEF TypeOK,e1aAction,e1a,Inv4559_3f08_R1_1_I2,\prec
-  \* (Inv4559_3f08_R1_1_I2,e1bAction)
-  <1>3. TypeOK /\ Inv4559_3f08_R1_1_I2 /\ e1bAction => Inv4559_3f08_R1_1_I2' BY DEF TypeOK,e1bAction,e1b,Inv4559_3f08_R1_1_I2,\prec
-  \* (Inv4559_3f08_R1_1_I2,e2aAction)
-  <1>4. TypeOK /\ Inv4559_3f08_R1_1_I2 /\ e2aAction => Inv4559_3f08_R1_1_I2' BY DEF TypeOK,e2aAction,e2a,Inv4559_3f08_R1_1_I2,\prec,Procs
-  \* (Inv4559_3f08_R1_1_I2,e2bAction)
-  <1>5. TypeOK /\ Inv4559_3f08_R1_1_I2 /\ e2bAction => Inv4559_3f08_R1_1_I2' BY DEF TypeOK,e2bAction,e2b,Inv4559_3f08_R1_1_I2,\prec
-  \* (Inv4559_3f08_R1_1_I2,e3aAction)
-  <1>6. TypeOK /\ Inv4559_3f08_R1_1_I2 /\ e3aAction => Inv4559_3f08_R1_1_I2' BY DEF TypeOK,e3aAction,e3a,Inv4559_3f08_R1_1_I2,\prec
-  \* (Inv4559_3f08_R1_1_I2,e3bAction)
-  <1>7. TypeOK /\ Inv4559_3f08_R1_1_I2 /\ e3bAction => Inv4559_3f08_R1_1_I2' BY DEF TypeOK,e3bAction,e3b,Inv4559_3f08_R1_1_I2,\prec,\prec
-  \* (Inv4559_3f08_R1_1_I2,e4aAction)
-  <1>8. TypeOK /\ Inv4559_3f08_R1_1_I2 /\ e4aAction => Inv4559_3f08_R1_1_I2' BY DEF TypeOK,e4aAction,e4a,Inv4559_3f08_R1_1_I2,\prec
-  \* (Inv4559_3f08_R1_1_I2,e4bAction)
-  <1>9. TypeOK /\ Inv4559_3f08_R1_1_I2 /\ e4bAction => Inv4559_3f08_R1_1_I2' BY DEF TypeOK,e4bAction,e4b,Inv4559_3f08_R1_1_I2,\prec,\prec
-  \* (Inv4559_3f08_R1_1_I2,w1aAction)
-  <1>10. TypeOK /\ Inv4559_3f08_R1_1_I2 /\ w1aAction => Inv4559_3f08_R1_1_I2' BY DEF TypeOK,w1aAction,w1a,Inv4559_3f08_R1_1_I2,\prec,\prec
-  \* (Inv4559_3f08_R1_1_I2,w1bAction)
-  <1>11. TypeOK /\ Inv26_b6ff_R2_0_I3 /\ Inv4559_3f08_R1_1_I2 /\ w1bAction => Inv4559_3f08_R1_1_I2' BY DEF TypeOK,Inv26_b6ff_R2_0_I3,w1bAction,w1b,Inv4559_3f08_R1_1_I2,\prec,\prec
-  \* (Inv4559_3f08_R1_1_I2,w2Action)
-  <1>12. TypeOK /\ Inv4559_3f08_R1_1_I2 /\ w2Action => Inv4559_3f08_R1_1_I2' BY DEF TypeOK,w2Action,w2,Inv4559_3f08_R1_1_I2,\prec,\prec
-  \* (Inv4559_3f08_R1_1_I2,csAction)
-  <1>13. TypeOK /\ Inv4559_3f08_R1_1_I2 /\ csAction => Inv4559_3f08_R1_1_I2' BY DEF TypeOK,csAction,cs,Inv4559_3f08_R1_1_I2,\prec
-  \* (Inv4559_3f08_R1_1_I2,exitAction)
-  <1>14. TypeOK /\ Inv4559_3f08_R1_1_I2 /\ exitAction => Inv4559_3f08_R1_1_I2' BY DEF TypeOK,exitAction,exit,Inv4559_3f08_R1_1_I2,\prec
+  \* (Inv3293_1a1e_R17_0_I3,ncsAction)
+  <1>1. TypeOK /\ Inv3293_1a1e_R17_0_I3 /\ ncsAction => Inv3293_1a1e_R17_0_I3' BY DEF TypeOK,ncsAction,ncs,Inv3293_1a1e_R17_0_I3,\prec
+  \* (Inv3293_1a1e_R17_0_I3,e1aAction)
+  <1>2. TypeOK /\ Inv3293_1a1e_R17_0_I3 /\ e1aAction => Inv3293_1a1e_R17_0_I3' BY DEF TypeOK,e1aAction,e1a,Inv3293_1a1e_R17_0_I3,\prec
+  \* (Inv3293_1a1e_R17_0_I3,e1bAction)
+  <1>3. TypeOK /\ Inv3293_1a1e_R17_0_I3 /\ e1bAction => Inv3293_1a1e_R17_0_I3' BY DEF TypeOK,e1bAction,e1b,Inv3293_1a1e_R17_0_I3,\prec
+  \* (Inv3293_1a1e_R17_0_I3,e2aAction)
+  <1>4. TypeOK /\ Inv3293_1a1e_R17_0_I3 /\ e2aAction => Inv3293_1a1e_R17_0_I3' BY DEF TypeOK,e2aAction,e2a,Inv3293_1a1e_R17_0_I3,\prec,Procs
+  \* (Inv3293_1a1e_R17_0_I3,e2bAction)
+  <1>5. TypeOK /\ Inv3293_1a1e_R17_0_I3 /\ e2bAction => Inv3293_1a1e_R17_0_I3' BY DEF TypeOK,e2bAction,e2b,Inv3293_1a1e_R17_0_I3,\prec
+  \* (Inv3293_1a1e_R17_0_I3,e3aAction)
+  <1>6. TypeOK /\ Inv3293_1a1e_R17_0_I3 /\ e3aAction => Inv3293_1a1e_R17_0_I3' BY DEF TypeOK,e3aAction,e3a,Inv3293_1a1e_R17_0_I3,\prec
+  \* (Inv3293_1a1e_R17_0_I3,e3bAction)
+  <1>7. TypeOK /\ Inv3293_1a1e_R17_0_I3 /\ e3bAction => Inv3293_1a1e_R17_0_I3' BY DEF TypeOK,e3bAction,e3b,Inv3293_1a1e_R17_0_I3,\prec,\prec
+  \* (Inv3293_1a1e_R17_0_I3,e4aAction)
+  <1>8. TypeOK /\ Inv3293_1a1e_R17_0_I3 /\ e4aAction => Inv3293_1a1e_R17_0_I3' BY DEF TypeOK,e4aAction,e4a,Inv3293_1a1e_R17_0_I3,\prec
+  \* (Inv3293_1a1e_R17_0_I3,e4bAction)
+  <1>9. TypeOK /\ Inv3293_1a1e_R17_0_I3 /\ e4bAction => Inv3293_1a1e_R17_0_I3' BY DEF TypeOK,e4bAction,e4b,Inv3293_1a1e_R17_0_I3,\prec,\prec
+  \* (Inv3293_1a1e_R17_0_I3,w1aAction)
+  <1>10. TypeOK /\ Inv3293_1a1e_R17_0_I3 /\ w1aAction => Inv3293_1a1e_R17_0_I3' BY DEF TypeOK,w1aAction,w1a,Inv3293_1a1e_R17_0_I3,\prec,\prec
+  \* (Inv3293_1a1e_R17_0_I3,w1bAction)
+  <1>11. TypeOK /\ Inv19_037d_R19_0_I1 /\ Inv3293_1a1e_R17_0_I3 /\ w1bAction => Inv3293_1a1e_R17_0_I3' BY DEF TypeOK,Inv19_037d_R19_0_I1,w1bAction,w1b,Inv3293_1a1e_R17_0_I3,\prec,\prec
+  \* (Inv3293_1a1e_R17_0_I3,w2Action)
+  <1>12. TypeOK /\ Inv3293_1a1e_R17_0_I3 /\ w2Action => Inv3293_1a1e_R17_0_I3' BY DEF TypeOK,w2Action,w2,Inv3293_1a1e_R17_0_I3,\prec,\prec
+  \* (Inv3293_1a1e_R17_0_I3,csAction)
+  <1>13. TypeOK /\ Inv3293_1a1e_R17_0_I3 /\ csAction => Inv3293_1a1e_R17_0_I3' BY DEF TypeOK,csAction,cs,Inv3293_1a1e_R17_0_I3,\prec
+  \* (Inv3293_1a1e_R17_0_I3,exitAction)
+  <1>14. TypeOK /\ Inv3293_1a1e_R17_0_I3 /\ exitAction => Inv3293_1a1e_R17_0_I3' BY DEF TypeOK,exitAction,exit,Inv3293_1a1e_R17_0_I3,\prec
+<1>15. QED BY <1>1,<1>2,<1>3,<1>4,<1>5,<1>6,<1>7,<1>8,<1>9,<1>10,<1>11,<1>12,<1>13,<1>14 DEF Next
+
+
+\*** Inv19_037d_R19_0_I1
+THEOREM L_26 == TypeOK /\ Inv350_b077_R20_1_I2 /\ Inv1_b58a_R20_0_I1 /\ Inv19_037d_R19_0_I1 /\ Next => Inv19_037d_R19_0_I1'
+  <1>. USE A0
+  \* (Inv19_037d_R19_0_I1,ncsAction)
+  <1>1. TypeOK /\ Inv19_037d_R19_0_I1 /\ ncsAction => Inv19_037d_R19_0_I1' BY DEF TypeOK,ncsAction,ncs,Inv19_037d_R19_0_I1,\prec
+  \* (Inv19_037d_R19_0_I1,e1aAction)
+  <1>2. TypeOK /\ Inv19_037d_R19_0_I1 /\ e1aAction => Inv19_037d_R19_0_I1' BY DEF TypeOK,e1aAction,e1a,Inv19_037d_R19_0_I1,\prec
+  \* (Inv19_037d_R19_0_I1,e1bAction)
+  <1>3. TypeOK /\ Inv19_037d_R19_0_I1 /\ e1bAction => Inv19_037d_R19_0_I1' BY DEF TypeOK,e1bAction,e1b,Inv19_037d_R19_0_I1,\prec
+  \* (Inv19_037d_R19_0_I1,e2aAction)
+  <1>4. TypeOK /\ Inv19_037d_R19_0_I1 /\ e2aAction => Inv19_037d_R19_0_I1' BY DEF TypeOK,e2aAction,e2a,Inv19_037d_R19_0_I1,\prec,Procs
+  \* (Inv19_037d_R19_0_I1,e2bAction)
+  <1>5. TypeOK /\ Inv19_037d_R19_0_I1 /\ e2bAction => Inv19_037d_R19_0_I1' BY DEF TypeOK,e2bAction,e2b,Inv19_037d_R19_0_I1,\prec
+  \* (Inv19_037d_R19_0_I1,e3aAction)
+  <1>6. TypeOK /\ Inv19_037d_R19_0_I1 /\ e3aAction => Inv19_037d_R19_0_I1' BY DEF TypeOK,e3aAction,e3a,Inv19_037d_R19_0_I1,\prec
+  \* (Inv19_037d_R19_0_I1,e3bAction)
+  <1>7. TypeOK /\ Inv19_037d_R19_0_I1 /\ e3bAction => Inv19_037d_R19_0_I1' BY DEF TypeOK,e3bAction,e3b,Inv19_037d_R19_0_I1,\prec,\prec
+  \* (Inv19_037d_R19_0_I1,e4aAction)
+  <1>8. TypeOK /\ Inv19_037d_R19_0_I1 /\ e4aAction => Inv19_037d_R19_0_I1' BY DEF TypeOK,e4aAction,e4a,Inv19_037d_R19_0_I1,\prec
+  \* (Inv19_037d_R19_0_I1,e4bAction)
+  <1>9. TypeOK /\ Inv19_037d_R19_0_I1 /\ e4bAction => Inv19_037d_R19_0_I1' BY DEF TypeOK,e4bAction,e4b,Inv19_037d_R19_0_I1,\prec,\prec
+  \* (Inv19_037d_R19_0_I1,w1aAction)
+  <1>10. TypeOK /\ Inv19_037d_R19_0_I1 /\ w1aAction => Inv19_037d_R19_0_I1' BY DEF TypeOK,w1aAction,w1a,Inv19_037d_R19_0_I1,\prec,\prec
+  \* (Inv19_037d_R19_0_I1,w1bAction)
+  <1>11. TypeOK /\ Inv19_037d_R19_0_I1 /\ w1bAction => Inv19_037d_R19_0_I1' BY DEF TypeOK,w1bAction,w1b,Inv19_037d_R19_0_I1,\prec,\prec
+  \* (Inv19_037d_R19_0_I1,w2Action)
+  <1>12. TypeOK /\ Inv350_b077_R20_1_I2 /\ Inv1_b58a_R20_0_I1 /\ Inv19_037d_R19_0_I1 /\ w2Action => Inv19_037d_R19_0_I1' BY DEF TypeOK,Inv350_b077_R20_1_I2,Inv1_b58a_R20_0_I1,w2Action,w2,Inv19_037d_R19_0_I1,\prec,\prec
+  \* (Inv19_037d_R19_0_I1,csAction)
+  <1>13. TypeOK /\ Inv19_037d_R19_0_I1 /\ csAction => Inv19_037d_R19_0_I1' BY DEF TypeOK,csAction,cs,Inv19_037d_R19_0_I1,\prec
+  \* (Inv19_037d_R19_0_I1,exitAction)
+  <1>14. TypeOK /\ Inv19_037d_R19_0_I1 /\ exitAction => Inv19_037d_R19_0_I1' BY DEF TypeOK,exitAction,exit,Inv19_037d_R19_0_I1,\prec
+<1>15. QED BY <1>1,<1>2,<1>3,<1>4,<1>5,<1>6,<1>7,<1>8,<1>9,<1>10,<1>11,<1>12,<1>13,<1>14 DEF Next
+
+
+\*** Inv4521_3f08_R1_1_I2
+THEOREM L_27 == TypeOK /\ Inv80_b6ff_R2_0_I3 /\ Inv4521_3f08_R1_1_I2 /\ Next => Inv4521_3f08_R1_1_I2'
+  <1>. USE A0
+  \* (Inv4521_3f08_R1_1_I2,ncsAction)
+  <1>1. TypeOK /\ Inv4521_3f08_R1_1_I2 /\ ncsAction => Inv4521_3f08_R1_1_I2' BY DEF TypeOK,ncsAction,ncs,Inv4521_3f08_R1_1_I2,\prec
+  \* (Inv4521_3f08_R1_1_I2,e1aAction)
+  <1>2. TypeOK /\ Inv4521_3f08_R1_1_I2 /\ e1aAction => Inv4521_3f08_R1_1_I2' BY DEF TypeOK,e1aAction,e1a,Inv4521_3f08_R1_1_I2,\prec
+  \* (Inv4521_3f08_R1_1_I2,e1bAction)
+  <1>3. TypeOK /\ Inv4521_3f08_R1_1_I2 /\ e1bAction => Inv4521_3f08_R1_1_I2' BY DEF TypeOK,e1bAction,e1b,Inv4521_3f08_R1_1_I2,\prec
+  \* (Inv4521_3f08_R1_1_I2,e2aAction)
+  <1>4. TypeOK /\ Inv4521_3f08_R1_1_I2 /\ e2aAction => Inv4521_3f08_R1_1_I2' BY DEF TypeOK,e2aAction,e2a,Inv4521_3f08_R1_1_I2,\prec,Procs
+  \* (Inv4521_3f08_R1_1_I2,e2bAction)
+  <1>5. TypeOK /\ Inv4521_3f08_R1_1_I2 /\ e2bAction => Inv4521_3f08_R1_1_I2' BY DEF TypeOK,e2bAction,e2b,Inv4521_3f08_R1_1_I2,\prec
+  \* (Inv4521_3f08_R1_1_I2,e3aAction)
+  <1>6. TypeOK /\ Inv4521_3f08_R1_1_I2 /\ e3aAction => Inv4521_3f08_R1_1_I2' BY DEF TypeOK,e3aAction,e3a,Inv4521_3f08_R1_1_I2,\prec
+  \* (Inv4521_3f08_R1_1_I2,e3bAction)
+  <1>7. TypeOK /\ Inv4521_3f08_R1_1_I2 /\ e3bAction => Inv4521_3f08_R1_1_I2' BY DEF TypeOK,e3bAction,e3b,Inv4521_3f08_R1_1_I2,\prec,\prec
+  \* (Inv4521_3f08_R1_1_I2,e4aAction)
+  <1>8. TypeOK /\ Inv4521_3f08_R1_1_I2 /\ e4aAction => Inv4521_3f08_R1_1_I2' BY DEF TypeOK,e4aAction,e4a,Inv4521_3f08_R1_1_I2,\prec
+  \* (Inv4521_3f08_R1_1_I2,e4bAction)
+  <1>9. TypeOK /\ Inv4521_3f08_R1_1_I2 /\ e4bAction => Inv4521_3f08_R1_1_I2' BY DEF TypeOK,e4bAction,e4b,Inv4521_3f08_R1_1_I2,\prec,\prec
+  \* (Inv4521_3f08_R1_1_I2,w1aAction)
+  <1>10. TypeOK /\ Inv4521_3f08_R1_1_I2 /\ w1aAction => Inv4521_3f08_R1_1_I2' BY DEF TypeOK,w1aAction,w1a,Inv4521_3f08_R1_1_I2,\prec,\prec
+  \* (Inv4521_3f08_R1_1_I2,w1bAction)
+  <1>11. TypeOK /\ Inv80_b6ff_R2_0_I3 /\ Inv4521_3f08_R1_1_I2 /\ w1bAction => Inv4521_3f08_R1_1_I2' BY DEF TypeOK,Inv80_b6ff_R2_0_I3,w1bAction,w1b,Inv4521_3f08_R1_1_I2,\prec,\prec
+  \* (Inv4521_3f08_R1_1_I2,w2Action)
+  <1>12. TypeOK /\ Inv4521_3f08_R1_1_I2 /\ w2Action => Inv4521_3f08_R1_1_I2' BY DEF TypeOK,w2Action,w2,Inv4521_3f08_R1_1_I2,\prec,\prec
+  \* (Inv4521_3f08_R1_1_I2,csAction)
+  <1>13. TypeOK /\ Inv4521_3f08_R1_1_I2 /\ csAction => Inv4521_3f08_R1_1_I2' BY DEF TypeOK,csAction,cs,Inv4521_3f08_R1_1_I2,\prec
+  \* (Inv4521_3f08_R1_1_I2,exitAction)
+  <1>14. TypeOK /\ Inv4521_3f08_R1_1_I2 /\ exitAction => Inv4521_3f08_R1_1_I2' BY DEF TypeOK,exitAction,exit,Inv4521_3f08_R1_1_I2,\prec
 <1>15. QED BY <1>1,<1>2,<1>3,<1>4,<1>5,<1>6,<1>7,<1>8,<1>9,<1>10,<1>11,<1>12,<1>13,<1>14 DEF Next
 
 \* Initiation.
 THEOREM Init => IndGlobal
     <1> USE A0
- DEF \prec, ProcSet
-    <1>0. Init => TypeOK 
-      <2> SUFFICES ASSUME Init
-                   PROVE  TypeOK
-        OBVIOUS
-      <2>1. num \in [Procs -> Nat]
-        BY DEF Init, TypeOK, IndGlobal
-      <2>2. flag \in [Procs -> BOOLEAN]
-        BY DEF Init, TypeOK, IndGlobal
-      <2>3. unchecked \in [Procs -> SUBSET Procs]
-        BY DEF Init, TypeOK, IndGlobal
-      <2>4. max \in [Procs -> Nat]
-        BY DEF Init, TypeOK, IndGlobal
-      <2>5. nxt \in [Procs -> Procs]
-        BY DEF Init, TypeOK, IndGlobal
-      <2>6. pc \in [Procs -> {"ncs", "e1", "e2", "e3", "e4", "w1", "w2", "cs", "exit"}]
-        BY DEF Init, TypeOK, IndGlobal
-      <2>7. QED
-        BY <2>1, <2>2, <2>3, <2>4, <2>5, <2>6 DEF TypeOK
-    <1>1. Init => Safety BY DEF Init, Safety, IndGlobal, H_MutualExclusion
-    <1>2. Init => Inv23439_af2b_R0_0_I2 BY DEF Init, Inv23439_af2b_R0_0_I2, IndGlobal
-    <1>3. Init => Inv3155_48f3_R1_0_I2 BY DEF Init, Inv3155_48f3_R1_0_I2, IndGlobal
-    <1>4. Init => Inv6938_a43e_R2_0_I3 BY DEF Init, Inv6938_a43e_R2_0_I3, IndGlobal
-    <1>5. Init => Inv14061_f302_R7_0_I3 BY DEF Init, Inv14061_f302_R7_0_I3, IndGlobal
-    <1>6. Init => Inv0_b3ba_R10_0_I0 BY DEF Init, Inv0_b3ba_R10_0_I0, IndGlobal
-    <1>7. Init => Inv1_b58a_R13_0_I1 BY DEF Init, Inv1_b58a_R13_0_I1, IndGlobal
-    <1>8. Init => Inv738_26ef_R13_1_I2 BY DEF Init, Inv738_26ef_R13_1_I2, IndGlobal
-    <1>9. Init => Inv48_180c_R17_0_I1 BY DEF Init, Inv48_180c_R17_0_I1, IndGlobal
-    <1>10. Init => Inv5493_34f2_R10_1_I2 BY DEF Init, Inv5493_34f2_R10_1_I2, IndGlobal
-    <1>11. Init => Inv296_b692_R14_1_I1 BY DEF Init, Inv296_b692_R14_1_I1, IndGlobal
-    <1>12. Init => Inv11_73d9_R7_1_I1 BY DEF Init, Inv11_73d9_R7_1_I1, IndGlobal
-    <1>13. Init => Inv26_b6ff_R2_0_I3 BY DEF Init, Inv26_b6ff_R2_0_I3, IndGlobal
-    <1>14. Init => Inv21465_bb1b_R1_1_I2 BY DEF Init, Inv21465_bb1b_R1_1_I2, IndGlobal
-    <1>15. Init => Inv19891_1bc3_R1_1_I2 BY DEF Init, Inv19891_1bc3_R1_1_I2, IndGlobal
-    <1>16. Init => Inv1222_288c_R4_0_I2 BY DEF Init, Inv1222_288c_R4_0_I2, IndGlobal
-    <1>17. Init => Inv10269_2818_R9_0_I2 BY DEF Init, Inv10269_2818_R9_0_I2, IndGlobal
-    <1>18. Init => Inv2205_3e9d_R12_0_I3 BY DEF Init, Inv2205_3e9d_R12_0_I3, IndGlobal
-    <1>19. Init => Inv12452_548a_R1_1_I2 BY DEF Init, Inv12452_548a_R1_1_I2, IndGlobal
-    <1>20. Init => Inv4559_3f08_R1_1_I2 BY DEF Init, Inv4559_3f08_R1_1_I2, IndGlobal
-    <1>a. QED BY <1>0,<1>1,<1>2,<1>3,<1>4,<1>5,<1>6,<1>7,<1>8,<1>9,<1>10,<1>11,<1>12,<1>13,<1>14,<1>15,<1>16,<1>17,<1>18,<1>19,<1>20 DEF IndGlobal
+<1> USE DEF \prec
+    <1>0. Init => TypeOK BY DEF Init, TypeOK, IndGlobal
+    <1>1. Init => Safety BY DEF Init, Safety, IndGlobal
+    <1>2. Init => Inv4690_2f61_R0_0_I2 BY DEF Init, Inv4690_2f61_R0_0_I2, IndGlobal
+    <1>3. Init => Inv4520_48f3_R1_0_I2 BY DEF Init, Inv4520_48f3_R1_0_I2, IndGlobal
+    <1>4. Init => Inv10_8778_R2_0_I3 BY DEF Init, Inv10_8778_R2_0_I3, IndGlobal
+    <1>5. Init => Inv5742_3d78_R2_0_I3 BY DEF Init, Inv5742_3d78_R2_0_I3, IndGlobal
+    <1>6. Init => Inv11_3838_R8_0_I2 BY DEF Init, Inv11_3838_R8_0_I2, IndGlobal
+    <1>7. Init => Inv61_df69_R8_0_I2 BY DEF Init, Inv61_df69_R8_0_I2, IndGlobal
+    <1>8. Init => Inv1922_5e75_R2_0_I3 BY DEF Init, Inv1922_5e75_R2_0_I3, IndGlobal
+    <1>9. Init => Inv4227_eecc_R10_0_I3 BY DEF Init, Inv4227_eecc_R10_0_I3, IndGlobal
+    <1>10. Init => Inv2740_e784_R16_0_I3 BY DEF Init, Inv2740_e784_R16_0_I3, IndGlobal
+    <1>11. Init => Inv0_b3ba_R18_0_I0 BY DEF Init, Inv0_b3ba_R18_0_I0, IndGlobal
+    <1>12. Init => Inv1_b58a_R20_0_I1 BY DEF Init, Inv1_b58a_R20_0_I1, IndGlobal
+    <1>13. Init => Inv350_b077_R20_1_I2 BY DEF Init, Inv350_b077_R20_1_I2, IndGlobal
+    <1>14. Init => Inv40_180c_R24_0_I1 BY DEF Init, Inv40_180c_R24_0_I1, IndGlobal
+    <1>15. Init => Inv6093_1c74_R18_1_I2 BY DEF Init, Inv6093_1c74_R18_1_I2, IndGlobal
+    <1>16. Init => Inv103_c9b1_R21_1_I1 BY DEF Init, Inv103_c9b1_R21_1_I1, IndGlobal
+    <1>17. Init => Inv80_b6ff_R2_0_I3 BY DEF Init, Inv80_b6ff_R2_0_I3, IndGlobal
+    <1>18. Init => Inv140_f68c_R9_0_I1 BY DEF Init, Inv140_f68c_R9_0_I1, IndGlobal
+    <1>19. Init => Inv1028_6ea5_R8_0_I2 BY DEF Init, Inv1028_6ea5_R8_0_I2, IndGlobal
+    <1>20. Init => Inv24959_7f87_R1_1_I2 BY DEF Init, Inv24959_7f87_R1_1_I2, IndGlobal
+    <1>21. Init => Inv5819_32cd_R1_1_I2 BY DEF Init, Inv5819_32cd_R1_1_I2, IndGlobal
+    <1>22. Init => Inv4576_59b1_R1_1_I2 BY DEF Init, Inv4576_59b1_R1_1_I2, IndGlobal
+    <1>23. Init => Inv4606_2f6b_R5_0_I2 BY DEF Init, Inv4606_2f6b_R5_0_I2, IndGlobal
+    <1>24. Init => Inv32498_2818_R11_0_I2 BY DEF Init, Inv32498_2818_R11_0_I2, IndGlobal
+    <1>25. Init => Inv3293_1a1e_R17_0_I3 BY DEF Init, Inv3293_1a1e_R17_0_I3, IndGlobal
+    <1>26. Init => Inv19_037d_R19_0_I1 BY DEF Init, Inv19_037d_R19_0_I1, IndGlobal
+    <1>27. Init => Inv4521_3f08_R1_1_I2 BY DEF Init, Inv4521_3f08_R1_1_I2, IndGlobal
+    <1>a. QED BY <1>0,<1>1,<1>2,<1>3,<1>4,<1>5,<1>6,<1>7,<1>8,<1>9,<1>10,<1>11,<1>12,<1>13,<1>14,<1>15,<1>16,<1>17,<1>18,<1>19,<1>20,<1>21,<1>22,<1>23,<1>24,<1>25,<1>26,<1>27 DEF IndGlobal
 
 \* Consecution.
 THEOREM IndGlobal /\ Next => IndGlobal'
-  BY L_0,L_1,L_2,L_3,L_4,L_5,L_6,L_7,L_8,L_9,L_10,L_11,L_12,L_13,L_14,L_15,L_16,L_17,L_18,L_19,L_20 DEF Next, IndGlobal
-
-
-
-
-
-
+  BY L_0,L_1,L_2,L_3,L_4,L_5,L_6,L_7,L_8,L_9,L_10,L_11,L_12,L_13,L_14,L_15,L_16,L_17,L_18,L_19,L_20,L_21,L_22,L_23,L_24,L_25,L_26,L_27 DEF Next, IndGlobal
 
 
 
@@ -2119,6 +2302,6 @@ THEOREM IndGlobal /\ Next => IndGlobal'
 \* Inv21195_R4_0_I3 == \A VARI \in Procs : ~(nxt[VARI] = VARI) \/ (~(unchecked[VARI] = {})) \/ (~(pc[VARI] = "w1"))
 =============================================================================
 \* Modification History
-\* Last modified Sat Sep 14 14:19:51 EDT 2024 by willyschultz
+\* Last modified Wed Oct 02 15:54:33 EDT 2024 by willyschultz
 \* Last modified Tue Dec 18 13:48:46 PST 2018 by lamport
 \* Created Thu Nov 21 15:54:32 PST 2013 by lamport
