@@ -362,7 +362,7 @@ THEOREM L_9 == TypeOK /\ Inv1270_3acc_R0_0_I1 /\ Next => Inv1270_3acc_R0_0_I1'
 THEOREM Init => IndGlobal
     <1> USE A0,A1,A2,A3,A4,A5,A6,A7
     <1>0. Init => TypeOK BY DEF Init, TypeOK, IndGlobal
-    <1>1. Init => Safety BY DEF Init, Safety, IndGlobal
+    <1>1. Init => Safety BY DEF Init, Safety, IndGlobal, H_OnePrimaryPerTerm
     <1>2. Init => Inv28_8e53_R0_0_I1 BY DEF Init, Inv28_8e53_R0_0_I1, IndGlobal
     <1>3. Init => Inv20_42ac_R1_0_I0 BY DEF Init, Inv20_42ac_R1_0_I0, IndGlobal
     <1>4. Init => Inv11_e30e_R3_0_I1 BY DEF Init, Inv11_e30e_R3_0_I1, IndGlobal
