@@ -848,7 +848,7 @@ THEOREM L_18 == TypeOK /\ Inv5771_fffd_R5_1_I2 /\ Next => Inv5771_fffd_R5_1_I2'
 
 \*** Inv8096_c721_R2_2_I2
 THEOREM L_19 == TypeOK /\ Inv7_1e2e_R6_3_I1 /\ Inv6746_404d_R2_1_I2 /\ Inv13_6261_R6_1_I1 /\ Inv4_42ac_R5_1_I2 /\ Inv138_3acc_R6_1_I1 /\ Inv2_8e53_R5_0_I0 /\ Inv5_c57a_R6_2_I1 /\ Inv13_6261_R6_1_I1 /\ Inv607_376d_R6_2_I1 /\ Inv6390_7e0d_R1_1_I2 /\ Inv8096_c721_R2_2_I2 /\ Next => Inv8096_c721_R2_2_I2'
-  <1>. USE A0,A1,A2,A3,A4,A5,A6,A7
+  <1>. USE A0,A1,A2,A3,A4,A5,A6,A7 DEF GrantedVoteSet, RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero,AppendEntriesRequestType,AppendEntriesResponseType, CanAppend, LogOk
   \* (Inv8096_c721_R2_2_I2,RequestVoteAction)
   <1>1. TypeOK /\ Inv7_1e2e_R6_3_I1 /\ Inv8096_c721_R2_2_I2 /\ RequestVoteAction => Inv8096_c721_R2_2_I2' BY DEF TypeOK,Inv7_1e2e_R6_3_I1,RequestVoteAction,RequestVote,Inv8096_c721_R2_2_I2,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero,AppendEntriesRequestType,AppendEntriesResponseType
   \* (Inv8096_c721_R2_2_I2,UpdateTermAction)
