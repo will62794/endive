@@ -895,8 +895,8 @@ THEOREM L_20 == TypeOK /\ Inv138_3acc_R6_1_I1 /\ Next => Inv138_3acc_R6_1_I1'
 
 
 \*** Inv5_c57a_R6_2_I1
-THEOREM L_21 == TypeOK /\ Inv31_73fd_R15_1_I1 /\ Inv138_3acc_R6_1_I1 /\ Inv0_2c32_R8_1_I1 /\ Inv11_dadc_R15_1_I1 /\ Inv31_73fd_R15_1_I1 /\ Inv11_f533_R10_0_I0 /\ Inv107_791e_R15_2_I1 /\ Inv7_2014_R15_0_I1 /\ Inv8509_2dd8_R0_0_I2 /\ Inv5_c57a_R6_2_I1 /\ Next => Inv5_c57a_R6_2_I1'
-  <1>. USE A0,A1,A2,A3,A4,A5,A6,A7
+THEOREM L_21 == TypeOK /\ Inv31_73fd_R15_1_I1  /\ Inv138_3acc_R6_1_I1 /\ Inv0_2c32_R8_1_I1 /\ Inv11_dadc_R15_1_I1 /\ Inv31_73fd_R15_1_I1 /\ Inv11_f533_R10_0_I0 /\ Inv107_791e_R15_2_I1 /\ Inv7_2014_R15_0_I1 /\ Inv8509_2dd8_R0_0_I2 /\ Inv5_c57a_R6_2_I1 /\ Next => Inv5_c57a_R6_2_I1'
+  <1>. USE A0,A1,A2,A3,A4,A5,A6,A7 DEF H_LogEntryInTermImpliesSafeAtTerm
   \* (Inv5_c57a_R6_2_I1,RequestVoteAction)
   <1>1. TypeOK /\ Inv5_c57a_R6_2_I1 /\ RequestVoteAction => Inv5_c57a_R6_2_I1' BY DEF TypeOK,RequestVoteAction,RequestVote,Inv5_c57a_R6_2_I1,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero,AppendEntriesRequestType,AppendEntriesResponseType
   \* (Inv5_c57a_R6_2_I1,UpdateTermAction)
@@ -920,7 +920,7 @@ THEOREM L_21 == TypeOK /\ Inv31_73fd_R15_1_I1 /\ Inv138_3acc_R6_1_I1 /\ Inv0_2c3
 
 \*** Inv7_2014_R15_0_I1
 THEOREM L_22 == TypeOK /\ Inv12_0a54_R24_0_I1 /\ Inv379_f624_R24_0_I1 /\ Inv18_bf9f_R24_0_I1 /\ Inv7_2014_R15_0_I1 /\ Next => Inv7_2014_R15_0_I1'
-  <1>. USE A0,A1,A2,A3,A4,A5,A6,A7
+  <1>. USE A0,A1,A2,A3,A4,A5,A6,A7 DEF H_LogEntryInTermImpliesSafeAtTermAppendEntries
   \* (Inv7_2014_R15_0_I1,RequestVoteAction)
   <1>1. TypeOK /\ Inv7_2014_R15_0_I1 /\ RequestVoteAction => Inv7_2014_R15_0_I1' BY DEF TypeOK,RequestVoteAction,RequestVote,Inv7_2014_R15_0_I1,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero,AppendEntriesRequestType,AppendEntriesResponseType
   \* (Inv7_2014_R15_0_I1,UpdateTermAction)
