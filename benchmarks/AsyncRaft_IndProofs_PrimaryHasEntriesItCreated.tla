@@ -518,7 +518,18 @@ THEOREM L_14 == TypeOK /\ Inv81_fe26_R20_0_I1 /\ Inv387_09bb_R9_0_I1 /\ Next => 
 THEOREM L_15 == TypeOK /\ Inv81_fe26_R20_0_I1 /\ Next => Inv81_fe26_R20_0_I1'
   <1>. USE A0,A1,A2,A3,A4,A5,A6,A7
   \* (Inv81_fe26_R20_0_I1,RequestVoteAction)
-  <1>1. TypeOK /\ Inv81_fe26_R20_0_I1 /\ RequestVoteAction => Inv81_fe26_R20_0_I1' BY DEF TypeOK,RequestVoteAction,RequestVote,Inv81_fe26_R20_0_I1,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero,AppendEntriesRequestType,AppendEntriesResponseType
+  <1>1. TypeOK /\ Inv81_fe26_R20_0_I1 /\ RequestVoteAction => Inv81_fe26_R20_0_I1' 
+    <2> SUFFICES ASSUME TypeOK,
+                        Inv81_fe26_R20_0_I1,
+                        TRUE,
+                        NEW i \in Server,
+                        RequestVote(i),
+                        NEW VARI \in Server',
+                        NEW VARREQVM \in requestVoteRequestMsgs'
+                 PROVE  (~(VARREQVM.msource = VARI) \/ (~(votesGranted[VARI] = {})))'
+      BY DEF Inv81_fe26_R20_0_I1, RequestVoteAction
+    <2> QED
+      BY FS_EmptySet, FS_Singleton DEF TypeOK,RequestVoteAction,RequestVote,Inv81_fe26_R20_0_I1,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero,AppendEntriesRequestType,AppendEntriesResponseType,LastTerm
   \* (Inv81_fe26_R20_0_I1,UpdateTermAction)
   <1>2. TypeOK /\ Inv81_fe26_R20_0_I1 /\ UpdateTermAction => Inv81_fe26_R20_0_I1' BY DEF TypeOK,UpdateTermAction,UpdateTerm,Inv81_fe26_R20_0_I1,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero,AppendEntriesRequestType,AppendEntriesResponseType
   \* (Inv81_fe26_R20_0_I1,BecomeLeaderAction)
