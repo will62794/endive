@@ -772,7 +772,7 @@ THEOREM L_23 == TypeOK /\ Inv12_0a54_R24_0_I1 /\ Next => Inv12_0a54_R24_0_I1'
 
 \*** Inv379_f624_R24_0_I1
 THEOREM L_24 == TypeOK /\ Inv31_73fd_R15_1_I1 /\ Inv10303_8d53_R26_3_I2 /\ Inv11_dadc_R15_1_I1 /\ Inv379_f624_R24_0_I1 /\ Next => Inv379_f624_R24_0_I1'
-  <1>. USE A0,A1,A2,A3,A4,A5,A6,A7
+  <1>. USE A0,A1,A2,A3,A4,A5,A6,A7 DEF H_QuorumsSafeAtTerms
   \* (Inv379_f624_R24_0_I1,RequestVoteAction)
   <1>1. TypeOK /\ Inv379_f624_R24_0_I1 /\ RequestVoteAction => Inv379_f624_R24_0_I1' BY DEF TypeOK,RequestVoteAction,RequestVote,Inv379_f624_R24_0_I1,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero,AppendEntriesRequestType,AppendEntriesResponseType
   \* (Inv379_f624_R24_0_I1,UpdateTermAction)
