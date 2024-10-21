@@ -78,7 +78,7 @@
     "large_instance_inv_check_index": 1,
     "cti_gen_instance_indexes": [0,1],
     "constants"  : {
-        "R_NODES" : ["{33,44,55}", "{33,44,55,66}"],
+        "R_NODES" : ["{0,1,2}", "{0,1,2,3}"],
         "R_MAX_VERSION" : ["4"],
         "R_MAX_EPOCH" : ["4"]
     },
@@ -103,7 +103,7 @@
             "R_NODES \\subseteq Nat /\\ R_MAX_VERSION \\in Nat"
         ],
         "lemma_def_expands": {
-            "Safety": ["RConsistentInvariant", "RMessageINV"]
+            "Safety": ["RConsistentInvariant", "RMessageINV", "RSingleOnwerInvariant"]
         },
         "action_def_expands":{
             "RNodeFailureAction": ["RMessageINV", "RNoChanges_but_membership"],
