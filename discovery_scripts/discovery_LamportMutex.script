@@ -12,6 +12,13 @@ specname="LamportMutex"
 seed=$SLURM_ARRAY_TASK_ID
 source /home/schultz.w/bm_setup.sh "${specname}_${seed}"
 
+common_flags=" --tlc_workers $tlc_workers --num_ctigen_workers $num_ctigen_workers --cti_elimination_workers=$cti_elimination_workers"
+common_flags+=" --debug --target_sample_time_limit_ms $target_sample_time_limit_ms --num_simulate_traces $num_simulate_traces --target_sample_states $target_sample_states"
+common_flags+=" --opt_quant_minimize --k_cti_induction_depth 1"
+common_flags+=" --ninvs $ninvs --max_num_ctis_per_round $max_num_ctis_per_round"
+common_flags+=" --save_dot --max_num_conjuncts_per_round 20 --niters $niters --nrounds $nrounds"
+common_flags+=" --tlapm_install $tlapm_install"
+
 # All optimizations.
 srun -o /scratch/schultz.w/endive_logs/${specname}/${specname}_output_${seed}.txt \
     python3 endive.py --spec benchmarks/$specname \
