@@ -61,7 +61,7 @@ Inv11_dadc_R15_1_I1 == \A VARI \in Server : ((votedFor[VARI] = VARI)) => ((\A t 
 Inv107_791e_R15_2_I1 == \A VARI \in Server : \A VARJ \in Server : \A VARREQVRES \in requestVoteResponseMsgs : ~(VARREQVRES.mterm = currentTerm[VARI] /\ VARREQVRES.msource = VARJ /\ VARREQVRES.mdest # VARI /\ VARREQVRES.mvoteGranted) \/ (~(votedFor[VARJ] = VARI))
 Inv3_9e78_R17_0_I0 == \A VARREQVM \in requestVoteRequestMsgs : (currentTerm[VARREQVM.msource] >= VARREQVM.mterm)
 Inv15_1f30_R18_0_I1 == \A VARJ \in Server : ((state[VARJ] = Follower)) \/ ((votedFor[VARJ] = VARJ))
-Inv81_fe26_R20_0_I1 == \A VARI \in Server : \A VARREQVM \in requestVoteRequestMsgs : ~(VARREQVM.msource = VARI) \/ (~(votesGranted[VARI] = {}))
+Inv81_fe26_R20_0_I1 == \A VARI \in Server : \A VARREQVM \in requestVoteRequestMsgs : (VARREQVM.msource = VARI) => (~(votesGranted[VARI] = {}))
 Inv13_3715_R22_0_I0 == (\A m \in requestVoteResponseMsgs : m.mtype = RequestVoteResponse =>  /\ (m.mvoteGranted /\ (currentTerm[m.msource] = m.mterm)) => votedFor[m.msource] = m.mdest)
 Inv12_0a54_R24_0_I1 == \A VARI \in Server : ~((commitIndex[VARI] > 0))
 Inv379_f624_R24_0_I1 == \A VARI \in Server : (H_QuorumsSafeAtTerms /\ currentTerm = currentTerm /\ state = state /\ votedFor = votedFor) \/ (~((state[VARI] = Leader)))
@@ -133,7 +133,7 @@ ASSUME A7 == MaxTerm \in Nat
 
 \*** TypeOK
 THEOREM L_0 == TypeOK /\ TypeOK /\ Next => TypeOK'
-  <1>. USE A0,A1,A2,A3,A4,A5,A6,A7
+  <1>. USE A0,A1,A2,A3,A4,A5,A6,A7 DEF AppendEntriesRequestType, AppendEntriesResponseType
   \* (TypeOK,RequestVoteAction)
   <1>1. TypeOK /\ TypeOK /\ RequestVoteAction => TypeOK' 
     <2> SUFFICES ASSUME TypeOK /\ TypeOK /\ RequestVoteAction
@@ -189,7 +189,7 @@ THEOREM L_0 == TypeOK /\ TypeOK /\ Next => TypeOK'
     <2>2. (requestVoteResponseMsgs \in SUBSET RequestVoteResponseType)'
       BY DEF TypeOK,AppendEntriesAction,AppendEntries,TypeOK
     <2>3. (appendEntriesRequestMsgs \in SUBSET AppendEntriesRequestType)'
-      BY DEF TypeOK,AppendEntriesAction,AppendEntries,TypeOK
+      BY DEF TypeOK,AppendEntriesAction,AppendEntries,TypeOK, Min
     <2>4. (appendEntriesResponseMsgs \in SUBSET AppendEntriesResponseType)'
       BY DEF TypeOK,AppendEntriesAction,AppendEntries,TypeOK
     <2>5. (currentTerm \in [Server -> Nat])'
@@ -406,7 +406,20 @@ THEOREM L_2 == TypeOK /\ Inv6390_7e0d_R1_1_I2 /\ Safety /\ Inv8509_2dd8_R0_0_I2 
   \* (Inv8509_2dd8_R0_0_I2,ClientRequestAction)
   <1>4. TypeOK /\ Inv8509_2dd8_R0_0_I2 /\ ClientRequestAction => Inv8509_2dd8_R0_0_I2' BY DEF TypeOK,ClientRequestAction,ClientRequest,Inv8509_2dd8_R0_0_I2
   \* (Inv8509_2dd8_R0_0_I2,AppendEntriesAction)
-  <1>5. TypeOK /\ Safety /\ Inv8509_2dd8_R0_0_I2 /\ AppendEntriesAction => Inv8509_2dd8_R0_0_I2' BY DEF TypeOK,Safety,AppendEntriesAction,AppendEntries,Inv8509_2dd8_R0_0_I2
+  <1>5. TypeOK /\ Safety /\ Inv8509_2dd8_R0_0_I2 /\ AppendEntriesAction => Inv8509_2dd8_R0_0_I2' 
+    <2> SUFFICES ASSUME TypeOK,
+                        Safety,
+                        Inv8509_2dd8_R0_0_I2,
+                        TRUE,
+                        NEW i \in Server, NEW j \in Server,
+                        AppendEntries(i, j),
+                        NEW VARI \in Server',
+                        NEW VARMAEREQ \in appendEntriesRequestMsgs',
+                        NEW VARLOGINDI \in LogIndices'
+                 PROVE  ((VARMAEREQ.mentries # <<>> /\ VARLOGINDI \in DOMAIN log[VARI] /\ log[VARI][VARLOGINDI] = VARMAEREQ.mentries[1]) \/ (~(VARMAEREQ.mentries # <<>> /\ VARMAEREQ.mentries[1] = currentTerm[VARI] /\ state[VARI] = Leader)) \/ (~(VARLOGINDI = VARMAEREQ.mprevLogIndex + 1)))'
+      BY DEF AppendEntriesAction, Inv8509_2dd8_R0_0_I2
+    <2> QED
+      BY DEF TypeOK,Safety,AppendEntriesAction,AppendEntries,Inv8509_2dd8_R0_0_I2
   \* (Inv8509_2dd8_R0_0_I2,HandleRequestVoteRequestAction)
   <1>6. TypeOK /\ Inv8509_2dd8_R0_0_I2 /\ HandleRequestVoteRequestAction => Inv8509_2dd8_R0_0_I2' BY DEF TypeOK,HandleRequestVoteRequestAction,HandleRequestVoteRequest,Inv8509_2dd8_R0_0_I2,LastTerm,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero
   \* (Inv8509_2dd8_R0_0_I2,HandleRequestVoteResponseAction)
@@ -422,7 +435,18 @@ THEOREM L_2 == TypeOK /\ Inv6390_7e0d_R1_1_I2 /\ Safety /\ Inv8509_2dd8_R0_0_I2 
 THEOREM L_3 == TypeOK /\ Inv5215_bcfb_R0_1_I2 /\ Inv7767_5b71_R4_1_I2 /\ Inv6390_7e0d_R1_1_I2 /\ Next => Inv6390_7e0d_R1_1_I2'
   <1>. USE A0,A1,A2,A3,A4,A5,A6,A7
   \* (Inv6390_7e0d_R1_1_I2,RequestVoteAction)
-  <1>1. TypeOK /\ Inv6390_7e0d_R1_1_I2 /\ RequestVoteAction => Inv6390_7e0d_R1_1_I2' BY DEF TypeOK,RequestVoteAction,RequestVote,Inv6390_7e0d_R1_1_I2,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero,AppendEntriesRequestType,AppendEntriesResponseType
+  <1>1. TypeOK /\ Inv6390_7e0d_R1_1_I2 /\ RequestVoteAction => Inv6390_7e0d_R1_1_I2' 
+    <2> SUFFICES ASSUME TypeOK,
+                        Inv6390_7e0d_R1_1_I2,
+                        TRUE,
+                        NEW i \in Server,
+                        RequestVote(i),
+                        NEW VARI \in Server',
+                        NEW VARMAEREQ \in appendEntriesRequestMsgs'
+                 PROVE  (~((state[VARI] = Candidate)) \/ (~(VARMAEREQ.mentries # <<>> /\ VARMAEREQ.mentries[1] = currentTerm[VARI]) \/ (~(votesGranted[VARI] \in Quorum))))'
+      BY DEF Inv6390_7e0d_R1_1_I2, RequestVoteAction
+    <2> QED
+      BY DEF TypeOK,RequestVoteAction,RequestVote,Inv6390_7e0d_R1_1_I2,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero,AppendEntriesRequestType,AppendEntriesResponseType
   \* (Inv6390_7e0d_R1_1_I2,UpdateTermAction)
   <1>2. TypeOK /\ Inv6390_7e0d_R1_1_I2 /\ UpdateTermAction => Inv6390_7e0d_R1_1_I2' BY DEF TypeOK,UpdateTermAction,UpdateTerm,Inv6390_7e0d_R1_1_I2,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero,AppendEntriesRequestType,AppendEntriesResponseType
   \* (Inv6390_7e0d_R1_1_I2,BecomeLeaderAction)
@@ -430,11 +454,34 @@ THEOREM L_3 == TypeOK /\ Inv5215_bcfb_R0_1_I2 /\ Inv7767_5b71_R4_1_I2 /\ Inv6390
   \* (Inv6390_7e0d_R1_1_I2,ClientRequestAction)
   <1>4. TypeOK /\ Inv6390_7e0d_R1_1_I2 /\ ClientRequestAction => Inv6390_7e0d_R1_1_I2' BY DEF TypeOK,ClientRequestAction,ClientRequest,Inv6390_7e0d_R1_1_I2
   \* (Inv6390_7e0d_R1_1_I2,AppendEntriesAction)
-  <1>5. TypeOK /\ Inv5215_bcfb_R0_1_I2 /\ Inv6390_7e0d_R1_1_I2 /\ AppendEntriesAction => Inv6390_7e0d_R1_1_I2' BY DEF TypeOK,Inv5215_bcfb_R0_1_I2,AppendEntriesAction,AppendEntries,Inv6390_7e0d_R1_1_I2
+  <1>5. TypeOK /\ Inv5215_bcfb_R0_1_I2 /\ Inv6390_7e0d_R1_1_I2 /\ AppendEntriesAction => Inv6390_7e0d_R1_1_I2' 
+    <2> SUFFICES ASSUME TypeOK,
+                        Inv5215_bcfb_R0_1_I2,
+                        Inv6390_7e0d_R1_1_I2,
+                        TRUE,
+                        NEW i \in Server, NEW j \in Server,
+                        AppendEntries(i, j),
+                        NEW VARI \in Server',
+                        NEW VARMAEREQ \in appendEntriesRequestMsgs'
+                 PROVE  (~((state[VARI] = Candidate)) \/ (~(VARMAEREQ.mentries # <<>> /\ VARMAEREQ.mentries[1] = currentTerm[VARI]) \/ (~(votesGranted[VARI] \in Quorum))))'
+      BY DEF AppendEntriesAction, Inv6390_7e0d_R1_1_I2
+    <2> QED
+      BY DEF TypeOK,Inv5215_bcfb_R0_1_I2,AppendEntriesAction,AppendEntries,Inv6390_7e0d_R1_1_I2
   \* (Inv6390_7e0d_R1_1_I2,HandleRequestVoteRequestAction)
   <1>6. TypeOK /\ Inv6390_7e0d_R1_1_I2 /\ HandleRequestVoteRequestAction => Inv6390_7e0d_R1_1_I2' BY DEF TypeOK,HandleRequestVoteRequestAction,HandleRequestVoteRequest,Inv6390_7e0d_R1_1_I2,LastTerm,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero
   \* (Inv6390_7e0d_R1_1_I2,HandleRequestVoteResponseAction)
-  <1>7. TypeOK /\ Inv7767_5b71_R4_1_I2 /\ Inv6390_7e0d_R1_1_I2 /\ HandleRequestVoteResponseAction => Inv6390_7e0d_R1_1_I2' BY DEF TypeOK,Inv7767_5b71_R4_1_I2,HandleRequestVoteResponseAction,HandleRequestVoteResponse,Inv6390_7e0d_R1_1_I2,LastTerm,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero
+  <1>7. TypeOK /\ Inv7767_5b71_R4_1_I2 /\ Inv6390_7e0d_R1_1_I2 /\ HandleRequestVoteResponseAction => Inv6390_7e0d_R1_1_I2' 
+    <2> SUFFICES ASSUME TypeOK,
+                        Inv7767_5b71_R4_1_I2,
+                        Inv6390_7e0d_R1_1_I2,
+                        NEW m \in requestVoteResponseMsgs,
+                        HandleRequestVoteResponse(m),
+                        NEW VARI \in Server',
+                        NEW VARMAEREQ \in appendEntriesRequestMsgs'
+                 PROVE  (~((state[VARI] = Candidate)) \/ (~(VARMAEREQ.mentries # <<>> /\ VARMAEREQ.mentries[1] = currentTerm[VARI]) \/ (~(votesGranted[VARI] \in Quorum))))'
+      BY DEF HandleRequestVoteResponseAction, Inv6390_7e0d_R1_1_I2
+    <2> QED
+      BY DEF TypeOK,Inv7767_5b71_R4_1_I2,HandleRequestVoteResponseAction,HandleRequestVoteResponse,Inv6390_7e0d_R1_1_I2,LastTerm,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero
   \* (Inv6390_7e0d_R1_1_I2,AcceptAppendEntriesRequestAppendAction)
   <1>8. TypeOK /\ Inv6390_7e0d_R1_1_I2 /\ AcceptAppendEntriesRequestAppendAction => Inv6390_7e0d_R1_1_I2' BY DEF TypeOK,AcceptAppendEntriesRequestAppendAction,AcceptAppendEntriesRequestAppend,Inv6390_7e0d_R1_1_I2
   \* (Inv6390_7e0d_R1_1_I2,HandleAppendEntriesResponseAction)
@@ -446,7 +493,18 @@ THEOREM L_3 == TypeOK /\ Inv5215_bcfb_R0_1_I2 /\ Inv7767_5b71_R4_1_I2 /\ Inv6390
 THEOREM L_4 == TypeOK /\ Inv6746_404d_R2_1_I2 /\ Inv8096_c721_R2_2_I2 /\ Inv6390_7e0d_R1_1_I2 /\ Inv5215_bcfb_R0_1_I2 /\ Next => Inv5215_bcfb_R0_1_I2'
   <1>. USE A0,A1,A2,A3,A4,A5,A6,A7
   \* (Inv5215_bcfb_R0_1_I2,RequestVoteAction)
-  <1>1. TypeOK /\ Inv5215_bcfb_R0_1_I2 /\ RequestVoteAction => Inv5215_bcfb_R0_1_I2' BY DEF TypeOK,RequestVoteAction,RequestVote,Inv5215_bcfb_R0_1_I2,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero,AppendEntriesRequestType,AppendEntriesResponseType
+  <1>1. TypeOK /\ Inv5215_bcfb_R0_1_I2 /\ RequestVoteAction => Inv5215_bcfb_R0_1_I2' 
+    <2> SUFFICES ASSUME TypeOK,
+                        Inv5215_bcfb_R0_1_I2,
+                        TRUE,
+                        NEW i \in Server,
+                        RequestVote(i),
+                        NEW VARI \in Server',
+                        NEW VARJ \in Server'
+                 PROVE  (~((state[VARI] = Candidate /\ VARI # VARJ)) \/ (~(\E INDK \in DOMAIN log[VARJ] : log[VARJ][INDK] = currentTerm[VARI]) \/ (~(votesGranted[VARI] \in Quorum))))'
+      BY DEF Inv5215_bcfb_R0_1_I2, RequestVoteAction
+    <2> QED
+      BY DEF TypeOK,RequestVoteAction,RequestVote,Inv5215_bcfb_R0_1_I2,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero,AppendEntriesRequestType,AppendEntriesResponseType
   \* (Inv5215_bcfb_R0_1_I2,UpdateTermAction)
   <1>2. TypeOK /\ Inv5215_bcfb_R0_1_I2 /\ UpdateTermAction => Inv5215_bcfb_R0_1_I2' BY DEF TypeOK,UpdateTermAction,UpdateTerm,Inv5215_bcfb_R0_1_I2,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero,AppendEntriesRequestType,AppendEntriesResponseType
   \* (Inv5215_bcfb_R0_1_I2,BecomeLeaderAction)
@@ -458,9 +516,31 @@ THEOREM L_4 == TypeOK /\ Inv6746_404d_R2_1_I2 /\ Inv8096_c721_R2_2_I2 /\ Inv6390
   \* (Inv5215_bcfb_R0_1_I2,HandleRequestVoteRequestAction)
   <1>6. TypeOK /\ Inv5215_bcfb_R0_1_I2 /\ HandleRequestVoteRequestAction => Inv5215_bcfb_R0_1_I2' BY DEF TypeOK,HandleRequestVoteRequestAction,HandleRequestVoteRequest,Inv5215_bcfb_R0_1_I2,LastTerm,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero
   \* (Inv5215_bcfb_R0_1_I2,HandleRequestVoteResponseAction)
-  <1>7. TypeOK /\ Inv8096_c721_R2_2_I2 /\ Inv5215_bcfb_R0_1_I2 /\ HandleRequestVoteResponseAction => Inv5215_bcfb_R0_1_I2' BY DEF TypeOK,Inv8096_c721_R2_2_I2,HandleRequestVoteResponseAction,HandleRequestVoteResponse,Inv5215_bcfb_R0_1_I2,LastTerm,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero
+  <1>7. TypeOK /\ Inv8096_c721_R2_2_I2 /\ Inv5215_bcfb_R0_1_I2 /\ HandleRequestVoteResponseAction => Inv5215_bcfb_R0_1_I2' 
+    <2> SUFFICES ASSUME TypeOK,
+                        Inv8096_c721_R2_2_I2,
+                        Inv5215_bcfb_R0_1_I2,
+                        NEW m \in requestVoteResponseMsgs,
+                        HandleRequestVoteResponse(m),
+                        NEW VARI \in Server',
+                        NEW VARJ \in Server'
+                 PROVE  (~((state[VARI] = Candidate /\ VARI # VARJ)) \/ (~(\E INDK \in DOMAIN log[VARJ] : log[VARJ][INDK] = currentTerm[VARI]) \/ (~(votesGranted[VARI] \in Quorum))))'
+      BY DEF HandleRequestVoteResponseAction, Inv5215_bcfb_R0_1_I2
+    <2> QED
+      BY DEF TypeOK,Inv8096_c721_R2_2_I2,HandleRequestVoteResponseAction,HandleRequestVoteResponse,Inv5215_bcfb_R0_1_I2,LastTerm,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero
   \* (Inv5215_bcfb_R0_1_I2,AcceptAppendEntriesRequestAppendAction)
-  <1>8. TypeOK /\ Inv6390_7e0d_R1_1_I2 /\ Inv5215_bcfb_R0_1_I2 /\ AcceptAppendEntriesRequestAppendAction => Inv5215_bcfb_R0_1_I2' BY DEF TypeOK,Inv6390_7e0d_R1_1_I2,AcceptAppendEntriesRequestAppendAction,AcceptAppendEntriesRequestAppend,Inv5215_bcfb_R0_1_I2
+  <1>8. TypeOK /\ Inv6390_7e0d_R1_1_I2 /\ Inv5215_bcfb_R0_1_I2 /\ AcceptAppendEntriesRequestAppendAction => Inv5215_bcfb_R0_1_I2' 
+    <2> SUFFICES ASSUME TypeOK,
+                        Inv6390_7e0d_R1_1_I2,
+                        Inv5215_bcfb_R0_1_I2,
+                        NEW m \in appendEntriesRequestMsgs,
+                        AcceptAppendEntriesRequestAppend(m),
+                        NEW VARI \in Server',
+                        NEW VARJ \in Server'
+                 PROVE  (~((state[VARI] = Candidate /\ VARI # VARJ)) \/ (~(\E INDK \in DOMAIN log[VARJ] : log[VARJ][INDK] = currentTerm[VARI]) \/ (~(votesGranted[VARI] \in Quorum))))'
+      BY DEF AcceptAppendEntriesRequestAppendAction, Inv5215_bcfb_R0_1_I2
+    <2> QED
+      BY DEF TypeOK,Inv6390_7e0d_R1_1_I2,AcceptAppendEntriesRequestAppendAction,AcceptAppendEntriesRequestAppend,Inv5215_bcfb_R0_1_I2
   \* (Inv5215_bcfb_R0_1_I2,HandleAppendEntriesResponseAction)
   <1>9. TypeOK /\ Inv5215_bcfb_R0_1_I2 /\ HandleAppendEntriesResponseAction => Inv5215_bcfb_R0_1_I2' BY DEF TypeOK,HandleAppendEntriesResponseAction,HandleAppendEntriesResponse,Inv5215_bcfb_R0_1_I2
 <1>10. QED BY <1>1,<1>2,<1>3,<1>4,<1>5,<1>6,<1>7,<1>8,<1>9 DEF Next
@@ -470,7 +550,18 @@ THEOREM L_4 == TypeOK /\ Inv6746_404d_R2_1_I2 /\ Inv8096_c721_R2_2_I2 /\ Inv6390
 THEOREM L_5 == TypeOK /\ Inv2_8e53_R5_0_I0 /\ Inv9_928b_R5_1_I2 /\ Inv1630_58c9_R5_1_I2 /\ Inv5771_fffd_R5_1_I2 /\ Inv4_42ac_R5_1_I2 /\ Inv6746_404d_R2_1_I2 /\ Next => Inv6746_404d_R2_1_I2'
   <1>. USE A0,A1,A2,A3,A4,A5,A6,A7
   \* (Inv6746_404d_R2_1_I2,RequestVoteAction)
-  <1>1. TypeOK /\ Inv6746_404d_R2_1_I2 /\ RequestVoteAction => Inv6746_404d_R2_1_I2' BY DEF TypeOK,RequestVoteAction,RequestVote,Inv6746_404d_R2_1_I2,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero,AppendEntriesRequestType,AppendEntriesResponseType
+  <1>1. TypeOK /\ Inv6746_404d_R2_1_I2 /\ RequestVoteAction => Inv6746_404d_R2_1_I2' 
+    <2> SUFFICES ASSUME TypeOK,
+                        Inv6746_404d_R2_1_I2,
+                        TRUE,
+                        NEW i \in Server,
+                        RequestVote(i),
+                        NEW VARI \in Server',
+                        NEW VARJ \in Server'
+                 PROVE  (~((state[VARI] = Candidate /\ VARI # VARJ /\ currentTerm[VARI] = currentTerm[VARJ])) \/ (~((state[VARJ] = Leader))) \/ (~(votesGranted[VARI] \in Quorum)))'
+      BY DEF Inv6746_404d_R2_1_I2, RequestVoteAction
+    <2> QED
+      BY DEF TypeOK,RequestVoteAction,RequestVote,Inv6746_404d_R2_1_I2,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero,AppendEntriesRequestType,AppendEntriesResponseType
   \* (Inv6746_404d_R2_1_I2,UpdateTermAction)
   <1>2. TypeOK /\ Inv6746_404d_R2_1_I2 /\ UpdateTermAction => Inv6746_404d_R2_1_I2' BY DEF TypeOK,UpdateTermAction,UpdateTerm,Inv6746_404d_R2_1_I2,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero,AppendEntriesRequestType,AppendEntriesResponseType
   \* (Inv6746_404d_R2_1_I2,BecomeLeaderAction)
@@ -750,11 +841,18 @@ THEOREM L_15 == TypeOK /\ Inv81_fe26_R20_0_I1 /\ Next => Inv81_fe26_R20_0_I1'
                         NEW i \in Server,
                         RequestVote(i),
                         NEW VARI \in Server',
-                        NEW VARREQVM \in requestVoteRequestMsgs'
-                 PROVE  (~(VARREQVM.msource = VARI) \/ (~(votesGranted[VARI] = {})))'
+                        NEW VARREQVM \in requestVoteRequestMsgs',
+                        (VARREQVM.msource = VARI)'
+                 PROVE  (~(votesGranted[VARI] = {}))'
       BY DEF Inv81_fe26_R20_0_I1, RequestVoteAction
+    <2>1 CASE i = VARI
+          BY <2>1, SMTT(60), FS_Difference, FS_EmptySet, FS_Singleton DEF TypeOK,RequestVoteAction,RequestVote,Inv81_fe26_R20_0_I1,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero,AppendEntriesRequestType,AppendEntriesResponseType,LastTerm
+    <2>2 CASE i # VARI
+          BY <2>2, SMTT(60), FS_Difference, FS_EmptySet, FS_Singleton DEF TypeOK,RequestVoteAction,RequestVote,Inv81_fe26_R20_0_I1,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero,AppendEntriesRequestType,AppendEntriesResponseType,LastTerm
+    
     <2> QED
-      BY FS_EmptySet, FS_Singleton DEF TypeOK,RequestVoteAction,RequestVote,Inv81_fe26_R20_0_I1,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero,AppendEntriesRequestType,AppendEntriesResponseType,LastTerm
+      BY <2>1, <2>2, FS_Difference, FS_EmptySet, FS_Singleton DEF TypeOK,RequestVoteAction,RequestVote,Inv81_fe26_R20_0_I1,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero,AppendEntriesRequestType,AppendEntriesResponseType,LastTerm
+    
   \* (Inv81_fe26_R20_0_I1,UpdateTermAction)
   <1>2. TypeOK /\ Inv81_fe26_R20_0_I1 /\ UpdateTermAction => Inv81_fe26_R20_0_I1' BY DEF TypeOK,UpdateTermAction,UpdateTerm,Inv81_fe26_R20_0_I1,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero,AppendEntriesRequestType,AppendEntriesResponseType
   \* (Inv81_fe26_R20_0_I1,BecomeLeaderAction)
@@ -852,9 +950,31 @@ THEOREM L_19 == TypeOK /\ Inv7_1e2e_R6_3_I1 /\ Inv6746_404d_R2_1_I2 /\ Inv13_626
   \* (Inv8096_c721_R2_2_I2,RequestVoteAction)
   <1>1. TypeOK /\ Inv7_1e2e_R6_3_I1 /\ Inv8096_c721_R2_2_I2 /\ RequestVoteAction => Inv8096_c721_R2_2_I2' BY DEF TypeOK,Inv7_1e2e_R6_3_I1,RequestVoteAction,RequestVote,Inv8096_c721_R2_2_I2,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero,AppendEntriesRequestType,AppendEntriesResponseType
   \* (Inv8096_c721_R2_2_I2,UpdateTermAction)
-  <1>2. TypeOK /\ Inv8096_c721_R2_2_I2 /\ UpdateTermAction => Inv8096_c721_R2_2_I2' BY DEF TypeOK,UpdateTermAction,UpdateTerm,Inv8096_c721_R2_2_I2,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero,AppendEntriesRequestType,AppendEntriesResponseType
+  <1>2. TypeOK /\ Inv8096_c721_R2_2_I2 /\ UpdateTermAction => Inv8096_c721_R2_2_I2' 
+    <2> SUFFICES ASSUME TypeOK,
+                        Inv8096_c721_R2_2_I2,
+                        TRUE,
+                        NEW m \in requestVoteRequestMsgs \cup requestVoteResponseMsgs \cup appendEntriesRequestMsgs \cup appendEntriesResponseMsgs,
+                        UpdateTerm(m.mterm, m.mdest),
+                        NEW VARI \in Server',
+                        NEW VARJ \in Server'
+                 PROVE  (~((state[VARI] = Candidate)) \/ (~(\E INDK \in DOMAIN log[VARJ] : log[VARJ][INDK] = currentTerm[VARI])) \/ (~(GrantedVoteSet(VARI) \in Quorum /\ votesGranted = votesGranted /\ requestVoteResponseMsgs = requestVoteResponseMsgs)))'
+      BY DEF Inv8096_c721_R2_2_I2, UpdateTermAction
+    <2> QED
+      BY DEF TypeOK,UpdateTermAction,UpdateTerm,Inv8096_c721_R2_2_I2,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero,AppendEntriesRequestType,AppendEntriesResponseType
   \* (Inv8096_c721_R2_2_I2,BecomeLeaderAction)
-  <1>3. TypeOK /\ Inv8096_c721_R2_2_I2 /\ BecomeLeaderAction => Inv8096_c721_R2_2_I2' BY DEF TypeOK,BecomeLeaderAction,BecomeLeader,Inv8096_c721_R2_2_I2
+  <1>3. TypeOK /\ Inv8096_c721_R2_2_I2 /\ BecomeLeaderAction => Inv8096_c721_R2_2_I2' 
+    <2> SUFFICES ASSUME TypeOK,
+                        Inv8096_c721_R2_2_I2,
+                        TRUE,
+                        NEW i \in Server,
+                        BecomeLeader(i),
+                        NEW VARI \in Server',
+                        NEW VARJ \in Server'
+                 PROVE  (~((state[VARI] = Candidate)) \/ (~(\E INDK \in DOMAIN log[VARJ] : log[VARJ][INDK] = currentTerm[VARI])) \/ (~(GrantedVoteSet(VARI) \in Quorum /\ votesGranted = votesGranted /\ requestVoteResponseMsgs = requestVoteResponseMsgs)))'
+      BY DEF BecomeLeaderAction, Inv8096_c721_R2_2_I2
+    <2> QED
+      BY DEF TypeOK,BecomeLeaderAction,BecomeLeader,Inv8096_c721_R2_2_I2
   \* (Inv8096_c721_R2_2_I2,ClientRequestAction)
   <1>4. TypeOK /\ Inv6746_404d_R2_1_I2 /\ Inv13_6261_R6_1_I1 /\ Inv4_42ac_R5_1_I2 /\ Inv138_3acc_R6_1_I1 /\ Inv2_8e53_R5_0_I0 /\ Inv8096_c721_R2_2_I2 /\ ClientRequestAction => Inv8096_c721_R2_2_I2' BY DEF TypeOK,Inv6746_404d_R2_1_I2,Inv13_6261_R6_1_I1,Inv4_42ac_R5_1_I2,Inv138_3acc_R6_1_I1,Inv2_8e53_R5_0_I0,ClientRequestAction,ClientRequest,Inv8096_c721_R2_2_I2
   \* (Inv8096_c721_R2_2_I2,AppendEntriesAction)
@@ -970,7 +1090,17 @@ THEOREM L_23 == TypeOK /\ Inv12_0a54_R24_0_I1 /\ Next => Inv12_0a54_R24_0_I1'
 THEOREM L_24 == TypeOK /\ Inv31_73fd_R15_1_I1 /\ Inv10303_8d53_R26_3_I2 /\ Inv11_dadc_R15_1_I1 /\ Inv379_f624_R24_0_I1 /\ Next => Inv379_f624_R24_0_I1'
   <1>. USE A0,A1,A2,A3,A4,A5,A6,A7 DEF H_QuorumsSafeAtTerms
   \* (Inv379_f624_R24_0_I1,RequestVoteAction)
-  <1>1. TypeOK /\ Inv379_f624_R24_0_I1 /\ RequestVoteAction => Inv379_f624_R24_0_I1' BY DEF TypeOK,RequestVoteAction,RequestVote,Inv379_f624_R24_0_I1,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero,AppendEntriesRequestType,AppendEntriesResponseType
+  <1>1. TypeOK /\ Inv379_f624_R24_0_I1 /\ RequestVoteAction => Inv379_f624_R24_0_I1' 
+    <2> SUFFICES ASSUME TypeOK,
+                        Inv379_f624_R24_0_I1,
+                        TRUE,
+                        NEW i \in Server,
+                        RequestVote(i),
+                        NEW VARI \in Server'
+                 PROVE  ((H_QuorumsSafeAtTerms /\ currentTerm = currentTerm /\ state = state /\ votedFor = votedFor) \/ (~((state[VARI] = Leader))))'
+      BY DEF Inv379_f624_R24_0_I1, RequestVoteAction
+    <2> QED
+      BY DEF TypeOK,RequestVoteAction,RequestVote,Inv379_f624_R24_0_I1,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero,AppendEntriesRequestType,AppendEntriesResponseType
   \* (Inv379_f624_R24_0_I1,UpdateTermAction)
   <1>2. TypeOK /\ Inv379_f624_R24_0_I1 /\ UpdateTermAction => Inv379_f624_R24_0_I1' BY DEF TypeOK,UpdateTermAction,UpdateTerm,Inv379_f624_R24_0_I1,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero,AppendEntriesRequestType,AppendEntriesResponseType
   \* (Inv379_f624_R24_0_I1,BecomeLeaderAction)
@@ -1358,7 +1488,20 @@ THEOREM L_37 == TypeOK /\ Inv7_1e2e_R6_3_I1 /\ Inv8096_c721_R2_2_I2 /\ Inv84_4aa
     <2> QED
       BY DEF TypeOK,ClientRequestAction,ClientRequest,Inv7767_5b71_R4_1_I2
   \* (Inv7767_5b71_R4_1_I2,AppendEntriesAction)
-  <1>5. TypeOK /\ Inv8096_c721_R2_2_I2 /\ Inv7767_5b71_R4_1_I2 /\ AppendEntriesAction => Inv7767_5b71_R4_1_I2' BY DEF TypeOK,Inv8096_c721_R2_2_I2,AppendEntriesAction,AppendEntries,Inv7767_5b71_R4_1_I2
+  <1>5. TypeOK /\ Inv8096_c721_R2_2_I2 /\ Inv7767_5b71_R4_1_I2 /\ AppendEntriesAction => Inv7767_5b71_R4_1_I2' 
+    <2> SUFFICES ASSUME TypeOK,
+                        Inv8096_c721_R2_2_I2,
+                        Inv7767_5b71_R4_1_I2,
+                        TRUE,
+                        NEW i \in Server, NEW j \in Server,
+                        AppendEntries(i, j),
+                        NEW VARI \in Server',
+                        NEW VARJ \in Server',
+                        NEW VARMAEREQ \in appendEntriesRequestMsgs'
+                 PROVE  (~((state[VARI] = Candidate /\ VARI # VARJ)) \/ (~(GrantedVoteSet(VARI) \in Quorum /\ votesGranted = votesGranted /\ requestVoteResponseMsgs = requestVoteResponseMsgs) \/ (~(VARMAEREQ.mentries # <<>> /\ VARMAEREQ.mentries[1] = currentTerm[VARI]))))'
+      BY DEF AppendEntriesAction, Inv7767_5b71_R4_1_I2
+    <2> QED
+      BY DEF TypeOK,Inv8096_c721_R2_2_I2,AppendEntriesAction,AppendEntries,Inv7767_5b71_R4_1_I2
   \* (Inv7767_5b71_R4_1_I2,HandleRequestVoteRequestAction)
   <1>6. TypeOK /\ Inv84_4aa6_R7_1_I1 /\ Inv5_c57a_R6_2_I1 /\ Inv9_928b_R5_1_I2 /\ Inv607_376d_R6_2_I1 /\ Safety /\ Inv7767_5b71_R4_1_I2 /\ HandleRequestVoteRequestAction => Inv7767_5b71_R4_1_I2' BY DEF TypeOK,Inv84_4aa6_R7_1_I1,Inv5_c57a_R6_2_I1,Inv9_928b_R5_1_I2,Inv607_376d_R6_2_I1,Safety,HandleRequestVoteRequestAction,HandleRequestVoteRequest,Inv7767_5b71_R4_1_I2,LastTerm,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero
   \* (Inv7767_5b71_R4_1_I2,HandleRequestVoteResponseAction)
@@ -1445,7 +1588,7 @@ THEOREM L_40 == TypeOK /\ Inv6746_404d_R2_1_I2 /\ Inv5_404d_R0_2_I1 /\ Next => I
 THEOREM Init => IndGlobal
     <1> USE A0,A1,A2,A3,A4,A5,A6,A7
     <1>0. Init => TypeOK BY DEF Init, TypeOK, IndGlobal
-    <1>1. Init => Safety BY DEF Init, Safety, IndGlobal
+    <1>1. Init => Safety BY DEF Init, Safety, IndGlobal, H_PrimaryHasEntriesItCreated
     <1>2. Init => Inv8509_2dd8_R0_0_I2 BY DEF Init, Inv8509_2dd8_R0_0_I2, IndGlobal
     <1>3. Init => Inv6390_7e0d_R1_1_I2 BY DEF Init, Inv6390_7e0d_R1_1_I2, IndGlobal
     <1>4. Init => Inv5215_bcfb_R0_1_I2 BY DEF Init, Inv5215_bcfb_R0_1_I2, IndGlobal
@@ -1465,8 +1608,8 @@ THEOREM Init => IndGlobal
     <1>18. Init => Inv5771_fffd_R5_1_I2 BY DEF Init, Inv5771_fffd_R5_1_I2, IndGlobal
     <1>19. Init => Inv8096_c721_R2_2_I2 BY DEF Init, Inv8096_c721_R2_2_I2, IndGlobal
     <1>20. Init => Inv138_3acc_R6_1_I1 BY DEF Init, Inv138_3acc_R6_1_I1, IndGlobal
-    <1>21. Init => Inv5_c57a_R6_2_I1 BY DEF Init, Inv5_c57a_R6_2_I1, IndGlobal
-    <1>22. Init => Inv7_2014_R15_0_I1 BY DEF Init, Inv7_2014_R15_0_I1, IndGlobal
+    <1>21. Init => Inv5_c57a_R6_2_I1 BY DEF Init, Inv5_c57a_R6_2_I1, IndGlobal, H_LogEntryInTermImpliesSafeAtTerm
+    <1>22. Init => Inv7_2014_R15_0_I1 BY DEF Init, Inv7_2014_R15_0_I1, IndGlobal, H_LogEntryInTermImpliesSafeAtTermAppendEntries
     <1>23. Init => Inv12_0a54_R24_0_I1 BY DEF Init, Inv12_0a54_R24_0_I1, IndGlobal
     <1>24. Init => Inv379_f624_R24_0_I1 BY DEF Init, Inv379_f624_R24_0_I1, IndGlobal
     <1>25. Init => Inv31_73fd_R15_1_I1 BY DEF Init, Inv31_73fd_R15_1_I1, IndGlobal
