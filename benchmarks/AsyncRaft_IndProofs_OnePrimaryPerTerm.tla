@@ -383,9 +383,13 @@ THEOREM L_4 == TypeOK /\ Inv10_2c32_R1_1_I1 /\ Inv10_2c32_R1_1_I1 /\ Inv5_3715_R
       BY <2>1 DEF TypeOK,Inv10_2c32_R1_1_I1,UpdateTermAction,UpdateTerm,Inv11_e30e_R3_0_I1,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero,AppendEntriesRequestType,AppendEntriesResponseType
    <2>2 CASE VARI # t /\ m.mdest # t 
       BY <2>2, FS_Singleton DEF TypeOK,Inv10_2c32_R1_1_I1,UpdateTermAction,UpdateTerm,Inv11_e30e_R3_0_I1,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero,AppendEntriesRequestType,AppendEntriesResponseType    
-    <2>3 CASE VARI # t /\ m.mdest = t 
+    <2>3 CASE VARI # t /\ m.mdest = t /\ currentTerm[t] = currentTerm[VARI]
       BY <2>3, FS_Singleton DEF TypeOK,Inv10_2c32_R1_1_I1,UpdateTermAction,UpdateTerm,Inv11_e30e_R3_0_I1,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero,AppendEntriesRequestType,AppendEntriesResponseType    
-    
+    <2>4 CASE VARI # t /\ m.mdest = t /\ currentTerm[t] > currentTerm[VARI]
+      BY <2>4, FS_Singleton DEF TypeOK,Inv10_2c32_R1_1_I1,UpdateTermAction,UpdateTerm,Inv11_e30e_R3_0_I1,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero,AppendEntriesRequestType,AppendEntriesResponseType    
+    <2>5 CASE VARI # t /\ m.mdest = t /\ currentTerm[t] < currentTerm[VARI]
+      BY <2>4, FS_Singleton DEF TypeOK,Inv10_2c32_R1_1_I1,UpdateTermAction,UpdateTerm,Inv11_e30e_R3_0_I1,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero,AppendEntriesRequestType,AppendEntriesResponseType    
+                
     <2> QED
       BY <2>1,<2>2 DEF TypeOK,Inv10_2c32_R1_1_I1,UpdateTermAction,UpdateTerm,Inv11_e30e_R3_0_I1,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero,AppendEntriesRequestType,AppendEntriesResponseType
   \* (Inv11_e30e_R3_0_I1,BecomeLeaderAction)
