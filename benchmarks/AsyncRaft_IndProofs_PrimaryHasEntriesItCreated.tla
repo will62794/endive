@@ -133,14 +133,20 @@ ASSUME A7 == MaxTerm \in Nat
 
 \*** TypeOK
 THEOREM L_0 == TypeOK /\ TypeOK /\ Next => TypeOK'
-  <1>. USE A0,A1,A2,A3,A4,A5,A6,A7 DEF AppendEntriesRequestType, AppendEntriesResponseType
+  <1>. USE A0,A1,A2,A3,A4,A5,A6,A7 DEF AppendEntriesRequestType, AppendEntriesResponseType, LastTerm
   \* (TypeOK,RequestVoteAction)
   <1>1. TypeOK /\ TypeOK /\ RequestVoteAction => TypeOK' 
     <2> SUFFICES ASSUME TypeOK /\ TypeOK /\ RequestVoteAction
                  PROVE  TypeOK'
       OBVIOUS
     <2>1. (requestVoteRequestMsgs \in SUBSET RequestVoteRequestType)'
-      BY DEF TypeOK,RequestVoteAction,RequestVote,TypeOK,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero,AppendEntriesRequestType,AppendEntriesResponseType
+      <3> SUFFICES ASSUME NEW i \in Server,
+                          RequestVote(i)
+                   PROVE  (requestVoteRequestMsgs \in SUBSET RequestVoteRequestType)'
+        BY DEF RequestVoteAction
+      <3> QED
+        BY FS_Subset DEF LastTerm, TypeOK,RequestVoteAction,RequestVote,TypeOK,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero,AppendEntriesRequestType,AppendEntriesResponseType
+      
     <2>2. (requestVoteResponseMsgs \in SUBSET RequestVoteResponseType)'
       BY DEF TypeOK,RequestVoteAction,RequestVote,TypeOK,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero,AppendEntriesRequestType,AppendEntriesResponseType
     <2>3. (appendEntriesRequestMsgs \in SUBSET AppendEntriesRequestType)'
@@ -226,7 +232,19 @@ THEOREM L_0 == TypeOK /\ TypeOK /\ Next => TypeOK'
     <2>1. (requestVoteRequestMsgs \in SUBSET RequestVoteRequestType)'
       BY DEF TypeOK,HandleRequestVoteRequestAction,HandleRequestVoteRequest,TypeOK,LastTerm,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero
     <2>2. (requestVoteResponseMsgs \in SUBSET RequestVoteResponseType)'
-      BY DEF TypeOK,HandleRequestVoteRequestAction,HandleRequestVoteRequest,TypeOK,LastTerm,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero
+      <3> SUFFICES ASSUME NEW m \in requestVoteRequestMsgs,
+                          HandleRequestVoteRequest(m)
+                   PROVE  (requestVoteResponseMsgs \in SUBSET RequestVoteResponseType)'
+        BY DEF HandleRequestVoteRequestAction
+      <3> QED
+        <4> SUFFICES ASSUME NEW m_1 \in requestVoteRequestMsgs,
+                            HandleRequestVoteRequest(m_1)
+                     PROVE  (requestVoteResponseMsgs \in SUBSET RequestVoteResponseType)'
+          BY DEF HandleRequestVoteRequestAction
+        <4> QED
+          BY FS_Singleton, FS_Difference, FS_Subset DEF TypeOK,HandleRequestVoteRequestAction,HandleRequestVoteRequest,TypeOK,LastTerm,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero
+        
+      
     <2>3. (appendEntriesRequestMsgs \in SUBSET AppendEntriesRequestType)'
       BY DEF TypeOK,HandleRequestVoteRequestAction,HandleRequestVoteRequest,TypeOK,LastTerm,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero
     <2>4. (appendEntriesResponseMsgs \in SUBSET AppendEntriesResponseType)'
@@ -656,7 +674,17 @@ THEOREM L_8 == TypeOK /\ Inv0_2c32_R8_1_I1 /\ Inv0_2c32_R8_1_I1 /\ Inv13_3715_R2
   \* (Inv2_e30e_R12_0_I1,HandleRequestVoteRequestAction)
   <1>6. TypeOK /\ Inv2_e30e_R12_0_I1 /\ HandleRequestVoteRequestAction => Inv2_e30e_R12_0_I1' BY DEF TypeOK,HandleRequestVoteRequestAction,HandleRequestVoteRequest,Inv2_e30e_R12_0_I1,LastTerm,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero
   \* (Inv2_e30e_R12_0_I1,HandleRequestVoteResponseAction)
-  <1>7. TypeOK /\ Inv13_3715_R22_0_I0 /\ Inv2_e30e_R12_0_I1 /\ HandleRequestVoteResponseAction => Inv2_e30e_R12_0_I1' BY DEF TypeOK,Inv13_3715_R22_0_I0,HandleRequestVoteResponseAction,HandleRequestVoteResponse,Inv2_e30e_R12_0_I1,LastTerm,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero
+  <1>7. TypeOK /\ Inv13_3715_R22_0_I0 /\ Inv2_e30e_R12_0_I1 /\ HandleRequestVoteResponseAction => Inv2_e30e_R12_0_I1' 
+    <2> SUFFICES ASSUME TypeOK,
+                        Inv13_3715_R22_0_I0,
+                        Inv2_e30e_R12_0_I1,
+                        NEW m \in requestVoteResponseMsgs,
+                        HandleRequestVoteResponse(m),
+                        NEW VARI \in Server'
+                 PROVE  (((\A t \in votesGranted[VARI] : /\ currentTerm[t] = currentTerm[VARI] => votedFor[t] = VARI )) \/ (((state[VARI] = Follower))))'
+      BY DEF HandleRequestVoteResponseAction, Inv2_e30e_R12_0_I1
+    <2> QED
+      BY DEF TypeOK,Inv13_3715_R22_0_I0,HandleRequestVoteResponseAction,HandleRequestVoteResponse,Inv2_e30e_R12_0_I1,LastTerm,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero
   \* (Inv2_e30e_R12_0_I1,AcceptAppendEntriesRequestAppendAction)
   <1>8. TypeOK /\ Inv2_e30e_R12_0_I1 /\ AcceptAppendEntriesRequestAppendAction => Inv2_e30e_R12_0_I1' BY DEF TypeOK,AcceptAppendEntriesRequestAppendAction,AcceptAppendEntriesRequestAppend,Inv2_e30e_R12_0_I1
   \* (Inv2_e30e_R12_0_I1,HandleAppendEntriesResponseAction)
@@ -760,6 +788,36 @@ THEOREM L_12 == TypeOK /\ Inv13_3715_R22_0_I0 /\ Inv7_82b3_R12_1_I0 /\ Next => I
                         (/\ mi.mterm = mj.mterm /\ mi.msource = mj.msource /\ mi.mvoteGranted /\ mj.mvoteGranted)'
                  PROVE  (mi.mdest = mj.mdest)'
       BY DEF HandleRequestVoteRequestAction, Inv7_82b3_R12_1_I0
+    
+    <2>1 CASE m.mterm # currentTerm[m.mdest]
+          BY <2>1 DEF TypeOK,Inv13_3715_R22_0_I0,HandleRequestVoteRequestAction,HandleRequestVoteRequest,Inv7_82b3_R12_1_I0,LastTerm,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero
+    <2>2. CASE m.mterm = currentTerm[m.mdest] /\ votedFor[m.mdest] \notin {Nil, m.msource}
+          BY <2>2 DEF TypeOK,Inv13_3715_R22_0_I0,HandleRequestVoteRequestAction,HandleRequestVoteRequest,Inv7_82b3_R12_1_I0,LastTerm,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero
+    <2>3. CASE m.mterm = currentTerm[m.mdest] /\ votedFor[m.mdest] \in {Nil, m.msource}
+        <3>1. CASE m.mdest # mi.msource
+            BY <2>3, <3>1 DEF TypeOK,Inv13_3715_R22_0_I0,HandleRequestVoteRequestAction,HandleRequestVoteRequest,Inv7_82b3_R12_1_I0,LastTerm,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero
+         \* m is the vote request message so its dest is the one receivign the vote request.         
+         <3>2. CASE m.mdest = mi.msource /\ currentTerm[m.mdest] # mi.mterm
+            BY <2>3, <3>2 DEF TypeOK,Inv13_3715_R22_0_I0,HandleRequestVoteRequestAction,HandleRequestVoteRequest,Inv7_82b3_R12_1_I0,LastTerm,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero
+         <3>3. CASE m.mdest = mi.msource /\ currentTerm[m.mdest] = mi.mterm /\ m.mdest # mi.msource
+            BY <2>3, <3>3 DEF TypeOK,Inv13_3715_R22_0_I0,HandleRequestVoteRequestAction,HandleRequestVoteRequest,Inv7_82b3_R12_1_I0,LastTerm,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero
+         <3>4. CASE m.mdest = mi.msource /\ currentTerm[m.mdest] = mi.mterm /\ m.mdest = mi.msource /\ mi \in requestVoteResponseMsgs
+            <4>1. currentTerm[mi.msource] = mi.mterm /\ mi.mvoteGranted
+                BY <2>3, <3>4 DEF TypeOK,Inv13_3715_R22_0_I0,HandleRequestVoteRequestAction,HandleRequestVoteRequest,Inv7_82b3_R12_1_I0,LastTerm,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero
+            <4>2. votedFor[mi.msource] = mi.mdest
+                BY  <4>1, <2>3,<3>4 DEF TypeOK,Inv13_3715_R22_0_I0,HandleRequestVoteRequestAction,HandleRequestVoteRequest,Inv7_82b3_R12_1_I0,LastTerm,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero
+            <4>3. QED 
+                BY <4>1, <4>2,<3>4,<2>3 DEF TypeOK,Inv13_3715_R22_0_I0,HandleRequestVoteRequestAction,HandleRequestVoteRequest,Inv7_82b3_R12_1_I0,LastTerm,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero
+         <3>5. CASE m.mdest = mi.msource /\ currentTerm[m.mdest] = mi.mterm /\ m.mdest = mi.msource /\ mi \notin requestVoteResponseMsgs /\ mj \notin requestVoteResponseMsgs
+            <4>1. currentTerm[mi.msource] = mi.mterm /\ mi.mvoteGranted
+              BY <2>3, <3>5 DEF TypeOK,Inv13_3715_R22_0_I0,HandleRequestVoteRequestAction,HandleRequestVoteRequest,Inv7_82b3_R12_1_I0,LastTerm,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero
+            <4>3. QED 
+              BY <2>3, <3>5, <4>1 DEF TypeOK,Inv13_3715_R22_0_I0,HandleRequestVoteRequestAction,HandleRequestVoteRequest,Inv7_82b3_R12_1_I0,LastTerm,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero
+         <3>6. CASE m.mdest = mi.msource /\ currentTerm[m.mdest] = mi.mterm /\ m.mdest = mi.msource /\ mi \notin requestVoteResponseMsgs /\ mj \in requestVoteResponseMsgs
+            <4>3. QED 
+              BY <3>6 DEF TypeOK,Inv13_3715_R22_0_I0,HandleRequestVoteRequestAction,HandleRequestVoteRequest,Inv7_82b3_R12_1_I0,LastTerm,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero
+            
+         <3>. QED BY <3>1, <3>2, <3>3,<3>4,<3>5,<3>6    
     <2> QED
       BY DEF TypeOK,Inv13_3715_R22_0_I0,HandleRequestVoteRequestAction,HandleRequestVoteRequest,Inv7_82b3_R12_1_I0,LastTerm,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero
   \* (Inv7_82b3_R12_1_I0,HandleRequestVoteResponseAction)
@@ -936,7 +994,16 @@ THEOREM L_18 == TypeOK /\ Inv5771_fffd_R5_1_I2 /\ Next => Inv5771_fffd_R5_1_I2'
   \* (Inv5771_fffd_R5_1_I2,HandleRequestVoteRequestAction)
   <1>6. TypeOK /\ Inv5771_fffd_R5_1_I2 /\ HandleRequestVoteRequestAction => Inv5771_fffd_R5_1_I2' BY DEF TypeOK,HandleRequestVoteRequestAction,HandleRequestVoteRequest,Inv5771_fffd_R5_1_I2,LastTerm,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero
   \* (Inv5771_fffd_R5_1_I2,HandleRequestVoteResponseAction)
-  <1>7. TypeOK /\ Inv5771_fffd_R5_1_I2 /\ HandleRequestVoteResponseAction => Inv5771_fffd_R5_1_I2' BY DEF TypeOK,HandleRequestVoteResponseAction,HandleRequestVoteResponse,Inv5771_fffd_R5_1_I2,LastTerm,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero
+  <1>7. TypeOK /\ Inv5771_fffd_R5_1_I2 /\ HandleRequestVoteResponseAction => Inv5771_fffd_R5_1_I2' 
+    <2> SUFFICES ASSUME TypeOK,
+                        Inv5771_fffd_R5_1_I2,
+                        NEW m \in requestVoteResponseMsgs,
+                        HandleRequestVoteResponse(m),
+                        NEW VARJ \in Server'
+                 PROVE  (((state[VARJ] = Follower)) \/ (~((state[VARJ] = Leader))) \/ ((votesGranted[VARJ] \in Quorum)))'
+      BY DEF HandleRequestVoteResponseAction, Inv5771_fffd_R5_1_I2
+    <2> QED
+      BY AddingToQuorumRemainsQuorum DEF TypeOK,HandleRequestVoteResponseAction,HandleRequestVoteResponse,Inv5771_fffd_R5_1_I2,LastTerm,RequestVoteRequestType,RequestVoteResponseType,Terms,LogIndicesWithZero
   \* (Inv5771_fffd_R5_1_I2,AcceptAppendEntriesRequestAppendAction)
   <1>8. TypeOK /\ Inv5771_fffd_R5_1_I2 /\ AcceptAppendEntriesRequestAppendAction => Inv5771_fffd_R5_1_I2' BY DEF TypeOK,AcceptAppendEntriesRequestAppendAction,AcceptAppendEntriesRequestAppend,Inv5771_fffd_R5_1_I2
   \* (Inv5771_fffd_R5_1_I2,HandleAppendEntriesResponseAction)
