@@ -24,9 +24,8 @@ for bm in $bms
 do
     # Fetch rendered proof tree and proof graph object.
     echo "fetching $bm"
-    scp -O -r "$xfer:$bmdir/${bm}_[0-9]/endive/benchmarks/${bm}_ind-proof-tree-sd[0-9].*" $local_dir &
-    scp -O -r "$xfer:$bmdir/${bm}_[0-9]/endive/binned_histogram_25_${bm}._sd1.pdf" $local_dir &
-    scp -O -r "$xfer:$bmdir/${bm}_[0-9]/endive/benchmarks/${bm}_IndDecompProof_*.tla" $local_dir &
+    scp -O -r "$xfer:$bmdir/${bm}_[0-9]/scimitar/benchmarks/${bm}_ind-proof-tree-sd[0-9].*" $local_dir &
+    scp -O -r "$xfer:$bmdir/${bm}_[0-9]/scimitar/benchmarks/${bm}_IndDecompProof_*.tla" $local_dir &
 done
 wait
 
@@ -40,18 +39,18 @@ if [[ $bms == *"AsyncRaft"* ]]; then
     do
         for seed in 1 2 3 4 5 6 7 8 9 10
         do
-        scp -O -r "$xfer:$bmdir/AsyncRaft_${tag}_$seed/endive/benchmarks/AsyncRaft_ind-proof-tree-sd$seed.pdf" $local_dir/AsyncRaft_${tag}_ind-proof-tree-sd$seed.pdf &
-        scp -O -r "$xfer:$bmdir/AsyncRaft_${tag}_$seed/endive/benchmarks/AsyncRaft_ind-proof-tree-sd$seed.proofgraph.json" $local_dir/AsyncRaft_${tag}_ind-proof-tree-sd$seed.proofgraph.json &
-        scp -O -r "$xfer:$bmdir/AsyncRaft_${tag}_$seed/endive/benchmarks/AsyncRaft_IndDecompProof_$seed.tla" $local_dir/AsyncRaft_${tag}_IndDecompProof_$seed.tla &
+        scp -O -r "$xfer:$bmdir/AsyncRaft_${tag}_$seed/scimitar/benchmarks/AsyncRaft_ind-proof-tree-sd$seed.pdf" $local_dir/AsyncRaft_${tag}_ind-proof-tree-sd$seed.pdf &
+        scp -O -r "$xfer:$bmdir/AsyncRaft_${tag}_$seed/scimitar/benchmarks/AsyncRaft_ind-proof-tree-sd$seed.proofgraph.json" $local_dir/AsyncRaft_${tag}_ind-proof-tree-sd$seed.proofgraph.json &
+        scp -O -r "$xfer:$bmdir/AsyncRaft_${tag}_$seed/scimitar/benchmarks/AsyncRaft_IndDecompProof_$seed.tla" $local_dir/AsyncRaft_${tag}_IndDecompProof_$seed.tla &
         done
         wait
     done
     wait
 fi
 
-scp -O -r "$xfer:$bmdir/LamportMutex_broken_grammar/endive/benchmarks/LamportMutex_ind-proof-tree-sd3.pdf" $local_dir/LamportMutex_broken_grammar_ind-proof-tree-sd3.pdf
-scp -O -r "$xfer:$bmdir/consensus_epr_broken_grammar/endive/benchmarks/consensus_epr_ind-proof-tree-sd3.pdf" $local_dir/consensus_epr_broken_grammar_ind-proof-tree-sd3.pdf
-scp -O -r "$xfer:$bmdir/consensus_epr_broken_grammar_2/endive/benchmarks/consensus_epr_ind-proof-tree-sd3.pdf" $local_dir/consensus_epr_broken_grammar_2_ind-proof-tree-sd3.pdf
+scp -O -r "$xfer:$bmdir/LamportMutex_broken_grammar/scimitar/benchmarks/LamportMutex_ind-proof-tree-sd3.pdf" $local_dir/LamportMutex_broken_grammar_ind-proof-tree-sd3.pdf
+scp -O -r "$xfer:$bmdir/consensus_epr_broken_grammar/scimitar/benchmarks/consensus_epr_ind-proof-tree-sd3.pdf" $local_dir/consensus_epr_broken_grammar_ind-proof-tree-sd3.pdf
+scp -O -r "$xfer:$bmdir/consensus_epr_broken_grammar_2/scimitar/benchmarks/consensus_epr_ind-proof-tree-sd3.pdf" $local_dir/consensus_epr_broken_grammar_2_ind-proof-tree-sd3.pdf
 
 echo "-----------"
 echo "Fetching logs"

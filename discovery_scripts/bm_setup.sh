@@ -27,8 +27,8 @@ mkdir -p $bmdir
 cd $bmdir
 
 # Clone if not already cloned.
-git clone --depth 1 -b ind-tree https://github.com/will62794/endive.git
-cd endive
+git clone --depth 1 https://github.com/will62794/scimitar.git
+cd scimitar
 git pull --rebase
 python3 -m pip install -r requirements.txt
 
