@@ -1203,9 +1203,13 @@ class StructuredProof():
             node_children = []
 
 
-        cti_info = indgen.check_cti_elimination(ctis, [
-            (child.name,child.expr) for child in node_children
-        ], constants_obj=constants_obj)
+        invstocheck = [
+            (f"Inv{i}", child.expr) for i,child in enumerate(node_children)
+        ]
+        invnames = [x[0] for x in invstocheck]
+        invs = sorted([x[1] for x in invstocheck])
+
+        cti_info = indgen.check_cti_elimination(ctis, invs, invnames, constants_obj=constants_obj)
 
         ctis_eliminated = cti_info["eliminated"]
         cti_cost = cti_info["cost"]
