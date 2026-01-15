@@ -23,6 +23,52 @@ cytoscape.warnings(false);
 
 var projectionStats = [];
 
+// Setup horizontal resizer between graph pane and CTI pane
+function setupResizer(resizer, leftPane, rightPane) {
+    let isResizing = false;
+    let startX, startLeftWidth;
+
+    resizer.addEventListener('mousedown', function(e) {
+        isResizing = true;
+        startX = e.clientX;
+        startLeftWidth = leftPane.offsetWidth;
+        resizer.classList.add('resizing');
+        document.body.style.cursor = 'col-resize';
+        document.body.style.userSelect = 'none';
+        e.preventDefault();
+    });
+
+    document.addEventListener('mousemove', function(e) {
+        if (!isResizing) return;
+
+        const dx = e.clientX - startX;
+        const containerWidth = document.body.clientWidth;
+        const newLeftWidth = startLeftWidth + dx;
+        const resizerWidth = 6;
+
+        // Constrain the resize (min 20%, max 80%)
+        const minWidth = containerWidth * 0.2;
+        const maxWidth = containerWidth * 0.8;
+
+        if (newLeftWidth >= minWidth && newLeftWidth <= maxWidth) {
+            const leftPercent = (newLeftWidth / containerWidth) * 100;
+            const rightPercent = 100 - leftPercent - (resizerWidth / containerWidth * 100);
+            
+            leftPane.style.width = leftPercent + '%';
+            rightPane.style.width = 'calc(' + rightPercent + '% - ' + resizerWidth + 'px)';
+        }
+    });
+
+    document.addEventListener('mouseup', function(e) {
+        if (isResizing) {
+            isResizing = false;
+            resizer.classList.remove('resizing');
+            document.body.style.cursor = '';
+            document.body.style.userSelect = '';
+        }
+    });
+}
+
 const loadingIcon = '<i class="fa fa-refresh fa-spin"></i>';
 
 //
@@ -219,8 +265,7 @@ function setCTIPaneHtml(nodeData){
 
     // For now don't allow CTI generation for specific sub-actions, only for top-level node all at once.
     // ctipane.innerHTML += `<div><button id='gen-ctis-btn'> Generate CTIs </button> ${generatingCTIsDiv}</div> <br>`;
-    ctipane.innerHTML += `<div><button id='gen-ctis-btn'> Check node </button></div> <br>`;
-    ctipane.innerHTML += "<div><button id='gen-ctis-btn-subtree'> Check node (recursive) </button></div> <br>";
+    ctipane.innerHTML += `<div><button id='gen-ctis-btn'> Check node </button> <button id='gen-ctis-btn-subtree'> Check node (recursive) </button></div><br>`;
 
     // ctipane.innerHTML += "<div><button id='refresh-node-btn'> Refresh Proof Node </button></div> <br>";
     ctipane.innerHTML += "<div><button id='add-support-lemma-btn'> Add support lemma </button></div><br>";
@@ -939,13 +984,21 @@ function reloadLayout(){
     var div = document.createElement("div");
     div.id = "stategraph";
 
+    var divResizer = document.createElement("div");
+    divResizer.id = "resizer";
+
     var divcti = document.createElement("div");
     divcti.id = "ctiPane";
 
     // document.body.appendChild(div);
     document.body.prepend(divcti);
+    document.body.prepend(divResizer);
     document.body.prepend(div);
 
+    // Setup resizer functionality
+    setupResizer(divResizer, div, divcti);
+
+    
     setCTIPaneHtml();
 
     function edgeColor(el){
