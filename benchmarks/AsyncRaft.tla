@@ -547,14 +547,14 @@ UpdateTermAction == TRUE /\ \E m \in requestVoteRequestMsgs \cup requestVoteResp
 \* UpdateTermAEResAction == TRUE /\ \E m \in appendEntriesResponseMsgs : UpdateTermAERes(m.mterm, m.mdest)
 BecomeLeaderAction == TRUE /\ \E i \in Server : BecomeLeader(i)
 ClientRequestAction == TRUE /\ \E i \in Server : ClientRequest(i)
-\* AdvanceCommitIndexAction == TRUE /\ \E i \in Server : AdvanceCommitIndex(i)
+AdvanceCommitIndexAction == TRUE /\ \E i \in Server : AdvanceCommitIndex(i)
 AppendEntriesAction == TRUE /\ \E i,j \in Server : AppendEntries(i, j)
 HandleRequestVoteRequestAction == \E m \in requestVoteRequestMsgs : HandleRequestVoteRequest(m)
 HandleRequestVoteResponseAction == \E m \in requestVoteResponseMsgs : HandleRequestVoteResponse(m)
 \* RejectAppendEntriesRequestAction == \E m \in appendEntriesRequestMsgs : RejectAppendEntriesRequest(m)
 AcceptAppendEntriesRequestAppendAction == \E m \in appendEntriesRequestMsgs : AcceptAppendEntriesRequestAppend(m)
 \* AcceptAppendEntriesRequestTruncateAction == TRUE /\ \E m \in appendEntriesRequestMsgs : AcceptAppendEntriesRequestTruncate(m)
-\* AcceptAppendEntriesRequestLearnCommitAction == \E m \in appendEntriesRequestMsgs : AcceptAppendEntriesRequestLearnCommit(m)
+AcceptAppendEntriesRequestLearnCommitAction == \E m \in appendEntriesRequestMsgs : AcceptAppendEntriesRequestLearnCommit(m)
 HandleAppendEntriesResponseAction == \E m \in appendEntriesResponseMsgs : HandleAppendEntriesResponse(m)
 
 \* Defines how the variables may transition.
@@ -568,9 +568,9 @@ Next ==
     \/ AppendEntriesAction
     \* \/ RejectAppendEntriesRequestAction
     \/ AcceptAppendEntriesRequestAppendAction
-    \* \/ AcceptAppendEntriesRequestLearnCommitAction
+    \/ AcceptAppendEntriesRequestLearnCommitAction
     \/ HandleAppendEntriesResponseAction 
-    \* \/ AdvanceCommitIndexAction
+    \/ AdvanceCommitIndexAction
     \* \/ AcceptAppendEntriesRequestTruncateAction \* (DISABLE FOR NOW FOR SMALLER PROOF)
 
 NextUnchanged == UNCHANGED vars
