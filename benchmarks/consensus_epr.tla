@@ -114,6 +114,8 @@ NextUnchanged == UNCHANGED vars
 \* Helper lemmas.
 \* 
 
+\* START_PROOF
+
 NodesEq(VI, VJ) == VI = VJ /\ votes = votes
 
 \* H_NoConflictingValues == 

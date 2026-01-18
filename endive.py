@@ -3535,6 +3535,7 @@ class InductiveInvGen():
         import proof_Paxos
         import proof_EPaxos
         import proof_Zab
+        import proof_Bakery
         import proof_Boulanger
         import proof_Hermes
 
@@ -3567,6 +3568,10 @@ class InductiveInvGen():
             root = proof_adr.adr_root
             actions = proof_adr.adr_actions
             nodes = proof_adr.adr_nodes
+        elif self.specname == "Bakery":
+            root = proof_Bakery.root
+            actions = proof_Bakery.actions
+            nodes = proof_Bakery.nodes
         elif self.specname == "Boulanger":
             root = proof_Boulanger.root
             actions = proof_Boulanger.actions
