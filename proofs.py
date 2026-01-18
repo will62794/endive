@@ -1025,11 +1025,11 @@ class StructuredProof():
         seen.add(node.expr)
 
         actions_to_always_show = {
-            "AppendEntriesAction" : "AEAction",
-            "AcceptAppendEntriesRequestAppendAction": "AcceptAEAction",
+            "AppendEntriesAction" : "AppendEntriesAction",
+            "AcceptAppendEntriesRequestAppendAction": "AcceptAppendEntriesAction",
             "AcceptAppendEntriesRequestLearnCommitAction": "LearnCommitAction",
-            # "ClientRequestAction",
-            # "BecomeLeaderAction"
+            "ClientRequestAction": "ClientRequest",
+            "BecomeLeaderAction" : "BecomeLeader",
             "RMChooseToAbortAction": "RMChooseAbortAction",
             "RMRcvAbortMsgAction": "RMRcvAbortMsgAction",
             "RMRcvCommitMsgAction": "RMRcvCommitMsgAction"
@@ -1062,7 +1062,7 @@ class StructuredProof():
             if (node.expr, action) in nodes_to_include_var_slice:
                 slice_vars = self.lemma_action_coi[action][node.expr]
                 sliced = ",".join(slice_vars)
-                slice_font_size="\Larger"
+                slice_font_size="\small"
                 slice_label="-90:{%s\{%s\}}" % (slice_font_size,sliced)
 
                 # slice_label=""
