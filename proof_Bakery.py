@@ -39,6 +39,10 @@ lemmaTRUEShim = StructuredProofNode("LemmaTrueShim", "1=1")
 # H_Inv40_180c_R24_0_I1 == \A VARI \in Procs : (flag[VARI]) \/ (~(pc[VARI] = "e2"))
 
 
+#
+# Proof nodes.
+#
+
 Safety = make_node("Safety")
 H_Inv4690_2f61_R0_0_I2 = make_node("H_Inv4690_2f61_R0_0_I2")
 H_Inv4520_48f3_R1_0_I2 = make_node("H_Inv4520_48f3_R1_0_I2")
@@ -66,52 +70,6 @@ H_Inv1_b58a_R20_0_I1 = make_node("H_Inv1_b58a_R20_0_I1")
 H_Inv350_b077_R20_1_I2 = make_node("H_Inv350_b077_R20_1_I2")
 H_Inv103_c9b1_R21_1_I1 = make_node("H_Inv103_c9b1_R21_1_I1")
 H_Inv40_180c_R24_0_I1 = make_node("H_Inv40_180c_R24_0_I1")
-
-
-
-
-
-
-# H9.children = {
-#     "w1Action": [
-#         H6
-#     ],
-#     "w2Action": [
-#         H2,
-#         H6,
-#         H8,
-#         H7
-#     ]
-# }
-
-# H7.children = {
-#     "w1Action": [
-#         H3
-#     ]
-# }
-
-# H6.children = {
-#     "w2Action": [
-#         H2,
-#         H8,
-#         # H9,
-#         H7
-#     ]
-# }
-# # Comment out stuff below for demo.
-# children = {
-#     "w1Action": [
-#         H9,
-#         H6
-#     ],
-#     "w2Action": [
-#         H6,
-#         H8,
-#         H9
-#     ]
-# }
-
-
 
 
 
@@ -147,15 +105,13 @@ H_Inv4690_2f61_R0_0_I2.children = {
 #     "Inv10_8778_R2_0_I3",
 #     "Inv4520_48f3_R1_0_I2_w2Action"
 #   ],
-H_Inv4520_48f3_R1_0_I2.children = {
-    "w2Action": [H_Inv10_8778_R2_0_I3, H_Inv5742_3d78_R2_0_I3, H_Inv4521_3f08_R1_1_I2, H_Inv1922_5e75_R2_0_I3]
-}
-
-
 #   [
 #     "Inv80_b6ff_R2_0_I3",
 #     "Inv4520_48f3_R1_0_I2_w2Action"
 #   ],
+H_Inv4520_48f3_R1_0_I2.children = {
+    "w2Action": [H_Inv10_8778_R2_0_I3, H_Inv5742_3d78_R2_0_I3, H_Inv4521_3f08_R1_1_I2, H_Inv1922_5e75_R2_0_I3]
+}
 
 
 
@@ -191,6 +147,9 @@ H_Inv4576_59b1_R1_1_I2.children = {
 #     "Inv80_b6ff_R2_0_I3",
 #     "Inv4521_3f08_R1_1_I2_w1bAction"
 #   ],
+H_Inv4521_3f08_R1_1_I2.children = {
+    "w1bAction": [H_Inv80_b6ff_R2_0_I3]
+}
 
 
 
