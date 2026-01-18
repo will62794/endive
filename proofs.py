@@ -1015,7 +1015,7 @@ class StructuredProof():
             # if node.expr not in lemmas_to_show_for_graph_diff and self.specname == "AsyncRaft":
             #     texbl = "\phantom{\Huge" + "\emph{" + label + "}}"
             # else:
-            texbl = "\Huge" + "\emph{" + label + "}"
+            texbl = "\huge" + "\emph{" + label + "}"
         else:
             label = "L_{" + str(self.dotnode_ind) + "}"
             self.dotnode_ind += 1
