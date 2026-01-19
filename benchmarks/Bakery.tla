@@ -292,30 +292,101 @@ H_Inv4690_2f61_R0_0_I2 ==
     \A VARJ \in Procs : 
         (VARI \in unchecked[VARJ]) \/ (~(pc[VARI] = "cs")) \/ (~(pc[VARJ] = "w1"))
         
-H_Inv4520_48f3_R1_0_I2 == \A VARI \in Procs : \A VARJ \in Procs : (VARI \in unchecked[VARJ]) \/ (~(((pc[VARJ] \in {"w1","w2"}) /\ (pc[VARI] = "w1"))) \/ (~(VARJ \in (Procs \ unchecked[VARI]) \ {VARI})))
-H_Inv24959_7f87_R1_1_I2 == \A VARJ \in Procs : (pc[VARJ] = "e2") \/ ((unchecked[VARJ] = {})) \/ ((pc[VARJ] \in {"w1","w2"}))
-H_Inv5819_32cd_R1_1_I2 == \A VARI \in Procs : \A VARJ \in Procs : (VARI \in unchecked[VARJ]) \/ (~(pc[VARI] = "cs") \/ (~(pc[VARJ] = "w2")))
-H_Inv4576_59b1_R1_1_I2 == \A VARI \in Procs : \A VARJ \in Procs : (<<num[VARI],VARI>> \prec <<num[VARJ],VARJ>>) \/ (~(pc[VARI] = "cs")) \/ (~(pc[VARJ] = "w2"))
-H_Inv4521_3f08_R1_1_I2 == \A VARI \in Procs : ~(num[VARI] = 0) \/ (~(pc[VARI] = "cs"))
+H_Inv4520_48f3_R1_0_I2 == 
+    \A VARI \in Procs : 
+    \A VARJ \in Procs : 
+        (VARI \in unchecked[VARJ]) \/ (~(((pc[VARJ] \in {"w1","w2"}) /\ (pc[VARI] = "w1"))) \/ (~(VARJ \in (Procs \ unchecked[VARI]) \ {VARI})))
+
+H_Inv24959_7f87_R1_1_I2 == 
+    \A VARJ \in Procs : 
+        (pc[VARJ] = "e2") \/ ((unchecked[VARJ] = {})) \/ ((pc[VARJ] \in {"w1","w2"}))
+
+H_Inv5819_32cd_R1_1_I2 == 
+    \A VARI \in Procs : 
+    \A VARJ \in Procs : 
+        (VARI \in unchecked[VARJ]) \/ (~(pc[VARI] = "cs") \/ (~(pc[VARJ] = "w2")))
+
+H_Inv4576_59b1_R1_1_I2 == 
+    \A VARI \in Procs : 
+    \A VARJ \in Procs : 
+        (<<num[VARI],VARI>> \prec <<num[VARJ],VARJ>>) \/ (~(pc[VARI] = "cs")) \/ (~(pc[VARJ] = "w2"))
+
+H_Inv4521_3f08_R1_1_I2 == 
+    \A VARI \in Procs : ~(num[VARI] = 0) \/ (~(pc[VARI] = "cs"))
+
 H_Inv10_8778_R2_0_I3 == \A VARJ \in Procs : ~(VARJ \in unchecked[VARJ])
-H_Inv5742_3d78_R2_0_I3 == \A VARI \in Procs : \A VARJ \in Procs : (VARI \in unchecked[VARJ]) \/ (~(<<num[VARI],VARI>> \prec <<num[VARJ],VARJ>>) \/ (~(pc[VARI] = "w2"))) \/ (~(pc[VARJ] = "w2"))
+
+H_Inv5742_3d78_R2_0_I3 == 
+    \A VARI \in Procs : 
+    \A VARJ \in Procs : 
+        (VARI \in unchecked[VARJ]) \/ (~(<<num[VARI],VARI>> \prec <<num[VARJ],VARJ>>) \/ (~(pc[VARI] = "w2"))) \/ (~(pc[VARJ] = "w2"))
+
 H_Inv80_b6ff_R2_0_I3 == \A VARI \in Procs : ~(num[VARI] = 0) \/ (~(pc[VARI] \in {"w1","w2"}))
-H_Inv1922_5e75_R2_0_I3 == \A VARI \in Procs : \A VARJ \in Procs : (<<num[VARI],VARI>> \prec <<num[VARJ],VARJ>>) \/ (~(((pc[VARJ] \in {"w1","w2"}) /\ (pc[VARI] = "w1")))) \/ (~(VARJ \in (Procs \ unchecked[VARI]) \ {VARI}))
-H_Inv4606_2f6b_R5_0_I2 == \A VARI \in Procs : \A VARJ \in Procs : ~(<<num[VARI],VARI>> \prec <<num[VARJ],VARJ>>) \/ (~(pc[VARI] \in {"e4","w1","w2"})) \/ (~(pc[VARJ] = "cs"))
+
+H_Inv1922_5e75_R2_0_I3 == 
+    \A VARI \in Procs : 
+    \A VARJ \in Procs : 
+        (<<num[VARI],VARI>> \prec <<num[VARJ],VARJ>>) \/ (~(((pc[VARJ] \in {"w1","w2"}) /\ (pc[VARI] = "w1")))) \/ (~(VARJ \in (Procs \ unchecked[VARI]) \ {VARI}))
+
+H_Inv4606_2f6b_R5_0_I2 == 
+    \A VARI \in Procs : 
+        \A VARJ \in Procs : 
+            ~(<<num[VARI],VARI>> \prec <<num[VARJ],VARJ>>) \/ (~(pc[VARI] \in {"e4","w1","w2"})) \/ (~(pc[VARJ] = "cs"))
+
 H_Inv11_3838_R8_0_I2 == \A VARI \in Procs : ~(VARI \in unchecked[VARI])
-H_Inv61_df69_R8_0_I2 == \A VARI \in Procs : (nxt[VARI] \in unchecked[VARI]) \/ (~(pc[VARI] = "w2"))
-H_Inv1028_6ea5_R8_0_I2 == \A VARI \in Procs : \A VARJ \in Procs : (VARI \in unchecked[VARJ]) \/ (~(((pc[VARJ] \in {"w1","w2"}) /\ (pc[VARI] = "w1")))) \/ (~(<<num[VARI],VARI>> \prec <<num[VARJ],VARJ>>))
+
+H_Inv61_df69_R8_0_I2 == 
+    \A VARI \in Procs : (nxt[VARI] \in unchecked[VARI]) \/ (~(pc[VARI] = "w2"))
+
+H_Inv1028_6ea5_R8_0_I2 == 
+    \A VARI \in Procs : 
+    \A VARJ \in Procs : 
+        (VARI \in unchecked[VARJ]) \/ (~(((pc[VARJ] \in {"w1","w2"}) /\ (pc[VARI] = "w1")))) \/ (~(<<num[VARI],VARI>> \prec <<num[VARJ],VARJ>>))
+
 H_Inv140_f68c_R9_0_I1 == \A VARI \in Procs : ~(num[VARI] = 0) \/ (~(pc[VARI] = "e4"))
-H_Inv4227_eecc_R10_0_I3 == \A VARI \in Procs : \A VARJ \in Procs : (VARI \in unchecked[VARJ]) \/ (~(<<num[VARI],VARI>> \prec <<num[VARJ],VARJ>>) \/ (~(pc[VARJ] \in {"w1","w2"}))) \/ (~(pc[VARI] \in {"e4","w1","w2"}))
-H_Inv32498_2818_R11_0_I2 == \A VARI \in Procs : \A VARJ \in Procs : ~(max[VARI] < num[VARJ]) \/ (~(pc[VARI] = "e3") \/ (~(pc[VARJ] = "cs")))
-H_Inv2740_e784_R16_0_I3 == \A VARI \in Procs : \A VARJ \in Procs : (VARI \in unchecked[VARJ]) \/ (~(max[VARI] < num[VARJ])) \/ (~(pc[VARI] = "e3")) \/ (~(pc[VARJ] \in {"w1","w2"}))
-H_Inv3293_1a1e_R17_0_I3 == \A VARI \in Procs : \A VARJ \in Procs : (VARJ \in unchecked[VARI]) \/ (~(pc[VARI] = "e2")) \/ (~(pc[VARJ] = "cs")) \/ (~(max[VARI] < num[VARJ]))
-H_Inv0_b3ba_R18_0_I0 == \A VARI \in Procs : \A VARJ \in Procs : ((VARI \in unchecked[VARJ]) \/ ((pc[VARJ] = "e1") \/ (~(max[VARI] < num[VARJ]) \/ (~(pc[VARI] = "e2"))) \/ (~(unchecked[VARI] = {}))) \/ (~(pc[VARJ] \in {"w1","w2"})))
-H_Inv6093_1c74_R18_1_I2 == \A VARI \in Procs : (max[nxt[VARI]] >= num[VARI]) \/ (~((pc[nxt[VARI]] = "e3"))) \/ (~(pc[VARI] = "w2"))
-H_Inv19_037d_R19_0_I1 == \A VARI \in Procs : \A VARJ \in Procs : ((VARI \in unchecked[VARJ]) \/ (~(pc[VARJ] = "e2")) \/ ((max[VARJ] >= num[VARI])) \/ (~(pc[VARI] \in {"w1","w2"}))) \/ (~(unchecked[VARI] = {}))
-H_Inv1_b58a_R20_0_I1 == \A VARI \in Procs : \A VARJ \in Procs : ((VARI \in unchecked[VARJ]) \/ (~(pc[VARJ] = "e2")) \/ ((max[VARJ] >= num[VARI])) \/ (~(pc[VARI] \in {"w1","w2"}))) \/ ((VARJ \in unchecked[VARI]))
+
+H_Inv4227_eecc_R10_0_I3 == 
+        \A VARI \in Procs : 
+            \A VARJ \in Procs : 
+                (VARI \in unchecked[VARJ]) \/ (~(<<num[VARI],VARI>> \prec <<num[VARJ],VARJ>>) \/ (~(pc[VARJ] \in {"w1","w2"}))) \/ (~(pc[VARI] \in {"e4","w1","w2"}))
+
+H_Inv32498_2818_R11_0_I2 == 
+    \A VARI \in Procs : 
+    \A VARJ \in Procs : 
+        ~(max[VARI] < num[VARJ]) \/ (~(pc[VARI] = "e3") \/ (~(pc[VARJ] = "cs"))) \/ (~(VARI \in unchecked[VARJ]))
+
+H_Inv2740_e784_R16_0_I3 == 
+    \A VARI \in Procs : 
+    \A VARJ \in Procs : 
+        (VARI \in unchecked[VARJ]) \/ (~(max[VARI] < num[VARJ])) \/ (~(pc[VARI] = "e3")) \/ (~(pc[VARJ] \in {"w1","w2"})) \/ (~(VARI \in unchecked[VARJ]))
+
+H_Inv3293_1a1e_R17_0_I3 == 
+    \A VARI \in Procs : 
+    \A VARJ \in Procs : 
+    (VARJ \in unchecked[VARI]) \/ (~(pc[VARI] = "e2")) \/ (~(pc[VARJ] = "cs")) \/ (~(max[VARI] < num[VARJ]))
+
+H_Inv0_b3ba_R18_0_I0 == 
+    \A VARI \in Procs : 
+    \A VARJ \in Procs : 
+    ((VARI \in unchecked[VARJ]) \/ ((pc[VARJ] = "e1") \/ (~(max[VARI] < num[VARJ]) \/ (~(pc[VARI] = "e2"))) \/ (~(unchecked[VARI] = {}))) \/ (~(pc[VARJ] \in {"w1","w2"})))
+
+H_Inv6093_1c74_R18_1_I2 == 
+    \A VARI \in Procs : (max[nxt[VARI]] >= num[VARI]) \/ (~((pc[nxt[VARI]] = "e3"))) \/ (~(pc[VARI] = "w2"))
+
+H_Inv19_037d_R19_0_I1 == 
+    \A VARI \in Procs : 
+    \A VARJ \in Procs : 
+    ((VARI \in unchecked[VARJ]) \/ (~(pc[VARJ] = "e2")) \/ ((max[VARJ] >= num[VARI])) \/ (~(pc[VARI] \in {"w1","w2"}))) \/ (~(unchecked[VARI] = {}))
+
+H_Inv1_b58a_R20_0_I1 == 
+    \A VARI \in Procs : 
+    \A VARJ \in Procs : 
+    ((VARI \in unchecked[VARJ]) \/ (~(pc[VARJ] = "e2")) \/ ((max[VARJ] >= num[VARI])) \/ (~(pc[VARI] \in {"w1","w2"}))) \/ ((VARJ \in unchecked[VARI]))
+
 H_Inv350_b077_R20_1_I2 == \A VARI \in Procs : \A VARJ \in Procs : ((VARI \in unchecked[VARJ]) \/ (~(pc[VARJ] = "e2")) \/ ((max[VARJ] >= num[VARI])) \/ (~(pc[VARI] \in {"w1","w2"}))) \/ (~(nxt[VARI] = VARJ)) \/ (~(pc[VARI] = "w2"))
+
 H_Inv103_c9b1_R21_1_I1 == \A VARJ \in Procs : (flag[VARJ]) \/ (~(pc[VARJ] = "e3"))
+
 H_Inv40_180c_R24_0_I1 == \A VARI \in Procs : (flag[VARI]) \/ (~(pc[VARI] = "e2"))
 
 
